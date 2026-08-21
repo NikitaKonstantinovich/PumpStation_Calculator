@@ -16,6 +16,17 @@ npm run dev
 npm run build
 ```
 
+## Email authentication
+
+Copy `.env.example` to `.env.local` and configure `RESEND_API_KEY`,
+`EMAIL_FROM`, and `APP_BASE_URL`. In local development, when mail credentials
+are absent, confirmation and password-reset links are returned in the UI for
+testing. Production intentionally requires configured mail credentials.
+
+User accounts, one-time tokens, sessions, and projects are stored in D1. Apply
+the checked-in Drizzle migrations when provisioning the database; the API also
+performs idempotent table initialization on first use.
+
 This starter does not use `wrangler.jsonc`.
 
 ## Included Shape
