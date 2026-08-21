@@ -1,0 +1,128 @@
+[
+  {
+    "model": "CDM 1-10",
+    "dbModel": "CDM1-10",
+    "seriesId": 48,
+    "partCode": "CDM1-10YSWPC",
+    "file": "cdm-1-10.png",
+    "sourceFile": "da2a2e23e473483fbcb4bec54a53caa7.png",
+    "source": "CNP SPump model database"
+  },
+  {
+    "model": "CDM 1-13",
+    "dbModel": "CDM1-13",
+    "seriesId": 48,
+    "partCode": "CDM1-13YSWPC",
+    "file": "cdm-1-13.png",
+    "sourceFile": "6acb486cb05f4c23ad7cd1d50c92cd08.png",
+    "source": "CNP SPump model database"
+  },
+  {
+    "model": "CDM 1-14",
+    "dbModel": "CDM1-14",
+    "seriesId": 48,
+    "partCode": "CDMF1-14KSWSC",
+    "file": "cdm-1-14.png",
+    "sourceFile": "c3a14afb11e84dacae71459cd6509c57.png",
+    "source": "CNP SPump model database"
+  },
+  {
+    "model": "CDM 1-15",
+    "dbModel": "CDM1-15",
+    "seriesId": 48,
+    "partCode": "CDM1-15YSWPC",
+    "file": "cdm-1-15.png",
+    "sourceFile": "c993a736918c4a99b48994ab60f53680.png",
+    "source": "CNP SPump model database"
+  },
+  {
+    "model": "CDM 1-19",
+    "dbModel": "CDM1-19",
+    "seriesId": 48,
+    "partCode": "CDM1-19YSWPC",
+    "file": "cdm-1-19.png",
+    "sourceFile": "e819d130bf444aed973e90111dfd6448.png",
+    "source": "CNP SPump model database"
+  },
+  {
+    "model": "CDM 1-2",
+    "dbModel": "CDM1-2",
+    "seriesId": 48,
+    "partCode": "CDM1-2YSWPC",
+    "file": "cdm-1-2.png",
+    "sourceFile": "48c88a07cb2c48a8ab36b5034a6fbc9e.png",
+    "source": "CNP SPump model database"
+  },
+  {
+    "model": "CDM 1-27",
+    "dbModel": "CDM1-27",
+    "seriesId": 48,
+    "partCode": "CDM1-27FSWPC",
+    "file": "cdm-1-27.png",
+    "sourceFile": "6fee195a788c406ca6b2767b8dacccee.png",
+    "source": "CNP SPump model database"
+  },
+  {
+    "model": "CDM 1-4",
+    "dbModel": "CDM1-4",
+    "seriesId": 48,
+    "partCode": "CDM1-4YSWPC",
+    "file": "cdm-1-4.png",
+    "sourceFile": "ca4f7de3e3a348b69b7d6f5f4b69a71c.png",
+    "source": "CNP SPump model database"
+  },
+  {
+    "model": "CDM 10-12",
+    "dbModel": "CDM10-12",
+    "seriesId": 48,
+    "partCode": "CDMF10-12FSWSC",
+    "file": "cdm-10-12.png",
+    "sourceFile": "0550a03578b34a4b89842db7a6383cd2.png",
+    "source": "CNP SPump model database"
+  },
+  {
+    "model": "CDM 120-2-1",
+    "dbModel": "CDM120-2-1",
+    "seriesId": 48,
+    "partCode": "CDMF120-2-1FSWSC",
+    "file": "cdm-120-2-1.png",
+    "sourceFile": "0392369e93f14e64b5039a25be453e74.png",
+    "source": "CNP SPump model database"
+  },
+  {
+    "model": "CDM 32-3",
+    "dbModel": "CDM32-3",
+    "seriesId": 48,
+    "partCode": "CDMF32-3FSWSC",
+    "file": "cdm-32-3.png",
+    "sourceFile": "3af02aff11cf4e67ad203bd8fe23be81.png",
+    "source": "CNP SPump model database"
+  },
+  {
+    "model": "CDM 42-2-2",
+    "dbModel": "CDM42-2-2",
+    "seriesId": 48,
+    "partCode": "CDMF42-2-2FSWSC",
+    "file": "cdm-42-2-2.png",
+    "sourceFile": "f241def15e9b4a2e8bd17c8d049c9b4c.png",
+    "source": "CNP SPump model database"
+  },
+  {
+    "model": "CHLF(T)2-40",
+    "dbModel": "CHLF2-40",
+    "seriesId": 10,
+    "partCode": "CHLF2-40LSWSC",
+    "file": "chlft2-40.png",
+    "sourceFile": "9c2e64e64d8241b3be31c3c3bb1725f1.png",
+    "source": "CNP SPump model database"
+  },
+  {
+    "model": "CHLF(T)2-60",
+    "dbModel": "CHLF2-60",
+    "seriesId": 10,
+    "partCode": "CHLF2-60LSWSC",
+    "file": "chlft2-60.png",
+    "sourceFile": "a8290550d2fc465b834ad5296c6521a0.png",
+    "source": "CNP SPump model database"
+  }
+]

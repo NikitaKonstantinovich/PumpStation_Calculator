@@ -1,0 +1,23 @@
+[
+  {"id":"CNP-CDM1-DIM-P056","family":"CDM1","page":56,"file":"cnp-cdm1-dimensions.png","width":1489,"height":2020,"source":"CDM_CDMF_220626.pdf"},
+  {"id":"CNP-CDM3-DIM-P057","family":"CDM3","page":57,"file":"cnp-cdm3-dimensions.png","width":1489,"height":2020,"source":"CDM_CDMF_220626.pdf"},
+  {"id":"CNP-CDM5-DIM-P058","family":"CDM5","page":58,"file":"cnp-cdm5-dimensions.png","width":1489,"height":2020,"source":"CDM_CDMF_220626.pdf"},
+  {"id":"CNP-CDM10-DIM-P059","family":"CDM10","page":59,"file":"cnp-cdm10-dimensions.png","width":1489,"height":2020,"source":"CDM_CDMF_220626.pdf"},
+  {"id":"CNP-CDM15-DIM-P060","family":"CDM15","page":60,"file":"cnp-cdm15-dimensions.png","width":1489,"height":2020,"source":"CDM_CDMF_220626.pdf"},
+  {"id":"CNP-CDM20-DIM-P061","family":"CDM20","page":61,"file":"cnp-cdm20-dimensions.png","width":1489,"height":2020,"source":"CDM_CDMF_220626.pdf"},
+  {"id":"CNP-CDM32-DIM-P062","family":"CDM32","page":62,"file":"cnp-cdm32-dimensions.png","width":1489,"height":2020,"source":"CDM_CDMF_220626.pdf"},
+  {"id":"CNP-CDM42-DIM-P063","family":"CDM42","page":63,"file":"cnp-cdm42-dimensions.png","width":1489,"height":2020,"source":"CDM_CDMF_220626.pdf"},
+  {"id":"CNP-CDM65-DIM-P064","family":"CDM65","page":64,"file":"cnp-cdm65-dimensions.png","width":1489,"height":2020,"source":"CDM_CDMF_220626.pdf"},
+  {"id":"CNP-CDM85-DIM-P065","family":"CDM85","page":65,"file":"cnp-cdm85-dimensions.png","width":1489,"height":2020,"source":"CDM_CDMF_220626.pdf"},
+  {"id":"CNP-CDM95-DIM-P066","family":"CDM95","page":66,"file":"cnp-cdm95-dimensions.png","width":1489,"height":2020,"source":"CDM_CDMF_220626.pdf"},
+  {"id":"CNP-CDM120-DIM-P067","family":"CDM120","page":67,"file":"cnp-cdm120-dimensions.png","width":1489,"height":2020,"source":"CDM_CDMF_220626.pdf"},
+  {"id":"CNP-CDM125-DIM-P068","family":"CDM125","page":68,"file":"cnp-cdm125-dimensions.png","width":1489,"height":2020,"source":"CDM_CDMF_220626.pdf"},
+  {"id":"CNP-CDM150-DIM-P069","family":"CDM150","page":69,"file":"cnp-cdm150-dimensions.png","width":1489,"height":2020,"source":"CDM_CDMF_220626.pdf"},
+  {"id":"CNP-CDM155-DIM-P070","family":"CDM155","page":70,"file":"cnp-cdm155-dimensions.png","width":1489,"height":2020,"source":"CDM_CDMF_220626.pdf"},
+  {"id":"CNP-CDM185-DIM-P071","family":"CDM185","page":71,"file":"cnp-cdm185-dimensions.png","width":1489,"height":2020,"source":"CDM_CDMF_220626.pdf"},
+  {"id":"CNP-CDM200-DIM-P072","family":"CDM200","page":72,"file":"cnp-cdm200-dimensions.png","width":1489,"height":2020,"source":"CDM_CDMF_220626.pdf"},
+  {"id":"CNP-CDM215-DIM-P073","family":"CDM215","page":73,"file":"cnp-cdm215-dimensions.png","width":1489,"height":2020,"source":"CDM_CDMF_220626.pdf"},
+  {"id":"CNP-CHLFT2-4-DIM-P027","family":"CHLF(T)2,4","page":27,"file":"cnp-chlft2-4-dimensions.png","width":1510,"height":2063,"source":"CHL_27082025.pdf"},
+  {"id":"CNP-CHLFT8-12-DIM-P028","family":"CHLF(T)8,12","page":28,"file":"cnp-chlft8-12-dimensions.png","width":1510,"height":2063,"source":"CHL_27082025.pdf"},
+  {"id":"CNP-CHLFT15-20-DIM-P029","family":"CHLF(T)15,20","page":29,"file":"cnp-chlft15-20-dimensions.png","width":1510,"height":2063,"source":"CHL_27082025.pdf"}
+]

@@ -1,0 +1,932 @@
+[
+    {
+        "id":  "CNP-S04-DIM-001",
+        "series":  "Series4",
+        "file":  "cnp-s04-dim-001.png",
+        "url":  "/cnp-drawings-archive/cnp-s04-dim-001.png",
+        "width":  1653,
+        "height":  2338,
+        "sourceFile":  "1591cc926bdd4a4e8ab41ff1813c3f48.png",
+        "type":  "dimensional-drawing"
+    },
+    {
+        "id":  "CNP-S04-DIM-002",
+        "series":  "Series4",
+        "file":  "cnp-s04-dim-002.png",
+        "url":  "/cnp-drawings-archive/cnp-s04-dim-002.png",
+        "width":  2338,
+        "height":  1653,
+        "sourceFile":  "1706c31ba1884761baa39b70132fd0d0.png",
+        "type":  "dimensional-drawing"
+    },
+    {
+        "id":  "CNP-S04-DIM-003",
+        "series":  "Series4",
+        "file":  "cnp-s04-dim-003.png",
+        "url":  "/cnp-drawings-archive/cnp-s04-dim-003.png",
+        "width":  2338,
+        "height":  1653,
+        "sourceFile":  "1f2fe9ca45854e8fa13acef1c3c3b20b.png",
+        "type":  "dimensional-drawing"
+    },
+    {
+        "id":  "CNP-S04-DIM-004",
+        "series":  "Series4",
+        "file":  "cnp-s04-dim-004.png",
+        "url":  "/cnp-drawings-archive/cnp-s04-dim-004.png",
+        "width":  2338,
+        "height":  1653,
+        "sourceFile":  "20bcc92ce66f4041945311d2bc8c4fba.png",
+        "type":  "dimensional-drawing"
+    },
+    {
+        "id":  "CNP-S04-DIM-005",
+        "series":  "Series4",
+        "file":  "cnp-s04-dim-005.png",
+        "url":  "/cnp-drawings-archive/cnp-s04-dim-005.png",
+        "width":  2338,
+        "height":  1653,
+        "sourceFile":  "21a9f3250a194480a2e4f6534ad213eb.png",
+        "type":  "dimensional-drawing"
+    },
+    {
+        "id":  "CNP-S04-DIM-006",
+        "series":  "Series4",
+        "file":  "cnp-s04-dim-006.png",
+        "url":  "/cnp-drawings-archive/cnp-s04-dim-006.png",
+        "width":  2338,
+        "height":  1653,
+        "sourceFile":  "453e1d7bdf0e4e439dc1b36a85523ed8.png",
+        "type":  "dimensional-drawing"
+    },
+    {
+        "id":  "CNP-S04-DIM-007",
+        "series":  "Series4",
+        "file":  "cnp-s04-dim-007.png",
+        "url":  "/cnp-drawings-archive/cnp-s04-dim-007.png",
+        "width":  2338,
+        "height":  1653,
+        "sourceFile":  "47e3c52496bb47c98798c3c45131954b.png",
+        "type":  "dimensional-drawing"
+    },
+    {
+        "id":  "CNP-S04-DIM-008",
+        "series":  "Series4",
+        "file":  "cnp-s04-dim-008.png",
+        "url":  "/cnp-drawings-archive/cnp-s04-dim-008.png",
+        "width":  2338,
+        "height":  1653,
+        "sourceFile":  "7f7a7083a3fe4edf8a38ca94bdc579d7.png",
+        "type":  "dimensional-drawing"
+    },
+    {
+        "id":  "CNP-S04-DIM-009",
+        "series":  "Series4",
+        "file":  "cnp-s04-dim-009.png",
+        "url":  "/cnp-drawings-archive/cnp-s04-dim-009.png",
+        "width":  2338,
+        "height":  1653,
+        "sourceFile":  "8ce5d847e6bf40788ad8f0b703aac4e8.png",
+        "type":  "dimensional-drawing"
+    },
+    {
+        "id":  "CNP-S04-DIM-010",
+        "series":  "Series4",
+        "file":  "cnp-s04-dim-010.png",
+        "url":  "/cnp-drawings-archive/cnp-s04-dim-010.png",
+        "width":  2338,
+        "height":  1653,
+        "sourceFile":  "8d49e5f6958244f5ad46e84ab9e632b0.png",
+        "type":  "dimensional-drawing"
+    },
+    {
+        "id":  "CNP-S04-DIM-011",
+        "series":  "Series4",
+        "file":  "cnp-s04-dim-011.png",
+        "url":  "/cnp-drawings-archive/cnp-s04-dim-011.png",
+        "width":  2338,
+        "height":  1653,
+        "sourceFile":  "8f92c19e8b4a473c97ca30aa958970d4.png",
+        "type":  "dimensional-drawing"
+    },
+    {
+        "id":  "CNP-S04-DIM-012",
+        "series":  "Series4",
+        "file":  "cnp-s04-dim-012.png",
+        "url":  "/cnp-drawings-archive/cnp-s04-dim-012.png",
+        "width":  2338,
+        "height":  1653,
+        "sourceFile":  "9c034329a5b24327ac804f5e46d51e14.png",
+        "type":  "dimensional-drawing"
+    },
+    {
+        "id":  "CNP-S04-DIM-013",
+        "series":  "Series4",
+        "file":  "cnp-s04-dim-013.png",
+        "url":  "/cnp-drawings-archive/cnp-s04-dim-013.png",
+        "width":  2338,
+        "height":  1653,
+        "sourceFile":  "ceb733d5a3b847199a1a11bdca9f5e69.png",
+        "type":  "dimensional-drawing"
+    },
+    {
+        "id":  "CNP-S04-DIM-014",
+        "series":  "Series4",
+        "file":  "cnp-s04-dim-014.png",
+        "url":  "/cnp-drawings-archive/cnp-s04-dim-014.png",
+        "width":  2338,
+        "height":  1653,
+        "sourceFile":  "d5481b3b84464d5aaddfdb644cbcbb63.png",
+        "type":  "dimensional-drawing"
+    },
+    {
+        "id":  "CNP-S04-DIM-015",
+        "series":  "Series4",
+        "file":  "cnp-s04-dim-015.png",
+        "url":  "/cnp-drawings-archive/cnp-s04-dim-015.png",
+        "width":  2338,
+        "height":  1653,
+        "sourceFile":  "e863f42047e3447ab1452267ce34a684.png",
+        "type":  "dimensional-drawing"
+    },
+    {
+        "id":  "CNP-S04-DIM-016",
+        "series":  "Series4",
+        "file":  "cnp-s04-dim-016.png",
+        "url":  "/cnp-drawings-archive/cnp-s04-dim-016.png",
+        "width":  2338,
+        "height":  1653,
+        "sourceFile":  "fcdbf5bd682e4208bf7ef10da6a67dfe.png",
+        "type":  "dimensional-drawing"
+    },
+    {
+        "id":  "CNP-S04-DIM-017",
+        "series":  "Series4",
+        "file":  "cnp-s04-dim-017.png",
+        "url":  "/cnp-drawings-archive/cnp-s04-dim-017.png",
+        "width":  2338,
+        "height":  1653,
+        "sourceFile":  "fe596602dbfd40f889c49a36a0b8daf9.png",
+        "type":  "dimensional-drawing"
+    },
+    {
+        "id":  "CNP-S05-DIM-001",
+        "series":  "Series5",
+        "file":  "cnp-s05-dim-001.png",
+        "url":  "/cnp-drawings-archive/cnp-s05-dim-001.png",
+        "width":  2338,
+        "height":  1653,
+        "sourceFile":  "94c61c0fc0314af28746eea2872145e3.png",
+        "type":  "dimensional-drawing"
+    },
+    {
+        "id":  "CNP-S06-DIM-001",
+        "series":  "Series6",
+        "file":  "cnp-s06-dim-001.png",
+        "url":  "/cnp-drawings-archive/cnp-s06-dim-001.png",
+        "width":  2338,
+        "height":  1653,
+        "sourceFile":  "1ed4aafa82514e0d8669d2c0f48c104a.png",
+        "type":  "dimensional-drawing"
+    },
+    {
+        "id":  "CNP-S06-DIM-002",
+        "series":  "Series6",
+        "file":  "cnp-s06-dim-002.png",
+        "url":  "/cnp-drawings-archive/cnp-s06-dim-002.png",
+        "width":  2338,
+        "height":  1653,
+        "sourceFile":  "f02c056806bb4dd3bbfa59a3ce00dda1.png",
+        "type":  "dimensional-drawing"
+    },
+    {
+        "id":  "CNP-S08-DIM-001",
+        "series":  "Series8",
+        "file":  "cnp-s08-dim-001.png",
+        "url":  "/cnp-drawings-archive/cnp-s08-dim-001.png",
+        "width":  2338,
+        "height":  1653,
+        "sourceFile":  "172e704cd3db485a935bbca677efe084.png",
+        "type":  "dimensional-drawing"
+    },
+    {
+        "id":  "CNP-S08-DIM-002",
+        "series":  "Series8",
+        "file":  "cnp-s08-dim-002.png",
+        "url":  "/cnp-drawings-archive/cnp-s08-dim-002.png",
+        "width":  2338,
+        "height":  1653,
+        "sourceFile":  "2c02395590f44995abc3e1c4f35036ab.png",
+        "type":  "dimensional-drawing"
+    },
+    {
+        "id":  "CNP-S08-DIM-003",
+        "series":  "Series8",
+        "file":  "cnp-s08-dim-003.png",
+        "url":  "/cnp-drawings-archive/cnp-s08-dim-003.png",
+        "width":  2338,
+        "height":  1653,
+        "sourceFile":  "8f534fbc9c0e4c1b8898961c18cb9592.png",
+        "type":  "dimensional-drawing"
+    },
+    {
+        "id":  "CNP-S08-DIM-004",
+        "series":  "Series8",
+        "file":  "cnp-s08-dim-004.png",
+        "url":  "/cnp-drawings-archive/cnp-s08-dim-004.png",
+        "width":  2338,
+        "height":  1653,
+        "sourceFile":  "bc240c6a164e419cb88bc93400ffb409.png",
+        "type":  "dimensional-drawing"
+    },
+    {
+        "id":  "CNP-S08-DIM-005",
+        "series":  "Series8",
+        "file":  "cnp-s08-dim-005.png",
+        "url":  "/cnp-drawings-archive/cnp-s08-dim-005.png",
+        "width":  2338,
+        "height":  1653,
+        "sourceFile":  "da1ea229ece241a8a038862fc32015af.png",
+        "type":  "dimensional-drawing"
+    },
+    {
+        "id":  "CNP-S10-DIM-001",
+        "series":  "Series10",
+        "file":  "cnp-s10-dim-001.png",
+        "url":  "/cnp-drawings-archive/cnp-s10-dim-001.png",
+        "width":  2338,
+        "height":  1653,
+        "sourceFile":  "9c2e64e64d8241b3be31c3c3bb1725f1.png",
+        "type":  "dimensional-drawing"
+    },
+    {
+        "id":  "CNP-S10-DIM-002",
+        "series":  "Series10",
+        "file":  "cnp-s10-dim-002.png",
+        "url":  "/cnp-drawings-archive/cnp-s10-dim-002.png",
+        "width":  2338,
+        "height":  1653,
+        "sourceFile":  "a8290550d2fc465b834ad5296c6521a0.png",
+        "type":  "dimensional-drawing"
+    },
+    {
+        "id":  "CNP-S12-DIM-001",
+        "series":  "Series12",
+        "file":  "cnp-s12-dim-001.png",
+        "url":  "/cnp-drawings-archive/cnp-s12-dim-001.png",
+        "width":  2338,
+        "height":  1653,
+        "sourceFile":  "05d02a4037df461c885ab01d5557b3d8.png",
+        "type":  "dimensional-drawing"
+    },
+    {
+        "id":  "CNP-S12-DIM-002",
+        "series":  "Series12",
+        "file":  "cnp-s12-dim-002.png",
+        "url":  "/cnp-drawings-archive/cnp-s12-dim-002.png",
+        "width":  2338,
+        "height":  1653,
+        "sourceFile":  "13abac261ed54622a300634695560310.png",
+        "type":  "dimensional-drawing"
+    },
+    {
+        "id":  "CNP-S13-DIM-001",
+        "series":  "Series13",
+        "file":  "cnp-s13-dim-001.png",
+        "url":  "/cnp-drawings-archive/cnp-s13-dim-001.png",
+        "width":  2338,
+        "height":  1653,
+        "sourceFile":  "1d82f1ea84a2454e98d1b0fe7668ac49.png",
+        "type":  "dimensional-drawing"
+    },
+    {
+        "id":  "CNP-S13-DIM-002",
+        "series":  "Series13",
+        "file":  "cnp-s13-dim-002.png",
+        "url":  "/cnp-drawings-archive/cnp-s13-dim-002.png",
+        "width":  2338,
+        "height":  1653,
+        "sourceFile":  "3e4f3634147a412da1c14b4bb01629b5.png",
+        "type":  "dimensional-drawing"
+    },
+    {
+        "id":  "CNP-S13-DIM-003",
+        "series":  "Series13",
+        "file":  "cnp-s13-dim-003.png",
+        "url":  "/cnp-drawings-archive/cnp-s13-dim-003.png",
+        "width":  2338,
+        "height":  1653,
+        "sourceFile":  "728d4d34c42548018937ff001213ed8b.png",
+        "type":  "dimensional-drawing"
+    },
+    {
+        "id":  "CNP-S15-DIM-001",
+        "series":  "Series15",
+        "file":  "cnp-s15-dim-001.png",
+        "url":  "/cnp-drawings-archive/cnp-s15-dim-001.png",
+        "width":  2338,
+        "height":  1653,
+        "sourceFile":  "05f174fc6b7c4e238472f160f3d7109b.png",
+        "type":  "dimensional-drawing"
+    },
+    {
+        "id":  "CNP-S15-DIM-002",
+        "series":  "Series15",
+        "file":  "cnp-s15-dim-002.png",
+        "url":  "/cnp-drawings-archive/cnp-s15-dim-002.png",
+        "width":  2338,
+        "height":  1653,
+        "sourceFile":  "2234e4d122574869b92330da0b319564.png",
+        "type":  "dimensional-drawing"
+    },
+    {
+        "id":  "CNP-S15-DIM-003",
+        "series":  "Series15",
+        "file":  "cnp-s15-dim-003.png",
+        "url":  "/cnp-drawings-archive/cnp-s15-dim-003.png",
+        "width":  2338,
+        "height":  1653,
+        "sourceFile":  "46f3930660a44618b997eecdad6876d8.png",
+        "type":  "dimensional-drawing"
+    },
+    {
+        "id":  "CNP-S15-DIM-004",
+        "series":  "Series15",
+        "file":  "cnp-s15-dim-004.png",
+        "url":  "/cnp-drawings-archive/cnp-s15-dim-004.png",
+        "width":  2338,
+        "height":  1653,
+        "sourceFile":  "74e69b413d1748308e45a8f2c83b67aa.png",
+        "type":  "dimensional-drawing"
+    },
+    {
+        "id":  "CNP-S15-DIM-005",
+        "series":  "Series15",
+        "file":  "cnp-s15-dim-005.png",
+        "url":  "/cnp-drawings-archive/cnp-s15-dim-005.png",
+        "width":  2338,
+        "height":  1653,
+        "sourceFile":  "b89106b48a514b03ac3c775d1fcdc4c4.png",
+        "type":  "dimensional-drawing"
+    },
+    {
+        "id":  "CNP-S15-DIM-006",
+        "series":  "Series15",
+        "file":  "cnp-s15-dim-006.png",
+        "url":  "/cnp-drawings-archive/cnp-s15-dim-006.png",
+        "width":  2338,
+        "height":  1653,
+        "sourceFile":  "c25e15a780a14323ab7560181b773f87.png",
+        "type":  "dimensional-drawing"
+    },
+    {
+        "id":  "CNP-S15-DIM-007",
+        "series":  "Series15",
+        "file":  "cnp-s15-dim-007.png",
+        "url":  "/cnp-drawings-archive/cnp-s15-dim-007.png",
+        "width":  2338,
+        "height":  1653,
+        "sourceFile":  "d184a3e9942a4de2962fd8f2e165bd03.png",
+        "type":  "dimensional-drawing"
+    },
+    {
+        "id":  "CNP-S15-DIM-008",
+        "series":  "Series15",
+        "file":  "cnp-s15-dim-008.png",
+        "url":  "/cnp-drawings-archive/cnp-s15-dim-008.png",
+        "width":  2338,
+        "height":  1653,
+        "sourceFile":  "eb303cf067c04c71bfcbd6aab4bcad92.png",
+        "type":  "dimensional-drawing"
+    },
+    {
+        "id":  "CNP-S17-DIM-001",
+        "series":  "Series17",
+        "file":  "cnp-s17-dim-001.png",
+        "url":  "/cnp-drawings-archive/cnp-s17-dim-001.png",
+        "width":  2338,
+        "height":  1653,
+        "sourceFile":  "778bc899f8734836856b93369c72bc67.png",
+        "type":  "dimensional-drawing"
+    },
+    {
+        "id":  "CNP-S19-DIM-001",
+        "series":  "Series19",
+        "file":  "cnp-s19-dim-001.png",
+        "url":  "/cnp-drawings-archive/cnp-s19-dim-001.png",
+        "width":  2338,
+        "height":  1653,
+        "sourceFile":  "2c8e578d79df4b3ab1078d0710921290.png",
+        "type":  "dimensional-drawing"
+    },
+    {
+        "id":  "CNP-S19-DIM-002",
+        "series":  "Series19",
+        "file":  "cnp-s19-dim-002.png",
+        "url":  "/cnp-drawings-archive/cnp-s19-dim-002.png",
+        "width":  2338,
+        "height":  1653,
+        "sourceFile":  "a24d1d431c0740d9859adb59d737d78b.png",
+        "type":  "dimensional-drawing"
+    },
+    {
+        "id":  "CNP-S21-DIM-001",
+        "series":  "Series21",
+        "file":  "cnp-s21-dim-001.png",
+        "url":  "/cnp-drawings-archive/cnp-s21-dim-001.png",
+        "width":  2338,
+        "height":  1653,
+        "sourceFile":  "5614acab24074449b7a39384ad4b1b4b.png",
+        "type":  "dimensional-drawing"
+    },
+    {
+        "id":  "CNP-S21-DIM-002",
+        "series":  "Series21",
+        "file":  "cnp-s21-dim-002.png",
+        "url":  "/cnp-drawings-archive/cnp-s21-dim-002.png",
+        "width":  2338,
+        "height":  1653,
+        "sourceFile":  "d1d19571be644bbebc55463693ab2c1f.png",
+        "type":  "dimensional-drawing"
+    },
+    {
+        "id":  "CNP-S22-DIM-001",
+        "series":  "Series22",
+        "file":  "cnp-s22-dim-001.png",
+        "url":  "/cnp-drawings-archive/cnp-s22-dim-001.png",
+        "width":  2338,
+        "height":  1653,
+        "sourceFile":  "00a08b3ca76b4ab792a91ee8fbb773b9.png",
+        "type":  "dimensional-drawing"
+    },
+    {
+        "id":  "CNP-S27-DIM-001",
+        "series":  "Series27",
+        "file":  "cnp-s27-dim-001.png",
+        "url":  "/cnp-drawings-archive/cnp-s27-dim-001.png",
+        "width":  2338,
+        "height":  1653,
+        "sourceFile":  "647229a990c8490495d54c75535aaee2.png",
+        "type":  "dimensional-drawing"
+    },
+    {
+        "id":  "CNP-S27-DIM-002",
+        "series":  "Series27",
+        "file":  "cnp-s27-dim-002.png",
+        "url":  "/cnp-drawings-archive/cnp-s27-dim-002.png",
+        "width":  2338,
+        "height":  1653,
+        "sourceFile":  "d40cff8e71a64eb5949d6be6dbb4f51f.png",
+        "type":  "dimensional-drawing"
+    },
+    {
+        "id":  "CNP-S29-DIM-001",
+        "series":  "Series29",
+        "file":  "cnp-s29-dim-001.png",
+        "url":  "/cnp-drawings-archive/cnp-s29-dim-001.png",
+        "width":  2338,
+        "height":  1653,
+        "sourceFile":  "7ad020f5f3d046488ac67e29b57cb6d2.png",
+        "type":  "dimensional-drawing"
+    },
+    {
+        "id":  "CNP-S31-DIM-001",
+        "series":  "Series31",
+        "file":  "cnp-s31-dim-001.png",
+        "url":  "/cnp-drawings-archive/cnp-s31-dim-001.png",
+        "width":  2338,
+        "height":  1653,
+        "sourceFile":  "cc29726e029f48e9b478abe503cb7d35.png",
+        "type":  "dimensional-drawing"
+    },
+    {
+        "id":  "CNP-S37-DIM-001",
+        "series":  "Series37",
+        "file":  "cnp-s37-dim-001.png",
+        "url":  "/cnp-drawings-archive/cnp-s37-dim-001.png",
+        "width":  2338,
+        "height":  1653,
+        "sourceFile":  "d70ff9b7364c4395b60e0a699f24e094.png",
+        "type":  "dimensional-drawing"
+    },
+    {
+        "id":  "CNP-S39-DIM-001",
+        "series":  "Series39",
+        "file":  "cnp-s39-dim-001.png",
+        "url":  "/cnp-drawings-archive/cnp-s39-dim-001.png",
+        "width":  3507,
+        "height":  2480,
+        "sourceFile":  "48b5c1a4d8484500a6c22f5a3d471927.png",
+        "type":  "dimensional-drawing"
+    },
+    {
+        "id":  "CNP-S39-DIM-002",
+        "series":  "Series39",
+        "file":  "cnp-s39-dim-002.png",
+        "url":  "/cnp-drawings-archive/cnp-s39-dim-002.png",
+        "width":  2338,
+        "height":  1653,
+        "sourceFile":  "6ebae8e9e86e41eea191960493793862.png",
+        "type":  "dimensional-drawing"
+    },
+    {
+        "id":  "CNP-S39-DIM-003",
+        "series":  "Series39",
+        "file":  "cnp-s39-dim-003.png",
+        "url":  "/cnp-drawings-archive/cnp-s39-dim-003.png",
+        "width":  2338,
+        "height":  1653,
+        "sourceFile":  "7f15681f8cd3479d87366088ee21329c.png",
+        "type":  "dimensional-drawing"
+    },
+    {
+        "id":  "CNP-S48-DIM-001",
+        "series":  "Series48",
+        "file":  "cnp-s48-dim-001.png",
+        "url":  "/cnp-drawings-archive/cnp-s48-dim-001.png",
+        "width":  2338,
+        "height":  1653,
+        "sourceFile":  "0392369e93f14e64b5039a25be453e74.png",
+        "type":  "dimensional-drawing"
+    },
+    {
+        "id":  "CNP-S48-DIM-002",
+        "series":  "Series48",
+        "file":  "cnp-s48-dim-002.png",
+        "url":  "/cnp-drawings-archive/cnp-s48-dim-002.png",
+        "width":  2338,
+        "height":  1653,
+        "sourceFile":  "0550a03578b34a4b89842db7a6383cd2.png",
+        "type":  "dimensional-drawing"
+    },
+    {
+        "id":  "CNP-S48-DIM-003",
+        "series":  "Series48",
+        "file":  "cnp-s48-dim-003.png",
+        "url":  "/cnp-drawings-archive/cnp-s48-dim-003.png",
+        "width":  2338,
+        "height":  1653,
+        "sourceFile":  "0c39ab5240064333915235b898284096.png",
+        "type":  "dimensional-drawing"
+    },
+    {
+        "id":  "CNP-S48-DIM-004",
+        "series":  "Series48",
+        "file":  "cnp-s48-dim-004.png",
+        "url":  "/cnp-drawings-archive/cnp-s48-dim-004.png",
+        "width":  2338,
+        "height":  1653,
+        "sourceFile":  "1c48db020f4b4e65b3642af1fd02dc23.png",
+        "type":  "dimensional-drawing"
+    },
+    {
+        "id":  "CNP-S48-DIM-005",
+        "series":  "Series48",
+        "file":  "cnp-s48-dim-005.png",
+        "url":  "/cnp-drawings-archive/cnp-s48-dim-005.png",
+        "width":  2338,
+        "height":  1653,
+        "sourceFile":  "3229c7885e014b9aaefb85df0a8af377.png",
+        "type":  "dimensional-drawing"
+    },
+    {
+        "id":  "CNP-S48-DIM-006",
+        "series":  "Series48",
+        "file":  "cnp-s48-dim-006.png",
+        "url":  "/cnp-drawings-archive/cnp-s48-dim-006.png",
+        "width":  3507,
+        "height":  2480,
+        "sourceFile":  "3af02aff11cf4e67ad203bd8fe23be81.png",
+        "type":  "dimensional-drawing"
+    },
+    {
+        "id":  "CNP-S48-DIM-007",
+        "series":  "Series48",
+        "file":  "cnp-s48-dim-007.png",
+        "url":  "/cnp-drawings-archive/cnp-s48-dim-007.png",
+        "width":  2338,
+        "height":  1653,
+        "sourceFile":  "3e9968840e8640aeaffe3b9c090c9332.png",
+        "type":  "dimensional-drawing"
+    },
+    {
+        "id":  "CNP-S48-DIM-008",
+        "series":  "Series48",
+        "file":  "cnp-s48-dim-008.png",
+        "url":  "/cnp-drawings-archive/cnp-s48-dim-008.png",
+        "width":  2338,
+        "height":  1653,
+        "sourceFile":  "48c88a07cb2c48a8ab36b5034a6fbc9e.png",
+        "type":  "dimensional-drawing"
+    },
+    {
+        "id":  "CNP-S48-DIM-009",
+        "series":  "Series48",
+        "file":  "cnp-s48-dim-009.png",
+        "url":  "/cnp-drawings-archive/cnp-s48-dim-009.png",
+        "width":  2338,
+        "height":  1653,
+        "sourceFile":  "68b984c112d2413e8ddcb7dd0d7b8ba8.png",
+        "type":  "dimensional-drawing"
+    },
+    {
+        "id":  "CNP-S48-DIM-010",
+        "series":  "Series48",
+        "file":  "cnp-s48-dim-010.png",
+        "url":  "/cnp-drawings-archive/cnp-s48-dim-010.png",
+        "width":  2338,
+        "height":  1653,
+        "sourceFile":  "6acb486cb05f4c23ad7cd1d50c92cd08.png",
+        "type":  "dimensional-drawing"
+    },
+    {
+        "id":  "CNP-S48-DIM-011",
+        "series":  "Series48",
+        "file":  "cnp-s48-dim-011.png",
+        "url":  "/cnp-drawings-archive/cnp-s48-dim-011.png",
+        "width":  2338,
+        "height":  1653,
+        "sourceFile":  "6fee195a788c406ca6b2767b8dacccee.png",
+        "type":  "dimensional-drawing"
+    },
+    {
+        "id":  "CNP-S48-DIM-012",
+        "series":  "Series48",
+        "file":  "cnp-s48-dim-012.png",
+        "url":  "/cnp-drawings-archive/cnp-s48-dim-012.png",
+        "width":  3507,
+        "height":  2480,
+        "sourceFile":  "7f7f2a08123d4b04971fab63a468ff27.png",
+        "type":  "dimensional-drawing"
+    },
+    {
+        "id":  "CNP-S48-DIM-013",
+        "series":  "Series48",
+        "file":  "cnp-s48-dim-013.png",
+        "url":  "/cnp-drawings-archive/cnp-s48-dim-013.png",
+        "width":  2338,
+        "height":  1653,
+        "sourceFile":  "9080502cddd246f5b97ea35883fc139d.png",
+        "type":  "dimensional-drawing"
+    },
+    {
+        "id":  "CNP-S48-DIM-014",
+        "series":  "Series48",
+        "file":  "cnp-s48-dim-014.png",
+        "url":  "/cnp-drawings-archive/cnp-s48-dim-014.png",
+        "width":  2338,
+        "height":  1653,
+        "sourceFile":  "a8ba1e174ab94e4787b18015e386f0fc.png",
+        "type":  "dimensional-drawing"
+    },
+    {
+        "id":  "CNP-S48-DIM-015",
+        "series":  "Series48",
+        "file":  "cnp-s48-dim-015.png",
+        "url":  "/cnp-drawings-archive/cnp-s48-dim-015.png",
+        "width":  2338,
+        "height":  1653,
+        "sourceFile":  "af4f7bf6ebd24b2fb906c978af366733.png",
+        "type":  "dimensional-drawing"
+    },
+    {
+        "id":  "CNP-S48-DIM-016",
+        "series":  "Series48",
+        "file":  "cnp-s48-dim-016.png",
+        "url":  "/cnp-drawings-archive/cnp-s48-dim-016.png",
+        "width":  2338,
+        "height":  1653,
+        "sourceFile":  "baf15c63bacd4d7a9ee1ced53426fd67.png",
+        "type":  "dimensional-drawing"
+    },
+    {
+        "id":  "CNP-S48-DIM-017",
+        "series":  "Series48",
+        "file":  "cnp-s48-dim-017.png",
+        "url":  "/cnp-drawings-archive/cnp-s48-dim-017.png",
+        "width":  2338,
+        "height":  1653,
+        "sourceFile":  "c3a14afb11e84dacae71459cd6509c57.png",
+        "type":  "dimensional-drawing"
+    },
+    {
+        "id":  "CNP-S48-DIM-018",
+        "series":  "Series48",
+        "file":  "cnp-s48-dim-018.png",
+        "url":  "/cnp-drawings-archive/cnp-s48-dim-018.png",
+        "width":  2338,
+        "height":  1653,
+        "sourceFile":  "c993a736918c4a99b48994ab60f53680.png",
+        "type":  "dimensional-drawing"
+    },
+    {
+        "id":  "CNP-S48-DIM-019",
+        "series":  "Series48",
+        "file":  "cnp-s48-dim-019.png",
+        "url":  "/cnp-drawings-archive/cnp-s48-dim-019.png",
+        "width":  2338,
+        "height":  1653,
+        "sourceFile":  "ca4f7de3e3a348b69b7d6f5f4b69a71c.png",
+        "type":  "dimensional-drawing"
+    },
+    {
+        "id":  "CNP-S48-DIM-020",
+        "series":  "Series48",
+        "file":  "cnp-s48-dim-020.png",
+        "url":  "/cnp-drawings-archive/cnp-s48-dim-020.png",
+        "width":  2338,
+        "height":  1653,
+        "sourceFile":  "ce3edd80759c42adbdb8ae3abf6c1dab.png",
+        "type":  "dimensional-drawing"
+    },
+    {
+        "id":  "CNP-S48-DIM-021",
+        "series":  "Series48",
+        "file":  "cnp-s48-dim-021.png",
+        "url":  "/cnp-drawings-archive/cnp-s48-dim-021.png",
+        "width":  2338,
+        "height":  1653,
+        "sourceFile":  "da2a2e23e473483fbcb4bec54a53caa7.png",
+        "type":  "dimensional-drawing"
+    },
+    {
+        "id":  "CNP-S48-DIM-022",
+        "series":  "Series48",
+        "file":  "cnp-s48-dim-022.png",
+        "url":  "/cnp-drawings-archive/cnp-s48-dim-022.png",
+        "width":  2338,
+        "height":  1653,
+        "sourceFile":  "de23ec004da74a18aabba4d820d569f0.png",
+        "type":  "dimensional-drawing"
+    },
+    {
+        "id":  "CNP-S48-DIM-023",
+        "series":  "Series48",
+        "file":  "cnp-s48-dim-023.png",
+        "url":  "/cnp-drawings-archive/cnp-s48-dim-023.png",
+        "width":  2338,
+        "height":  1653,
+        "sourceFile":  "e4bbffc3f33d48daa6864f5f48cc8f0c.png",
+        "type":  "dimensional-drawing"
+    },
+    {
+        "id":  "CNP-S48-DIM-024",
+        "series":  "Series48",
+        "file":  "cnp-s48-dim-024.png",
+        "url":  "/cnp-drawings-archive/cnp-s48-dim-024.png",
+        "width":  2338,
+        "height":  1653,
+        "sourceFile":  "e819d130bf444aed973e90111dfd6448.png",
+        "type":  "dimensional-drawing"
+    },
+    {
+        "id":  "CNP-S48-DIM-025",
+        "series":  "Series48",
+        "file":  "cnp-s48-dim-025.png",
+        "url":  "/cnp-drawings-archive/cnp-s48-dim-025.png",
+        "width":  2338,
+        "height":  1653,
+        "sourceFile":  "f241def15e9b4a2e8bd17c8d049c9b4c.png",
+        "type":  "dimensional-drawing"
+    },
+    {
+        "id":  "CNP-S48-DIM-026",
+        "series":  "Series48",
+        "file":  "cnp-s48-dim-026.png",
+        "url":  "/cnp-drawings-archive/cnp-s48-dim-026.png",
+        "width":  2338,
+        "height":  1653,
+        "sourceFile":  "f535d0a853844f35b7d817a89df18177.png",
+        "type":  "dimensional-drawing"
+    },
+    {
+        "id":  "CNP-S48-DIM-027",
+        "series":  "Series48",
+        "file":  "cnp-s48-dim-027.png",
+        "url":  "/cnp-drawings-archive/cnp-s48-dim-027.png",
+        "width":  2338,
+        "height":  1653,
+        "sourceFile":  "fc66bd2b35e54006b07cbdc98f5222c8.png",
+        "type":  "dimensional-drawing"
+    },
+    {
+        "id":  "CNP-S51-DIM-001",
+        "series":  "Series51",
+        "file":  "cnp-s51-dim-001.png",
+        "url":  "/cnp-drawings-archive/cnp-s51-dim-001.png",
+        "width":  2338,
+        "height":  1653,
+        "sourceFile":  "4eefcc69f7b54c03854a4f2770857219.png",
+        "type":  "dimensional-drawing"
+    },
+    {
+        "id":  "CNP-S52-DIM-001",
+        "series":  "Series52",
+        "file":  "cnp-s52-dim-001.png",
+        "url":  "/cnp-drawings-archive/cnp-s52-dim-001.png",
+        "width":  2338,
+        "height":  1653,
+        "sourceFile":  "572645848e1b48999cd51075f23918bd.png",
+        "type":  "dimensional-drawing"
+    },
+    {
+        "id":  "CNP-S52-DIM-002",
+        "series":  "Series52",
+        "file":  "cnp-s52-dim-002.png",
+        "url":  "/cnp-drawings-archive/cnp-s52-dim-002.png",
+        "width":  2338,
+        "height":  1653,
+        "sourceFile":  "79519f1efb6c4f3cade6b75e8939ddcd.png",
+        "type":  "dimensional-drawing"
+    },
+    {
+        "id":  "CNP-S52-DIM-003",
+        "series":  "Series52",
+        "file":  "cnp-s52-dim-003.png",
+        "url":  "/cnp-drawings-archive/cnp-s52-dim-003.png",
+        "width":  2338,
+        "height":  1653,
+        "sourceFile":  "a336490511344c25aedd571cc6a5a176.png",
+        "type":  "dimensional-drawing"
+    },
+    {
+        "id":  "CNP-S56-DIM-001",
+        "series":  "Series56",
+        "file":  "cnp-s56-dim-001.png",
+        "url":  "/cnp-drawings-archive/cnp-s56-dim-001.png",
+        "width":  2338,
+        "height":  1653,
+        "sourceFile":  "4bf95d052d83492d9fa1ba33df9eab20.png",
+        "type":  "dimensional-drawing"
+    },
+    {
+        "id":  "CNP-S65-DIM-001",
+        "series":  "Series65",
+        "file":  "cnp-s65-dim-001.png",
+        "url":  "/cnp-drawings-archive/cnp-s65-dim-001.png",
+        "width":  2480,
+        "height":  3507,
+        "sourceFile":  "05f19e808b3a45b2bdbe20c112379583.png",
+        "type":  "dimensional-drawing"
+    },
+    {
+        "id":  "CNP-S65-DIM-002",
+        "series":  "Series65",
+        "file":  "cnp-s65-dim-002.png",
+        "url":  "/cnp-drawings-archive/cnp-s65-dim-002.png",
+        "width":  2480,
+        "height":  3507,
+        "sourceFile":  "2c07806c03fc4fe68dc9b83d9ea46d52.png",
+        "type":  "dimensional-drawing"
+    },
+    {
+        "id":  "CNP-S65-DIM-003",
+        "series":  "Series65",
+        "file":  "cnp-s65-dim-003.png",
+        "url":  "/cnp-drawings-archive/cnp-s65-dim-003.png",
+        "width":  2480,
+        "height":  3507,
+        "sourceFile":  "43dc5f45ecb1435981682c8278fc38fb.png",
+        "type":  "dimensional-drawing"
+    },
+    {
+        "id":  "CNP-S65-DIM-004",
+        "series":  "Series65",
+        "file":  "cnp-s65-dim-004.png",
+        "url":  "/cnp-drawings-archive/cnp-s65-dim-004.png",
+        "width":  2480,
+        "height":  3507,
+        "sourceFile":  "6b6ab025f4a845a1a60f58d4fc1f9d24.png",
+        "type":  "dimensional-drawing"
+    },
+    {
+        "id":  "CNP-S65-DIM-005",
+        "series":  "Series65",
+        "file":  "cnp-s65-dim-005.png",
+        "url":  "/cnp-drawings-archive/cnp-s65-dim-005.png",
+        "width":  2480,
+        "height":  3507,
+        "sourceFile":  "7fcb1e8f52774d5394c035847d25577d.png",
+        "type":  "dimensional-drawing"
+    },
+    {
+        "id":  "CNP-S65-DIM-006",
+        "series":  "Series65",
+        "file":  "cnp-s65-dim-006.png",
+        "url":  "/cnp-drawings-archive/cnp-s65-dim-006.png",
+        "width":  2480,
+        "height":  3507,
+        "sourceFile":  "c861d512db754e1b9bb1d10c3fddad06.png",
+        "type":  "dimensional-drawing"
+    },
+    {
+        "id":  "CNP-S68-DIM-001",
+        "series":  "Series68",
+        "file":  "cnp-s68-dim-001.png",
+        "url":  "/cnp-drawings-archive/cnp-s68-dim-001.png",
+        "width":  3507,
+        "height":  2480,
+        "sourceFile":  "36d5ccdfabcd47a5bed02cb1dc7f10df.png",
+        "type":  "dimensional-drawing"
+    }
+]

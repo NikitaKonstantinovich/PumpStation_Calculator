@@ -1,0 +1,1690 @@
+{
+  "version": "6",
+  "dialect": "sqlite",
+  "id": "927cfe85-eccc-4257-8a8a-2078ac40fbdf",
+  "prevId": "00000000-0000-0000-0000-000000000000",
+  "tables": {
+    "attribute_definitions": {
+      "name": "attribute_definitions",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "family_id": {
+          "name": "family_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "source_column": {
+          "name": "source_column",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "key": {
+          "name": "key",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "label": {
+          "name": "label",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "header_path_json": {
+          "name": "header_path_json",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'[]'"
+        },
+        "data_type": {
+          "name": "data_type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "unit": {
+          "name": "unit",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "sort_order": {
+          "name": "sort_order",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 0
+        }
+      },
+      "indexes": {
+        "uq_attribute_definitions_family_column": {
+          "name": "uq_attribute_definitions_family_column",
+          "columns": [
+            "family_id",
+            "source_column"
+          ],
+          "isUnique": true
+        },
+        "idx_attribute_definitions_family_sort": {
+          "name": "idx_attribute_definitions_family_sort",
+          "columns": [
+            "family_id",
+            "sort_order"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "attribute_definitions_family_id_component_families_id_fk": {
+          "name": "attribute_definitions_family_id_component_families_id_fk",
+          "tableFrom": "attribute_definitions",
+          "tableTo": "component_families",
+          "columnsFrom": [
+            "family_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "catalog_imports": {
+      "name": "catalog_imports",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "source_file": {
+          "name": "source_file",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "source_sha256": {
+          "name": "source_sha256",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "source_size_bytes": {
+          "name": "source_size_bytes",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "source_modified_at": {
+          "name": "source_modified_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "imported_at": {
+          "name": "imported_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "CURRENT_TIMESTAMP"
+        },
+        "default_currency": {
+          "name": "default_currency",
+          "type": "text(3)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'RUB'"
+        },
+        "schema_version": {
+          "name": "schema_version",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 1
+        },
+        "is_active": {
+          "name": "is_active",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": true
+        }
+      },
+      "indexes": {
+        "uq_catalog_imports_sha256": {
+          "name": "uq_catalog_imports_sha256",
+          "columns": [
+            "source_sha256"
+          ],
+          "isUnique": true
+        },
+        "idx_catalog_imports_active_imported_at": {
+          "name": "idx_catalog_imports_active_imported_at",
+          "columns": [
+            "is_active",
+            "imported_at"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {
+        "ck_catalog_imports_sha256_length": {
+          "name": "ck_catalog_imports_sha256_length",
+          "value": "length(\"catalog_imports\".\"source_sha256\") = 64"
+        },
+        "ck_catalog_imports_source_size": {
+          "name": "ck_catalog_imports_source_size",
+          "value": "\"catalog_imports\".\"source_size_bytes\" > 0"
+        }
+      }
+    },
+    "component_attribute_values": {
+      "name": "component_attribute_values",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "component_id": {
+          "name": "component_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "attribute_definition_id": {
+          "name": "attribute_definition_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "formula_rule_id": {
+          "name": "formula_rule_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "value_type": {
+          "name": "value_type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "text_value": {
+          "name": "text_value",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "numeric_value": {
+          "name": "numeric_value",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "boolean_value": {
+          "name": "boolean_value",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "date_value": {
+          "name": "date_value",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "json_value": {
+          "name": "json_value",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "number_format": {
+          "name": "number_format",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "comment": {
+          "name": "comment",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "uq_component_attribute_values_component_attribute": {
+          "name": "uq_component_attribute_values_component_attribute",
+          "columns": [
+            "component_id",
+            "attribute_definition_id"
+          ],
+          "isUnique": true
+        },
+        "idx_component_attribute_values_text": {
+          "name": "idx_component_attribute_values_text",
+          "columns": [
+            "attribute_definition_id",
+            "text_value"
+          ],
+          "isUnique": false
+        },
+        "idx_component_attribute_values_number": {
+          "name": "idx_component_attribute_values_number",
+          "columns": [
+            "attribute_definition_id",
+            "numeric_value"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "component_attribute_values_component_id_components_id_fk": {
+          "name": "component_attribute_values_component_id_components_id_fk",
+          "tableFrom": "component_attribute_values",
+          "tableTo": "components",
+          "columnsFrom": [
+            "component_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "component_attribute_values_attribute_definition_id_attribute_definitions_id_fk": {
+          "name": "component_attribute_values_attribute_definition_id_attribute_definitions_id_fk",
+          "tableFrom": "component_attribute_values",
+          "tableTo": "attribute_definitions",
+          "columnsFrom": [
+            "attribute_definition_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "component_attribute_values_formula_rule_id_formula_rules_id_fk": {
+          "name": "component_attribute_values_formula_rule_id_formula_rules_id_fk",
+          "tableFrom": "component_attribute_values",
+          "tableTo": "formula_rules",
+          "columnsFrom": [
+            "formula_rule_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "component_catalogs": {
+      "name": "component_catalogs",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "import_id": {
+          "name": "import_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "source_id": {
+          "name": "source_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "source_sheet": {
+          "name": "source_sheet",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "sort_order": {
+          "name": "sort_order",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 0
+        }
+      },
+      "indexes": {
+        "uq_component_catalogs_import_source": {
+          "name": "uq_component_catalogs_import_source",
+          "columns": [
+            "import_id",
+            "source_id"
+          ],
+          "isUnique": true
+        },
+        "idx_component_catalogs_import_sort": {
+          "name": "idx_component_catalogs_import_sort",
+          "columns": [
+            "import_id",
+            "sort_order"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "component_catalogs_import_id_catalog_imports_id_fk": {
+          "name": "component_catalogs_import_id_catalog_imports_id_fk",
+          "tableFrom": "component_catalogs",
+          "tableTo": "catalog_imports",
+          "columnsFrom": [
+            "import_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "component_data_sources": {
+      "name": "component_data_sources",
+      "columns": {
+        "component_id": {
+          "name": "component_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "data_source_id": {
+          "name": "data_source_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "role": {
+          "name": "role",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'reference'"
+        }
+      },
+      "indexes": {
+        "uq_component_data_sources_link": {
+          "name": "uq_component_data_sources_link",
+          "columns": [
+            "component_id",
+            "data_source_id",
+            "role"
+          ],
+          "isUnique": true
+        },
+        "idx_component_data_sources_source": {
+          "name": "idx_component_data_sources_source",
+          "columns": [
+            "data_source_id"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "component_data_sources_component_id_components_id_fk": {
+          "name": "component_data_sources_component_id_components_id_fk",
+          "tableFrom": "component_data_sources",
+          "tableTo": "components",
+          "columnsFrom": [
+            "component_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "component_data_sources_data_source_id_data_sources_id_fk": {
+          "name": "component_data_sources_data_source_id_data_sources_id_fk",
+          "tableFrom": "component_data_sources",
+          "tableTo": "data_sources",
+          "columnsFrom": [
+            "data_source_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "component_families": {
+      "name": "component_families",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "catalog_id": {
+          "name": "catalog_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "source_id": {
+          "name": "source_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "title": {
+          "name": "title",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "source_range": {
+          "name": "source_range",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "source_urls_json": {
+          "name": "source_urls_json",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'[]'"
+        },
+        "sort_order": {
+          "name": "sort_order",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 0
+        }
+      },
+      "indexes": {
+        "uq_component_families_catalog_source": {
+          "name": "uq_component_families_catalog_source",
+          "columns": [
+            "catalog_id",
+            "source_id"
+          ],
+          "isUnique": true
+        },
+        "idx_component_families_catalog_sort": {
+          "name": "idx_component_families_catalog_sort",
+          "columns": [
+            "catalog_id",
+            "sort_order"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "component_families_catalog_id_component_catalogs_id_fk": {
+          "name": "component_families_catalog_id_component_catalogs_id_fk",
+          "tableFrom": "component_families",
+          "tableTo": "component_catalogs",
+          "columnsFrom": [
+            "catalog_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "component_prices": {
+      "name": "component_prices",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "component_id": {
+          "name": "component_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "attribute_definition_id": {
+          "name": "attribute_definition_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "label": {
+          "name": "label",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "amount_microunits": {
+          "name": "amount_microunits",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "scale": {
+          "name": "scale",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 1000000
+        },
+        "currency": {
+          "name": "currency",
+          "type": "text(3)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'RUB'"
+        },
+        "source_column": {
+          "name": "source_column",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "idx_component_prices_component": {
+          "name": "idx_component_prices_component",
+          "columns": [
+            "component_id"
+          ],
+          "isUnique": false
+        },
+        "idx_component_prices_currency_amount": {
+          "name": "idx_component_prices_currency_amount",
+          "columns": [
+            "currency",
+            "amount_microunits"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "component_prices_component_id_components_id_fk": {
+          "name": "component_prices_component_id_components_id_fk",
+          "tableFrom": "component_prices",
+          "tableTo": "components",
+          "columnsFrom": [
+            "component_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "component_prices_attribute_definition_id_attribute_definitions_id_fk": {
+          "name": "component_prices_attribute_definition_id_attribute_definitions_id_fk",
+          "tableFrom": "component_prices",
+          "tableTo": "attribute_definitions",
+          "columnsFrom": [
+            "attribute_definition_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {
+        "ck_component_prices_amount": {
+          "name": "ck_component_prices_amount",
+          "value": "\"component_prices\".\"amount_microunits\" > 0"
+        },
+        "ck_component_prices_scale": {
+          "name": "ck_component_prices_scale",
+          "value": "\"component_prices\".\"scale\" > 0"
+        }
+      }
+    },
+    "components": {
+      "name": "components",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "family_id": {
+          "name": "family_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "source_id": {
+          "name": "source_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "source_row": {
+          "name": "source_row",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "display_name": {
+          "name": "display_name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "manufacturer": {
+          "name": "manufacturer",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "model": {
+          "name": "model",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "article": {
+          "name": "article",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "is_active": {
+          "name": "is_active",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": true
+        }
+      },
+      "indexes": {
+        "uq_components_family_source": {
+          "name": "uq_components_family_source",
+          "columns": [
+            "family_id",
+            "source_id"
+          ],
+          "isUnique": true
+        },
+        "idx_components_family_row": {
+          "name": "idx_components_family_row",
+          "columns": [
+            "family_id",
+            "source_row"
+          ],
+          "isUnique": false
+        },
+        "idx_components_manufacturer_model": {
+          "name": "idx_components_manufacturer_model",
+          "columns": [
+            "manufacturer",
+            "model"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "components_family_id_component_families_id_fk": {
+          "name": "components_family_id_component_families_id_fk",
+          "tableFrom": "components",
+          "tableTo": "component_families",
+          "columnsFrom": [
+            "family_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {
+        "ck_components_source_row": {
+          "name": "ck_components_source_row",
+          "value": "\"components\".\"source_row\" > 0"
+        }
+      }
+    },
+    "data_sources": {
+      "name": "data_sources",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "url": {
+          "name": "url",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "title": {
+          "name": "title",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "source_type": {
+          "name": "source_type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'reference'"
+        }
+      },
+      "indexes": {
+        "uq_data_sources_url": {
+          "name": "uq_data_sources_url",
+          "columns": [
+            "url"
+          ],
+          "isUnique": true
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "data_validations": {
+      "name": "data_validations",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "import_id": {
+          "name": "import_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "sheet": {
+          "name": "sheet",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'Исходные данные'"
+        },
+        "source_range": {
+          "name": "source_range",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "validation_type": {
+          "name": "validation_type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "operator": {
+          "name": "operator",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "formula1": {
+          "name": "formula1",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "formula2": {
+          "name": "formula2",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "allow_blank": {
+          "name": "allow_blank",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": false
+        },
+        "extension": {
+          "name": "extension",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "uq_data_validations_import_range": {
+          "name": "uq_data_validations_import_range",
+          "columns": [
+            "import_id",
+            "sheet",
+            "source_range"
+          ],
+          "isUnique": true
+        },
+        "idx_data_validations_sheet_range": {
+          "name": "idx_data_validations_sheet_range",
+          "columns": [
+            "sheet",
+            "source_range"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "data_validations_import_id_catalog_imports_id_fk": {
+          "name": "data_validations_import_id_catalog_imports_id_fk",
+          "tableFrom": "data_validations",
+          "tableTo": "catalog_imports",
+          "columnsFrom": [
+            "import_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "external_workbook_links": {
+      "name": "external_workbook_links",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "import_id": {
+          "name": "import_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "relationship_id": {
+          "name": "relationship_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "target": {
+          "name": "target",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "target_mode": {
+          "name": "target_mode",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "uq_external_workbook_links_target": {
+          "name": "uq_external_workbook_links_target",
+          "columns": [
+            "import_id",
+            "target"
+          ],
+          "isUnique": true
+        }
+      },
+      "foreignKeys": {
+        "external_workbook_links_import_id_catalog_imports_id_fk": {
+          "name": "external_workbook_links_import_id_catalog_imports_id_fk",
+          "tableFrom": "external_workbook_links",
+          "tableTo": "catalog_imports",
+          "columnsFrom": [
+            "import_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "formula_dependencies": {
+      "name": "formula_dependencies",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "formula_rule_id": {
+          "name": "formula_rule_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "target_sheet": {
+          "name": "target_sheet",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "target_address": {
+          "name": "target_address",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "is_external": {
+          "name": "is_external",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": false
+        }
+      },
+      "indexes": {
+        "uq_formula_dependencies_target": {
+          "name": "uq_formula_dependencies_target",
+          "columns": [
+            "formula_rule_id",
+            "target_sheet",
+            "target_address"
+          ],
+          "isUnique": true
+        },
+        "idx_formula_dependencies_lookup": {
+          "name": "idx_formula_dependencies_lookup",
+          "columns": [
+            "target_sheet",
+            "target_address"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "formula_dependencies_formula_rule_id_formula_rules_id_fk": {
+          "name": "formula_dependencies_formula_rule_id_formula_rules_id_fk",
+          "tableFrom": "formula_dependencies",
+          "tableTo": "formula_rules",
+          "columnsFrom": [
+            "formula_rule_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "formula_rules": {
+      "name": "formula_rules",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "import_id": {
+          "name": "import_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "source_id": {
+          "name": "source_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "sheet": {
+          "name": "sheet",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "address": {
+          "name": "address",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "formula": {
+          "name": "formula",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "cached_value_text": {
+          "name": "cached_value_text",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "cached_value_number": {
+          "name": "cached_value_number",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "uq_formula_rules_import_source": {
+          "name": "uq_formula_rules_import_source",
+          "columns": [
+            "import_id",
+            "source_id"
+          ],
+          "isUnique": true
+        },
+        "uq_formula_rules_import_cell": {
+          "name": "uq_formula_rules_import_cell",
+          "columns": [
+            "import_id",
+            "sheet",
+            "address"
+          ],
+          "isUnique": true
+        },
+        "idx_formula_rules_sheet_address": {
+          "name": "idx_formula_rules_sheet_address",
+          "columns": [
+            "sheet",
+            "address"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "formula_rules_import_id_catalog_imports_id_fk": {
+          "name": "formula_rules_import_id_catalog_imports_id_fk",
+          "tableFrom": "formula_rules",
+          "tableTo": "catalog_imports",
+          "columnsFrom": [
+            "import_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "relation_fields": {
+      "name": "relation_fields",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "relation_record_id": {
+          "name": "relation_record_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "formula_rule_id": {
+          "name": "formula_rule_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "source_column": {
+          "name": "source_column",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "header_path_json": {
+          "name": "header_path_json",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'[]'"
+        },
+        "value_type": {
+          "name": "value_type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "text_value": {
+          "name": "text_value",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "numeric_value": {
+          "name": "numeric_value",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "boolean_value": {
+          "name": "boolean_value",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "date_value": {
+          "name": "date_value",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "json_value": {
+          "name": "json_value",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "number_format": {
+          "name": "number_format",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "source_url": {
+          "name": "source_url",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "comment": {
+          "name": "comment",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "uq_relation_fields_record_column": {
+          "name": "uq_relation_fields_record_column",
+          "columns": [
+            "relation_record_id",
+            "source_column"
+          ],
+          "isUnique": true
+        },
+        "idx_relation_fields_text": {
+          "name": "idx_relation_fields_text",
+          "columns": [
+            "source_column",
+            "text_value"
+          ],
+          "isUnique": false
+        },
+        "idx_relation_fields_number": {
+          "name": "idx_relation_fields_number",
+          "columns": [
+            "source_column",
+            "numeric_value"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "relation_fields_relation_record_id_relation_records_id_fk": {
+          "name": "relation_fields_relation_record_id_relation_records_id_fk",
+          "tableFrom": "relation_fields",
+          "tableTo": "relation_records",
+          "columnsFrom": [
+            "relation_record_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "relation_fields_formula_rule_id_formula_rules_id_fk": {
+          "name": "relation_fields_formula_rule_id_formula_rules_id_fk",
+          "tableFrom": "relation_fields",
+          "tableTo": "formula_rules",
+          "columnsFrom": [
+            "formula_rule_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "relation_records": {
+      "name": "relation_records",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "relation_table_id": {
+          "name": "relation_table_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "source_id": {
+          "name": "source_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "source_row": {
+          "name": "source_row",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "uq_relation_records_table_source": {
+          "name": "uq_relation_records_table_source",
+          "columns": [
+            "relation_table_id",
+            "source_id"
+          ],
+          "isUnique": true
+        },
+        "idx_relation_records_table_row": {
+          "name": "idx_relation_records_table_row",
+          "columns": [
+            "relation_table_id",
+            "source_row"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "relation_records_relation_table_id_relation_tables_id_fk": {
+          "name": "relation_records_relation_table_id_relation_tables_id_fk",
+          "tableFrom": "relation_records",
+          "tableTo": "relation_tables",
+          "columnsFrom": [
+            "relation_table_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {
+        "ck_relation_records_source_row": {
+          "name": "ck_relation_records_source_row",
+          "value": "\"relation_records\".\"source_row\" > 0"
+        }
+      }
+    },
+    "relation_tables": {
+      "name": "relation_tables",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "import_id": {
+          "name": "import_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "source_id": {
+          "name": "source_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "kind": {
+          "name": "kind",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "title": {
+          "name": "title",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "source_sheet": {
+          "name": "source_sheet",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "source_range": {
+          "name": "source_range",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "uq_relation_tables_import_source": {
+          "name": "uq_relation_tables_import_source",
+          "columns": [
+            "import_id",
+            "source_id"
+          ],
+          "isUnique": true
+        },
+        "idx_relation_tables_kind": {
+          "name": "idx_relation_tables_kind",
+          "columns": [
+            "import_id",
+            "kind"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "relation_tables_import_id_catalog_imports_id_fk": {
+          "name": "relation_tables_import_id_catalog_imports_id_fk",
+          "tableFrom": "relation_tables",
+          "tableTo": "catalog_imports",
+          "columnsFrom": [
+            "import_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "workbook_defined_names": {
+      "name": "workbook_defined_names",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "import_id": {
+          "name": "import_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "value": {
+          "name": "value",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "local_sheet_id": {
+          "name": "local_sheet_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "is_hidden": {
+          "name": "is_hidden",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": false
+        }
+      },
+      "indexes": {
+        "uq_workbook_defined_names_scope": {
+          "name": "uq_workbook_defined_names_scope",
+          "columns": [
+            "import_id",
+            "name",
+            "local_sheet_id"
+          ],
+          "isUnique": true
+        }
+      },
+      "foreignKeys": {
+        "workbook_defined_names_import_id_catalog_imports_id_fk": {
+          "name": "workbook_defined_names_import_id_catalog_imports_id_fk",
+          "tableFrom": "workbook_defined_names",
+          "tableTo": "catalog_imports",
+          "columnsFrom": [
+            "import_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    }
+  },
+  "views": {},
+  "enums": {},
+  "_meta": {
+    "schemas": {},
+    "tables": {},
+    "columns": {}
+  },
+  "internal": {
+    "indexes": {}
+  }
+}

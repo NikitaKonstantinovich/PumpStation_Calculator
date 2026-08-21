@@ -1,0 +1,177 @@
+[
+  {
+    "family": "EVR1",
+    "file": "aquastrong-evr1.png",
+    "pdfPage": 8,
+    "cataloguePage": 11,
+    "source": "Equipment/Pumps/AQUASTRONG Многоступенчатые насосы.pdf"
+  },
+  {
+    "family": "EVR2",
+    "file": "aquastrong-evr2.png",
+    "pdfPage": 9,
+    "cataloguePage": 13,
+    "source": "Equipment/Pumps/AQUASTRONG Многоступенчатые насосы.pdf"
+  },
+  {
+    "family": "EVR3",
+    "file": "aquastrong-evr3.png",
+    "pdfPage": 10,
+    "cataloguePage": 15,
+    "source": "Equipment/Pumps/AQUASTRONG Многоступенчатые насосы.pdf"
+  },
+  {
+    "family": "EVR4",
+    "file": "aquastrong-evr4.png",
+    "pdfPage": 11,
+    "cataloguePage": 17,
+    "source": "Equipment/Pumps/AQUASTRONG Многоступенчатые насосы.pdf"
+  },
+  {
+    "family": "EVR5",
+    "file": "aquastrong-evr5.png",
+    "pdfPage": 12,
+    "cataloguePage": 19,
+    "source": "Equipment/Pumps/AQUASTRONG Многоступенчатые насосы.pdf"
+  },
+  {
+    "family": "EVR10",
+    "file": "aquastrong-evr10.png",
+    "pdfPage": 13,
+    "cataloguePage": 21,
+    "source": "Equipment/Pumps/AQUASTRONG Многоступенчатые насосы.pdf"
+  },
+  {
+    "family": "EVR15",
+    "file": "aquastrong-evr15.png",
+    "pdfPage": 14,
+    "cataloguePage": 23,
+    "source": "Equipment/Pumps/AQUASTRONG Многоступенчатые насосы.pdf"
+  },
+  {
+    "family": "EVR20",
+    "file": "aquastrong-evr20.png",
+    "pdfPage": 15,
+    "cataloguePage": 25,
+    "source": "Equipment/Pumps/AQUASTRONG Многоступенчатые насосы.pdf"
+  },
+  {
+    "family": "EVR32",
+    "file": "aquastrong-evr32.png",
+    "pdfPage": 16,
+    "cataloguePage": 27,
+    "source": "Equipment/Pumps/AQUASTRONG Многоступенчатые насосы.pdf"
+  },
+  {
+    "family": "EVR45",
+    "file": "aquastrong-evr45.png",
+    "pdfPage": 17,
+    "cataloguePage": 29,
+    "source": "Equipment/Pumps/AQUASTRONG Многоступенчатые насосы.pdf"
+  },
+  {
+    "family": "EVR64",
+    "file": "aquastrong-evr64.png",
+    "pdfPage": 18,
+    "cataloguePage": 31,
+    "source": "Equipment/Pumps/AQUASTRONG Многоступенчатые насосы.pdf"
+  },
+  {
+    "family": "EVR90",
+    "file": "aquastrong-evr90.png",
+    "pdfPage": 19,
+    "cataloguePage": 33,
+    "source": "Equipment/Pumps/AQUASTRONG Многоступенчатые насосы.pdf"
+  },
+  {
+    "family": "EVR120",
+    "file": "aquastrong-evr120.png",
+    "pdfPage": 20,
+    "cataloguePage": 35,
+    "source": "Equipment/Pumps/AQUASTRONG Многоступенчатые насосы.pdf"
+  },
+  {
+    "family": "EVR150",
+    "file": "aquastrong-evr150.png",
+    "pdfPage": 21,
+    "cataloguePage": 37,
+    "source": "Equipment/Pumps/AQUASTRONG Многоступенчатые насосы.pdf"
+  },
+  {
+    "family": "EVR200",
+    "file": "aquastrong-evr200.png",
+    "pdfPage": 22,
+    "cataloguePage": 39,
+    "source": "Equipment/Pumps/AQUASTRONG Многоступенчатые насосы.pdf"
+  },
+  {
+    "family": "ECH2",
+    "file": "aquastrong-ech2.png",
+    "pdfPage": 27,
+    "cataloguePage": 48,
+    "source": "Equipment/Pumps/AQUASTRONG Многоступенчатые насосы.pdf"
+  },
+  {
+    "family": "ECH4",
+    "file": "aquastrong-ech4.png",
+    "pdfPage": 28,
+    "cataloguePage": 49,
+    "source": "Equipment/Pumps/AQUASTRONG Многоступенчатые насосы.pdf"
+  },
+  {
+    "family": "ECH10",
+    "file": "aquastrong-ech10.png",
+    "pdfPage": 28,
+    "cataloguePage": 50,
+    "source": "Equipment/Pumps/AQUASTRONG Многоступенчатые насосы.pdf"
+  },
+  {
+    "family": "ECH15",
+    "file": "aquastrong-ech15.png",
+    "pdfPage": 29,
+    "cataloguePage": 51,
+    "source": "Equipment/Pumps/AQUASTRONG Многоступенчатые насосы.pdf"
+  },
+  {
+    "family": "ECH20",
+    "file": "aquastrong-ech20.png",
+    "pdfPage": 29,
+    "cataloguePage": 52,
+    "source": "Equipment/Pumps/AQUASTRONG Многоступенчатые насосы.pdf"
+  },
+  {
+    "family": "EDH2",
+    "file": "aquastrong-edh2.png",
+    "pdfPage": 31,
+    "cataloguePage": 55,
+    "source": "Equipment/Pumps/AQUASTRONG Многоступенчатые насосы.pdf"
+  },
+  {
+    "family": "EDH4",
+    "file": "aquastrong-edh4.png",
+    "pdfPage": 31,
+    "cataloguePage": 56,
+    "source": "Equipment/Pumps/AQUASTRONG Многоступенчатые насосы.pdf"
+  },
+  {
+    "family": "EDH10",
+    "file": "aquastrong-edh10.png",
+    "pdfPage": 32,
+    "cataloguePage": 57,
+    "source": "Equipment/Pumps/AQUASTRONG Многоступенчатые насосы.pdf"
+  },
+  {
+    "family": "EDH15",
+    "file": "aquastrong-edh15.png",
+    "pdfPage": 32,
+    "cataloguePage": 58,
+    "source": "Equipment/Pumps/AQUASTRONG Многоступенчатые насосы.pdf"
+  },
+  {
+    "family": "EDH20",
+    "file": "aquastrong-edh20.png",
+    "pdfPage": 33,
+    "cataloguePage": 59,
+    "source": "Equipment/Pumps/AQUASTRONG Многоступенчатые насосы.pdf"
+  }
+]
