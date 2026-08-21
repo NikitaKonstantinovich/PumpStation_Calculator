@@ -64,6 +64,47 @@ FORMULA_REF = re.compile(
     re.UNICODE,
 )
 
+OBVYAZKA_TABLES = {
+    1: ("затворы", "Затворы", "Затвор поворотный дисковый 017W · Синий PN10/16"),
+    2: ("затворы", "Затворы", "Затвор поворотный дисковый 017W · Красный PN16"),
+    3: ("затворы", "Затворы", "Затвор поворотный дисковый 017W · Красный PN25"),
+    4: ("задвижки", "Задвижки", "Задвижка клиновая фланцевая 47GV · Синяя"),
+    5: ("задвижки", "Задвижки", "Задвижка клиновая фланцевая 47GV · Красная"),
+    6: ("обратные-клапаны", "Обратные клапаны", "Клапан обратный двустворчатый межфланцевый 010С.Y · Синий"),
+    7: ("обратные-клапаны", "Обратные клапаны", "Клапан обратный двустворчатый межфланцевый 010С.Y · Красный"),
+    8: ("обратные-клапаны", "Обратные клапаны", "Клапан обратный шаровой фланцевый 012F"),
+    9: ("компенсаторы", "Компенсаторы", "Компенсатор резиновый фланцевый KMS · EPDM"),
+    10: ("электроприводы", "Электроприводы", "Электропривод многооборотный · IP67, 380 В"),
+    11: ("задвижки", "Задвижки", "Задвижка шиберная межфланцевая K21GV · Синяя"),
+    12: ("обратные-клапаны", "Обратные клапаны", "Обратный клапан с латунным сердечником"),
+    13: ("шаровые-краны", "Шаровые краны", "Кран шаровой латунный ВР · ручка-рычаг"),
+    14: ("шаровые-краны", "Шаровые краны", "Кран шаровой латунный ВР-ВР · дренаж и воздухоотводчик"),
+    15: ("шаровые-краны", "Шаровые краны", "Кран шаровой латунный ВР · ручка-бабочка"),
+    16: ("резьбовые-фитинги", "Резьбовые фитинги", "Ниппель латунный НР/НР · LD Pride"),
+    17: ("резьбовые-фитинги", "Резьбовые фитинги", "Футорка латунная НР-ВР · LD Pride"),
+    18: ("резьбовые-фитинги", "Резьбовые фитинги", "Переходник латунный ВР-НР · MVI"),
+    19: ("пожарная-арматура", "Пожарная арматура", "Головка пожарная муфтовая ГМ ПМ УХЛ1 · Цветлит"),
+    20: ("пожарная-арматура", "Пожарная арматура", "Головка-заглушка ГЗ А-П"),
+}
+
+OBVYAZKA_COLUMN_OVERRIDES = {
+    6: [["DN"], ["Чугун", "Цена, ₽"], ["Нержавеющая сталь", "Цена, ₽"], ["Вес, кг"]],
+    7: [["DN"], ["Чугун", "Цена, ₽"], ["Нержавеющая сталь", "Цена, ₽"], ["Вес, кг"]],
+    8: [["DN"], ["Тип 012F.Z", "Чугун", "Цена, ₽"], ["Тип 012F.M", "Чугун", "Цена, ₽"]],
+    9: [["DN"], ["PN10", "Цена, ₽"], ["PN16", "Цена, ₽"], ["PN25", "Цена, ₽"], ["PN10", "Вес, кг"], ["PN16", "Вес, кг"], ["PN25", "Вес, кг"]],
+    10: [["Тип привода"], ["IP67 · 380 В", "Цена, ₽"], ["Вес, кг"]],
+    12: [["DN"], ["Латунь", "Цена, ₽"], ["Ссылка"]],
+}
+
+OBVYAZKA_EXTRA_HEADER_ROWS = {
+    6: {59, 60},
+    7: {59, 60},
+    8: {85, 86},
+    9: {110, 111},
+    10: {135},
+    12: {182},
+}
+
 
 def clean_scalar(value: Any) -> Any:
     if value is None or isinstance(value, (bool, int)):
@@ -379,6 +420,83 @@ def parse_tables(worksheet_formula, worksheet_values, formula_map, sheet_id: str
     return tables
 
 
+def rebuild_prices(fields: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    prices = []
+    for field in fields:
+        label = " / ".join(field["headerPath"])
+        amount = numeric_value(field["value"])
+        if amount is not None and amount > 0 and PRICE_WORDS.search(label):
+            prices.append({
+                "label": label or "Цена",
+                "amount": amount,
+                "currency": "RUB",
+                "sourceColumn": field["column"],
+            })
+    return prices
+
+
+def normalize_obvyazka(tables: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Turn the mixed source sheet into clean, product-oriented catalogues."""
+    grouped: dict[str, dict[str, Any]] = {}
+    counters: Counter[str] = Counter()
+    for source_number, table in enumerate(tables, start=1):
+        category_id, category_name, title = OBVYAZKA_TABLES[source_number]
+        counters[category_id] += 1
+        new_table_id = f"{category_id}-{counters[category_id]:03d}"
+        table["id"] = new_table_id
+        table["title"] = title
+
+        override_paths = OBVYAZKA_COLUMN_OVERRIDES.get(source_number)
+        if override_paths:
+            for column, header_path in zip(table["columns"], override_paths):
+                column["headerPath"] = header_path
+            paths_by_column = {column["column"]: column["headerPath"] for column in table["columns"]}
+            for record in table["records"]:
+                for field in record["fields"]:
+                    if field["column"] in paths_by_column:
+                        field["headerPath"] = paths_by_column[field["column"]]
+
+        extra_headers = OBVYAZKA_EXTRA_HEADER_ROWS.get(source_number, set())
+        table["headerRows"] = sorted({*table["headerRows"], *extra_headers})
+        records = []
+        seen_products = set()
+        for record in table["records"]:
+            if record["sourceRow"] in extra_headers:
+                continue
+            record["prices"] = rebuild_prices(record["fields"])
+            # Rows with only a size and placeholders are incomplete source templates,
+            # not purchasable components. They made the viewer look like it contained
+            # products named "-" and are intentionally omitted.
+            if not record["prices"]:
+                continue
+            identity = tuple(
+                str(field["value"]).strip().casefold()
+                for field in record["fields"]
+                if field["value"] not in (None, "", "-")
+            )
+            # The drive table repeats the same component for several valve sizes.
+            # In a component catalogue a drive model is a single product.
+            if source_number == 10:
+                identity = identity[:1]
+            if identity in seen_products:
+                continue
+            seen_products.add(identity)
+            record["id"] = f"{new_table_id}-r{record['sourceRow']:04d}"
+            records.append(record)
+        table["records"] = records
+
+        if not records:
+            continue
+        category = grouped.setdefault(category_id, {
+            "id": category_id,
+            "name": category_name,
+            "sourceSheet": "Обвязка",
+            "tables": [],
+        })
+        category["tables"].append(table)
+    return list(grouped.values())
+
+
 def extract_validations(worksheet) -> list[dict[str, Any]]:
     validations = []
     for validation in worksheet.data_validations.dataValidation:
@@ -429,32 +547,41 @@ def main() -> None:
             xml_formulas.get(sheet_name, {}),
             sheet_id,
         )
-        catalog = {
+        source_catalogs = normalize_obvyazka(tables) if sheet_name == "Обвязка" else [{
             "id": sheet_id,
             "name": sheet_name,
             "sourceSheet": sheet_name,
-            "tables": [
-                {
-                    **{key: value for key, value in table.items() if key != "records"},
-                    "recordIds": [record["id"] for record in table["records"]],
-                }
-                for table in tables
-            ],
-        }
-        catalogs.append(catalog)
-        for table in tables:
-            for record in table["records"]:
-                flat_items.append({
-                    "id": record["id"],
-                    "catalogId": sheet_id,
-                    "tableId": table["id"],
-                    "family": table["title"],
-                    "sourceSheet": sheet_name,
-                    "sourceRow": record["sourceRow"],
-                    "fields": record["fields"],
-                    "prices": record["prices"],
-                    "sourceUrls": list(dict.fromkeys([*table["sourceUrls"], *record["sourceUrls"]])),
-                })
+            "tables": tables,
+        }]
+        for source_catalog in source_catalogs:
+            catalog_id = source_catalog["id"]
+            catalog_tables = source_catalog["tables"]
+            catalog = {
+                "id": catalog_id,
+                "name": source_catalog["name"],
+                "sourceSheet": source_catalog["sourceSheet"],
+                "tables": [
+                    {
+                        **{key: value for key, value in table.items() if key != "records"},
+                        "recordIds": [record["id"] for record in table["records"]],
+                    }
+                    for table in catalog_tables
+                ],
+            }
+            catalogs.append(catalog)
+            for table in catalog_tables:
+                for record in table["records"]:
+                    flat_items.append({
+                        "id": record["id"],
+                        "catalogId": catalog_id,
+                        "tableId": table["id"],
+                        "family": table["title"],
+                        "sourceSheet": sheet_name,
+                        "sourceRow": record["sourceRow"],
+                        "fields": record["fields"],
+                        "prices": record["prices"],
+                        "sourceUrls": list(dict.fromkeys([*table["sourceUrls"], *record["sourceUrls"]])),
+                    })
 
     formula_rules = []
     for sheet_name in RULE_SHEETS:

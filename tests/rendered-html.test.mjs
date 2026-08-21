@@ -298,8 +298,11 @@ test("provides a component-database tool with category-specific characteristics 
     readFile(new URL("../public/binding-components.json", import.meta.url), "utf8"),
   ]);
   const database = JSON.parse(rawDatabase);
-  assert.equal(database.catalogs.length, 18);
-  assert.equal(database.items.length, 1859);
+  assert.equal(database.catalogs.length, 25);
+  assert.equal(database.items.length, 1794);
+  assert.ok(!database.catalogs.some(catalog => catalog.id === "обвязка"));
+  assert.ok(database.catalogs.some(catalog => catalog.id === "обратные-клапаны"));
+  assert.ok(database.catalogs.some(catalog => catalog.id === "пожарная-арматура"));
   assert.match(projectConfig, /"components" \| "model"/);
   assert.match(projectConfig, /"station-components": \{ kind: "components" \}/);
   assert.match(page, /components: \{ title: "База комплектующих"/);
@@ -347,11 +350,11 @@ test("ships the complete binding-component catalogue with prices and relations",
   assert.match(catalogue.source.sha256, /^[a-f0-9]{64}$/);
   assert.equal(catalogue.source.externalLinks.length, 2);
   assert.deepEqual(catalogue.statistics, {
-    catalogs: 18,
+    catalogs: 25,
     tables: 76,
-    componentRows: 1859,
-    pricedComponentRows: 1688,
-    priceEntries: 4082,
+    componentRows: 1794,
+    pricedComponentRows: 1765,
+    priceEntries: 4226,
     formulaRules: 4785,
     formulaErrorsInSavedValues: 0,
     dataValidations: 23,
@@ -363,6 +366,8 @@ test("ships the complete binding-component catalogue with prices and relations",
   assert.ok(catalogue.items.every(item => item.fields.length > 0));
   assert.ok(catalogue.items.flatMap(item => item.prices).every(price => price.currency === "RUB" && Number.isFinite(price.amount) && price.amount > 0));
   assert.ok(catalogue.catalogs.every(catalog => catalog.tables.every(table => table.recordIds.every(id => itemsById.has(id)))));
+  assert.ok(!catalogue.catalogs.some(catalog => catalog.id === "обвязка"));
+  assert.ok(catalogue.items.filter(item => item.sourceSheet === "Обвязка").every(item => item.prices.length > 0));
 
   const steelThreadedDn15 = catalogue.items.find(item => item.id === "сгоны-резьба-001-r0005");
   assert.equal(steelThreadedDn15.fields.find(field => field.column === "B")?.value, "DN15");
