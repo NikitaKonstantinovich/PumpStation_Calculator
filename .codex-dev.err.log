@@ -1,4 +1,0 @@
-Unable to fetch the `Request.cf` object! Falling back to a default placeholder...
-AggregateError [EACCES]: 
-    at internalConnectMultiple (node:net:1339:18)
-    at afterConnectMultiple (node:net:1942:7)

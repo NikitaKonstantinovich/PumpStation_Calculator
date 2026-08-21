@@ -38,3 +38,6 @@ yarn-error.log*
 /.wrangler/
 /outputs/
 /work/
+/.codex-dev*.log
+/.dev-server*.log
+/.next-dev*.log
