@@ -20,9 +20,11 @@ const PANEL_INFO: Record<PanelKind, { title: string; eyebrow: string }> = {
 const ENTITY_BY_TOOL:Record<PanelKind,string>={input:"system-input",chart:"working-point",sketch:"pump-sketch",input2:"system-input-2",chart2:"working-point-2",sketch2:"pump-sketch-2",settings:"station-settings",spec:"station-spec",components:"station-components",model:"station-model"};
 const isSecondaryEnabled = (settings: SettingsEntity) => settings.stationType === "combined" || (settings.stationType === "fire" && settings.jockeyPump);
 const SPEC_GROUPS: Array<{ title: string; sections: Array<{ id: SpecSection; title?: string }> }> = [
-  { title: "Насосный агрегат", sections: [{ id: "pump" }] },
+  { title: "Насосы", sections: [{ id: "pump" }] },
   { title: "Шкаф управления", sections: [{ id: "control" }] },
-  { title: "Сборочный комплект", sections: [{ id: "suction", title: "Подводящая линия" }, { id: "discharge", title: "Напорная линия" }, { id: "frame", title: "Рама" }] },
+  { title: "Рама", sections: [{ id: "frame" }] },
+  { title: "Сборочный комплект гидравлики", sections: [{ id: "suction", title: "Всасывающая линия" }, { id: "discharge", title: "Напорная линия" }] },
+  { title: "Сборочный комплект электрики", sections: [{ id: "electrical" }] },
 ];
 
 type Pump = { id:string; manufacturer:string; series:string; group:string; model:string; type:"vertical"|"horizontal"|"unknown"; power:number|null; efficiency:number|null; nominalFlow:number|null; minFlow:number|null; maxFlow:number|null; minHead:number|null; maxHead:number|null; price:number|null; priceCurrency:"USD"|"CNY"|null; priceSource:string|null; source:string|null; curve:Array<[number,number]> };
@@ -195,7 +197,7 @@ function InstallationSettings({ settings, onChange }: { settings: SettingsEntity
 
 function Specification({ entity, settings, catalogue }: { entity: SpecEntity; settings: SettingsEntity; catalogue:Pump[] }) {
   const formatMoney = (value: number) => value.toLocaleString("ru-RU", { maximumFractionDigits: 2 });
-  const sectionFor = (item: SpecItem): SpecSection => item.section ?? (item.position === "01" || /^Насос\b/i.test(item.name) ? "pump" : item.position === "02" || /шкаф/i.test(item.name) ? "control" : /рам|стойк|крепеж|вибро/i.test(item.name) ? "frame" : /подвод|манометр|реле|затвор/i.test(item.name) ? "suction" : "discharge");
+  const sectionFor = (item: SpecItem): SpecSection => item.section ?? (item.position === "01" || /^Насос\b/i.test(item.name) ? "pump" : item.position === "02" || /шкаф/i.test(item.name) ? "control" : /кабел|электр|клем|наконечн|провод|гофр|лоток/i.test(item.name) ? "electrical" : /рам|стойк|крепеж|вибро/i.test(item.name) ? "frame" : /подвод|манометр|реле|затвор/i.test(item.name) ? "suction" : "discharge");
   const secondaryEnabled = isSecondaryEnabled(settings);
   const pumpItems = entity.items.filter(item => sectionFor(item) === "pump").sort((a,b)=>a.position.localeCompare(b.position,"ru",{numeric:true})).slice(0,secondaryEnabled?2:1);
   const allowedPumpItems = new Set(pumpItems);
@@ -207,6 +209,10 @@ function Specification({ entity, settings, catalogue }: { entity: SpecEntity; se
   });
   const pricedItems = visibleItems.filter(item => typeof item.price === "number");
   const knownTotal = pricedItems.reduce((sum, item) => sum + item.price! * item.quantity, 0);
+  const sectionItems=(sections:SpecSection[])=>visibleItems.filter(item=>sections.includes(sectionFor(item)));
+  const subtotal=(items:SpecItem[])=>items.reduce((sum,item)=>sum+(typeof item.price==="number"?item.price*item.quantity:0),0);
+  const subtotalLabel=(items:SpecItem[])=>`${formatMoney(subtotal(items))} ₽`;
+  const sectionSummary=(items:SpecItem[])=><span className="spec-table__section-summary" title={items.some(item=>typeof item.price!=="number")?"Сумма рассчитана по позициям с заполненной ценой":"Полная стоимость раздела"}><i>{items.length} поз.</i><strong>{subtotalLabel(items)}</strong></span>;
   const renderItem = (item: SpecItem) => {
     const hasPrice = typeof item.price === "number";
     const cabinetNotFound=sectionFor(item)==="control"&&item.description==="Шкаф управления не найден в базе",cabinetPowerWarning=sectionFor(item)==="control"&&item.description.startsWith("Предупреждение:"),cabinetWarning=cabinetNotFound||cabinetPowerWarning;
@@ -222,16 +228,16 @@ function Specification({ entity, settings, catalogue }: { entity: SpecEntity; se
   };
 
   return <div className="spec-sheet">
-    <div className="spec-sheet__summary"><span><b>{visibleItems.length}</b> позиций в составе установки</span><span>{pricedItems.length ? <><small>Известная стоимость</small><b>{formatMoney(knownTotal)} ₽</b></> : <><small>Стоимость</small><b>Цены не заполнены</b></>}</span></div>
+    <div className="spec-sheet__summary"><span><b>{visibleItems.length}</b> позиций в составе установки</span><span><small>Итоговая стоимость{pricedItems.length<visibleItems.length?" · по заполненным ценам":""}</small><b>{formatMoney(knownTotal)} ₽</b></span></div>
     <div className="spec-table" role="table" aria-label="Спецификация насосной установки">
       <div className="spec-table__row spec-table__row--head" role="row"><span>№</span><span>Наименование</span><span>Кол-во</span><span>Ед.</span><span>Цена, ₽</span><span>Сумма, ₽</span><span>Описание</span></div>
-      {SPEC_GROUPS.map(group => <div className="spec-table__group" key={group.title}>
-        <div className="spec-table__section spec-table__section--main"><b>{group.title}</b><span>{group.sections.reduce((sum, section) => sum + visibleItems.filter(item => sectionFor(item) === section.id).length, 0)} поз.</span></div>
-        {group.sections.map(section => <div className="spec-table__subsection" key={section.id}>
-          {section.title && <div className="spec-table__section spec-table__section--sub"><b>{section.title}</b></div>}
-          {visibleItems.filter(item => sectionFor(item) === section.id).map(renderItem)}
-        </div>)}
-      </div>)}
+      {SPEC_GROUPS.map(group => {const groupItems=sectionItems(group.sections.map(section=>section.id));return <div className="spec-table__group" key={group.title}>
+        <div className="spec-table__section spec-table__section--main"><b>{group.title}</b>{sectionSummary(groupItems)}</div>
+        {group.sections.map(section => {const items=sectionItems([section.id]);return <div className="spec-table__subsection" key={section.id}>
+          {section.title && <div className="spec-table__section spec-table__section--sub"><b>{section.title}</b>{sectionSummary(items)}</div>}
+          {items.map(renderItem)}
+        </div>;})}
+      </div>;})}
     </div>
   </div>;
 }

@@ -42,7 +42,7 @@ export type SettingsEntity = {
   cnyRate: number;
   manufacturerDiscounts: { cnp: number; aquastrong: number };
 };
-export type SpecSection = "pump" | "control" | "suction" | "discharge" | "frame";
+export type SpecSection = "pump" | "control" | "suction" | "discharge" | "frame" | "electrical";
 export type SpecOption = "secondaryPump" | "membraneTank" | "vibrationCompensators" | "collectorPlugs" | "isolatingValves";
 export type SpecItem = {
   position: string;
@@ -156,7 +156,7 @@ export function parseProjectConfig(raw: unknown): ProjectConfig {
   const spec = entities["station-spec"] as SpecEntity | undefined;
   if (spec?.kind === "spec") {
     const isPumpItem = (item: SpecItem) => item.section === "pump" || /^Насос\b/i.test(item.name);
-    const sectionFor = (item: SpecItem): SpecSection => item.section ?? (isPumpItem(item) ? "pump" : /шкаф/i.test(item.name) ? "control" : /рам|стойк|крепеж|вибро/i.test(item.name) ? "frame" : /подвод|манометр|реле|затвор/i.test(item.name) ? "suction" : "discharge");
+    const sectionFor = (item: SpecItem): SpecSection => item.section ?? (isPumpItem(item) ? "pump" : /шкаф/i.test(item.name) ? "control" : /кабел|электр|клем|наконечн|провод|гофр|лоток/i.test(item.name) ? "electrical" : /рам|стойк|крепеж|вибро/i.test(item.name) ? "frame" : /подвод|манометр|реле|затвор/i.test(item.name) ? "suction" : "discharge");
     const optionFor = (item: SpecItem): SpecOption | undefined => item.option ?? (/бак мембран/i.test(item.name) ? "membraneTank" : /вставка гибк|виброкомпенс/i.test(item.name) ? "vibrationCompensators" : /заглушк/i.test(item.name) ? "collectorPlugs" : /разделительн/i.test(item.name) ? "isolatingValves" : item.position === "02" && /^Насос\b/i.test(item.name) ? "secondaryPump" : undefined);
     const normalized = Array.isArray(spec.items) ? spec.items.map(item => ({ ...item, unit: item.unit ?? "шт.", price: item.price ?? null, description: item.description ?? "", section: sectionFor(item), option: optionFor(item) })) : [];
     const pumpItems = normalized.filter(isPumpItem);

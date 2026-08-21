@@ -46,10 +46,10 @@ test("keeps the production surface free of the starter preview", async () => {
 
   assert.match(page, /title: "Подбор насосов"/);
   assert.match(page, /title: "Гидравлическая кривая"/);
-  assert.match(page, /Насосный агрегат/);
-  assert.match(page, /Сборочный комплект/);
+  assert.match(page, /title: "Спецификация"/);
+  assert.match(page, /Сборочный комплект гидравлики/);
   assert.match(page, /Цена, ₽/);
-  assert.match(page, /Цены не заполнены/);
+  assert.match(page, /Итоговая стоимость/);
   assert.match(page, /settings: \{ title: "Настройки проекта"/);
   assert.match(page, /const PANEL_INFO[^]*settings:[^]*input:/);
   assert.match(page, /Подбор насосов 2/);
@@ -313,6 +313,29 @@ test("provides a component-database tool with category-specific characteristics 
   assert.match(page, /Цена<\/th>/);
   assert.match(styles, /\.components-db__table/);
   assert.match(styles, /position:sticky/);
+});
+
+test("groups the specification and calculates section, subsection and final totals", async () => {
+  const [page, styles, projectConfig] = await Promise.all([
+    readFile(new URL("../app/page.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/globals.css", import.meta.url), "utf8"),
+    readFile(new URL("../app/project-config.ts", import.meta.url), "utf8"),
+  ]);
+  assert.match(projectConfig, /"frame" \| "electrical"/);
+  assert.match(page, /title: "Насосы"/);
+  assert.match(page, /title: "Шкаф управления"/);
+  assert.match(page, /title: "Рама"/);
+  assert.match(page, /title: "Сборочный комплект гидравлики"/);
+  assert.match(page, /title: "Сборочный комплект электрики"/);
+  assert.match(page, /title: "Всасывающая линия"/);
+  assert.match(page, /title: "Напорная линия"/);
+  assert.match(page, /const subtotal=/);
+  assert.match(page, /sectionSummary\(groupItems\)/);
+  assert.match(page, /sectionSummary\(items\)/);
+  assert.match(page, /Итоговая стоимость/);
+  assert.match(page, /formatMoney\(knownTotal\)/);
+  assert.match(styles, /\.spec-table__section-summary/);
+  assert.match(styles, /font-variant-numeric:tabular-nums/);
 });
 
 test("ships the complete binding-component catalogue with prices and relations", async () => {
