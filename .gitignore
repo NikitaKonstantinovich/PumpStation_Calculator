@@ -41,3 +41,4 @@ yarn-error.log*
 /.codex-dev*.log
 /.dev-server*.log
 /.next-dev*.log
+/.site-package*
