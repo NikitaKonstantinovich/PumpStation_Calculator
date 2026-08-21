@@ -16,6 +16,46 @@ npm run dev
 npm run build
 ```
 
+## База данных и исходные материалы
+
+База насосов и исходные каталоги хранятся отдельно от Git-репозитория:
+
+- [скачать архив с Яндекс Диска](https://disk.360.yandex.ru/d/ibtEqDcrlv4tbQ)
+- имя файла: `PumpStation_Calculator_data_2026-08-21.zip`
+- размер: 51,9 МБ
+- SHA-256: `F8F2D45650319FC4AEEB7AB61909D99F3480FFBCB437EDB4CCB62128A6D8C1DB`
+
+Создайте общую папку проекта, клонируйте репозиторий в подпапку `frontend`,
+а затем распакуйте содержимое архива рядом с ней:
+
+```text
+PumpStation_Calculator/
+├── frontend/            # этот Git-репозиторий
+├── database/            # pumps.sqlite, схема и скрипты импорта
+└── Equipment/           # Excel/PDF/MDB — исходные материалы
+```
+
+Пример установки в PowerShell:
+
+```powershell
+New-Item -ItemType Directory PumpStation_Calculator
+Set-Location PumpStation_Calculator
+git clone https://github.com/NikitaKonstantinovich/PumpStation_Calculator.git frontend
+Expand-Archive -LiteralPath <путь-к-архиву>\PumpStation_Calculator_data_2026-08-21.zip -DestinationPath .
+Set-Location frontend
+npm install
+npm run dev
+```
+
+Не помещайте `database` и `Equipment` внутрь `frontend`: скрипты импорта
+рассчитывают на показанную выше структуру. Готовая SQLite-база находится в
+`database/pumps.sqlite`. Для её пересборки из Excel после распаковки выполните
+из папки `PumpStation_Calculator`:
+
+```powershell
+python -X utf8 database/import_pumps.py
+```
+
 ## Email authentication
 
 Copy `.env.example` to `.env.local` and configure `RESEND_API_KEY`,
