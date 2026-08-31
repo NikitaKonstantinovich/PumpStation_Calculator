@@ -43,7 +43,7 @@ export type SettingsEntity = {
   manufacturerDiscounts: { cnp: number; aquastrong: number };
 };
 export type SpecSection = "pump" | "control" | "suction" | "discharge" | "frame" | "electrical";
-export type SpecOption = "secondaryPump" | "membraneTank" | "vibrationCompensators" | "collectorPlugs" | "isolatingValves";
+export type SpecOption = "secondaryPump" | "membraneTank" | "vibrationCompensators" | "collectorPlugs" | "isolatingValves" | "primarySuctionValve" | "primaryDischargeValve" | "primaryCheckValve" | "secondarySuctionValve" | "secondaryDischargeValve" | "secondaryCheckValve";
 export type SpecItem = {
   position: string;
   name: string;
@@ -65,6 +65,9 @@ export type ModelEntity = { kind: "model"; view: { rotation: number; zoom: numbe
 export type ComponentsEntity = { kind:"components" };
 export type CabinetEntity = { kind:"cabinet" };
 export type CollectorMaterial = "st20" | "aisi304";
+export type ValveConnection = "threaded" | "flanged";
+export type ValvePn = 10 | 16 | 25;
+export type ShutoffValveType = "butterfly" | "ball";
 export type DnEntity = {
   kind:"dn";
   suctionCollectorDn:number|null;
@@ -72,6 +75,18 @@ export type DnEntity = {
   suctionValveDn:number|null;
   dischargeValveDn:number|null;
   collectorMaterial:CollectorMaterial|null;
+  connectionType:ValveConnection|null;
+  pn:ValvePn|null;
+  suctionValveType:ShutoffValveType|null;
+  dischargeValveType:ShutoffValveType|null;
+  secondarySuctionCollectorDn:number|null;
+  secondaryDischargeCollectorDn:number|null;
+  secondarySuctionValveDn:number|null;
+  secondaryDischargeValveDn:number|null;
+  secondaryConnectionType:ValveConnection|null;
+  secondaryPn:ValvePn|null;
+  secondarySuctionValveType:ShutoffValveType|null;
+  secondaryDischargeValveType:ShutoffValveType|null;
 };
 export type ProjectEntity = InputEntity | ChartEntity | SketchEntity | SettingsEntity | DnEntity | SpecEntity | ComponentsEntity | CabinetEntity | ModelEntity;
 
@@ -129,7 +144,7 @@ export function createProject(name = "Новая насосная станция
       "pump-sketch": { kind: "sketch" },
       "pump-sketch-2": { kind: "sketch" },
       "station-settings": { kind: "settings", stationType: "utility", membraneTank: false, membraneTankVolume: 8, vibrationCompensators: false, collectorPlugs: false, isolatingValves: false, jockeyPump: false, usdRate: 85, cnyRate: 13, manufacturerDiscounts: { cnp: 45, aquastrong: 45 } },
-      "station-dn": { kind: "dn", suctionCollectorDn: null, dischargeCollectorDn: null, suctionValveDn: null, dischargeValveDn: null, collectorMaterial: null },
+      "station-dn": { kind: "dn", suctionCollectorDn: null, dischargeCollectorDn: null, suctionValveDn: null, dischargeValveDn: null, collectorMaterial: null, connectionType:null, pn:null, suctionValveType:null, dischargeValveType:null, secondarySuctionCollectorDn:null, secondaryDischargeCollectorDn:null, secondarySuctionValveDn:null, secondaryDischargeValveDn:null, secondaryConnectionType:null, secondaryPn:null, secondarySuctionValveType:null, secondaryDischargeValveType:null },
       "station-spec": { kind: "spec", items: DEFAULT_SPEC_ITEMS.map(item => ({ ...item })) },
       "station-components": { kind: "components" },
       "station-control-cabinet": { kind: "cabinet" },
@@ -167,7 +182,10 @@ export function parseProjectConfig(raw: unknown): ProjectConfig {
   entities["station-settings"] = { kind: "settings", stationType: rawSettings.stationType ?? "utility", membraneTank: rawSettings.membraneTank ?? false, membraneTankVolume: rawSettings.membraneTankVolume ?? 8, vibrationCompensators: rawSettings.vibrationCompensators ?? false, collectorPlugs: rawSettings.collectorPlugs ?? false, isolatingValves: rawSettings.isolatingValves ?? false, jockeyPump: rawSettings.jockeyPump ?? false, usdRate: finite(rawSettings.usdRate, 85), cnyRate: finite(rawSettings.cnyRate, 13), manufacturerDiscounts: { cnp: finite(rawSettings.manufacturerDiscounts?.cnp, 45), aquastrong: finite(rawSettings.manufacturerDiscounts?.aquastrong, 45) } };
   const rawDn = entities["station-dn"] as Partial<DnEntity>;
   const savedDn = (value:unknown) => typeof value === "number" && Number.isFinite(value) && value > 0 ? value : null;
-  entities["station-dn"] = { kind:"dn", suctionCollectorDn:savedDn(rawDn.suctionCollectorDn), dischargeCollectorDn:savedDn(rawDn.dischargeCollectorDn), suctionValveDn:savedDn(rawDn.suctionValveDn), dischargeValveDn:savedDn(rawDn.dischargeValveDn), collectorMaterial:rawDn.collectorMaterial==="st20"||rawDn.collectorMaterial==="aisi304"?rawDn.collectorMaterial:null };
+  const connection = (value:unknown):ValveConnection|null => value==="threaded"||value==="flanged"?value:null;
+  const pn = (value:unknown):ValvePn|null => value===10||value===16||value===25?value:null;
+  const valveType = (value:unknown):ShutoffValveType|null => value==="butterfly"||value==="ball"?value:null;
+  entities["station-dn"] = { kind:"dn", suctionCollectorDn:savedDn(rawDn.suctionCollectorDn), dischargeCollectorDn:savedDn(rawDn.dischargeCollectorDn), suctionValveDn:savedDn(rawDn.suctionValveDn), dischargeValveDn:savedDn(rawDn.dischargeValveDn), collectorMaterial:rawDn.collectorMaterial==="st20"||rawDn.collectorMaterial==="aisi304"?rawDn.collectorMaterial:null, connectionType:connection(rawDn.connectionType), pn:pn(rawDn.pn), suctionValveType:valveType(rawDn.suctionValveType), dischargeValveType:valveType(rawDn.dischargeValveType), secondarySuctionCollectorDn:savedDn(rawDn.secondarySuctionCollectorDn), secondaryDischargeCollectorDn:savedDn(rawDn.secondaryDischargeCollectorDn), secondarySuctionValveDn:savedDn(rawDn.secondarySuctionValveDn), secondaryDischargeValveDn:savedDn(rawDn.secondaryDischargeValveDn), secondaryConnectionType:connection(rawDn.secondaryConnectionType), secondaryPn:pn(rawDn.secondaryPn), secondarySuctionValveType:valveType(rawDn.secondarySuctionValveType), secondaryDischargeValveType:valveType(rawDn.secondaryDischargeValveType) };
   const spec = entities["station-spec"] as SpecEntity | undefined;
   if (spec?.kind === "spec") {
     const isPumpItem = (item: SpecItem) => item.section === "pump" || /^Насос\b/i.test(item.name);
