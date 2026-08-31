@@ -1,0 +1,4067 @@
+{
+  "generatedAt": "2026-08-31T19:50:47.3124822Z",
+  "count": 406,
+  "drawings": [
+    {
+      "series": "TD",
+      "pumpId": 1520,
+      "model": "TD100-27/2",
+      "file": "td-exploded.png",
+      "sourceFile": "819334d33fc842a796a28ca512cf6acd-en.png",
+      "scope": "TD",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "TD",
+      "pumpId": 1521,
+      "model": "TD100-33/2",
+      "file": "td-exploded.png",
+      "sourceFile": "819334d33fc842a796a28ca512cf6acd-en.png",
+      "scope": "TD",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "TD",
+      "pumpId": 1537,
+      "model": "TD150-33/4",
+      "file": "td-exploded.png",
+      "sourceFile": "819334d33fc842a796a28ca512cf6acd-en.png",
+      "scope": "TD",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "TD",
+      "pumpId": 1539,
+      "model": "TD150-50/4",
+      "file": "td-exploded.png",
+      "sourceFile": "819334d33fc842a796a28ca512cf6acd-en.png",
+      "scope": "TD",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "TD",
+      "pumpId": 1542,
+      "model": "TD200-24/4",
+      "file": "td-200-250-exploded.png",
+      "sourceFile": "07070969ec6840638a35e4d7f9f9316c.png",
+      "scope": "TD200-250",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "TD",
+      "pumpId": 1546,
+      "model": "TD200-53/4",
+      "file": "td-200-250-exploded.png",
+      "sourceFile": "07070969ec6840638a35e4d7f9f9316c.png",
+      "scope": "TD200-250",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "TD",
+      "pumpId": 1548,
+      "model": "TD200-20/4",
+      "file": "td-200-250-exploded.png",
+      "sourceFile": "07070969ec6840638a35e4d7f9f9316c.png",
+      "scope": "TD200-250",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "TD",
+      "pumpId": 1549,
+      "model": "TD200-23/4",
+      "file": "td-200-250-exploded.png",
+      "sourceFile": "07070969ec6840638a35e4d7f9f9316c.png",
+      "scope": "TD200-250",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "TD",
+      "pumpId": 1550,
+      "model": "TD200-27/4",
+      "file": "td-200-250-exploded.png",
+      "sourceFile": "07070969ec6840638a35e4d7f9f9316c.png",
+      "scope": "TD200-250",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "TD",
+      "pumpId": 1552,
+      "model": "TD200-43/4",
+      "file": "td-200-250-exploded.png",
+      "sourceFile": "07070969ec6840638a35e4d7f9f9316c.png",
+      "scope": "TD200-250",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "TD",
+      "pumpId": 1554,
+      "model": "TD250-16/4",
+      "file": "td-200-250-exploded.png",
+      "sourceFile": "07070969ec6840638a35e4d7f9f9316c.png",
+      "scope": "TD200-250",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "TD",
+      "pumpId": 1555,
+      "model": "TD250-19/4",
+      "file": "td-200-250-exploded.png",
+      "sourceFile": "07070969ec6840638a35e4d7f9f9316c.png",
+      "scope": "TD200-250",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "TD",
+      "pumpId": 1556,
+      "model": "TD250-22/4",
+      "file": "td-200-250-exploded.png",
+      "sourceFile": "07070969ec6840638a35e4d7f9f9316c.png",
+      "scope": "TD200-250",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "TD",
+      "pumpId": 1557,
+      "model": "TD250-29/4",
+      "file": "td-200-250-exploded.png",
+      "sourceFile": "07070969ec6840638a35e4d7f9f9316c.png",
+      "scope": "TD200-250",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "TD",
+      "pumpId": 1558,
+      "model": "TD250-36/4",
+      "file": "td-200-250-exploded.png",
+      "sourceFile": "07070969ec6840638a35e4d7f9f9316c.png",
+      "scope": "TD200-250",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "TD",
+      "pumpId": 1559,
+      "model": "TD250-47/4",
+      "file": "td-200-250-exploded.png",
+      "sourceFile": "07070969ec6840638a35e4d7f9f9316c.png",
+      "scope": "TD200-250",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "TD",
+      "pumpId": 1560,
+      "model": "TD250-56/4",
+      "file": "td-200-250-exploded.png",
+      "sourceFile": "07070969ec6840638a35e4d7f9f9316c.png",
+      "scope": "TD200-250",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "TD",
+      "pumpId": 1563,
+      "model": "TD250-17/4",
+      "file": "td-200-250-exploded.png",
+      "sourceFile": "07070969ec6840638a35e4d7f9f9316c.png",
+      "scope": "TD200-250",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "TD",
+      "pumpId": 1564,
+      "model": "TD250-20/4",
+      "file": "td-200-250-exploded.png",
+      "sourceFile": "07070969ec6840638a35e4d7f9f9316c.png",
+      "scope": "TD200-250",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "TD",
+      "pumpId": 1565,
+      "model": "TD250-26/4",
+      "file": "td-200-250-exploded.png",
+      "sourceFile": "07070969ec6840638a35e4d7f9f9316c.png",
+      "scope": "TD200-250",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "TD",
+      "pumpId": 1566,
+      "model": "TD250-32/4",
+      "file": "td-200-250-exploded.png",
+      "sourceFile": "07070969ec6840638a35e4d7f9f9316c.png",
+      "scope": "TD200-250",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "TD",
+      "pumpId": 1568,
+      "model": "TD250-50/4",
+      "file": "td-200-250-exploded.png",
+      "sourceFile": "07070969ec6840638a35e4d7f9f9316c.png",
+      "scope": "TD200-250",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "TD",
+      "pumpId": 1569,
+      "model": "TD300-15/4",
+      "file": "td-300-exploded.png",
+      "sourceFile": "939f1861150e45c089e6b4cb299ef6f4-en.png",
+      "scope": "TD300",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "TD",
+      "pumpId": 1570,
+      "model": "TD300-20/4",
+      "file": "td-300-exploded.png",
+      "sourceFile": "939f1861150e45c089e6b4cb299ef6f4-en.png",
+      "scope": "TD300",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "TD",
+      "pumpId": 1571,
+      "model": "TD300-25/4",
+      "file": "td-300-exploded.png",
+      "sourceFile": "939f1861150e45c089e6b4cb299ef6f4-en.png",
+      "scope": "TD300",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "TD",
+      "pumpId": 1572,
+      "model": "TD300-30/4",
+      "file": "td-300-exploded.png",
+      "sourceFile": "939f1861150e45c089e6b4cb299ef6f4-en.png",
+      "scope": "TD300",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "TD",
+      "pumpId": 1573,
+      "model": "TD300-35/4",
+      "file": "td-300-exploded.png",
+      "sourceFile": "939f1861150e45c089e6b4cb299ef6f4-en.png",
+      "scope": "TD300",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "TD",
+      "pumpId": 1574,
+      "model": "TD300-44/4",
+      "file": "td-300-exploded.png",
+      "sourceFile": "939f1861150e45c089e6b4cb299ef6f4-en.png",
+      "scope": "TD300",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "TD",
+      "pumpId": 1575,
+      "model": "TD300-55/4",
+      "file": "td-300-exploded.png",
+      "sourceFile": "939f1861150e45c089e6b4cb299ef6f4-en.png",
+      "scope": "TD300",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "TD",
+      "pumpId": 4828,
+      "model": "TD32-18G/2",
+      "file": "td-exploded.png",
+      "sourceFile": "819334d33fc842a796a28ca512cf6acd-en.png",
+      "scope": "TD",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "TD",
+      "pumpId": 4829,
+      "model": "TD32-21G/2",
+      "file": "td-exploded.png",
+      "sourceFile": "819334d33fc842a796a28ca512cf6acd-en.png",
+      "scope": "TD",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "TD",
+      "pumpId": 4830,
+      "model": "TD32-26G/2",
+      "file": "td-exploded.png",
+      "sourceFile": "819334d33fc842a796a28ca512cf6acd-en.png",
+      "scope": "TD",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "TD",
+      "pumpId": 4831,
+      "model": "TD32-33G/2",
+      "file": "td-exploded.png",
+      "sourceFile": "819334d33fc842a796a28ca512cf6acd-en.png",
+      "scope": "TD",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "TD",
+      "pumpId": 4832,
+      "model": "TD32-40G/2",
+      "file": "td-exploded.png",
+      "sourceFile": "819334d33fc842a796a28ca512cf6acd-en.png",
+      "scope": "TD",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "TD",
+      "pumpId": 4833,
+      "model": "TD32-50G/2",
+      "file": "td-exploded.png",
+      "sourceFile": "819334d33fc842a796a28ca512cf6acd-en.png",
+      "scope": "TD",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "TD",
+      "pumpId": 4834,
+      "model": "TD40-16G/2",
+      "file": "td-exploded.png",
+      "sourceFile": "819334d33fc842a796a28ca512cf6acd-en.png",
+      "scope": "TD",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "TD",
+      "pumpId": 4835,
+      "model": "TD40-21G/2",
+      "file": "td-exploded.png",
+      "sourceFile": "819334d33fc842a796a28ca512cf6acd-en.png",
+      "scope": "TD",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "TD",
+      "pumpId": 4836,
+      "model": "TD40-20G/2",
+      "file": "td-exploded.png",
+      "sourceFile": "819334d33fc842a796a28ca512cf6acd-en.png",
+      "scope": "TD",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "TD",
+      "pumpId": 4837,
+      "model": "TD40-26G/2",
+      "file": "td-exploded.png",
+      "sourceFile": "819334d33fc842a796a28ca512cf6acd-en.png",
+      "scope": "TD",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "TD",
+      "pumpId": 4838,
+      "model": "TD40-30G/2",
+      "file": "td-exploded.png",
+      "sourceFile": "819334d33fc842a796a28ca512cf6acd-en.png",
+      "scope": "TD",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "TD",
+      "pumpId": 4839,
+      "model": "TD40-36G/2",
+      "file": "td-exploded.png",
+      "sourceFile": "819334d33fc842a796a28ca512cf6acd-en.png",
+      "scope": "TD",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "TD",
+      "pumpId": 4840,
+      "model": "TD40-48G/2",
+      "file": "td-exploded.png",
+      "sourceFile": "819334d33fc842a796a28ca512cf6acd-en.png",
+      "scope": "TD",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "TD",
+      "pumpId": 4841,
+      "model": "TD50-32G/2",
+      "file": "td-exploded.png",
+      "sourceFile": "819334d33fc842a796a28ca512cf6acd-en.png",
+      "scope": "TD",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "TD",
+      "pumpId": 4842,
+      "model": "TD50-39G/2",
+      "file": "td-exploded.png",
+      "sourceFile": "819334d33fc842a796a28ca512cf6acd-en.png",
+      "scope": "TD",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "TD",
+      "pumpId": 4843,
+      "model": "TD50-49G/2",
+      "file": "td-exploded.png",
+      "sourceFile": "819334d33fc842a796a28ca512cf6acd-en.png",
+      "scope": "TD",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "TD",
+      "pumpId": 4844,
+      "model": "TD50-59G/2",
+      "file": "td-exploded.png",
+      "sourceFile": "819334d33fc842a796a28ca512cf6acd-en.png",
+      "scope": "TD",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "TD",
+      "pumpId": 4845,
+      "model": "TD50-80G/2",
+      "file": "td-exploded.png",
+      "sourceFile": "819334d33fc842a796a28ca512cf6acd-en.png",
+      "scope": "TD",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "TD",
+      "pumpId": 4846,
+      "model": "TD50-12G/2",
+      "file": "td-exploded.png",
+      "sourceFile": "819334d33fc842a796a28ca512cf6acd-en.png",
+      "scope": "TD",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "TD",
+      "pumpId": 4847,
+      "model": "TD50-15G/2",
+      "file": "td-exploded.png",
+      "sourceFile": "819334d33fc842a796a28ca512cf6acd-en.png",
+      "scope": "TD",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "TD",
+      "pumpId": 4848,
+      "model": "TD50-18G/2",
+      "file": "td-exploded.png",
+      "sourceFile": "819334d33fc842a796a28ca512cf6acd-en.png",
+      "scope": "TD",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "TD",
+      "pumpId": 4849,
+      "model": "TD50-24G/2",
+      "file": "td-exploded.png",
+      "sourceFile": "819334d33fc842a796a28ca512cf6acd-en.png",
+      "scope": "TD",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "TD",
+      "pumpId": 4850,
+      "model": "TD50-28G/2",
+      "file": "td-exploded.png",
+      "sourceFile": "819334d33fc842a796a28ca512cf6acd-en.png",
+      "scope": "TD",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "TD",
+      "pumpId": 4851,
+      "model": "TD50-35G/2",
+      "file": "td-exploded.png",
+      "sourceFile": "819334d33fc842a796a28ca512cf6acd-en.png",
+      "scope": "TD",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "TD",
+      "pumpId": 4852,
+      "model": "TD50-40G/2",
+      "file": "td-exploded.png",
+      "sourceFile": "819334d33fc842a796a28ca512cf6acd-en.png",
+      "scope": "TD",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "TD",
+      "pumpId": 4853,
+      "model": "TD50-50G/2",
+      "file": "td-exploded.png",
+      "sourceFile": "819334d33fc842a796a28ca512cf6acd-en.png",
+      "scope": "TD",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "TD",
+      "pumpId": 4854,
+      "model": "TD50-60G/2",
+      "file": "td-exploded.png",
+      "sourceFile": "819334d33fc842a796a28ca512cf6acd-en.png",
+      "scope": "TD",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "TD",
+      "pumpId": 4855,
+      "model": "TD50-70G/2",
+      "file": "td-exploded.png",
+      "sourceFile": "819334d33fc842a796a28ca512cf6acd-en.png",
+      "scope": "TD",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "TD",
+      "pumpId": 4856,
+      "model": "TD50-81G/2",
+      "file": "td-exploded.png",
+      "sourceFile": "819334d33fc842a796a28ca512cf6acd-en.png",
+      "scope": "TD",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "TD",
+      "pumpId": 4857,
+      "model": "TD65-37G/2",
+      "file": "td-exploded.png",
+      "sourceFile": "819334d33fc842a796a28ca512cf6acd-en.png",
+      "scope": "TD",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "TD",
+      "pumpId": 4858,
+      "model": "TD65-48G/2",
+      "file": "td-exploded.png",
+      "sourceFile": "819334d33fc842a796a28ca512cf6acd-en.png",
+      "scope": "TD",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "TD",
+      "pumpId": 4861,
+      "model": "TD65-22G/2",
+      "file": "td-exploded.png",
+      "sourceFile": "819334d33fc842a796a28ca512cf6acd-en.png",
+      "scope": "TD",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "TD",
+      "pumpId": 4862,
+      "model": "TD65-30G/2",
+      "file": "td-exploded.png",
+      "sourceFile": "819334d33fc842a796a28ca512cf6acd-en.png",
+      "scope": "TD",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "TD",
+      "pumpId": 4863,
+      "model": "TD65-34G/2",
+      "file": "td-exploded.png",
+      "sourceFile": "819334d33fc842a796a28ca512cf6acd-en.png",
+      "scope": "TD",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "TD",
+      "pumpId": 4864,
+      "model": "TD65-41G/2",
+      "file": "td-exploded.png",
+      "sourceFile": "819334d33fc842a796a28ca512cf6acd-en.png",
+      "scope": "TD",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "TD",
+      "pumpId": 4865,
+      "model": "TD65-51G/2",
+      "file": "td-exploded.png",
+      "sourceFile": "819334d33fc842a796a28ca512cf6acd-en.png",
+      "scope": "TD",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "TD",
+      "pumpId": 4866,
+      "model": "TD65-61G/2",
+      "file": "td-exploded.png",
+      "sourceFile": "819334d33fc842a796a28ca512cf6acd-en.png",
+      "scope": "TD",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "TD",
+      "pumpId": 4867,
+      "model": "TD65-68G/2",
+      "file": "td-exploded.png",
+      "sourceFile": "819334d33fc842a796a28ca512cf6acd-en.png",
+      "scope": "TD",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "TD",
+      "pumpId": 4868,
+      "model": "TD65-85G/2",
+      "file": "td-exploded.png",
+      "sourceFile": "819334d33fc842a796a28ca512cf6acd-en.png",
+      "scope": "TD",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "TD",
+      "pumpId": 4869,
+      "model": "TD80-13G/2",
+      "file": "td-exploded.png",
+      "sourceFile": "819334d33fc842a796a28ca512cf6acd-en.png",
+      "scope": "TD",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "TD",
+      "pumpId": 4870,
+      "model": "TD80-18G/2",
+      "file": "td-exploded.png",
+      "sourceFile": "819334d33fc842a796a28ca512cf6acd-en.png",
+      "scope": "TD",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "TD",
+      "pumpId": 4871,
+      "model": "TD80-23G/2",
+      "file": "td-exploded.png",
+      "sourceFile": "819334d33fc842a796a28ca512cf6acd-en.png",
+      "scope": "TD",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "TD",
+      "pumpId": 4872,
+      "model": "TD80-29G/2",
+      "file": "td-exploded.png",
+      "sourceFile": "819334d33fc842a796a28ca512cf6acd-en.png",
+      "scope": "TD",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "TD",
+      "pumpId": 4873,
+      "model": "TD80-41G/2",
+      "file": "td-exploded.png",
+      "sourceFile": "819334d33fc842a796a28ca512cf6acd-en.png",
+      "scope": "TD",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "TD",
+      "pumpId": 4874,
+      "model": "TD80-48G/2",
+      "file": "td-exploded.png",
+      "sourceFile": "819334d33fc842a796a28ca512cf6acd-en.png",
+      "scope": "TD",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "TD",
+      "pumpId": 4875,
+      "model": "TD80-32G/2",
+      "file": "td-exploded.png",
+      "sourceFile": "819334d33fc842a796a28ca512cf6acd-en.png",
+      "scope": "TD",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "TD",
+      "pumpId": 4876,
+      "model": "TD80-38G/2",
+      "file": "td-exploded.png",
+      "sourceFile": "819334d33fc842a796a28ca512cf6acd-en.png",
+      "scope": "TD",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "TD",
+      "pumpId": 4877,
+      "model": "TD80-47G/2",
+      "file": "td-exploded.png",
+      "sourceFile": "819334d33fc842a796a28ca512cf6acd-en.png",
+      "scope": "TD",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "TD",
+      "pumpId": 4878,
+      "model": "TD80-54G/2",
+      "file": "td-exploded.png",
+      "sourceFile": "819334d33fc842a796a28ca512cf6acd-en.png",
+      "scope": "TD",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "TD",
+      "pumpId": 4879,
+      "model": "TD80-67G/2",
+      "file": "td-exploded.png",
+      "sourceFile": "819334d33fc842a796a28ca512cf6acd-en.png",
+      "scope": "TD",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "TD",
+      "pumpId": 4880,
+      "model": "TD100-17G/2",
+      "file": "td-exploded.png",
+      "sourceFile": "819334d33fc842a796a28ca512cf6acd-en.png",
+      "scope": "TD",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "TD",
+      "pumpId": 4881,
+      "model": "TD100-22G/2",
+      "file": "td-exploded.png",
+      "sourceFile": "819334d33fc842a796a28ca512cf6acd-en.png",
+      "scope": "TD",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "TD",
+      "pumpId": 4882,
+      "model": "TD125-11G/4",
+      "file": "td-exploded.png",
+      "sourceFile": "819334d33fc842a796a28ca512cf6acd-en.png",
+      "scope": "TD",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "TD",
+      "pumpId": 4883,
+      "model": "TD125-14G/4",
+      "file": "td-exploded.png",
+      "sourceFile": "819334d33fc842a796a28ca512cf6acd-en.png",
+      "scope": "TD",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "TD",
+      "pumpId": 4884,
+      "model": "TD125-19G/4",
+      "file": "td-exploded.png",
+      "sourceFile": "819334d33fc842a796a28ca512cf6acd-en.png",
+      "scope": "TD",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "TD",
+      "pumpId": 4885,
+      "model": "TD125-40G/4",
+      "file": "td-exploded.png",
+      "sourceFile": "819334d33fc842a796a28ca512cf6acd-en.png",
+      "scope": "TD",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "TD",
+      "pumpId": 4886,
+      "model": "TD125-48G/4",
+      "file": "td-exploded.png",
+      "sourceFile": "819334d33fc842a796a28ca512cf6acd-en.png",
+      "scope": "TD",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "TD",
+      "pumpId": 4889,
+      "model": "TD150-22G/4",
+      "file": "td-exploded.png",
+      "sourceFile": "819334d33fc842a796a28ca512cf6acd-en.png",
+      "scope": "TD",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "TD",
+      "pumpId": 4890,
+      "model": "TD200-16/4",
+      "file": "td-200-250-exploded.png",
+      "sourceFile": "07070969ec6840638a35e4d7f9f9316c.png",
+      "scope": "TD200-250",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "TD",
+      "pumpId": 4891,
+      "model": "TD200-19/4",
+      "file": "td-200-250-exploded.png",
+      "sourceFile": "07070969ec6840638a35e4d7f9f9316c.png",
+      "scope": "TD200-250",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "TD",
+      "pumpId": 4892,
+      "model": "TD200-31/4",
+      "file": "td-200-250-exploded.png",
+      "sourceFile": "07070969ec6840638a35e4d7f9f9316c.png",
+      "scope": "TD200-250",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "TD",
+      "pumpId": 4893,
+      "model": "TD200-36/4",
+      "file": "td-200-250-exploded.png",
+      "sourceFile": "07070969ec6840638a35e4d7f9f9316c.png",
+      "scope": "TD200-250",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "TD",
+      "pumpId": 4894,
+      "model": "TD200-47/4",
+      "file": "td-200-250-exploded.png",
+      "sourceFile": "07070969ec6840638a35e4d7f9f9316c.png",
+      "scope": "TD200-250",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "TD",
+      "pumpId": 5682,
+      "model": "TD32-14G/2",
+      "file": "td-exploded.png",
+      "sourceFile": "819334d33fc842a796a28ca512cf6acd-en.png",
+      "scope": "TD",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "TD",
+      "pumpId": 5683,
+      "model": "TD40-14G/2",
+      "file": "td-exploded.png",
+      "sourceFile": "819334d33fc842a796a28ca512cf6acd-en.png",
+      "scope": "TD",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "TD",
+      "pumpId": 5684,
+      "model": "TD100-40G/2",
+      "file": "td-exploded.png",
+      "sourceFile": "819334d33fc842a796a28ca512cf6acd-en.png",
+      "scope": "TD",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "TD",
+      "pumpId": 5685,
+      "model": "TD100-48G/2",
+      "file": "td-exploded.png",
+      "sourceFile": "819334d33fc842a796a28ca512cf6acd-en.png",
+      "scope": "TD",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "TD",
+      "pumpId": 5686,
+      "model": "TD100-52G/2",
+      "file": "td-exploded.png",
+      "sourceFile": "819334d33fc842a796a28ca512cf6acd-en.png",
+      "scope": "TD",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "TD",
+      "pumpId": 5687,
+      "model": "TD125-22G/4",
+      "file": "td-exploded.png",
+      "sourceFile": "819334d33fc842a796a28ca512cf6acd-en.png",
+      "scope": "TD",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "TD",
+      "pumpId": 5688,
+      "model": "TD125-28G/4",
+      "file": "td-exploded.png",
+      "sourceFile": "819334d33fc842a796a28ca512cf6acd-en.png",
+      "scope": "TD",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "TD",
+      "pumpId": 5689,
+      "model": "TD125-32G/4",
+      "file": "td-exploded.png",
+      "sourceFile": "819334d33fc842a796a28ca512cf6acd-en.png",
+      "scope": "TD",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "TD",
+      "pumpId": 7127,
+      "model": "TD200-14.5/4",
+      "file": "td-200-250-exploded.png",
+      "sourceFile": "07070969ec6840638a35e4d7f9f9316c.png",
+      "scope": "TD200-250",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "TD",
+      "pumpId": 7567,
+      "model": "TD80-60G/2",
+      "file": "td-exploded.png",
+      "sourceFile": "819334d33fc842a796a28ca512cf6acd-en.png",
+      "scope": "TD",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "TD",
+      "pumpId": 7568,
+      "model": "TD100-35G/2",
+      "file": "td-exploded.png",
+      "sourceFile": "819334d33fc842a796a28ca512cf6acd-en.png",
+      "scope": "TD",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "TD",
+      "pumpId": 7569,
+      "model": "TD150-18G/4",
+      "file": "td-exploded.png",
+      "sourceFile": "819334d33fc842a796a28ca512cf6acd-en.png",
+      "scope": "TD",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "TD",
+      "pumpId": 7570,
+      "model": "TD150-27/4",
+      "file": "td-exploded.png",
+      "sourceFile": "819334d33fc842a796a28ca512cf6acd-en.png",
+      "scope": "TD",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "TD",
+      "pumpId": 7571,
+      "model": "TD150-35/4",
+      "file": "td-exploded.png",
+      "sourceFile": "819334d33fc842a796a28ca512cf6acd-en.png",
+      "scope": "TD",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "TD",
+      "pumpId": 7572,
+      "model": "TD150-42/4",
+      "file": "td-exploded.png",
+      "sourceFile": "819334d33fc842a796a28ca512cf6acd-en.png",
+      "scope": "TD",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "TD",
+      "pumpId": 7573,
+      "model": "TD200-15Q/4",
+      "file": "td-200-250-exploded.png",
+      "sourceFile": "07070969ec6840638a35e4d7f9f9316c.png",
+      "scope": "TD200-250",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "TD",
+      "pumpId": 7574,
+      "model": "TD200-18Q/4",
+      "file": "td-200-250-exploded.png",
+      "sourceFile": "07070969ec6840638a35e4d7f9f9316c.png",
+      "scope": "TD200-250",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "TD",
+      "pumpId": 7575,
+      "model": "TD200-28Q/4",
+      "file": "td-200-250-exploded.png",
+      "sourceFile": "07070969ec6840638a35e4d7f9f9316c.png",
+      "scope": "TD200-250",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "TD",
+      "pumpId": 7576,
+      "model": "TD200-33Q/4",
+      "file": "td-200-250-exploded.png",
+      "sourceFile": "07070969ec6840638a35e4d7f9f9316c.png",
+      "scope": "TD200-250",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "TD",
+      "pumpId": 7577,
+      "model": "TD200-48Q/4",
+      "file": "td-200-250-exploded.png",
+      "sourceFile": "07070969ec6840638a35e4d7f9f9316c.png",
+      "scope": "TD200-250",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "TD",
+      "pumpId": 7578,
+      "model": "TD200-53Q/4",
+      "file": "td-200-250-exploded.png",
+      "sourceFile": "07070969ec6840638a35e4d7f9f9316c.png",
+      "scope": "TD200-250",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "TD",
+      "pumpId": 7579,
+      "model": "TD200-30/4",
+      "file": "td-200-250-exploded.png",
+      "sourceFile": "07070969ec6840638a35e4d7f9f9316c.png",
+      "scope": "TD200-250",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "TD",
+      "pumpId": 7580,
+      "model": "TD200-36.5/4",
+      "file": "td-200-250-exploded.png",
+      "sourceFile": "07070969ec6840638a35e4d7f9f9316c.png",
+      "scope": "TD200-250",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "TD",
+      "pumpId": 7581,
+      "model": "TD200-49/4",
+      "file": "td-200-250-exploded.png",
+      "sourceFile": "07070969ec6840638a35e4d7f9f9316c.png",
+      "scope": "TD200-250",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "TD",
+      "pumpId": 7582,
+      "model": "TD250-39/4",
+      "file": "td-200-250-exploded.png",
+      "sourceFile": "07070969ec6840638a35e4d7f9f9316c.png",
+      "scope": "TD200-250",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "TD",
+      "pumpId": 7583,
+      "model": "TD250-46/4",
+      "file": "td-200-250-exploded.png",
+      "sourceFile": "07070969ec6840638a35e4d7f9f9316c.png",
+      "scope": "TD200-250",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "TD",
+      "pumpId": 7882,
+      "model": "TD150-30.5/4",
+      "file": "td-exploded.png",
+      "sourceFile": "819334d33fc842a796a28ca512cf6acd-en.png",
+      "scope": "TD",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "TD",
+      "pumpId": 7883,
+      "model": "TD150-37/4",
+      "file": "td-exploded.png",
+      "sourceFile": "819334d33fc842a796a28ca512cf6acd-en.png",
+      "scope": "TD",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "TD",
+      "pumpId": 7884,
+      "model": "TD150-24.5/4",
+      "file": "td-exploded.png",
+      "sourceFile": "819334d33fc842a796a28ca512cf6acd-en.png",
+      "scope": "TD",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "TD",
+      "pumpId": 7885,
+      "model": "TD150-30/4",
+      "file": "td-exploded.png",
+      "sourceFile": "819334d33fc842a796a28ca512cf6acd-en.png",
+      "scope": "TD",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "TD",
+      "pumpId": 7886,
+      "model": "TD200-21/4",
+      "file": "td-200-250-exploded.png",
+      "sourceFile": "07070969ec6840638a35e4d7f9f9316c.png",
+      "scope": "TD200-250",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "TD",
+      "pumpId": 7887,
+      "model": "TD200-26/4",
+      "file": "td-200-250-exploded.png",
+      "sourceFile": "07070969ec6840638a35e4d7f9f9316c.png",
+      "scope": "TD200-250",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "TD",
+      "pumpId": 7888,
+      "model": "TD200-32/4",
+      "file": "td-200-250-exploded.png",
+      "sourceFile": "07070969ec6840638a35e4d7f9f9316c.png",
+      "scope": "TD200-250",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "TD",
+      "pumpId": 8814,
+      "model": "TD65-17.5/2",
+      "file": "td-exploded.png",
+      "sourceFile": "819334d33fc842a796a28ca512cf6acd-en.png",
+      "scope": "TD",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "TD",
+      "pumpId": 8815,
+      "model": "TD65-20G1/2",
+      "file": "td-exploded.png",
+      "sourceFile": "819334d33fc842a796a28ca512cf6acd-en.png",
+      "scope": "TD",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "TD",
+      "pumpId": 8816,
+      "model": "TD65-17/2",
+      "file": "td-exploded.png",
+      "sourceFile": "819334d33fc842a796a28ca512cf6acd-en.png",
+      "scope": "TD",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "TD",
+      "pumpId": 8817,
+      "model": "TD65-13.5/2",
+      "file": "td-exploded.png",
+      "sourceFile": "819334d33fc842a796a28ca512cf6acd-en.png",
+      "scope": "TD",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "TD",
+      "pumpId": 8818,
+      "model": "TD65-12/2",
+      "file": "td-exploded.png",
+      "sourceFile": "819334d33fc842a796a28ca512cf6acd-en.png",
+      "scope": "TD",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "TD",
+      "pumpId": 8819,
+      "model": "TD100-17.5/2",
+      "file": "td-exploded.png",
+      "sourceFile": "819334d33fc842a796a28ca512cf6acd-en.png",
+      "scope": "TD",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "TD",
+      "pumpId": 8820,
+      "model": "TD100-13/2",
+      "file": "td-exploded.png",
+      "sourceFile": "819334d33fc842a796a28ca512cf6acd-en.png",
+      "scope": "TD",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "TD",
+      "pumpId": 8821,
+      "model": "TD100-11/2",
+      "file": "td-exploded.png",
+      "sourceFile": "819334d33fc842a796a28ca512cf6acd-en.png",
+      "scope": "TD",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "TD",
+      "pumpId": 8822,
+      "model": "TD150-14.5/4",
+      "file": "td-exploded.png",
+      "sourceFile": "819334d33fc842a796a28ca512cf6acd-en.png",
+      "scope": "TD",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "TD",
+      "pumpId": 8823,
+      "model": "TD150-10.5/4",
+      "file": "td-exploded.png",
+      "sourceFile": "819334d33fc842a796a28ca512cf6acd-en.png",
+      "scope": "TD",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "TD",
+      "pumpId": 8824,
+      "model": "TD200-13/4",
+      "file": "td-200-250-exploded.png",
+      "sourceFile": "07070969ec6840638a35e4d7f9f9316c.png",
+      "scope": "TD200-250",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "TD",
+      "pumpId": 8825,
+      "model": "TD200-11/4",
+      "file": "td-200-250-exploded.png",
+      "sourceFile": "07070969ec6840638a35e4d7f9f9316c.png",
+      "scope": "TD200-250",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "TD",
+      "pumpId": 8826,
+      "model": "TD200-8/4",
+      "file": "td-200-250-exploded.png",
+      "sourceFile": "07070969ec6840638a35e4d7f9f9316c.png",
+      "scope": "TD200-250",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "TD",
+      "pumpId": 8827,
+      "model": "TD250-14G/4",
+      "file": "td-200-250-exploded.png",
+      "sourceFile": "07070969ec6840638a35e4d7f9f9316c.png",
+      "scope": "TD200-250",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "TD",
+      "pumpId": 8828,
+      "model": "TD250-12.5G/4",
+      "file": "td-200-250-exploded.png",
+      "sourceFile": "07070969ec6840638a35e4d7f9f9316c.png",
+      "scope": "TD200-250",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "TD",
+      "pumpId": 8829,
+      "model": "TD250-9G/4",
+      "file": "td-200-250-exploded.png",
+      "sourceFile": "07070969ec6840638a35e4d7f9f9316c.png",
+      "scope": "TD200-250",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "TD",
+      "pumpId": 8835,
+      "model": "TD125-12/2",
+      "file": "td-exploded.png",
+      "sourceFile": "819334d33fc842a796a28ca512cf6acd-en.png",
+      "scope": "TD",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "TD",
+      "pumpId": 8836,
+      "model": "TD125-19/2",
+      "file": "td-exploded.png",
+      "sourceFile": "819334d33fc842a796a28ca512cf6acd-en.png",
+      "scope": "TD",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "TD",
+      "pumpId": 8837,
+      "model": "TD125-24G/2",
+      "file": "td-exploded.png",
+      "sourceFile": "819334d33fc842a796a28ca512cf6acd-en.png",
+      "scope": "TD",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "TD",
+      "pumpId": 8838,
+      "model": "TD125-32G1/2",
+      "file": "td-exploded.png",
+      "sourceFile": "819334d33fc842a796a28ca512cf6acd-en.png",
+      "scope": "TD",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "TD",
+      "pumpId": 8839,
+      "model": "TD125-37.5/2",
+      "file": "td-exploded.png",
+      "sourceFile": "819334d33fc842a796a28ca512cf6acd-en.png",
+      "scope": "TD",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "TD",
+      "pumpId": 8840,
+      "model": "TD125-47/2",
+      "file": "td-exploded.png",
+      "sourceFile": "819334d33fc842a796a28ca512cf6acd-en.png",
+      "scope": "TD",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "TD",
+      "pumpId": 8841,
+      "model": "TD125-59/2",
+      "file": "td-exploded.png",
+      "sourceFile": "819334d33fc842a796a28ca512cf6acd-en.png",
+      "scope": "TD",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "TD",
+      "pumpId": 9394,
+      "model": "TD100-55/2",
+      "file": "td-exploded.png",
+      "sourceFile": "819334d33fc842a796a28ca512cf6acd-en.png",
+      "scope": "TD",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "TD",
+      "pumpId": 9395,
+      "model": "TD100-50/2",
+      "file": "td-exploded.png",
+      "sourceFile": "819334d33fc842a796a28ca512cf6acd-en.png",
+      "scope": "TD",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "TD",
+      "pumpId": 9396,
+      "model": "TD100-44/2",
+      "file": "td-exploded.png",
+      "sourceFile": "819334d33fc842a796a28ca512cf6acd-en.png",
+      "scope": "TD",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "TD",
+      "pumpId": 9397,
+      "model": "TD100-43/2",
+      "file": "td-exploded.png",
+      "sourceFile": "819334d33fc842a796a28ca512cf6acd-en.png",
+      "scope": "TD",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "TD",
+      "pumpId": 9398,
+      "model": "TD100-36/2",
+      "file": "td-exploded.png",
+      "sourceFile": "819334d33fc842a796a28ca512cf6acd-en.png",
+      "scope": "TD",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "TD",
+      "pumpId": 9399,
+      "model": "TD100-35/2",
+      "file": "td-exploded.png",
+      "sourceFile": "819334d33fc842a796a28ca512cf6acd-en.png",
+      "scope": "TD",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "TD",
+      "pumpId": 9400,
+      "model": "TD100-29/2",
+      "file": "td-exploded.png",
+      "sourceFile": "819334d33fc842a796a28ca512cf6acd-en.png",
+      "scope": "TD",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 3675,
+      "model": "NIS50-32-160/3",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 3676,
+      "model": "NIS50-32-160/4",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 3677,
+      "model": "NIS50-32-160/5.5",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 3678,
+      "model": "NIS50-32-200/7.5",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 3679,
+      "model": "NIS50-32-200/11",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 3680,
+      "model": "NIS65-40-200/7.5",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 3681,
+      "model": "NIS65-40-200/11",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 3682,
+      "model": "NIS65-40-200/15",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 3683,
+      "model": "NIS65-40-250/18.5",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 3684,
+      "model": "NIS65-40-250/22",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 3685,
+      "model": "NIS65-40-250/30",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 3686,
+      "model": "NIS65-40-315/22",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 3687,
+      "model": "NIS65-40-315/30",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 3688,
+      "model": "NIS65-40-315/37",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 3689,
+      "model": "NIS65-40-315/45",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 3690,
+      "model": "NIS65-50-160/4",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 3691,
+      "model": "NIS65-50-160/5.5",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 3692,
+      "model": "NIS65-50-160/7.5",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 3693,
+      "model": "NIS80-50-200/11",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 3694,
+      "model": "NIS80-50-200/15",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 3695,
+      "model": "NIS80-50-200/18.5",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 3696,
+      "model": "NIS80-50-200/22",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 3697,
+      "model": "NIS80-50-250/30",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 3698,
+      "model": "NIS80-50-250/37",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 3699,
+      "model": "NIS80-50-315/37",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 3700,
+      "model": "NIS80-50-315/45",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 3701,
+      "model": "NIS80-50-315/55",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 3702,
+      "model": "NIS80-50-315/75",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 3703,
+      "model": "NIS80-65-160/5.5",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 3704,
+      "model": "NIS80-65-160/7.5",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 3705,
+      "model": "NIS80-65-160/11",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 3706,
+      "model": "NIS80-65-160/15",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 3707,
+      "model": "NIS100-65-200/18.5",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 3708,
+      "model": "NIS100-65-200/22",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 3709,
+      "model": "NIS100-65-200/30",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 3710,
+      "model": "NIS100-65-200/37",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 3711,
+      "model": "NIS100-65-250/45",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 3712,
+      "model": "NIS100-65-250/55",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 3713,
+      "model": "NIS100-65-250/75",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 3714,
+      "model": "NIS100-65-315/90",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 3715,
+      "model": "NIS100-65-315/110",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 3716,
+      "model": "NIS100-80-160/11",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 3717,
+      "model": "NIS100-80-160/15",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 3718,
+      "model": "NIS100-80-160/18.5",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 3719,
+      "model": "NIS100-80-160/22",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 3720,
+      "model": "NIS125-100-200/30",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 3721,
+      "model": "NIS125-100-200/37",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 3722,
+      "model": "NIS125-100-200/45",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 3723,
+      "model": "NIS125-100-200/55",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 3724,
+      "model": "NIS125-100-200/75",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 3725,
+      "model": "NIS125-100-250/75",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 3726,
+      "model": "NIS125-100-250/90",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 3727,
+      "model": "NIS125-100-250/110",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 3728,
+      "model": "NIS125-100-315/90",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 3729,
+      "model": "NIS125-100-315/110",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 3730,
+      "model": "NIS125-100-315/132",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 3731,
+      "model": "NIS125-100-315/160",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 3732,
+      "model": "NIS50-32-160/0.55",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 3733,
+      "model": "NIS50-32-160/0.75",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 3734,
+      "model": "NIS50-32-200/1.1",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 3735,
+      "model": "NIS50-32-200/1.5",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 3736,
+      "model": "NIS65-40-200/1.1",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 3737,
+      "model": "NIS65-40-200/1.5",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 3738,
+      "model": "NIS65-40-200/2.2",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 3739,
+      "model": "NIS65-40-250/3",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 3740,
+      "model": "NIS65-40-315/4",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 3741,
+      "model": "NIS65-40-315/5.5",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 3742,
+      "model": "NIS65-50-160/0.55",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 3743,
+      "model": "NIS65-50-160/0.75",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 3744,
+      "model": "NIS65-50-160/1.1",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 3745,
+      "model": "NIS80-50-200/1.5",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 3746,
+      "model": "NIS80-50-200/2.2",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 3747,
+      "model": "NIS80-50-200/3",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 3748,
+      "model": "NIS80-50-250/4",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 3749,
+      "model": "NIS80-50-250/5.5",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 3750,
+      "model": "NIS80-50-315/5.5",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 3751,
+      "model": "NIS80-50-315/7.5",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 3752,
+      "model": "NIS80-65-160/0.75",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 3753,
+      "model": "NIS80-65-160/1.1",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 3754,
+      "model": "NIS80-65-160/1.5",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 3755,
+      "model": "NIS100-65-200/3",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 3756,
+      "model": "NIS100-65-200/4",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 3757,
+      "model": "NIS100-65-200/5.5",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 3758,
+      "model": "NIS100-65-250/5.5",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 3759,
+      "model": "NIS100-65-250/7.5",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 3760,
+      "model": "NIS100-65-315/11",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 3761,
+      "model": "NIS100-65-315/15",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 3762,
+      "model": "NIS100-80-160/1.5",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 3763,
+      "model": "NIS100-80-160/2.2",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 3764,
+      "model": "NIS100-80-160/3",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 3765,
+      "model": "NIS125-80-400/15",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 3766,
+      "model": "NIS125-80-400/18.5",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 3767,
+      "model": "NIS125-80-400/22",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 3768,
+      "model": "NIS125-80-400/30",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 3769,
+      "model": "NIS125-80-400/37",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 3770,
+      "model": "NIS125-100-200/4",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 3771,
+      "model": "NIS125-100-200/5.5",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 3772,
+      "model": "NIS125-100-200/7.5",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 3773,
+      "model": "NIS125-100-200/11",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 3774,
+      "model": "NIS125-100-250/15",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 3775,
+      "model": "NIS125-100-315/11",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 3776,
+      "model": "NIS125-100-315/18.5",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 3777,
+      "model": "NIS125-100-315/22",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 3778,
+      "model": "NIS125-100-315/30",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 3779,
+      "model": "NIS125-100-400/30",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 3780,
+      "model": "NIS125-100-400/37",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 3781,
+      "model": "NIS125-100-400/45",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 3782,
+      "model": "NIS150-125-250/11",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 3783,
+      "model": "NIS150-125-250/15",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 3784,
+      "model": "NIS150-125-250/18.5",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 3785,
+      "model": "NIS150-125-250/22",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 3786,
+      "model": "NIS150-125-315/30",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 3787,
+      "model": "NIS150-125-315/37",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 3788,
+      "model": "NIS150-125-400/45",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 3789,
+      "model": "NIS150-125-400/55",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 3790,
+      "model": "NIS150-125-400/75",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 3791,
+      "model": "NIS200-150-315/37",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 3792,
+      "model": "NIS200-150-315/45",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 3793,
+      "model": "NIS200-150-315/55",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 3794,
+      "model": "NIS200-150-315/75",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 3795,
+      "model": "NIS200-150-400/75",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 3796,
+      "model": "NIS200-150-400/90",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 3797,
+      "model": "NIS200-150-400/110",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 3798,
+      "model": "NIS250-200-315/37",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 3799,
+      "model": "NIS250-200-315/45",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 3800,
+      "model": "NIS250-200-315/55",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 3801,
+      "model": "NIS250-200-315/75",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 3802,
+      "model": "NIS250-200-400/90",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 3803,
+      "model": "NIS250-200-400/110",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 3804,
+      "model": "NIS250-200-400/132",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 3805,
+      "model": "NIS250-200-400/160",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 5711,
+      "model": "NIS300-250-315(Q)/75",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 5712,
+      "model": "NIS300-250-315(Q)/90",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 5713,
+      "model": "NIS300-250-315(Q)/110",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 5714,
+      "model": "NIS300-250-400(Q)/110",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 5715,
+      "model": "NIS300-250-400(Q)/132",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 5716,
+      "model": "NIS300-250-400(Q)/160",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 5717,
+      "model": "NIS300-250-400(Q)/200",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 5718,
+      "model": "NIS300-250-315/75",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 5719,
+      "model": "NIS300-250-315/90",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 5720,
+      "model": "NIS300-250-315/110",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 5721,
+      "model": "NIS300-250-400/132",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 5722,
+      "model": "NIS300-250-400/160",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 5723,
+      "model": "NIS300-250-400/200",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 5761,
+      "model": "NIS100-65-200G/18.5",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 5762,
+      "model": "NIS100-65-200G/22",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 5763,
+      "model": "NIS100-65-200G/30",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 5764,
+      "model": "NIS100-65-200G/37",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 5765,
+      "model": "NIS100-65-250G/45",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 5766,
+      "model": "NIS100-65-250G/55",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 5767,
+      "model": "NIS100-65-315G/75",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 5768,
+      "model": "NIS100-65-315G/90",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 5769,
+      "model": "NIS100-80-160G/11",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 5770,
+      "model": "NIS100-80-160G/15",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 5771,
+      "model": "NIS100-80-160G/18.5",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 5772,
+      "model": "NIS125-100-200(Q)/30",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 5773,
+      "model": "NIS125-100-200(Q)/37",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 5774,
+      "model": "NIS125-100-200G/30",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 5775,
+      "model": "NIS125-100-200G/37",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 5776,
+      "model": "NIS125-100-200G/45",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 5777,
+      "model": "NIS125-100-200G/55",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 5778,
+      "model": "NIS125-100-200G/75",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 5779,
+      "model": "NIS125-100-250G/75",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 5780,
+      "model": "NIS125-100-250G/90",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 5781,
+      "model": "NIS125-100-315G/110",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 5782,
+      "model": "NIS125-100-315G/132",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 5783,
+      "model": "NIS125-100-315G/160",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 5784,
+      "model": "NIS100-65-200G/3",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 5785,
+      "model": "NIS100-65-200G/4",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 5786,
+      "model": "NIS100-65-250G/5.5",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 5787,
+      "model": "NIS100-65-250G/7.5",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 5788,
+      "model": "NIS100-65-315G/11",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 5789,
+      "model": "NIS100-65-315G/15",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 5790,
+      "model": "NIS100-80-160G/1.5",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 5791,
+      "model": "NIS100-80-160G/2.2",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 5792,
+      "model": "NIS125-100-200G/4",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 5793,
+      "model": "NIS125-100-200G/5.5",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 5794,
+      "model": "NIS125-100-200G/7.5",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 5795,
+      "model": "NIS125-100-250G/11",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 5796,
+      "model": "NIS125-100-315G/15",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 5797,
+      "model": "NIS125-100-315G/18.5",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 5798,
+      "model": "NIS125-100-400G/30",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 5799,
+      "model": "NIS125-100-400G/37",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 5800,
+      "model": "NIS125-100-400G/45",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 5801,
+      "model": "NIS150-125-200(Q)/5.5",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 5802,
+      "model": "NIS150-125-200(Q)/7.5",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 5803,
+      "model": "NIS150-125-200(Q)/11",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 5804,
+      "model": "NIS150-125-200G/5.5",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 5805,
+      "model": "NIS150-125-200G/7.5",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 5806,
+      "model": "NIS150-125-200G/11",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 5807,
+      "model": "NIS150-125-250G/15",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 5808,
+      "model": "NIS150-125-250G/18.5",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 5809,
+      "model": "NIS150-125-250G/22",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 5810,
+      "model": "NIS150-125-315(Q)/22",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 5811,
+      "model": "NIS150-125-315(Q)/30",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 5812,
+      "model": "NIS150-125-315G/30",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 5813,
+      "model": "NIS150-125-315G/37",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 5814,
+      "model": "NIS150-125-400(Q)/37",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 5815,
+      "model": "NIS150-125-400G/45",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 5816,
+      "model": "NIS150-125-400G/55",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 5817,
+      "model": "NIS150-125-400G/75",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 5818,
+      "model": "NIS200-150-250(Q)/11",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 5819,
+      "model": "NIS200-150-250(Q)/15",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 5820,
+      "model": "NIS200-150-250(Q)/18.5",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 5821,
+      "model": "NIS200-150-250(Q)/22",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 5822,
+      "model": "NIS200-150-250G/15",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 5823,
+      "model": "NIS200-150-250G/18.5",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 5824,
+      "model": "NIS200-150-250G/22",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 5825,
+      "model": "NIS200-150-250G/30",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 5826,
+      "model": "NIS200-150-315G/37",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 5827,
+      "model": "NIS200-150-315G/45",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 5828,
+      "model": "NIS200-150-315G/55",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 5829,
+      "model": "NIS200-150-400G/75",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 5830,
+      "model": "NIS200-150-400G/90",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 5831,
+      "model": "NIS200-150-400G/110",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 6371,
+      "model": "NIS350-300-250/75",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 6372,
+      "model": "NIS350-300-250/90",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 6373,
+      "model": "NIS350-300-250/110",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 6374,
+      "model": "NIS350-300-250/132",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 6375,
+      "model": "NIS300-250-250(Q)/37",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 6376,
+      "model": "NIS300-250-250(Q)/45",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 6377,
+      "model": "NIS300-250-250(Q)/55",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 6378,
+      "model": "NIS300-250-250/45",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 6379,
+      "model": "NIS300-250-250/55",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 6380,
+      "model": "NIS300-250-250/75",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 6381,
+      "model": "NIS250-200-250/22",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 6382,
+      "model": "NIS250-200-250/30",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 6383,
+      "model": "NIS250-200-250/37",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 6384,
+      "model": "NIS250-200-250/45",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 6385,
+      "model": "NIS350-300-315/132",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 6386,
+      "model": "NIS350-300-315/160",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 6387,
+      "model": "NIS350-300-315/185",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 6388,
+      "model": "NIS350-300-315/200",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 7049,
+      "model": "NIS50-32-125G/1.5",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 7050,
+      "model": "NIS50-32-125G/1.1",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 7051,
+      "model": "NIS50-32-125G/0.75",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 7052,
+      "model": "NIS50-32-160G/3",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 7053,
+      "model": "NIS50-32-160G/2.2",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 7054,
+      "model": "NIS65-50-125G/2.2",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 7055,
+      "model": "NIS65-50-125G/1.5",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 7056,
+      "model": "NIS65-50-125G/1.1",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 7057,
+      "model": "NIS65-50-160G/4",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 7058,
+      "model": "NIS65-50-160G/3",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 7059,
+      "model": "NIS80-65-125G/4",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 7060,
+      "model": "NIS80-65-125G/3",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 7061,
+      "model": "NIS80-65-125G/2.2",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 7062,
+      "model": "NIS80-65-160G/7.5",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 7063,
+      "model": "NIS80-65-160G/5.5",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 7064,
+      "model": "NIS100-80-125G/7.5",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 7065,
+      "model": "NIS100-80-125G/5.5",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    },
+    {
+      "series": "NIS",
+      "pumpId": 7066,
+      "model": "NIS100-80-125G/4",
+      "file": "nis-exploded.png",
+      "sourceFile": "7021b533f7394627b36056adaed4365c.png",
+      "scope": "NIS",
+      "drawingType": "exploded",
+      "source": "CNP Pump Selection / SPump series structure drawing"
+    }
+  ],
+  "failures": []
+}

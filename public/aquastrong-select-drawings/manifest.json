@@ -1,0 +1,4396 @@
+{
+  "generatedAt": "2026-08-31T12:45:06.932Z",
+  "count": 546,
+  "drawings": [
+    {
+      "pumpId": 2678,
+      "series": "EPP",
+      "model": "EPP32-4-0.37/2N",
+      "file": "2678-epp32-4-0-37-2n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 2681,
+      "series": "EPP",
+      "model": "EPP32-8-0.37/2N",
+      "file": "2681-epp32-8-0-37-2n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 2674,
+      "series": "EPP",
+      "model": "EPP32-16-1.1/2N",
+      "file": "2674-epp32-16-1-1-2n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 2675,
+      "series": "EPP",
+      "model": "EPP32-21-1.5/2N",
+      "file": "2675-epp32-21-1-5-2n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 2676,
+      "series": "EPP",
+      "model": "EPP32-26-2.2/2N",
+      "file": "2676-epp32-26-2-2-2n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 2677,
+      "series": "EPP",
+      "model": "EPP32-31-3/2N",
+      "file": "2677-epp32-31-3-2n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 2679,
+      "series": "EPP",
+      "model": "EPP32-40-4/2N",
+      "file": "2679-epp32-40-4-2n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 2680,
+      "series": "EPP",
+      "model": "EPP32-50-5.5/2N",
+      "file": "2680-epp32-50-5-5-2n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 2682,
+      "series": "EPP",
+      "model": "EPP40-13-0.75/2N",
+      "file": "2682-epp40-13-0-75-2n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 2683,
+      "series": "EPP",
+      "model": "EPP40-17.5-1.1/2N",
+      "file": "2683-epp40-17-5-1-1-2n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 2684,
+      "series": "EPP",
+      "model": "EPP40-20.5-1.5/2N",
+      "file": "2684-epp40-20-5-1-5-2n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 2685,
+      "series": "EPP",
+      "model": "EPP40-20.5-2.2/2N",
+      "file": "2685-epp40-20-5-2-2-2n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 2732,
+      "series": "EPP",
+      "model": "EPP40-24.5-3/2N",
+      "file": "2732-epp40-24-5-3-2n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 2686,
+      "series": "EPP",
+      "model": "EPP40-31-4/2N",
+      "file": "2686-epp40-31-4-2n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 2687,
+      "series": "EPP",
+      "model": "EPP50-12-1.1/2N",
+      "file": "2687-epp50-12-1-1-2n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 2688,
+      "series": "EPP",
+      "model": "EPP50-16-1.5/2N",
+      "file": "2688-epp50-16-1-5-2n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 2689,
+      "series": "EPP",
+      "model": "EPP50-21-2.2/2N",
+      "file": "2689-epp50-21-2-2-2n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 2690,
+      "series": "EPP",
+      "model": "EPP50-24-3/2N",
+      "file": "2690-epp50-24-3-2n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 2693,
+      "series": "EPP",
+      "model": "EPP50-35-3/2N",
+      "file": "2693-epp50-35-3-2n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 2691,
+      "series": "EPP",
+      "model": "EPP50-28-4/2N",
+      "file": "2691-epp50-28-4-2n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 2694,
+      "series": "EPP",
+      "model": "EPP50-40-4/2N",
+      "file": "2694-epp50-40-4-2n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 2692,
+      "series": "EPP",
+      "model": "EPP50-34-5.5/2N",
+      "file": "2692-epp50-34-5-5-2n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 2695,
+      "series": "EPP",
+      "model": "EPP50-50-5.5/2N",
+      "file": "2695-epp50-50-5-5-2n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 2697,
+      "series": "EPP",
+      "model": "EPP50-60-7.5/2N",
+      "file": "2697-epp50-60-7-5-2n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 2699,
+      "series": "EPP",
+      "model": "EPP50-70-7.5/2N",
+      "file": "2699-epp50-70-7-5-2n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 2700,
+      "series": "EPP",
+      "model": "EPP50-80-11/2N",
+      "file": "2700-epp50-80-11-2n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 2696,
+      "series": "EPP",
+      "model": "EPP50-60-15/2N",
+      "file": "2696-epp50-60-15-2n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 2698,
+      "series": "EPP",
+      "model": "EPP50-70-18.5/2N",
+      "file": "2698-epp50-70-18-5-2n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 2701,
+      "series": "EPP",
+      "model": "EPP50-81-22/2N",
+      "file": "2701-epp50-81-22-2n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 2702,
+      "series": "EPP",
+      "model": "EPP65-14-2.2/2N",
+      "file": "2702-epp65-14-2-2-2n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 2703,
+      "series": "EPP",
+      "model": "EPP65-17-3/2N",
+      "file": "2703-epp65-17-3-2n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 2704,
+      "series": "EPP",
+      "model": "EPP65-21-4/2N",
+      "file": "2704-epp65-21-4-2n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 2705,
+      "series": "EPP",
+      "model": "EPP65-28-5.5/2N",
+      "file": "2705-epp65-28-5-5-2n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 2805,
+      "series": "EPP",
+      "model": "EPP65-40-5.5/2N",
+      "file": "2805-epp65-40-5-5-2n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 2706,
+      "series": "EPP",
+      "model": "EPP65-35-7.5/2N",
+      "file": "2706-epp65-35-7-5-2n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 2806,
+      "series": "EPP",
+      "model": "EPP65-51-7.5/2N",
+      "file": "2806-epp65-51-7-5-2n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 2707,
+      "series": "EPP",
+      "model": "EPP65-40-11/2N",
+      "file": "2707-epp65-40-11-2n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 2708,
+      "series": "EPP",
+      "model": "EPP65-49-15/2N",
+      "file": "2708-epp65-49-15-2n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 2709,
+      "series": "EPP",
+      "model": "EPP65-56-18.5/2N",
+      "file": "2709-epp65-56-18-5-2n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 2722,
+      "series": "EPP",
+      "model": "EPP80-8.5-1.5/2N",
+      "file": "2722-epp80-8-5-1-5-2n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 2710,
+      "series": "EPP",
+      "model": "EPP80-10.5-2.2/2N",
+      "file": "2710-epp80-10-5-2-2-2n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 2711,
+      "series": "EPP",
+      "model": "EPP80-14-3/2N",
+      "file": "2711-epp80-14-3-2n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 2712,
+      "series": "EPP",
+      "model": "EPP80-17-4/2N",
+      "file": "2712-epp80-17-4-2n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 2714,
+      "series": "EPP",
+      "model": "EPP80-20-5.5/2N",
+      "file": "2714-epp80-20-5-5-2n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 2715,
+      "series": "EPP",
+      "model": "EPP80-21.5-7.5/2N",
+      "file": "2715-epp80-21-5-7-5-2n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 2717,
+      "series": "EPP",
+      "model": "EPP80-28-11/2N",
+      "file": "2717-epp80-28-11-2n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 2719,
+      "series": "EPP",
+      "model": "EPP80-35-15/2N",
+      "file": "2719-epp80-35-15-2n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 2720,
+      "series": "EPP",
+      "model": "EPP80-60-15/2N",
+      "file": "2720-epp80-60-15-2n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 2721,
+      "series": "EPP",
+      "model": "EPP80-70-18.5/2N",
+      "file": "2721-epp80-70-18-5-2n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 2723,
+      "series": "EPP",
+      "model": "EPP80-80-22/2N",
+      "file": "2723-epp80-80-22-2n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 2713,
+      "series": "EPP",
+      "model": "EPP80-19-5.5/4N",
+      "file": "2713-epp80-19-5-5-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 2716,
+      "series": "EPP",
+      "model": "EPP80-22-7.5/4N",
+      "file": "2716-epp80-22-7-5-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 2718,
+      "series": "EPP",
+      "model": "EPP80-28-11/4N",
+      "file": "2718-epp80-28-11-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 2620,
+      "series": "EPP",
+      "model": "EPP100-21.5-7.5/2N",
+      "file": "2620-epp100-21-5-7-5-2n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 2619,
+      "series": "EPP",
+      "model": "EPP100-20-11/2N",
+      "file": "2619-epp100-20-11-2n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 2622,
+      "series": "EPP",
+      "model": "EPP100-28-11/2N",
+      "file": "2622-epp100-28-11-2n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 2621,
+      "series": "EPP",
+      "model": "EPP100-24-15/2N",
+      "file": "2621-epp100-24-15-2n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 2625,
+      "series": "EPP",
+      "model": "EPP100-35-15/2N",
+      "file": "2625-epp100-35-15-2n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 2626,
+      "series": "EPP",
+      "model": "EPP100-38-15/2N",
+      "file": "2626-epp100-38-15-2n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 2623,
+      "series": "EPP",
+      "model": "EPP100-30-18.5/2N",
+      "file": "2623-epp100-30-18-5-2n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 2627,
+      "series": "EPP",
+      "model": "EPP100-44-18.5/2N",
+      "file": "2627-epp100-44-18-5-2n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 2624,
+      "series": "EPP",
+      "model": "EPP100-32-22/2N",
+      "file": "2624-epp100-32-22-2n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 2628,
+      "series": "EPP",
+      "model": "EPP100-50-22/2N",
+      "file": "2628-epp100-50-22-2n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 2629,
+      "series": "EPP",
+      "model": "EPP100-60-22/2N",
+      "file": "2629-epp100-60-22-2n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 2630,
+      "series": "EPP",
+      "model": "EPP100-70-30/2N",
+      "file": "2630-epp100-70-30-2n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 2631,
+      "series": "EPP",
+      "model": "EPP100-80-37/2N",
+      "file": "2631-epp100-80-37-2n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 1,
+      "series": "EPP",
+      "model": "EPP100-16-7.5/4N",
+      "file": "1-epp100-16-7-5-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 2,
+      "series": "EPP",
+      "model": "EPP100-21-11/4N",
+      "file": "2-epp100-21-11-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 3,
+      "series": "EPP",
+      "model": "EPP100-25-15/4N",
+      "file": "3-epp100-25-15-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4,
+      "series": "EPP",
+      "model": "EPP100-30-18.5/4N",
+      "file": "4-epp100-30-18-5-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 5,
+      "series": "EPP",
+      "model": "EPP100-32-22/4N",
+      "file": "5-epp100-32-22-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 2638,
+      "series": "EPP",
+      "model": "EPP125-37.5-22/2N",
+      "file": "2638-epp125-37-5-22-2n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 2639,
+      "series": "EPP",
+      "model": "EPP125-44-30/2N",
+      "file": "2639-epp125-44-30-2n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 2640,
+      "series": "EPP",
+      "model": "EPP125-50-30/2N",
+      "file": "2640-epp125-50-30-2n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 2641,
+      "series": "EPP",
+      "model": "EPP125-8-4/4N",
+      "file": "2641-epp125-8-4-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 2633,
+      "series": "EPP",
+      "model": "EPP125-12.5-5.5/4N",
+      "file": "2633-epp125-12-5-5-5-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 2632,
+      "series": "EPP",
+      "model": "EPP125-10-7.5/4N",
+      "file": "2632-epp125-10-7-5-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 2634,
+      "series": "EPP",
+      "model": "EPP125-19-11/4N",
+      "file": "2634-epp125-19-11-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 2635,
+      "series": "EPP",
+      "model": "EPP125-24-15/4N",
+      "file": "2635-epp125-24-15-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 2724,
+      "series": "EPP",
+      "model": "EPP125-28-18.5/4N",
+      "file": "2724-epp125-28-18-5-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 2636,
+      "series": "EPP",
+      "model": "EPP125-31-22/4N",
+      "file": "2636-epp125-31-22-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 2637,
+      "series": "EPP",
+      "model": "EPP125-35-30/4N",
+      "file": "2637-epp125-35-30-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 2642,
+      "series": "EPP",
+      "model": "EPP150-12.5-11/4N",
+      "file": "2642-epp150-12-5-11-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 2643,
+      "series": "EPP",
+      "model": "EPP150-17-15/4N",
+      "file": "2643-epp150-17-15-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 2644,
+      "series": "EPP",
+      "model": "EPP150-21-18.5/4N",
+      "file": "2644-epp150-21-18-5-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 2645,
+      "series": "EPP",
+      "model": "EPP150-21.5-18.5/4N",
+      "file": "2645-epp150-21-5-18-5-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 2646,
+      "series": "EPP",
+      "model": "EPP150-24.5-22/4N",
+      "file": "2646-epp150-24-5-22-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 2647,
+      "series": "EPP",
+      "model": "EPP150-25-22/4N",
+      "file": "2647-epp150-25-22-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 2648,
+      "series": "EPP",
+      "model": "EPP150-25-30/4N",
+      "file": "2648-epp150-25-30-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 2649,
+      "series": "EPP",
+      "model": "EPP150-29-30/4N",
+      "file": "2649-epp150-29-30-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 2650,
+      "series": "EPP",
+      "model": "EPP150-33-30/4N",
+      "file": "2650-epp150-33-30-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 2651,
+      "series": "EPP",
+      "model": "EPP150-33-37/4N",
+      "file": "2651-epp150-33-37-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 2652,
+      "series": "EPP",
+      "model": "EPP150-40-37/4N",
+      "file": "2652-epp150-40-37-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 2653,
+      "series": "EPP",
+      "model": "EPP150-50-45/4N",
+      "file": "2653-epp150-50-45-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 2654,
+      "series": "EPP",
+      "model": "EPP200-10-11/4N",
+      "file": "2654-epp200-10-11-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 2655,
+      "series": "EPP",
+      "model": "EPP200-10-15/4N",
+      "file": "2655-epp200-10-15-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 2657,
+      "series": "EPP",
+      "model": "EPP200-15-15/4N",
+      "file": "2657-epp200-15-15-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 2656,
+      "series": "EPP",
+      "model": "EPP200-12.5-18.5/4N",
+      "file": "2656-epp200-12-5-18-5-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 2659,
+      "series": "EPP",
+      "model": "EPP200-18-18.5/4N",
+      "file": "2659-epp200-18-18-5-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 2658,
+      "series": "EPP",
+      "model": "EPP200-15-30/4N",
+      "file": "2658-epp200-15-30-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 2660,
+      "series": "EPP",
+      "model": "EPP200-18-37/4N",
+      "file": "2660-epp200-18-37-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 2663,
+      "series": "EPP",
+      "model": "EPP200-32-37/4N",
+      "file": "2663-epp200-32-37-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 2661,
+      "series": "EPP",
+      "model": "EPP200-22.5-45/4N",
+      "file": "2661-epp200-22-5-45-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 2666,
+      "series": "EPP",
+      "model": "EPP200-38-45/4N",
+      "file": "2666-epp200-38-45-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 2807,
+      "series": "EPP",
+      "model": "EPP200-28-55/4NZ",
+      "file": "2807-epp200-28-55-4nz.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 2808,
+      "series": "EPP",
+      "model": "EPP200-44-55/4NZ",
+      "file": "2808-epp200-44-55-4nz.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 2664,
+      "series": "EPP",
+      "model": "EPP200-34-75/4NZ",
+      "file": "2664-epp200-34-75-4nz.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 2665,
+      "series": "EPP",
+      "model": "EPP200-36-75/4NZ",
+      "file": "2665-epp200-36-75-4nz.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 2668,
+      "series": "EPP",
+      "model": "EPP200-55-75/4NZ",
+      "file": "2668-epp200-55-75-4nz.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 2669,
+      "series": "EPP",
+      "model": "EPP250-37-75/4NZ",
+      "file": "2669-epp250-37-75-4nz.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 2671,
+      "series": "EPP",
+      "model": "EPP250-44-90/4NZ",
+      "file": "2671-epp250-44-90-4nz.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 2670,
+      "series": "EPP",
+      "model": "EPP250-40-110/4NZ",
+      "file": "2670-epp250-40-110-4nz.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 2672,
+      "series": "EPP",
+      "model": "EPP250-50-110/4NZ",
+      "file": "2672-epp250-50-110-4nz.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 2673,
+      "series": "EPP",
+      "model": "EPP250-50-132/4NZ",
+      "file": "2673-epp250-50-132-4nz.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 2809,
+      "series": "EPP",
+      "model": "EPP300-15-55/4NZ",
+      "file": "2809-epp300-15-55-4nz.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 2726,
+      "series": "EPP",
+      "model": "EPP300-20-75/4NZ",
+      "file": "2726-epp300-20-75-4nz.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 2727,
+      "series": "EPP",
+      "model": "EPP300-25-90/4NZ",
+      "file": "2727-epp300-25-90-4nz.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 2728,
+      "series": "EPP",
+      "model": "EPP300-30-110/4NZ",
+      "file": "2728-epp300-30-110-4nz.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 2729,
+      "series": "EPP",
+      "model": "EPP300-35-132/4NZ",
+      "file": "2729-epp300-35-132-4nz.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 2730,
+      "series": "EPP",
+      "model": "EPP300-44-160/4NZ",
+      "file": "2730-epp300-44-160-4nz.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 2731,
+      "series": "EPP",
+      "model": "EPP300-55-200/4NZ",
+      "file": "2731-epp300-55-200-4nz.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 2786,
+      "series": "EST",
+      "model": "ESTm32-125/7",
+      "file": "2786-estm32-125-7.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 2785,
+      "series": "EST",
+      "model": "ESTm32-125/11",
+      "file": "2785-estm32-125-11.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 2787,
+      "series": "EST",
+      "model": "ESTm32-160/15",
+      "file": "2787-estm32-160-15.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 2788,
+      "series": "EST",
+      "model": "ESTm32-160/22",
+      "file": "2788-estm32-160-22.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 2789,
+      "series": "EST",
+      "model": "ESTm32-160/30",
+      "file": "2789-estm32-160-30.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 2734,
+      "series": "EST",
+      "model": "EST32-125/7",
+      "file": "2734-est32-125-7.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 2733,
+      "series": "EST",
+      "model": "EST32-125/11",
+      "file": "2733-est32-125-11.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 2735,
+      "series": "EST",
+      "model": "EST32-160/15",
+      "file": "2735-est32-160-15.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 2736,
+      "series": "EST",
+      "model": "EST32-160/22",
+      "file": "2736-est32-160-22.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 2737,
+      "series": "EST",
+      "model": "EST32-160/30",
+      "file": "2737-est32-160-30.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 2738,
+      "series": "EST",
+      "model": "EST32-200/30",
+      "file": "2738-est32-200-30.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 2739,
+      "series": "EST",
+      "model": "EST32-200/40",
+      "file": "2739-est32-200-40.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 2740,
+      "series": "EST",
+      "model": "EST32-250/55",
+      "file": "2740-est32-250-55.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 2741,
+      "series": "EST",
+      "model": "EST32-250/75",
+      "file": "2741-est32-250-75.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 2790,
+      "series": "EST",
+      "model": "ESTm40-125/11",
+      "file": "2790-estm40-125-11.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 2791,
+      "series": "EST",
+      "model": "ESTm40-125/15",
+      "file": "2791-estm40-125-15.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 2792,
+      "series": "EST",
+      "model": "ESTm40-125/22",
+      "file": "2792-estm40-125-22.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 2742,
+      "series": "EST",
+      "model": "EST40-125/11",
+      "file": "2742-est40-125-11.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 2743,
+      "series": "EST",
+      "model": "EST40-125/15",
+      "file": "2743-est40-125-15.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 2744,
+      "series": "EST",
+      "model": "EST40-125/22",
+      "file": "2744-est40-125-22.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 2745,
+      "series": "EST",
+      "model": "EST40-160/30",
+      "file": "2745-est40-160-30.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 2746,
+      "series": "EST",
+      "model": "EST40-160/40",
+      "file": "2746-est40-160-40.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 2747,
+      "series": "EST",
+      "model": "EST40-200/55",
+      "file": "2747-est40-200-55.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 2748,
+      "series": "EST",
+      "model": "EST40-200/75",
+      "file": "2748-est40-200-75.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 2751,
+      "series": "EST",
+      "model": "EST40-250/92",
+      "file": "2751-est40-250-92.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 2749,
+      "series": "EST",
+      "model": "EST40-250/110",
+      "file": "2749-est40-250-110.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 2750,
+      "series": "EST",
+      "model": "EST40-250/150",
+      "file": "2750-est40-250-150.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 2793,
+      "series": "EST",
+      "model": "ESTm50-125/22",
+      "file": "2793-estm50-125-22.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 2752,
+      "series": "EST",
+      "model": "EST50-125/22",
+      "file": "2752-est50-125-22.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 2753,
+      "series": "EST",
+      "model": "EST50-125/30",
+      "file": "2753-est50-125-30.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 2754,
+      "series": "EST",
+      "model": "EST50-125/40",
+      "file": "2754-est50-125-40.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 2755,
+      "series": "EST",
+      "model": "EST50-160/55",
+      "file": "2755-est50-160-55.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 2756,
+      "series": "EST",
+      "model": "EST50-160/75",
+      "file": "2756-est50-160-75.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 2758,
+      "series": "EST",
+      "model": "EST50-200/92",
+      "file": "2758-est50-200-92.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 2757,
+      "series": "EST",
+      "model": "EST50-200/110",
+      "file": "2757-est50-200-110.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 2759,
+      "series": "EST",
+      "model": "EST50-250/150",
+      "file": "2759-est50-250-150.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 2760,
+      "series": "EST",
+      "model": "EST50-250/185",
+      "file": "2760-est50-250-185.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 2761,
+      "series": "EST",
+      "model": "EST50-250/220",
+      "file": "2761-est50-250-220.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 2762,
+      "series": "EST",
+      "model": "EST65-125/40",
+      "file": "2762-est65-125-40.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 2763,
+      "series": "EST",
+      "model": "EST65-125/55",
+      "file": "2763-est65-125-55.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 2764,
+      "series": "EST",
+      "model": "EST65-125/75",
+      "file": "2764-est65-125-75.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 2767,
+      "series": "EST",
+      "model": "EST65-160/92",
+      "file": "2767-est65-160-92.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 2765,
+      "series": "EST",
+      "model": "EST65-160/110",
+      "file": "2765-est65-160-110.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 2766,
+      "series": "EST",
+      "model": "EST65-160/150",
+      "file": "2766-est65-160-150.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 2768,
+      "series": "EST",
+      "model": "EST65-200/150",
+      "file": "2768-est65-200-150.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 2769,
+      "series": "EST",
+      "model": "EST65-200/185",
+      "file": "2769-est65-200-185.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 2770,
+      "series": "EST",
+      "model": "EST65-200/220",
+      "file": "2770-est65-200-220.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 2771,
+      "series": "EST",
+      "model": "EST65-200K/185",
+      "file": "2771-est65-200k-185.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 2772,
+      "series": "EST",
+      "model": "EST65-200K/220",
+      "file": "2772-est65-200k-220.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 2773,
+      "series": "EST",
+      "model": "EST65-200K/300",
+      "file": "2773-est65-200k-300.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 2774,
+      "series": "EST",
+      "model": "EST65-250/220",
+      "file": "2774-est65-250-220.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 2775,
+      "series": "EST",
+      "model": "EST65-250/300",
+      "file": "2775-est65-250-300.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 2776,
+      "series": "EST",
+      "model": "EST65-250/370",
+      "file": "2776-est65-250-370.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 2777,
+      "series": "EST",
+      "model": "EST80-160/110",
+      "file": "2777-est80-160-110.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 2778,
+      "series": "EST",
+      "model": "EST80-160/150",
+      "file": "2778-est80-160-150.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 2779,
+      "series": "EST",
+      "model": "EST80-160/185",
+      "file": "2779-est80-160-185.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 2780,
+      "series": "EST",
+      "model": "EST80-200/220",
+      "file": "2780-est80-200-220.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 2781,
+      "series": "EST",
+      "model": "EST80-200/300",
+      "file": "2781-est80-200-300.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 2782,
+      "series": "EST",
+      "model": "EST80-250/370",
+      "file": "2782-est80-250-370.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 2783,
+      "series": "EST",
+      "model": "EST80-250/450",
+      "file": "2783-est80-250-450.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 2784,
+      "series": "EST",
+      "model": "EST80-250/550",
+      "file": "2784-est80-250-550.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4671,
+      "series": "EEZ",
+      "model": "EEZ50-32-130/100-2N",
+      "file": "4671-eez50-32-130-100-2n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4673,
+      "series": "EEZ",
+      "model": "EEZ50-32-130/110-2N",
+      "file": "4673-eez50-32-130-110-2n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4675,
+      "series": "EEZ",
+      "model": "EEZ50-32-130/120-2N",
+      "file": "4675-eez50-32-130-120-2n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4677,
+      "series": "EEZ",
+      "model": "EEZ50-32-130/130-2N",
+      "file": "4677-eez50-32-130-130-2n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4679,
+      "series": "EEZ",
+      "model": "EEZ50-32-130/139-2N",
+      "file": "4679-eez50-32-130-139-2n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4680,
+      "series": "EEZ",
+      "model": "EEZ50-32-160/125-2N",
+      "file": "4680-eez50-32-160-125-2n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4682,
+      "series": "EEZ",
+      "model": "EEZ50-32-160/135-2N",
+      "file": "4682-eez50-32-160-135-2n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4684,
+      "series": "EEZ",
+      "model": "EEZ50-32-160/145-2N",
+      "file": "4684-eez50-32-160-145-2n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4686,
+      "series": "EEZ",
+      "model": "EEZ50-32-160/155-2N",
+      "file": "4686-eez50-32-160-155-2n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4688,
+      "series": "EEZ",
+      "model": "EEZ50-32-160/165-2N",
+      "file": "4688-eez50-32-160-165-2n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4689,
+      "series": "EEZ",
+      "model": "EEZ50-32-160/174-2N",
+      "file": "4689-eez50-32-160-174-2n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4691,
+      "series": "EEZ",
+      "model": "EEZ50-32-200/165-2N",
+      "file": "4691-eez50-32-200-165-2n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4693,
+      "series": "EEZ",
+      "model": "EEZ50-32-200/175-2N",
+      "file": "4693-eez50-32-200-175-2n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4695,
+      "series": "EEZ",
+      "model": "EEZ50-32-200/185-2N",
+      "file": "4695-eez50-32-200-185-2n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4697,
+      "series": "EEZ",
+      "model": "EEZ50-32-200/195-2N",
+      "file": "4697-eez50-32-200-195-2n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4699,
+      "series": "EEZ",
+      "model": "EEZ50-32-200/205-2N",
+      "file": "4699-eez50-32-200-205-2n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4701,
+      "series": "EEZ",
+      "model": "EEZ50-32-200/214-2N",
+      "file": "4701-eez50-32-200-214-2n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4703,
+      "series": "EEZ",
+      "model": "EEZ50-32-260/205-2N",
+      "file": "4703-eez50-32-260-205-2n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4704,
+      "series": "EEZ",
+      "model": "EEZ50-32-260/215-2N",
+      "file": "4704-eez50-32-260-215-2n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4589,
+      "series": "EEZ",
+      "model": "EEZ50-32-260/225-2NZ",
+      "file": "4589-eez50-32-260-225-2nz.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4590,
+      "series": "EEZ",
+      "model": "EEZ50-32-260/235-2NZ",
+      "file": "4590-eez50-32-260-235-2nz.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4591,
+      "series": "EEZ",
+      "model": "EEZ50-32-260/245-2NZ",
+      "file": "4591-eez50-32-260-245-2nz.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4592,
+      "series": "EEZ",
+      "model": "EEZ50-32-260/255-2NZ",
+      "file": "4592-eez50-32-260-255-2nz.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4593,
+      "series": "EEZ",
+      "model": "EEZ50-32-260/264-2NZ",
+      "file": "4593-eez50-32-260-264-2nz.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4672,
+      "series": "EEZ",
+      "model": "EEZ50-32-130/100-4N",
+      "file": "4672-eez50-32-130-100-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4674,
+      "series": "EEZ",
+      "model": "EEZ50-32-130/110-4N",
+      "file": "4674-eez50-32-130-110-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4676,
+      "series": "EEZ",
+      "model": "EEZ50-32-130/120-4N",
+      "file": "4676-eez50-32-130-120-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4678,
+      "series": "EEZ",
+      "model": "EEZ50-32-130/130-4N",
+      "file": "4678-eez50-32-130-130-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4587,
+      "series": "EEZ",
+      "model": "EEZ50-32-130/139-4N",
+      "file": "4587-eez50-32-130-139-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4681,
+      "series": "EEZ",
+      "model": "EEZ50-32-160/125-4N",
+      "file": "4681-eez50-32-160-125-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4683,
+      "series": "EEZ",
+      "model": "EEZ50-32-160/135-4N",
+      "file": "4683-eez50-32-160-135-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4685,
+      "series": "EEZ",
+      "model": "EEZ50-32-160/145-4N",
+      "file": "4685-eez50-32-160-145-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4687,
+      "series": "EEZ",
+      "model": "EEZ50-32-160/155-4N",
+      "file": "4687-eez50-32-160-155-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4588,
+      "series": "EEZ",
+      "model": "EEZ50-32-160/165-4N",
+      "file": "4588-eez50-32-160-165-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4690,
+      "series": "EEZ",
+      "model": "EEZ50-32-160/174-4N",
+      "file": "4690-eez50-32-160-174-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4692,
+      "series": "EEZ",
+      "model": "EEZ50-32-200/165-4N",
+      "file": "4692-eez50-32-200-165-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4694,
+      "series": "EEZ",
+      "model": "EEZ50-32-200/175-4N",
+      "file": "4694-eez50-32-200-175-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4696,
+      "series": "EEZ",
+      "model": "EEZ50-32-200/185-4N",
+      "file": "4696-eez50-32-200-185-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4698,
+      "series": "EEZ",
+      "model": "EEZ50-32-200/195-4N",
+      "file": "4698-eez50-32-200-195-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4700,
+      "series": "EEZ",
+      "model": "EEZ50-32-200/205-4N",
+      "file": "4700-eez50-32-200-205-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4702,
+      "series": "EEZ",
+      "model": "EEZ50-32-200/214-4N",
+      "file": "4702-eez50-32-200-214-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4782,
+      "series": "EEZ",
+      "model": "EEZ50-32-260/225-4N",
+      "file": "4782-eez50-32-260-225-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4783,
+      "series": "EEZ",
+      "model": "EEZ50-32-260/235-4N",
+      "file": "4783-eez50-32-260-235-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4784,
+      "series": "EEZ",
+      "model": "EEZ50-32-260/245-4N",
+      "file": "4784-eez50-32-260-245-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4785,
+      "series": "EEZ",
+      "model": "EEZ50-32-260/255-4N",
+      "file": "4785-eez50-32-260-255-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4786,
+      "series": "EEZ",
+      "model": "EEZ50-32-260/264-4N",
+      "file": "4786-eez50-32-260-264-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4705,
+      "series": "EEZ",
+      "model": "EEZ65-40-130/100-2N",
+      "file": "4705-eez65-40-130-100-2n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4707,
+      "series": "EEZ",
+      "model": "EEZ65-40-130/110-2N",
+      "file": "4707-eez65-40-130-110-2n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4709,
+      "series": "EEZ",
+      "model": "EEZ65-40-130/120-2N",
+      "file": "4709-eez65-40-130-120-2n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4594,
+      "series": "EEZ",
+      "model": "EEZ65-40-130/130-2N",
+      "file": "4594-eez65-40-130-130-2n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4712,
+      "series": "EEZ",
+      "model": "EEZ65-40-130/139-2N",
+      "file": "4712-eez65-40-130-139-2n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4714,
+      "series": "EEZ",
+      "model": "EEZ65-40-160/125-2N",
+      "file": "4714-eez65-40-160-125-2n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4716,
+      "series": "EEZ",
+      "model": "EEZ65-40-160/135-2N",
+      "file": "4716-eez65-40-160-135-2n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4718,
+      "series": "EEZ",
+      "model": "EEZ65-40-160/145-2N",
+      "file": "4718-eez65-40-160-145-2n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4595,
+      "series": "EEZ",
+      "model": "EEZ65-40-160/155-2N",
+      "file": "4595-eez65-40-160-155-2n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4721,
+      "series": "EEZ",
+      "model": "EEZ65-40-160/165-2N",
+      "file": "4721-eez65-40-160-165-2n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4723,
+      "series": "EEZ",
+      "model": "EEZ65-40-160/174-2N",
+      "file": "4723-eez65-40-160-174-2n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4724,
+      "series": "EEZ",
+      "model": "EEZ65-40-200/165-2N",
+      "file": "4724-eez65-40-200-165-2n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4726,
+      "series": "EEZ",
+      "model": "EEZ65-40-200/175-2N",
+      "file": "4726-eez65-40-200-175-2n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4727,
+      "series": "EEZ",
+      "model": "EEZ65-40-200/185-2N",
+      "file": "4727-eez65-40-200-185-2n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4728,
+      "series": "EEZ",
+      "model": "EEZ65-40-200/195-2N",
+      "file": "4728-eez65-40-200-195-2n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4730,
+      "series": "EEZ",
+      "model": "EEZ65-40-200/205-2N",
+      "file": "4730-eez65-40-200-205-2n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4731,
+      "series": "EEZ",
+      "model": "EEZ65-40-200/214-2N",
+      "file": "4731-eez65-40-200-214-2n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4599,
+      "series": "EEZ",
+      "model": "EEZ65-40-260/205-2N",
+      "file": "4599-eez65-40-260-205-2n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4600,
+      "series": "EEZ",
+      "model": "EEZ65-40-260/215-2NZ",
+      "file": "4600-eez65-40-260-215-2nz.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4601,
+      "series": "EEZ",
+      "model": "EEZ65-40-260/225-2NZ",
+      "file": "4601-eez65-40-260-225-2nz.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4602,
+      "series": "EEZ",
+      "model": "EEZ65-40-260/235-2NZ",
+      "file": "4602-eez65-40-260-235-2nz.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4603,
+      "series": "EEZ",
+      "model": "EEZ65-40-260/245-2NZ",
+      "file": "4603-eez65-40-260-245-2nz.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4604,
+      "series": "EEZ",
+      "model": "EEZ65-40-260/255-2NZ",
+      "file": "4604-eez65-40-260-255-2nz.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4605,
+      "series": "EEZ",
+      "model": "EEZ65-40-260/264-2NZ",
+      "file": "4605-eez65-40-260-264-2nz.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4606,
+      "series": "EEZ",
+      "model": "EEZ65-40-320/255-2NZ",
+      "file": "4606-eez65-40-320-255-2nz.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4607,
+      "series": "EEZ",
+      "model": "EEZ65-40-320/270-2NZ",
+      "file": "4607-eez65-40-320-270-2nz.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4608,
+      "series": "EEZ",
+      "model": "EEZ65-40-320/285-2NZ",
+      "file": "4608-eez65-40-320-285-2nz.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4609,
+      "series": "EEZ",
+      "model": "EEZ65-40-320/300-2NZ",
+      "file": "4609-eez65-40-320-300-2nz.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4610,
+      "series": "EEZ",
+      "model": "EEZ65-40-320/315-2NZ",
+      "file": "4610-eez65-40-320-315-2nz.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4611,
+      "series": "EEZ",
+      "model": "EEZ65-40-320/329-2NZ",
+      "file": "4611-eez65-40-320-329-2nz.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4733,
+      "series": "EEZ",
+      "model": "EEZ65-50-130/110-2N",
+      "file": "4733-eez65-50-130-110-2n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4612,
+      "series": "EEZ",
+      "model": "EEZ65-50-130/120-2N",
+      "file": "4612-eez65-50-130-120-2n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4613,
+      "series": "EEZ",
+      "model": "EEZ65-50-130/130-2N",
+      "file": "4613-eez65-50-130-130-2n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4737,
+      "series": "EEZ",
+      "model": "EEZ65-50-130/139-2N",
+      "file": "4737-eez65-50-130-139-2n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4739,
+      "series": "EEZ",
+      "model": "EEZ65-50-160/125-2N",
+      "file": "4739-eez65-50-160-125-2n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4741,
+      "series": "EEZ",
+      "model": "EEZ65-50-160/135-2N",
+      "file": "4741-eez65-50-160-135-2n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4743,
+      "series": "EEZ",
+      "model": "EEZ65-50-160/145-2N",
+      "file": "4743-eez65-50-160-145-2n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4745,
+      "series": "EEZ",
+      "model": "EEZ65-50-160/155-2N",
+      "file": "4745-eez65-50-160-155-2n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4747,
+      "series": "EEZ",
+      "model": "EEZ65-50-160/165-2N",
+      "file": "4747-eez65-50-160-165-2n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4748,
+      "series": "EEZ",
+      "model": "EEZ65-50-160/174-2N",
+      "file": "4748-eez65-50-160-174-2n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4614,
+      "series": "EEZ",
+      "model": "EEZ65-50-200/165-2N",
+      "file": "4614-eez65-50-200-165-2n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4750,
+      "series": "EEZ",
+      "model": "EEZ65-50-200/175-2N",
+      "file": "4750-eez65-50-200-175-2n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4615,
+      "series": "EEZ",
+      "model": "EEZ65-50-200/185-2N",
+      "file": "4615-eez65-50-200-185-2n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4617,
+      "series": "EEZ",
+      "model": "EEZ65-50-200/195-2NZ",
+      "file": "4617-eez65-50-200-195-2nz.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4618,
+      "series": "EEZ",
+      "model": "EEZ65-50-200/205-2NZ",
+      "file": "4618-eez65-50-200-205-2nz.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4622,
+      "series": "EEZ",
+      "model": "EEZ65-50-260/215-2NZ",
+      "file": "4622-eez65-50-260-215-2nz.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4623,
+      "series": "EEZ",
+      "model": "EEZ65-50-260/225-2NZ",
+      "file": "4623-eez65-50-260-225-2nz.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4624,
+      "series": "EEZ",
+      "model": "EEZ65-50-260/235-2NZ",
+      "file": "4624-eez65-50-260-235-2nz.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4625,
+      "series": "EEZ",
+      "model": "EEZ65-50-260/245-2NZ",
+      "file": "4625-eez65-50-260-245-2nz.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4626,
+      "series": "EEZ",
+      "model": "EEZ65-50-260/255-2NZ",
+      "file": "4626-eez65-50-260-255-2nz.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4627,
+      "series": "EEZ",
+      "model": "EEZ65-50-260/264-2NZ",
+      "file": "4627-eez65-50-260-264-2nz.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4628,
+      "series": "EEZ",
+      "model": "EEZ65-50-320/255-2NZ",
+      "file": "4628-eez65-50-320-255-2nz.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4629,
+      "series": "EEZ",
+      "model": "EEZ65-50-320/270-2NZ",
+      "file": "4629-eez65-50-320-270-2nz.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4630,
+      "series": "EEZ",
+      "model": "EEZ65-50-320/285-2NZ",
+      "file": "4630-eez65-50-320-285-2nz.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4631,
+      "series": "EEZ",
+      "model": "EEZ65-50-320/300-2NZ",
+      "file": "4631-eez65-50-320-300-2nz.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4632,
+      "series": "EEZ",
+      "model": "EEZ65-50-320/315-2NZ",
+      "file": "4632-eez65-50-320-315-2nz.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4633,
+      "series": "EEZ",
+      "model": "EEZ65-50-320/329-2NZ",
+      "file": "4633-eez65-50-320-329-2nz.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4706,
+      "series": "EEZ",
+      "model": "EEZ65-40-130/100-4N",
+      "file": "4706-eez65-40-130-100-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4708,
+      "series": "EEZ",
+      "model": "EEZ65-40-130/110-4N",
+      "file": "4708-eez65-40-130-110-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4710,
+      "series": "EEZ",
+      "model": "EEZ65-40-130/120-4N",
+      "file": "4710-eez65-40-130-120-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4711,
+      "series": "EEZ",
+      "model": "EEZ65-40-130/130-4N",
+      "file": "4711-eez65-40-130-130-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4713,
+      "series": "EEZ",
+      "model": "EEZ65-40-130/139-4N",
+      "file": "4713-eez65-40-130-139-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4715,
+      "series": "EEZ",
+      "model": "EEZ65-40-160/125-4N",
+      "file": "4715-eez65-40-160-125-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4717,
+      "series": "EEZ",
+      "model": "EEZ65-40-160/135-4N",
+      "file": "4717-eez65-40-160-135-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4719,
+      "series": "EEZ",
+      "model": "EEZ65-40-160/145-4N",
+      "file": "4719-eez65-40-160-145-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4720,
+      "series": "EEZ",
+      "model": "EEZ65-40-160/155-4N",
+      "file": "4720-eez65-40-160-155-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4722,
+      "series": "EEZ",
+      "model": "EEZ65-40-160/165-4N",
+      "file": "4722-eez65-40-160-165-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4596,
+      "series": "EEZ",
+      "model": "EEZ65-40-160/174-4N",
+      "file": "4596-eez65-40-160-174-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4725,
+      "series": "EEZ",
+      "model": "EEZ65-40-200/165-4N",
+      "file": "4725-eez65-40-200-165-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4597,
+      "series": "EEZ",
+      "model": "EEZ65-40-200/175-4N",
+      "file": "4597-eez65-40-200-175-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4598,
+      "series": "EEZ",
+      "model": "EEZ65-40-200/185-4N",
+      "file": "4598-eez65-40-200-185-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4729,
+      "series": "EEZ",
+      "model": "EEZ65-40-200/195-4N",
+      "file": "4729-eez65-40-200-195-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4787,
+      "series": "EEZ",
+      "model": "EEZ65-40-200/205-4N",
+      "file": "4787-eez65-40-200-205-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4788,
+      "series": "EEZ",
+      "model": "EEZ65-40-200/214-4N",
+      "file": "4788-eez65-40-200-214-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4732,
+      "series": "EEZ",
+      "model": "EEZ65-40-260/215-4N",
+      "file": "4732-eez65-40-260-215-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4789,
+      "series": "EEZ",
+      "model": "EEZ65-40-260/225-4N",
+      "file": "4789-eez65-40-260-225-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4790,
+      "series": "EEZ",
+      "model": "EEZ65-40-260/235-4N",
+      "file": "4790-eez65-40-260-235-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4791,
+      "series": "EEZ",
+      "model": "EEZ65-40-260/245-4N",
+      "file": "4791-eez65-40-260-245-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4792,
+      "series": "EEZ",
+      "model": "EEZ65-40-260/255-4N",
+      "file": "4792-eez65-40-260-255-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4793,
+      "series": "EEZ",
+      "model": "EEZ65-40-260/264-4N",
+      "file": "4793-eez65-40-260-264-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4794,
+      "series": "EEZ",
+      "model": "EEZ65-40-320/255-4N",
+      "file": "4794-eez65-40-320-255-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4795,
+      "series": "EEZ",
+      "model": "EEZ65-40-320/270-4N",
+      "file": "4795-eez65-40-320-270-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4796,
+      "series": "EEZ",
+      "model": "EEZ65-40-320/285-4N",
+      "file": "4796-eez65-40-320-285-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4797,
+      "series": "EEZ",
+      "model": "EEZ65-40-320/300-4N",
+      "file": "4797-eez65-40-320-300-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4798,
+      "series": "EEZ",
+      "model": "EEZ65-40-320/315-4N",
+      "file": "4798-eez65-40-320-315-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4799,
+      "series": "EEZ",
+      "model": "EEZ65-40-320/329-4N",
+      "file": "4799-eez65-40-320-329-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4734,
+      "series": "EEZ",
+      "model": "EEZ65-50-130/110-4N",
+      "file": "4734-eez65-50-130-110-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4735,
+      "series": "EEZ",
+      "model": "EEZ65-50-130/120-4N",
+      "file": "4735-eez65-50-130-120-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4736,
+      "series": "EEZ",
+      "model": "EEZ65-50-130/130-4N",
+      "file": "4736-eez65-50-130-130-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4738,
+      "series": "EEZ",
+      "model": "EEZ65-50-130/139-4N",
+      "file": "4738-eez65-50-130-139-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4740,
+      "series": "EEZ",
+      "model": "EEZ65-50-160/125-4N",
+      "file": "4740-eez65-50-160-125-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4742,
+      "series": "EEZ",
+      "model": "EEZ65-50-160/135-4N",
+      "file": "4742-eez65-50-160-135-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4744,
+      "series": "EEZ",
+      "model": "EEZ65-50-160/145-4N",
+      "file": "4744-eez65-50-160-145-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4746,
+      "series": "EEZ",
+      "model": "EEZ65-50-160/155-4N",
+      "file": "4746-eez65-50-160-155-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4800,
+      "series": "EEZ",
+      "model": "EEZ65-50-160/165-4N",
+      "file": "4800-eez65-50-160-165-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4801,
+      "series": "EEZ",
+      "model": "EEZ65-50-160/174-4N",
+      "file": "4801-eez65-50-160-174-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4749,
+      "series": "EEZ",
+      "model": "EEZ65-50-200/165-4N",
+      "file": "4749-eez65-50-200-165-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4802,
+      "series": "EEZ",
+      "model": "EEZ65-50-200/175-4N",
+      "file": "4802-eez65-50-200-175-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4616,
+      "series": "EEZ",
+      "model": "EEZ65-50-200/185-4N",
+      "file": "4616-eez65-50-200-185-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4803,
+      "series": "EEZ",
+      "model": "EEZ65-50-200/195-4N",
+      "file": "4803-eez65-50-200-195-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4804,
+      "series": "EEZ",
+      "model": "EEZ65-50-200/205-4N",
+      "file": "4804-eez65-50-200-205-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4620,
+      "series": "EEZ",
+      "model": "EEZ65-50-200/214-4N",
+      "file": "4620-eez65-50-200-214-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4805,
+      "series": "EEZ",
+      "model": "EEZ65-50-260/205-4N",
+      "file": "4805-eez65-50-260-205-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4806,
+      "series": "EEZ",
+      "model": "EEZ65-50-260/215-4N",
+      "file": "4806-eez65-50-260-215-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4751,
+      "series": "EEZ",
+      "model": "EEZ65-50-260/225-4N",
+      "file": "4751-eez65-50-260-225-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4807,
+      "series": "EEZ",
+      "model": "EEZ65-50-260/235-4N",
+      "file": "4807-eez65-50-260-235-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4752,
+      "series": "EEZ",
+      "model": "EEZ65-50-260/245-4N",
+      "file": "4752-eez65-50-260-245-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4753,
+      "series": "EEZ",
+      "model": "EEZ65-50-260/255-4N",
+      "file": "4753-eez65-50-260-255-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4754,
+      "series": "EEZ",
+      "model": "EEZ65-50-260/264-4N",
+      "file": "4754-eez65-50-260-264-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4808,
+      "series": "EEZ",
+      "model": "EEZ65-50-320/255-4N",
+      "file": "4808-eez65-50-320-255-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4809,
+      "series": "EEZ",
+      "model": "EEZ65-50-320/270-4N",
+      "file": "4809-eez65-50-320-270-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4810,
+      "series": "EEZ",
+      "model": "EEZ65-50-320/285-4N",
+      "file": "4810-eez65-50-320-285-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4811,
+      "series": "EEZ",
+      "model": "EEZ65-50-320/300-4N",
+      "file": "4811-eez65-50-320-300-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4812,
+      "series": "EEZ",
+      "model": "EEZ65-50-320/315-4N",
+      "file": "4812-eez65-50-320-315-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4813,
+      "series": "EEZ",
+      "model": "EEZ65-50-320/329-4N",
+      "file": "4813-eez65-50-320-329-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4755,
+      "series": "EEZ",
+      "model": "EEZ80-65-130/120-2N",
+      "file": "4755-eez80-65-130-120-2n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4634,
+      "series": "EEZ",
+      "model": "EEZ80-65-130/133-2N",
+      "file": "4634-eez80-65-130-133-2n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4635,
+      "series": "EEZ",
+      "model": "EEZ80-65-130/139-2N",
+      "file": "4635-eez80-65-130-139-2n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4759,
+      "series": "EEZ",
+      "model": "EEZ80-65-160/125-2N",
+      "file": "4759-eez80-65-160-125-2n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4761,
+      "series": "EEZ",
+      "model": "EEZ80-65-160/135-2N",
+      "file": "4761-eez80-65-160-135-2n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4763,
+      "series": "EEZ",
+      "model": "EEZ80-65-160/145-2N",
+      "file": "4763-eez80-65-160-145-2n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4764,
+      "series": "EEZ",
+      "model": "EEZ80-65-160/155-2N",
+      "file": "4764-eez80-65-160-155-2n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4636,
+      "series": "EEZ",
+      "model": "EEZ80-65-160/165-2NZ",
+      "file": "4636-eez80-65-160-165-2nz.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4765,
+      "series": "EEZ",
+      "model": "EEZ80-65-160/174-2NZ",
+      "file": "4765-eez80-65-160-174-2nz.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4637,
+      "series": "EEZ",
+      "model": "EEZ80-65-200/165-2NZ",
+      "file": "4637-eez80-65-200-165-2nz.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4638,
+      "series": "EEZ",
+      "model": "EEZ80-65-200/175-2NZ",
+      "file": "4638-eez80-65-200-175-2nz.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4639,
+      "series": "EEZ",
+      "model": "EEZ80-65-200/185-2NZ",
+      "file": "4639-eez80-65-200-185-2nz.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4641,
+      "series": "EEZ",
+      "model": "EEZ80-65-200/195-2NZ",
+      "file": "4641-eez80-65-200-195-2nz.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4642,
+      "series": "EEZ",
+      "model": "EEZ80-65-200/205-2NZ",
+      "file": "4642-eez80-65-200-205-2nz.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4643,
+      "series": "EEZ",
+      "model": "EEZ80-65-200/214-2NZ",
+      "file": "4643-eez80-65-200-214-2nz.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4644,
+      "series": "EEZ",
+      "model": "EEZ80-65-260/205-2NZ",
+      "file": "4644-eez80-65-260-205-2nz.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4645,
+      "series": "EEZ",
+      "model": "EEZ80-65-260/215-2NZ",
+      "file": "4645-eez80-65-260-215-2nz.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4646,
+      "series": "EEZ",
+      "model": "EEZ80-65-260/225-2NZ",
+      "file": "4646-eez80-65-260-225-2nz.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4648,
+      "series": "EEZ",
+      "model": "EEZ80-65-260/235-2NZ",
+      "file": "4648-eez80-65-260-235-2nz.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4649,
+      "series": "EEZ",
+      "model": "EEZ80-65-260/245-2NZ",
+      "file": "4649-eez80-65-260-245-2nz.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4651,
+      "series": "EEZ",
+      "model": "EEZ80-65-260/255-2NZ",
+      "file": "4651-eez80-65-260-255-2nz.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4653,
+      "series": "EEZ",
+      "model": "EEZ80-65-260/264-2NZ",
+      "file": "4653-eez80-65-260-264-2nz.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4655,
+      "series": "EEZ",
+      "model": "EEZ80-65-320/255-2NZ",
+      "file": "4655-eez80-65-320-255-2nz.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4656,
+      "series": "EEZ",
+      "model": "EEZ80-65-320/270-2NZ",
+      "file": "4656-eez80-65-320-270-2nz.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4657,
+      "series": "EEZ",
+      "model": "EEZ80-65-320/285-2NZ",
+      "file": "4657-eez80-65-320-285-2nz.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4658,
+      "series": "EEZ",
+      "model": "EEZ80-65-320/300-2NZ",
+      "file": "4658-eez80-65-320-300-2nz.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4659,
+      "series": "EEZ",
+      "model": "EEZ80-65-320/315-2NZ",
+      "file": "4659-eez80-65-320-315-2nz.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4660,
+      "series": "EEZ",
+      "model": "EEZ80-65-320/329-2NZ",
+      "file": "4660-eez80-65-320-329-2nz.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4756,
+      "series": "EEZ",
+      "model": "EEZ80-65-130/120-4N",
+      "file": "4756-eez80-65-130-120-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4757,
+      "series": "EEZ",
+      "model": "EEZ80-65-130/133-4N",
+      "file": "4757-eez80-65-130-133-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4758,
+      "series": "EEZ",
+      "model": "EEZ80-65-130/139-4N",
+      "file": "4758-eez80-65-130-139-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4760,
+      "series": "EEZ",
+      "model": "EEZ80-65-160/125-4N",
+      "file": "4760-eez80-65-160-125-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4762,
+      "series": "EEZ",
+      "model": "EEZ80-65-160/135-4N",
+      "file": "4762-eez80-65-160-135-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4814,
+      "series": "EEZ",
+      "model": "EEZ80-65-160/145-4N",
+      "file": "4814-eez80-65-160-145-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4815,
+      "series": "EEZ",
+      "model": "EEZ80-65-160/155-4N",
+      "file": "4815-eez80-65-160-155-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4816,
+      "series": "EEZ",
+      "model": "EEZ80-65-160/165-4N",
+      "file": "4816-eez80-65-160-165-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4817,
+      "series": "EEZ",
+      "model": "EEZ80-65-160/174-4N",
+      "file": "4817-eez80-65-160-174-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4818,
+      "series": "EEZ",
+      "model": "EEZ80-65-200/165-4N",
+      "file": "4818-eez80-65-200-165-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4819,
+      "series": "EEZ",
+      "model": "EEZ80-65-200/175-4N",
+      "file": "4819-eez80-65-200-175-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4640,
+      "series": "EEZ",
+      "model": "EEZ80-65-200/185-4N",
+      "file": "4640-eez80-65-200-185-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4820,
+      "series": "EEZ",
+      "model": "EEZ80-65-200/195-4N",
+      "file": "4820-eez80-65-200-195-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4821,
+      "series": "EEZ",
+      "model": "EEZ80-65-200/205-4N",
+      "file": "4821-eez80-65-200-205-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4822,
+      "series": "EEZ",
+      "model": "EEZ80-65-200/214-4N",
+      "file": "4822-eez80-65-200-214-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4823,
+      "series": "EEZ",
+      "model": "EEZ80-65-260/205-4N",
+      "file": "4823-eez80-65-260-205-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4824,
+      "series": "EEZ",
+      "model": "EEZ80-65-260/215-4N",
+      "file": "4824-eez80-65-260-215-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4647,
+      "series": "EEZ",
+      "model": "EEZ80-65-260/225-4N",
+      "file": "4647-eez80-65-260-225-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4825,
+      "series": "EEZ",
+      "model": "EEZ80-65-260/235-4N",
+      "file": "4825-eez80-65-260-235-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4650,
+      "series": "EEZ",
+      "model": "EEZ80-65-260/245-4N",
+      "file": "4650-eez80-65-260-245-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4652,
+      "series": "EEZ",
+      "model": "EEZ80-65-260/255-4N",
+      "file": "4652-eez80-65-260-255-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4654,
+      "series": "EEZ",
+      "model": "EEZ80-65-260/264-4N",
+      "file": "4654-eez80-65-260-264-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4826,
+      "series": "EEZ",
+      "model": "EEZ80-65-320/255-4N",
+      "file": "4826-eez80-65-320-255-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4827,
+      "series": "EEZ",
+      "model": "EEZ80-65-320/270-4N",
+      "file": "4827-eez80-65-320-270-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4828,
+      "series": "EEZ",
+      "model": "EEZ80-65-320/285-4N",
+      "file": "4828-eez80-65-320-285-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4829,
+      "series": "EEZ",
+      "model": "EEZ80-65-320/300-4N",
+      "file": "4829-eez80-65-320-300-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4830,
+      "series": "EEZ",
+      "model": "EEZ80-65-320/315-4N",
+      "file": "4830-eez80-65-320-315-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4661,
+      "series": "EEZ",
+      "model": "EEZ80-65-320/329-4NZ",
+      "file": "4661-eez80-65-320-329-4nz.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4665,
+      "series": "EEZ",
+      "model": "EEZ100-80-160/135-2N",
+      "file": "4665-eez100-80-160-135-2n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4460,
+      "series": "EEZ",
+      "model": "EEZ100-80-160/145-2NZ",
+      "file": "4460-eez100-80-160-145-2nz.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4461,
+      "series": "EEZ",
+      "model": "EEZ100-80-160/155-2NZ",
+      "file": "4461-eez100-80-160-155-2nz.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4667,
+      "series": "EEZ",
+      "model": "EEZ100-80-160/165-2NZ",
+      "file": "4667-eez100-80-160-165-2nz.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4462,
+      "series": "EEZ",
+      "model": "EEZ100-80-160/174-2NZ",
+      "file": "4462-eez100-80-160-174-2nz.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4463,
+      "series": "EEZ",
+      "model": "EEZ100-80-200/165-2NZ",
+      "file": "4463-eez100-80-200-165-2nz.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4464,
+      "series": "EEZ",
+      "model": "EEZ100-80-200/175-2NZ",
+      "file": "4464-eez100-80-200-175-2nz.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4465,
+      "series": "EEZ",
+      "model": "EEZ100-80-200/185-2NZ",
+      "file": "4465-eez100-80-200-185-2nz.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4467,
+      "series": "EEZ",
+      "model": "EEZ100-80-200/195-2NZ",
+      "file": "4467-eez100-80-200-195-2nz.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4469,
+      "series": "EEZ",
+      "model": "EEZ100-80-200/205-2NZ",
+      "file": "4469-eez100-80-200-205-2nz.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4471,
+      "series": "EEZ",
+      "model": "EEZ100-80-200/214-2NZ",
+      "file": "4471-eez100-80-200-214-2nz.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4473,
+      "series": "EEZ",
+      "model": "EEZ100-80-260/205-2NZ",
+      "file": "4473-eez100-80-260-205-2nz.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4474,
+      "series": "EEZ",
+      "model": "EEZ100-80-260/215-2NZ",
+      "file": "4474-eez100-80-260-215-2nz.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4475,
+      "series": "EEZ",
+      "model": "EEZ100-80-260/225-2NZ",
+      "file": "4475-eez100-80-260-225-2nz.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4476,
+      "series": "EEZ",
+      "model": "EEZ100-80-260/235-2NZ",
+      "file": "4476-eez100-80-260-235-2nz.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4478,
+      "series": "EEZ",
+      "model": "EEZ100-80-260/245-2NZ",
+      "file": "4478-eez100-80-260-245-2nz.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4480,
+      "series": "EEZ",
+      "model": "EEZ100-80-260/255-2NZ",
+      "file": "4480-eez100-80-260-255-2nz.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4481,
+      "series": "EEZ",
+      "model": "EEZ100-80-260/264-2NZ",
+      "file": "4481-eez100-80-260-264-2nz.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4482,
+      "series": "EEZ",
+      "model": "EEZ100-80-320/255-2NZ",
+      "file": "4482-eez100-80-320-255-2nz.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4484,
+      "series": "EEZ",
+      "model": "EEZ100-80-320/270-2NZ",
+      "file": "4484-eez100-80-320-270-2nz.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4486,
+      "series": "EEZ",
+      "model": "EEZ100-80-320/285-2NZ",
+      "file": "4486-eez100-80-320-285-2nz.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4666,
+      "series": "EEZ",
+      "model": "EEZ100-80-160/135-4N",
+      "file": "4666-eez100-80-160-135-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4766,
+      "series": "EEZ",
+      "model": "EEZ100-80-160/145-4N",
+      "file": "4766-eez100-80-160-145-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4767,
+      "series": "EEZ",
+      "model": "EEZ100-80-160/155-4N",
+      "file": "4767-eez100-80-160-155-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4768,
+      "series": "EEZ",
+      "model": "EEZ100-80-160/165-4N",
+      "file": "4768-eez100-80-160-165-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4769,
+      "series": "EEZ",
+      "model": "EEZ100-80-160/174-4N",
+      "file": "4769-eez100-80-160-174-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4770,
+      "series": "EEZ",
+      "model": "EEZ100-80-200/165-4N",
+      "file": "4770-eez100-80-200-165-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4771,
+      "series": "EEZ",
+      "model": "EEZ100-80-200/175-4N",
+      "file": "4771-eez100-80-200-175-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4466,
+      "series": "EEZ",
+      "model": "EEZ100-80-200/185-4N",
+      "file": "4466-eez100-80-200-185-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4468,
+      "series": "EEZ",
+      "model": "EEZ100-80-200/195-4N",
+      "file": "4468-eez100-80-200-195-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4470,
+      "series": "EEZ",
+      "model": "EEZ100-80-200/205-4N",
+      "file": "4470-eez100-80-200-205-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4472,
+      "series": "EEZ",
+      "model": "EEZ100-80-200/214-4N",
+      "file": "4472-eez100-80-200-214-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4772,
+      "series": "EEZ",
+      "model": "EEZ100-80-260/205-4N",
+      "file": "4772-eez100-80-260-205-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4773,
+      "series": "EEZ",
+      "model": "EEZ100-80-260/215-4N",
+      "file": "4773-eez100-80-260-215-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4774,
+      "series": "EEZ",
+      "model": "EEZ100-80-260/225-4N",
+      "file": "4774-eez100-80-260-225-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4477,
+      "series": "EEZ",
+      "model": "EEZ100-80-260/235-4N",
+      "file": "4477-eez100-80-260-235-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4479,
+      "series": "EEZ",
+      "model": "EEZ100-80-260/245-4N",
+      "file": "4479-eez100-80-260-245-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4775,
+      "series": "EEZ",
+      "model": "EEZ100-80-260/255-4N",
+      "file": "4775-eez100-80-260-255-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4776,
+      "series": "EEZ",
+      "model": "EEZ100-80-260/264-4N",
+      "file": "4776-eez100-80-260-264-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4483,
+      "series": "EEZ",
+      "model": "EEZ100-80-320/255-4N",
+      "file": "4483-eez100-80-320-255-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4485,
+      "series": "EEZ",
+      "model": "EEZ100-80-320/270-4N",
+      "file": "4485-eez100-80-320-270-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4487,
+      "series": "EEZ",
+      "model": "EEZ100-80-320/285-4N",
+      "file": "4487-eez100-80-320-285-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4488,
+      "series": "EEZ",
+      "model": "EEZ100-80-320/300-4NZ",
+      "file": "4488-eez100-80-320-300-4nz.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4489,
+      "series": "EEZ",
+      "model": "EEZ100-80-320/315-4NZ",
+      "file": "4489-eez100-80-320-315-4nz.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4490,
+      "series": "EEZ",
+      "model": "EEZ100-80-320/329-4NZ",
+      "file": "4490-eez100-80-320-329-4nz.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4491,
+      "series": "EEZ",
+      "model": "EEZ100-80-400/320-4NZ",
+      "file": "4491-eez100-80-400-320-4nz.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4492,
+      "series": "EEZ",
+      "model": "EEZ100-80-400/335-4NZ",
+      "file": "4492-eez100-80-400-335-4nz.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4493,
+      "series": "EEZ",
+      "model": "EEZ100-80-400/350-4NZ",
+      "file": "4493-eez100-80-400-350-4nz.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4494,
+      "series": "EEZ",
+      "model": "EEZ100-80-400/365-4NZ",
+      "file": "4494-eez100-80-400-365-4nz.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4495,
+      "series": "EEZ",
+      "model": "EEZ100-80-400/380-4NZ",
+      "file": "4495-eez100-80-400-380-4nz.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4496,
+      "series": "EEZ",
+      "model": "EEZ100-80-400/395-4NZ",
+      "file": "4496-eez100-80-400-395-4nz.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4497,
+      "series": "EEZ",
+      "model": "EEZ100-80-400/409-4NZ",
+      "file": "4497-eez100-80-400-409-4nz.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4498,
+      "series": "EEZ",
+      "model": "EEZ125-100-160/145-2NZ",
+      "file": "4498-eez125-100-160-145-2nz.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4499,
+      "series": "EEZ",
+      "model": "EEZ125-100-160/158-2NZ",
+      "file": "4499-eez125-100-160-158-2nz.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4500,
+      "series": "EEZ",
+      "model": "EEZ125-100-160/168-2NZ",
+      "file": "4500-eez125-100-160-168-2nz.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4501,
+      "series": "EEZ",
+      "model": "EEZ125-100-160/176-2NZ",
+      "file": "4501-eez125-100-160-176-2nz.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4503,
+      "series": "EEZ",
+      "model": "EEZ125-100-200/165-2NZ",
+      "file": "4503-eez125-100-200-165-2nz.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4504,
+      "series": "EEZ",
+      "model": "EEZ125-100-200/175-2NZ",
+      "file": "4504-eez125-100-200-175-2nz.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4505,
+      "series": "EEZ",
+      "model": "EEZ125-100-200/185-2NZ",
+      "file": "4505-eez125-100-200-185-2nz.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4506,
+      "series": "EEZ",
+      "model": "EEZ125-100-200/195-2NZ",
+      "file": "4506-eez125-100-200-195-2nz.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4508,
+      "series": "EEZ",
+      "model": "EEZ125-100-200/205-2NZ",
+      "file": "4508-eez125-100-200-205-2nz.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4510,
+      "series": "EEZ",
+      "model": "EEZ125-100-200/214-2NZ",
+      "file": "4510-eez125-100-200-214-2nz.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4512,
+      "series": "EEZ",
+      "model": "EEZ125-100-260/205-2NZ",
+      "file": "4512-eez125-100-260-205-2nz.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4513,
+      "series": "EEZ",
+      "model": "EEZ125-100-260/215-2NZ",
+      "file": "4513-eez125-100-260-215-2nz.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4515,
+      "series": "EEZ",
+      "model": "EEZ125-100-260/225-2NZ",
+      "file": "4515-eez125-100-260-225-2nz.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4517,
+      "series": "EEZ",
+      "model": "EEZ125-100-260/235-2NZ",
+      "file": "4517-eez125-100-260-235-2nz.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4519,
+      "series": "EEZ",
+      "model": "EEZ125-100-260/245-2NZ",
+      "file": "4519-eez125-100-260-245-2nz.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4777,
+      "series": "EEZ",
+      "model": "EEZ125-100-160/145-4N",
+      "file": "4777-eez125-100-160-145-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4668,
+      "series": "EEZ",
+      "model": "EEZ125-100-160/158-4N",
+      "file": "4668-eez125-100-160-158-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4778,
+      "series": "EEZ",
+      "model": "EEZ125-100-160/168-4N",
+      "file": "4778-eez125-100-160-168-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4502,
+      "series": "EEZ",
+      "model": "EEZ125-100-160/176-4N",
+      "file": "4502-eez125-100-160-176-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4779,
+      "series": "EEZ",
+      "model": "EEZ125-100-200/165-4N",
+      "file": "4779-eez125-100-200-165-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4669,
+      "series": "EEZ",
+      "model": "EEZ125-100-200/175-4N",
+      "file": "4669-eez125-100-200-175-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4670,
+      "series": "EEZ",
+      "model": "EEZ125-100-200/185-4N",
+      "file": "4670-eez125-100-200-185-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4507,
+      "series": "EEZ",
+      "model": "EEZ125-100-200/195-4N",
+      "file": "4507-eez125-100-200-195-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4509,
+      "series": "EEZ",
+      "model": "EEZ125-100-200/205-4N",
+      "file": "4509-eez125-100-200-205-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4511,
+      "series": "EEZ",
+      "model": "EEZ125-100-200/214-4N",
+      "file": "4511-eez125-100-200-214-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4780,
+      "series": "EEZ",
+      "model": "EEZ125-100-260/205-4N",
+      "file": "4780-eez125-100-260-205-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4514,
+      "series": "EEZ",
+      "model": "EEZ125-100-260/215-4N",
+      "file": "4514-eez125-100-260-215-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4516,
+      "series": "EEZ",
+      "model": "EEZ125-100-260/225-4N",
+      "file": "4516-eez125-100-260-225-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4518,
+      "series": "EEZ",
+      "model": "EEZ125-100-260/235-4N",
+      "file": "4518-eez125-100-260-235-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4781,
+      "series": "EEZ",
+      "model": "EEZ125-100-260/245-4N",
+      "file": "4781-eez125-100-260-245-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4520,
+      "series": "EEZ",
+      "model": "EEZ125-100-260/255-4NZ",
+      "file": "4520-eez125-100-260-255-4nz.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4521,
+      "series": "EEZ",
+      "model": "EEZ125-100-260/264-4NZ",
+      "file": "4521-eez125-100-260-264-4nz.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4522,
+      "series": "EEZ",
+      "model": "EEZ125-100-320/255-4NZ",
+      "file": "4522-eez125-100-320-255-4nz.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4523,
+      "series": "EEZ",
+      "model": "EEZ125-100-320/270-4NZ",
+      "file": "4523-eez125-100-320-270-4nz.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4524,
+      "series": "EEZ",
+      "model": "EEZ125-100-320/285-4NZ",
+      "file": "4524-eez125-100-320-285-4nz.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4525,
+      "series": "EEZ",
+      "model": "EEZ125-100-320/300-4NZ",
+      "file": "4525-eez125-100-320-300-4nz.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4526,
+      "series": "EEZ",
+      "model": "EEZ125-100-320/315-4NZ",
+      "file": "4526-eez125-100-320-315-4nz.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4527,
+      "series": "EEZ",
+      "model": "EEZ125-100-320/329-4NZ",
+      "file": "4527-eez125-100-320-329-4nz.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4528,
+      "series": "EEZ",
+      "model": "EEZ125-100-400/320-4NZ",
+      "file": "4528-eez125-100-400-320-4nz.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4529,
+      "series": "EEZ",
+      "model": "EEZ125-100-400/335-4NZ",
+      "file": "4529-eez125-100-400-335-4nz.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4530,
+      "series": "EEZ",
+      "model": "EEZ125-100-400/350-4NZ",
+      "file": "4530-eez125-100-400-350-4nz.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4531,
+      "series": "EEZ",
+      "model": "EEZ125-100-400/365-4NZ",
+      "file": "4531-eez125-100-400-365-4nz.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4532,
+      "series": "EEZ",
+      "model": "EEZ125-100-400/380-4NZ",
+      "file": "4532-eez125-100-400-380-4nz.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4533,
+      "series": "EEZ",
+      "model": "EEZ125-100-400/395-4NZ",
+      "file": "4533-eez125-100-400-395-4nz.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4534,
+      "series": "EEZ",
+      "model": "EEZ125-100-400/409-4NZ",
+      "file": "4534-eez125-100-400-409-4nz.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4535,
+      "series": "EEZ",
+      "model": "EEZ150-125-200/185-2NZ",
+      "file": "4535-eez150-125-200-185-2nz.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4537,
+      "series": "EEZ",
+      "model": "EEZ150-125-200/195-2NZ",
+      "file": "4537-eez150-125-200-195-2nz.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4539,
+      "series": "EEZ",
+      "model": "EEZ150-125-200/205-2NZ",
+      "file": "4539-eez150-125-200-205-2nz.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4536,
+      "series": "EEZ",
+      "model": "EEZ150-125-200/185-4N",
+      "file": "4536-eez150-125-200-185-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4538,
+      "series": "EEZ",
+      "model": "EEZ150-125-200/195-4N",
+      "file": "4538-eez150-125-200-195-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4540,
+      "series": "EEZ",
+      "model": "EEZ150-125-200/205-4N",
+      "file": "4540-eez150-125-200-205-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4542,
+      "series": "EEZ",
+      "model": "EEZ150-125-200/214-4N",
+      "file": "4542-eez150-125-200-214-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4543,
+      "series": "EEZ",
+      "model": "EEZ150-125-260/205-4N",
+      "file": "4543-eez150-125-260-205-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4544,
+      "series": "EEZ",
+      "model": "EEZ150-125-260/215-4NZ",
+      "file": "4544-eez150-125-260-215-4nz.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4545,
+      "series": "EEZ",
+      "model": "EEZ150-125-260/225-4NZ",
+      "file": "4545-eez150-125-260-225-4nz.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4546,
+      "series": "EEZ",
+      "model": "EEZ150-125-260/235-4NZ",
+      "file": "4546-eez150-125-260-235-4nz.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4547,
+      "series": "EEZ",
+      "model": "EEZ150-125-260/245-4NZ",
+      "file": "4547-eez150-125-260-245-4nz.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4548,
+      "series": "EEZ",
+      "model": "EEZ150-125-260/255-4NZ",
+      "file": "4548-eez150-125-260-255-4nz.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4549,
+      "series": "EEZ",
+      "model": "EEZ150-125-260/264-4NZ",
+      "file": "4549-eez150-125-260-264-4nz.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4550,
+      "series": "EEZ",
+      "model": "EEZ150-125-320/255-4NZ",
+      "file": "4550-eez150-125-320-255-4nz.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4551,
+      "series": "EEZ",
+      "model": "EEZ150-125-320/270-4NZ",
+      "file": "4551-eez150-125-320-270-4nz.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4552,
+      "series": "EEZ",
+      "model": "EEZ150-125-320/285-4NZ",
+      "file": "4552-eez150-125-320-285-4nz.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4553,
+      "series": "EEZ",
+      "model": "EEZ150-125-320/300-4NZ",
+      "file": "4553-eez150-125-320-300-4nz.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4554,
+      "series": "EEZ",
+      "model": "EEZ150-125-320/315-4NZ",
+      "file": "4554-eez150-125-320-315-4nz.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4555,
+      "series": "EEZ",
+      "model": "EEZ150-125-320/329-4NZ",
+      "file": "4555-eez150-125-320-329-4nz.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4556,
+      "series": "EEZ",
+      "model": "EEZ150-125-400/320-4NZ",
+      "file": "4556-eez150-125-400-320-4nz.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4557,
+      "series": "EEZ",
+      "model": "EEZ150-125-400/335-4NZ",
+      "file": "4557-eez150-125-400-335-4nz.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4558,
+      "series": "EEZ",
+      "model": "EEZ150-125-400/350-4NZ",
+      "file": "4558-eez150-125-400-350-4nz.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4559,
+      "series": "EEZ",
+      "model": "EEZ150-125-400/365-4NZ",
+      "file": "4559-eez150-125-400-365-4nz.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4560,
+      "series": "EEZ",
+      "model": "EEZ150-125-400/380-4NZ",
+      "file": "4560-eez150-125-400-380-4nz.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4561,
+      "series": "EEZ",
+      "model": "EEZ150-125-400/395-4NZ",
+      "file": "4561-eez150-125-400-395-4nz.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4562,
+      "series": "EEZ",
+      "model": "EEZ150-125-400/409-4NZ",
+      "file": "4562-eez150-125-400-409-4nz.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4563,
+      "series": "EEZ",
+      "model": "EEZ200-150-200/175-4N",
+      "file": "4563-eez200-150-200-175-4n.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4564,
+      "series": "EEZ",
+      "model": "EEZ200-150-200/185-4NZ",
+      "file": "4564-eez200-150-200-185-4nz.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4565,
+      "series": "EEZ",
+      "model": "EEZ200-150-200/195-4NZ",
+      "file": "4565-eez200-150-200-195-4nz.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4566,
+      "series": "EEZ",
+      "model": "EEZ200-150-200/205-4NZ",
+      "file": "4566-eez200-150-200-205-4nz.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4567,
+      "series": "EEZ",
+      "model": "EEZ200-150-200/214-4NZ",
+      "file": "4567-eez200-150-200-214-4nz.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4568,
+      "series": "EEZ",
+      "model": "EEZ200-150-260/215-4NZ",
+      "file": "4568-eez200-150-260-215-4nz.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4569,
+      "series": "EEZ",
+      "model": "EEZ200-150-260/225-4NZ",
+      "file": "4569-eez200-150-260-225-4nz.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4570,
+      "series": "EEZ",
+      "model": "EEZ200-150-260/235-4NZ",
+      "file": "4570-eez200-150-260-235-4nz.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4571,
+      "series": "EEZ",
+      "model": "EEZ200-150-260/245-4NZ",
+      "file": "4571-eez200-150-260-245-4nz.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4572,
+      "series": "EEZ",
+      "model": "EEZ200-150-260/255-4NZ",
+      "file": "4572-eez200-150-260-255-4nz.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4573,
+      "series": "EEZ",
+      "model": "EEZ200-150-260/264-4NZ",
+      "file": "4573-eez200-150-260-264-4nz.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4575,
+      "series": "EEZ",
+      "model": "EEZ200-150-320/270-4NZ",
+      "file": "4575-eez200-150-320-270-4nz.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4576,
+      "series": "EEZ",
+      "model": "EEZ200-150-320/285-4NZ",
+      "file": "4576-eez200-150-320-285-4nz.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4577,
+      "series": "EEZ",
+      "model": "EEZ200-150-320/300-4NZ",
+      "file": "4577-eez200-150-320-300-4nz.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4578,
+      "series": "EEZ",
+      "model": "EEZ200-150-320/315-4NZ",
+      "file": "4578-eez200-150-320-315-4nz.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4579,
+      "series": "EEZ",
+      "model": "EEZ200-150-320/329-4NZ",
+      "file": "4579-eez200-150-320-329-4nz.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4580,
+      "series": "EEZ",
+      "model": "EEZ200-150-400/320-4NZ",
+      "file": "4580-eez200-150-400-320-4nz.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4581,
+      "series": "EEZ",
+      "model": "EEZ200-150-400/335-4NZ",
+      "file": "4581-eez200-150-400-335-4nz.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4582,
+      "series": "EEZ",
+      "model": "EEZ200-150-400/350-4NZ",
+      "file": "4582-eez200-150-400-350-4nz.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4583,
+      "series": "EEZ",
+      "model": "EEZ200-150-400/365-4NZ",
+      "file": "4583-eez200-150-400-365-4nz.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4584,
+      "series": "EEZ",
+      "model": "EEZ200-150-400/380-4NZ",
+      "file": "4584-eez200-150-400-380-4nz.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4585,
+      "series": "EEZ",
+      "model": "EEZ200-150-400/395-4NZ",
+      "file": "4585-eez200-150-400-395-4nz.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    },
+    {
+      "pumpId": 4586,
+      "series": "EEZ",
+      "model": "EEZ200-150-400/409-4NZ",
+      "file": "4586-eez200-150-400-409-4nz.jpg",
+      "source": "Aquastrong Select",
+      "sourceUrl": "https://aquastrong-select.ru/selection/series"
+    }
+  ],
+  "failures": [
+    {
+      "pumpId": 4619,
+      "model": "EEZ65-50-200/214-2NZ",
+      "error": "Error: Generation timeout"
+    },
+    {
+      "pumpId": 4574,
+      "model": "EEZ200-150-320/255-4NZ",
+      "error": "Error: Generation timeout"
+    },
+    {
+      "pumpId": 4541,
+      "model": "EEZ150-125-200/214-2NZ",
+      "error": "Error: Generation timeout"
+    },
+    {
+      "pumpId": 4621,
+      "model": "EEZ65-50-260/205-2NZ",
+      "error": "Error: Generation timeout"
+    }
+  ]
+}

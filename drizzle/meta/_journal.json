@@ -15,6 +15,27 @@
       "when": 1787314795133,
       "tag": "0001_organic_lady_bullseye",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1787749200000,
+      "tag": "0002_control_cabinet_configurator",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1787835600000,
+      "tag": "0003_control_cabinet_item_groups",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "6",
+      "when": 1787922000000,
+      "tag": "0004_smart_power_ranges",
+      "breakpoints": true
     }
   ]
 }

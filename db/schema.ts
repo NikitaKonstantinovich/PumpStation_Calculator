@@ -279,6 +279,67 @@ export const externalWorkbookLinks = sqliteTable("external_workbook_links", {
   uniqueIndex("uq_external_workbook_links_target").on(table.importId, table.target),
 ]);
 
+export const controlComponents = sqliteTable("control_components", {
+  id: text("id").primaryKey(),
+  category: text("category").notNull(),
+  manufacturer: text("manufacturer"),
+  article: text("article"),
+  name: text("name").notNull(),
+  componentType: text("component_type"),
+  attributesJson: text("attributes_json", { mode: "json" }).$type<Record<string, unknown>>().notNull().default(sql`'{}'`),
+  currentPriceMicrounits: integer("current_price_microunits"),
+  currency: text("currency", { length: 3 }).notNull().default("RUB"),
+  sourceFile: text("source_file").notNull(),
+  sourceSheet: text("source_sheet").notNull(),
+  sourceRow: integer("source_row").notNull(),
+  isActive: integer("is_active", { mode: "boolean" }).notNull().default(true),
+  updatedAt: text("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+}, table => [
+  index("idx_control_components_category").on(table.category),
+  index("idx_control_components_article").on(table.article),
+]);
+
+export const controlCabinets = sqliteTable("control_cabinets", {
+  id: text("id").primaryKey(),
+  configurationKey: text("configuration_key").notNull(),
+  stationType: text("station_type", { enum: ["fire", "utility", "combined", "smart"] }).notNull(),
+  name: text("name").notNull(),
+  pumpCount: integer("pump_count").notNull(),
+  pumpPowerKw: real("pump_power_kw").notNull(),
+  breakerCurrentA: real("breaker_current_a").notNull(),
+  incomingSwitchCurrentA: real("incoming_switch_current_a").notNull(),
+  contactorCount: integer("contactor_count").notNull(),
+  vfdCount: integer("vfd_count").notNull(),
+  vfdPowerKw: real("vfd_power_kw").notNull(),
+  enclosureDimensions: text("enclosure_dimensions").notNull(),
+  assemblyKitType: text("assembly_kit_type").notNull(),
+  laborHours: real("labor_hours").notNull(),
+  laborRate: real("labor_rate").notNull(),
+  cachedTotalMicrounits: integer("cached_total_microunits").notNull(),
+  source: text("source").notNull(),
+  createdByUserId: text("created_by_user_id").references(() => users.id, { onDelete: "set null" }),
+  priceUpdatedAt: text("price_updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+  createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+  updatedAt: text("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+}, table => [
+  uniqueIndex("uq_control_cabinets_configuration").on(table.configurationKey),
+  index("idx_control_cabinets_lookup").on(table.stationType, table.pumpCount, table.pumpPowerKw),
+]);
+
+export const controlCabinetItems = sqliteTable("control_cabinet_items", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  cabinetId: text("cabinet_id").notNull().references(() => controlCabinets.id, { onDelete: "cascade" }),
+  componentId: text("component_id").notNull().references(() => controlComponents.id, { onDelete: "restrict" }),
+  role: text("role").notNull(),
+  componentGroup: text("component_group", { enum: ["dynamic", "static"] }).notNull().default("dynamic"),
+  quantity: real("quantity").notNull(),
+  sortOrder: integer("sort_order").notNull().default(0),
+}, table => [
+  uniqueIndex("uq_control_cabinet_items_role").on(table.cabinetId, table.role),
+  index("idx_control_cabinet_items_component").on(table.componentId),
+  index("idx_control_cabinet_items_group").on(table.cabinetId, table.componentGroup, table.sortOrder),
+]);
+
 export const catalogImportsRelations = relations(catalogImports, ({ many }) => ({
   catalogs: many(componentCatalogs),
   formulas: many(formulaRules),
@@ -319,4 +380,18 @@ export const relationTablesRelations = relations(relationTables, ({ one, many })
 export const relationRecordsRelations = relations(relationRecords, ({ one, many }) => ({
   table: one(relationTables, { fields: [relationRecords.relationTableId], references: [relationTables.id] }),
   fields: many(relationFields),
+}));
+
+export const controlComponentsRelations = relations(controlComponents, ({ many }) => ({
+  cabinetItems: many(controlCabinetItems),
+}));
+
+export const controlCabinetsRelations = relations(controlCabinets, ({ one, many }) => ({
+  createdBy: one(users, { fields: [controlCabinets.createdByUserId], references: [users.id] }),
+  items: many(controlCabinetItems),
+}));
+
+export const controlCabinetItemsRelations = relations(controlCabinetItems, ({ one }) => ({
+  cabinet: one(controlCabinets, { fields: [controlCabinetItems.cabinetId], references: [controlCabinets.id] }),
+  component: one(controlComponents, { fields: [controlCabinetItems.componentId], references: [controlComponents.id] }),
 }));

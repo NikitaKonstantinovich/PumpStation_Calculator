@@ -1,0 +1,1402 @@
+{
+  "count": 155,
+  "exactCount": 95,
+  "drawings": [
+    {
+      "series": "TD",
+      "model": "TD100-27/2",
+      "file": "td-812.jpeg",
+      "sourceFile": "TD100-272SWHCJ.jpeg",
+      "matchType": "exact",
+      "nominalSize": 100,
+      "source": "CNP Russia / TD Габаритные чертежи PNG"
+    },
+    {
+      "series": "TD",
+      "model": "TD100-33/2",
+      "file": "td-813.jpeg",
+      "sourceFile": "TD100-332SWHCJ.jpeg",
+      "matchType": "exact",
+      "nominalSize": 100,
+      "source": "CNP Russia / TD Габаритные чертежи PNG"
+    },
+    {
+      "series": "TD",
+      "model": "TD100-17G/2",
+      "file": "td-814.jpeg",
+      "sourceFile": "TD100-17G2SWHCJ.jpeg",
+      "matchType": "exact",
+      "nominalSize": 100,
+      "source": "CNP Russia / TD Габаритные чертежи PNG"
+    },
+    {
+      "series": "TD",
+      "model": "TD100-22G/2",
+      "file": "td-815.jpeg",
+      "sourceFile": "TD100-22G2SWHCJ.jpeg",
+      "matchType": "exact",
+      "nominalSize": 100,
+      "source": "CNP Russia / TD Габаритные чертежи PNG"
+    },
+    {
+      "series": "TD",
+      "model": "TD100-40G/2",
+      "file": "td-816.jpeg",
+      "sourceFile": "TD100-40G2SWHCJ.jpeg",
+      "matchType": "exact",
+      "nominalSize": 100,
+      "source": "CNP Russia / TD Габаритные чертежи PNG"
+    },
+    {
+      "series": "TD",
+      "model": "TD100-48G/2",
+      "file": "td-817.jpeg",
+      "sourceFile": "TD100-48G2SWHCJ.jpeg",
+      "matchType": "exact",
+      "nominalSize": 100,
+      "source": "CNP Russia / TD Габаритные чертежи PNG"
+    },
+    {
+      "series": "TD",
+      "model": "TD100-52G/2",
+      "file": "td-818.jpeg",
+      "sourceFile": "TD100-52G2SWHCJ.jpeg",
+      "matchType": "exact",
+      "nominalSize": 100,
+      "source": "CNP Russia / TD Габаритные чертежи PNG"
+    },
+    {
+      "series": "TD",
+      "model": "TD100-35G/2",
+      "file": "td-819.jpeg",
+      "sourceFile": "TD100-92SWHCJ.jpeg",
+      "matchType": "nominal-size",
+      "nominalSize": 100,
+      "source": "CNP Russia / TD Габаритные чертежи PNG"
+    },
+    {
+      "series": "TD",
+      "model": "TD100-17.5/2",
+      "file": "td-820.jpeg",
+      "sourceFile": "TD100-92SWHCJ.jpeg",
+      "matchType": "nominal-size",
+      "nominalSize": 100,
+      "source": "CNP Russia / TD Габаритные чертежи PNG"
+    },
+    {
+      "series": "TD",
+      "model": "TD100-13/2",
+      "file": "td-821.jpeg",
+      "sourceFile": "TD100-92SWHCJ.jpeg",
+      "matchType": "nominal-size",
+      "nominalSize": 100,
+      "source": "CNP Russia / TD Габаритные чертежи PNG"
+    },
+    {
+      "series": "TD",
+      "model": "TD100-11/2",
+      "file": "td-822.jpeg",
+      "sourceFile": "TD100-92SWHCJ.jpeg",
+      "matchType": "nominal-size",
+      "nominalSize": 100,
+      "source": "CNP Russia / TD Габаритные чертежи PNG"
+    },
+    {
+      "series": "TD",
+      "model": "TD100-55/2",
+      "file": "td-823.jpeg",
+      "sourceFile": "TD100-92SWHCJ.jpeg",
+      "matchType": "nominal-size",
+      "nominalSize": 100,
+      "source": "CNP Russia / TD Габаритные чертежи PNG"
+    },
+    {
+      "series": "TD",
+      "model": "TD100-50/2",
+      "file": "td-824.jpeg",
+      "sourceFile": "TD100-92SWHCJ.jpeg",
+      "matchType": "nominal-size",
+      "nominalSize": 100,
+      "source": "CNP Russia / TD Габаритные чертежи PNG"
+    },
+    {
+      "series": "TD",
+      "model": "TD100-44/2",
+      "file": "td-825.jpeg",
+      "sourceFile": "TD100-92SWHCJ.jpeg",
+      "matchType": "nominal-size",
+      "nominalSize": 100,
+      "source": "CNP Russia / TD Габаритные чертежи PNG"
+    },
+    {
+      "series": "TD",
+      "model": "TD100-43/2",
+      "file": "td-826.jpeg",
+      "sourceFile": "TD100-92SWHCJ.jpeg",
+      "matchType": "nominal-size",
+      "nominalSize": 100,
+      "source": "CNP Russia / TD Габаритные чертежи PNG"
+    },
+    {
+      "series": "TD",
+      "model": "TD100-36/2",
+      "file": "td-827.jpeg",
+      "sourceFile": "TD100-92SWHCJ.jpeg",
+      "matchType": "nominal-size",
+      "nominalSize": 100,
+      "source": "CNP Russia / TD Габаритные чертежи PNG"
+    },
+    {
+      "series": "TD",
+      "model": "TD100-35/2",
+      "file": "td-828.jpeg",
+      "sourceFile": "TD100-92SWHCJ.jpeg",
+      "matchType": "nominal-size",
+      "nominalSize": 100,
+      "source": "CNP Russia / TD Габаритные чертежи PNG"
+    },
+    {
+      "series": "TD",
+      "model": "TD100-29/2",
+      "file": "td-829.jpeg",
+      "sourceFile": "TD100-92SWHCJ.jpeg",
+      "matchType": "nominal-size",
+      "nominalSize": 100,
+      "source": "CNP Russia / TD Габаритные чертежи PNG"
+    },
+    {
+      "series": "TD",
+      "model": "TD125-11G/4",
+      "file": "td-830.jpeg",
+      "sourceFile": "TD125-11G4SWHCJ.jpeg",
+      "matchType": "exact",
+      "nominalSize": 125,
+      "source": "CNP Russia / TD Габаритные чертежи PNG"
+    },
+    {
+      "series": "TD",
+      "model": "TD125-14G/4",
+      "file": "td-831.jpeg",
+      "sourceFile": "TD125-14G4SWHCJ.jpeg",
+      "matchType": "exact",
+      "nominalSize": 125,
+      "source": "CNP Russia / TD Габаритные чертежи PNG"
+    },
+    {
+      "series": "TD",
+      "model": "TD125-19G/4",
+      "file": "td-832.jpeg",
+      "sourceFile": "TD125-19G4SWHCJ.jpeg",
+      "matchType": "exact",
+      "nominalSize": 125,
+      "source": "CNP Russia / TD Габаритные чертежи PNG"
+    },
+    {
+      "series": "TD",
+      "model": "TD125-40G/4",
+      "file": "td-833.jpeg",
+      "sourceFile": "TD125-40G4SWHCJ.jpeg",
+      "matchType": "exact",
+      "nominalSize": 125,
+      "source": "CNP Russia / TD Габаритные чертежи PNG"
+    },
+    {
+      "series": "TD",
+      "model": "TD125-48G/4",
+      "file": "td-834.jpeg",
+      "sourceFile": "TD125-48G4SWHCJ.jpeg",
+      "matchType": "exact",
+      "nominalSize": 125,
+      "source": "CNP Russia / TD Габаритные чертежи PNG"
+    },
+    {
+      "series": "TD",
+      "model": "TD125-22G/4",
+      "file": "td-835.jpeg",
+      "sourceFile": "TD125-114SWSCJ.jpeg",
+      "matchType": "nominal-size",
+      "nominalSize": 125,
+      "source": "CNP Russia / TD Габаритные чертежи PNG"
+    },
+    {
+      "series": "TD",
+      "model": "TD125-28G/4",
+      "file": "td-836.jpeg",
+      "sourceFile": "TD125-28G4SWHCJ.jpeg",
+      "matchType": "exact",
+      "nominalSize": 125,
+      "source": "CNP Russia / TD Габаритные чертежи PNG"
+    },
+    {
+      "series": "TD",
+      "model": "TD125-32G/4",
+      "file": "td-837.jpeg",
+      "sourceFile": "TD125-32G4SWHCJ.jpeg",
+      "matchType": "exact",
+      "nominalSize": 125,
+      "source": "CNP Russia / TD Габаритные чертежи PNG"
+    },
+    {
+      "series": "TD",
+      "model": "TD125-12/2",
+      "file": "td-838.jpeg",
+      "sourceFile": "TD125-114SWSCJ.jpeg",
+      "matchType": "nominal-size",
+      "nominalSize": 125,
+      "source": "CNP Russia / TD Габаритные чертежи PNG"
+    },
+    {
+      "series": "TD",
+      "model": "TD125-19/2",
+      "file": "td-839.jpeg",
+      "sourceFile": "TD125-114SWSCJ.jpeg",
+      "matchType": "nominal-size",
+      "nominalSize": 125,
+      "source": "CNP Russia / TD Габаритные чертежи PNG"
+    },
+    {
+      "series": "TD",
+      "model": "TD125-24G/2",
+      "file": "td-840.jpeg",
+      "sourceFile": "TD125-114SWSCJ.jpeg",
+      "matchType": "nominal-size",
+      "nominalSize": 125,
+      "source": "CNP Russia / TD Габаритные чертежи PNG"
+    },
+    {
+      "series": "TD",
+      "model": "TD125-32G1/2",
+      "file": "td-841.jpeg",
+      "sourceFile": "TD125-114SWSCJ.jpeg",
+      "matchType": "nominal-size",
+      "nominalSize": 125,
+      "source": "CNP Russia / TD Габаритные чертежи PNG"
+    },
+    {
+      "series": "TD",
+      "model": "TD125-37.5/2",
+      "file": "td-842.jpeg",
+      "sourceFile": "TD125-114SWSCJ.jpeg",
+      "matchType": "nominal-size",
+      "nominalSize": 125,
+      "source": "CNP Russia / TD Габаритные чертежи PNG"
+    },
+    {
+      "series": "TD",
+      "model": "TD125-47/2",
+      "file": "td-843.jpeg",
+      "sourceFile": "TD125-114SWSCJ.jpeg",
+      "matchType": "nominal-size",
+      "nominalSize": 125,
+      "source": "CNP Russia / TD Габаритные чертежи PNG"
+    },
+    {
+      "series": "TD",
+      "model": "TD125-59/2",
+      "file": "td-844.jpeg",
+      "sourceFile": "TD125-114SWSCJ.jpeg",
+      "matchType": "nominal-size",
+      "nominalSize": 125,
+      "source": "CNP Russia / TD Габаритные чертежи PNG"
+    },
+    {
+      "series": "TD",
+      "model": "TD150-33/4",
+      "file": "td-845.jpeg",
+      "sourceFile": "TD150-334SWHCJ.jpeg",
+      "matchType": "exact",
+      "nominalSize": 150,
+      "source": "CNP Russia / TD Габаритные чертежи PNG"
+    },
+    {
+      "series": "TD",
+      "model": "TD150-50/4",
+      "file": "td-846.jpeg",
+      "sourceFile": "TD150-504SWHCJ.jpeg",
+      "matchType": "exact",
+      "nominalSize": 150,
+      "source": "CNP Russia / TD Габаритные чертежи PNG"
+    },
+    {
+      "series": "TD",
+      "model": "TD150-22G/4",
+      "file": "td-847.jpeg",
+      "sourceFile": "TD150-22G4SWHCJ.jpeg",
+      "matchType": "exact",
+      "nominalSize": 150,
+      "source": "CNP Russia / TD Габаритные чертежи PNG"
+    },
+    {
+      "series": "TD",
+      "model": "TD150-18G/4",
+      "file": "td-848.jpeg",
+      "sourceFile": "TD150-174SWHCJ.jpeg",
+      "matchType": "nominal-size",
+      "nominalSize": 150,
+      "source": "CNP Russia / TD Габаритные чертежи PNG"
+    },
+    {
+      "series": "TD",
+      "model": "TD150-27/4",
+      "file": "td-849.jpeg",
+      "sourceFile": "TD150-174SWHCJ.jpeg",
+      "matchType": "nominal-size",
+      "nominalSize": 150,
+      "source": "CNP Russia / TD Габаритные чертежи PNG"
+    },
+    {
+      "series": "TD",
+      "model": "TD150-35/4",
+      "file": "td-850.jpeg",
+      "sourceFile": "TD150-174SWHCJ.jpeg",
+      "matchType": "nominal-size",
+      "nominalSize": 150,
+      "source": "CNP Russia / TD Габаритные чертежи PNG"
+    },
+    {
+      "series": "TD",
+      "model": "TD150-42/4",
+      "file": "td-851.jpeg",
+      "sourceFile": "TD150-174SWHCJ.jpeg",
+      "matchType": "nominal-size",
+      "nominalSize": 150,
+      "source": "CNP Russia / TD Габаритные чертежи PNG"
+    },
+    {
+      "series": "TD",
+      "model": "TD150-30.5/4",
+      "file": "td-852.jpeg",
+      "sourceFile": "TD150-174SWHCJ.jpeg",
+      "matchType": "nominal-size",
+      "nominalSize": 150,
+      "source": "CNP Russia / TD Габаритные чертежи PNG"
+    },
+    {
+      "series": "TD",
+      "model": "TD150-37/4",
+      "file": "td-853.jpeg",
+      "sourceFile": "TD150-174SWHCJ.jpeg",
+      "matchType": "nominal-size",
+      "nominalSize": 150,
+      "source": "CNP Russia / TD Габаритные чертежи PNG"
+    },
+    {
+      "series": "TD",
+      "model": "TD150-24.5/4",
+      "file": "td-854.jpeg",
+      "sourceFile": "TD150-174SWHCJ.jpeg",
+      "matchType": "nominal-size",
+      "nominalSize": 150,
+      "source": "CNP Russia / TD Габаритные чертежи PNG"
+    },
+    {
+      "series": "TD",
+      "model": "TD150-30/4",
+      "file": "td-855.jpeg",
+      "sourceFile": "TD150-174SWHCJ.jpeg",
+      "matchType": "nominal-size",
+      "nominalSize": 150,
+      "source": "CNP Russia / TD Габаритные чертежи PNG"
+    },
+    {
+      "series": "TD",
+      "model": "TD150-14.5/4",
+      "file": "td-856.jpeg",
+      "sourceFile": "TD150-174SWHCJ.jpeg",
+      "matchType": "nominal-size",
+      "nominalSize": 150,
+      "source": "CNP Russia / TD Габаритные чертежи PNG"
+    },
+    {
+      "series": "TD",
+      "model": "TD150-10.5/4",
+      "file": "td-857.jpeg",
+      "sourceFile": "TD150-174SWHCJ.jpeg",
+      "matchType": "nominal-size",
+      "nominalSize": 150,
+      "source": "CNP Russia / TD Габаритные чертежи PNG"
+    },
+    {
+      "series": "TD",
+      "model": "TD200-24/4",
+      "file": "td-858.jpeg",
+      "sourceFile": "TD200-244SWHCB.jpeg",
+      "matchType": "exact",
+      "nominalSize": 200,
+      "source": "CNP Russia / TD Габаритные чертежи PNG"
+    },
+    {
+      "series": "TD",
+      "model": "TD200-53/4",
+      "file": "td-859.jpeg",
+      "sourceFile": "TD200-534SWHCB.jpeg",
+      "matchType": "exact",
+      "nominalSize": 200,
+      "source": "CNP Russia / TD Габаритные чертежи PNG"
+    },
+    {
+      "series": "TD",
+      "model": "TD200-20/4",
+      "file": "td-860.jpeg",
+      "sourceFile": "TD200-204SWHCB.jpeg",
+      "matchType": "exact",
+      "nominalSize": 200,
+      "source": "CNP Russia / TD Габаритные чертежи PNG"
+    },
+    {
+      "series": "TD",
+      "model": "TD200-23/4",
+      "file": "td-861.jpeg",
+      "sourceFile": "TD200-234SWHCB.jpeg",
+      "matchType": "exact",
+      "nominalSize": 200,
+      "source": "CNP Russia / TD Габаритные чертежи PNG"
+    },
+    {
+      "series": "TD",
+      "model": "TD200-27/4",
+      "file": "td-862.jpeg",
+      "sourceFile": "TD200-274SWHCB.jpeg",
+      "matchType": "exact",
+      "nominalSize": 200,
+      "source": "CNP Russia / TD Габаритные чертежи PNG"
+    },
+    {
+      "series": "TD",
+      "model": "TD200-43/4",
+      "file": "td-863.jpeg",
+      "sourceFile": "TD200-434SWHCB.jpeg",
+      "matchType": "exact",
+      "nominalSize": 200,
+      "source": "CNP Russia / TD Габаритные чертежи PNG"
+    },
+    {
+      "series": "TD",
+      "model": "TD200-16/4",
+      "file": "td-864.jpeg",
+      "sourceFile": "TD200-164SWHCB.jpeg",
+      "matchType": "exact",
+      "nominalSize": 200,
+      "source": "CNP Russia / TD Габаритные чертежи PNG"
+    },
+    {
+      "series": "TD",
+      "model": "TD200-19/4",
+      "file": "td-865.jpeg",
+      "sourceFile": "TD200-194SWHCB.jpeg",
+      "matchType": "exact",
+      "nominalSize": 200,
+      "source": "CNP Russia / TD Габаритные чертежи PNG"
+    },
+    {
+      "series": "TD",
+      "model": "TD200-31/4",
+      "file": "td-866.jpeg",
+      "sourceFile": "TD200-314SWHCB.jpeg",
+      "matchType": "exact",
+      "nominalSize": 200,
+      "source": "CNP Russia / TD Габаритные чертежи PNG"
+    },
+    {
+      "series": "TD",
+      "model": "TD200-36/4",
+      "file": "td-867.jpeg",
+      "sourceFile": "TD200-364SWHCB.jpeg",
+      "matchType": "exact",
+      "nominalSize": 200,
+      "source": "CNP Russia / TD Габаритные чертежи PNG"
+    },
+    {
+      "series": "TD",
+      "model": "TD200-47/4",
+      "file": "td-868.jpeg",
+      "sourceFile": "TD200-474SWHCB.jpeg",
+      "matchType": "exact",
+      "nominalSize": 200,
+      "source": "CNP Russia / TD Габаритные чертежи PNG"
+    },
+    {
+      "series": "TD",
+      "model": "TD200-14.5/4",
+      "file": "td-869.jpeg",
+      "sourceFile": "TD200-154SWHCB.jpeg",
+      "matchType": "nominal-size",
+      "nominalSize": 200,
+      "source": "CNP Russia / TD Габаритные чертежи PNG"
+    },
+    {
+      "series": "TD",
+      "model": "TD200-15Q/4",
+      "file": "td-870.jpeg",
+      "sourceFile": "TD200-154SWHCB.jpeg",
+      "matchType": "nominal-size",
+      "nominalSize": 200,
+      "source": "CNP Russia / TD Габаритные чертежи PNG"
+    },
+    {
+      "series": "TD",
+      "model": "TD200-18Q/4",
+      "file": "td-871.jpeg",
+      "sourceFile": "TD200-154SWHCB.jpeg",
+      "matchType": "nominal-size",
+      "nominalSize": 200,
+      "source": "CNP Russia / TD Габаритные чертежи PNG"
+    },
+    {
+      "series": "TD",
+      "model": "TD200-28Q/4",
+      "file": "td-872.jpeg",
+      "sourceFile": "TD200-154SWHCB.jpeg",
+      "matchType": "nominal-size",
+      "nominalSize": 200,
+      "source": "CNP Russia / TD Габаритные чертежи PNG"
+    },
+    {
+      "series": "TD",
+      "model": "TD200-33Q/4",
+      "file": "td-873.jpeg",
+      "sourceFile": "TD200-154SWHCB.jpeg",
+      "matchType": "nominal-size",
+      "nominalSize": 200,
+      "source": "CNP Russia / TD Габаритные чертежи PNG"
+    },
+    {
+      "series": "TD",
+      "model": "TD200-48Q/4",
+      "file": "td-874.jpeg",
+      "sourceFile": "TD200-154SWHCB.jpeg",
+      "matchType": "nominal-size",
+      "nominalSize": 200,
+      "source": "CNP Russia / TD Габаритные чертежи PNG"
+    },
+    {
+      "series": "TD",
+      "model": "TD200-53Q/4",
+      "file": "td-875.jpeg",
+      "sourceFile": "TD200-154SWHCB.jpeg",
+      "matchType": "nominal-size",
+      "nominalSize": 200,
+      "source": "CNP Russia / TD Габаритные чертежи PNG"
+    },
+    {
+      "series": "TD",
+      "model": "TD200-30/4",
+      "file": "td-876.jpeg",
+      "sourceFile": "TD200-304SWHCB.jpeg",
+      "matchType": "exact",
+      "nominalSize": 200,
+      "source": "CNP Russia / TD Габаритные чертежи PNG"
+    },
+    {
+      "series": "TD",
+      "model": "TD200-36.5/4",
+      "file": "td-877.jpeg",
+      "sourceFile": "TD200-154SWHCB.jpeg",
+      "matchType": "nominal-size",
+      "nominalSize": 200,
+      "source": "CNP Russia / TD Габаритные чертежи PNG"
+    },
+    {
+      "series": "TD",
+      "model": "TD200-49/4",
+      "file": "td-878.jpeg",
+      "sourceFile": "TD200-154SWHCB.jpeg",
+      "matchType": "nominal-size",
+      "nominalSize": 200,
+      "source": "CNP Russia / TD Габаритные чертежи PNG"
+    },
+    {
+      "series": "TD",
+      "model": "TD200-21/4",
+      "file": "td-879.jpeg",
+      "sourceFile": "TD200-154SWHCB.jpeg",
+      "matchType": "nominal-size",
+      "nominalSize": 200,
+      "source": "CNP Russia / TD Габаритные чертежи PNG"
+    },
+    {
+      "series": "TD",
+      "model": "TD200-26/4",
+      "file": "td-880.jpeg",
+      "sourceFile": "TD200-154SWHCB.jpeg",
+      "matchType": "nominal-size",
+      "nominalSize": 200,
+      "source": "CNP Russia / TD Габаритные чертежи PNG"
+    },
+    {
+      "series": "TD",
+      "model": "TD200-32/4",
+      "file": "td-881.jpeg",
+      "sourceFile": "TD200-324SWHCB.jpeg",
+      "matchType": "exact",
+      "nominalSize": 200,
+      "source": "CNP Russia / TD Габаритные чертежи PNG"
+    },
+    {
+      "series": "TD",
+      "model": "TD200-13/4",
+      "file": "td-882.jpeg",
+      "sourceFile": "TD200-154SWHCB.jpeg",
+      "matchType": "nominal-size",
+      "nominalSize": 200,
+      "source": "CNP Russia / TD Габаритные чертежи PNG"
+    },
+    {
+      "series": "TD",
+      "model": "TD200-11/4",
+      "file": "td-883.jpeg",
+      "sourceFile": "TD200-154SWHCB.jpeg",
+      "matchType": "nominal-size",
+      "nominalSize": 200,
+      "source": "CNP Russia / TD Габаритные чертежи PNG"
+    },
+    {
+      "series": "TD",
+      "model": "TD200-8/4",
+      "file": "td-884.jpeg",
+      "sourceFile": "TD200-154SWHCB.jpeg",
+      "matchType": "nominal-size",
+      "nominalSize": 200,
+      "source": "CNP Russia / TD Габаритные чертежи PNG"
+    },
+    {
+      "series": "TD",
+      "model": "TD250-17/4",
+      "file": "td-885.jpeg",
+      "sourceFile": "TD250-174SWHCB.jpeg",
+      "matchType": "exact",
+      "nominalSize": 250,
+      "source": "CNP Russia / TD Габаритные чертежи PNG"
+    },
+    {
+      "series": "TD",
+      "model": "TD250-20/4",
+      "file": "td-886.jpeg",
+      "sourceFile": "TD250-204SWHCB.jpeg",
+      "matchType": "exact",
+      "nominalSize": 250,
+      "source": "CNP Russia / TD Габаритные чертежи PNG"
+    },
+    {
+      "series": "TD",
+      "model": "TD250-26/4",
+      "file": "td-887.jpeg",
+      "sourceFile": "TD250-264SWHCB.jpeg",
+      "matchType": "exact",
+      "nominalSize": 250,
+      "source": "CNP Russia / TD Габаритные чертежи PNG"
+    },
+    {
+      "series": "TD",
+      "model": "TD250-32/4",
+      "file": "td-888.jpeg",
+      "sourceFile": "TD250-324SWHCB.jpeg",
+      "matchType": "exact",
+      "nominalSize": 250,
+      "source": "CNP Russia / TD Габаритные чертежи PNG"
+    },
+    {
+      "series": "TD",
+      "model": "TD250-50/4",
+      "file": "td-889.jpeg",
+      "sourceFile": "TD250-504SWHCB.jpeg",
+      "matchType": "exact",
+      "nominalSize": 250,
+      "source": "CNP Russia / TD Габаритные чертежи PNG"
+    },
+    {
+      "series": "TD",
+      "model": "TD250-16/4",
+      "file": "td-890.jpeg",
+      "sourceFile": "TD250-144SWHCB.jpeg",
+      "matchType": "nominal-size",
+      "nominalSize": 250,
+      "source": "CNP Russia / TD Габаритные чертежи PNG"
+    },
+    {
+      "series": "TD",
+      "model": "TD250-19/4",
+      "file": "td-891.jpeg",
+      "sourceFile": "TD250-144SWHCB.jpeg",
+      "matchType": "nominal-size",
+      "nominalSize": 250,
+      "source": "CNP Russia / TD Габаритные чертежи PNG"
+    },
+    {
+      "series": "TD",
+      "model": "TD250-22/4",
+      "file": "td-892.jpeg",
+      "sourceFile": "TD250-144SWHCB.jpeg",
+      "matchType": "nominal-size",
+      "nominalSize": 250,
+      "source": "CNP Russia / TD Габаритные чертежи PNG"
+    },
+    {
+      "series": "TD",
+      "model": "TD250-29/4",
+      "file": "td-893.jpeg",
+      "sourceFile": "TD250-144SWHCB.jpeg",
+      "matchType": "nominal-size",
+      "nominalSize": 250,
+      "source": "CNP Russia / TD Габаритные чертежи PNG"
+    },
+    {
+      "series": "TD",
+      "model": "TD250-36/4",
+      "file": "td-894.jpeg",
+      "sourceFile": "TD250-364SWHCB.jpeg",
+      "matchType": "exact",
+      "nominalSize": 250,
+      "source": "CNP Russia / TD Габаритные чертежи PNG"
+    },
+    {
+      "series": "TD",
+      "model": "TD250-47/4",
+      "file": "td-895.jpeg",
+      "sourceFile": "TD250-144SWHCB.jpeg",
+      "matchType": "nominal-size",
+      "nominalSize": 250,
+      "source": "CNP Russia / TD Габаритные чертежи PNG"
+    },
+    {
+      "series": "TD",
+      "model": "TD250-56/4",
+      "file": "td-896.jpeg",
+      "sourceFile": "TD250-144SWHCB.jpeg",
+      "matchType": "nominal-size",
+      "nominalSize": 250,
+      "source": "CNP Russia / TD Габаритные чертежи PNG"
+    },
+    {
+      "series": "TD",
+      "model": "TD250-39/4",
+      "file": "td-897.jpeg",
+      "sourceFile": "TD250-144SWHCB.jpeg",
+      "matchType": "nominal-size",
+      "nominalSize": 250,
+      "source": "CNP Russia / TD Габаритные чертежи PNG"
+    },
+    {
+      "series": "TD",
+      "model": "TD250-46/4",
+      "file": "td-898.jpeg",
+      "sourceFile": "TD250-144SWHCB.jpeg",
+      "matchType": "nominal-size",
+      "nominalSize": 250,
+      "source": "CNP Russia / TD Габаритные чертежи PNG"
+    },
+    {
+      "series": "TD",
+      "model": "TD250-14G/4",
+      "file": "td-899.jpeg",
+      "sourceFile": "TD250-144SWHCB.jpeg",
+      "matchType": "nominal-size",
+      "nominalSize": 250,
+      "source": "CNP Russia / TD Габаритные чертежи PNG"
+    },
+    {
+      "series": "TD",
+      "model": "TD250-12.5G/4",
+      "file": "td-900.jpeg",
+      "sourceFile": "TD250-144SWHCB.jpeg",
+      "matchType": "nominal-size",
+      "nominalSize": 250,
+      "source": "CNP Russia / TD Габаритные чертежи PNG"
+    },
+    {
+      "series": "TD",
+      "model": "TD250-9G/4",
+      "file": "td-901.jpeg",
+      "sourceFile": "TD250-144SWHCB.jpeg",
+      "matchType": "nominal-size",
+      "nominalSize": 250,
+      "source": "CNP Russia / TD Габаритные чертежи PNG"
+    },
+    {
+      "series": "TD",
+      "model": "TD300-15/4",
+      "file": "td-902.jpeg",
+      "sourceFile": "TD300-154SWHCB.jpeg",
+      "matchType": "exact",
+      "nominalSize": 300,
+      "source": "CNP Russia / TD Габаритные чертежи PNG"
+    },
+    {
+      "series": "TD",
+      "model": "TD300-20/4",
+      "file": "td-903.jpeg",
+      "sourceFile": "TD300-204SWHCB.jpeg",
+      "matchType": "exact",
+      "nominalSize": 300,
+      "source": "CNP Russia / TD Габаритные чертежи PNG"
+    },
+    {
+      "series": "TD",
+      "model": "TD300-25/4",
+      "file": "td-904.jpeg",
+      "sourceFile": "TD300-254SWHCB.jpeg",
+      "matchType": "exact",
+      "nominalSize": 300,
+      "source": "CNP Russia / TD Габаритные чертежи PNG"
+    },
+    {
+      "series": "TD",
+      "model": "TD300-30/4",
+      "file": "td-905.jpeg",
+      "sourceFile": "TD300-304SWHCB.jpeg",
+      "matchType": "exact",
+      "nominalSize": 300,
+      "source": "CNP Russia / TD Габаритные чертежи PNG"
+    },
+    {
+      "series": "TD",
+      "model": "TD300-35/4",
+      "file": "td-906.jpeg",
+      "sourceFile": "TD300-354SWHCB.jpeg",
+      "matchType": "exact",
+      "nominalSize": 300,
+      "source": "CNP Russia / TD Габаритные чертежи PNG"
+    },
+    {
+      "series": "TD",
+      "model": "TD300-44/4",
+      "file": "td-907.jpeg",
+      "sourceFile": "TD300-444SWHCB.jpeg",
+      "matchType": "exact",
+      "nominalSize": 300,
+      "source": "CNP Russia / TD Габаритные чертежи PNG"
+    },
+    {
+      "series": "TD",
+      "model": "TD300-55/4",
+      "file": "td-908.jpeg",
+      "sourceFile": "TD300-554SWHCB.jpeg",
+      "matchType": "exact",
+      "nominalSize": 300,
+      "source": "CNP Russia / TD Габаритные чертежи PNG"
+    },
+    {
+      "series": "TD",
+      "model": "TD32-18G/2",
+      "file": "td-754.jpeg",
+      "sourceFile": "TD32-18G2SWHCJ.jpeg",
+      "matchType": "exact",
+      "nominalSize": 32,
+      "source": "CNP Russia / TD Габаритные чертежи PNG"
+    },
+    {
+      "series": "TD",
+      "model": "TD32-21G/2",
+      "file": "td-755.jpeg",
+      "sourceFile": "TD32-21G2SWHCJ.jpeg",
+      "matchType": "exact",
+      "nominalSize": 32,
+      "source": "CNP Russia / TD Габаритные чертежи PNG"
+    },
+    {
+      "series": "TD",
+      "model": "TD32-26G/2",
+      "file": "td-756.jpeg",
+      "sourceFile": "TD32-26G2SWHCJ.jpeg",
+      "matchType": "exact",
+      "nominalSize": 32,
+      "source": "CNP Russia / TD Габаритные чертежи PNG"
+    },
+    {
+      "series": "TD",
+      "model": "TD32-33G/2",
+      "file": "td-757.jpeg",
+      "sourceFile": "TD32-33G2SWHCJ.jpeg",
+      "matchType": "exact",
+      "nominalSize": 32,
+      "source": "CNP Russia / TD Габаритные чертежи PNG"
+    },
+    {
+      "series": "TD",
+      "model": "TD32-40G/2",
+      "file": "td-758.jpeg",
+      "sourceFile": "TD32-40G2SWHCJ.jpeg",
+      "matchType": "exact",
+      "nominalSize": 32,
+      "source": "CNP Russia / TD Габаритные чертежи PNG"
+    },
+    {
+      "series": "TD",
+      "model": "TD32-50G/2",
+      "file": "td-759.jpeg",
+      "sourceFile": "TD32-50G2SWHCJ.jpeg",
+      "matchType": "exact",
+      "nominalSize": 32,
+      "source": "CNP Russia / TD Габаритные чертежи PNG"
+    },
+    {
+      "series": "TD",
+      "model": "TD32-14G/2",
+      "file": "td-760.jpeg",
+      "sourceFile": "TD32-14G2SWHCJ.jpeg",
+      "matchType": "exact",
+      "nominalSize": 32,
+      "source": "CNP Russia / TD Габаритные чертежи PNG"
+    },
+    {
+      "series": "TD",
+      "model": "TD40-16G/2",
+      "file": "td-761.jpeg",
+      "sourceFile": "TD40-16G2SWHCJ.jpeg",
+      "matchType": "exact",
+      "nominalSize": 40,
+      "source": "CNP Russia / TD Габаритные чертежи PNG"
+    },
+    {
+      "series": "TD",
+      "model": "TD40-21G/2",
+      "file": "td-762.jpeg",
+      "sourceFile": "TD40-21G2SWHCJ.jpeg",
+      "matchType": "exact",
+      "nominalSize": 40,
+      "source": "CNP Russia / TD Габаритные чертежи PNG"
+    },
+    {
+      "series": "TD",
+      "model": "TD40-20G/2",
+      "file": "td-763.jpeg",
+      "sourceFile": "TD40-20G2SWHCJ.jpeg",
+      "matchType": "exact",
+      "nominalSize": 40,
+      "source": "CNP Russia / TD Габаритные чертежи PNG"
+    },
+    {
+      "series": "TD",
+      "model": "TD40-26G/2",
+      "file": "td-764.jpeg",
+      "sourceFile": "TD40-26G2SWHCJ.jpeg",
+      "matchType": "exact",
+      "nominalSize": 40,
+      "source": "CNP Russia / TD Габаритные чертежи PNG"
+    },
+    {
+      "series": "TD",
+      "model": "TD40-30G/2",
+      "file": "td-765.jpeg",
+      "sourceFile": "TD40-30G2SWHCJ.jpeg",
+      "matchType": "exact",
+      "nominalSize": 40,
+      "source": "CNP Russia / TD Габаритные чертежи PNG"
+    },
+    {
+      "series": "TD",
+      "model": "TD40-36G/2",
+      "file": "td-766.jpeg",
+      "sourceFile": "TD40-36G2SWHCJ.jpeg",
+      "matchType": "exact",
+      "nominalSize": 40,
+      "source": "CNP Russia / TD Габаритные чертежи PNG"
+    },
+    {
+      "series": "TD",
+      "model": "TD40-48G/2",
+      "file": "td-767.jpeg",
+      "sourceFile": "TD40-48G2SWHCJ.jpeg",
+      "matchType": "exact",
+      "nominalSize": 40,
+      "source": "CNP Russia / TD Габаритные чертежи PNG"
+    },
+    {
+      "series": "TD",
+      "model": "TD40-14G/2",
+      "file": "td-768.jpeg",
+      "sourceFile": "TD40-14G2SWHCJ.jpeg",
+      "matchType": "exact",
+      "nominalSize": 40,
+      "source": "CNP Russia / TD Габаритные чертежи PNG"
+    },
+    {
+      "series": "TD",
+      "model": "TD50-32G/2",
+      "file": "td-769.jpeg",
+      "sourceFile": "TD50-32G2SWHCJ.jpeg",
+      "matchType": "exact",
+      "nominalSize": 50,
+      "source": "CNP Russia / TD Габаритные чертежи PNG"
+    },
+    {
+      "series": "TD",
+      "model": "TD50-39G/2",
+      "file": "td-770.jpeg",
+      "sourceFile": "TD50-39G2SWHCJ.jpeg",
+      "matchType": "exact",
+      "nominalSize": 50,
+      "source": "CNP Russia / TD Габаритные чертежи PNG"
+    },
+    {
+      "series": "TD",
+      "model": "TD50-49G/2",
+      "file": "td-771.jpeg",
+      "sourceFile": "TD50-49G2SWHCJ.jpeg",
+      "matchType": "exact",
+      "nominalSize": 50,
+      "source": "CNP Russia / TD Габаритные чертежи PNG"
+    },
+    {
+      "series": "TD",
+      "model": "TD50-59G/2",
+      "file": "td-772.jpeg",
+      "sourceFile": "TD50-59G2SWHCJ.jpeg",
+      "matchType": "exact",
+      "nominalSize": 50,
+      "source": "CNP Russia / TD Габаритные чертежи PNG"
+    },
+    {
+      "series": "TD",
+      "model": "TD50-80G/2",
+      "file": "td-773.jpeg",
+      "sourceFile": "TD50-80G2SWHCJ.jpeg",
+      "matchType": "exact",
+      "nominalSize": 50,
+      "source": "CNP Russia / TD Габаритные чертежи PNG"
+    },
+    {
+      "series": "TD",
+      "model": "TD50-12G/2",
+      "file": "td-774.jpeg",
+      "sourceFile": "TD50-12G2SWHCJ.jpeg",
+      "matchType": "exact",
+      "nominalSize": 50,
+      "source": "CNP Russia / TD Габаритные чертежи PNG"
+    },
+    {
+      "series": "TD",
+      "model": "TD50-15G/2",
+      "file": "td-775.jpeg",
+      "sourceFile": "TD50-15G2SWHCJ.jpeg",
+      "matchType": "exact",
+      "nominalSize": 50,
+      "source": "CNP Russia / TD Габаритные чертежи PNG"
+    },
+    {
+      "series": "TD",
+      "model": "TD50-18G/2",
+      "file": "td-776.jpeg",
+      "sourceFile": "TD50-18G2SWHCJ.jpeg",
+      "matchType": "exact",
+      "nominalSize": 50,
+      "source": "CNP Russia / TD Габаритные чертежи PNG"
+    },
+    {
+      "series": "TD",
+      "model": "TD50-24G/2",
+      "file": "td-777.jpeg",
+      "sourceFile": "TD50-24G2SWHCJ.jpeg",
+      "matchType": "exact",
+      "nominalSize": 50,
+      "source": "CNP Russia / TD Габаритные чертежи PNG"
+    },
+    {
+      "series": "TD",
+      "model": "TD50-28G/2",
+      "file": "td-778.jpeg",
+      "sourceFile": "TD50-28G2SWHCJ.jpeg",
+      "matchType": "exact",
+      "nominalSize": 50,
+      "source": "CNP Russia / TD Габаритные чертежи PNG"
+    },
+    {
+      "series": "TD",
+      "model": "TD50-35G/2",
+      "file": "td-779.jpeg",
+      "sourceFile": "TD50-35G2SWHCJ.jpeg",
+      "matchType": "exact",
+      "nominalSize": 50,
+      "source": "CNP Russia / TD Габаритные чертежи PNG"
+    },
+    {
+      "series": "TD",
+      "model": "TD50-40G/2",
+      "file": "td-780.jpeg",
+      "sourceFile": "TD50-40G2SWHCJ.jpeg",
+      "matchType": "exact",
+      "nominalSize": 50,
+      "source": "CNP Russia / TD Габаритные чертежи PNG"
+    },
+    {
+      "series": "TD",
+      "model": "TD50-50G/2",
+      "file": "td-781.jpeg",
+      "sourceFile": "TD50-50G2SWHCJ.jpeg",
+      "matchType": "exact",
+      "nominalSize": 50,
+      "source": "CNP Russia / TD Габаритные чертежи PNG"
+    },
+    {
+      "series": "TD",
+      "model": "TD50-60G/2",
+      "file": "td-782.jpeg",
+      "sourceFile": "TD50-60G2SWHCJ.jpeg",
+      "matchType": "exact",
+      "nominalSize": 50,
+      "source": "CNP Russia / TD Габаритные чертежи PNG"
+    },
+    {
+      "series": "TD",
+      "model": "TD50-70G/2",
+      "file": "td-783.jpeg",
+      "sourceFile": "TD50-70G2SWHCJ.jpeg",
+      "matchType": "exact",
+      "nominalSize": 50,
+      "source": "CNP Russia / TD Габаритные чертежи PNG"
+    },
+    {
+      "series": "TD",
+      "model": "TD50-81G/2",
+      "file": "td-784.jpeg",
+      "sourceFile": "TD50-81G2SWHCJ.jpeg",
+      "matchType": "exact",
+      "nominalSize": 50,
+      "source": "CNP Russia / TD Габаритные чертежи PNG"
+    },
+    {
+      "series": "TD",
+      "model": "TD65-37G/2",
+      "file": "td-785.jpeg",
+      "sourceFile": "TD65-37G2SWHCJ.jpeg",
+      "matchType": "exact",
+      "nominalSize": 65,
+      "source": "CNP Russia / TD Габаритные чертежи PNG"
+    },
+    {
+      "series": "TD",
+      "model": "TD65-48G/2",
+      "file": "td-786.jpeg",
+      "sourceFile": "TD65-48G2SWHCJ.jpeg",
+      "matchType": "exact",
+      "nominalSize": 65,
+      "source": "CNP Russia / TD Габаритные чертежи PNG"
+    },
+    {
+      "series": "TD",
+      "model": "TD65-22G/2",
+      "file": "td-787.jpeg",
+      "sourceFile": "TD65-22G2SWHCJ.jpeg",
+      "matchType": "exact",
+      "nominalSize": 65,
+      "source": "CNP Russia / TD Габаритные чертежи PNG"
+    },
+    {
+      "series": "TD",
+      "model": "TD65-30G/2",
+      "file": "td-788.jpeg",
+      "sourceFile": "TD65-30G2SWHCJ.jpeg",
+      "matchType": "exact",
+      "nominalSize": 65,
+      "source": "CNP Russia / TD Габаритные чертежи PNG"
+    },
+    {
+      "series": "TD",
+      "model": "TD65-34G/2",
+      "file": "td-789.jpeg",
+      "sourceFile": "TD65-34G2SWHCJ.jpeg",
+      "matchType": "exact",
+      "nominalSize": 65,
+      "source": "CNP Russia / TD Габаритные чертежи PNG"
+    },
+    {
+      "series": "TD",
+      "model": "TD65-41G/2",
+      "file": "td-790.jpeg",
+      "sourceFile": "TD65-41G2SWHCJ.jpeg",
+      "matchType": "exact",
+      "nominalSize": 65,
+      "source": "CNP Russia / TD Габаритные чертежи PNG"
+    },
+    {
+      "series": "TD",
+      "model": "TD65-51G/2",
+      "file": "td-791.jpeg",
+      "sourceFile": "TD65-51G2SWHCJ.jpeg",
+      "matchType": "exact",
+      "nominalSize": 65,
+      "source": "CNP Russia / TD Габаритные чертежи PNG"
+    },
+    {
+      "series": "TD",
+      "model": "TD65-61G/2",
+      "file": "td-792.jpeg",
+      "sourceFile": "TD65-61G2SWHCJ.jpeg",
+      "matchType": "exact",
+      "nominalSize": 65,
+      "source": "CNP Russia / TD Габаритные чертежи PNG"
+    },
+    {
+      "series": "TD",
+      "model": "TD65-68G/2",
+      "file": "td-793.jpeg",
+      "sourceFile": "TD65-68G2SWHCJ.jpeg",
+      "matchType": "exact",
+      "nominalSize": 65,
+      "source": "CNP Russia / TD Габаритные чертежи PNG"
+    },
+    {
+      "series": "TD",
+      "model": "TD65-85G/2",
+      "file": "td-794.jpeg",
+      "sourceFile": "TD65-85G2SWHCJ.jpeg",
+      "matchType": "exact",
+      "nominalSize": 65,
+      "source": "CNP Russia / TD Габаритные чертежи PNG"
+    },
+    {
+      "series": "TD",
+      "model": "TD65-17.5/2",
+      "file": "td-795.jpeg",
+      "sourceFile": "TD65-152SWHCJ.jpeg",
+      "matchType": "nominal-size",
+      "nominalSize": 65,
+      "source": "CNP Russia / TD Габаритные чертежи PNG"
+    },
+    {
+      "series": "TD",
+      "model": "TD65-20G1/2",
+      "file": "td-796.jpeg",
+      "sourceFile": "TD65-152SWHCJ.jpeg",
+      "matchType": "nominal-size",
+      "nominalSize": 65,
+      "source": "CNP Russia / TD Габаритные чертежи PNG"
+    },
+    {
+      "series": "TD",
+      "model": "TD65-17/2",
+      "file": "td-797.jpeg",
+      "sourceFile": "TD65-152SWHCJ.jpeg",
+      "matchType": "nominal-size",
+      "nominalSize": 65,
+      "source": "CNP Russia / TD Габаритные чертежи PNG"
+    },
+    {
+      "series": "TD",
+      "model": "TD65-13.5/2",
+      "file": "td-798.jpeg",
+      "sourceFile": "TD65-152SWHCJ.jpeg",
+      "matchType": "nominal-size",
+      "nominalSize": 65,
+      "source": "CNP Russia / TD Габаритные чертежи PNG"
+    },
+    {
+      "series": "TD",
+      "model": "TD65-12/2",
+      "file": "td-799.jpeg",
+      "sourceFile": "TD65-152SWHCJ.jpeg",
+      "matchType": "nominal-size",
+      "nominalSize": 65,
+      "source": "CNP Russia / TD Габаритные чертежи PNG"
+    },
+    {
+      "series": "TD",
+      "model": "TD80-13G/2",
+      "file": "td-800.jpeg",
+      "sourceFile": "TD80-13G2SWHCJ.jpeg",
+      "matchType": "exact",
+      "nominalSize": 80,
+      "source": "CNP Russia / TD Габаритные чертежи PNG"
+    },
+    {
+      "series": "TD",
+      "model": "TD80-18G/2",
+      "file": "td-801.jpeg",
+      "sourceFile": "TD80-18G2SWHCJ.jpeg",
+      "matchType": "exact",
+      "nominalSize": 80,
+      "source": "CNP Russia / TD Габаритные чертежи PNG"
+    },
+    {
+      "series": "TD",
+      "model": "TD80-23G/2",
+      "file": "td-802.jpeg",
+      "sourceFile": "TD80-23G2SWHCJ.jpeg",
+      "matchType": "exact",
+      "nominalSize": 80,
+      "source": "CNP Russia / TD Габаритные чертежи PNG"
+    },
+    {
+      "series": "TD",
+      "model": "TD80-29G/2",
+      "file": "td-803.jpeg",
+      "sourceFile": "TD80-29G2SWHCJ.jpeg",
+      "matchType": "exact",
+      "nominalSize": 80,
+      "source": "CNP Russia / TD Габаритные чертежи PNG"
+    },
+    {
+      "series": "TD",
+      "model": "TD80-41G/2",
+      "file": "td-804.jpeg",
+      "sourceFile": "TD80-41G2SWHCJ.jpeg",
+      "matchType": "exact",
+      "nominalSize": 80,
+      "source": "CNP Russia / TD Габаритные чертежи PNG"
+    },
+    {
+      "series": "TD",
+      "model": "TD80-48G/2",
+      "file": "td-805.jpeg",
+      "sourceFile": "TD80-48G2SWHCJ.jpeg",
+      "matchType": "exact",
+      "nominalSize": 80,
+      "source": "CNP Russia / TD Габаритные чертежи PNG"
+    },
+    {
+      "series": "TD",
+      "model": "TD80-32G/2",
+      "file": "td-806.jpeg",
+      "sourceFile": "TD80-32G2SWHCJ.jpeg",
+      "matchType": "exact",
+      "nominalSize": 80,
+      "source": "CNP Russia / TD Габаритные чертежи PNG"
+    },
+    {
+      "series": "TD",
+      "model": "TD80-38G/2",
+      "file": "td-807.jpeg",
+      "sourceFile": "TD80-38G2SWHCJ.jpeg",
+      "matchType": "exact",
+      "nominalSize": 80,
+      "source": "CNP Russia / TD Габаритные чертежи PNG"
+    },
+    {
+      "series": "TD",
+      "model": "TD80-47G/2",
+      "file": "td-808.jpeg",
+      "sourceFile": "TD80-47G2SWHCJ.jpeg",
+      "matchType": "exact",
+      "nominalSize": 80,
+      "source": "CNP Russia / TD Габаритные чертежи PNG"
+    },
+    {
+      "series": "TD",
+      "model": "TD80-54G/2",
+      "file": "td-809.jpeg",
+      "sourceFile": "TD80-54G2SWHCJ.jpeg",
+      "matchType": "exact",
+      "nominalSize": 80,
+      "source": "CNP Russia / TD Габаритные чертежи PNG"
+    },
+    {
+      "series": "TD",
+      "model": "TD80-67G/2",
+      "file": "td-810.jpeg",
+      "sourceFile": "TD80-67G2SWHCJ.jpeg",
+      "matchType": "exact",
+      "nominalSize": 80,
+      "source": "CNP Russia / TD Габаритные чертежи PNG"
+    },
+    {
+      "series": "TD",
+      "model": "TD80-60G/2",
+      "file": "td-811.jpeg",
+      "sourceFile": "TD80-132SWHCJ.jpeg",
+      "matchType": "nominal-size",
+      "nominalSize": 80,
+      "source": "CNP Russia / TD Габаритные чертежи PNG"
+    }
+  ],
+  "failures": []
+}

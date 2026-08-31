@@ -1,4 +1,4 @@
-export type PanelKind = "input" | "chart" | "sketch" | "input2" | "chart2" | "sketch2" | "settings" | "spec" | "components" | "model";
+export type PanelKind = "input" | "chart" | "sketch" | "input2" | "chart2" | "sketch2" | "settings" | "dn" | "spec" | "components" | "cabinet" | "model";
 export type WorkspaceMode = "free" | "mobile" | "grid";
 export type WorkspaceGrid = { columns:number; rows:number; columnSizes:number[]; rowSizes:number[]; cells:Array<string|null> };
 
@@ -63,7 +63,17 @@ export type SpecItem = {
 export type SpecEntity = { kind: "spec"; items: SpecItem[] };
 export type ModelEntity = { kind: "model"; view: { rotation: number; zoom: number } };
 export type ComponentsEntity = { kind:"components" };
-export type ProjectEntity = InputEntity | ChartEntity | SketchEntity | SettingsEntity | SpecEntity | ComponentsEntity | ModelEntity;
+export type CabinetEntity = { kind:"cabinet" };
+export type CollectorMaterial = "st20" | "aisi304";
+export type DnEntity = {
+  kind:"dn";
+  suctionCollectorDn:number|null;
+  dischargeCollectorDn:number|null;
+  suctionValveDn:number|null;
+  dischargeValveDn:number|null;
+  collectorMaterial:CollectorMaterial|null;
+};
+export type ProjectEntity = InputEntity | ChartEntity | SketchEntity | SettingsEntity | DnEntity | SpecEntity | ComponentsEntity | CabinetEntity | ModelEntity;
 
 export type ProjectConfig = {
   schemaVersion: 1;
@@ -119,8 +129,10 @@ export function createProject(name = "Новая насосная станция
       "pump-sketch": { kind: "sketch" },
       "pump-sketch-2": { kind: "sketch" },
       "station-settings": { kind: "settings", stationType: "utility", membraneTank: false, membraneTankVolume: 8, vibrationCompensators: false, collectorPlugs: false, isolatingValves: false, jockeyPump: false, usdRate: 85, cnyRate: 13, manufacturerDiscounts: { cnp: 45, aquastrong: 45 } },
+      "station-dn": { kind: "dn", suctionCollectorDn: null, dischargeCollectorDn: null, suctionValveDn: null, dischargeValveDn: null, collectorMaterial: null },
       "station-spec": { kind: "spec", items: DEFAULT_SPEC_ITEMS.map(item => ({ ...item })) },
       "station-components": { kind: "components" },
+      "station-control-cabinet": { kind: "cabinet" },
       "station-model": { kind: "model", view: { rotation: 0, zoom: 1 } },
     },
   };
@@ -136,7 +148,7 @@ export function parseProjectConfig(raw: unknown): ProjectConfig {
   if (candidate.schemaVersion !== 1) throw new Error("Неподдерживаемая версия файла проекта");
   if (!candidate.project || typeof candidate.project.name !== "string" || typeof candidate.project.id !== "string") throw new Error("В файле отсутствуют данные проекта");
   if (!candidate.workspace || !Array.isArray(candidate.workspace.windows) || !candidate.entities || typeof candidate.entities !== "object") throw new Error("В файле отсутствует рабочее пространство");
-  const allowed = new Set<PanelKind>(["input", "chart", "sketch", "input2", "chart2", "sketch2", "settings", "spec", "components", "model"]);
+  const allowed = new Set<PanelKind>(["input", "chart", "sketch", "input2", "chart2", "sketch2", "settings", "dn", "spec", "components", "cabinet", "model"]);
   const windows = candidate.workspace.windows.map((window, index) => {
     if (!window || typeof window.id !== "string" || typeof window.entityId !== "string" || !candidate.entities?.[window.entityId]) throw new Error(`Некорректное окно № ${index + 1}`);
     const legacyTool = allowed.has(window.id as PanelKind) ? window.id as PanelKind : undefined;
@@ -153,6 +165,9 @@ export function parseProjectConfig(raw: unknown): ProjectConfig {
   if (input2?.kind === "input") entities["system-input-2"] = { ...input2, staticHead: input2.staticHead ?? 0, workingPumpCount: input2.workingPumpCount == null ? null : Math.max(1, finite(input2.workingPumpCount, 1)), reservePumpCount: input2.reservePumpCount == null ? null : Math.max(0, finite(input2.reservePumpCount, 0)), calculated: input2.calculated ?? false };
   const rawSettings = entities["station-settings"] as Partial<SettingsEntity>;
   entities["station-settings"] = { kind: "settings", stationType: rawSettings.stationType ?? "utility", membraneTank: rawSettings.membraneTank ?? false, membraneTankVolume: rawSettings.membraneTankVolume ?? 8, vibrationCompensators: rawSettings.vibrationCompensators ?? false, collectorPlugs: rawSettings.collectorPlugs ?? false, isolatingValves: rawSettings.isolatingValves ?? false, jockeyPump: rawSettings.jockeyPump ?? false, usdRate: finite(rawSettings.usdRate, 85), cnyRate: finite(rawSettings.cnyRate, 13), manufacturerDiscounts: { cnp: finite(rawSettings.manufacturerDiscounts?.cnp, 45), aquastrong: finite(rawSettings.manufacturerDiscounts?.aquastrong, 45) } };
+  const rawDn = entities["station-dn"] as Partial<DnEntity>;
+  const savedDn = (value:unknown) => typeof value === "number" && Number.isFinite(value) && value > 0 ? value : null;
+  entities["station-dn"] = { kind:"dn", suctionCollectorDn:savedDn(rawDn.suctionCollectorDn), dischargeCollectorDn:savedDn(rawDn.dischargeCollectorDn), suctionValveDn:savedDn(rawDn.suctionValveDn), dischargeValveDn:savedDn(rawDn.dischargeValveDn), collectorMaterial:rawDn.collectorMaterial==="st20"||rawDn.collectorMaterial==="aisi304"?rawDn.collectorMaterial:null };
   const spec = entities["station-spec"] as SpecEntity | undefined;
   if (spec?.kind === "spec") {
     const isPumpItem = (item: SpecItem) => item.section === "pump" || /^Насос\b/i.test(item.name);
