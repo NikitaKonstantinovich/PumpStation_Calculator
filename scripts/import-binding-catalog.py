@@ -18,7 +18,7 @@ from openpyxl.utils import get_column_letter
 
 
 ROOT = Path(__file__).resolve().parents[2]
-SOURCE = ROOT / "Equipment" / "Калькулятор по ОБВЯЗКЕ.xlsm"
+SOURCE = Path(sys.argv[1]).resolve() if len(sys.argv) > 1 else ROOT / "Equipment" / "Калькулятор по ОБВЯЗКЕ.xlsm"
 OUTPUT = ROOT / "frontend" / "public" / "binding-components.json"
 
 CATALOG_SHEETS = [
@@ -523,6 +523,29 @@ def defined_names(workbook) -> list[dict[str, Any]]:
     return result
 
 
+def collector_reference(workbook) -> dict:
+    sheet = next(sheet for sheet in workbook if sheet.title.strip() == "Полезная инфа")
+    # Explicit source ranges: two-flange bolt length, and material pipe OD.
+    # Do not use the unrelated valve/check-valve bolt-length tables.
+    if "Длина болтов" not in str(sheet["P49"].value):
+        raise ValueError("Изменилась структура таблицы длин болтов: Полезная инфа!P49")
+    bolts = []
+    for row in range(51, 71):
+        dn = int(str(sheet[f"B{row}"].value).removeprefix("DN"))
+        for column, pn in [("P", 10), ("Q", 16), ("R", 25)]:
+            length = numeric_value(sheet[f"{column}{row}"].value)
+            if length and length > 0:
+                bolts.append({"dn": dn, "pn": pn, "length": length, "source": f"Полезная инфа!{column}{row} (два фланца)"})
+    diameters = []
+    for material, rows in [("st20", range(4, 24)), ("aisi304", range(28, 48))]:
+        for row in rows:
+            dn = int(str(sheet[f"B{row}"].value).removeprefix("DN"))
+            # Sgon DN15/DN20 uses the matching pipe outside diameter from this table.
+            if dn in (15, 20):
+                diameters.append({"dn": dn, "material": material, "outerDiameter": sheet[f"C{row}"].value, "source": f"Полезная инфа!C{row}"})
+    return {"bolts": bolts, "nippleDiameters": diameters}
+
+
 def main() -> None:
     if not SOURCE.exists():
         raise FileNotFoundError(SOURCE)
@@ -648,6 +671,7 @@ def main() -> None:
         },
         "catalogs": catalogs,
         "items": flat_items,
+        "collectorReference": collector_reference(workbook_values),
         "relations": {
             "dependencyTables": dependency_tables,
             "inputTables": input_tables,

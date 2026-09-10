@@ -96,3 +96,34 @@ button,a { -webkit-tap-highlight-color:transparent; }
 @media(max-width:800px){.auth-page{grid-template-columns:1fr}.auth-intro{min-height:290px;padding:28px}.auth-intro>div{margin:48px 0 20px}.auth-intro h1{font-size:36px}.auth-intro ul{display:none}.auth-panel{padding:20px}.auth-card{padding:30px 24px}}
 
 .projects-page { min-height:100vh; background:#eef3f6; }.projects-header { height:70px; padding:0 28px; display:flex; align-items:center; gap:20px; border-bottom:1px solid #d9e2e7; background:#fff; }.projects-header__actions { margin-left:auto; display:flex; align-items:center; gap:10px; }.projects-main { width:min(1100px,calc(100% - 40px)); margin:0 auto; padding:54px 0; }.projects-main__title { display:flex; align-items:end; justify-content:space-between; gap:20px; margin-bottom:24px; }.projects-main h1 { margin:0; font-size:30px; color:#203743; }.projects-main__title p { margin:8px 0 0; color:#7c8991; font-size:12px; }.projects-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(250px,1fr)); gap:16px; }.project-card { padding:20px; display:grid; gap:12px; border:1px solid #d4dfe5; border-radius:9px; background:#fff; box-shadow:0 5px 18px rgba(35,59,73,.05); }.project-card__icon { width:42px; height:42px; display:grid; place-items:center; border-radius:8px; color:#0c6299; background:#e7f2f8; font-size:21px; }.project-card h2 { margin:0; font-size:15px; }.project-card p { margin:0; color:#82909a; font-size:10px; }.project-card__actions { display:flex; gap:8px; margin-top:4px; }.project-card__actions button { min-height:32px; padding:0 11px; border:1px solid #ccd9df; border-radius:5px; background:#fff; cursor:pointer; font-size:10px; font-weight:650; }.project-card__actions button:first-child { color:#fff; border-color:#176796; background:#176796; }.project-card__actions button:last-child { margin-left:auto; color:#9b4444; }.projects-empty { padding:60px 20px; text-align:center; border:1px dashed #bdcbd3; border-radius:10px; color:#788892; background:rgba(255,255,255,.65); }.projects-empty b,.projects-empty span { display:block; }.projects-empty span { font-size:34px; margin-bottom:12px; }
+/* Collector constructor follows the workspace panel width, including grid cells. */
+.collector-constructor { container-type: inline-size; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr)); gap: 16px; padding: 16px; align-items: start; }
+.collector-card { min-width: 0; padding: 18px; border: 1px solid #d9e1ed; border-radius: 12px; background: #fff; color: #233047; font-size: 14px; line-height: 1.5; }
+.collector-card h2 { font-size: 19px; margin: 0 0 10px; }
+.collector-card h3 { font-size: 16px; margin: 0 0 6px; }
+.collector-card p { margin: 8px 0; }
+.collector-card code { display: block; padding: 10px; background: #eef3fb; color: #174f9b; overflow-wrap: anywhere; font-size: 14px; }
+.collector-fields { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 180px), 1fr)); gap: 12px; }
+.collector-field { min-width: 0; display: flex; flex-direction: column; gap: 5px; }
+.collector-field input, .collector-field select { width: 100%; min-width: 0; border: 1px solid #bbc8d9; border-radius: 6px; padding: 9px; background: white; color: #233047; font: inherit; }
+.collector-field small, .collector-note { color: #52627a; font-size: 13px; }
+.collector-reset { border: 0; background: transparent; color: #205caa; text-align: left; padding: 3px 0; font: inherit; font-size: 13px; text-decoration: underline; cursor: pointer; }
+.collector-circuit { margin: 16px 0; padding: 14px 0; border-top: 1px solid #d9e1ed; }
+.collector-checkbox { display: flex; align-items: center; gap: 8px; margin: 14px 0; }
+.collector-checkbox input { width: 18px; height: 18px; }
+.collector-warning { color: #8b4908; background: #fff4dd; padding: 10px; border-radius: 6px; overflow-wrap: anywhere; }
+.collector-warning ul { padding-left: 20px; }
+.collector-success { color: #226438; }
+.collector-mode { background: #eaf2ff; padding: 10px; font-weight: 600; }
+.collector-metrics, .collector-prices { margin: 14px 0; }
+.collector-metrics div, .collector-prices div { display: flex; flex-wrap: wrap; gap: 6px 12px; justify-content: space-between; padding: 6px 0; }
+.collector-metrics dd, .collector-prices dd { margin: 0; font-weight: 600; }
+.collector-card details { border-top: 1px solid #d9e1ed; padding: 10px 0; }
+.collector-card summary { cursor: pointer; font-weight: 600; }
+.collector-table-wrap { overflow-x: auto; margin-top: 8px; }
+.collector-card table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.collector-card th, .collector-card td { text-align: left; padding: 8px 5px; border-bottom: 1px solid #e4eaf2; vertical-align: top; }
+.collector-card td small { display: block; color: #52627a; }
+.collector-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.collector-actions .button { width: auto; height: auto; min-height: 36px; white-space: normal; padding: 8px 12px; }
+.collector-actions .button:disabled { opacity: .5; cursor: not-allowed; }

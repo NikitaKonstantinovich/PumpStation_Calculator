@@ -11,6 +11,37 @@ export const users = sqliteTable("users", {
   updatedAt: text("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
 }, table => [uniqueIndex("uq_users_email").on(table.email)]);
 
+export const collectors = sqliteTable("collectors", {
+  id: text("id").primaryKey(),
+  code: text("code").notNull(),
+  type: text("type", { enum: ["suction", "discharge"] }).notNull(),
+  configurationJson: text("configuration_json").notNull(),
+  calculationJson: text("calculation_json").notNull(),
+  cachedPriceMicrounits: integer("cached_price_microunits").notNull(),
+  weldLengthMm: real("weld_length_mm").notNull(),
+  weldCostMicrounits: integer("weld_cost_microunits").notNull(),
+  source: text("source").notNull(),
+  createdByUserId: text("created_by_user_id").references(() => users.id, { onDelete: "set null" }),
+  priceUpdatedAt: text("price_updated_at").notNull(),
+  createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+}, table => [uniqueIndex("uq_collectors_code").on(table.code), check("ck_collectors_price", sql`${table.cachedPriceMicrounits} >= 0`)]);
+
+export const collectorItems = sqliteTable("collector_items", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  collectorId: text("collector_id").notNull().references(() => collectors.id, { onDelete: "cascade" }),
+  role: text("role").notNull(),
+  // Stable source identifier from the imported binding catalogue (not a browser row index).
+  componentSourceId: text("component_source_id"),
+  name: text("name").notNull(),
+  kind: text("kind").notNull(),
+  quantity: real("quantity").notNull(),
+  unit: text("unit").notNull(),
+  unitPriceMicrounits: integer("unit_price_microunits").notNull(),
+  costMicrounits: integer("cost_microunits").notNull(),
+  source: text("source"),
+  sortOrder: integer("sort_order").notNull(),
+}, table => [uniqueIndex("uq_collector_items_role").on(table.collectorId, table.role)]);
+
 export const authTokens = sqliteTable("auth_tokens", {
   id: text("id").primaryKey(),
   userId: text("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),

@@ -1,4 +1,6 @@
-export type PanelKind = "input" | "chart" | "sketch" | "input2" | "chart2" | "sketch2" | "settings" | "dn" | "spec" | "components" | "cabinet" | "model";
+import { createCollectors, normalizeCollectors, synchronizeCollectors, type CollectorsEntity } from "./collector-project";
+
+export type PanelKind = "input" | "chart" | "sketch" | "input2" | "chart2" | "sketch2" | "settings" | "dn" | "spec" | "components" | "cabinet" | "collectors" | "model";
 export type WorkspaceMode = "free" | "mobile" | "grid";
 export type WorkspaceGrid = { columns:number; rows:number; columnSizes:number[]; rowSizes:number[]; cells:Array<string|null> };
 
@@ -23,6 +25,7 @@ export type InputEntity = {
   reservePumpCount: number | null;
   medium: "water" | "wastewater";
   selectedPumpId?: string;
+  selectedPumpModel?: string;
   calculated: boolean;
 };
 
@@ -32,6 +35,7 @@ export type StationType = "utility" | "fire" | "combined" | "smart";
 export type SettingsEntity = {
   kind: "settings";
   stationType: StationType;
+  combinedCircuitsSimultaneous: boolean;
   membraneTank: boolean;
   membraneTankVolume: 8 | 50 | 100;
   vibrationCompensators: boolean;
@@ -43,7 +47,7 @@ export type SettingsEntity = {
   manufacturerDiscounts: { cnp: number; aquastrong: number };
 };
 export type SpecSection = "pump" | "control" | "suction" | "discharge" | "frame" | "electrical";
-export type SpecOption = "secondaryPump" | "membraneTank" | "vibrationCompensators" | "collectorPlugs" | "isolatingValves" | "primarySuctionValve" | "primaryDischargeValve" | "primaryCheckValve" | "secondarySuctionValve" | "secondaryDischargeValve" | "secondaryCheckValve";
+export type SpecOption = "suctionCollector" | "dischargeCollector" | "secondaryPump" | "membraneTank" | "vibrationCompensators" | "collectorPlugs" | "isolatingValves" | "primarySuctionValve" | "primaryDischargeValve" | "primaryCheckValve" | "secondarySuctionValve" | "secondaryDischargeValve" | "secondaryCheckValve";
 export type SpecItem = {
   position: string;
   name: string;
@@ -58,7 +62,7 @@ export type SpecItem = {
   description?: string;
   section?: SpecSection;
   option?: SpecOption;
-  status: "selected" | "clarify";
+  status: "selected" | "clarify" | "confirmation";
 };
 export type SpecEntity = { kind: "spec"; items: SpecItem[] };
 export type ModelEntity = { kind: "model"; view: { rotation: number; zoom: number } };
@@ -88,7 +92,7 @@ export type DnEntity = {
   secondarySuctionValveType:ShutoffValveType|null;
   secondaryDischargeValveType:ShutoffValveType|null;
 };
-export type ProjectEntity = InputEntity | ChartEntity | SketchEntity | SettingsEntity | DnEntity | SpecEntity | ComponentsEntity | CabinetEntity | ModelEntity;
+export type ProjectEntity = InputEntity | ChartEntity | SketchEntity | SettingsEntity | DnEntity | SpecEntity | ComponentsEntity | CabinetEntity | ModelEntity | CollectorsEntity;
 
 export type ProjectConfig = {
   schemaVersion: 1;
@@ -112,12 +116,12 @@ const projectId = () => `PS-${new Date().getFullYear()}-${Math.random().toString
 export const DEFAULT_SPEC_ITEMS: SpecItem[] = [
   { position: "01", name: "Насос CNP CDM 32-4", details: "22 кВт · 2900 об/мин", quantity: 3, unit: "шт.", price: null, description: "Рабочие и резервные насосы", section: "pump", status: "selected" },
   { position: "03", name: "Шкаф управления", details: "ПЧ · IP54", quantity: 1, unit: "шт.", price: null, description: "Управление насосной установкой", section: "control", status: "selected" },
-  { position: "03.01", name: "Коллектор подводящий", details: "Нержавеющая сталь", quantity: 1, unit: "шт.", price: null, description: "Общий всасывающий коллектор", section: "suction", status: "clarify" },
+  { position: "03.01", name: "Коллектор подводящий", details: "Нержавеющая сталь", quantity: 1, unit: "шт.", price: null, description: "Общий всасывающий коллектор", section: "suction", option: "suctionCollector", status: "clarify" },
   { position: "03.02", name: "Затвор дисковый", details: "Межфланцевый", quantity: 3, unit: "шт.", price: null, description: "На подводящей линии каждого насоса", section: "suction", status: "clarify" },
   { position: "03.03", name: "Манометр", details: "С комплектом подключения", quantity: 1, unit: "шт.", price: null, description: "Контроль давления на входе", section: "suction", status: "clarify" },
   { position: "03.04", name: "Реле давления", details: "Защита от сухого хода", quantity: 1, unit: "шт.", price: null, description: "Автоматика подводящей линии", section: "suction", status: "clarify" },
   { position: "04.01", name: "Клапан обратный", details: "Межфланцевый", quantity: 3, unit: "шт.", price: null, description: "На напорной линии каждого насоса", section: "discharge", status: "clarify" },
-  { position: "04.02", name: "Коллектор напорный", details: "Нержавеющая сталь", quantity: 1, unit: "шт.", price: null, description: "Общий напорный коллектор", section: "discharge", status: "clarify" },
+  { position: "04.02", name: "Коллектор напорный", details: "Нержавеющая сталь", quantity: 1, unit: "шт.", price: null, description: "Общий напорный коллектор", section: "discharge", option: "dischargeCollector", status: "clarify" },
   { position: "04.03", name: "Вставка гибкая", details: "Виброкомпенсатор, фланцевая", quantity: 3, unit: "шт.", price: null, description: "Компенсация вибраций", section: "discharge", option: "vibrationCompensators", status: "clarify" },
   { position: "04.04", name: "Бак мембранный", details: "Объём уточняется настройками", quantity: 1, unit: "шт.", price: null, description: "Стабилизация давления", section: "discharge", option: "membraneTank", status: "clarify" },
   { position: "04.05", name: "Преобразователь давления", details: "Выход 4–20 мА", quantity: 1, unit: "шт.", price: null, description: "Обратная связь для шкафа управления", section: "discharge", status: "clarify" },
@@ -131,7 +135,7 @@ export const DEFAULT_SPEC_ITEMS: SpecItem[] = [
 
 export function createProject(name = "Новая насосная станция", seed?: { id?: string; timestamp?: string }): ProjectConfig {
   const timestamp = seed?.timestamp ?? now();
-  return {
+  return synchronizeCollectors({
     schemaVersion: 1,
     project: { id: seed?.id ?? projectId(), name, createdAt: timestamp, updatedAt: timestamp },
     station: {},
@@ -143,14 +147,15 @@ export function createProject(name = "Новая насосная станция
       "working-point-2": { kind: "chart", efficiency: 78, power: 22, npsh: 3.2 },
       "pump-sketch": { kind: "sketch" },
       "pump-sketch-2": { kind: "sketch" },
-      "station-settings": { kind: "settings", stationType: "utility", membraneTank: false, membraneTankVolume: 8, vibrationCompensators: false, collectorPlugs: false, isolatingValves: false, jockeyPump: false, usdRate: 85, cnyRate: 13, manufacturerDiscounts: { cnp: 45, aquastrong: 45 } },
+      "station-settings": { kind: "settings", stationType: "utility", combinedCircuitsSimultaneous: false, membraneTank: false, membraneTankVolume: 8, vibrationCompensators: false, collectorPlugs: false, isolatingValves: false, jockeyPump: false, usdRate: 85, cnyRate: 13, manufacturerDiscounts: { cnp: 45, aquastrong: 45 } },
       "station-dn": { kind: "dn", suctionCollectorDn: null, dischargeCollectorDn: null, suctionValveDn: null, dischargeValveDn: null, collectorMaterial: null, connectionType:null, pn:null, suctionValveType:null, dischargeValveType:null, secondarySuctionCollectorDn:null, secondaryDischargeCollectorDn:null, secondarySuctionValveDn:null, secondaryDischargeValveDn:null, secondaryConnectionType:null, secondaryPn:null, secondarySuctionValveType:null, secondaryDischargeValveType:null },
       "station-spec": { kind: "spec", items: DEFAULT_SPEC_ITEMS.map(item => ({ ...item })) },
       "station-components": { kind: "components" },
       "station-control-cabinet": { kind: "cabinet" },
+      "station-collectors": createCollectors(),
       "station-model": { kind: "model", view: { rotation: 0, zoom: 1 } },
     },
-  };
+  });
 }
 
 function finite(value: unknown, fallback: number) {
@@ -163,7 +168,7 @@ export function parseProjectConfig(raw: unknown): ProjectConfig {
   if (candidate.schemaVersion !== 1) throw new Error("Неподдерживаемая версия файла проекта");
   if (!candidate.project || typeof candidate.project.name !== "string" || typeof candidate.project.id !== "string") throw new Error("В файле отсутствуют данные проекта");
   if (!candidate.workspace || !Array.isArray(candidate.workspace.windows) || !candidate.entities || typeof candidate.entities !== "object") throw new Error("В файле отсутствует рабочее пространство");
-  const allowed = new Set<PanelKind>(["input", "chart", "sketch", "input2", "chart2", "sketch2", "settings", "dn", "spec", "components", "cabinet", "model"]);
+  const allowed = new Set<PanelKind>(["input", "chart", "sketch", "input2", "chart2", "sketch2", "settings", "dn", "spec", "components", "cabinet", "collectors", "model"]);
   const windows = candidate.workspace.windows.map((window, index) => {
     if (!window || typeof window.id !== "string" || typeof window.entityId !== "string" || !candidate.entities?.[window.entityId]) throw new Error(`Некорректное окно № ${index + 1}`);
     const legacyTool = allowed.has(window.id as PanelKind) ? window.id as PanelKind : undefined;
@@ -179,25 +184,27 @@ export function parseProjectConfig(raw: unknown): ProjectConfig {
   const input2 = entities["system-input-2"] as InputEntity | undefined;
   if (input2?.kind === "input") entities["system-input-2"] = { ...input2, staticHead: input2.staticHead ?? 0, workingPumpCount: input2.workingPumpCount == null ? null : Math.max(1, finite(input2.workingPumpCount, 1)), reservePumpCount: input2.reservePumpCount == null ? null : Math.max(0, finite(input2.reservePumpCount, 0)), calculated: input2.calculated ?? false };
   const rawSettings = entities["station-settings"] as Partial<SettingsEntity>;
-  entities["station-settings"] = { kind: "settings", stationType: rawSettings.stationType ?? "utility", membraneTank: rawSettings.membraneTank ?? false, membraneTankVolume: rawSettings.membraneTankVolume ?? 8, vibrationCompensators: rawSettings.vibrationCompensators ?? false, collectorPlugs: rawSettings.collectorPlugs ?? false, isolatingValves: rawSettings.isolatingValves ?? false, jockeyPump: rawSettings.jockeyPump ?? false, usdRate: finite(rawSettings.usdRate, 85), cnyRate: finite(rawSettings.cnyRate, 13), manufacturerDiscounts: { cnp: finite(rawSettings.manufacturerDiscounts?.cnp, 45), aquastrong: finite(rawSettings.manufacturerDiscounts?.aquastrong, 45) } };
+  const stationType = rawSettings.stationType ?? "utility";
+  entities["station-settings"] = { kind: "settings", stationType, combinedCircuitsSimultaneous: stationType === "combined" && rawSettings.combinedCircuitsSimultaneous === true, membraneTank: rawSettings.membraneTank ?? false, membraneTankVolume: rawSettings.membraneTankVolume ?? 8, vibrationCompensators: rawSettings.vibrationCompensators ?? false, collectorPlugs: rawSettings.collectorPlugs ?? false, isolatingValves: rawSettings.isolatingValves ?? false, jockeyPump: rawSettings.jockeyPump ?? false, usdRate: finite(rawSettings.usdRate, 85), cnyRate: finite(rawSettings.cnyRate, 13), manufacturerDiscounts: { cnp: finite(rawSettings.manufacturerDiscounts?.cnp, 45), aquastrong: finite(rawSettings.manufacturerDiscounts?.aquastrong, 45) } };
   const rawDn = entities["station-dn"] as Partial<DnEntity>;
   const savedDn = (value:unknown) => typeof value === "number" && Number.isFinite(value) && value > 0 ? value : null;
   const connection = (value:unknown):ValveConnection|null => value==="threaded"||value==="flanged"?value:null;
   const pn = (value:unknown):ValvePn|null => value===10||value===16||value===25?value:null;
   const valveType = (value:unknown):ShutoffValveType|null => value==="butterfly"||value==="ball"?value:null;
   entities["station-dn"] = { kind:"dn", suctionCollectorDn:savedDn(rawDn.suctionCollectorDn), dischargeCollectorDn:savedDn(rawDn.dischargeCollectorDn), suctionValveDn:savedDn(rawDn.suctionValveDn), dischargeValveDn:savedDn(rawDn.dischargeValveDn), collectorMaterial:rawDn.collectorMaterial==="st20"||rawDn.collectorMaterial==="aisi304"?rawDn.collectorMaterial:null, connectionType:connection(rawDn.connectionType), pn:pn(rawDn.pn), suctionValveType:valveType(rawDn.suctionValveType), dischargeValveType:valveType(rawDn.dischargeValveType), secondarySuctionCollectorDn:savedDn(rawDn.secondarySuctionCollectorDn), secondaryDischargeCollectorDn:savedDn(rawDn.secondaryDischargeCollectorDn), secondarySuctionValveDn:savedDn(rawDn.secondarySuctionValveDn), secondaryDischargeValveDn:savedDn(rawDn.secondaryDischargeValveDn), secondaryConnectionType:connection(rawDn.secondaryConnectionType), secondaryPn:pn(rawDn.secondaryPn), secondarySuctionValveType:valveType(rawDn.secondarySuctionValveType), secondaryDischargeValveType:valveType(rawDn.secondaryDischargeValveType) };
+  entities["station-collectors"] = normalizeCollectors(entities["station-collectors"]);
   const spec = entities["station-spec"] as SpecEntity | undefined;
   if (spec?.kind === "spec") {
     const isPumpItem = (item: SpecItem) => item.section === "pump" || /^Насос\b/i.test(item.name);
     const sectionFor = (item: SpecItem): SpecSection => item.section ?? (isPumpItem(item) ? "pump" : /шкаф/i.test(item.name) ? "control" : /кабел|электр|клем|наконечн|провод|гофр|лоток/i.test(item.name) ? "electrical" : /рам|стойк|крепеж|вибро/i.test(item.name) ? "frame" : /подвод|манометр|реле|затвор/i.test(item.name) ? "suction" : "discharge");
-    const optionFor = (item: SpecItem): SpecOption | undefined => item.option ?? (/бак мембран/i.test(item.name) ? "membraneTank" : /вставка гибк|виброкомпенс/i.test(item.name) ? "vibrationCompensators" : /заглушк/i.test(item.name) ? "collectorPlugs" : /разделительн/i.test(item.name) ? "isolatingValves" : item.position === "02" && /^Насос\b/i.test(item.name) ? "secondaryPump" : undefined);
+    const optionFor = (item: SpecItem): SpecOption | undefined => item.option ?? (item.name === "Коллектор подводящий" ? "suctionCollector" : item.name === "Коллектор напорный" ? "dischargeCollector" : /бак мембран/i.test(item.name) ? "membraneTank" : /вставка гибк|виброкомпенс/i.test(item.name) ? "vibrationCompensators" : /заглушк/i.test(item.name) ? "collectorPlugs" : /разделительн/i.test(item.name) ? "isolatingValves" : item.position === "02" && /^Насос\b/i.test(item.name) ? "secondaryPump" : undefined);
     const normalized = Array.isArray(spec.items) ? spec.items.map(item => ({ ...item, unit: item.unit ?? "шт.", price: item.price ?? null, description: item.description ?? "", section: sectionFor(item), option: optionFor(item) })) : [];
     const pumpItems = normalized.filter(isPumpItem);
     const primaryPump = pumpItems.find(item => item.position === "01" && item.option !== "secondaryPump") ?? pumpItems.find(item => item.option !== "secondaryPump");
     const secondaryPump = pumpItems.find(item => item.position === "02" || item.option === "secondaryPump");
     const savedItems = [...normalized.filter(item => !isPumpItem(item)), ...(primaryPump ? [{ ...primaryPump, position: "01", section: "pump" as const, option: undefined }] : []), ...(secondaryPump && secondaryPump !== primaryPump ? [{ ...secondaryPump, position: "02", section: "pump" as const, option: "secondaryPump" as const }] : [])];
     const savedNames = new Set(savedItems.map(item => item.name.trim().toLocaleLowerCase("ru-RU")));
-    const additions = DEFAULT_SPEC_ITEMS.filter(item => item.section !== "pump" && !savedNames.has(item.name.toLocaleLowerCase("ru-RU"))).map(item => ({ ...item }));
+    const additions = DEFAULT_SPEC_ITEMS.filter(item => item.section !== "pump" && !(item.option && savedItems.some(saved => saved.option === item.option)) && !savedNames.has(item.name.toLocaleLowerCase("ru-RU"))).map(item => ({ ...item }));
     const fallbackPump = primaryPump ? [] : DEFAULT_SPEC_ITEMS.filter(item => item.section === "pump").slice(0, 1).map(item => ({ ...item, position: "01" }));
     entities["station-spec"] = { ...spec, items: [...fallbackPump, ...savedItems, ...additions].sort((a,b)=>a.position.localeCompare(b.position,"ru",{numeric:true})) };
   }
@@ -207,13 +214,13 @@ export function parseProjectConfig(raw: unknown): ProjectConfig {
   const hasSavedCells=Array.isArray(rawGrid?.cells),savedCells=hasSavedCells?rawGrid!.cells.slice(0,cellCount).map(id=>typeof id==="string"&&windows.some(panel=>panel.id===id)?id:null):[];
   const fallbackCells=windows.filter(panel=>!panel.minimized).slice(0,cellCount).map(panel=>panel.id);
   const cells=Array.from({length:cellCount},(_,index)=>hasSavedCells?savedCells[index]??null:fallbackCells[index]??null);
-  return {
+  return synchronizeCollectors({
     schemaVersion: 1,
     project: { ...candidate.project, name: candidate.project.name.trim() || "Без названия", createdAt: candidate.project.createdAt || now(), updatedAt: candidate.project.updatedAt || now() },
     station: candidate.station ?? {},
     workspace: { zoom: Math.min(150, Math.max(50, finite(candidate.workspace.zoom, 100))), mode, grid:{columns,rows,columnSizes:normalizeSizes(rawGrid?.columnSizes,columns),rowSizes:normalizeSizes(rawGrid?.rowSizes,rows),cells}, windows: needsSettingsPanel ? [...windows, { ...DEFAULT_PANELS.find(window => window.activeTool === "settings")! }] : windows },
     entities,
-  };
+  });
 }
 
 export function withUpdatedTimestamp(config: ProjectConfig): ProjectConfig {

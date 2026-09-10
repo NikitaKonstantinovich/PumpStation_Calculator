@@ -1,8 +1,13 @@
 import assert from "node:assert/strict";
 import { access, readFile } from "node:fs/promises";
 import test from "node:test";
+import { loadTs } from "./load-ts.mjs";
 
 const templateRoot = new URL("../", import.meta.url);
+
+async function loadProjectConfig() {
+  return loadTs(new URL("../app/project-config.ts", import.meta.url));
+}
 
 async function render() {
   const workerUrl = new URL("../dist/server/index.js", import.meta.url);
@@ -97,6 +102,39 @@ test("keeps the production surface free of the starter preview", async () => {
   await assert.rejects(access(new URL("public/_sites-preview", templateRoot)));
 });
 
+test("persists and normalizes the simultaneous combined-circuits setting", async () => {
+  const { createProject, parseProjectConfig } = await loadProjectConfig();
+  const fresh = createProject("Новый проект", { id: "PS-TEST", timestamp: "2026-09-09T00:00:00.000Z" });
+  const freshSettings = fresh.entities["station-settings"];
+  assert.equal(freshSettings.combinedCircuitsSimultaneous, false);
+  assert.match(JSON.stringify(fresh), /"combinedCircuitsSimultaneous":false/);
+  assert.equal(fresh.schemaVersion, 1);
+
+  const legacy = structuredClone(fresh);
+  delete legacy.entities["station-settings"].combinedCircuitsSimultaneous;
+  const loadedLegacy = parseProjectConfig(legacy);
+  assert.equal(loadedLegacy.entities["station-settings"].combinedCircuitsSimultaneous, false);
+
+  const combined = structuredClone(fresh);
+  combined.entities["station-settings"].stationType = "combined";
+  combined.entities["station-settings"].combinedCircuitsSimultaneous = true;
+  const reloaded = parseProjectConfig(JSON.parse(JSON.stringify(combined)));
+  assert.equal(reloaded.entities["station-settings"].combinedCircuitsSimultaneous, true);
+  assert.equal(reloaded.schemaVersion, 1);
+
+  const fire = structuredClone(combined);
+  fire.entities["station-settings"].stationType = "fire";
+  assert.equal(parseProjectConfig(fire).entities["station-settings"].combinedCircuitsSimultaneous, false);
+});
+
+test("shows the simultaneous-circuits setting only for combined stations and resets it on type change", async () => {
+  const page = await readFile(new URL("../app/page.tsx", import.meta.url), "utf8");
+  assert.match(page, /settings\.stationType === "combined" && toggle\("combinedCircuitsSimultaneous"/);
+  assert.match(page, /Контуры работают одновременно/);
+  assert.match(page, /Учитывать сумму расходов двух контуров при расчёте общих коллекторов/);
+  assert.match(page, /combinedCircuitsSimultaneous: stationType === "combined" \? settings\.combinedCircuitsSimultaneous : false/);
+});
+
 test("provides a persisted DN calculator with SP velocity defaults", async () => {
   const [page, styles, projectConfig] = await Promise.all([
     readFile(new URL("../app/page.tsx", import.meta.url), "utf8"),
@@ -106,12 +144,14 @@ test("provides a persisted DN calculator with SP velocity defaults", async () =>
 
   assert.match(page, /dn: \{ title: "Расчёт DN"/);
   assert.match(page, /dn:"station-dn"/);
-  assert.match(page, /const STANDARD_DN=\[25,32,40,50,65,80,100,125,150,200,250,300/);
-  assert.match(page, /const dnVelocityLimit=\(dn:number\)=>dn<=250\?2:3/);
-  assert.match(page, /flowRate\/3600\/\(Math\.PI\*\(dn\/1000\)\*\*2\/4\)/);
+  const dnDefaults = await loadTs(new URL("../app/dn-defaults.ts", import.meta.url));
+  assert.deepEqual(dnDefaults.STANDARD_DN.slice(0,12), [25,32,40,50,65,80,100,125,150,200,250,300]);
+  assert.equal(dnDefaults.dnVelocityLimit(250), 2);
+  assert.equal(dnDefaults.dnVelocityLimit(300), 3);
+  assert.equal(dnDefaults.flowVelocity(36,100), 36/3600/(Math.PI*.1**2/4));
   assert.match(page, /pumpFlow=stationFlow\/Math\.max\(1,input\.workingPumpCount\)/);
   assert.match(page, /Заполнить по умолчанию/);
-  assert.match(page, /settings\.stationType==="fire"\?"st20":"aisi304"/);
+  assert.equal(dnDefaults.defaultCollectorMaterial({stationType:"fire"}), "st20");
   assert.match(page, /Скорость потока/);
   assert.match(page, /Резьбовое · до 2″/);
   assert.match(page, /Фланцевое/);
@@ -424,7 +464,7 @@ test("provides a component-database tool with category-specific characteristics 
   assert.ok(!database.catalogs.some(catalog => catalog.id === "обвязка"));
   assert.ok(database.catalogs.some(catalog => catalog.id === "обратные-клапаны"));
   assert.ok(database.catalogs.some(catalog => catalog.id === "пожарная-арматура"));
-  assert.match(projectConfig, /"components" \| "cabinet" \| "model"/);
+  assert.match(projectConfig, /"components" \| "cabinet" \| "collectors" \| "model"/);
   assert.match(projectConfig, /"station-components": \{ kind: "components" \}/);
   assert.match(page, /components: \{ title: "База комплектующих"/);
   assert.match(page, /components:"station-components"/);
@@ -518,7 +558,7 @@ test("defines the normalized D1 schema for binding components", async () => {
     readFile(new URL("../.openai/hosting.json", import.meta.url), "utf8"),
   ]);
 
-  assert.equal([...schema.matchAll(/sqliteTable\("/g)].length, 24);
+  assert.equal([...schema.matchAll(/sqliteTable\("/g)].length, 26);
   for (const table of [
     "catalog_imports",
     "component_catalogs",
