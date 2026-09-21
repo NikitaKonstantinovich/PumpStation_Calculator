@@ -8,7 +8,7 @@ const field = (item: Item, pattern: RegExp) => item.fields.find(v => pattern.tes
 export function makeCollectorCatalog(data: BindingCatalog): CollectorCatalog {
   const components: CollectorComponent[] = [];
   for (const item of data.items) {
-    const material = /AISI\s*304/i.test(item.family) ? "aisi304" : /(?:сталь|ст[.\s]*)\s*20/i.test(item.family) ? "st20" : null;
+    const material = /AISI\s*304/i.test(item.family) ? "aisi304" : /(?:сталь|ст[.\s]*)\s*20/i.test(item.family) ? "st20" : /латун/i.test(item.family) ? "brass" : null;
     if (!material) continue;
     let kind: ComponentKind | null = null;
     if (item.catalogId === "трубы") kind = "pipe";
@@ -23,11 +23,17 @@ export function makeCollectorCatalog(data: BindingCatalog): CollectorCatalog {
     // Merged PN cells are only present on the first source row of a table.
     const directPn = number(field(item, /^PN$|^Давление$/i));
     const inheritedPn = data.items.filter(v => v.tableId === item.tableId && v.sourceRow <= item.sourceRow).sort((a,b) => b.sourceRow-a.sourceRow).map(v => number(field(v, /^PN$|^Давление$/i))).find(v => v !== null) ?? null;
-    const pn = directPn ?? inheritedPn;
+    // Supplier PN is explicit per SKU; an unknown larger size must not inherit PN40.
+    const pn = kind === "plug" ? directPn : directPn ?? inheritedPn;
     const price = item.prices.find(v => v.currency === "RUB" && (kind === "pipe" ? /₽\/м|руб.*\/м/.test(v.label) : /цен/i.test(v.label)));
     const outer = number(field(item, /^(?:Наружный )?Диаметр, мм$/i)), thickness = number(field(item, /^Толщина, мм$/i));
     const nippleRef = kind === "nipple" ? data.collectorReference?.nippleDiameters.find(v => v.dn === dn && v.material === material) : null;
-    components.push({ id: item.id, kind, name: String(field(item, /^Наименование$/i) ?? `${item.family} DN${dn}`), dn, pn, material, price: price?.amount ?? null, outerDiameter: outer ?? nippleRef?.outerDiameter ?? null, innerDiameter: outer && thickness ? outer - 2 * thickness : null, source: `${item.sourceSheet}!строка ${item.sourceRow}${price ? `, цена ${price.sourceColumn}${item.sourceRow}` : ""}${nippleRef ? `; Ø: ${nippleRef.source}` : ""}` });
+    const thread = field(item, /^Резьба$/i);
+    const supplierUrl = field(item, /^Источник URL$/i), priceDate = field(item, /^Дата цены$/i), documentUrl = field(item, /^Паспорт URL$/i);
+    components.push({ id: item.id, kind, name: String(field(item, /^Наименование$/i) ?? `${item.family} DN${dn}`), dn, pn, material,
+      ...(thread === "ВР" ? { threadGender: "female" as const } : thread === "НР" ? { threadGender: "male" as const } : {}),
+      price: price?.amount ?? null, outerDiameter: outer ?? nippleRef?.outerDiameter ?? null, innerDiameter: outer && thickness ? outer - 2 * thickness : null,
+      source: supplierUrl ? `${supplierUrl}; цена с НДС от ${priceDate ?? "неизвестной даты"}${documentUrl ? `; паспорт: ${documentUrl}` : ""}` : `${item.sourceSheet}!строка ${item.sourceRow}${price ? `, цена ${price.sourceColumn}${item.sourceRow}` : ""}${nippleRef ? `; Ø: ${nippleRef.source}` : ""}` });
   }
   return { version: `${data.source.sha256}:${data.source.importedAt}`, components, bolts: data.collectorReference?.bolts ?? [] };
 }

@@ -5,10 +5,17 @@ import Link from "next/link";
 import { createProject, DEFAULT_PANELS, parseProjectConfig, projectFilename, withUpdatedTimestamp, type CollectorMaterial, type DnEntity, type InputEntity, type PanelKind, type PanelState, type ProjectConfig, type ProjectEntity, type SettingsEntity, type ShutoffValveType, type SpecEntity, type SpecItem, type SpecOption, type SpecSection, type ValveConnection, type ValvePn, type WorkspaceGrid, type WorkspaceMode } from "./project-config";
 import { CollectorConstructor, useCollectorDatabase } from "./collector-constructor";
 import { synchronizeCollectors, type CollectorsEntity } from "./collector-project";
+import { normalizeSpecificationItems, specificationOption } from "./specification-items";
 import { configurationFingerprint } from "./collector-calculations";
-import { STANDARD_DN, dnVelocityLimit, flowVelocity, recommendedDn, defaultCollectorMaterial } from "./dn-defaults";
+import { STANDARD_DN, dnVelocityLimit, flowVelocity, recommendedDn, defaultCollectorMaterial, resolveDnConnection } from "./dn-defaults";
 import { AccountScreen } from "./account-ui";
 import { CabinetConfigurator, smartCabinetSupportsPower, type SmartCabinet } from "./cabinet-configurator";
+import { suctionHydraulics } from "./dn-defaults";
+import { pumpPortChoices } from "./pump-ports";
+import { suctionCatalogItems } from "./suction-catalog";
+import { makeCollectorCatalog, type BindingCatalog } from "./collector-catalog";
+import type { CollectorCatalog } from "./collector-calculations";
+import { buildSuctionSpec, replaceSuctionSpec, suctionFingerprint } from "./suction-spec";
 
 const PANEL_INFO: Record<PanelKind, { title: string; eyebrow: string }> = {
   settings: { title: "Настройки проекта", eyebrow: "КОНФИГУРАЦИЯ" },
@@ -225,13 +232,14 @@ function InstallationSettings({ settings, onChange }: { settings: SettingsEntity
 }
 
 function Specification({ entity, settings, catalogue }: { entity: SpecEntity; settings: SettingsEntity; catalogue:Pump[] }) {
+  const specItems = normalizeSpecificationItems(entity.items);
   const formatMoney = (value: number) => value.toLocaleString("ru-RU", { maximumFractionDigits: 2 });
   const sectionFor = (item: SpecItem): SpecSection => item.section ?? (item.position === "01" || /^Насос\b/i.test(item.name) ? "pump" : item.position === "02" || /шкаф/i.test(item.name) ? "control" : /кабел|электр|клем|наконечн|провод|гофр|лоток/i.test(item.name) ? "electrical" : /рам|стойк|крепеж|вибро/i.test(item.name) ? "frame" : /подвод|манометр|реле|затвор/i.test(item.name) ? "suction" : "discharge");
   const secondaryEnabled = isSecondaryEnabled(settings);
-  const pumpItems = entity.items.filter(item => sectionFor(item) === "pump").sort((a,b)=>a.position.localeCompare(b.position,"ru",{numeric:true})).slice(0,secondaryEnabled?2:1);
+  const pumpItems = specItems.filter(item => sectionFor(item) === "pump").sort((a,b)=>a.position.localeCompare(b.position,"ru",{numeric:true})).slice(0,secondaryEnabled?2:1);
   const allowedPumpItems = new Set(pumpItems);
   const optionVisible=(option:SpecOption|undefined)=>!option||option==="suctionCollector"||option==="dischargeCollector"||option==="secondaryPump"||option==="primarySuctionValve"||option==="primaryDischargeValve"||option==="primaryCheckValve"||option==="secondarySuctionValve"||option==="secondaryDischargeValve"||option==="secondaryCheckValve"||(option==="membraneTank"?settings.membraneTank:option==="vibrationCompensators"?settings.vibrationCompensators:option==="collectorPlugs"?settings.collectorPlugs:settings.isolatingValves);
-  const visibleItems = entity.items.filter(item => sectionFor(item) !== "pump" ? optionVisible(item.option) : allowedPumpItems.has(item)).map(item => {
+  const visibleItems = specItems.filter(item => sectionFor(item) !== "pump" ? optionVisible(item.option) : allowedPumpItems.has(item)).map(item => {
     if(item.option === "membraneTank") return { ...item, details: `${settings.membraneTankVolume} л` };
     if(sectionFor(item)!=="pump") return item;
     const pump=catalogue.find(candidate=>candidate.id===item.equipmentId||item.name.toLocaleLowerCase("ru-RU")===`насос ${candidate.manufacturer} ${candidate.model}`.toLocaleLowerCase("ru-RU"));
@@ -299,13 +307,14 @@ type ComponentPrice={label:string;amount:number;currency:string};
 type ComponentItem={id:string;catalogId:string;family:string;fields:ComponentField[];prices:ComponentPrice[]};
 type ComponentGroupId="hydraulic"|"control"|"metal"|"services";
 type ComponentCatalog={id:string;name:string;groupId:ComponentGroupId};
-type ComponentsDatabase={catalogs:ComponentCatalog[];items:ComponentItem[];statistics:{componentRows:number;pricedComponentRows:number}};
-type RawBindingDatabase={catalogs:Array<{id:string;name:string}>;items:ComponentItem[];statistics:{componentRows:number;pricedComponentRows:number}};
+type ComponentsDatabase={catalogs:ComponentCatalog[];items:ComponentItem[];collectorCatalog:CollectorCatalog;statistics:{componentRows:number;pricedComponentRows:number}};
+type RawBindingDatabase=BindingCatalog & {catalogs:Array<{id:string;name:string}>;items:ComponentItem[];statistics:{componentRows:number;pricedComponentRows:number}};
 type RawControlDatabase={components:Array<{id:string;category:string;manufacturer:string|null;article:string|null;name:string;componentType:string|null;attributes:Record<string,unknown>;currentPrice:number|null;currency:string}>;statistics:{components:number;pricedComponents:number}};
 const COMPONENT_GROUPS:Array<{id:ComponentGroupId;name:string}>=[{id:"hydraulic",name:"Сборочный комплект гидравлики"},{id:"control",name:"Комплектующие ШУ"},{id:"metal",name:"Металлоконструкция и рама"},{id:"services",name:"Работы и услуги"}];
 const METAL_CATALOGS=new Set(["металл","метизы","опоры","кронштейны","рама"]);
 const bindingGroupFor=(catalogId:string):ComponentGroupId=>catalogId==="работы"?"services":METAL_CATALOGS.has(catalogId)?"metal":"hydraulic";
 let componentsDatabasePromise:Promise<ComponentsDatabase>|undefined;
+let loadedComponentsDatabase:ComponentsDatabase|undefined;
 const loadComponentsDatabase=()=>componentsDatabasePromise??=Promise.all([
   fetch("/binding-components.json",{cache:"no-store"}).then(response=>response.ok?response.json():Promise.reject(new Error("Не удалось загрузить базу гидравлики"))) as Promise<RawBindingDatabase>,
   fetch("/control-cabinet-database.json",{cache:"no-store"}).then(response=>response.ok?response.json():Promise.reject(new Error("Не удалось загрузить комплектующие ШУ"))) as Promise<RawControlDatabase>,
@@ -313,7 +322,7 @@ const loadComponentsDatabase=()=>componentsDatabasePromise??=Promise.all([
   const categories=[...new Set(control.components.map(item=>item.category))].sort((a,b)=>a.localeCompare(b,"ru"));
   const controlCatalogs:ComponentCatalog[]=categories.map(category=>({id:`control:${category}`,name:category.replaceAll("_"," "),groupId:category==="Работы"?"services":"control"}));
   const controlItems:ComponentItem[]=control.components.map(item=>({id:item.id,catalogId:`control:${item.category}`,family:item.name,fields:[{column:"manufacturer",headerPath:["Производитель"],value:item.manufacturer},{column:"article",headerPath:["Артикул"],value:item.article},{column:"componentType",headerPath:["Тип"],value:item.componentType},...Object.entries(item.attributes).map(([key,value])=>({column:key,headerPath:[key],value}))],prices:typeof item.currentPrice==="number"&&item.currentPrice>0?[{label:"Актуальная цена",amount:item.currentPrice,currency:item.currency}]:[]}));
-  return {catalogs:[...binding.catalogs.map(catalog=>({...catalog,groupId:bindingGroupFor(catalog.id)})),...controlCatalogs],items:[...binding.items,...controlItems],statistics:{componentRows:binding.statistics.componentRows+control.statistics.components,pricedComponentRows:binding.statistics.pricedComponentRows+control.statistics.pricedComponents}};
+  return loadedComponentsDatabase={collectorCatalog:makeCollectorCatalog(binding),catalogs:[...binding.catalogs.map(catalog=>({...catalog,groupId:bindingGroupFor(catalog.id)})),{id:"ответные-части",name:"Ответные части и американки",groupId:"hydraulic"},...controlCatalogs],items:[...binding.items,...suctionCatalogItems,...controlItems],statistics:{componentRows:binding.statistics.componentRows+control.statistics.components+suctionCatalogItems.length,pricedComponentRows:binding.statistics.pricedComponentRows+control.statistics.pricedComponents+suctionCatalogItems.length}};
 });
 const componentFieldLabel=(field:ComponentField)=>field.headerPath.filter(Boolean).at(-1)?.trim()??"";
 const componentValue=(value:unknown)=>typeof value==="number"?value.toLocaleString("ru-RU",{maximumFractionDigits:3}):typeof value==="string"&&value.trim()?value:"—";
@@ -334,6 +343,7 @@ function ComponentsDatabaseView(){
 type DnField="suctionCollectorDn"|"dischargeCollectorDn"|"suctionValveDn"|"dischargeValveDn"|"secondarySuctionCollectorDn"|"secondaryDischargeCollectorDn"|"secondarySuctionValveDn"|"secondaryDischargeValveDn";
 type CircuitId="primary"|"secondary";
 type CircuitDnConfig={
+  suction:ReturnType<typeof suctionHydraulics>;
   id:CircuitId;title:string;stationFlow:number;pumpFlow:number;workingPumpCount:number;totalPumpCount:number;
   values:Record<DnField,number>;connection:ValveConnection;pn:ValvePn;suctionValveType:ShutoffValveType;dischargeValveType:ShutoffValveType;
   connectionField:"connectionType"|"secondaryConnectionType";pnField:"pn"|"secondaryPn";suctionTypeField:"suctionValveType"|"secondarySuctionValveType";dischargeTypeField:"dischargeValveType"|"secondaryDischargeValveType";
@@ -349,14 +359,16 @@ const getCircuitDnConfig=(entity:DnEntity,input:InputEntity,settings:SettingsEnt
     suctionCollectorDn:entity.suctionCollectorDn??collectorDn,dischargeCollectorDn:entity.dischargeCollectorDn??collectorDn,suctionValveDn:entity.suctionValveDn??pumpDn,dischargeValveDn:entity.dischargeValveDn??pumpDn,
     secondarySuctionCollectorDn:entity.secondarySuctionCollectorDn??collectorDn,secondaryDischargeCollectorDn:entity.secondaryDischargeCollectorDn??collectorDn,secondarySuctionValveDn:entity.secondarySuctionValveDn??pumpDn,secondaryDischargeValveDn:entity.secondaryDischargeValveDn??pumpDn,
   };
+  const suction=suctionHydraulics(entity,input,settings,secondary);
+  values[secondary?"secondarySuctionValveDn":"suctionValveDn"]=suction.dn;
   const valveDns=secondary?[values.secondarySuctionValveDn,values.secondaryDischargeValveDn]:[values.suctionValveDn,values.dischargeValveDn],maxValveDn=Math.max(...valveDns);
-  const jockey=isJockeyCircuit(settings,secondary),forcedFlanged=(settings.stationType==="fire"&&!jockey)||settings.stationType==="combined",threadedAllowed=maxValveDn<=50&&(settings.stationType==="utility"||jockey);
+  const jockey=isJockeyCircuit(settings,secondary);
   const savedConnection=secondary?entity.secondaryConnectionType:entity.connectionType;
-  const connection:ValveConnection=forcedFlanged||!threadedAllowed?"flanged":savedConnection??"threaded";
+  const {connection,forcedFlanged,threadedAllowed}=resolveDnConnection(settings,maxValveDn,secondary,savedConnection);
   const savedSuctionType=secondary?entity.secondarySuctionValveType:entity.suctionValveType,savedDischargeType=secondary?entity.secondaryDischargeValveType:entity.dischargeValveType;
-  const suctionValveType:ShutoffValveType=connection==="threaded"?"ball":savedSuctionType??"butterfly",dischargeValveType:ShutoffValveType=connection==="threaded"?"ball":savedDischargeType??"butterfly";
+  const suctionValveType:ShutoffValveType=suction.valveType,dischargeValveType:ShutoffValveType=connection==="threaded"?"ball":savedDischargeType??"butterfly";
   const fields=secondary?{suctionCollector:"secondarySuctionCollectorDn" as const,dischargeCollector:"secondaryDischargeCollectorDn" as const,suctionValve:"secondarySuctionValveDn" as const,dischargeValve:"secondaryDischargeValveDn" as const}:{suctionCollector:"suctionCollectorDn" as const,dischargeCollector:"dischargeCollectorDn" as const,suctionValve:"suctionValveDn" as const,dischargeValve:"dischargeValveDn" as const};
-  return {id:secondary?"secondary":"primary",title:secondary?(jockey?"Контур 2 · жокей-насос":"Контур 2 · совмещённая НС"):"Основной контур",stationFlow,pumpFlow,workingPumpCount:input.workingPumpCount,totalPumpCount:input.workingPumpCount+input.reservePumpCount,values,connection,pn:(secondary?entity.secondaryPn:entity.pn)??16,suctionValveType,dischargeValveType,connectionField:secondary?"secondaryConnectionType":"connectionType",pnField:secondary?"secondaryPn":"pn",suctionTypeField:secondary?"secondarySuctionValveType":"suctionValveType",dischargeTypeField:secondary?"secondaryDischargeValveType":"dischargeValveType",threadedAllowed,forcedFlanged,color:settings.stationType==="fire"||settings.stationType==="combined"?"red":"blue",rows:[
+  return {suction,id:secondary?"secondary":"primary",title:secondary?(jockey?"Контур 2 · жокей-насос":"Контур 2 · совмещённая НС"):"Основной контур",stationFlow,pumpFlow,workingPumpCount:input.workingPumpCount,totalPumpCount:input.workingPumpCount+input.reservePumpCount,values,connection,pn:(secondary?entity.secondaryPn:entity.pn)??16,suctionValveType,dischargeValveType,connectionField:secondary?"secondaryConnectionType":"connectionType",pnField:secondary?"secondaryPn":"pn",suctionTypeField:secondary?"secondarySuctionValveType":"suctionValveType",dischargeTypeField:secondary?"secondaryDischargeValveType":"dischargeValveType",threadedAllowed,forcedFlanged,color:settings.stationType==="fire"||settings.stationType==="combined"?"red":"blue",rows:[
     {field:fields.suctionCollector,title:"Всасывающий коллектор",subtitle:"Расход контура",flow:stationFlow},{field:fields.dischargeCollector,title:"Напорный коллектор",subtitle:"Расход контура",flow:stationFlow},{field:fields.suctionValve,title:"Арматура на всасе насоса",subtitle:"Расход одного рабочего насоса",flow:pumpFlow},{field:fields.dischargeValve,title:"Арматура на напоре насоса",subtitle:"Расход одного рабочего насоса",flow:pumpFlow},
   ]};
 };
@@ -364,55 +376,99 @@ const getCircuitDnConfig=(entity:DnEntity,input:InputEntity,settings:SettingsEnt
 const componentDn=(item:ComponentItem)=>{for(const field of item.fields){const label=componentFieldLabel(field),match=String(field.value??"").match(/(?:DN|Ду)\s*(\d+)/i);if(/^DN$|условн|диаметр/i.test(label)&&match)return Number(match[1]);}return null;};
 const componentText=(item:ComponentItem)=>`${item.family} ${item.fields.flatMap(field=>[...field.headerPath,String(field.value??"")]).join(" ")}`;
 const componentPns=(item:ComponentItem)=>[...componentText(item).matchAll(/PN\s*(10|16|25)(?:\s*\/\s*(10|16|25))?/gi)].flatMap(match=>[Number(match[1]),match[2]?Number(match[2]):null]).filter((value):value is number=>value!==null);
+const checkValvePns=(item:ComponentItem):ValvePn[]=>{
+  const explicit=componentPns(item) as ValvePn[];if(explicit.length)return explicit;
+  const text=componentText(item);
+  if(/латунн.*сердечник/i.test(text)||/010C\.Y.*красн/i.test(text))return [16];
+  if(/\b(?:010C(?:\.Y)?|012F(?:\.[ZM])?)\b/i.test(text))return [10,16];
+  return [];
+};
+const checkValveMaterial=(material:CollectorMaterial,connection:ValveConnection)=>connection==="threaded"?"Латунь":material==="aisi304"?"Нержавеющая сталь":"Чугун";
 const componentColor=(item:ComponentItem):"red"|"blue"|"neutral"=>/красн/i.test(componentText(item))?"red":/син/i.test(componentText(item))?"blue":"neutral";
 type ValveSelectionKind="butterfly"|"ball"|"check";
-type ValveSelection={item:ComponentItem;price:ComponentPrice|null;execution:string};
-const selectValveComponent=(items:ComponentItem[],kind:ValveSelectionKind,dn:number,connection:ValveConnection,pn:ValvePn,color:"red"|"blue"):ValveSelection|null=>{
+type ValveSelection={item:ComponentItem;price:ComponentPrice|null;execution:string;material:string|null};
+const selectValveComponent=(items:ComponentItem[],kind:ValveSelectionKind,dn:number,connection:ValveConnection,pn:ValvePn,color:"red"|"blue",collectorMaterial:CollectorMaterial):ValveSelection|null=>{
   const catalogId=kind==="butterfly"?"затворы":kind==="ball"?"шаровые-краны":"обратные-клапаны";
   let candidates=items.filter(item=>item.catalogId===catalogId&&componentDn(item)===dn);
-  candidates=candidates.filter(item=>connection==="threaded"?(kind==="ball"||kind==="check"&&/латун/i.test(componentText(item))):(kind==="butterfly"||kind==="check"&&/фланц/i.test(componentText(item))));
-  candidates=candidates.filter(item=>{const pns=componentPns(item);return !pns.length||pns.includes(pn);});
+  if(kind==="ball"){
+    // Ball valves are always the brass lever-handle catalogue series. Colour
+    // and collector material do not apply; DN, PN and connection still do.
+    if(connection!=="threaded")return null;
+    const ranked=candidates.filter(item=>/латун/i.test(item.family)&&/ручка[\s—–-]*рычаг/i.test(item.family))
+      .filter(item=>{const pns=componentPns(item);return !pns.length||pns.includes(pn);})
+      .map(item=>({item,price:item.prices.find(price=>Number.isFinite(price.amount)&&price.amount>0)??null}))
+      .filter(candidate=>candidate.price)
+      .sort((a,b)=>a.price!.amount-b.price!.amount||a.item.id.localeCompare(b.item.id));
+    const best=ranked[0];
+    return best?{...best,execution:"резьбовое · ручка-рычаг",material:"Латунь"}:null;
+  }
+  candidates=candidates.filter(item=>connection==="threaded"?(kind==="check"&&/латун/i.test(componentText(item))):(kind==="butterfly"||kind==="check"&&/фланц/i.test(componentText(item))));
+  candidates=candidates.filter(item=>{const pns=kind==="check"?checkValvePns(item):componentPns(item);return !pns.length||pns.includes(pn);});
   if(color==="red")candidates=candidates.filter(item=>componentColor(item)==="red");
   const actuation=kind==="butterfly"?(dn<150?/рукоятк/i:/редуктор/i):null;
-  const ranked=candidates.map(item=>{const price=actuation?item.prices.find(entry=>actuation.test(entry.label))??null:item.prices[0]??null,colorRank=color==="red"?(componentColor(item)==="red"?0:1):(componentColor(item)==="blue"?0:componentColor(item)==="neutral"?1:2),pnRank=componentPns(item).includes(pn)?0:1;return {item,price,colorRank,pnRank};}).filter(candidate=>kind!=="butterfly"||candidate.price).sort((a,b)=>a.colorRank-b.colorRank||a.pnRank-b.pnRank||(a.price?.amount??Number.MAX_VALUE)-(b.price?.amount??Number.MAX_VALUE));
+  const material=kind==="check"?checkValveMaterial(collectorMaterial,connection):null;
+  const ranked=candidates.map(item=>{const price=actuation?item.prices.find(entry=>actuation.test(entry.label))??null:material?item.prices.find(entry=>entry.label.toLocaleLowerCase("ru-RU").includes(material.toLocaleLowerCase("ru-RU")))??null:item.prices[0]??null,colorRank=color==="red"?(componentColor(item)==="red"?0:1):(componentColor(item)==="blue"?0:componentColor(item)==="neutral"?1:2),pnRank=(kind==="check"?checkValvePns(item):componentPns(item)).includes(pn)?0:1;return {item,price,colorRank,pnRank};}).filter(candidate=>(kind!=="butterfly"&&kind!=="check")||candidate.price).sort((a,b)=>a.colorRank-b.colorRank||a.pnRank-b.pnRank||(a.price?.amount??Number.MAX_VALUE)-(b.price?.amount??Number.MAX_VALUE));
   const best=ranked[0];if(!best)return null;
-  return {item:best.item,price:best.price,execution:kind==="butterfly"?(dn<150?"с рукояткой":"с редуктором"):connection==="threaded"?"резьбовое":"фланцевое"};
+  return {item:best.item,price:best.price,execution:kind==="butterfly"?(dn<150?"с рукояткой":"с редуктором"):connection==="threaded"?"резьбовое":"фланцевое",material};
 };
 
 function DnCalculator({entity,input,secondaryInput,settings,onChange,onAddValves}:{entity:DnEntity;input:InputEntity;secondaryInput:InputEntity;settings:SettingsEntity;onChange?:(patch:Partial<DnEntity>)=>void;onAddValves?:()=>void}){
   const primary=getCircuitDnConfig(entity,input,settings),secondary=isSecondaryEnabled(settings)?getCircuitDnConfig(entity,secondaryInput,settings,true):null;
   if(!primary)return <div className="dn-calculator__empty"><span aria-hidden="true">Ø</span><b>Сначала задайте рабочую точку</b><p>Укажите расход станции и количество рабочих насосов в инструменте «Подбор насосов».</p></div>;
   const circuits=[primary,...(secondary?[secondary]:[])];
-  const reset=()=>{const patch:Partial<DnEntity>={collectorMaterial:defaultCollectorMaterial(settings)};for(const circuit of circuits){const collectorDn=recommendedDn(circuit.stationFlow),pumpDn=recommendedDn(circuit.pumpFlow);for(const row of circuit.rows)patch[row.field]=row.subtitle==="Расход контура"?collectorDn:pumpDn;patch[circuit.connectionField]=circuit.threadedAllowed&&!circuit.forcedFlanged?"threaded":"flanged";patch[circuit.pnField]=16;patch[circuit.suctionTypeField]=circuit.threadedAllowed&&!circuit.forcedFlanged?"ball":"butterfly";patch[circuit.dischargeTypeField]=circuit.threadedAllowed&&!circuit.forcedFlanged?"ball":"butterfly";}onChange?.(patch);};
+  const reset=()=>{const patch:Partial<DnEntity>={collectorMaterial:defaultCollectorMaterial(settings)};for(const circuit of circuits){const collectorDn=recommendedDn(circuit.stationFlow),pumpDn=recommendedDn(circuit.pumpFlow),{connection}=resolveDnConnection(settings,pumpDn,circuit.id==="secondary");for(const row of circuit.rows)patch[row.field]=row.subtitle==="Расход контура"?collectorDn:pumpDn;patch[circuit.connectionField]=null;patch[circuit.pnField]=16;patch[circuit.suctionTypeField]=connection==="threaded"?"ball":"butterfly";patch[circuit.dischargeTypeField]=connection==="threaded"?"ball":"butterfly";}onChange?.(patch);};
   const patchField=<K extends keyof DnEntity>(field:K,value:DnEntity[K])=>onChange?.({[field]:value} as Partial<DnEntity>);
   return <div className="dn-calculator">
-    <header className="dn-calculator__summary"><div><small>РАСЧЁТ DN И ПОДБОР АРМАТУРЫ</small><b>{secondary?2:1} {secondary?"контура":"контур"} · {settings.stationType==="fire"||settings.stationType==="combined"?"красное исполнение":"приоритет синего исполнения"}</b><span>DN, тип соединения, PN и приводы затворов сохраняются в проекте</span></div><div className="dn-calculator__actions"><button className="button" onClick={reset}>Заполнить по умолчанию</button><button className="button button--primary" onClick={onAddValves}>Добавить арматуру в спецификацию</button></div></header>
+    <header className="dn-calculator__summary"><div><small>РАСЧЁТ DN И ПОДБОР АРМАТУРЫ</small><b>{secondary?2:1} {secondary?"контура":"контур"} · {settings.stationType==="fire"||settings.stationType==="combined"?"красное исполнение":"приоритет синего исполнения"}</b><span>DN, материал коллекторов, PN, тип соединения и приводы сохраняются в проекте</span></div><div className="dn-calculator__actions"><button className="button" onClick={reset}>Заполнить по умолчанию</button><button className="button button--primary" onClick={onAddValves}>Добавить арматуру в спецификацию</button></div></header>
     <div className="dn-calculator__material"><label><span>Материал коллекторов</span><select value={entity.collectorMaterial??defaultCollectorMaterial(settings)} onChange={event=>onChange?.({collectorMaterial:event.target.value as CollectorMaterial})}><option value="st20">Ст20</option><option value="aisi304">AISI 304</option></select></label><p><b>{settings.stationType==="fire"?"Пожарная НС":"Стандарт проекта"}</b><span>{settings.stationType==="fire"?"По умолчанию применяется Ст20":"По умолчанию применяется AISI 304"}</span></p></div>
     {circuits.map(circuit=><section className="dn-circuit" key={circuit.id}><header className="dn-circuit__header"><div><small>{circuit.id==="secondary"?"ВТОРОЙ КОНТУР":"КОНТУР 1"}</small><b>{circuit.title}</b><span>Q = {circuit.stationFlow.toLocaleString("ru-RU",{maximumFractionDigits:2})} м³/ч · {circuit.workingPumpCount} раб. + {circuit.totalPumpCount-circuit.workingPumpCount} рез.</span></div><i className={circuit.color==="red"?"dn-circuit__color dn-circuit__color--red":"dn-circuit__color dn-circuit__color--blue"}>{circuit.color==="red"?"Красная арматура":"Синяя в приоритете"}</i></header>
-      <div className="dn-calculator__controls"><label><span>Соединение арматуры</span><select value={circuit.connection} onChange={event=>{const connection=event.target.value as ValveConnection;onChange?.({[circuit.connectionField]:connection,...(connection==="threaded"?{[circuit.suctionTypeField]:"ball",[circuit.dischargeTypeField]:"ball"}:{})} as Partial<DnEntity>);}}><option value="threaded" disabled={!circuit.threadedAllowed}>Резьбовое · до 2″</option><option value="flanged">Фланцевое</option></select><small>{circuit.forcedFlanged?"Для этого типа НС разрешено только фланцевое соединение":circuit.threadedAllowed?"Резьба — стандарт до DN50":"Для выбранного DN требуется фланец"}</small></label><label><span>Рабочее давление</span><select value={circuit.pn} onChange={event=>patchField(circuit.pnField,Number(event.target.value) as ValvePn)}><option value={10}>PN10</option><option value={16}>PN16</option><option value={25}>PN25</option></select></label><label><span>Запорная арматура на всасе</span><select value={circuit.suctionValveType} onChange={event=>patchField(circuit.suctionTypeField,event.target.value as ShutoffValveType)}><option value="butterfly" disabled={circuit.connection==="threaded"}>Затвор дисковый</option><option value="ball">Шаровой кран</option></select></label><label><span>Запорная арматура на напоре</span><select value={circuit.dischargeValveType} onChange={event=>patchField(circuit.dischargeTypeField,event.target.value as ShutoffValveType)}><option value="butterfly" disabled={circuit.connection==="threaded"}>Затвор дисковый</option><option value="ball">Шаровой кран</option></select></label></div>
-      <div className="dn-calculator__grid">{circuit.rows.map(row=>{const dn=circuit.values[row.field],velocity=flowVelocity(row.flow,dn),limit=dnVelocityLimit(dn),valid=velocity<=limit+1e-9;return <section className="dn-calculator__card" key={row.field}><div className="dn-calculator__card-title"><span><b>{row.title}</b><small>{row.subtitle} · {row.flow.toLocaleString("ru-RU",{maximumFractionDigits:2})} м³/ч</small></span><i className={valid?"dn-calculator__status dn-calculator__status--ok":"dn-calculator__status dn-calculator__status--warning"}>{valid?"Норма":"Выше нормы"}</i></div><div className="dn-calculator__values"><label><span>Условный проход</span><select value={dn} onChange={event=>{const next=Number(event.target.value);onChange?.({[row.field]:next,...(next>50&&circuit.connection==="threaded"?{[circuit.connectionField]:"flanged"}:{})} as Partial<DnEntity>);}} aria-label={`Ду: ${circuit.title}, ${row.title}`}>{STANDARD_DN.map(value=><option key={value} value={value}>Ду {value}</option>)}</select></label><span className="dn-calculator__speed"><small>Скорость потока</small><b>{velocity.toLocaleString("ru-RU",{minimumFractionDigits:2,maximumFractionDigits:2})} <i>м/с</i></b><em>Допустимо до {limit} м/с</em></span></div></section>;})}</div>
+      <div className="dn-calculator__controls"><label><span>Соединение арматуры</span><select value={circuit.connection} onChange={event=>{const connection=event.target.value as ValveConnection;onChange?.({[circuit.connectionField]:connection,[circuit.suctionTypeField]:connection==="threaded"?"ball":"butterfly",[circuit.dischargeTypeField]:connection==="threaded"?"ball":"butterfly"} as Partial<DnEntity>);}}><option value="threaded" disabled={!circuit.threadedAllowed}>Резьбовое · до 2″</option><option value="flanged">Фланцевое</option></select><small>{circuit.forcedFlanged?"Для этого типа НС разрешено только фланцевое соединение":circuit.threadedAllowed?"Резьба — стандарт до DN50":"Для выбранного DN требуется фланец"}</small></label><label><span>Рабочее давление</span><select value={circuit.pn} onChange={event=>patchField(circuit.pnField,Number(event.target.value) as ValvePn)}><option value={10}>PN10</option><option value={16}>PN16</option><option value={25}>PN25</option></select></label><label><span>Запорная арматура на всасе</span><select value={circuit.suctionValveType} onChange={event=>patchField(circuit.suctionTypeField,event.target.value as ShutoffValveType)}><option value="butterfly" disabled={circuit.connection==="threaded"}>Затвор дисковый</option><option value="ball">Шаровой кран</option></select></label><label><span>Запорная арматура на напоре</span><select value={circuit.dischargeValveType} onChange={event=>patchField(circuit.dischargeTypeField,event.target.value as ShutoffValveType)}><option value="butterfly" disabled={circuit.connection==="threaded"}>Затвор дисковый</option><option value="ball">Шаровой кран</option></select></label></div>
+
+      {(()=>{const secondary=circuit.id==="secondary",active=secondary?secondaryInput:input,portField=secondary?"secondaryPumpSuctionPort":"pumpSuctionPort",savedPort=entity[portField],port=(savedPort?.pumpId===active.selectedPumpId?savedPort:null)??circuit.suction.port;const setPort=(patch:{dn?:number;connection?:ValveConnection})=>{if(!active.selectedPumpId)return;onChange?.({[portField]:{pumpId:active.selectedPumpId,dn:patch.dn??port?.dn??null,connection:patch.connection??port?.connection??null,source:"Указано пользователем",maxPressure:null}} as Partial<DnEntity>);};return <div className="dn-calculator__controls"><label><span>Всасывающий патрубок насоса · DN</span><select aria-label={`DN патрубка: ${circuit.title}`} disabled={!active.selectedPumpId} value={port?.dn??""} onChange={event=>setPort({dn:Number(event.target.value)})}><option value="" disabled>Укажите размер</option>{[15,20,...STANDARD_DN].map(size=><option key={size} value={size}>DN{size}</option>)}</select></label><label><span>Соединение патрубка насоса</span><select aria-label={`Соединение патрубка: ${circuit.title}`} disabled={!active.selectedPumpId} value={port?.connection??""} onChange={event=>setPort({connection:event.target.value as ValveConnection})}><option value="" disabled>Укажите соединение</option><option value="threaded">Резьбовое</option><option value="flanged">Фланцевое</option></select><small>{port?.source??"В каталоге нет однозначного размера. Укажите по паспорту насоса."}</small></label><div><button className="button" disabled={!pumpPortChoices(active.selectedPumpId).length} onClick={()=>onChange?.({[portField]:null} as Partial<DnEntity>)}>Патрубок из каталога</button><p>Всас: {circuit.suction.connection==="threaded"?"резьбовая арматура":"фланцевая арматура"}. {circuit.suction.locked?"DN крана равен DN патрубка и изменяется вместе с ним.":""}</p></div></div>;})()}
+      {circuit.suction.errors.map(error=><p key={error} role="alert" className="dn-calculator__error">{error}</p>)}
+      <div className="dn-calculator__grid">{circuit.rows.map(row=>{const dn=circuit.values[row.field],velocity=flowVelocity(row.flow,dn),limit=dnVelocityLimit(dn),valid=velocity<=limit+1e-9;return <section className="dn-calculator__card" key={row.field}><div className="dn-calculator__card-title"><span><b>{row.title}</b><small>{row.subtitle} · {row.flow.toLocaleString("ru-RU",{maximumFractionDigits:2})} м³/ч</small></span><i className={valid?"dn-calculator__status dn-calculator__status--ok":"dn-calculator__status dn-calculator__status--warning"}>{valid?"Норма":"Выше нормы"}</i></div><div className="dn-calculator__values"><label><span>Условный проход</span><select value={dn} disabled={circuit.suction.locked && /[Ss]uctionValveDn$/.test(row.field)} onChange={event=>{const next=Number(event.target.value);onChange?.({[row.field]:next} as Partial<DnEntity>);}} aria-label={`Ду: ${circuit.title}, ${row.title}`}>{[15,20,...STANDARD_DN].map(value=><option key={value} value={value}>Ду {value}</option>)}</select></label><span className="dn-calculator__speed"><small>Скорость потока</small><b>{velocity.toLocaleString("ru-RU",{minimumFractionDigits:2,maximumFractionDigits:2})} <i>м/с</i></b><em>Допустимо до {limit} м/с</em></span></div></section>;})}</div>
     </section>)}
     {isSecondaryEnabled(settings)&&!secondary&&<div className="dn-calculator__secondary-empty"><b>Контур 2 ожидает рабочую точку</b><span>Заполните «Подбор насосов 2» — DN и арматура появятся автоматически.</span></div>}
-    <footer className="dn-calculator__note"><span>i</span><p><b>Правила автоподбора</b>До DN250 скорость ограничена 2 м/с, выше — 3 м/с. Резьба применяется до DN50 для хозпита и жокея. Затворы до DN125 подбираются с рукояткой, от DN150 — с редуктором.</p></footer>
+    <footer className="dn-calculator__note"><span>i</span><p><b>Правила автоподбора</b>До DN250 скорость ограничена 2 м/с, выше — 3 м/с. Резьба до DN50 (2″) включительно — по умолчанию для первого контура хоз-пит и SMART и для второго контура. При необходимости можно выбрать фланцевое соединение. Затворы до DN125 подбираются с рукояткой, от DN150 — с редуктором. Обратный клапан подбирается по DN напорной арматуры, PN и материалу коллектора. Шаровой кран — всегда латунный с ручкой-рычагом, независимо от цвета и материала коллектора.</p></footer>
   </div>;
 }
 
 const HYDRAULIC_SPEC_OPTIONS:SpecOption[]=["primarySuctionValve","primaryDischargeValve","primaryCheckValve","secondarySuctionValve","secondaryDischargeValve","secondaryCheckValve"];
-const valveSpecItem=(selection:ValveSelection|null,kind:ValveSelectionKind,circuit:CircuitDnConfig,dn:number,section:SpecSection,position:string,option:SpecOption):SpecItem=>{
-  const connectionLabel=circuit.connection==="threaded"?"Резьбовое до 2″":"Фланцевое",colorLabel=circuit.color==="red"?"Красное исполнение":"Синее исполнение в приоритете",typeLabel=kind==="butterfly"?"Затвор дисковый":kind==="ball"?"Кран шаровой":"Клапан обратный",execution=kind==="butterfly"?(dn<150?"рукоятка":"редуктор"):circuit.connection==="threaded"?"резьбовой":"фланцевый";
-  return {position,name:selection?.item.family??typeLabel,details:`DN${dn} · PN${circuit.pn} · ${connectionLabel} · ${colorLabel} · ${execution}`,quantity:circuit.totalPumpCount,unit:"шт.",price:selection?.price?.amount??null,equipmentId:selection?.item.id,description:selection?`${circuit.title} · подобрано из базы комплектующих`:`${circuit.title} · точное исполнение по DN, PN, соединению и цвету не найдено в базе`,section,option,status:selection?.price?"selected":"clarify"};
+const valveSpecItem=(selection:ValveSelection|null,kind:ValveSelectionKind,circuit:CircuitDnConfig,dn:number,section:SpecSection,position:string,option:SpecOption,collectorMaterial:CollectorMaterial):SpecItem=>{
+  if(kind==="ball")return {
+    position,name:selection?.item.family??"Кран шаровой латунный · ручка-рычаг",
+    details:`DN${dn} · PN${circuit.pn} · ${circuit.connection==="threaded"?"Резьбовое до 2″":"Требуется фланцевое соединение"} · Материал: Латунь · Ручка-рычаг`,
+    quantity:circuit.totalPumpCount,unit:"шт.",price:selection?.price?.amount??null,equipmentId:selection?.item.id,
+    description:selection?`${circuit.title} · латунный кран с ручкой-рычагом; цвет и материал коллектора не учитываются`:`${circuit.title} · латунный кран с ручкой-рычагом по DN, PN и соединению не найден в базе`,
+    section,option,status:selection?.price?"selected":"clarify",
+  };
+  const connectionLabel=circuit.connection==="threaded"?"Резьбовое до 2″":"Фланцевое",colorLabel=circuit.color==="red"?"Красное исполнение":"Синее исполнение в приоритете",typeLabel=kind==="butterfly"?"Затвор дисковый":"Клапан обратный",execution=kind==="butterfly"?(dn<150?"рукоятка":"редуктор"):circuit.connection==="threaded"?"резьбовой":"фланцевый";
+  const material=kind==="check"?(selection?.material??checkValveMaterial(collectorMaterial,circuit.connection)):null,materialDetails=material?` · Материал: ${material}`:"";
+  return {position,name:selection?.item.family??typeLabel,details:`DN${dn} · PN${circuit.pn} · ${connectionLabel} · ${colorLabel} · ${execution}${materialDetails}`,quantity:circuit.totalPumpCount,unit:"шт.",price:selection?.price?.amount??null,equipmentId:selection?.item.id,description:selection?`${circuit.title} · подобрано из базы комплектующих по DN, PN и материалу коллектора`:`${circuit.title} · точное исполнение по DN, PN, соединению, цвету и материалу коллектора не найдено в базе`,section,option,status:selection?.price?"selected":"clarify"};
 };
 const buildValveSpecItems=(database:ComponentsDatabase,entity:DnEntity,input:InputEntity,secondaryInput:InputEntity,settings:SettingsEntity)=>{
-  const primary=getCircuitDnConfig(entity,input,settings),secondary=isSecondaryEnabled(settings)?getCircuitDnConfig(entity,secondaryInput,settings,true):null,circuits=[primary,...(secondary?[secondary]:[])].filter((item):item is CircuitDnConfig=>Boolean(item));
+  const primary=getCircuitDnConfig(entity,input,settings),secondary=isSecondaryEnabled(settings)?getCircuitDnConfig(entity,secondaryInput,settings,true):null,circuits=[primary,...(secondary?[secondary]:[])].filter((item):item is CircuitDnConfig=>Boolean(item)),collectorMaterial=entity.collectorMaterial??defaultCollectorMaterial(settings);
   return circuits.flatMap(circuit=>{const secondaryCircuit=circuit.id==="secondary",suctionDn=circuit.values[secondaryCircuit?"secondarySuctionValveDn":"suctionValveDn"],dischargeDn=circuit.values[secondaryCircuit?"secondaryDischargeValveDn":"dischargeValveDn"],prefix=secondaryCircuit?"secondary":"primary";
     const suctionKind:ValveSelectionKind=circuit.suctionValveType,dischargeKind:ValveSelectionKind=circuit.dischargeValveType;
     return [
-      valveSpecItem(selectValveComponent(database.items,suctionKind,suctionDn,circuit.connection,circuit.pn,circuit.color),suctionKind,circuit,suctionDn,"suction",secondaryCircuit?"03.20":"03.10",`${prefix}SuctionValve` as SpecOption),
-      valveSpecItem(selectValveComponent(database.items,dischargeKind,dischargeDn,circuit.connection,circuit.pn,circuit.color),dischargeKind,circuit,dischargeDn,"discharge",secondaryCircuit?"04.20":"04.10",`${prefix}DischargeValve` as SpecOption),
-      valveSpecItem(selectValveComponent(database.items,"check",dischargeDn,circuit.connection,circuit.pn,circuit.color),"check",circuit,dischargeDn,"discharge",secondaryCircuit?"04.21":"04.11",`${prefix}CheckValve` as SpecOption),
+      valveSpecItem(selectValveComponent(database.items,suctionKind,suctionDn,circuit.suction.connection,circuit.pn,circuit.color,collectorMaterial),suctionKind,{...circuit,connection:circuit.suction.connection},suctionDn,"suction",secondaryCircuit?"03.20":"03.10",`${prefix}SuctionValve` as SpecOption,collectorMaterial),
+      valveSpecItem(selectValveComponent(database.items,dischargeKind,dischargeDn,circuit.connection,circuit.pn,circuit.color,collectorMaterial),dischargeKind,circuit,dischargeDn,"discharge",secondaryCircuit?"04.20":"04.10",`${prefix}DischargeValve` as SpecOption,collectorMaterial),
+      valveSpecItem(selectValveComponent(database.items,"check",dischargeDn,circuit.connection,circuit.pn,circuit.color,collectorMaterial),"check",circuit,dischargeDn,"discharge",secondaryCircuit?"04.21":"04.11",`${prefix}CheckValve` as SpecOption,collectorMaterial),
     ];
   });
 };
+
+function refreshSuctionSpecification(project:ProjectConfig,database=loadedComponentsDatabase,force=false):ProjectConfig {
+  const spec=project.entities["station-spec"] as SpecEntity;
+  const managed=spec.items.filter(item=>item.generatedBy==="suction-line");
+  if(!database || (!force&&!managed.length))return project;
+  const fingerprint=suctionFingerprint(project);
+  if(!force && managed.length && managed.every(item=>item.sourceFingerprint===fingerprint))return project;
+  const dn=project.entities["station-dn"] as DnEntity,settings=project.entities["station-settings"] as SettingsEntity,primary=project.entities["system-input"] as InputEntity,secondary=project.entities["system-input-2"] as InputEntity;
+  const valves=buildValveSpecItems(database,dn,primary,secondary,settings);
+  const items=normalizeSpecificationItems([...replaceSuctionSpec(spec.items.filter(item=>!HYDRAULIC_SPEC_OPTIONS.includes(specificationOption(item) as SpecOption)),buildSuctionSpec(project,database,database.collectorCatalog)),...valves]);
+  return {...project,entities:{...project.entities,"station-spec":{...spec,items}}};
+}
 
 function PanelContent({ collectorPanel, id, entity, input, secondaryInput, settings, draftPoint, catalogue, onDraftPointChange, onInputChange, onSettingsChange, onDnChange, onAddValves, onAddToSpec, onCabinetConfigured, locked }: { collectorPanel?: React.ReactNode; id: PanelKind; entity: ProjectEntity; input: InputEntity; secondaryInput:InputEntity; settings: SettingsEntity; draftPoint:{flowRate:string;head:string}; catalogue:Pump[]; onDraftPointChange:(point:{flowRate:string;head:string})=>void; onInputChange?: (patch: Partial<InputEntity>) => void; onSettingsChange?: (patch: Partial<SettingsEntity>) => void; onDnChange?:(patch:Partial<DnEntity>)=>void; onAddValves?:()=>void; onAddToSpec?:()=>void; onCabinetConfigured?:(cabinet:SmartCabinet)=>void; locked?:boolean }) {
   if (locked) return <div className="tool-lock"><span aria-hidden="true">🔒</span><b>Второй контур заблокирован</b><p>Выберите совмещённую установку или пожаротушение и включите жокей-насос в настройках.</p></div>;
@@ -541,6 +597,13 @@ export default function Home() {
   const secondaryEnabled = isSecondaryEnabled(settingsEntity);
   const { catalog: collectorCatalog, catalogError: collectorCatalogError, setCatalog: setCollectorCatalog } = useCollectorDatabase(config, setConfig, Boolean(account));
   const updateDraftPoint=(point:{flowRate:string;head:string})=>setDraftPoint(point);
+  const suctionSource=suctionFingerprint(config), suctionEnabled=(config.entities["station-spec"] as SpecEntity).items.some(item=>item.generatedBy==="suction-line");
+  useEffect(()=>{
+    if(!suctionEnabled)return;
+    let active=true;
+    void loadComponentsDatabase().then(database=>{if(active)setConfig(current=>refreshSuctionSpecification(synchronizeCollectors(current),database));}).catch(()=>setSaveMessage("Не удалось обновить комплектацию всасывающей линии"));
+    return()=>{active=false;};
+  },[suctionEnabled,suctionSource]);
 
   useEffect(() => {
     const params=new URLSearchParams(window.location.search),panel=params.get("panel"),requestedProject=params.get("project");
@@ -575,7 +638,7 @@ export default function Home() {
 
   const refreshHistoryState = () => setHistoryState({ canUndo:historyIndex.current>0, canRedo:historyIndex.current<history.current.length-1 });
   const updateConfig = (change: (current: ProjectConfig) => ProjectConfig) => setConfig(current => {
-    const next=withUpdatedTimestamp(synchronizeCollectors(change(current)));
+    const next=withUpdatedTimestamp(refreshSuctionSpecification(synchronizeCollectors(change(current))));
     if (hydrated.current && JSON.stringify(next)!==JSON.stringify(current)) { history.current=history.current.slice(0,historyIndex.current+1); history.current.push(next); historyIndex.current=history.current.length-1; queueMicrotask(refreshHistoryState); }
     return next;
   });
@@ -599,7 +662,7 @@ export default function Home() {
   const updateInput = (patch: Partial<InputEntity>) => updateConfig(current => ({ ...current, entities: { ...current.entities, "system-input": { ...(current.entities["system-input"] as InputEntity), ...patch, ...(patch.selectedPumpId ? {selectedPumpModel: (()=>{const pump=catalogue.find(p=>p.id===patch.selectedPumpId);return pump?`${pump.manufacturer} ${pump.model}`:undefined;})()} : {}) } } }));
   const updateInput2 = (patch: Partial<InputEntity>) => updateConfig(current => ({ ...current, entities: { ...current.entities, "system-input-2": { ...(current.entities["system-input-2"] as InputEntity), ...patch, ...(patch.selectedPumpId ? {selectedPumpModel: (()=>{const pump=catalogue.find(p=>p.id===patch.selectedPumpId);return pump?`${pump.manufacturer} ${pump.model}`:undefined;})()} : {}) } } }));
   const updateDn = (patch:Partial<DnEntity>) => updateConfig(current=>({...current,entities:{...current.entities,"station-dn":{...(current.entities["station-dn"] as DnEntity),...patch}}}));
-  const addValvesToSpec=()=>{setSaveMessage("Подбор арматуры…");void loadComponentsDatabase().then(database=>{updateConfig(current=>{const settings=current.entities["station-settings"] as SettingsEntity,dn=current.entities["station-dn"] as DnEntity,primary=current.entities["system-input"] as InputEntity,secondary=current.entities["system-input-2"] as InputEntity,spec=current.entities["station-spec"] as SpecEntity,selected=buildValveSpecItems(database,dn,primary,secondary,settings),items=[...spec.items.filter(item=>!HYDRAULIC_SPEC_OPTIONS.includes(item.option as SpecOption)&&!(item.position==="03.02"&&item.name==="Затвор дисковый")&&!(item.position==="04.01"&&item.name==="Клапан обратный")),...selected].sort((a,b)=>a.position.localeCompare(b.position,"ru",{numeric:true}));return {...current,entities:{...current.entities,"station-spec":{...spec,items}}};});setSaveMessage("Арматура добавлена в спецификацию");}).catch(()=>setSaveMessage("Не удалось подобрать арматуру"));};
+  const addValvesToSpec=()=>{setSaveMessage("Подбор арматуры и комплектация всасывающей линии…");void loadComponentsDatabase().then(database=>{updateConfig(current=>refreshSuctionSpecification(current,database,true));setSaveMessage("Всасывающая линия заполнена. Позиции без точного исполнения или цены отмечены «Уточнить».");}).catch(()=>setSaveMessage("Не удалось загрузить комплектующие для спецификации"));};
   const updateSettings = (patch: Partial<SettingsEntity>) => updateConfig(current => {
     const settings={ ...(current.entities["station-settings"] as SettingsEntity), ...patch };
     const spec=current.entities["station-spec"] as SpecEntity,pump=catalogue.find(item=>item.id===current.station.selectedPumpId),total=current.station.totalPumpCount;

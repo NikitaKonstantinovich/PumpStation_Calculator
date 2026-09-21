@@ -127,3 +127,6 @@ button,a { -webkit-tap-highlight-color:transparent; }
 .collector-actions { display: flex; flex-wrap: wrap; gap: 8px; }
 .collector-actions .button { width: auto; height: auto; min-height: 36px; white-space: normal; padding: 8px 12px; }
 .collector-actions .button:disabled { opacity: .5; cursor: not-allowed; }
+.dn-calculator__error { padding: 10px 12px; border-left: 3px solid #c83434; background: #fff1f1; color: #982525; border-radius: 4px; }
+.dn-calculator__controls p { font-size: 12px; line-height: 1.45; color: #52627a; }
+.dn-calculator__values select:disabled { opacity: .75; cursor: not-allowed; }

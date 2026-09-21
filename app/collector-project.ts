@@ -1,5 +1,6 @@
 import type { DnEntity, InputEntity, ProjectConfig, SettingsEntity, SpecItem } from "./project-config";
-import { defaultCollectorMaterial, recommendedDn } from "./dn-defaults";
+import { normalizeSpecificationItems } from "./specification-items";
+import { defaultCollectorMaterial, recommendedDn, resolveDnConnection, suctionHydraulics } from "./dn-defaults";
 import { collectorCode, configurationFingerprint, positive, secondaryAllowed, type CollectorCalculation, type CollectorConfiguration, type CollectorType } from "./collector-calculations";
 
 export type CollectorOverrides = Partial<Pick<CollectorConfiguration, "dn" | "pn" | "material" | "connection">> & { primaryDn?: number; secondaryDn?: number; primaryConnection?: "threaded" | "flanged"; secondaryConnection?: "threaded" | "flanged"; secondaryPn?: number };
@@ -31,10 +32,11 @@ export function collectorRecommendation(project: ProjectConfig, type: CollectorT
   const first = project.entities["system-input"] as InputEntity, second = project.entities["system-input-2"] as InputEntity;
   const circuit = (input: InputEntity, secondary: boolean) => {
     const prefix = secondary ? "secondary" : "", branch = type === "suction" ? (secondary ? "secondarySuctionValveDn" : "suctionValveDn") : (secondary ? "secondaryDischargeValveDn" : "dischargeValveDn");
-    const branchDn = dn[branch] ?? (positive(input.flowRate) && positive(input.workingPumpCount) ? recommendedDn(input.flowRate / input.workingPumpCount) : null);
+    const pumpDn = positive(input.flowRate) && positive(input.workingPumpCount) ? recommendedDn(input.flowRate / input.workingPumpCount) : null;
+    const suction = type === "suction" ? suctionHydraulics(dn,input,settings,secondary) : null;
+    const branchDn = suction && positive(input.flowRate) ? suction.dn : dn[branch] ?? pumpDn;
     const pair = secondary ? [dn.secondarySuctionValveDn, dn.secondaryDischargeValveDn] : [dn.suctionValveDn, dn.dischargeValveDn];
-    const forced = settings.stationType === "combined" || (settings.stationType === "fire" && !secondary);
-    const connection = forced || Math.max(branchDn ?? 0, ...pair.map(v => v ?? branchDn ?? 0)) > 50 || (settings.stationType !== "utility" && !(secondary && settings.stationType === "fire")) ? "flanged" : (secondary ? dn.secondaryConnectionType : dn.connectionType) ?? "threaded";
+    const connection = suction?.connection ?? resolveDnConnection(settings, Math.max(...pair.map(v => v ?? pumpDn ?? 0)), secondary, secondary ? dn.secondaryConnectionType : dn.connectionType).connection;
     return { flow: input.flowRate, working: input.workingPumpCount, reserve: input.reservePumpCount, pumpId: input.selectedPumpId ?? (prefix ? project.station.secondaryPumpId : project.station.selectedPumpId), pumpModel: input.selectedPumpModel ?? (input.selectedPumpId && input.selectedPumpId !== (prefix ? project.station.secondaryPumpId : project.station.selectedPumpId) ? undefined : prefix ? project.station.secondaryPumpModel : project.station.selectedPumpModel), dn: branchDn, connection, pn: (secondary ? dn.secondaryPn : dn.pn) ?? 16, spacing: secondary ? 400 : 500 } as CollectorConfiguration["primary"];
   };
   const base = { stationType: settings.stationType, jockey: settings.jockeyPump, simultaneous: settings.combinedCircuitsSimultaneous };
@@ -43,7 +45,7 @@ export function collectorRecommendation(project: ProjectConfig, type: CollectorT
   const primary = circuit(first, false), secondary = secondaryAllowed(base) ? circuit(second, true) : null;
   const recommended1 = firstDn ?? (positive(first.flowRate) ? recommendedDn(first.flowRate) : null), recommended2 = secondDn ?? (positive(second.flowRate) ? recommendedDn(second.flowRate) : null);
   const networkDn = secondary && recommended1 && recommended2 ? Math.max(recommended1, recommended2) : recommended1;
-  return { ...base, type, dn: networkDn, pn: Math.max(primary.pn, secondary?.pn ?? 0), material: dn.collectorMaterial ?? defaultCollectorMaterial(settings), connection: networkDn && networkDn <= 50 ? primary.connection : "flanged", eccentric: false, primary, secondary };
+  return { ...base, type, dn: networkDn, pn: Math.max(primary.pn, secondary?.pn ?? 0), material: dn.collectorMaterial ?? defaultCollectorMaterial(settings), connection: resolveDnConnection(settings, networkDn, false, dn.connectionType).connection, eccentric: false, primary, secondary };
 }
 export function resolveCollector(recommended: CollectorConfiguration, state: CollectorCardState): CollectorConfiguration {
   const o = state.overrides;
@@ -65,7 +67,7 @@ export function syncCollectorSpec(items: SpecItem[], collectors: CollectorsEntit
     result = result.filter(item => !isItem(item));
     result.push({ ...previous, position: type === "suction" ? "03.01" : "04.02", name: legacy, section: type, option, quantity: 1, unit: "шт.", equipmentId: saved?.id, details: state.code ?? "Не заданы параметры коллектора", price: saved?.price ?? calculated?.price ?? null, description, status: saved ? "selected" : calculated ? "confirmation" : "clarify" });
   }
-  return result.sort((a, b) => a.position.localeCompare(b.position, "ru", { numeric: true }));
+  return normalizeSpecificationItems(result);
 }
 export function synchronizeCollectors(project: ProjectConfig): ProjectConfig {
   const previous = (project.entities["station-collectors"] as CollectorsEntity | undefined) ?? createCollectors();

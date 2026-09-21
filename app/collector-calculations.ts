@@ -4,7 +4,7 @@ export type CollectorType = "suction" | "discharge";
 export type CollectorCircuit = { flow: number | null; working: number | null; reserve: number | null; pumpId?: string; pumpModel?: string; dn: number | null; connection: ValveConnection; spacing: number; pn: number };
 export type CollectorConfiguration = { type: CollectorType; dn: number | null; pn: number; material: CollectorMaterial; connection: ValveConnection; eccentric: boolean; stationType: StationType; simultaneous: boolean; jockey: boolean; primary: CollectorCircuit; secondary: CollectorCircuit | null };
 export type ComponentKind = "pipe" | "weldFlange" | "looseFlange" | "collar" | "nipple" | "plug";
-export type CollectorComponent = { id: string; kind: ComponentKind; name: string; dn: number; pn: number | null; material: CollectorMaterial; price: number | null; outerDiameter: number | null; innerDiameter: number | null; source: string };
+export type CollectorComponent = { id: string; kind: ComponentKind; name: string; dn: number; pn: number | null; material: CollectorMaterial | "brass"; threadGender?: "female" | "male"; price: number | null; outerDiameter: number | null; innerDiameter: number | null; source: string };
 export type CollectorCatalog = { version: string; components: CollectorComponent[]; bolts: Array<{ dn: number; pn: number; length: number; source: string }> };
 export type CollectorBomItem = { role: string; componentId: string | null; kind: ComponentKind | "welding"; name: string; quantity: number; unit: "м" | "шт."; unitPrice: number | null; cost: number | null; source: string | null };
 export type WeldOperation = { role: string; name: string; count: number; lengthMm: number; cost: number };
@@ -57,8 +57,14 @@ export function calculateCollector(c: CollectorConfiguration, catalog: Collector
   const warnings = configurationWarnings(c), bom: CollectorBomItem[] = [], welds: WeldOperation[] = [];
   const rate = WELD_RATES[c.material], flow = collectorFlow(c);
   if (flow.flow === null) warnings.push("Укажите расход каждого активного контура больше нуля");
-  const label = (kind: ComponentKind, dn: number | null, pn: number) => `${({ pipe: "Труба", weldFlange: "Фланец приварной", looseFlange: "Фланец воротниковый", collar: "Воротник", nipple: "Сгон", plug: "Заглушка резьбовая" })[kind]} DN${dn ?? "?"} PN${pn} ${c.material === "aisi304" ? "AISI304" : "СТ20"}`;
-  const find = (kind: ComponentKind, dn: number | null, pn: number) => catalog.components.find(v => v.kind === kind && v.dn === dn && v.material === c.material && (v.pn === pn || ((kind === "nipple" || kind === "plug") && v.pn === null)));
+  const label = (kind: ComponentKind, dn: number | null, pn: number) => `${({ pipe: "Труба", weldFlange: "Фланец приварной", looseFlange: "Фланец воротниковый", collar: "Воротник", nipple: "Сгон", plug: "Заглушка резьбовая ВР" })[kind]} DN${dn ?? "?"} PN${pn}${kind === "plug" ? " или выше" : ` ${c.material === "aisi304" ? "AISI304" : "СТ20"}`}`;
+  const find = (kind: ComponentKind, dn: number | null, pn: number) => catalog.components.find(v => {
+    if (v.kind !== kind || v.dn !== dn) return false;
+    // Caps screw onto the sgon: their material need not match welded parts.
+    // Unknown pressure or a male thread cannot establish a compatible cap.
+    if (kind === "plug") return v.threadGender === "female" && positive(v.pn) && v.pn >= pn && (v.material === c.material || v.material === "brass");
+    return v.material === c.material && (v.pn === pn || (kind === "nipple" && v.pn === null));
+  });
   const add = (role: string, kind: ComponentKind, dn: number | null, pn: number, quantity: number) => {
     const item = find(kind, dn, pn), name = item?.name ?? label(kind, dn, pn);
     if (!item) warnings.push(`Нет компонента: ${label(kind, dn, pn)}`);

@@ -158,13 +158,19 @@ test("provides a persisted DN calculator with SP velocity defaults", async () =>
   assert.match(page, /PN10/);
   assert.match(page, /PN16/);
   assert.match(page, /PN25/);
-  assert.match(page, /forcedFlanged=\(settings\.stationType==="fire"&&!jockey\)\|\|settings\.stationType==="combined"/);
-  assert.match(page, /threadedAllowed=maxValveDn<=50&&\(settings\.stationType==="utility"\|\|jockey\)/);
+  assert.match(page, /resolveDnConnection\(settings,maxValveDn,secondary,savedConnection\)/);
   assert.match(page, /dn<150\?\/рукоятк\/i:\/редуктор\/i/);
   assert.match(page, /if\(color==="red"\)candidates=candidates\.filter\(item=>componentColor\(item\)==="red"\)/);
   assert.match(page, /componentColor\(item\)==="blue"\?0/);
   assert.match(page, /Добавить арматуру в спецификацию/);
   assert.match(page, /const buildValveSpecItems=/);
+  assert.match(page, /const checkValvePns=/);
+  assert.match(page, /if\(\/латунн\.\*сердечник\/i\.test\(text\)\|\|\/010C\\\.Y\.\*красн\/i\.test\(text\)\)return \[16\]/);
+  assert.match(page, /if\(\/\\b\(\?:010C/);
+  assert.match(page, /const checkValveMaterial=/);
+  assert.match(page, /material==="aisi304"\?"Нержавеющая сталь":"Чугун"/);
+  assert.match(page, /item\.prices\.find\(entry=>entry\.label\.toLocaleLowerCase\("ru-RU"\)\.includes\(material\.toLocaleLowerCase\("ru-RU"\)\)\)/);
+  assert.match(page, /подобрано из базы комплектующих по DN, PN и материалу коллектора/);
   assert.match(page, /primarySuctionValve/);
   assert.match(page, /secondaryCheckValve/);
   assert.match(page, /Контур 2 · жокей-насос/);
@@ -460,7 +466,7 @@ test("provides a component-database tool with category-specific characteristics 
   ]);
   const database = JSON.parse(rawDatabase);
   assert.equal(database.catalogs.length, 25);
-  assert.equal(database.items.length, 1794);
+  assert.equal(database.items.length, 1800);
   assert.ok(!database.catalogs.some(catalog => catalog.id === "обвязка"));
   assert.ok(database.catalogs.some(catalog => catalog.id === "обратные-клапаны"));
   assert.ok(database.catalogs.some(catalog => catalog.id === "пожарная-арматура"));
@@ -518,10 +524,10 @@ test("ships the complete binding-component catalogue with prices and relations",
   assert.equal(catalogue.source.externalLinks.length, 2);
   assert.deepEqual(catalogue.statistics, {
     catalogs: 25,
-    tables: 76,
-    componentRows: 1794,
-    pricedComponentRows: 1765,
-    priceEntries: 4226,
+    tables: 77,
+    componentRows: 1800,
+    pricedComponentRows: 1771,
+    priceEntries: 4232,
     formulaRules: 4785,
     formulaErrorsInSavedValues: 0,
     dataValidations: 23,

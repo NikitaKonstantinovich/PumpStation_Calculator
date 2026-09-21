@@ -1,0 +1,3644 @@
+{
+  "1": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN25",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    },
+    {
+      "kind": "cdm_oval_flange",
+      "value": "G1",
+      "maxPressure": 16.0,
+      "source": "Соединение CDM: овальный фланец"
+    }
+  ],
+  "2": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN25",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    },
+    {
+      "kind": "cdm_oval_flange",
+      "value": "G1",
+      "maxPressure": 16.0,
+      "source": "Соединение CDM: овальный фланец"
+    }
+  ],
+  "3": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN25",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    },
+    {
+      "kind": "cdm_oval_flange",
+      "value": "G1",
+      "maxPressure": 16.0,
+      "source": "Соединение CDM: овальный фланец"
+    }
+  ],
+  "4": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN25",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    },
+    {
+      "kind": "cdm_oval_flange",
+      "value": "G1",
+      "maxPressure": 16.0,
+      "source": "Соединение CDM: овальный фланец"
+    }
+  ],
+  "5": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN25",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    },
+    {
+      "kind": "cdm_oval_flange",
+      "value": "G1",
+      "maxPressure": 16.0,
+      "source": "Соединение CDM: овальный фланец"
+    }
+  ],
+  "6": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN25",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    },
+    {
+      "kind": "cdm_oval_flange",
+      "value": "G1",
+      "maxPressure": 16.0,
+      "source": "Соединение CDM: овальный фланец"
+    }
+  ],
+  "7": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN25",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    },
+    {
+      "kind": "cdm_oval_flange",
+      "value": "G1",
+      "maxPressure": 16.0,
+      "source": "Соединение CDM: овальный фланец"
+    }
+  ],
+  "8": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN25",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    },
+    {
+      "kind": "cdm_oval_flange",
+      "value": "G1",
+      "maxPressure": 16.0,
+      "source": "Соединение CDM: овальный фланец"
+    }
+  ],
+  "9": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN25",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    },
+    {
+      "kind": "cdm_oval_flange",
+      "value": "G1",
+      "maxPressure": 16.0,
+      "source": "Соединение CDM: овальный фланец"
+    }
+  ],
+  "10": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN25",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    },
+    {
+      "kind": "cdm_oval_flange",
+      "value": "G1",
+      "maxPressure": 16.0,
+      "source": "Соединение CDM: овальный фланец"
+    }
+  ],
+  "11": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN25",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    },
+    {
+      "kind": "cdm_oval_flange",
+      "value": "G1",
+      "maxPressure": 16.0,
+      "source": "Соединение CDM: овальный фланец"
+    }
+  ],
+  "12": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN25",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    },
+    {
+      "kind": "cdm_oval_flange",
+      "value": "G1",
+      "maxPressure": 16.0,
+      "source": "Соединение CDM: овальный фланец"
+    }
+  ],
+  "13": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN25",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    },
+    {
+      "kind": "cdm_oval_flange",
+      "value": "G1",
+      "maxPressure": 16.0,
+      "source": "Соединение CDM: овальный фланец"
+    }
+  ],
+  "14": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN25",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    },
+    {
+      "kind": "cdm_oval_flange",
+      "value": "G1",
+      "maxPressure": 16.0,
+      "source": "Соединение CDM: овальный фланец"
+    }
+  ],
+  "15": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN25",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    },
+    {
+      "kind": "cdm_oval_flange",
+      "value": "G1",
+      "maxPressure": 16.0,
+      "source": "Соединение CDM: овальный фланец"
+    }
+  ],
+  "16": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN25",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    },
+    {
+      "kind": "cdm_oval_flange",
+      "value": "G1",
+      "maxPressure": 16.0,
+      "source": "Соединение CDM: овальный фланец"
+    }
+  ],
+  "17": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN25",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    },
+    {
+      "kind": "cdm_oval_flange",
+      "value": "G1",
+      "maxPressure": 16.0,
+      "source": "Соединение CDM: овальный фланец"
+    }
+  ],
+  "18": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN25",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    },
+    {
+      "kind": "cdm_oval_flange",
+      "value": "G1",
+      "maxPressure": 16.0,
+      "source": "Соединение CDM: овальный фланец"
+    }
+  ],
+  "19": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN25",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    },
+    {
+      "kind": "cdm_oval_flange",
+      "value": "G1",
+      "maxPressure": 16.0,
+      "source": "Соединение CDM: овальный фланец"
+    }
+  ],
+  "20": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN25",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    },
+    {
+      "kind": "cdm_oval_flange",
+      "value": "G1",
+      "maxPressure": 16.0,
+      "source": "Соединение CDM: овальный фланец"
+    }
+  ],
+  "21": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN25",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    },
+    {
+      "kind": "cdm_oval_flange",
+      "value": "G1",
+      "maxPressure": 16.0,
+      "source": "Соединение CDM: овальный фланец"
+    }
+  ],
+  "22": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN25",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    },
+    {
+      "kind": "cdm_oval_flange",
+      "value": "G1",
+      "maxPressure": 16.0,
+      "source": "Соединение CDM: овальный фланец"
+    }
+  ],
+  "23": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN25",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    },
+    {
+      "kind": "cdm_oval_flange",
+      "value": "G1",
+      "maxPressure": 16.0,
+      "source": "Соединение CDM: овальный фланец"
+    }
+  ],
+  "24": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN25",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    },
+    {
+      "kind": "cdm_oval_flange",
+      "value": "G1",
+      "maxPressure": 16.0,
+      "source": "Соединение CDM: овальный фланец"
+    }
+  ],
+  "25": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN25",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    },
+    {
+      "kind": "cdm_oval_flange",
+      "value": "G1",
+      "maxPressure": 16.0,
+      "source": "Соединение CDM: овальный фланец"
+    }
+  ],
+  "26": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN25",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    },
+    {
+      "kind": "cdm_oval_flange",
+      "value": "G1",
+      "maxPressure": 16.0,
+      "source": "Соединение CDM: овальный фланец"
+    }
+  ],
+  "27": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN25",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    },
+    {
+      "kind": "cdm_oval_flange",
+      "value": "G1",
+      "maxPressure": 16.0,
+      "source": "Соединение CDM: овальный фланец"
+    }
+  ],
+  "28": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN25",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    },
+    {
+      "kind": "cdm_oval_flange",
+      "value": "G1",
+      "maxPressure": 16.0,
+      "source": "Соединение CDM: овальный фланец"
+    }
+  ],
+  "29": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN25",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    },
+    {
+      "kind": "cdm_oval_flange",
+      "value": "G1",
+      "maxPressure": 16.0,
+      "source": "Соединение CDM: овальный фланец"
+    }
+  ],
+  "30": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN25",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    },
+    {
+      "kind": "cdm_oval_flange",
+      "value": "G1",
+      "maxPressure": 16.0,
+      "source": "Соединение CDM: овальный фланец"
+    }
+  ],
+  "31": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN25",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    },
+    {
+      "kind": "cdm_oval_flange",
+      "value": "G1",
+      "maxPressure": 16.0,
+      "source": "Соединение CDM: овальный фланец"
+    }
+  ],
+  "32": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN25",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    },
+    {
+      "kind": "cdm_oval_flange",
+      "value": "G1",
+      "maxPressure": 16.0,
+      "source": "Соединение CDM: овальный фланец"
+    }
+  ],
+  "33": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN25",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    },
+    {
+      "kind": "cdm_oval_flange",
+      "value": "G1",
+      "maxPressure": 16.0,
+      "source": "Соединение CDM: овальный фланец"
+    }
+  ],
+  "34": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN25",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    },
+    {
+      "kind": "cdm_oval_flange",
+      "value": "G1",
+      "maxPressure": 16.0,
+      "source": "Соединение CDM: овальный фланец"
+    }
+  ],
+  "35": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN25",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    },
+    {
+      "kind": "cdm_oval_flange",
+      "value": "G1",
+      "maxPressure": 16.0,
+      "source": "Соединение CDM: овальный фланец"
+    }
+  ],
+  "36": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN25",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    },
+    {
+      "kind": "cdm_oval_flange",
+      "value": "G1",
+      "maxPressure": 16.0,
+      "source": "Соединение CDM: овальный фланец"
+    }
+  ],
+  "37": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN25",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    },
+    {
+      "kind": "cdm_oval_flange",
+      "value": "G1",
+      "maxPressure": 16.0,
+      "source": "Соединение CDM: овальный фланец"
+    }
+  ],
+  "38": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN25",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    },
+    {
+      "kind": "cdm_oval_flange",
+      "value": "G1",
+      "maxPressure": 16.0,
+      "source": "Соединение CDM: овальный фланец"
+    }
+  ],
+  "39": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN25",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    },
+    {
+      "kind": "cdm_oval_flange",
+      "value": "G1",
+      "maxPressure": 16.0,
+      "source": "Соединение CDM: овальный фланец"
+    }
+  ],
+  "87": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN25",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    },
+    {
+      "kind": "cdm_oval_flange",
+      "value": "G1",
+      "maxPressure": 16.0,
+      "source": "Соединение CDM: овальный фланец"
+    }
+  ],
+  "88": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN25",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    },
+    {
+      "kind": "cdm_oval_flange",
+      "value": "G1",
+      "maxPressure": 16.0,
+      "source": "Соединение CDM: овальный фланец"
+    }
+  ],
+  "89": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN25",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    },
+    {
+      "kind": "cdm_oval_flange",
+      "value": "G1",
+      "maxPressure": 16.0,
+      "source": "Соединение CDM: овальный фланец"
+    }
+  ],
+  "90": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN25",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    },
+    {
+      "kind": "cdm_oval_flange",
+      "value": "G1",
+      "maxPressure": 16.0,
+      "source": "Соединение CDM: овальный фланец"
+    }
+  ],
+  "91": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN25",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    },
+    {
+      "kind": "cdm_oval_flange",
+      "value": "G1",
+      "maxPressure": 16.0,
+      "source": "Соединение CDM: овальный фланец"
+    }
+  ],
+  "92": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN25",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    },
+    {
+      "kind": "cdm_oval_flange",
+      "value": "G1",
+      "maxPressure": 16.0,
+      "source": "Соединение CDM: овальный фланец"
+    }
+  ],
+  "93": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN25",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    },
+    {
+      "kind": "cdm_oval_flange",
+      "value": "G1",
+      "maxPressure": 16.0,
+      "source": "Соединение CDM: овальный фланец"
+    }
+  ],
+  "94": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN25",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    },
+    {
+      "kind": "cdm_oval_flange",
+      "value": "G1",
+      "maxPressure": 16.0,
+      "source": "Соединение CDM: овальный фланец"
+    }
+  ],
+  "95": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN25",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    },
+    {
+      "kind": "cdm_oval_flange",
+      "value": "G1",
+      "maxPressure": 16.0,
+      "source": "Соединение CDM: овальный фланец"
+    }
+  ],
+  "96": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN25",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    },
+    {
+      "kind": "cdm_oval_flange",
+      "value": "G1",
+      "maxPressure": 16.0,
+      "source": "Соединение CDM: овальный фланец"
+    }
+  ],
+  "97": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN25",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    },
+    {
+      "kind": "cdm_oval_flange",
+      "value": "G1",
+      "maxPressure": 16.0,
+      "source": "Соединение CDM: овальный фланец"
+    }
+  ],
+  "98": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN25",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    },
+    {
+      "kind": "cdm_oval_flange",
+      "value": "G1",
+      "maxPressure": 16.0,
+      "source": "Соединение CDM: овальный фланец"
+    }
+  ],
+  "99": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN25",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    },
+    {
+      "kind": "cdm_oval_flange",
+      "value": "G1",
+      "maxPressure": 16.0,
+      "source": "Соединение CDM: овальный фланец"
+    }
+  ],
+  "100": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN25",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    },
+    {
+      "kind": "cdm_oval_flange",
+      "value": "G1",
+      "maxPressure": 16.0,
+      "source": "Соединение CDM: овальный фланец"
+    }
+  ],
+  "101": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN25",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    },
+    {
+      "kind": "cdm_oval_flange",
+      "value": "G1",
+      "maxPressure": 16.0,
+      "source": "Соединение CDM: овальный фланец"
+    }
+  ],
+  "102": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN25",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    },
+    {
+      "kind": "cdm_oval_flange",
+      "value": "G1",
+      "maxPressure": 16.0,
+      "source": "Соединение CDM: овальный фланец"
+    }
+  ],
+  "103": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN25",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    },
+    {
+      "kind": "cdm_oval_flange",
+      "value": "G1",
+      "maxPressure": 16.0,
+      "source": "Соединение CDM: овальный фланец"
+    }
+  ],
+  "104": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN25",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    },
+    {
+      "kind": "cdm_oval_flange",
+      "value": "G1",
+      "maxPressure": 16.0,
+      "source": "Соединение CDM: овальный фланец"
+    }
+  ],
+  "105": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN25",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    },
+    {
+      "kind": "cdm_oval_flange",
+      "value": "G1",
+      "maxPressure": 16.0,
+      "source": "Соединение CDM: овальный фланец"
+    }
+  ],
+  "106": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN25",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    },
+    {
+      "kind": "cdm_oval_flange",
+      "value": "G1",
+      "maxPressure": 16.0,
+      "source": "Соединение CDM: овальный фланец"
+    }
+  ],
+  "107": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN25",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    },
+    {
+      "kind": "cdm_oval_flange",
+      "value": "G1",
+      "maxPressure": 16.0,
+      "source": "Соединение CDM: овальный фланец"
+    }
+  ],
+  "108": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN25",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    },
+    {
+      "kind": "cdm_oval_flange",
+      "value": "G1",
+      "maxPressure": 16.0,
+      "source": "Соединение CDM: овальный фланец"
+    }
+  ],
+  "109": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN25",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    },
+    {
+      "kind": "cdm_oval_flange",
+      "value": "G1",
+      "maxPressure": 16.0,
+      "source": "Соединение CDM: овальный фланец"
+    }
+  ],
+  "110": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN25",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    },
+    {
+      "kind": "cdm_oval_flange",
+      "value": "G1",
+      "maxPressure": 16.0,
+      "source": "Соединение CDM: овальный фланец"
+    }
+  ],
+  "111": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN25",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    },
+    {
+      "kind": "cdm_oval_flange",
+      "value": "G1",
+      "maxPressure": 16.0,
+      "source": "Соединение CDM: овальный фланец"
+    }
+  ],
+  "112": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN25",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    },
+    {
+      "kind": "cdm_oval_flange",
+      "value": "G1",
+      "maxPressure": 16.0,
+      "source": "Соединение CDM: овальный фланец"
+    }
+  ],
+  "113": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN25",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    },
+    {
+      "kind": "cdm_oval_flange",
+      "value": "G1",
+      "maxPressure": 16.0,
+      "source": "Соединение CDM: овальный фланец"
+    }
+  ],
+  "114": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN25",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    },
+    {
+      "kind": "cdm_oval_flange",
+      "value": "G1",
+      "maxPressure": 16.0,
+      "source": "Соединение CDM: овальный фланец"
+    }
+  ],
+  "115": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN25",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    },
+    {
+      "kind": "cdm_oval_flange",
+      "value": "G1",
+      "maxPressure": 16.0,
+      "source": "Соединение CDM: овальный фланец"
+    }
+  ],
+  "116": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN25",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    },
+    {
+      "kind": "cdm_oval_flange",
+      "value": "G1",
+      "maxPressure": 16.0,
+      "source": "Соединение CDM: овальный фланец"
+    }
+  ],
+  "140": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN32",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    },
+    {
+      "kind": "cdm_oval_flange",
+      "value": "G1 1/4",
+      "maxPressure": 16.0,
+      "source": "Соединение CDM: овальный фланец"
+    }
+  ],
+  "141": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN32",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    },
+    {
+      "kind": "cdm_oval_flange",
+      "value": "G1 1/4",
+      "maxPressure": 16.0,
+      "source": "Соединение CDM: овальный фланец"
+    }
+  ],
+  "142": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN32",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    },
+    {
+      "kind": "cdm_oval_flange",
+      "value": "G1 1/4",
+      "maxPressure": 16.0,
+      "source": "Соединение CDM: овальный фланец"
+    }
+  ],
+  "143": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN32",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    },
+    {
+      "kind": "cdm_oval_flange",
+      "value": "G1 1/4",
+      "maxPressure": 16.0,
+      "source": "Соединение CDM: овальный фланец"
+    }
+  ],
+  "144": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN32",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    },
+    {
+      "kind": "cdm_oval_flange",
+      "value": "G1 1/4",
+      "maxPressure": 16.0,
+      "source": "Соединение CDM: овальный фланец"
+    }
+  ],
+  "145": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN32",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    },
+    {
+      "kind": "cdm_oval_flange",
+      "value": "G1 1/4",
+      "maxPressure": 16.0,
+      "source": "Соединение CDM: овальный фланец"
+    }
+  ],
+  "146": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN32",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    },
+    {
+      "kind": "cdm_oval_flange",
+      "value": "G1 1/4",
+      "maxPressure": 16.0,
+      "source": "Соединение CDM: овальный фланец"
+    }
+  ],
+  "147": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN32",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    },
+    {
+      "kind": "cdm_oval_flange",
+      "value": "G1 1/4",
+      "maxPressure": 16.0,
+      "source": "Соединение CDM: овальный фланец"
+    }
+  ],
+  "148": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN32",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    },
+    {
+      "kind": "cdm_oval_flange",
+      "value": "G1 1/4",
+      "maxPressure": 16.0,
+      "source": "Соединение CDM: овальный фланец"
+    }
+  ],
+  "149": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN32",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    },
+    {
+      "kind": "cdm_oval_flange",
+      "value": "G1 1/4",
+      "maxPressure": 16.0,
+      "source": "Соединение CDM: овальный фланец"
+    }
+  ],
+  "150": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN32",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    },
+    {
+      "kind": "cdm_oval_flange",
+      "value": "G1 1/4",
+      "maxPressure": 16.0,
+      "source": "Соединение CDM: овальный фланец"
+    }
+  ],
+  "151": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN32",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    },
+    {
+      "kind": "cdm_oval_flange",
+      "value": "G1 1/4",
+      "maxPressure": 16.0,
+      "source": "Соединение CDM: овальный фланец"
+    }
+  ],
+  "152": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN32",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    },
+    {
+      "kind": "cdm_oval_flange",
+      "value": "G1 1/4",
+      "maxPressure": 16.0,
+      "source": "Соединение CDM: овальный фланец"
+    }
+  ],
+  "153": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN32",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    },
+    {
+      "kind": "cdm_oval_flange",
+      "value": "G1 1/4",
+      "maxPressure": 16.0,
+      "source": "Соединение CDM: овальный фланец"
+    }
+  ],
+  "154": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN32",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    },
+    {
+      "kind": "cdm_oval_flange",
+      "value": "G1 1/4",
+      "maxPressure": 16.0,
+      "source": "Соединение CDM: овальный фланец"
+    }
+  ],
+  "155": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN32",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    },
+    {
+      "kind": "cdm_oval_flange",
+      "value": "G1 1/4",
+      "maxPressure": 16.0,
+      "source": "Соединение CDM: овальный фланец"
+    }
+  ],
+  "156": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN32",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    },
+    {
+      "kind": "cdm_oval_flange",
+      "value": "G1 1/4",
+      "maxPressure": 16.0,
+      "source": "Соединение CDM: овальный фланец"
+    }
+  ],
+  "157": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN32",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    },
+    {
+      "kind": "cdm_oval_flange",
+      "value": "G1 1/4",
+      "maxPressure": 16.0,
+      "source": "Соединение CDM: овальный фланец"
+    }
+  ],
+  "158": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN32",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    },
+    {
+      "kind": "cdm_oval_flange",
+      "value": "G1 1/4",
+      "maxPressure": 16.0,
+      "source": "Соединение CDM: овальный фланец"
+    }
+  ],
+  "159": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN32",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    },
+    {
+      "kind": "cdm_oval_flange",
+      "value": "G1 1/4",
+      "maxPressure": 16.0,
+      "source": "Соединение CDM: овальный фланец"
+    }
+  ],
+  "160": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN32",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    },
+    {
+      "kind": "cdm_oval_flange",
+      "value": "G1 1/4",
+      "maxPressure": 16.0,
+      "source": "Соединение CDM: овальный фланец"
+    }
+  ],
+  "161": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN32",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    },
+    {
+      "kind": "cdm_oval_flange",
+      "value": "G1 1/4",
+      "maxPressure": 16.0,
+      "source": "Соединение CDM: овальный фланец"
+    }
+  ],
+  "162": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN32",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    },
+    {
+      "kind": "cdm_oval_flange",
+      "value": "G1 1/4",
+      "maxPressure": 16.0,
+      "source": "Соединение CDM: овальный фланец"
+    }
+  ],
+  "163": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN32",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    },
+    {
+      "kind": "cdm_oval_flange",
+      "value": "G1 1/4",
+      "maxPressure": 16.0,
+      "source": "Соединение CDM: овальный фланец"
+    }
+  ],
+  "164": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN32",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    },
+    {
+      "kind": "cdm_oval_flange",
+      "value": "G1 1/4",
+      "maxPressure": 16.0,
+      "source": "Соединение CDM: овальный фланец"
+    }
+  ],
+  "165": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN32",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    },
+    {
+      "kind": "cdm_oval_flange",
+      "value": "G1 1/4",
+      "maxPressure": 16.0,
+      "source": "Соединение CDM: овальный фланец"
+    }
+  ],
+  "166": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN32",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    },
+    {
+      "kind": "cdm_oval_flange",
+      "value": "G1 1/4",
+      "maxPressure": 16.0,
+      "source": "Соединение CDM: овальный фланец"
+    }
+  ],
+  "167": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN32",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    },
+    {
+      "kind": "cdm_oval_flange",
+      "value": "G1 1/4",
+      "maxPressure": 16.0,
+      "source": "Соединение CDM: овальный фланец"
+    }
+  ],
+  "168": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN32",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    },
+    {
+      "kind": "cdm_oval_flange",
+      "value": "G1 1/4",
+      "maxPressure": 16.0,
+      "source": "Соединение CDM: овальный фланец"
+    }
+  ],
+  "169": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN32",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    },
+    {
+      "kind": "cdm_oval_flange",
+      "value": "G1 1/4",
+      "maxPressure": 16.0,
+      "source": "Соединение CDM: овальный фланец"
+    }
+  ],
+  "170": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN32",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    },
+    {
+      "kind": "cdm_oval_flange",
+      "value": "G1 1/4",
+      "maxPressure": 16.0,
+      "source": "Соединение CDM: овальный фланец"
+    }
+  ],
+  "171": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN32",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    },
+    {
+      "kind": "cdm_oval_flange",
+      "value": "G1 1/4",
+      "maxPressure": 16.0,
+      "source": "Соединение CDM: овальный фланец"
+    }
+  ],
+  "214": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN40",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    },
+    {
+      "kind": "cdm_oval_flange",
+      "value": "G1 1/2",
+      "maxPressure": 16.0,
+      "source": "Соединение CDM: овальный фланец"
+    }
+  ],
+  "215": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN40",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    },
+    {
+      "kind": "cdm_oval_flange",
+      "value": "G1 1/2",
+      "maxPressure": 16.0,
+      "source": "Соединение CDM: овальный фланец"
+    }
+  ],
+  "216": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN40",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    },
+    {
+      "kind": "cdm_oval_flange",
+      "value": "G1 1/2",
+      "maxPressure": 16.0,
+      "source": "Соединение CDM: овальный фланец"
+    }
+  ],
+  "217": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN40",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    },
+    {
+      "kind": "cdm_oval_flange",
+      "value": "G1 1/2",
+      "maxPressure": 16.0,
+      "source": "Соединение CDM: овальный фланец"
+    }
+  ],
+  "218": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN40",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    },
+    {
+      "kind": "cdm_oval_flange",
+      "value": "G1 1/2",
+      "maxPressure": 16.0,
+      "source": "Соединение CDM: овальный фланец"
+    }
+  ],
+  "219": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN40",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    },
+    {
+      "kind": "cdm_oval_flange",
+      "value": "G1 1/2",
+      "maxPressure": 16.0,
+      "source": "Соединение CDM: овальный фланец"
+    }
+  ],
+  "220": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN40",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    },
+    {
+      "kind": "cdm_oval_flange",
+      "value": "G1 1/2",
+      "maxPressure": 16.0,
+      "source": "Соединение CDM: овальный фланец"
+    }
+  ],
+  "221": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN40",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    },
+    {
+      "kind": "cdm_oval_flange",
+      "value": "G1 1/2",
+      "maxPressure": 16.0,
+      "source": "Соединение CDM: овальный фланец"
+    }
+  ],
+  "222": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN40",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    },
+    {
+      "kind": "cdm_oval_flange",
+      "value": "G1 1/2",
+      "maxPressure": 16.0,
+      "source": "Соединение CDM: овальный фланец"
+    }
+  ],
+  "223": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN40",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    },
+    {
+      "kind": "cdm_oval_flange",
+      "value": "G1 1/2",
+      "maxPressure": 16.0,
+      "source": "Соединение CDM: овальный фланец"
+    }
+  ],
+  "224": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN40",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    },
+    {
+      "kind": "cdm_oval_flange",
+      "value": "G1 1/2",
+      "maxPressure": 16.0,
+      "source": "Соединение CDM: овальный фланец"
+    }
+  ],
+  "225": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN40",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    },
+    {
+      "kind": "cdm_oval_flange",
+      "value": "G1 1/2",
+      "maxPressure": 16.0,
+      "source": "Соединение CDM: овальный фланец"
+    }
+  ],
+  "226": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN40",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    },
+    {
+      "kind": "cdm_oval_flange",
+      "value": "G1 1/2",
+      "maxPressure": 16.0,
+      "source": "Соединение CDM: овальный фланец"
+    }
+  ],
+  "227": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN40",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    },
+    {
+      "kind": "cdm_oval_flange",
+      "value": "G1 1/2",
+      "maxPressure": 16.0,
+      "source": "Соединение CDM: овальный фланец"
+    }
+  ],
+  "228": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN40",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    },
+    {
+      "kind": "cdm_oval_flange",
+      "value": "G1 1/2",
+      "maxPressure": 16.0,
+      "source": "Соединение CDM: овальный фланец"
+    }
+  ],
+  "229": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN40",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    },
+    {
+      "kind": "cdm_oval_flange",
+      "value": "G1 1/2",
+      "maxPressure": 16.0,
+      "source": "Соединение CDM: овальный фланец"
+    }
+  ],
+  "230": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN40",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    },
+    {
+      "kind": "cdm_oval_flange",
+      "value": "G1 1/2",
+      "maxPressure": 16.0,
+      "source": "Соединение CDM: овальный фланец"
+    }
+  ],
+  "231": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN40",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    },
+    {
+      "kind": "cdm_oval_flange",
+      "value": "G1 1/2",
+      "maxPressure": 16.0,
+      "source": "Соединение CDM: овальный фланец"
+    }
+  ],
+  "232": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN40",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    },
+    {
+      "kind": "cdm_oval_flange",
+      "value": "G1 1/2",
+      "maxPressure": 16.0,
+      "source": "Соединение CDM: овальный фланец"
+    }
+  ],
+  "233": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN40",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    },
+    {
+      "kind": "cdm_oval_flange",
+      "value": "G1 1/2",
+      "maxPressure": 16.0,
+      "source": "Соединение CDM: овальный фланец"
+    }
+  ],
+  "234": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN40",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    },
+    {
+      "kind": "cdm_oval_flange",
+      "value": "G1 1/2",
+      "maxPressure": 16.0,
+      "source": "Соединение CDM: овальный фланец"
+    }
+  ],
+  "235": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN40",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    },
+    {
+      "kind": "cdm_oval_flange",
+      "value": "G1 1/2",
+      "maxPressure": 16.0,
+      "source": "Соединение CDM: овальный фланец"
+    }
+  ],
+  "251": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN50",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "252": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN50",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "253": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN50",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "254": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN50",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "255": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN50",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "256": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN50",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "257": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN50",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "258": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN50",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "259": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN50",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "260": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN50",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "261": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN50",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "262": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN50",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "263": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN50",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "264": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN50",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "265": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN50",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "266": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN50",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "267": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN50",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "268": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN50",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "282": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN50",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "283": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN50",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "284": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN50",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "285": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN50",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "286": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN50",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "287": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN50",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "288": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN50",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "289": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN50",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "290": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN50",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "291": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN50",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "292": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN50",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "293": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN50",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "294": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN50",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "295": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN50",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "296": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN50",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "297": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN50",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "298": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN50",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "311": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN65",
+      "maxPressure": 16.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "312": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN65",
+      "maxPressure": 16.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "313": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN65",
+      "maxPressure": 16.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "314": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN65",
+      "maxPressure": 16.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "315": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN65",
+      "maxPressure": 16.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "316": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN65",
+      "maxPressure": 16.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "317": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN65",
+      "maxPressure": 16.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "318": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN65",
+      "maxPressure": 16.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "319": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN65",
+      "maxPressure": 16.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "320": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN65",
+      "maxPressure": 16.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "321": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN65",
+      "maxPressure": 16.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "322": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN65",
+      "maxPressure": 16.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "323": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN65",
+      "maxPressure": 16.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "324": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN65",
+      "maxPressure": 16.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "325": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN65",
+      "maxPressure": 16.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "326": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN65",
+      "maxPressure": 16.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "327": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN65",
+      "maxPressure": 30.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "328": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN65",
+      "maxPressure": 30.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "329": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN65",
+      "maxPressure": 30.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "330": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN65",
+      "maxPressure": 30.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "331": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN65",
+      "maxPressure": 30.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "332": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN65",
+      "maxPressure": 30.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "333": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN65",
+      "maxPressure": 30.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "334": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN65",
+      "maxPressure": 30.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "335": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN65",
+      "maxPressure": 30.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "336": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN65",
+      "maxPressure": 30.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "337": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN65",
+      "maxPressure": 30.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "338": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN65",
+      "maxPressure": 30.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "339": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN65",
+      "maxPressure": 30.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "340": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN65",
+      "maxPressure": 30.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "341": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN65",
+      "maxPressure": 30.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "342": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN65",
+      "maxPressure": 30.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "371": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN80",
+      "maxPressure": 16.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "372": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN80",
+      "maxPressure": 16.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "373": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN80",
+      "maxPressure": 16.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "374": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN80",
+      "maxPressure": 16.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "375": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN80",
+      "maxPressure": 16.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "376": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN80",
+      "maxPressure": 16.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "377": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN80",
+      "maxPressure": 16.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "378": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN80",
+      "maxPressure": 16.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "379": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN80",
+      "maxPressure": 16.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "380": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN80",
+      "maxPressure": 16.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "381": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN80",
+      "maxPressure": 16.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "382": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN80",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "383": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN80",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "384": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN80",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "385": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN80",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "386": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN80",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "387": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN80",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "388": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN80",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "389": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN80",
+      "maxPressure": 30.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "390": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN80",
+      "maxPressure": 30.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "391": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN80",
+      "maxPressure": 30.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "392": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN80",
+      "maxPressure": 30.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "393": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN80",
+      "maxPressure": 30.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "394": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN80",
+      "maxPressure": 30.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "395": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN80",
+      "maxPressure": 30.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "421": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN100",
+      "maxPressure": 16.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "422": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN100",
+      "maxPressure": 16.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "423": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN100",
+      "maxPressure": 16.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "424": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN100",
+      "maxPressure": 16.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "425": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN100",
+      "maxPressure": 16.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "426": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN100",
+      "maxPressure": 16.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "427": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN100",
+      "maxPressure": 16.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "428": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN100",
+      "maxPressure": 16.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "429": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN100",
+      "maxPressure": 16.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "430": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN100",
+      "maxPressure": 16.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "431": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN100",
+      "maxPressure": 16.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "432": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN100",
+      "maxPressure": 16.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "433": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN100",
+      "maxPressure": 16.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "434": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN100",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "435": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN100",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "436": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN100",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "437": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN100",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "438": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN100",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "439": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN100",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "440": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN100",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "441": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN100",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "442": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN100",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "465": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN100",
+      "maxPressure": 16.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "466": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN100",
+      "maxPressure": 16.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "467": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN100",
+      "maxPressure": 16.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "468": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN100",
+      "maxPressure": 16.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "469": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN100",
+      "maxPressure": 16.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "470": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN100",
+      "maxPressure": 16.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "471": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN100",
+      "maxPressure": 16.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "472": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN100",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "473": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN100",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "474": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN100",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "475": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN100",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "476": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN100",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "477": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN100",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "478": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN100",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "479": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN100",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "480": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN100",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "481": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN100",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "482": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN100",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "483": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN100",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "484": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN100",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "485": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN100",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "486": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN100",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "487": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN100",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "500": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN125",
+      "maxPressure": 20.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "501": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN125",
+      "maxPressure": 20.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "502": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN125",
+      "maxPressure": 20.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "503": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN125",
+      "maxPressure": 20.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "504": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN125",
+      "maxPressure": 20.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "505": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN125",
+      "maxPressure": 20.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "506": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN125",
+      "maxPressure": 20.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "507": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN125",
+      "maxPressure": 20.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "508": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN125",
+      "maxPressure": 20.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "509": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN125",
+      "maxPressure": 20.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "510": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN125",
+      "maxPressure": 20.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "511": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN125",
+      "maxPressure": 20.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "512": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN125",
+      "maxPressure": 20.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "513": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN125",
+      "maxPressure": 20.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "514": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN125",
+      "maxPressure": 20.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "515": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN125",
+      "maxPressure": 20.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "516": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN125",
+      "maxPressure": 20.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "517": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN125",
+      "maxPressure": 20.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "518": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN125",
+      "maxPressure": 20.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "538": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN150",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "539": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN150",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "540": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN150",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "541": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN150",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "542": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN150",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "543": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN150",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "544": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN150",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "545": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN150",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "546": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN150",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "547": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN125",
+      "maxPressure": 20.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "548": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN125",
+      "maxPressure": 20.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "549": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN125",
+      "maxPressure": 20.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "550": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN125",
+      "maxPressure": 20.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "551": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN125",
+      "maxPressure": 20.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "552": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN125",
+      "maxPressure": 20.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "553": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN125",
+      "maxPressure": 20.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "554": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN125",
+      "maxPressure": 20.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "555": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN125",
+      "maxPressure": 20.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "556": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN125",
+      "maxPressure": 20.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "557": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN125",
+      "maxPressure": 20.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "558": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN125",
+      "maxPressure": 20.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "559": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN125",
+      "maxPressure": 20.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "560": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN125",
+      "maxPressure": 20.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "561": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN125",
+      "maxPressure": 20.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "562": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN125",
+      "maxPressure": 20.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "563": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN125",
+      "maxPressure": 20.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "581": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN150",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "582": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN150",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "583": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN150",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "584": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN150",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "585": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN150",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "586": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN150",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "587": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN150",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "588": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN200",
+      "maxPressure": 16.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "589": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN200",
+      "maxPressure": 16.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "590": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN200",
+      "maxPressure": 16.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "591": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN200",
+      "maxPressure": 16.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "592": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN200",
+      "maxPressure": 16.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "593": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN200",
+      "maxPressure": 16.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "594": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN200",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "595": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN200",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "596": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN200",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "597": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN200",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "598": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN200",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "599": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN200",
+      "maxPressure": 40.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "600": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN200",
+      "maxPressure": 40.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "601": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN200",
+      "maxPressure": 40.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "602": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN200",
+      "maxPressure": 40.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "603": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN200",
+      "maxPressure": 40.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "604": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN200",
+      "maxPressure": 40.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "605": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN200",
+      "maxPressure": 40.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "606": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN150",
+      "maxPressure": 20.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "607": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN150",
+      "maxPressure": 20.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "608": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN150",
+      "maxPressure": 20.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "609": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN150",
+      "maxPressure": 20.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "610": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN150",
+      "maxPressure": 20.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "611": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN150",
+      "maxPressure": 20.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "612": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN150",
+      "maxPressure": 20.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "613": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN150",
+      "maxPressure": 20.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "614": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN150",
+      "maxPressure": 20.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "615": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN150",
+      "maxPressure": 20.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "616": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN150",
+      "maxPressure": 20.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "617": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN150",
+      "maxPressure": 20.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "618": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN150",
+      "maxPressure": 20.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "619": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN150",
+      "maxPressure": 20.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "620": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN150",
+      "maxPressure": 20.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "621": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN150",
+      "maxPressure": 20.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "622": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN150",
+      "maxPressure": 20.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "640": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN200",
+      "maxPressure": 16.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "641": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN200",
+      "maxPressure": 16.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "642": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN200",
+      "maxPressure": 16.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "643": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN200",
+      "maxPressure": 16.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "644": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN200",
+      "maxPressure": 16.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "645": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN200",
+      "maxPressure": 16.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "646": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN200",
+      "maxPressure": 16.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "647": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN200",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "648": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN200",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "649": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN200",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "650": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN200",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "651": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN200",
+      "maxPressure": 25.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "652": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN200",
+      "maxPressure": 40.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "653": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN200",
+      "maxPressure": 40.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "654": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN200",
+      "maxPressure": 40.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ],
+  "655": [
+    {
+      "kind": "cdm_round_flange",
+      "value": "DN200",
+      "maxPressure": 40.0,
+      "source": "Соединение CDM: круглый фланец"
+    }
+  ]
+}

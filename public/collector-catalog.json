@@ -1,5 +1,5 @@
 {
-  "version": "2bd2a0263350693f414130b77436739cfeeb6087855f8811ad6259d414e0414a",
+  "version": "12a089a1bfeae63a42e6e5c7199bcc937b9145cbb939c5758f42d9064fed2cb3",
   "components": [
     {
       "id": "сгоны-резьба-001-r0005",
@@ -3552,6 +3552,84 @@
       "outerDiameter": null,
       "innerDiameter": null,
       "source": "Воротники!строка 48, цена E48"
+    },
+    {
+      "id": "lunda-ld-67-504:LD.67.504.15",
+      "kind": "plug",
+      "name": "Заглушка 1/2\" ВР, латунь никелированная, LD.67.504.15",
+      "dn": 15,
+      "pn": 40,
+      "material": "brass",
+      "threadGender": "female",
+      "price": 56.12,
+      "outerDiameter": null,
+      "innerDiameter": null,
+      "source": "https://lunda.ru/catalog/category/c21568/product/zaglushka-ld_20582.html; цена с НДС от 2026-09-10; паспорт: https://cdn.lunda.ru/catalog/binary/document/texnicheskij-pasport_d20617.pdf"
+    },
+    {
+      "id": "lunda-ld-67-504:LD.67.504.20",
+      "kind": "plug",
+      "name": "Заглушка 3/4\" ВР, латунь никелированная, LD.67.504.20",
+      "dn": 20,
+      "pn": 40,
+      "material": "brass",
+      "threadGender": "female",
+      "price": 82.96,
+      "outerDiameter": null,
+      "innerDiameter": null,
+      "source": "https://lunda.ru/catalog/category/c21568/product/zaglushka-ld_20582.html; цена с НДС от 2026-09-10; паспорт: https://cdn.lunda.ru/catalog/binary/document/texnicheskij-pasport_d20617.pdf"
+    },
+    {
+      "id": "lunda-ld-67-504:LD.67.504.25",
+      "kind": "plug",
+      "name": "Заглушка 1\" ВР, латунь никелированная, LD.67.504.25",
+      "dn": 25,
+      "pn": 40,
+      "material": "brass",
+      "threadGender": "female",
+      "price": 130.54,
+      "outerDiameter": null,
+      "innerDiameter": null,
+      "source": "https://lunda.ru/catalog/category/c21568/product/zaglushka-ld_20582.html; цена с НДС от 2026-09-10; паспорт: https://cdn.lunda.ru/catalog/binary/document/texnicheskij-pasport_d20617.pdf"
+    },
+    {
+      "id": "lunda-ld-67-504:LD.67.504.32",
+      "kind": "plug",
+      "name": "Заглушка 1¼\" ВР, латунь никелированная, LD.67.504.32",
+      "dn": 32,
+      "pn": null,
+      "material": "brass",
+      "threadGender": "female",
+      "price": 222.04,
+      "outerDiameter": null,
+      "innerDiameter": null,
+      "source": "https://lunda.ru/catalog/category/c21568/product/zaglushka-ld_20582.html; цена с НДС от 2026-09-10; паспорт: https://cdn.lunda.ru/catalog/binary/document/texnicheskij-pasport_d20617.pdf"
+    },
+    {
+      "id": "lunda-ld-67-504:LD.67.504.40",
+      "kind": "plug",
+      "name": "Заглушка 1½\" ВР, латунь никелированная, LD.67.504.40",
+      "dn": 40,
+      "pn": null,
+      "material": "brass",
+      "threadGender": "female",
+      "price": 330.62,
+      "outerDiameter": null,
+      "innerDiameter": null,
+      "source": "https://lunda.ru/catalog/category/c21568/product/zaglushka-ld_20582.html; цена с НДС от 2026-09-10; паспорт: https://cdn.lunda.ru/catalog/binary/document/texnicheskij-pasport_d20617.pdf"
+    },
+    {
+      "id": "lunda-ld-67-504:LD.67.504.50",
+      "kind": "plug",
+      "name": "Заглушка 2\" ВР, латунь никелированная, LD.67.504.50",
+      "dn": 50,
+      "pn": null,
+      "material": "brass",
+      "threadGender": "female",
+      "price": 522.16,
+      "outerDiameter": null,
+      "innerDiameter": null,
+      "source": "https://lunda.ru/catalog/category/c21568/product/zaglushka-ld_20582.html; цена с НДС от 2026-09-10; паспорт: https://cdn.lunda.ru/catalog/binary/document/texnicheskij-pasport_d20617.pdf"
     }
   ],
   "bolts": [

@@ -1,0 +1,24 @@
+{
+  "id": "lunda-ld-67-504",
+  "catalogId": "заглушки",
+  "family": "Заглушки резьбовые ВР, латунь никелированная, LD.67.504",
+  "manufacturer": "LD",
+  "material": "Латунь никелированная",
+  "alloy": "CW617N",
+  "threadGender": "ВР",
+  "sourceUrl": "https://lunda.ru/catalog/category/c21568/product/zaglushka-ld_20582.html",
+  "documentUrl": "https://cdn.lunda.ru/catalog/binary/document/texnicheskij-pasport_d20617.pdf",
+  "priceUpdatedAt": "2026-09-10",
+  "checkedAt": "2026-09-10",
+  "currency": "RUB",
+  "priceIncludesVat": true,
+  "pressureNote": "PN40 (4,0 МПа) подтверждён паспортом, стр. 2 и 4, только для DN15, DN20, DN25. Для DN32–DN50 давление в доступном паспорте и карточке не указано.",
+  "items": [
+    { "article": "LD.67.504.15", "supplierArticle": "к2268", "dn": 15, "thread": "1/2\"", "pn": 40, "price": 56.12 },
+    { "article": "LD.67.504.20", "supplierArticle": "к2299", "dn": 20, "thread": "3/4\"", "pn": 40, "price": 82.96 },
+    { "article": "LD.67.504.25", "supplierArticle": "к2306", "dn": 25, "thread": "1\"", "pn": 40, "price": 130.54 },
+    { "article": "LD.67.504.32", "supplierArticle": "к2307", "dn": 32, "thread": "1¼\"", "pn": null, "price": 222.04 },
+    { "article": "LD.67.504.40", "supplierArticle": "к2308", "dn": 40, "thread": "1½\"", "pn": null, "price": 330.62 },
+    { "article": "LD.67.504.50", "supplierArticle": "к2309", "dn": 50, "thread": "2\"", "pn": null, "price": 522.16 }
+  ]
+}
