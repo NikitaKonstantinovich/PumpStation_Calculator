@@ -1,151 +1,183 @@
-# vinext-starter
+# Pump Station Calculator
 
-A clean full-stack starter running on
-[vinext](https://github.com/cloudflare/vinext), with optional Cloudflare D1 and
-Drizzle support.
+Веб-приложение для подбора насосов и комплектации насосных установок: рабочие
+кривые и эскизы, шкафы управления, конструктор коллекторов, всасывающая линия,
+спецификация и сохранение проектов.
 
-## Prerequisites
+Стек: React 19, TypeScript, vinext/Vite, Cloudflare Workers и D1, Drizzle ORM.
+Все команды ниже выполняются из корня клонированного репозитория (`frontend`
+в примере), если явно не указано иное.
 
-- Node.js `>=22.13.0`
+## Требования
 
-## Quick Start
+- Git, Node.js **>=22.13.0** и npm.
+- Python 3 — только для Python-тестов и скриптов импорта; для обычного запуска
+  приложения не нужен.
+- Место для зависимостей, сборки и локальных эскизов: только исходные изображения
+  занимают около 600 МБ. Первое клонирование может быть долгим.
 
-```bash
-npm install
-npm run dev
+Рабочий каталог насосов, комплектующие и сохранённые эскизы уже входят в Git.
+Внешний архив, SQLite-каталог насосов и доступ к исходному приватному репозиторию
+для обычного запуска **не требуются**.
+
+## Первый локальный запуск
+
+```powershell
+git clone https://github.com/NikitaKonstantinovich/PumpStation_Calculator.git frontend
+Set-Location frontend
+npm ci
 npm run build
 ```
 
-## База данных и исходные материалы
+Сборка автоматически запускает `prebuild`: обновляет каталог коллекторов,
+дополнительные поля карточек насосов и индекс патрубков из включённых в
+репозиторий данных. Результат сборки находится в `dist/`, в том числе
+конфигурация `dist/server/wrangler.json` для следующих команд.
 
-База насосов и исходные каталоги хранятся отдельно от Git-репозитория:
+### Инициализация новой локальной D1
 
-- [скачать архив с Яндекс Диска](https://disk.360.yandex.ru/d/ibtEqDcrlv4tbQ)
-- имя файла: `PumpStation_Calculator_data_2026-08-21.zip`
-- размер: 51,9 МБ
-- SHA-256: `F8F2D45650319FC4AEEB7AB61909D99F3480FFBCB437EDB4CCB62128A6D8C1DB`
+D1 хранит пользователей, сессии, проекты, шкафы и коллекторы. Это отдельная база,
+не `database/pumps.sqlite`. Локальный binding `DB` настроен в `vite.config.ts` и
+`.openai/hosting.json`; состояние эмулятора хранится в `.wrangler/state/`.
 
-Создайте общую папку проекта, клонируйте репозиторий в подпапку `frontend`,
-а затем распакуйте содержимое архива рядом с ней:
-
-```text
-PumpStation_Calculator/
-├── frontend/            # этот Git-репозиторий
-├── database/            # pumps.sqlite, схема и скрипты импорта
-└── Equipment/           # Excel/PDF/MDB — исходные материалы
-```
-
-Пример установки в PowerShell:
+Следующий блок предназначен **только для новой пустой локальной базы**, до первого
+запуска приложения и регистрации. Он применяет миграции `0000`–`0005` по порядку,
+включая исходные данные шкафов управления. Команды не обращаются к удалённой D1.
 
 ```powershell
-New-Item -ItemType Directory PumpStation_Calculator
-Set-Location PumpStation_Calculator
-git clone https://github.com/NikitaKonstantinovich/PumpStation_Calculator.git frontend
-Expand-Archive -LiteralPath <путь-к-архиву>\PumpStation_Calculator_data_2026-08-21.zip -DestinationPath .
-Set-Location frontend
-npm install
+$env:WRANGLER_WRITE_LOGS = "false"
+Get-ChildItem -LiteralPath drizzle -Filter *.sql | Sort-Object Name | ForEach-Object {
+    node node_modules/wrangler/bin/wrangler.js d1 execute DB --local --config dist/server/wrangler.json --persist-to .wrangler/state --file $_.FullName
+    if ($LASTEXITCODE -ne 0) { throw "Не удалось применить миграцию $($_.Name)" }
+}
 npm run dev
 ```
 
-Не помещайте `database` и `Equipment` внутрь `frontend`: скрипты импорта
-рассчитывают на показанную выше структуру. Готовая SQLite-база находится в
-`database/pumps.sqlite`. Для её пересборки из Excel после распаковки выполните
-из папки `PumpStation_Calculator`:
+Откройте [http://localhost:3000/](http://localhost:3000/) и зарегистрируйтесь.
+Без настроенной почты на `localhost` интерфейс показывает тестовую ссылку
+подтверждения адреса; перейдите по ней, затем войдите. Для повторных запусков
+достаточно `npm run dev`. Если порт занят, используйте `npm run dev -- --port 3001`
+и адрес, указанный сервером.
 
-```powershell
-python -X utf8 database/import_pumps.py
+Не применяйте весь блок миграций повторно к существующей базе: SQL содержит
+`CREATE TABLE`, `ALTER TABLE` и изменения исходных данных. API авторизации сам
+создаёт только таблицы пользователей, токенов, сессий и проектов; это **не заменяет**
+миграции каталогов, шкафов и коллекторов. Если приложение уже запускалось,
+сначала остановите его, сделайте резервную копию `.wrangler/state/`, проверьте
+существующие таблицы и применяйте только недостающие миграции. Разбор локальной
+ошибки 503 есть в [инструкции конструктора коллекторов](docs/collector-constructor.md).
+
+Если в D1 ещё нет активного импорта комплектующих, конструктор использует
+поставляемый `public/collector-catalog.json`. Таблицы каталога всё равно должны
+существовать: ошибка SQL не подменяется резервным JSON-каталогом. Перенос
+комплектующих в D1 описан в той же инструкции.
+
+## Почта и сохранение данных
+
+Для локальной проверки без отправки писем `.env.local` создавать не нужно.
+Для реальной отправки скопируйте `.env.example` в `.env.local` и задайте:
+
+- `RESEND_API_KEY` — настоящий ключ почтового сервиса, не заглушку `re_...`;
+- `EMAIL_FROM` — разрешённый отправитель;
+- `APP_BASE_URL` — базовый адрес приложения для ссылок в письмах.
+
+Перезапустите сервер после изменения окружения. Тестовые ссылки без почтового
+сервиса выдаются только при hostname `localhost`, не `127.0.0.1` и не сетевом IP.
+Для production задайте эти значения в окружении Worker; локальный `.env.local`
+не является настройкой удалённого окружения. Секреты не коммитьте.
+
+Состояние локальной D1 не входит в Git. Не удаляйте `.wrangler/state/` ради
+очистки сборки: там находятся учётные записи и сохранённые проекты. Локальная
+база и production D1 независимы; `git push` не переносит между ними данные и
+не применяет миграции. SQL-схема приложения находится в `db/schema.ts`, миграции
+— в `drizzle/`; схема не пустая.
+
+## Каталог насосов, эскизы и кривые
+
+Включены 5 758 моделей пяти производителей; для подбора доступны 4 978 моделей.
+Записи без пригодной кривой или с запретом подбора остаются в каталоге, но не
+предлагаются как подходящие насосы. Поддерживаются чистая и сточная вода.
+
+- `public/pumps.json` — рабочая база для браузера.
+- `data/pump-catalog/` — исходные поля, происхождение данных, журнал объединения
+  и проверенные дополнительные характеристики CNP.
+- `public/reference-pump-assets/` — локальные документы и изображения.
+- `app/pump-card-supplement.json`, `app/pump-nozzles.json` — генерируемые данные
+  карточек и патрубков.
+
+В подборе используется PCHIP без экстраполяции за исходный диапазон. В окне
+графика доступны PCHIP, ломаная и полиномиальное сглаживание; показанная рабочая
+точка вычисляется по выбранному способу. Переключение графика не меняет метод
+подбора. Для параллельных насосов суммируется расход, а не напор. График
+экспортируется в PNG, JPEG и PDF.
+
+Не у всех моделей есть индивидуальный эскиз. Справочный лист серии обозначается
+как справочный; недоступный внешний чертёж не заменяется изображением другого
+исполнения. Сохранённые локальные изображения и кривые не требуют доступа к
+сайтам производителей. Размеры, цены и пригодность оборудования нужно сверять
+с актуальными паспортами и условиями поставки.
+
+Правила приоритета полей, ограничения и повторный импорт:
+[README объединённого каталога](data/pump-catalog/README.md).
+
+### Исходные архивы — только для повторного импорта
+
+Прежний архив `PumpStation_Calculator_data_2026-08-21.zip` содержит старую SQLite
+и исходные материалы, а не актуальную объединённую базу приложения. Если нужна
+пересборка данных из источников, используйте структуру:
+
+```text
+PumpStation_Calculator/
+├── frontend/                 # этот Git-репозиторий
+├── database/                 # прежняя pumps.sqlite и объединённая pumps-merged.sqlite
+├── Equipment/                # исходные Excel/PDF/MDB
+└── reference-calculator-nu/   # отдельная копия источника для импорта насосов
 ```
 
-## Email authentication
+Не помещайте эти три внешние папки внутрь репозитория. Не запускайте старый
+`database/export_pumps_for_frontend.py` поверх текущего `public/pumps.json`:
+он экспортирует только прежний каталог и перезапишет результат объединения.
 
-Copy `.env.example` to `.env.local` and configure `RESEND_API_KEY`,
-`EMAIL_FROM`, and `APP_BASE_URL`. In local development, when mail credentials
-are absent, confirmation and password-reset links are returned in the UI for
-testing. Production intentionally requires configured mail credentials.
+## Команды и проверки
 
-User accounts, one-time tokens, sessions, and projects are stored in D1. Apply
-the checked-in Drizzle migrations when provisioning the database; the API also
-performs idempotent table initialization on first use.
+| Команда | Назначение |
+| --- | --- |
+| `npm ci` | Установить зависимости из `package-lock.json` |
+| `npm run dev` | Запустить локальный сервер разработки |
+| `npm run prebuild` | Пересобрать производные JSON-каталоги без сборки приложения |
+| `npm run build` | Выполнить `prebuild` и production-сборку в `dist/` |
+| `npm start` | Запустить Node-сервер собранного приложения через `vinext start`; ограничения D1 — ниже |
+| `npm test` | Выполнить сборку и все JS-тесты `tests/*.test.mjs` |
+| `npm run test:unit` | Запустить только `tests/collectors.test.mjs`, не весь набор |
+| `python -m unittest discover -s tests -p 'test_*.py'` | Проверить Python-импортёры |
+| `npm run lint` | Запустить ESLint; это отдельная проверка, не часть `npm test` |
+| `npm run db:generate` | Сгенерировать SQL-миграции после изменения схемы, не применить их |
 
-This starter does not use `wrangler.jsonc`.
+`npm start` сам по себе не создаёт binding `DB`: Node-сервер vinext не заменяет
+окружение Cloudflare Workers/D1. Для обычной локальной работы используйте
+`npm run dev`, который подключает эмулятор через Vite-плагин. Для развёртывания
+нужны Workers-окружение, binding `DB`, секреты почты и применённые миграции;
+одной сборки или отправки кода на GitHub недостаточно.
 
-## Included Shape
+Python-тесты используют стандартную библиотеку. Проверка соответствия JSON
+локальной `database/pumps-merged.sqlite` пропускается, если этой внешней базы нет.
+Остальные проверки не требуют доступа к приватному исходному репозиторию.
+При прямом запуске `node --test tests/*.test.mjs` сначала выполните сборку:
+тест серверного HTML читает `dist/server/index.js`.
 
-- edit site code under `app/`
-- `.openai/hosting.json` declares optional Sites D1 and R2 bindings
-- `vite.config.ts` simulates declared bindings for local development
-- `db/schema.ts` starts intentionally empty
-- `examples/d1/` contains an optional D1 example surface
-- `drizzle.config.ts` supports local migration generation when needed
+Проверено 29.09.2026: `npm test` — успешная сборка и 139 JS-тестов;
+Python — 11 успешных тестов при наличии локальной объединённой SQLite.
+Команды инициализации также проверены на отдельной пустой локальной D1:
+миграции `0000`–`0005` применились, `PRAGMA quick_check` вернул `ok`.
+Это не утверждение об отсутствии диагностик отдельного ESLint/TypeScript-check.
 
-## Workspace Auth Headers
+## Дополнительная документация
 
-Signed-in visitors receive both `oai-authenticated-user-id` and `oai-authenticated-user-email`. Private Sites require every visitor to sign in; public Sites may also have anonymous visitors, for whom neither header is present.
+- [Объединение базы насосов](data/pump-catalog/README.md).
+- [Конструктор коллекторов и локальная D1](docs/collector-constructor.md).
+- [Подбор уплотнений](docs/sealing-selection.md).
+- [Приборы всасывающей линии](docs/suction-instruments.md).
+- [Проверка входного давления](docs/suction-pressure.md).
 
-The user ID is stable for the same user on the same Site and different across Sites. Email and name are intended for display or contact purposes.
-
-SIWC-authenticated workspace sites may also receive
-`oai-authenticated-user-full-name` when the user's SIWC profile has a non-empty
-`name` claim. The full-name value is percent-encoded UTF-8 and is accompanied by
-`oai-authenticated-user-full-name-encoding: percent-encoded-utf-8`.
-
-Treat the full name as optional and fall back to email when it is absent:
-
-```tsx
-import { headers } from "next/headers";
-
-export default async function Home() {
-  const requestHeaders = await headers();
-  const userId = requestHeaders.get("oai-authenticated-user-id");
-  const email = requestHeaders.get("oai-authenticated-user-email");
-  const encodedFullName = requestHeaders.get("oai-authenticated-user-full-name");
-  const fullName =
-    encodedFullName &&
-    requestHeaders.get("oai-authenticated-user-full-name-encoding") ===
-      "percent-encoded-utf-8"
-      ? decodeURIComponent(encodedFullName)
-      : null;
-
-  const displayName = fullName ?? email;
-  // ...
-}
-```
-
-## Optional Dispatch-Owned ChatGPT Sign-In
-
-Import the ready-to-use helpers from `app/chatgpt-auth.ts` when the site needs
-optional or required ChatGPT sign-in:
-
-- Use `getChatGPTUser()` for optional signed-in UI.
-- Use `requireChatGPTUser(returnTo)` for server-rendered pages that should send
-  anonymous visitors through Sign in with ChatGPT.
-- Use `chatGPTSignInPath(returnTo)` and `chatGPTSignOutPath(returnTo)` for
-  browser links or actions.
-- Pass a same-origin relative `returnTo` path for the destination after sign-in
-  or sign-out. The helper validates and safely encodes it.
-- Mark protected pages with `export const dynamic = "force-dynamic"` because
-  they depend on per-request identity headers.
-
-Dispatch owns `/signin-with-chatgpt`, `/signout-with-chatgpt`, `/callback`, the
-OAuth cookies, and identity header injection. Do not implement app routes for
-those reserved paths. Routes that do not import and call the helper remain
-anonymous-compatible.
-
-SIWC establishes identity only; it does not prove workspace membership. Use the
-Sites hosting platform's access policy controls for workspace-wide restrictions,
-or enforce explicit server-side membership or allowlist checks.
-
-Use SIWC for account pages, user-specific dashboards, saved records, and write
-actions tied to the current ChatGPT user. Leave public content anonymous.
-
-## Useful Commands
-
-- `npm run dev`: start local development
-- `npm run build`: verify the vinext build output
-- `npm test`: build the starter and verify its rendered loading skeleton
-- `npm run db:generate`: generate Drizzle migrations after schema changes
-
-## Learn More
-
-- [vinext Documentation](https://github.com/cloudflare/vinext)
-- [Drizzle D1 Guide](https://orm.drizzle.team/docs/get-started/d1-new)
+Основной интерфейс и расчёты находятся в `app/`, серверные обработчики —
+в `app/api/`, импорты и сборщики каталогов — в `scripts/`, тесты — в `tests/`.
