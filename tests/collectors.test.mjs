@@ -12,7 +12,7 @@ const config = (patch = {}) => ({ type: "discharge", dn: 100, pn: 16, material: 
 const two = (patch = {}) => config({ stationType: "combined", secondary: { flow: 10, working: 1, reserve: 0, dn: 50, connection: "threaded", spacing: 400, pn: 16 }, ...patch });
 function fixtureCatalog() {
   const components = [];
-  const sizes = { 15: [21.3,17.3], 20: [26.9,22.9], 50: [60.3,56.3], 80: [88.9,83.9], 100: [114.3,108.3], 250: [273,263] };
+  const sizes = { 15: [21.3,17.3], 20: [26.9,22.9], 50: [60.3,56.3], 80: [88.9,83.9], 100: [114.3,108.3], 150: [159,153], 250: [273,263] };
   for (const material of ["aisi304", "st20"]) for (const [size, [outerDiameter, innerDiameter]] of Object.entries(sizes)) for (const pn of [10,16,25]) for (const kind of ["pipe", "weldFlange", "looseFlange", "collar", "nipple", "plug"]) {
     components.push({ id: `${material}-${kind}-${size}-${pn}`, name: `${kind} DN${size}`, kind, dn: Number(size), pn, material, threadGender: kind === "plug" ? "female" : undefined, outerDiameter, innerDiameter, price: kind === "pipe" ? 1000 : 100, source: "TEST FIXTURE ONLY" });
   }
@@ -37,6 +37,118 @@ test("14 jockey always alternating even with simultaneous flag", () => { const r
 test("15 stainless welding costs 5000 RUB/m", () => { const r=calculateCollector(config(),catalog); near(r.weldCost,r.weldLengthMm/1000*5000); });
 test("16 steel welding costs 2400 RUB/m", () => { const r=calculateCollector(config({material:"st20"}),catalog); near(r.weldCost,r.weldLengthMm/1000*2400); assert.equal(r.bom.find(i=>i.role==="end-weldFlange").quantity,2); });
 function readyProject() { const p=projectModule.createProject(); Object.assign(p.entities["system-input"],{ flowRate:60,workingPumpCount:2,reservePumpCount:1 }); Object.assign(p.entities["station-dn"],{suctionCollectorDn:100,dischargeCollectorDn:100,suctionValveDn:80,dischargeValveDn:80,pn:16,connectionType:"flanged",collectorMaterial:"aisi304"}); return model.synchronizeCollectors(p); }
+
+function commonSuctionProject(stationType = "combined") {
+  const p = readyProject();
+  Object.assign(p.entities["station-settings"], { stationType, jockeyPump: stationType === "fire" });
+  Object.assign(p.entities["system-input"], { flowRate: 50 });
+  Object.assign(p.entities["system-input-2"], { flowRate: 50, workingPumpCount: 2, reservePumpCount: 3 });
+  Object.assign(p.entities["station-dn"], { secondarySuctionCollectorDn: 100, secondarySuctionValveDn: 80 });
+  return model.synchronizeCollectors(p);
+}
+
+test("common suction uses 50 or 100 m3/h and recommends DN100 or DN150", () => {
+  let p = commonSuctionProject();
+  for (const [simultaneous, flow, dn, diameter] of [[false, 50, 100, 108.3], [true, 100, 150, 153], [false, 50, 100, 108.3]]) {
+    p.entities["station-settings"].combinedCircuitsSimultaneous = simultaneous;
+    p = model.synchronizeCollectors(p);
+    const state = p.entities["station-collectors"].suction;
+    const result = calculateCollector(state.configuration, catalog);
+    assert.equal(state.recommended.dn, dn);
+    assert.equal(state.configuration.dn, dn);
+    assert.equal(collectorFlow(state.configuration).flow, flow);
+    assert.equal(result.flow, flow);
+    near(result.velocities.collector, flowSpeed(flow, diameter));
+    assert.equal(calc.collectorVelocityWarning(dn, result.velocities.collector), null);
+    assert.match(p.entities["station-spec"].items.find(i => i.option === "suctionCollector").details, new RegExp(`^В${dn}_`));
+  }
+});
+
+test("jockey flow, working pumps and reserves never increase common suction flow", () => {
+  let p = commonSuctionProject("fire");
+  for (const flowRate of [5, 50, 200, null]) {
+    Object.assign(p.entities["system-input-2"], { flowRate, workingPumpCount: 4, reservePumpCount: 5 });
+    p.entities["station-settings"].combinedCircuitsSimultaneous = true;
+    p = model.synchronizeCollectors(p);
+    const c = p.entities["station-collectors"].suction.configuration;
+    assert.equal(collectorFlow(c).flow, 50);
+    assert.equal(c.dn, 100);
+    near(calculateCollector(c, catalog).velocities.collector, flowSpeed(50, 108.3));
+  }
+});
+
+test("fire-only common suction uses first circuit even when second is larger or missing", () => {
+  let p = commonSuctionProject();
+  for (const flow of [200, null]) {
+    p.entities["system-input-2"].flowRate = flow;
+    p = model.synchronizeCollectors(p);
+    const c = p.entities["station-collectors"].suction.configuration;
+    assert.equal(collectorFlow(c).flow, 50);
+    assert.equal(c.dn, 100);
+    assert.equal(collectorFlow({ ...c, simultaneous: true }).flow, flow === null ? null : 250);
+  }
+  p.entities["station-settings"].combinedCircuitsSimultaneous = true;
+  p = model.synchronizeCollectors(p);
+  assert.equal(p.entities["station-collectors"].suction.recommended.dn, null);
+});
+
+test("manual common DN survives mode changes and reload with an excess velocity warning", () => {
+  let p = commonSuctionProject();
+  p.entities["station-collectors"].suction.overrides.dn = 100;
+  p.entities["station-settings"].combinedCircuitsSimultaneous = true;
+  p = projectModule.parseProjectConfig(JSON.parse(JSON.stringify(p)));
+  const state = p.entities["station-collectors"].suction;
+  assert.equal(state.recommended.dn, 150);
+  assert.equal(state.configuration.dn, 100);
+  const result = calculateCollector(state.configuration, catalog);
+  assert.equal(result.flow, 100);
+  near(result.velocities.collector, flowSpeed(100, 108.3));
+  assert.match(calc.collectorVelocityWarning(100, result.velocities.collector), /превышает допустимую 2 м\/с/);
+  assert.equal(calc.collectorVelocityWarning(250, 2), null);
+  assert.match(calc.collectorVelocityWarning(250, 2.1), /2 м\/с/);
+  assert.equal(calc.collectorVelocityWarning(300, 3), null);
+  assert.match(calc.collectorVelocityWarning(300, 3.1), /3 м\/с/);
+});
+
+test("legacy simultaneous boolean restores common suction mode and invalidates old calculation", () => {
+  for (const simultaneous of [false, true, undefined]) {
+    let p = commonSuctionProject();
+    const state = p.entities["station-collectors"].suction;
+    state.calculation = calculateCollector(state.configuration, catalog);
+    state.calculationSourceFingerprint = state.sourceFingerprint;
+    p.entities["station-settings"].combinedCircuitsSimultaneous = simultaneous;
+    p = projectModule.parseProjectConfig(JSON.parse(JSON.stringify(p)));
+    assert.equal(p.entities["station-settings"].combinedCircuitsSimultaneous, simultaneous === true);
+    assert.equal(p.entities["station-collectors"].suction.configuration.dn, simultaneous ? 150 : 100);
+    if (simultaneous) {
+      assert.equal(p.entities["station-collectors"].suction.status, "stale");
+      assert.equal(p.entities["station-spec"].items.find(i => i.option === "suctionCollector").price, null);
+    }
+  }
+});
+
+test("utility and SMART common suction retain single-circuit sizing rules", () => {
+  for (const stationType of ["utility", "smart"]) {
+    const p = commonSuctionProject(stationType);
+    const c = p.entities["station-collectors"].suction.configuration;
+    assert.equal(c.dn, 100);
+    assert.equal(c.secondary, null);
+    assert.equal(collectorFlow(c).flow, 50);
+  }
+});
+
+test("old maximum-flow calculation is stale even when collector DN and configuration match", () => {
+  let p = commonSuctionProject();
+  p.entities["system-input-2"].flowRate = 60;
+  p = model.synchronizeCollectors(p);
+  const state = p.entities["station-collectors"].suction;
+  state.calculation = { ...calculateCollector(state.configuration, catalog), flow: 60 };
+  state.calculationSourceFingerprint = state.sourceFingerprint;
+  p = projectModule.parseProjectConfig(JSON.parse(JSON.stringify(p)));
+  assert.equal(p.entities["station-collectors"].suction.configuration.dn, 100);
+  assert.equal(p.entities["station-collectors"].suction.status, "stale");
+  assert.equal(p.entities["station-spec"].items.find(i => i.option === "suctionCollector").price, null);
+});
 test("17 specification synchronization replaces rows without duplicates", () => { let p=readyProject(); for(let i=0;i<4;i++) p=model.synchronizeCollectors(p); const state=p.entities["station-collectors"].discharge; state.calculation=calculateCollector(state.configuration,catalog); state.calculationSourceFingerprint=state.sourceFingerprint; p=model.synchronizeCollectors(p); let rows=p.entities["station-spec"].items; assert.equal(rows.filter(i=>i.option==="dischargeCollector").length,1); assert.equal(rows.find(i=>i.option==="dischargeCollector").status,"confirmation"); const card=p.entities["station-collectors"].discharge; card.database={id:"saved",code:card.code,price:123}; card.databaseStatus="found"; p=model.synchronizeCollectors(p); assert.equal(p.entities["station-spec"].items.find(i=>i.option==="dischargeCollector").status,"selected"); assert.equal(p.entities["station-spec"].items.find(i=>i.option==="dischargeCollector").price,123); });
 test("18 old JSON without constructor and legacy collector rows normalize", () => { const p=readyProject(); delete p.entities["station-collectors"]; for(const item of p.entities["station-spec"].items) if(item.option?.endsWith("Collector")) delete item.option; const parsed=projectModule.parseProjectConfig(JSON.parse(JSON.stringify(p))); assert.equal(parsed.entities["station-collectors"].kind,"collectors"); assert.equal(parsed.entities["station-spec"].items.filter(i=>i.option==="suctionCollector").length,1); assert.equal(parsed.entities["station-spec"].items.filter(i=>i.option==="dischargeCollector").length,1); });
 test("19 input invalidation clears current price but preserves manual DN", () => { let p=readyProject(); const card=p.entities["station-collectors"].discharge; card.overrides.dn=100; card.calculation=calculateCollector(card.configuration,catalog); card.calculationSourceFingerprint=card.sourceFingerprint; p=model.synchronizeCollectors(p); p.entities["system-input"].flowRate=90; p.entities["station-dn"].dischargeCollectorDn=150; p=model.synchronizeCollectors(p); assert.equal(p.entities["station-collectors"].discharge.status,"stale"); assert.equal(p.entities["station-collectors"].discharge.configuration.dn,100); assert.equal(p.entities["station-spec"].items.find(i=>i.option==="dischargeCollector").price,null); delete p.entities["station-collectors"].discharge.overrides.dn; p=model.synchronizeCollectors(p); assert.equal(p.entities["station-collectors"].discharge.configuration.dn,150); });

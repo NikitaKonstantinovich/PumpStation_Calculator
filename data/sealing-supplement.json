@@ -1,0 +1,34 @@
+{
+  "id": "user-seals-2026-09-28",
+  "source": "Таблица уплотнений пользователя от 28.09.2026",
+  "sourceImage": "codex-clipboard-eb9ed8ec-67d5-4427-b849-2475797dc9fc.png",
+  "standardUrl": "https://www.zaar.ru/gosty/gost-15180-86.pdf",
+  "gaskets": [
+    {"dn":15,"pn":40,"compatiblePn":[10,16,25,40],"price":16.8},
+    {"dn":20,"pn":40,"compatiblePn":[10,16,25,40],"price":16.8},
+    {"dn":25,"pn":40,"compatiblePn":[10,16,25,40],"price":16.8},
+    {"dn":32,"pn":40,"compatiblePn":[10,16,25,40],"price":9},
+    {"dn":40,"pn":40,"compatiblePn":[10,16,25,40],"price":16.8},
+    {"dn":50,"pn":40,"compatiblePn":[10,16,25,40],"price":16.8},
+    {"dn":65,"pn":40,"compatiblePn":[10,16,25,40],"price":24},
+    {"dn":80,"pn":40,"compatiblePn":[10,16,25,40],"price":25.8},
+    {"dn":100,"pn":16,"compatiblePn":[10,16],"price":37.2},
+    {"dn":100,"pn":40,"compatiblePn":[25,40],"price":100},
+    {"dn":125,"pn":16,"compatiblePn":[10,16],"price":40.2},
+    {"dn":125,"pn":40,"compatiblePn":[25,40],"price":600},
+    {"dn":150,"pn":16,"compatiblePn":[10,16],"price":87},
+    {"dn":150,"pn":40,"compatiblePn":[25,40],"price":700},
+    {"dn":200,"pn":16,"compatiblePn":[10,16],"price":87},
+    {"dn":200,"pn":40,"compatiblePn":[40],"price":800},
+    {"dn":250,"pn":16,"compatiblePn":[10,16],"price":150},
+    {"dn":250,"pn":40,"compatiblePn":[40],"price":300},
+    {"dn":300,"pn":10,"compatiblePn":[10],"price":350},
+    {"dn":350,"pn":10,"compatiblePn":[10],"price":500},
+    {"dn":400,"pn":10,"compatiblePn":[10],"price":1050},
+    {"dn":500,"pn":10,"compatiblePn":[10],"price":1100}
+  ],
+  "flax": [
+    {"dn":50,"thread":"2\"","pn":10,"price":51.5,"priceUnit":"м"},
+    {"dn":40,"thread":"1 1/2\"","pn":10,"price":51.5,"priceUnit":"м"}
+  ]
+}

@@ -36,6 +36,7 @@ export type SketchEntity = { kind: "sketch" };
 export type StationType = "utility" | "fire" | "combined" | "smart";
 export type SettingsEntity = {
   kind: "settings";
+  inletHead?: number | null;
   stationType: StationType;
   combinedCircuitsSimultaneous: boolean;
   membraneTank: boolean;
@@ -46,11 +47,12 @@ export type SettingsEntity = {
   jockeyPump: boolean;
   usdRate: number;
   cnyRate: number;
-  manufacturerDiscounts: { cnp: number; aquastrong: number };
+  manufacturerDiscounts: { cnp: number; aquastrong: number; onis?: number; vandjord?: number; wellmix?: number };
 };
 export type SpecSection = "pump" | "control" | "suction" | "discharge" | "frame" | "electrical";
 export type SpecOption = "suctionCollector" | "dischargeCollector" | "secondaryPump" | "membraneTank" | "vibrationCompensators" | "collectorPlugs" | "isolatingValves" | "primarySuctionValve" | "primaryDischargeValve" | "primaryCheckValve" | "secondarySuctionValve" | "secondaryDischargeValve" | "secondaryCheckValve";
 export type SpecItem = {
+  inletPressureCheck?: { checks: import("./dn-defaults").InletPressureCheck[]; baseStatus: "selected" | "clarify" | "confirmation" };
   generatedBy?: "suction-line";
   assemblyRole?: string;
   sourceFingerprint?: string;
@@ -62,7 +64,7 @@ export type SpecItem = {
   price?: number | null;
   equipmentId?: string;
   listPrice?: number | null;
-  priceCurrency?: "USD" | "CNY" | null;
+  priceCurrency?: "USD" | "CNY" | "RUB" | null;
   manufacturer?: string;
   description?: string;
   section?: SpecSection;
@@ -81,6 +83,8 @@ export type DnEntity = {
   kind:"dn";
   pumpSuctionPort?: PumpPortOverride | null;
   secondaryPumpSuctionPort?: PumpPortOverride | null;
+  pumpDischargePort?: PumpPortOverride | null;
+  secondaryPumpDischargePort?: PumpPortOverride | null;
   suctionCollectorDn:number|null;
   dischargeCollectorDn:number|null;
   suctionValveDn:number|null;
@@ -155,7 +159,7 @@ export function createProject(name = "Новая насосная станция
       "working-point-2": { kind: "chart", efficiency: 78, power: 22, npsh: 3.2 },
       "pump-sketch": { kind: "sketch" },
       "pump-sketch-2": { kind: "sketch" },
-      "station-settings": { kind: "settings", stationType: "utility", combinedCircuitsSimultaneous: false, membraneTank: false, membraneTankVolume: 8, vibrationCompensators: false, collectorPlugs: false, isolatingValves: false, jockeyPump: false, usdRate: 85, cnyRate: 13, manufacturerDiscounts: { cnp: 45, aquastrong: 45 } },
+      "station-settings": { kind: "settings", inletHead: null, stationType: "utility", combinedCircuitsSimultaneous: false, membraneTank: false, membraneTankVolume: 8, vibrationCompensators: false, collectorPlugs: false, isolatingValves: false, jockeyPump: false, usdRate: 85, cnyRate: 13, manufacturerDiscounts: { cnp: 45, aquastrong: 55, onis: 0, vandjord: 25, wellmix: 35 } },
       "station-dn": { kind: "dn", suctionCollectorDn: null, dischargeCollectorDn: null, suctionValveDn: null, dischargeValveDn: null, collectorMaterial: null, connectionType:null, pn:null, suctionValveType:null, dischargeValveType:null, secondarySuctionCollectorDn:null, secondaryDischargeCollectorDn:null, secondarySuctionValveDn:null, secondaryDischargeValveDn:null, secondaryConnectionType:null, secondaryPn:null, secondarySuctionValveType:null, secondaryDischargeValveType:null },
       "station-spec": { kind: "spec", items: DEFAULT_SPEC_ITEMS.map(item => ({ ...item })) },
       "station-components": { kind: "components" },
@@ -193,7 +197,7 @@ export function parseProjectConfig(raw: unknown): ProjectConfig {
   if (input2?.kind === "input") entities["system-input-2"] = { ...input2, staticHead: input2.staticHead ?? 0, workingPumpCount: input2.workingPumpCount == null ? null : Math.max(1, finite(input2.workingPumpCount, 1)), reservePumpCount: input2.reservePumpCount == null ? null : Math.max(0, finite(input2.reservePumpCount, 0)), calculated: input2.calculated ?? false };
   const rawSettings = entities["station-settings"] as Partial<SettingsEntity>;
   const stationType = rawSettings.stationType ?? "utility";
-  entities["station-settings"] = { kind: "settings", stationType, combinedCircuitsSimultaneous: stationType === "combined" && rawSettings.combinedCircuitsSimultaneous === true, membraneTank: rawSettings.membraneTank ?? false, membraneTankVolume: rawSettings.membraneTankVolume ?? 8, vibrationCompensators: rawSettings.vibrationCompensators ?? false, collectorPlugs: rawSettings.collectorPlugs ?? false, isolatingValves: rawSettings.isolatingValves ?? false, jockeyPump: rawSettings.jockeyPump ?? false, usdRate: finite(rawSettings.usdRate, 85), cnyRate: finite(rawSettings.cnyRate, 13), manufacturerDiscounts: { cnp: finite(rawSettings.manufacturerDiscounts?.cnp, 45), aquastrong: finite(rawSettings.manufacturerDiscounts?.aquastrong, 45) } };
+  entities["station-settings"] = { kind: "settings", inletHead: typeof rawSettings.inletHead === "number" && Number.isFinite(rawSettings.inletHead) ? rawSettings.inletHead : null, stationType, combinedCircuitsSimultaneous: stationType === "combined" && rawSettings.combinedCircuitsSimultaneous === true, membraneTank: rawSettings.membraneTank ?? false, membraneTankVolume: rawSettings.membraneTankVolume ?? 8, vibrationCompensators: rawSettings.vibrationCompensators ?? false, collectorPlugs: rawSettings.collectorPlugs ?? false, isolatingValves: rawSettings.isolatingValves ?? false, jockeyPump: rawSettings.jockeyPump ?? false, usdRate: finite(rawSettings.usdRate, 85), cnyRate: finite(rawSettings.cnyRate, 13), manufacturerDiscounts: { cnp: finite(rawSettings.manufacturerDiscounts?.cnp, 45), aquastrong: finite(rawSettings.manufacturerDiscounts?.aquastrong, 55), onis: finite(rawSettings.manufacturerDiscounts?.onis, 0), vandjord: finite(rawSettings.manufacturerDiscounts?.vandjord, 25), wellmix: finite(rawSettings.manufacturerDiscounts?.wellmix, 35) } };
   const rawDn = entities["station-dn"] as Partial<DnEntity>;
   const savedDn = (value:unknown) => typeof value === "number" && Number.isFinite(value) && value > 0 ? value : null;
   const connection = (value:unknown):ValveConnection|null => value==="threaded"||value==="flanged"?value:null;
@@ -202,9 +206,9 @@ export function parseProjectConfig(raw: unknown): ProjectConfig {
   entities["station-dn"] = { kind:"dn", suctionCollectorDn:savedDn(rawDn.suctionCollectorDn), dischargeCollectorDn:savedDn(rawDn.dischargeCollectorDn), suctionValveDn:savedDn(rawDn.suctionValveDn), dischargeValveDn:savedDn(rawDn.dischargeValveDn), collectorMaterial:rawDn.collectorMaterial==="st20"||rawDn.collectorMaterial==="aisi304"?rawDn.collectorMaterial:null, connectionType:connection(rawDn.connectionType), pn:pn(rawDn.pn), suctionValveType:valveType(rawDn.suctionValveType), dischargeValveType:valveType(rawDn.dischargeValveType), secondarySuctionCollectorDn:savedDn(rawDn.secondarySuctionCollectorDn), secondaryDischargeCollectorDn:savedDn(rawDn.secondaryDischargeCollectorDn), secondarySuctionValveDn:savedDn(rawDn.secondarySuctionValveDn), secondaryDischargeValveDn:savedDn(rawDn.secondaryDischargeValveDn), secondaryConnectionType:connection(rawDn.secondaryConnectionType), secondaryPn:pn(rawDn.secondaryPn), secondarySuctionValveType:valveType(rawDn.secondarySuctionValveType), secondaryDischargeValveType:valveType(rawDn.secondaryDischargeValveType) };
   entities["station-collectors"] = normalizeCollectors(entities["station-collectors"]);
   const normalizedDn = entities["station-dn"] as DnEntity;
-  for (const key of ["pumpSuctionPort", "secondaryPumpSuctionPort"] as const) {
+  for (const key of ["pumpSuctionPort", "secondaryPumpSuctionPort", "pumpDischargePort", "secondaryPumpDischargePort"] as const) {
     const port = rawDn[key];
-    if (port && typeof port.pumpId === "string") normalizedDn[key] = { pumpId: port.pumpId, dn: savedDn(port.dn), connection: connection(port.connection), source: typeof port.source === "string" ? port.source : "Указано пользователем", maxPressure: typeof port.maxPressure === "number" && port.maxPressure > 0 ? port.maxPressure : null };
+    if (port && typeof port.pumpId === "string") normalizedDn[key] = { pumpId: port.pumpId, dn: savedDn(port.dn), connection: connection(port.connection), source: typeof port.source === "string" ? port.source : "Указано пользователем", maxPressure: typeof port.maxPressure === "number" && port.maxPressure > 0 ? port.maxPressure : null, maxInletPressure: savedDn(port.maxInletPressure) };
   }
   const spec = entities["station-spec"] as SpecEntity | undefined;
   if (spec?.kind === "spec") {
@@ -217,6 +221,7 @@ export function parseProjectConfig(raw: unknown): ProjectConfig {
     const secondaryPump = pumpItems.find(item => item.position === "02" || item.option === "secondaryPump");
     const savedItems = [...normalized.filter(item => !isPumpItem(item)), ...(primaryPump ? [{ ...primaryPump, position: "01", section: "pump" as const, option: undefined }] : []), ...(secondaryPump && secondaryPump !== primaryPump ? [{ ...secondaryPump, position: "02", section: "pump" as const, option: "secondaryPump" as const }] : [])];
     const savedNames = new Set(savedItems.map(item => item.name.trim().toLocaleLowerCase("ru-RU")));
+    if (savedItems.some(item => item.section === "suction" && (item.assemblyRole === "gauge" || item.name === "Мановакуумметр"))) savedNames.add("манометр");
     const additions = DEFAULT_SPEC_ITEMS.filter(item => item.section !== "pump" && (item.option ? !savedItems.some(saved => saved.option === item.option) : !savedNames.has(item.name.toLocaleLowerCase("ru-RU")))).map(item => ({ ...item }));
     const fallbackPump = primaryPump ? [] : DEFAULT_SPEC_ITEMS.filter(item => item.section === "pump").slice(0, 1).map(item => ({ ...item, position: "01" }));
     entities["station-spec"] = { ...spec, items: [...fallbackPump, ...savedItems, ...additions].sort((a,b)=>a.position.localeCompare(b.position,"ru",{numeric:true})) };

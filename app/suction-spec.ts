@@ -1,9 +1,13 @@
 import type { DnEntity, InputEntity, ProjectConfig, SettingsEntity, SpecItem } from "./project-config";
 import type { CollectorsEntity } from "./collector-project";
-import { flangeKinds, secondaryAllowed, type CollectorCatalog } from "./collector-calculations";
-import { suctionHydraulics } from "./dn-defaults";
+import { collectorPressureChecks, flangeKinds, secondaryAllowed, type CollectorCatalog } from "./collector-calculations";
+import { checkInletPressure, suctionHydraulics } from "./dn-defaults";
+import { resolvePumpPortData } from "./pump-ports";
+import { componentPressureLimit, withInletPressureChecks } from "./suction-pressure";
 import { matingParts, suctionCatalogItems, type AssemblyComponent } from "./suction-catalog";
 import fastenerReference from "./suction-fasteners.json";
+import { selectSuctionInstruments } from "./suction-instruments";
+import { selectGasket, selectFlax, gasketPressures, sealingName, sealingPrice } from "./sealing-selection";
 
 const field = (item: AssemblyComponent, pattern: RegExp) => item.fields.find(f=>pattern.test(f.headerPath.at(-1)??""))?.value;
 const number = (v:unknown) => Number(String(v??"").replace(",",".").match(/\d+(?:\.\d+)?/)?.[0]) || null;
@@ -12,7 +16,7 @@ const price = (item?:AssemblyComponent) => item?.prices.find(p=>p.currency==="RU
 const itemName = (item?:AssemblyComponent) => item ? String(field(item,/^Наименование$/i)??item.family) : "";
 export function suctionFingerprint(project:ProjectConfig) {
   const e=project.entities, settings=e["station-settings"] as SettingsEntity;
-  return JSON.stringify([e["station-dn"],e["system-input"],secondaryAllowed({stationType:settings.stationType,jockey:settings.jockeyPump})?e["system-input-2"]:null,settings.stationType,settings.jockeyPump,(e["station-collectors"] as CollectorsEntity).suction.configuration]);
+  return JSON.stringify(["instruments-v2","seals-v2","instrument-valve-v1",settings.inletHead??null,e["station-dn"],e["system-input"],secondaryAllowed({stationType:settings.stationType,jockey:settings.jockeyPump})?e["system-input-2"]:null,settings.stationType,settings.jockeyPump,(e["station-collectors"] as CollectorsEntity).suction.configuration]);
 }
 
 export function buildSuctionSpec(project:ProjectConfig, database:{items:AssemblyComponent[]}, catalog:CollectorCatalog):SpecItem[] {
@@ -20,14 +24,18 @@ export function buildSuctionSpec(project:ProjectConfig, database:{items:Assembly
   const collector=(e["station-collectors"] as CollectorsEntity).suction.configuration;
   if (!collector || !(e["system-input"] as InputEntity).calculated) return [];
   const rows:SpecItem[]=[], fingerprint=suctionFingerprint(project);
-  const add=(role:string,name:string,quantity:number,details:string,item?:AssemblyComponent,unit="шт.",fixedPrice?:number,description="")=>{
+  const add=(role:string,name:string,quantity:number,details:string,item?:AssemblyComponent,unit="шт.",fixedPrice?:number,description="",status?:SpecItem["status"])=>{
     const amount=fixedPrice??price(item);
-    rows.push({position:`03.${String(30+rows.length).padStart(2,"0")}`,name,quantity:Number(quantity.toFixed(3)),unit,details,price:amount,equipmentId:item?.id,description:description || (item ? `База комплектующих: ${item.id}` : "Точное исполнение или цена отсутствуют в базе — требуется уточнение"),section:"suction",status:amount===null?"clarify":"selected",generatedBy:"suction-line",assemblyRole:role,sourceFingerprint:fingerprint});
+    rows.push({position:`03.${String(30+rows.length).padStart(2,"0")}`,name,quantity:Number(quantity.toFixed(3)),unit,details,price:amount,equipmentId:item?.id,description:description || (item ? `База комплектующих: ${item.id}` : "Точное исполнение или цена отсутствуют в базе — требуется уточнение"),section:"suction",status:status??(amount===null?"clarify":"selected"),generatedBy:"suction-line",assemblyRole:role,sourceFingerprint:fingerprint});
   };
   const gasket=(role:string,size:number,pn:number,count:number)=>{
-    const item=database.items.find(x=>x.catalogId==="прокладки"&&itemDn(x)===size&&number(field(x,/^PN$/i))===pn&&/паронит/i.test(x.family));
-    add(role,`Прокладка паронитовая DN${size}`,count,`DN${size} · PN${pn}`,item);
+    const item=selectGasket(database.items,size,pn);
+    const pressures=item?gasketPressures(item):[],fallback=Boolean(item&&!pressures.includes(pn));
+    const warning=fallback?`Предупреждение: для DN${size} требуется PN${pn}, выбрана прокладка PN${pressures.join("/")}. ${Math.max(...pressures)<pn?"PN прокладки ниже требуемого. ":""}Проверьте размеры и допустимое давление перед применением.`:"";
+    add(role,`Прокладка паронитовая DN${size}`,count,`DN${size} · соединение PN${pn}${item?` · ${sealingName(item)} · PN прокладки ${pressures.join("/")}`:" · исполнения этого DN в базе нет"}${warning?` · ⚠ ${warning}`:""}`,item,"шт.",item?sealingPrice(item)??undefined:undefined,warning,fallback?"confirmation":undefined);
   };
+  const flaxItem=selectFlax(database.items);
+  const flax=(role:string,quantity:number,details:string)=>add(role,"Лён для уплотнения труб",quantity,details,flaxItem,"м",flaxItem?sealingPrice(flaxItem)??undefined:undefined,flaxItem?"Цена за метр из базы уплотнений; расход 0,1 м на резьбовое соединение.":"Цена льна за метр отсутствует в базе — требуется уточнение");
   const flanges=(role:string,size:number,pn:number,count:number)=>{
     for(const kind of flangeKinds(collector.material,size,pn)) {
       const part=catalog.components.find(x=>x.kind===kind&&x.dn===size&&x.pn===pn&&x.material===collector.material);
@@ -94,21 +102,45 @@ export function buildSuctionSpec(project:ProjectConfig, database:{items:Assembly
       fasteners(`${prefix}-valve-fasteners`,v,pn,count,true);
       if(!secondary&&(settings.stationType==="fire"||settings.stationType==="combined")&&h.valveType==="butterfly") add(`${prefix}-limit-switches`,"Комплект концевых выключателей на затвор",count,`${title} · 1 комплект на 1 затвор`,undefined,"компл.",3000,"Стоимость комплекта задана пользователем: 3000 ₽");
     }
-    if(threads) add(`${prefix}-flax`,"Лён для уплотнения труб",count*threads*.1,`${title} · ${threads} резьбовых соединения × 0,1 м на насос`,undefined,"м");
+    if(threads) flax(`${prefix}-flax`,count*threads*.1,`${title} · ${count} нас. × ${threads} резьбовых соединения × 0,1 м`);
   }
   if(collector.dn) {
     if(collector.connection==="flanged") {gasket("network-gaskets",collector.dn,collector.pn,2);fasteners("network-fasteners",collector.dn,collector.pn,2);}
-    else add("network-flax","Лён для уплотнения труб",.2,"Два подключения коллектора к сети × 0,1 м, независимо от числа насосов",undefined,"м");
+    else flax("network-flax",.2,"Два подключения коллектора к сети × 0,1 м, независимо от числа насосов");
   }
   const instruments=settings.stationType==="fire"||settings.stationType==="combined"?2:1;
-  // The suction pressure/range and switch setpoint are not supplied by pump head.
-  add("gauge","Манометр",instruments,"Всасывающий коллектор · диапазон входного давления требуется указать",undefined,"шт.",undefined,"В базе есть манометры Экомера МД02. Диапазон нельзя определить по напору насоса; требуется уточнение.");
-  add("pressure-switch","Реле давления",instruments,"Всасывающий коллектор · защита от сухого хода · диапазон и уставка требуют уточнения",undefined,"шт.",undefined,"В базе есть реле РД-2Р. Подбор исполнения после уточнения входного давления и уставки.");
-  const instrumentValve=database.items.find(x=>/латун/i.test(x.family)&&/тр[её]хход/i.test(x.family)&&/воздухоотвод/i.test(x.family)&&itemDn(x)===15);
-  add("instrument-valve","Кран шаровой латунный трёхходовой с воздухоотводчиком DN15",instruments,"DN15 · арматура КИП",instrumentValve);
+  for (const instrument of selectSuctionInstruments(database.items,settings.inletHead)) {
+    add(instrument.role,instrument.name,instruments,instrument.details,instrument.item,"шт.",undefined,instrument.description,instrument.warning?"confirmation":undefined);
+  }
+  const instrumentValve=database.items.find(x=>x.catalogId==="шаровые-краны"&&field(x,/^Артикул$/i)==="44.15.В-В.С.Б"&&itemDn(x)===15&&(number(field(x,/^PN$/i))??0)>=collector.pn);
+  add("instrument-valve",instrumentValve?`${itemName(instrumentValve)} · DN15`:"Кран LD Pride 44.15.В-В.С.Б DN15",instruments,"DN15 · PN40 · арматура КИП · дренаж и воздухоотводчик",instrumentValve,"шт.",undefined,instrumentValve?"Модель и цена заданы пользователем: 650 ₽/шт.":"Указанная модель DN15 PN40 отсутствует в базе или не подходит по PN коллектора — требуется уточнение");
   return rows;
 }
 
 export function replaceSuctionSpec(items:SpecItem[],generated:SpecItem[]):SpecItem[] {
-  return [...items.filter(item=>item.generatedBy!=="suction-line" && !(item.section==="suction"&&["Манометр","Реле давления"].includes(item.name))),...generated];
+  return [...items.filter(item=>item.generatedBy!=="suction-line" && !(item.section==="suction"&&["Манометр","Мановакуумметр","Реле давления"].includes(item.name))),...generated];
+}
+
+export function checkSuctionSpecPressure(project: ProjectConfig, items: SpecItem[], database?: { items: AssemblyComponent[] }, catalog?: CollectorCatalog): SpecItem[] {
+  const settings = project.entities["station-settings"] as SettingsEntity;
+  const dn = project.entities["station-dn"] as DnEntity;
+  const collector = (project.entities["station-collectors"] as CollectorsEntity).suction.configuration;
+  const components = new Map([...suctionCatalogItems, ...(database?.items ?? [])].map(item => [item.id, item]));
+  return items.map(item => {
+    if (item.option === "suctionCollector" && collector) return withInletPressureChecks(item, collectorPressureChecks(collector, settings.inletHead, catalog));
+    if (item.section === "pump") {
+      const secondary = item.option === "secondaryPump";
+      if (secondary && (!collector || !secondaryAllowed(collector))) return item;
+      const input = project.entities[secondary ? "system-input-2" : "system-input"] as InputEntity;
+      const port = resolvePumpPortData(dn, { ...input, selectedPumpId: item.equipmentId ?? input.selectedPumpId }, secondary);
+      return withInletPressureChecks(item, [checkInletPressure(settings.inletHead, `${item.name}: допустимое давление на входе`, port?.maxInletPressure)]);
+    }
+    // Fasteners and limit switches have no independent hydraulic pressure rating.
+    if (item.section !== "suction" || /(?:fasteners|limit-switches|error)/.test(item.assemblyRole ?? "")) return item;
+    const component = components.get(item.equipmentId ?? "");
+    const rating = componentPressureLimit(component);
+    const catalogPart = catalog?.components.find(part => part.id === item.equipmentId);
+    const limit = rating ?? (catalogPart?.pn ? { bar: catalogPart.pn, label: `PN${catalogPart.pn}` } : null);
+    return withInletPressureChecks(item, [checkInletPressure(settings.inletHead, item.name, limit?.bar, limit?.label)]);
+  });
 }

@@ -2,7 +2,8 @@
 
 import { useCallback, useEffect, useState, type Dispatch, type SetStateAction } from "react";
 import type { ProjectConfig } from "./project-config";
-import { calculateCollector, collectorFlow, collectorLength, configurationFingerprint, pumpCount, type CollectorCatalog, type CollectorType } from "./collector-calculations";
+import { calculateCollector, collectorFlow, collectorLength, collectorVelocityWarning, collectorPressureChecks, configurationFingerprint, pumpCount, type CollectorCatalog, type CollectorType } from "./collector-calculations";
+import { pressureCheckWarning } from "./dn-defaults";
 import { synchronizeCollectors, type CollectorCardState, type CollectorOverrides, type CollectorsEntity, type SavedCollector } from "./collector-project";
 
 const money = (v: number | null | undefined) => v == null ? "—" : `${v.toLocaleString("ru-RU", { maximumFractionDigits: 2 })} ₽`;
@@ -19,7 +20,7 @@ export function useCollectorDatabase(project: ProjectConfig, setProject: Dispatc
     setCatalog(catalog); setCatalogError("");
     setProject(current => {
       const entity = current.entities["station-collectors"] as CollectorsEntity;
-      return synchronizeCollectors({ ...current, entities: { ...current.entities, "station-collectors": { ...entity, suction: { ...entity.suction, currentCatalogVersion: catalog.version }, discharge: { ...entity.discharge, currentCatalogVersion: catalog.version } } } });
+      return synchronizeCollectors({ ...current, entities: { ...current.entities, "station-collectors": { ...entity, suction: { ...entity.suction, currentCatalogVersion: catalog.version }, discharge: { ...entity.discharge, currentCatalogVersion: catalog.version } } } }, catalog);
     });
   }, [setProject]);
   useEffect(() => {
@@ -39,7 +40,7 @@ export function useCollectorDatabase(project: ProjectConfig, setProject: Dispatc
       const apply = (patch: Partial<CollectorCardState>) => { if (active) setProject(current => {
         const collectors = current.entities["station-collectors"] as CollectorsEntity, state = collectors[type];
         if (current.project.id !== JSON.parse(key)[0] || state.code !== code || !state.configuration || configurationFingerprint(state.configuration) !== fingerprint) return current;
-        return synchronizeCollectors({ ...current, entities: { ...current.entities, "station-collectors": { ...collectors, [type]: { ...state, ...(catalog ? { currentCatalogVersion: catalog.version } : {}), ...patch } } } });
+        return synchronizeCollectors({ ...current, entities: { ...current.entities, "station-collectors": { ...collectors, [type]: { ...state, ...(catalog ? { currentCatalogVersion: catalog.version } : {}), ...patch } } } }, catalog ?? undefined);
       }); };
       api(`/api/collectors?code=${encodeURIComponent(code)}`).then(data => apply({ database: data.collector, databaseStatus: data.collector ? "found" : "missing", databaseError: undefined })).catch(error => apply({ database: null, databaseStatus: "error", databaseError: error.message }));
     }
@@ -48,11 +49,11 @@ export function useCollectorDatabase(project: ProjectConfig, setProject: Dispatc
   return { catalog, catalogError, setCatalog: acceptCatalog };
 }
 
-type Props = { entity: CollectorsEntity; catalog: CollectorCatalog | null; catalogError: string; onCatalog: (catalog: CollectorCatalog) => void; onChange: (type: CollectorType, patch: Partial<CollectorCardState>, expectedFingerprint?: string) => void };
+type Props = { entity: CollectorsEntity; inletHead?: number | null; catalog: CollectorCatalog | null; catalogError: string; onCatalog: (catalog: CollectorCatalog) => void; onChange: (type: CollectorType, patch: Partial<CollectorCardState>, expectedFingerprint?: string) => void };
 export function CollectorConstructor(props: Props) {
   return <div className="collector-constructor">{(["suction", "discharge"] as const).map(type => <CollectorCard key={type} {...props} type={type} state={props.entity[type]}/>)}</div>;
 }
-function CollectorCard({ type, state, catalog, catalogError, onCatalog, onChange }: Props & { type: CollectorType; state: CollectorCardState }) {
+function CollectorCard({ type, state, inletHead, catalog, catalogError, onCatalog, onChange }: Props & { type: CollectorType; state: CollectorCardState }) {
   const [busy, setBusy] = useState(false), [message, setMessage] = useState("");
   const c = state.configuration, recommended = state.recommended;
   if (!c || !recommended) return <article className="collector-card">Подготовка параметров…</article>;
@@ -61,6 +62,7 @@ function CollectorCard({ type, state, catalog, catalogError, onCatalog, onChange
   const calculation = !stale && state.calculation?.fingerprint === fingerprint ? state.calculation : null;
   const saved = state.databaseStatus === "found" && state.database?.code === state.code ? state.database : null;
   const values = preview ?? calculation;
+  const velocityWarning = collectorVelocityWarning(c.dn, values?.velocities.collector);
   const pricedCalculation = calculation ?? (saved ? preview : null);
   const patch = (value: Partial<CollectorCardState>) => onChange(type, value);
   const override = (key: keyof CollectorOverrides, value: number | string | undefined) => { const overrides = { ...state.overrides, [key]: value }; if (value === undefined) delete overrides[key]; patch({ overrides }); };
@@ -102,6 +104,8 @@ function CollectorCard({ type, state, catalog, catalogError, onCatalog, onChange
       {i === 1 && <label className="collector-field"><span>PN контура 2</span><select value={circuit.pn} onChange={e => override("secondaryPn", Number(e.target.value))}>{[10,16,25].map(pn => <option key={pn} value={pn}>PN{pn}</option>)}</select><small>Из расчёта DN: PN{recommended.secondary?.pn}</small>{state.overrides.secondaryPn && <button className="collector-reset" onClick={() => override("secondaryPn", undefined)}>Вернуть из расчёта DN</button>}</label>}
     </div><p>Длина патрубка: {measure(values?.branchLengthsMm[i], "мм")} · скорость: {measure(i ? values?.velocities.secondary : values?.velocities.primary, "м/с")}</p></section>)}
     <dl className="collector-metrics"><div><dt>Расчётный расход</dt><dd>{measure(collectorFlow(c).flow, "м³/ч")}</dd></div><div><dt>Длина коллектора</dt><dd>{measure(collectorLength(c), "мм")}</dd></div><div><dt>Скорость в коллекторе</dt><dd>{measure(values?.velocities.collector, "м/с")}</dd></div></dl>
+    {velocityWarning && <p role="alert" className="collector-warning">{velocityWarning}</p>}
+    {type === "suction" && <section aria-label="Проверка давления по напору на входе"><h3>Давление по напору на входе</h3>{collectorPressureChecks(c,inletHead,catalog).map((check,index)=><p key={index} className={pressureCheckWarning(check)?"collector-warning":"collector-note"}>{check.message}</p>)}<p className="collector-note">Проверка по указанному напору на входе. Прочность, гидроудары и пригодность к работе под вакуумом не оцениваются.</p></section>}
     <p className="collector-note">Длина патрубка = 0,5 × наружный Ø коллектора + 1,1 × длина болта из таблицы обвязки. Крепёж учитывается отдельно в общей спецификации.</p>
     {(catalogError || stale) && <p className="collector-warning">{catalogError || "Расчёт устарел — выполните повторный расчёт"}</p>}
     {!!values?.warnings.length && <div className="collector-warning"><b>Расчёт неполный</b><ul>{values.warnings.map(warning => <li key={warning}>{warning}</li>)}</ul></div>}

@@ -16,10 +16,10 @@ test("supplier import adds six verified SKUs idempotently after a workbook reimp
   workbook.catalogs.forEach(v => { v.tables = v.tables.filter(t => t.id !== supplier.id); });
   const merged = mergeBindingSupplement(workbook, supplier);
   assert.deepEqual(mergeBindingSupplement(merged, supplier), merged);
-  assert.equal(workbook.items.length, 1794);
-  assert.equal(merged.items.length, 1800);
+  assert.equal(workbook.items.length, 1801);
+  assert.equal(merged.items.length, 1807);
   assert.deepEqual(merged.items.filter(v => v.tableId !== supplier.id), workbook.items);
-  assert.equal(merged.statistics.priceEntries, 4232);
+  assert.equal(merged.statistics.priceEntries, 4239);
   const caps = makeCollectorCatalog(merged).components.filter(v => v.kind === "plug");
   assert.deepEqual(caps.map(v => [v.dn, v.price, v.pn]), [[15,56.12,40],[20,82.96,40],[25,130.54,40],[32,222.04,null],[40,330.62,null],[50,522.16,null]]);
   assert.ok(caps.every(v => v.material === "brass" && v.threadGender === "female" && v.source.includes("2026-09-10")));

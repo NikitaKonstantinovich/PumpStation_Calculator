@@ -1,4 +1,5 @@
 import type { CollectorMaterial, StationType, ValveConnection } from "./project-config";
+import { checkInletPressure, dnVelocityLimit, type InletPressureCheck } from "./dn-defaults";
 
 export type CollectorType = "suction" | "discharge";
 export type CollectorCircuit = { flow: number | null; working: number | null; reserve: number | null; pumpId?: string; pumpModel?: string; dn: number | null; connection: ValveConnection; spacing: number; pn: number };
@@ -42,6 +43,14 @@ export function collectorCode(c: CollectorConfiguration): string | null {
   return `${c.type === "suction" ? "В" : "Н"}${size(c.dn, c.connection)}_${c.pn}_${group(circuits.map(v => String(pumpCount(v))))}_${group(circuits.map(v => String(v.spacing)))}_${group(circuits.map(v => size(v.dn, v.connection)))}_${c.material === "aisi304" ? "AISI304" : "СТ20"}${c.eccentric ? "_Э" : ""}`;
 }
 export function collectorFlow(c: CollectorConfiguration): { flow: number | null; mode: string } {
+  // Circuit flows already include all working pumps; reserves only add branches.
+  // On suction, the first circuit is always the fire circuit for these stations.
+  if (c.type === "suction" && (c.stationType === "fire" || c.stationType === "combined")) {
+    const simultaneous = c.stationType === "combined" && c.simultaneous;
+    const mode = simultaneous ? "Оба контура одновременно" : "Только пожарный контур";
+    const q1 = c.primary.flow, q2 = c.secondary?.flow;
+    return { flow: positive(q1) && (!simultaneous || positive(q2)) ? q1 + (simultaneous ? q2! : 0) : null, mode };
+  }
   const two = secondaryAllowed(c);
   const mode = !two ? "Расчёт по первому контуру" : c.stationType === "fire" ? "Основные насосы и жокей работают раздельно" : c.simultaneous ? "Контуры работают одновременно" : "Расчёт по наибольшему контуру";
   const q1 = c.primary.flow, q2 = c.secondary?.flow;
@@ -50,9 +59,26 @@ export function collectorFlow(c: CollectorConfiguration): { flow: number | null;
 }
 export const collectorLength = (c: CollectorConfiguration) => activeCircuits(c).reduce((sum, v) => sum + pumpCount(v) * v.spacing, 0);
 export const flowSpeed = (flow: number | null, innerDiameterMm: number | null) => positive(flow) && positive(innerDiameterMm) ? flow / 3600 / (Math.PI * (innerDiameterMm / 1000) ** 2 / 4) : null;
+export function collectorVelocityWarning(dn: number | null, velocity: number | null | undefined): string | null {
+  if (!positive(dn) || !positive(velocity) || velocity <= dnVelocityLimit(dn) + 1e-9) return null;
+  return `Скорость в коллекторе DN${dn} (${velocity.toLocaleString("ru-RU", { maximumFractionDigits: 3 })} м/с) превышает допустимую ${dnVelocityLimit(dn)} м/с. Увеличьте DN коллектора.`;
+}
 export const branchLength = (outer: number | null, bolt: number | null) => positive(outer) && positive(bolt) ? 0.5 * outer + 1.1 * bolt : null;
 export const flangeKinds = (material: CollectorMaterial, dn: number, pn: number): ComponentKind[] => material === "aisi304" && dn <= 200 && pn < 25 ? ["collar", "looseFlange"] : ["weldFlange"];
 export const configurationFingerprint = (c: CollectorConfiguration) => JSON.stringify(c);
+export function collectorPressureChecks(c: CollectorConfiguration, inletHead: number | null | undefined, catalog?: CollectorCatalog | null): InletPressureCheck[] {
+  if (c.type !== "suction") return [];
+  const checks = [checkInletPressure(inletHead, "Всасывающий коллектор", c.pn, `PN${c.pn}`)];
+  if (catalog) {
+    const bom = calculateCollector(c, catalog).bom;
+    for (const row of bom) {
+      if (row.kind === "welding") continue;
+      const component = catalog.components.find(item => item.id === row.componentId);
+      checks.push(checkInletPressure(inletHead, row.name, component?.pn, component?.pn ? `PN${component.pn}` : undefined));
+    }
+  }
+  return checks;
+}
 export function calculateCollector(c: CollectorConfiguration, catalog: CollectorCatalog): CollectorCalculation {
   const warnings = configurationWarnings(c), bom: CollectorBomItem[] = [], welds: WeldOperation[] = [];
   const rate = WELD_RATES[c.material], flow = collectorFlow(c);

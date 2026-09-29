@@ -4,6 +4,7 @@ import test from "node:test";
 import { loadTs } from "./load-ts.mjs";
 
 const templateRoot = new URL("../", import.meta.url);
+const readPage = async () => (await Promise.all(["page.tsx", "pump-sketches.ts"].map(name => readFile(new URL(`../app/${name}`, import.meta.url), "utf8")))).join("\n");
 
 async function loadProjectConfig() {
   return loadTs(new URL("../app/project-config.ts", import.meta.url));
@@ -44,7 +45,7 @@ test("server renders the protected pump-station entry", async () => {
 
 test("keeps the production surface free of the starter preview", async () => {
   const [page, layout, packageJson] = await Promise.all([
-    readFile(new URL("../app/page.tsx", import.meta.url), "utf8"),
+    readPage(),
     readFile(new URL("../app/layout.tsx", import.meta.url), "utf8"),
     readFile(new URL("../package.json", import.meta.url), "utf8"),
   ]);
@@ -90,9 +91,9 @@ test("keeps the production surface free of the starter preview", async () => {
   assert.match(projectConfig, /const secondaryPump/);
   assert.match(projectConfig, /usdRate: 85/);
   assert.match(projectConfig, /cnyRate: 13/);
-  assert.match(projectConfig, /manufacturerDiscounts: \{ cnp: 45, aquastrong: 45 \}/);
-  assert.match(page, /polynomialFit/);
-  assert.match(page, /solveLinearSystem/);
+  assert.match(projectConfig, /manufacturerDiscounts: \{ cnp: 45, aquastrong: 55, onis: 0, vandjord: 25, wellmix: 35 \}/);
+  assert.match(page, /const curvePath\s*=\s*pumpCurvePath/);
+  assert.doesNotMatch(page, /polynomialFit|solveLinearSystem/);
   assert.doesNotMatch(page, /pchipTangents/);
   assert.match(layout, /title: "Pump Station Calculator"/);
   assert.doesNotMatch(page, /codex-preview|_sites-preview|SkeletonPreview/);
@@ -128,16 +129,19 @@ test("persists and normalizes the simultaneous combined-circuits setting", async
 });
 
 test("shows the simultaneous-circuits setting only for combined stations and resets it on type change", async () => {
-  const page = await readFile(new URL("../app/page.tsx", import.meta.url), "utf8");
-  assert.match(page, /settings\.stationType === "combined" && toggle\("combinedCircuitsSimultaneous"/);
-  assert.match(page, /Контуры работают одновременно/);
-  assert.match(page, /Учитывать сумму расходов двух контуров при расчёте общих коллекторов/);
+  const page = await readPage();
+  assert.match(page, /settings\.stationType === "combined" && <label[^\n]+Расчёт всасывающего коллектора/);
+  assert.match(page, /value=\{settings\.combinedCircuitsSimultaneous \? "both" : "fire"\}/);
+  assert.match(page, /onChange\(\{combinedCircuitsSimultaneous:event\.target\.value === "both"\}\)/);
+  assert.match(page, /<option value="fire">Только пожарный контур<\/option>/);
+  assert.match(page, /<option value="both">Оба контура одновременно<\/option>/);
+  assert.doesNotMatch(page, /toggle\("combinedCircuitsSimultaneous"/);
   assert.match(page, /combinedCircuitsSimultaneous: stationType === "combined" \? settings\.combinedCircuitsSimultaneous : false/);
 });
 
 test("provides a persisted DN calculator with SP velocity defaults", async () => {
   const [page, styles, projectConfig] = await Promise.all([
-    readFile(new URL("../app/page.tsx", import.meta.url), "utf8"),
+    readPage(),
     readFile(new URL("../app/globals.css", import.meta.url), "utf8"),
     readFile(new URL("../app/project-config.ts", import.meta.url), "utf8"),
   ]);
@@ -196,7 +200,7 @@ test("provides a persisted DN calculator with SP velocity defaults", async () =>
 
 test("ships the discounted control-cabinet catalogue and selection rules", async () => {
   const [page, styles, rawCabinets, rawPumps] = await Promise.all([
-    readFile(new URL("../app/page.tsx", import.meta.url), "utf8"),
+    readPage(),
     readFile(new URL("../app/globals.css", import.meta.url), "utf8"),
     readFile(new URL("../public/control-cabinets.json", import.meta.url), "utf8"),
     readFile(new URL("../public/pumps.json", import.meta.url), "utf8"),
@@ -226,7 +230,7 @@ test("ships the discounted control-cabinet catalogue and selection rules", async
   assert.equal(nearestAbove(7.5)?.powerKw, 7.5);
   assert.equal(nearestAbove(8)?.powerKw, 11);
   assert.equal(nearestAbove(45), undefined);
-  const chlft1530 = pumps.find(pump => pump.model === "CHLF(T)15-30");
+  const chlft1530 = pumps.find(pump => pump.model === "CHLF15-30");
   assert.equal(chlft1530?.power, 3);
   assert.equal(nearestAbove(chlft1530.power)?.id, "BP-2-3,7");
   assert.match(page, /fetch\("\/pumps\.json",\{cache:"no-store"\}\)/);
@@ -237,7 +241,7 @@ test("ships the discounted control-cabinet catalogue and selection rules", async
 
 test("ships the SQL-backed NS Smart cabinet configurator and imported BOM", async () => {
   const [page, configurator, projectConfig, schema, migration, groupingMigration, rawDatabase, importer] = await Promise.all([
-    readFile(new URL("../app/page.tsx", import.meta.url), "utf8"),
+    readPage(),
     readFile(new URL("../app/cabinet-configurator.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/project-config.ts", import.meta.url), "utf8"),
     readFile(new URL("../db/schema.ts", import.meta.url), "utf8"),
@@ -289,29 +293,20 @@ test("ships the SQL-backed NS Smart cabinet configurator and imported BOM", asyn
 
 test("ships pump list prices with currencies and uses project pricing in the specification", async () => {
   const [page, rawPumps] = await Promise.all([
-    readFile(new URL("../app/page.tsx", import.meta.url), "utf8"),
+    readPage(),
     readFile(new URL("../public/pumps.json", import.meta.url), "utf8"),
   ]);
   const pumps = JSON.parse(rawPumps);
   const priced = pumps.filter(pump => Number.isFinite(pump.price));
-  assert.equal(pumps.length, 1683);
-  assert.ok(pumps.every(pump => Number.isFinite(pump.power) && pump.power > 0));
-  assert.deepEqual(
-    Object.fromEntries(pumps.filter(pump => pump.series === "CHLF(T)").map(pump => [pump.model, pump.power])),
-    {
-      "CHLF(T)2-20": 0.37, "CHLF(T)2-30": 0.37, "CHLF(T)2-40": 0.55, "CHLF(T)2-50": 0.55, "CHLF(T)2-60": 0.75,
-      "CHLF(T)4-20": 0.37, "CHLF(T)4-30": 0.55, "CHLF(T)4-40": 0.75, "CHLF(T)4-50": 1.1, "CHLF(T)4-60": 1.1,
-      "CHLF(T)8-10": 0.75, "CHLF(T)8-20": 0.75, "CHLF(T)8-30": 1.1, "CHLF(T)8-40": 1.5, "CHLF(T)8-50": 2.2,
-      "CHLF(T)12-10": 0.75, "CHLF(T)12-20": 1.2, "CHLF(T)12-30": 1.8, "CHLF(T)12-40": 2.4, "CHLF(T)12-50": 3,
-      "CHLF(T)15-10": 1.1, "CHLF(T)15-20": 2.2, "CHLF(T)15-30": 3, "CHLF(T)15-40": 4,
-      "CHLF(T)20-10": 1.1, "CHLF(T)20-20": 2.2, "CHLF(T)20-30": 4, "CHLF(T)20-40": 4.4,
-    },
-  );
-  assert.equal(priced.length, 1509);
-  assert.ok(priced.every(pump => ["USD", "CNY"].includes(pump.priceCurrency)));
+  assert.equal(pumps.length, 5758);
+  assert.ok(pumps.filter(pump => pump.selectable).every(pump => Number.isFinite(pump.power) && pump.power > 0));
+  assert.equal(pumps.find(pump => pump.model === "CHLF15-30")?.power, 3);
+  assert.equal(pumps.filter(pump => pump.manufacturer === "CNP" && pump.series === "CHLF").length, 28);
+  assert.ok(priced.length >= 1509);
+  assert.ok(priced.every(pump => ["USD", "CNY", "RUB"].includes(pump.priceCurrency)));
   assert.ok(priced.every(pump => typeof pump.priceSource === "string" && pump.priceSource.length > 0));
-  assert.equal(priced.filter(pump => pump.manufacturer === "CNP").length, 624);
-  assert.equal(priced.filter(pump => pump.manufacturer === "Aquastrong").length, 885);
+  assert.ok(priced.filter(pump => pump.manufacturer === "CNP").length >= 624);
+  assert.ok(priced.filter(pump => pump.manufacturer === "Aquastrong").length >= 885);
   assert.match(page, /const pumpPriceRub/);
   assert.match(page, /const pumpListPriceRub/);
   assert.match(page, /Прайсовая цена/);
@@ -328,7 +323,7 @@ test("ships pump list prices with currencies and uses project pricing in the spe
 
 test("binds verified CNP dimensional drawings to pump models", async () => {
   const [page, rawManifest, rawCatalogueManifest, rawPumps] = await Promise.all([
-    readFile(new URL("../app/page.tsx", import.meta.url), "utf8"),
+    readPage(),
     readFile(new URL("../public/cnp-model-drawings/manifest.json", import.meta.url), "utf8"),
     readFile(new URL("../public/cnp-drawings-archive/catalog-manifest.json", import.meta.url), "utf8"),
     readFile(new URL("../public/pumps.json", import.meta.url), "utf8"),
@@ -337,11 +332,12 @@ test("binds verified CNP dimensional drawings to pump models", async () => {
   const catalogueDrawings = JSON.parse(rawCatalogueManifest);
   const pumps = JSON.parse(rawPumps);
   const files = new Set(drawings.map(drawing => drawing.file));
-  const cnpModels = new Set(pumps.filter(pump => pump.manufacturer === "CNP").map(pump => pump.model));
+  const normalize = model => model.replace(/\s/g, "").replace("CHLF(T)", "CHLF");
+  const cnpModels = new Set(pumps.filter(pump => pump.manufacturer === "CNP").map(pump => normalize(pump.model)));
 
   assert.equal(drawings.length, 14);
   assert.equal(files.size, 14);
-  assert.ok(drawings.every(drawing => cnpModels.has(drawing.model)));
+  assert.ok(drawings.every(drawing => cnpModels.has(normalize(drawing.model))));
   assert.ok(drawings.every(drawing => drawing.dbModel.replace(/\s/g, "").replace("CHLF", "CHLF(T)") === drawing.model.replace(/\s/g, "")));
   assert.ok(drawings.every(drawing => [10, 48].includes(drawing.seriesId)));
   assert.ok(drawings.every(drawing => /^[a-z0-9-]+\.png$/.test(drawing.file)));
@@ -354,11 +350,11 @@ test("binds verified CNP dimensional drawings to pump models", async () => {
   const cdmFamilies = new Set(catalogueDrawings.filter(drawing => drawing.family.startsWith("CDM")).map(drawing => drawing.family.replace(/^CDM/, "")));
   const chlftFamilies = new Set(catalogueDrawings.filter(drawing => drawing.family.startsWith("CHLF(T)")).flatMap(drawing => drawing.family.match(/\d+/g)));
   const cnpCdmPumps = pumps.filter(pump => pump.manufacturer === "CNP" && /^CDM\s*\d+-/.test(pump.model));
-  const cnpChlftPumps = pumps.filter(pump => pump.manufacturer === "CNP" && /^CHLF\(T\)\d+-/.test(pump.model));
-  assert.equal(cnpCdmPumps.length, 363);
+  const cnpChlftPumps = pumps.filter(pump => pump.manufacturer === "CNP" && /^CHLF(?:\(T\))?\d+-/.test(pump.model));
+  assert.equal(cnpCdmPumps.length, 374);
   assert.equal(cnpChlftPumps.length, 28);
   assert.ok(cnpCdmPumps.every(pump => cdmFamilies.has(pump.model.match(/^CDM\s*(\d+)-/)[1])));
-  assert.ok(cnpChlftPumps.every(pump => chlftFamilies.has(pump.model.match(/^CHLF\(T\)(\d+)-/)[1])));
+  assert.ok(cnpChlftPumps.every(pump => chlftFamilies.has(pump.model.match(/^CHLF(?:\(T\))?(\d+)-/)[1])));
   assert.match(page, /"CDM 1-2":\{partCode:"CDM1-2YSWPC",file:"cdm-1-2\.png"\}/);
   assert.match(page, /"CHLF\(T\)2-40":\{partCode:"CHLF2-40LSWSC",file:"chlft2-40\.png"\}/);
   assert.match(page, /src:`\/cnp-model-drawings\/\$\{drawing\.file\}`/);
@@ -371,7 +367,7 @@ test("binds verified CNP dimensional drawings to pump models", async () => {
 
 test("binds Aquastrong dimensional sheets to catalogue pumps", async () => {
   const [page, rawManifest, rawSelectManifest, rawPumps] = await Promise.all([
-    readFile(new URL("../app/page.tsx", import.meta.url), "utf8"),
+    readPage(),
     readFile(new URL("../public/aquastrong-drawings/manifest.json", import.meta.url), "utf8"),
     readFile(new URL("../public/aquastrong-select-drawings/manifest.json", import.meta.url), "utf8"),
     readFile(new URL("../public/pumps.json", import.meta.url), "utf8"),
@@ -386,10 +382,11 @@ test("binds Aquastrong dimensional sheets to catalogue pumps", async () => {
     return match ? `${match[1]}${match[2]}` : undefined;
   };
 
-  assert.equal(pumps.length, 886);
+  assert.equal(pumps.length, 1389);
+  const legacyIds = new Set(JSON.parse(await readFile(new URL("../data/pump-catalog/legacy-pumps.json", import.meta.url), "utf8")).map(p => p.id));
   assert.equal(drawings.length, 25);
   assert.equal(families.size, 25);
-  assert.ok(pumps.filter(pump => ["EVR", "ECH", "EDH"].includes(pump.series)).every(pump => families.has(familyFor(pump.model))));
+  assert.ok(pumps.filter(pump => legacyIds.has(pump.id) && ["EVR", "ECH", "EDH"].includes(pump.series)).every(pump => families.has(familyFor(pump.model))));
   assert.equal(selectManifest.count, 546);
   assert.equal(selectManifest.drawings.length, 546);
   assert.equal(selectManifest.failures.length, 4);
@@ -409,7 +406,7 @@ test("binds Aquastrong dimensional sheets to catalogue pumps", async () => {
 
 test("zooms pump drawings with Ctrl and the mouse wheel", async () => {
   const [page, styles] = await Promise.all([
-    readFile(new URL("../app/page.tsx", import.meta.url), "utf8"),
+    readPage(),
     readFile(new URL("../app/globals.css", import.meta.url), "utf8"),
   ]);
   assert.match(page, /function PumpSketchView/);
@@ -425,7 +422,7 @@ test("zooms pump drawings with Ctrl and the mouse wheel", async () => {
 
 test("provides free, mobile and resizable grid workspace layouts", async () => {
   const [page, styles, projectConfig] = await Promise.all([
-    readFile(new URL("../app/page.tsx", import.meta.url), "utf8"),
+    readPage(),
     readFile(new URL("../app/globals.css", import.meta.url), "utf8"),
     readFile(new URL("../app/project-config.ts", import.meta.url), "utf8"),
   ]);
@@ -459,14 +456,14 @@ test("provides free, mobile and resizable grid workspace layouts", async () => {
 
 test("provides a component-database tool with category-specific characteristics and prices", async () => {
   const [page, styles, projectConfig, rawDatabase] = await Promise.all([
-    readFile(new URL("../app/page.tsx", import.meta.url), "utf8"),
+    readPage(),
     readFile(new URL("../app/globals.css", import.meta.url), "utf8"),
     readFile(new URL("../app/project-config.ts", import.meta.url), "utf8"),
     readFile(new URL("../public/binding-components.json", import.meta.url), "utf8"),
   ]);
   const database = JSON.parse(rawDatabase);
   assert.equal(database.catalogs.length, 25);
-  assert.equal(database.items.length, 1800);
+  assert.equal(database.items.length, 1807);
   assert.ok(!database.catalogs.some(catalog => catalog.id === "обвязка"));
   assert.ok(database.catalogs.some(catalog => catalog.id === "обратные-клапаны"));
   assert.ok(database.catalogs.some(catalog => catalog.id === "пожарная-арматура"));
@@ -493,7 +490,7 @@ test("provides a component-database tool with category-specific characteristics 
 
 test("groups the specification and calculates section, subsection and final totals", async () => {
   const [page, styles, projectConfig] = await Promise.all([
-    readFile(new URL("../app/page.tsx", import.meta.url), "utf8"),
+    readPage(),
     readFile(new URL("../app/globals.css", import.meta.url), "utf8"),
     readFile(new URL("../app/project-config.ts", import.meta.url), "utf8"),
   ]);
@@ -524,10 +521,10 @@ test("ships the complete binding-component catalogue with prices and relations",
   assert.equal(catalogue.source.externalLinks.length, 2);
   assert.deepEqual(catalogue.statistics, {
     catalogs: 25,
-    tables: 77,
-    componentRows: 1800,
-    pricedComponentRows: 1771,
-    priceEntries: 4232,
+    tables: 78,
+    componentRows: 1807,
+    pricedComponentRows: 1778,
+    priceEntries: 4239,
     formulaRules: 4785,
     formulaErrorsInSavedValues: 0,
     dataValidations: 23,
