@@ -149,5 +149,5 @@ test("actual specification render keeps priced warning rows yellow and exposes b
   assert.match(html, /проверить размеры/);
   assert.match(html, /200 м.*19,6 бар.*превышает PN16/);
   const css = await readFile(new URL("../app/globals.css", import.meta.url), "utf8");
-  assert.match(css, /\.spec-table__row--warning\s*\{\s*background:#fff8df/);
+  assert.match(css, /\.spec-table__row--warning\s*\{\s*background:var\(--theme-surface-warning, #fff8df\)/);
 });

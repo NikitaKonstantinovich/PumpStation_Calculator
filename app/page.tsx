@@ -2,6 +2,8 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
+import { AppSettings } from "./app-settings";
+import { useTheme } from "./use-theme";
 import { useCircuitSync } from "./use-circuit-sync";
 import { CircuitInputFields } from "./circuit-input-fields";
 import { createProject, DEFAULT_PANELS, parseProjectConfig, projectFilename, withUpdatedTimestamp, type CollectorMaterial, type DnEntity, type InputEntity, type PanelKind, type PanelState, type ProjectConfig, type ProjectEntity, type SettingsEntity, type ShutoffValveType, type SpecEntity, type SpecItem, type SpecOption, type SpecSection, type ValveConnection, type ValvePn, type WorkspaceGrid, type WorkspaceMode } from "./project-config";
@@ -498,6 +500,10 @@ function ProjectsPage({user,projects,onBack,onOpen,onCreate,onDelete,onLogout}:{
 
 export default function Home() {
   const [sidebar, setSidebar] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [theme, setTheme, colorProfile, setColorProfile] = useTheme();
+  const menuButton = useRef<HTMLButtonElement>(null);
+  const closeSettings = () => { setSettingsOpen(false); requestAnimationFrame(() => menuButton.current?.focus()); };
   const [config, setConfig] = useState<ProjectConfig>(() => createProject("Насосная станция № 24", { id:"PS-NEW", timestamp:"2000-01-01T00:00:00.000Z" }));
   const [activeTab, setActiveTab] = useState("Проект");
   const [detached, setDetached] = useState<string | null>(null);
@@ -646,13 +652,13 @@ export default function Home() {
   const workspaceHint=workspaceMode==="free"?"Окна можно перемещать, масштабировать и прикреплять к границам":workspaceMode==="mobile"?"Один инструмент в строке на всю ширину рабочего пространства":`Фиксированная сетка ${workspaceGrid.columns} × ${workspaceGrid.rows}`;
   return <div className={`app-shell app-shell--${workspaceMode} ${minimizedPanels.length?"app-shell--tasks":""}`}>
     <header className="app-header">
-      <button className="icon-button app-header__menu" onClick={() => setSidebar(true)} aria-label="Открыть меню"><Icon name="menu" /></button>
+      <button ref={menuButton} className="icon-button app-header__menu" onClick={() => setSidebar(true)} aria-label="Открыть меню"><Icon name="menu" /></button>
       <Link className="brand" href="/"><span className="brand__mark">PS</span><span><b>Pump Station</b><small>Calculator</small></span></Link>
       <div className="app-header__project"><small>ТЕКУЩИЙ ПРОЕКТ</small><button onClick={rename}>{config.project.name} <span>✎</span></button></div>
       <div className="app-header__actions"><span className="save-state"><i />{saveMessage}</span><button className="avatar" onClick={()=>{setSidebar(true)}} title={account.name}>{initials(account.name)}</button></div>
     </header>
 
-    <div className={`sidebar ${sidebar ? "sidebar--open" : ""}`}><button className="sidebar__backdrop" onClick={() => setSidebar(false)} aria-label="Закрыть меню"/><aside className="sidebar__panel"><div className="sidebar__top"><div className="brand"><span className="brand__mark">PS</span><span><b>Pump Station</b><small>Calculator</small></span></div><button className="icon-button" onClick={() => setSidebar(false)}><Icon name="close" /></button></div><div className="user-card"><span className="avatar avatar--large">{initials(account.name)}</span><div><b>{account.name}</b><small>{account.email}</small></div></div><nav className="sidebar__nav"><button className="sidebar__link sidebar__link--active" onClick={()=>setSidebar(false)}>▦ <span>Рабочее пространство</span></button><button className="sidebar__link" onClick={()=>{setView("projects");setSidebar(false);window.history.pushState({},"","/?view=projects");}}>▤ <span>Мои проекты</span><em>{projects.length}</em></button><Link className="sidebar__link" href="/?view=equipment">⌁ <span>База оборудования</span></Link><Link className="sidebar__link" href="/?view=settings">⚙ <span>Настройки</span></Link><button className="sidebar__link" onClick={logout}>↪ <span>Выйти</span></button></nav><div className="sidebar__footer"><button>?</button><span><b>Центр помощи</b><small>Документация и поддержка</small></span></div></aside></div>
+    <div className={`sidebar ${sidebar ? "sidebar--open" : ""}`} inert={!sidebar}><button className="sidebar__backdrop" onClick={() => setSidebar(false)} aria-label="Закрыть меню"/><aside className="sidebar__panel"><div className="sidebar__top"><div className="brand"><span className="brand__mark">PS</span><span><b>Pump Station</b><small>Calculator</small></span></div><button className="icon-button" onClick={() => setSidebar(false)}><Icon name="close" /></button></div><div className="user-card"><span className="avatar avatar--large">{initials(account.name)}</span><div><b>{account.name}</b><small>{account.email}</small></div></div><nav className="sidebar__nav"><button className="sidebar__link sidebar__link--active" onClick={()=>setSidebar(false)}>▦ <span>Рабочее пространство</span></button><button className="sidebar__link" onClick={()=>{setView("projects");setSidebar(false);window.history.pushState({},"","/?view=projects");}}>▤ <span>Мои проекты</span><em>{projects.length}</em></button><Link className="sidebar__link" href="/?view=equipment">⌁ <span>База оборудования</span></Link><button className="sidebar__link" onClick={() => { setSidebar(false); setSettingsOpen(true); }}>⚙ <span>Настройки</span></button><button className="sidebar__link" onClick={logout}>↪ <span>Выйти</span></button></nav><div className="sidebar__footer"><button>?</button><span><b>Центр помощи</b><small>Документация и поддержка</small></span></div></aside></div>
 
     <nav className="ribbon">
       <div className="ribbon__tabs">{["Проект", "Вставка", "Расчёт", "Вид"].map(t => <button key={t} className={activeTab === t ? "ribbon__tab ribbon__tab--active" : "ribbon__tab"} onClick={() => setActiveTab(t)}>{t}</button>)}</div>
@@ -661,6 +667,7 @@ export default function Home() {
 
     <main className={`workspace workspace--${workspaceMode}`}><div className="workspace__bar"><div><span className="workspace__status"/><b>Рабочее пространство</b><small>{workspaceHint}</small></div>{workspaceMode==="free"&&<div className="workspace__zoom"><button onClick={() => setZoom(value => Math.max(50, value - 10))} disabled={zoom === 50} aria-label="Уменьшить масштаб">−</button><button className="workspace__zoom-value" onClick={() => setZoom(100)} aria-label="Сбросить масштаб">{zoom}%</button><button onClick={() => setZoom(value => Math.min(150, value + 10))} disabled={zoom === 150} aria-label="Увеличить масштаб">＋</button></div>}</div>{workspaceMode==="free"?<div className="workspace__canvas"><div className="workspace__surface" style={{width:`${10000/zoom}%`,height:`${10000/zoom}%`,transform:`scale(${zoom/100})`}}>{panels.filter(panel=>!panel.minimized).map(panel=>renderWorkspacePanel(panel,"free"))}</div></div>:workspaceMode==="mobile"?<div className="workspace__canvas workspace__canvas--mobile"><div className="workspace-mobile">{panels.filter(panel=>!panel.minimized).map(panel=>renderWorkspacePanel(panel,"mobile"))}</div></div>:<div className="workspace__canvas workspace__canvas--grid"><GridWorkspace grid={workspaceGrid} panels={panels} secondaryEnabled={secondaryEnabled} renderPanel={renderWorkspacePanel} onGridChange={setWorkspaceGrid} onCreate={createGridTool}/></div>}</main>
     {minimizedPanels.length>0&&<div className="window-dock" role="toolbar" aria-label="Свернутые инструменты"><span className="window-dock__label">Свернутые</span>{minimizedPanels.map(panel=><button key={panel.id} onClick={()=>restorePanel(panel.id)}><i aria-hidden="true"/>{panel.activeTool?PANEL_INFO[panel.activeTool].title:"Пустой инструмент"}<span>Развернуть</span></button>)}</div>}
+    {settingsOpen && <AppSettings theme={theme} onThemeChange={setTheme} profile={colorProfile} onProfileChange={setColorProfile} onClose={closeSettings} />}
     <footer className="app-footer"><span>Проект: {config.project.id}</span><span>Формат проекта v{config.schemaVersion} · JSON</span><span>RU <i>•</i> {new Date(config.project.updatedAt).toLocaleDateString("ru-RU")}</span></footer>
   </div>;
 }
