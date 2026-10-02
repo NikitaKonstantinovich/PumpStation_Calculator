@@ -449,7 +449,7 @@ test("provides free, mobile and resizable grid workspace layouts", async () => {
   assert.match(styles, /\.workspace-grid__empty/);
   assert.match(styles, /cursor:col-resize/);
   assert.match(styles, /cursor:row-resize/);
-  assert.match(styles, /\.workspace__canvas--grid \{ padding:6px; overflow:hidden; \}/);
+  assert.match(styles, /\.workspace__canvas--grid \{ padding:6px; overflow:auto; \}/);
   assert.match(styles, /\.workspace-grid \{ width:100%; min-width:0; height:100%; min-height:0; \}/);
   assert.match(styles, /\.view-grid-menu__list/);
 });

@@ -109,7 +109,7 @@ export type ProjectConfig = {
   schemaVersion: 1;
   project: { id: string; name: string; createdAt: string; updatedAt: string };
   station: { selectedPumpId?: string; selectedPumpModel?: string; workingPumpCount?: number; reservePumpCount?: number; totalPumpCount?: number; secondaryPumpId?: string; secondaryPumpModel?: string; secondaryWorkingPumpCount?: number; secondaryReservePumpCount?: number; secondaryTotalPumpCount?: number };
-  workspace: { zoom: number; mode:WorkspaceMode; grid:WorkspaceGrid; windows: PanelState[] };
+  workspace: { zoom: number; mode:WorkspaceMode; gridHeightScreens:number; grid:WorkspaceGrid; windows: PanelState[] };
   entities: Record<string, ProjectEntity>;
 };
 
@@ -151,7 +151,7 @@ export function createProject(name = "Новая насосная станция
     schemaVersion: 1,
     project: { id: seed?.id ?? projectId(), name, createdAt: timestamp, updatedAt: timestamp },
     station: {},
-    workspace: { zoom: 100, mode:"free", grid:{columns:2,rows:2,columnSizes:[1,1],rowSizes:[1,1],cells:["input","chart","spec","model"]}, windows: DEFAULT_PANELS.map(window => ({ ...window })) },
+    workspace: { zoom: 100, mode:"free", grid:{columns:2,rows:2,columnSizes:[1,1],rowSizes:[1,1],cells:["input","chart","spec","model"]}, gridHeightScreens:1, windows: DEFAULT_PANELS.map(window => ({ ...window })) },
     entities: {
       "system-input": { kind: "input", flowRate: null, head: null, staticHead: null, workingPumpCount: null, reservePumpCount: null, medium: "water", calculated: false },
       "system-input-2": { kind: "input", flowRate: null, head: null, staticHead: null, workingPumpCount: null, reservePumpCount: null, medium: "water", calculated: false },
@@ -172,6 +172,11 @@ export function createProject(name = "Новая насосная станция
 
 function finite(value: unknown, fallback: number) {
   return typeof value === "number" && Number.isFinite(value) ? value : fallback;
+}
+
+export function normalizeGridHeightScreens(value: unknown): number {
+  if (typeof value !== "number" || !Number.isFinite(value) || value <= 0) return 1;
+  return Math.max(0.1, Number(value.toFixed(1)));
 }
 
 export function parseProjectConfig(raw: unknown): ProjectConfig {
@@ -236,7 +241,7 @@ export function parseProjectConfig(raw: unknown): ProjectConfig {
     schemaVersion: 1,
     project: { ...candidate.project, name: candidate.project.name.trim() || "Без названия", createdAt: candidate.project.createdAt || now(), updatedAt: candidate.project.updatedAt || now() },
     station: candidate.station ?? {},
-    workspace: { zoom: Math.min(150, Math.max(50, finite(candidate.workspace.zoom, 100))), mode, grid:{columns,rows,columnSizes:normalizeSizes(rawGrid?.columnSizes,columns),rowSizes:normalizeSizes(rawGrid?.rowSizes,rows),cells}, windows: needsSettingsPanel ? [...windows, { ...DEFAULT_PANELS.find(window => window.activeTool === "settings")! }] : windows },
+    workspace: { zoom: Math.min(150, Math.max(50, finite(candidate.workspace.zoom, 100))), mode, gridHeightScreens:normalizeGridHeightScreens(rawWorkspace.gridHeightScreens), grid:{columns,rows,columnSizes:normalizeSizes(rawGrid?.columnSizes,columns),rowSizes:normalizeSizes(rawGrid?.rowSizes,rows),cells}, windows: needsSettingsPanel ? [...windows, { ...DEFAULT_PANELS.find(window => window.activeTool === "settings")! }] : windows },
     entities,
   });
 }
