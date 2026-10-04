@@ -1,0 +1,17 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "lib": ["esnext"],
+    "types": ["node"],
+    "allowJs": false
+  },
+  "include": [
+    "worker-configuration.d.ts",
+    "worker/**/*.ts",
+    "app/api/**/*.ts",
+    "app/**/*-server.ts",
+    "examples/**/app/api/**/*.ts",
+    "db/**/*.ts"
+  ],
+  "exclude": ["node_modules", "dist", ".wrangler", "work"]
+}

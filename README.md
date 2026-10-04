@@ -182,7 +182,10 @@ PumpStation_Calculator/
 | `npm test` | Выполнить сборку и все JS-тесты `tests/*.test.mjs` |
 | `npm run test:unit` | Запустить только `tests/collectors.test.mjs`, не весь набор |
 | `python -m unittest discover -s tests -p 'test_*.py'` | Проверить Python-импортёры |
-| `npm run lint` | Запустить ESLint; это отдельная проверка, не часть `npm test` |
+| `npm run typecheck` | Проверить браузерный и серверный TypeScript отдельными конфигурациями |
+| `npm run lint` | Запустить ESLint; ошибки и предупреждения приводят к ненулевому коду выхода |
+| `npm run check` | Проверить типы, ESLint, сборку и весь набор JS-тестов |
+| `npm run cf-typegen` | После сборки обновить Cloudflare-типы по `dist/server/wrangler.json` |
 | `npm run db:generate` | Сгенерировать SQL-миграции после изменения схемы, не применить их |
 
 `npm start` сам по себе не создаёт binding `DB`: Node-сервер vinext не заменяет
@@ -197,14 +200,23 @@ Python-тесты используют стандартную библиотек
 При прямом запуске `node --test tests/*.test.mjs` сначала выполните сборку:
 тест серверного HTML читает `dist/server/index.js`.
 
-Проверено 04.10.2026: `npm test` — успешная сборка и 185 JS-тестов;
+Типы браузера проверяются через `tsconfig.json`, а API, серверные модули,
+D1 и Worker — через `tsconfig.worker.json`. Такое разделение сохраняет
+проверку серверного кода, не смешивая DOM браузера с Cloudflare HTMLRewriter.
+Официальные типы среды находятся в `worker-configuration.d.ts` и включены
+в Git, поэтому для проверки типов не нужно сначала собирать приложение.
+После изменения bindings, даты совместимости или версии Wrangler выполните
+`npm run build`, затем `npm run cf-typegen` и `npm run check`.
+[Описание генерации типов Cloudflare](https://developers.cloudflare.com/workers/languages/typescript/#generate-types).
+
+Проверено 04.10.2026: `npm run check` — типы и ESLint без ошибок и предупреждений,
+успешная сборка и 186 JS-тестов;
 Python — 12 успешных тестов при наличии локальной объединённой SQLite.
 Инициализация отдельной пустой локальной D1 проверялась 29.09.2026:
 миграции `0000`–`0005` применились, `PRAGMA quick_check` вернул `ok`.
 В текущую версию также входят миграции `0006` (исправления текста каталогов)
 и `0007` (управление пользователями). Этот результат проверки новой D1
 относится к миграциям `0000`–`0005`.
-Это не утверждение об отсутствии диагностик отдельного ESLint/TypeScript-check.
 
 ## Дополнительная документация
 

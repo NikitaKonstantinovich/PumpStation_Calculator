@@ -235,7 +235,8 @@ test("ships the discounted control-cabinet catalogue and selection rules", async
   assert.equal(nearestAbove(chlft1530.power)?.id, "BP-2-3,7");
   assert.match(page, /fetch\("\/pumps\.json",\{cache:"no-store"\}\)/);
   assert.match(page, /fetch\("\/control-cabinets\.json",\{cache:"no-store"\}\)/);
-  assert.match(page, /\},\[catalogue,controlCabinets,smartCabinets,/);
+  assert.match(page, /const cabinetInputs=\[catalogue,controlCabinets,smartCabinets,/);
+  assert.match(page, /cabinetInputs\.some\(\(value,index\)=>value!==previousCabinetInputs\[index\]\)/);
   assert.match(page, /цена со скидкой/);
 });
 

@@ -25,5 +25,16 @@
     ".next/dev/types/**/*.ts",
     "**/*.mts"
   ],
-  "exclude": ["node_modules"]
+  "exclude": [
+    "node_modules",
+    "dist",
+    ".wrangler",
+    "work",
+    "worker",
+    "worker-configuration.d.ts",
+    "app/api",
+    "app/**/*-server.ts",
+    "examples/**/app/api",
+    "db/index.ts"
+  ]
 }

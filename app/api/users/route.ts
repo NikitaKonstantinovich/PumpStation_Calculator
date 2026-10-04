@@ -21,7 +21,7 @@ async function authorize(request: Request): Promise<AccountUser | Response> {
 async function bodyOf(request: Request): Promise<Record<string, unknown>> {
   try {
     const body = await request.json();
-    return body && typeof body === "object" && !Array.isArray(body) ? body : {};
+    return body && typeof body === "object" && !Array.isArray(body) ? body as Record<string, unknown> : {};
   } catch { return {}; }
 }
 
