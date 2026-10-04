@@ -22,7 +22,7 @@ function fixture({pumpDn=40,pumpConnection="threaded",valveDn=40,valveConnection
   return synchronizeCollectors(p);
 }
 const build=p=>buildSuctionSpec(p,binding,catalog);
-const byRole=(rows,role)=>rows.find(x=>x.assemblyRole===role);
+const byRole=(rows,role)=>rows.find(x=>x.section==="suction"&&x.assemblyRole===role);
 
 test("user instrument valve updates the existing SKU without duplicates and survives repeated merge",()=>{
   const source=structuredClone(binding);
@@ -128,8 +128,9 @@ test("secondary branches scale independently while common instruments do not dou
 
 const pageUrl=new URL("../app/page.tsx",import.meta.url),page=await readFile(pageUrl,"utf8");
 const actualSelection=[
-  'import {recommendedDn,defaultCollectorMaterial,resolveDnConnection,suctionHydraulics} from "./dn-defaults";',
+  'import {recommendedDn,defaultCollectorMaterial,resolveDnConnection,suctionHydraulics,dischargeHydraulics} from "./dn-defaults";',
   'import {buildSuctionSpec,replaceSuctionSpec,suctionFingerprint,checkSuctionSpecPressure} from "./suction-spec";',
+  'import {buildDischargeSpec,replaceDischargeSpec,checkDischargeSpecPressure} from "./discharge-spec";',
   'import {normalizeSpecificationItems,specificationOption} from "./specification-items";',
   'import {synchronizeCollectors} from "./collector-project";',
   page.match(/^const isCalculated =.*$/m)[0],page.match(/^const isSecondaryEnabled =.*$/m)[0],
@@ -246,7 +247,7 @@ test("common suction mode refreshes network parts and survives project reload wi
       assert.match(rows.find(i=>i.option==="suctionCollector").details,new RegExp(`^В${expected}_`));
       assert.match(byRole(rows,"network-gaskets").details,new RegExp(`DN${expected}\\b`));
       assert.match(byRole(rows,"network-fasteners-bolts").details,new RegExp(`DN${expected}\\b`));
-      assert.equal(rows.filter(i=>i.assemblyRole==="network-gaskets").length,1);
+      assert.equal(rows.filter(i=>i.section==="suction"&&i.assemblyRole==="network-gaskets").length,1);
       assert.deepEqual(rows.find(i=>i.name===custom.name),{...custom,option:undefined});
       assert.deepEqual(rows.find(i=>i.name===customCabinet.name),{...customCabinet,option:undefined});
       p=refresh(parseProjectConfig(JSON.parse(JSON.stringify(p))),db);
@@ -268,7 +269,7 @@ test("actual page fill uses corrected DN, auto-refreshes changed counts and is i
   assert.equal(byRole(changed,"primary-union").quantity,5);
   assert.equal(byRole(changed,"primary-flax").quantity,1.5);
   assert.equal(changed.find(x=>x.option==="primarySuctionValve").quantity,5);
-  assert.equal(changed.filter(x=>x.assemblyRole==="gauge").length,1);
+  assert.equal(changed.filter(x=>x.section==="suction"&&x.assemblyRole==="gauge").length,1);
 });
 test("partially entered nozzle never falls back to calculated DN or a catalogue connection",()=>{
   let p=fixture();
@@ -321,7 +322,7 @@ test("saved specifications using the previous gauge policy refresh to a priced f
   const gauge=byRole(updated.entities["station-spec"].items,"gauge");
   assert.equal(gauge.name,"Манометр");assert.equal(gauge.price,511.79);
   assert.equal(gauge.status,"confirmation");assert.match(gauge.description,/Предупреждение:/);
-  assert.equal(updated.entities["station-spec"].items.filter(x=>x.assemblyRole==="gauge").length,1);
+  assert.equal(updated.entities["station-spec"].items.filter(x=>x.section==="suction"&&x.assemblyRole==="gauge").length,1);
 });
 
 test("old and invalid saved inlet heads remain unspecified; negative heads survive reload",()=>{
@@ -367,7 +368,7 @@ test("flax is priced in metres for pump branches and common threaded network con
   assert.equal(byRole(updated.entities["station-spec"].items,"primary-flax").price,51.5);
   assert.equal(refresh(updated,db),updated);
   const loaded=parseProjectConfig(JSON.parse(JSON.stringify(updated))).entities["station-spec"].items;
-  assert.equal(loaded.filter(x=>x.assemblyRole==="primary-flax").length,1);
+  assert.equal(loaded.filter(x=>x.section==="suction"&&x.assemblyRole==="primary-flax").length,1);
   assert.equal(byRole(loaded,"primary-flax").price,51.5);
 });
 
@@ -398,7 +399,7 @@ test("instrument valve uses the specified article, price and station quantities,
   assert.equal(byRole(updated.entities["station-spec"].items,"instrument-valve").price,650);
   assert.equal(refresh(updated,db),updated);
   const loaded=parseProjectConfig(JSON.parse(JSON.stringify(updated))).entities["station-spec"].items;
-  assert.equal(loaded.filter(x=>x.assemblyRole==="instrument-valve").length,1);
+  assert.equal(loaded.filter(x=>x.section==="suction"&&x.assemblyRole==="instrument-valve").length,1);
   assert.equal(byRole(loaded,"instrument-valve").price,650);
 });
 

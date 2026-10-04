@@ -9,10 +9,11 @@ const valveOptions = new Set<SpecOption>([
 // or replacing an automatically selected valve, regardless of its model name.
 export function specificationOption(item: SpecItem): SpecOption | undefined {
   if (item.option) return item.option;
-  if (/^(?:клапан обратный|обратный клапан)/i.test(item.name)) {
+  const legacyValve = !item.equipmentId && item.price == null && (!item.description || /На (?:подводящей|напорной) линии каждого насоса/i.test(item.description));
+  if (legacyValve && /^(?:клапан обратный|обратный клапан)(?: · DN\d+)?$/i.test(item.name)) {
     return /контур 2|второго контура/i.test(item.description ?? "") ? "secondaryCheckValve" : "primaryCheckValve";
   }
-  if (item.name === "Затвор дисковый") return item.section === "discharge" ? "primaryDischargeValve" : "primarySuctionValve";
+  if (legacyValve && item.name === "Затвор дисковый") return item.section === "discharge" ? "primaryDischargeValve" : "primarySuctionValve";
   if (item.name === "Коллектор подводящий") return "suctionCollector";
   if (item.name === "Коллектор напорный") return "dischargeCollector";
   return undefined;

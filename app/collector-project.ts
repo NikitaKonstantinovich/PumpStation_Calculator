@@ -1,6 +1,6 @@
 import type { DnEntity, InputEntity, ProjectConfig, SettingsEntity, SpecItem } from "./project-config";
 import { normalizeSpecificationItems } from "./specification-items";
-import { defaultCollectorMaterial, recommendedDn, resolveDnConnection, suctionHydraulics } from "./dn-defaults";
+import { defaultCollectorMaterial, recommendedDn, resolveDnConnection, suctionHydraulics, dischargeHydraulics } from "./dn-defaults";
 import { collectorCode, collectorFlow, collectorPressureChecks, configurationFingerprint, positive, secondaryAllowed, type CollectorCalculation, type CollectorCatalog, type CollectorConfiguration, type CollectorType } from "./collector-calculations";
 import { withInletPressureChecks } from "./suction-pressure";
 
@@ -34,7 +34,7 @@ export function collectorRecommendation(project: ProjectConfig, type: CollectorT
   const circuit = (input: InputEntity, secondary: boolean) => {
     const prefix = secondary ? "secondary" : "", branch = type === "suction" ? (secondary ? "secondarySuctionValveDn" : "suctionValveDn") : (secondary ? "secondaryDischargeValveDn" : "dischargeValveDn");
     const pumpDn = positive(input.flowRate) && positive(input.workingPumpCount) ? recommendedDn(input.flowRate / input.workingPumpCount) : null;
-    const suction = type === "suction" ? suctionHydraulics(dn,input,settings,secondary) : null;
+    const suction = (type === "suction" ? suctionHydraulics : dischargeHydraulics)(dn,input,settings,secondary);
     const branchDn = suction && positive(input.flowRate) ? suction.dn : dn[branch] ?? pumpDn;
     const pair = secondary ? [dn.secondarySuctionValveDn, dn.secondaryDischargeValveDn] : [dn.suctionValveDn, dn.dischargeValveDn];
     const connection = suction?.connection ?? resolveDnConnection(settings, Math.max(...pair.map(v => v ?? pumpDn ?? 0)), secondary, secondary ? dn.secondaryConnectionType : dn.connectionType).connection;
@@ -73,7 +73,7 @@ export function syncCollectorSpec(items: SpecItem[], collectors: CollectorsEntit
     const calculated = state.status === "complete" && state.calculation?.code === state.code ? state.calculation : null;
     const description = saved ? "Есть в базе · выбрано" : calculated ? "Требует подтверждения — сохраните коллектор в базе" : state.status === "stale" ? "Расчёт устарел — выполните расчёт в конструкторе" : "Коллектор отсутствует в базе — выполните расчёт в конструкторе";
     result = result.filter(item => !isItem(item));
-    const row: SpecItem = { ...previous, inletPressureCheck: undefined, position: type === "suction" ? "03.01" : "04.02", name: legacy, section: type, option, quantity: 1, unit: "шт.", equipmentId: saved?.id, details: state.code ?? "Не заданы параметры коллектора", price: saved?.price ?? calculated?.price ?? null, description, status: saved ? "selected" : calculated ? "confirmation" : "clarify" };
+    const row: SpecItem = { ...previous, inletPressureCheck: undefined, dischargePressureCheck: undefined, position: type === "suction" ? "03.01" : "04.02", name: legacy, section: type, option, quantity: 1, unit: "шт.", equipmentId: saved?.id, details: state.code ?? "Не заданы параметры коллектора", price: saved?.price ?? calculated?.price ?? null, description, status: saved ? "selected" : calculated ? "confirmation" : "clarify" };
     result.push(type === "suction" && state.configuration ? withInletPressureChecks(row, collectorPressureChecks(state.configuration, inletHead, catalog)) : row);
   }
   return normalizeSpecificationItems(result);

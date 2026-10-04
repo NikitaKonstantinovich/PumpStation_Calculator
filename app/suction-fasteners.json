@@ -6,7 +6,10 @@
     "boltDiameter": 12,
     "steelFlangeThickness": 12,
     "wafer017WLength": null,
-    "source": "�������� �� �������.xlsm: Полезная инфа!C51, G51, L51, C75"
+    "source": "Калькулятор по ОБВЯЗКЕ.xlsm: Полезная инфа!C51, G51, L51, C75",
+    "wafer010CLength": null,
+    "flange012FThickness": null,
+    "checkValveSource": "Калькулятор по ОБВЯЗКЕ.xlsm: Полезная инфа!C123, D147; пакет 10С: F123:H123"
   },
   {
     "dn": 15,
@@ -15,7 +18,10 @@
     "boltDiameter": 12,
     "steelFlangeThickness": 14,
     "wafer017WLength": null,
-    "source": "�������� �� �������.xlsm: Полезная инфа!D51, H51, M51, C75"
+    "source": "Калькулятор по ОБВЯЗКЕ.xlsm: Полезная инфа!D51, H51, M51, C75",
+    "wafer010CLength": null,
+    "flange012FThickness": null,
+    "checkValveSource": "Калькулятор по ОБВЯЗКЕ.xlsm: Полезная инфа!C123, D147; пакет 10С: F123:H123"
   },
   {
     "dn": 15,
@@ -24,7 +30,10 @@
     "boltDiameter": 12,
     "steelFlangeThickness": 16,
     "wafer017WLength": null,
-    "source": "�������� �� �������.xlsm: Полезная инфа!E51, I51, N51, C75"
+    "source": "Калькулятор по ОБВЯЗКЕ.xlsm: Полезная инфа!E51, I51, N51, C75",
+    "wafer010CLength": null,
+    "flange012FThickness": null,
+    "checkValveSource": "Калькулятор по ОБВЯЗКЕ.xlsm: Полезная инфа!C123, D147; пакет 10С: F123:H123"
   },
   {
     "dn": 20,
@@ -33,7 +42,10 @@
     "boltDiameter": 12,
     "steelFlangeThickness": 14,
     "wafer017WLength": null,
-    "source": "�������� �� �������.xlsm: Полезная инфа!C52, G52, L52, C76"
+    "source": "Калькулятор по ОБВЯЗКЕ.xlsm: Полезная инфа!C52, G52, L52, C76",
+    "wafer010CLength": null,
+    "flange012FThickness": null,
+    "checkValveSource": "Калькулятор по ОБВЯЗКЕ.xlsm: Полезная инфа!C124, D148; пакет 10С: F124:H124"
   },
   {
     "dn": 20,
@@ -42,7 +54,10 @@
     "boltDiameter": 12,
     "steelFlangeThickness": 16,
     "wafer017WLength": null,
-    "source": "�������� �� �������.xlsm: Полезная инфа!D52, H52, M52, C76"
+    "source": "Калькулятор по ОБВЯЗКЕ.xlsm: Полезная инфа!D52, H52, M52, C76",
+    "wafer010CLength": null,
+    "flange012FThickness": null,
+    "checkValveSource": "Калькулятор по ОБВЯЗКЕ.xlsm: Полезная инфа!C124, D148; пакет 10С: F124:H124"
   },
   {
     "dn": 20,
@@ -51,7 +66,10 @@
     "boltDiameter": 12,
     "steelFlangeThickness": 18,
     "wafer017WLength": null,
-    "source": "�������� �� �������.xlsm: Полезная инфа!E52, I52, N52, C76"
+    "source": "Калькулятор по ОБВЯЗКЕ.xlsm: Полезная инфа!E52, I52, N52, C76",
+    "wafer010CLength": null,
+    "flange012FThickness": null,
+    "checkValveSource": "Калькулятор по ОБВЯЗКЕ.xlsm: Полезная инфа!C124, D148; пакет 10С: F124:H124"
   },
   {
     "dn": 25,
@@ -60,7 +78,10 @@
     "boltDiameter": 12,
     "steelFlangeThickness": 14,
     "wafer017WLength": null,
-    "source": "�������� �� �������.xlsm: Полезная инфа!C53, G53, L53, C77"
+    "source": "Калькулятор по ОБВЯЗКЕ.xlsm: Полезная инфа!C53, G53, L53, C77",
+    "wafer010CLength": null,
+    "flange012FThickness": null,
+    "checkValveSource": "Калькулятор по ОБВЯЗКЕ.xlsm: Полезная инфа!C125, D149; пакет 10С: F125:H125"
   },
   {
     "dn": 25,
@@ -69,7 +90,10 @@
     "boltDiameter": 12,
     "steelFlangeThickness": 18,
     "wafer017WLength": null,
-    "source": "�������� �� �������.xlsm: Полезная инфа!D53, H53, M53, C77"
+    "source": "Калькулятор по ОБВЯЗКЕ.xlsm: Полезная инфа!D53, H53, M53, C77",
+    "wafer010CLength": null,
+    "flange012FThickness": null,
+    "checkValveSource": "Калькулятор по ОБВЯЗКЕ.xlsm: Полезная инфа!C125, D149; пакет 10С: F125:H125"
   },
   {
     "dn": 25,
@@ -78,7 +102,10 @@
     "boltDiameter": 12,
     "steelFlangeThickness": 18,
     "wafer017WLength": null,
-    "source": "�������� �� �������.xlsm: Полезная инфа!E53, I53, N53, C77"
+    "source": "Калькулятор по ОБВЯЗКЕ.xlsm: Полезная инфа!E53, I53, N53, C77",
+    "wafer010CLength": null,
+    "flange012FThickness": null,
+    "checkValveSource": "Калькулятор по ОБВЯЗКЕ.xlsm: Полезная инфа!C125, D149; пакет 10С: F125:H125"
   },
   {
     "dn": 32,
@@ -87,7 +114,10 @@
     "boltDiameter": 16,
     "steelFlangeThickness": 16,
     "wafer017WLength": 33,
-    "source": "�������� �� �������.xlsm: Полезная инфа!C54, G54, L54, C78"
+    "source": "Калькулятор по ОБВЯЗКЕ.xlsm: Полезная инфа!C54, G54, L54, C78",
+    "wafer010CLength": 43.0,
+    "flange012FThickness": 19.0,
+    "checkValveSource": "Калькулятор по ОБВЯЗКЕ.xlsm: Полезная инфа!C126, D150; пакет 10С: F126:H126"
   },
   {
     "dn": 32,
@@ -96,7 +126,10 @@
     "boltDiameter": 16,
     "steelFlangeThickness": 18,
     "wafer017WLength": 33,
-    "source": "�������� �� �������.xlsm: Полезная инфа!D54, H54, M54, C78"
+    "source": "Калькулятор по ОБВЯЗКЕ.xlsm: Полезная инфа!D54, H54, M54, C78",
+    "wafer010CLength": 43.0,
+    "flange012FThickness": 19.0,
+    "checkValveSource": "Калькулятор по ОБВЯЗКЕ.xlsm: Полезная инфа!C126, D150; пакет 10С: F126:H126"
   },
   {
     "dn": 32,
@@ -105,7 +138,10 @@
     "boltDiameter": 16,
     "steelFlangeThickness": 20,
     "wafer017WLength": 33,
-    "source": "�������� �� �������.xlsm: Полезная инфа!E54, I54, N54, C78"
+    "source": "Калькулятор по ОБВЯЗКЕ.xlsm: Полезная инфа!E54, I54, N54, C78",
+    "wafer010CLength": 43.0,
+    "flange012FThickness": 19.0,
+    "checkValveSource": "Калькулятор по ОБВЯЗКЕ.xlsm: Полезная инфа!C126, D150; пакет 10С: F126:H126"
   },
   {
     "dn": 40,
@@ -114,7 +150,10 @@
     "boltDiameter": 16,
     "steelFlangeThickness": 18,
     "wafer017WLength": 33,
-    "source": "�������� �� �������.xlsm: Полезная инфа!C55, G55, L55, C79"
+    "source": "Калькулятор по ОБВЯЗКЕ.xlsm: Полезная инфа!C55, G55, L55, C79",
+    "wafer010CLength": 43.0,
+    "flange012FThickness": 19.0,
+    "checkValveSource": "Калькулятор по ОБВЯЗКЕ.xlsm: Полезная инфа!C127, D151; пакет 10С: F127:H127"
   },
   {
     "dn": 40,
@@ -123,7 +162,10 @@
     "boltDiameter": 16,
     "steelFlangeThickness": 20,
     "wafer017WLength": 33,
-    "source": "�������� �� �������.xlsm: Полезная инфа!D55, H55, M55, C79"
+    "source": "Калькулятор по ОБВЯЗКЕ.xlsm: Полезная инфа!D55, H55, M55, C79",
+    "wafer010CLength": 43.0,
+    "flange012FThickness": 19.0,
+    "checkValveSource": "Калькулятор по ОБВЯЗКЕ.xlsm: Полезная инфа!C127, D151; пакет 10С: F127:H127"
   },
   {
     "dn": 40,
@@ -132,7 +174,10 @@
     "boltDiameter": 16,
     "steelFlangeThickness": 22,
     "wafer017WLength": 33,
-    "source": "�������� �� �������.xlsm: Полезная инфа!E55, I55, N55, C79"
+    "source": "Калькулятор по ОБВЯЗКЕ.xlsm: Полезная инфа!E55, I55, N55, C79",
+    "wafer010CLength": 43.0,
+    "flange012FThickness": 19.0,
+    "checkValveSource": "Калькулятор по ОБВЯЗКЕ.xlsm: Полезная инфа!C127, D151; пакет 10С: F127:H127"
   },
   {
     "dn": 50,
@@ -141,7 +186,10 @@
     "boltDiameter": 16,
     "steelFlangeThickness": 18,
     "wafer017WLength": 42,
-    "source": "�������� �� �������.xlsm: Полезная инфа!C56, G56, L56, C80"
+    "source": "Калькулятор по ОБВЯЗКЕ.xlsm: Полезная инфа!C56, G56, L56, C80",
+    "wafer010CLength": 43.0,
+    "flange012FThickness": 19.0,
+    "checkValveSource": "Калькулятор по ОБВЯЗКЕ.xlsm: Полезная инфа!C128, D152; пакет 10С: F128:H128"
   },
   {
     "dn": 50,
@@ -150,7 +198,10 @@
     "boltDiameter": 16,
     "steelFlangeThickness": 22,
     "wafer017WLength": 42,
-    "source": "�������� �� �������.xlsm: Полезная инфа!D56, H56, M56, C80"
+    "source": "Калькулятор по ОБВЯЗКЕ.xlsm: Полезная инфа!D56, H56, M56, C80",
+    "wafer010CLength": 43.0,
+    "flange012FThickness": 19.0,
+    "checkValveSource": "Калькулятор по ОБВЯЗКЕ.xlsm: Полезная инфа!C128, D152; пакет 10С: F128:H128"
   },
   {
     "dn": 50,
@@ -159,7 +210,10 @@
     "boltDiameter": 16,
     "steelFlangeThickness": 24,
     "wafer017WLength": 42,
-    "source": "�������� �� �������.xlsm: Полезная инфа!E56, I56, N56, C80"
+    "source": "Калькулятор по ОБВЯЗКЕ.xlsm: Полезная инфа!E56, I56, N56, C80",
+    "wafer010CLength": 43.0,
+    "flange012FThickness": 19.0,
+    "checkValveSource": "Калькулятор по ОБВЯЗКЕ.xlsm: Полезная инфа!C128, D152; пакет 10С: F128:H128"
   },
   {
     "dn": 65,
@@ -168,7 +222,10 @@
     "boltDiameter": 16,
     "steelFlangeThickness": 20,
     "wafer017WLength": 45,
-    "source": "�������� �� �������.xlsm: Полезная инфа!C57, G57, L57, C81"
+    "source": "Калькулятор по ОБВЯЗКЕ.xlsm: Полезная инфа!C57, G57, L57, C81",
+    "wafer010CLength": 46.0,
+    "flange012FThickness": 19.0,
+    "checkValveSource": "Калькулятор по ОБВЯЗКЕ.xlsm: Полезная инфа!C129, D153; пакет 10С: F129:H129"
   },
   {
     "dn": 65,
@@ -177,7 +234,10 @@
     "boltDiameter": 16,
     "steelFlangeThickness": 24,
     "wafer017WLength": 45,
-    "source": "�������� �� �������.xlsm: Полезная инфа!D57, H57, M57, C81"
+    "source": "Калькулятор по ОБВЯЗКЕ.xlsm: Полезная инфа!D57, H57, M57, C81",
+    "wafer010CLength": 46.0,
+    "flange012FThickness": 19.0,
+    "checkValveSource": "Калькулятор по ОБВЯЗКЕ.xlsm: Полезная инфа!C129, D153; пакет 10С: F129:H129"
   },
   {
     "dn": 65,
@@ -186,7 +246,10 @@
     "boltDiameter": 16,
     "steelFlangeThickness": 24,
     "wafer017WLength": 45,
-    "source": "�������� �� �������.xlsm: Полезная инфа!E57, I57, N57, C81"
+    "source": "Калькулятор по ОБВЯЗКЕ.xlsm: Полезная инфа!E57, I57, N57, C81",
+    "wafer010CLength": 46.0,
+    "flange012FThickness": 19.0,
+    "checkValveSource": "Калькулятор по ОБВЯЗКЕ.xlsm: Полезная инфа!C129, D153; пакет 10С: F129:H129"
   },
   {
     "dn": 80,
@@ -195,7 +258,10 @@
     "boltDiameter": 16,
     "steelFlangeThickness": 20,
     "wafer017WLength": 45,
-    "source": "�������� �� �������.xlsm: Полезная инфа!C58, G58, L58, C82"
+    "source": "Калькулятор по ОБВЯЗКЕ.xlsm: Полезная инфа!C58, G58, L58, C82",
+    "wafer010CLength": 64.0,
+    "flange012FThickness": 19.0,
+    "checkValveSource": "Калькулятор по ОБВЯЗКЕ.xlsm: Полезная инфа!C130, D154; пакет 10С: F130:H130"
   },
   {
     "dn": 80,
@@ -204,7 +270,10 @@
     "boltDiameter": 16,
     "steelFlangeThickness": 24,
     "wafer017WLength": 45,
-    "source": "�������� �� �������.xlsm: Полезная инфа!D58, H58, M58, C82"
+    "source": "Калькулятор по ОБВЯЗКЕ.xlsm: Полезная инфа!D58, H58, M58, C82",
+    "wafer010CLength": 64.0,
+    "flange012FThickness": 19.0,
+    "checkValveSource": "Калькулятор по ОБВЯЗКЕ.xlsm: Полезная инфа!C130, D154; пакет 10С: F130:H130"
   },
   {
     "dn": 80,
@@ -213,7 +282,10 @@
     "boltDiameter": 16,
     "steelFlangeThickness": 26,
     "wafer017WLength": 45,
-    "source": "�������� �� �������.xlsm: Полезная инфа!E58, I58, N58, C82"
+    "source": "Калькулятор по ОБВЯЗКЕ.xlsm: Полезная инфа!E58, I58, N58, C82",
+    "wafer010CLength": 64.0,
+    "flange012FThickness": 19.0,
+    "checkValveSource": "Калькулятор по ОБВЯЗКЕ.xlsm: Полезная инфа!C130, D154; пакет 10С: F130:H130"
   },
   {
     "dn": 100,
@@ -222,7 +294,10 @@
     "boltDiameter": 16,
     "steelFlangeThickness": 22,
     "wafer017WLength": 52,
-    "source": "�������� �� �������.xlsm: Полезная инфа!C59, G59, L59, C83"
+    "source": "Калькулятор по ОБВЯЗКЕ.xlsm: Полезная инфа!C59, G59, L59, C83",
+    "wafer010CLength": 64.0,
+    "flange012FThickness": 19.0,
+    "checkValveSource": "Калькулятор по ОБВЯЗКЕ.xlsm: Полезная инфа!C131, D155; пакет 10С: F131:H131"
   },
   {
     "dn": 100,
@@ -231,7 +306,10 @@
     "boltDiameter": 16,
     "steelFlangeThickness": 26,
     "wafer017WLength": 52,
-    "source": "�������� �� �������.xlsm: Полезная инфа!D59, H59, M59, C83"
+    "source": "Калькулятор по ОБВЯЗКЕ.xlsm: Полезная инфа!D59, H59, M59, C83",
+    "wafer010CLength": 64.0,
+    "flange012FThickness": 19.0,
+    "checkValveSource": "Калькулятор по ОБВЯЗКЕ.xlsm: Полезная инфа!C131, D155; пакет 10С: F131:H131"
   },
   {
     "dn": 100,
@@ -240,7 +318,10 @@
     "boltDiameter": 20,
     "steelFlangeThickness": 28,
     "wafer017WLength": 52,
-    "source": "�������� �� �������.xlsm: Полезная инфа!E59, I59, N59, C83"
+    "source": "Калькулятор по ОБВЯЗКЕ.xlsm: Полезная инфа!E59, I59, N59, C83",
+    "wafer010CLength": 64.0,
+    "flange012FThickness": 19.0,
+    "checkValveSource": "Калькулятор по ОБВЯЗКЕ.xlsm: Полезная инфа!C131, D155; пакет 10С: F131:H131"
   },
   {
     "dn": 125,
@@ -249,7 +330,10 @@
     "boltDiameter": 16,
     "steelFlangeThickness": 24,
     "wafer017WLength": 55,
-    "source": "�������� �� �������.xlsm: Полезная инфа!C60, G60, L60, C84"
+    "source": "Калькулятор по ОБВЯЗКЕ.xlsm: Полезная инфа!C60, G60, L60, C84",
+    "wafer010CLength": 70.0,
+    "flange012FThickness": 19.0,
+    "checkValveSource": "Калькулятор по ОБВЯЗКЕ.xlsm: Полезная инфа!C132, D156; пакет 10С: F132:H132"
   },
   {
     "dn": 125,
@@ -258,7 +342,10 @@
     "boltDiameter": 16,
     "steelFlangeThickness": 28,
     "wafer017WLength": 55,
-    "source": "�������� �� �������.xlsm: Полезная инфа!D60, H60, M60, C84"
+    "source": "Калькулятор по ОБВЯЗКЕ.xlsm: Полезная инфа!D60, H60, M60, C84",
+    "wafer010CLength": 70.0,
+    "flange012FThickness": 19.0,
+    "checkValveSource": "Калькулятор по ОБВЯЗКЕ.xlsm: Полезная инфа!C132, D156; пакет 10С: F132:H132"
   },
   {
     "dn": 125,
@@ -267,7 +354,10 @@
     "boltDiameter": 24,
     "steelFlangeThickness": 30,
     "wafer017WLength": 55,
-    "source": "�������� �� �������.xlsm: Полезная инфа!E60, I60, N60, C84"
+    "source": "Калькулятор по ОБВЯЗКЕ.xlsm: Полезная инфа!E60, I60, N60, C84",
+    "wafer010CLength": 70.0,
+    "flange012FThickness": 19.0,
+    "checkValveSource": "Калькулятор по ОБВЯЗКЕ.xlsm: Полезная инфа!C132, D156; пакет 10С: F132:H132"
   },
   {
     "dn": 150,
@@ -276,7 +366,10 @@
     "boltDiameter": 20,
     "steelFlangeThickness": 24,
     "wafer017WLength": 55,
-    "source": "�������� �� �������.xlsm: Полезная инфа!C61, G61, L61, C85"
+    "source": "Калькулятор по ОБВЯЗКЕ.xlsm: Полезная инфа!C61, G61, L61, C85",
+    "wafer010CLength": 76.0,
+    "flange012FThickness": 19.0,
+    "checkValveSource": "Калькулятор по ОБВЯЗКЕ.xlsm: Полезная инфа!C133, D157; пакет 10С: F133:H133"
   },
   {
     "dn": 150,
@@ -285,7 +378,10 @@
     "boltDiameter": 20,
     "steelFlangeThickness": 28,
     "wafer017WLength": 55,
-    "source": "�������� �� �������.xlsm: Полезная инфа!D61, H61, M61, C85"
+    "source": "Калькулятор по ОБВЯЗКЕ.xlsm: Полезная инфа!D61, H61, M61, C85",
+    "wafer010CLength": 76.0,
+    "flange012FThickness": 19.0,
+    "checkValveSource": "Калькулятор по ОБВЯЗКЕ.xlsm: Полезная инфа!C133, D157; пакет 10С: F133:H133"
   },
   {
     "dn": 150,
@@ -294,7 +390,10 @@
     "boltDiameter": 24,
     "steelFlangeThickness": 30,
     "wafer017WLength": 55,
-    "source": "�������� �� �������.xlsm: Полезная инфа!E61, I61, N61, C85"
+    "source": "Калькулятор по ОБВЯЗКЕ.xlsm: Полезная инфа!E61, I61, N61, C85",
+    "wafer010CLength": 76.0,
+    "flange012FThickness": 19.0,
+    "checkValveSource": "Калькулятор по ОБВЯЗКЕ.xlsm: Полезная инфа!C133, D157; пакет 10С: F133:H133"
   },
   {
     "dn": 200,
@@ -303,7 +402,10 @@
     "boltDiameter": 20,
     "steelFlangeThickness": 24,
     "wafer017WLength": 60,
-    "source": "�������� �� �������.xlsm: Полезная инфа!C62, G62, L62, C86"
+    "source": "Калькулятор по ОБВЯЗКЕ.xlsm: Полезная инфа!C62, G62, L62, C86",
+    "wafer010CLength": 89.0,
+    "flange012FThickness": 20.0,
+    "checkValveSource": "Калькулятор по ОБВЯЗКЕ.xlsm: Полезная инфа!C134, D158; пакет 10С: F134:H134"
   },
   {
     "dn": 200,
@@ -312,7 +414,10 @@
     "boltDiameter": 20,
     "steelFlangeThickness": 30,
     "wafer017WLength": 60,
-    "source": "�������� �� �������.xlsm: Полезная инфа!D62, H62, M62, C86"
+    "source": "Калькулятор по ОБВЯЗКЕ.xlsm: Полезная инфа!D62, H62, M62, C86",
+    "wafer010CLength": 89.0,
+    "flange012FThickness": 20.0,
+    "checkValveSource": "Калькулятор по ОБВЯЗКЕ.xlsm: Полезная инфа!C134, D158; пакет 10С: F134:H134"
   },
   {
     "dn": 200,
@@ -321,7 +426,10 @@
     "boltDiameter": 24,
     "steelFlangeThickness": 32,
     "wafer017WLength": 60,
-    "source": "�������� �� �������.xlsm: Полезная инфа!E62, I62, N62, C86"
+    "source": "Калькулятор по ОБВЯЗКЕ.xlsm: Полезная инфа!E62, I62, N62, C86",
+    "wafer010CLength": 89.0,
+    "flange012FThickness": 20.0,
+    "checkValveSource": "Калькулятор по ОБВЯЗКЕ.xlsm: Полезная инфа!C134, D158; пакет 10С: F134:H134"
   },
   {
     "dn": 250,
@@ -330,7 +438,10 @@
     "boltDiameter": 20,
     "steelFlangeThickness": 26,
     "wafer017WLength": 66,
-    "source": "�������� �� �������.xlsm: Полезная инфа!C63, G63, L63, C87"
+    "source": "Калькулятор по ОБВЯЗКЕ.xlsm: Полезная инфа!C63, G63, L63, C87",
+    "wafer010CLength": 114.0,
+    "flange012FThickness": 22.0,
+    "checkValveSource": "Калькулятор по ОБВЯЗКЕ.xlsm: Полезная инфа!C135, D159; пакет 10С: F135:H135"
   },
   {
     "dn": 250,
@@ -339,7 +450,10 @@
     "boltDiameter": 24,
     "steelFlangeThickness": 31,
     "wafer017WLength": 66,
-    "source": "�������� �� �������.xlsm: Полезная инфа!D63, H63, M63, C87"
+    "source": "Калькулятор по ОБВЯЗКЕ.xlsm: Полезная инфа!D63, H63, M63, C87",
+    "wafer010CLength": 114.0,
+    "flange012FThickness": 22.0,
+    "checkValveSource": "Калькулятор по ОБВЯЗКЕ.xlsm: Полезная инфа!C135, D159; пакет 10С: F135:H135"
   },
   {
     "dn": 250,
@@ -348,7 +462,10 @@
     "boltDiameter": 27,
     "steelFlangeThickness": 34,
     "wafer017WLength": 66,
-    "source": "�������� �� �������.xlsm: Полезная инфа!E63, I63, N63, C87"
+    "source": "Калькулятор по ОБВЯЗКЕ.xlsm: Полезная инфа!E63, I63, N63, C87",
+    "wafer010CLength": 114.0,
+    "flange012FThickness": 22.0,
+    "checkValveSource": "Калькулятор по ОБВЯЗКЕ.xlsm: Полезная инфа!C135, D159; пакет 10С: F135:H135"
   },
   {
     "dn": 300,
@@ -357,7 +474,10 @@
     "boltDiameter": 20,
     "steelFlangeThickness": 28,
     "wafer017WLength": 77,
-    "source": "�������� �� �������.xlsm: Полезная инфа!C64, G64, L64, C88"
+    "source": "Калькулятор по ОБВЯЗКЕ.xlsm: Полезная инфа!C64, G64, L64, C88",
+    "wafer010CLength": 114.0,
+    "flange012FThickness": 25.0,
+    "checkValveSource": "Калькулятор по ОБВЯЗКЕ.xlsm: Полезная инфа!C136, D160; пакет 10С: F136:H136"
   },
   {
     "dn": 300,
@@ -366,7 +486,10 @@
     "boltDiameter": 24,
     "steelFlangeThickness": 32,
     "wafer017WLength": 77,
-    "source": "�������� �� �������.xlsm: Полезная инфа!D64, H64, M64, C88"
+    "source": "Калькулятор по ОБВЯЗКЕ.xlsm: Полезная инфа!D64, H64, M64, C88",
+    "wafer010CLength": 114.0,
+    "flange012FThickness": 25.0,
+    "checkValveSource": "Калькулятор по ОБВЯЗКЕ.xlsm: Полезная инфа!C136, D160; пакет 10С: F136:H136"
   },
   {
     "dn": 300,
@@ -375,7 +498,10 @@
     "boltDiameter": 27,
     "steelFlangeThickness": 36,
     "wafer017WLength": 77,
-    "source": "�������� �� �������.xlsm: Полезная инфа!E64, I64, N64, C88"
+    "source": "Калькулятор по ОБВЯЗКЕ.xlsm: Полезная инфа!E64, I64, N64, C88",
+    "wafer010CLength": 114.0,
+    "flange012FThickness": 25.0,
+    "checkValveSource": "Калькулятор по ОБВЯЗКЕ.xlsm: Полезная инфа!C136, D160; пакет 10С: F136:H136"
   },
   {
     "dn": 350,
@@ -384,7 +510,10 @@
     "boltDiameter": 20,
     "steelFlangeThickness": 28,
     "wafer017WLength": 78,
-    "source": "�������� �� �������.xlsm: Полезная инфа!C65, G65, L65, C89"
+    "source": "Калькулятор по ОБВЯЗКЕ.xlsm: Полезная инфа!C65, G65, L65, C89",
+    "wafer010CLength": 127.0,
+    "flange012FThickness": 26.5,
+    "checkValveSource": "Калькулятор по ОБВЯЗКЕ.xlsm: Полезная инфа!C137, D161; пакет 10С: F137:H137"
   },
   {
     "dn": 350,
@@ -393,7 +522,10 @@
     "boltDiameter": 24,
     "steelFlangeThickness": 34,
     "wafer017WLength": 78,
-    "source": "�������� �� �������.xlsm: Полезная инфа!D65, H65, M65, C89"
+    "source": "Калькулятор по ОБВЯЗКЕ.xlsm: Полезная инфа!D65, H65, M65, C89",
+    "wafer010CLength": 127.0,
+    "flange012FThickness": 26.5,
+    "checkValveSource": "Калькулятор по ОБВЯЗКЕ.xlsm: Полезная инфа!C137, D161; пакет 10С: F137:H137"
   },
   {
     "dn": 350,
@@ -402,7 +534,10 @@
     "boltDiameter": 30,
     "steelFlangeThickness": 42,
     "wafer017WLength": 78,
-    "source": "�������� �� �������.xlsm: Полезная инфа!E65, I65, N65, C89"
+    "source": "Калькулятор по ОБВЯЗКЕ.xlsm: Полезная инфа!E65, I65, N65, C89",
+    "wafer010CLength": 127.0,
+    "flange012FThickness": 26.5,
+    "checkValveSource": "Калькулятор по ОБВЯЗКЕ.xlsm: Полезная инфа!C137, D161; пакет 10С: F137:H137"
   },
   {
     "dn": 400,
@@ -411,7 +546,10 @@
     "boltDiameter": 24,
     "steelFlangeThickness": 30,
     "wafer017WLength": 102,
-    "source": "�������� �� �������.xlsm: Полезная инфа!C66, G66, L66, C90"
+    "source": "Калькулятор по ОБВЯЗКЕ.xlsm: Полезная инфа!C66, G66, L66, C90",
+    "wafer010CLength": 140.0,
+    "flange012FThickness": 28.0,
+    "checkValveSource": "Калькулятор по ОБВЯЗКЕ.xlsm: Полезная инфа!C138, D162; пакет 10С: F138:H138"
   },
   {
     "dn": 400,
@@ -420,7 +558,10 @@
     "boltDiameter": 27,
     "steelFlangeThickness": 38,
     "wafer017WLength": 102,
-    "source": "�������� �� �������.xlsm: Полезная инфа!D66, H66, M66, C90"
+    "source": "Калькулятор по ОБВЯЗКЕ.xlsm: Полезная инфа!D66, H66, M66, C90",
+    "wafer010CLength": 140.0,
+    "flange012FThickness": 28.0,
+    "checkValveSource": "Калькулятор по ОБВЯЗКЕ.xlsm: Полезная инфа!C138, D162; пакет 10С: F138:H138"
   },
   {
     "dn": 400,
@@ -429,7 +570,10 @@
     "boltDiameter": 30,
     "steelFlangeThickness": 44,
     "wafer017WLength": 102,
-    "source": "�������� �� �������.xlsm: Полезная инфа!E66, I66, N66, C90"
+    "source": "Калькулятор по ОБВЯЗКЕ.xlsm: Полезная инфа!E66, I66, N66, C90",
+    "wafer010CLength": 140.0,
+    "flange012FThickness": 28.0,
+    "checkValveSource": "Калькулятор по ОБВЯЗКЕ.xlsm: Полезная инфа!C138, D162; пакет 10С: F138:H138"
   },
   {
     "dn": 500,
@@ -438,7 +582,10 @@
     "boltDiameter": 24,
     "steelFlangeThickness": 34,
     "wafer017WLength": 127,
-    "source": "�������� �� �������.xlsm: Полезная инфа!C67, G67, L67, C91"
+    "source": "Калькулятор по ОБВЯЗКЕ.xlsm: Полезная инфа!C67, G67, L67, C91",
+    "wafer010CLength": 152.0,
+    "flange012FThickness": 34.0,
+    "checkValveSource": "Калькулятор по ОБВЯЗКЕ.xlsm: Полезная инфа!C139, D163; пакет 10С: F139:H139"
   },
   {
     "dn": 500,
@@ -447,7 +594,10 @@
     "boltDiameter": 30,
     "steelFlangeThickness": 44,
     "wafer017WLength": 127,
-    "source": "�������� �� �������.xlsm: Полезная инфа!D67, H67, M67, C91"
+    "source": "Калькулятор по ОБВЯЗКЕ.xlsm: Полезная инфа!D67, H67, M67, C91",
+    "wafer010CLength": 152.0,
+    "flange012FThickness": 34.0,
+    "checkValveSource": "Калькулятор по ОБВЯЗКЕ.xlsm: Полезная инфа!C139, D163; пакет 10С: F139:H139"
   },
   {
     "dn": 500,
@@ -456,7 +606,10 @@
     "boltDiameter": 33,
     "steelFlangeThickness": 52,
     "wafer017WLength": 127,
-    "source": "�������� �� �������.xlsm: Полезная инфа!E67, I67, N67, C91"
+    "source": "Калькулятор по ОБВЯЗКЕ.xlsm: Полезная инфа!E67, I67, N67, C91",
+    "wafer010CLength": 152.0,
+    "flange012FThickness": 34.0,
+    "checkValveSource": "Калькулятор по ОБВЯЗКЕ.xlsm: Полезная инфа!C139, D163; пакет 10С: F139:H139"
   },
   {
     "dn": 600,
@@ -465,7 +618,10 @@
     "boltDiameter": 27,
     "steelFlangeThickness": 38,
     "wafer017WLength": 154,
-    "source": "�������� �� �������.xlsm: Полезная инфа!C68, G68, L68, C92"
+    "source": "Калькулятор по ОБВЯЗКЕ.xlsm: Полезная инфа!C68, G68, L68, C92",
+    "wafer010CLength": 178.0,
+    "flange012FThickness": 38.0,
+    "checkValveSource": "Калькулятор по ОБВЯЗКЕ.xlsm: Полезная инфа!C140, D164; пакет 10С: F140:H140"
   },
   {
     "dn": 600,
@@ -474,7 +630,10 @@
     "boltDiameter": 33,
     "steelFlangeThickness": 48,
     "wafer017WLength": 154,
-    "source": "�������� �� �������.xlsm: Полезная инфа!D68, H68, M68, C92"
+    "source": "Калькулятор по ОБВЯЗКЕ.xlsm: Полезная инфа!D68, H68, M68, C92",
+    "wafer010CLength": 178.0,
+    "flange012FThickness": 38.0,
+    "checkValveSource": "Калькулятор по ОБВЯЗКЕ.xlsm: Полезная инфа!C140, D164; пакет 10С: F140:H140"
   },
   {
     "dn": 600,
@@ -483,7 +642,10 @@
     "boltDiameter": 36,
     "steelFlangeThickness": 58,
     "wafer017WLength": 154,
-    "source": "�������� �� �������.xlsm: Полезная инфа!E68, I68, N68, C92"
+    "source": "Калькулятор по ОБВЯЗКЕ.xlsm: Полезная инфа!E68, I68, N68, C92",
+    "wafer010CLength": 178.0,
+    "flange012FThickness": 38.0,
+    "checkValveSource": "Калькулятор по ОБВЯЗКЕ.xlsm: Полезная инфа!C140, D164; пакет 10С: F140:H140"
   },
   {
     "dn": 700,
@@ -492,7 +654,10 @@
     "boltDiameter": 30,
     "steelFlangeThickness": 42,
     "wafer017WLength": 165,
-    "source": "�������� �� �������.xlsm: Полезная инфа!C69, G69, L69, C93"
+    "source": "Калькулятор по ОБВЯЗКЕ.xlsm: Полезная инфа!C69, G69, L69, C93",
+    "wafer010CLength": 229.0,
+    "flange012FThickness": 42.0,
+    "checkValveSource": "Калькулятор по ОБВЯЗКЕ.xlsm: Полезная инфа!C141, D165; пакет 10С: F141:H141"
   },
   {
     "dn": 700,
@@ -501,7 +666,10 @@
     "boltDiameter": 36,
     "steelFlangeThickness": 52,
     "wafer017WLength": 165,
-    "source": "�������� �� �������.xlsm: Полезная инфа!D69, H69, M69, C93"
+    "source": "Калькулятор по ОБВЯЗКЕ.xlsm: Полезная инфа!D69, H69, M69, C93",
+    "wafer010CLength": 229.0,
+    "flange012FThickness": 42.0,
+    "checkValveSource": "Калькулятор по ОБВЯЗКЕ.xlsm: Полезная инфа!C141, D165; пакет 10С: F141:H141"
   },
   {
     "dn": 700,
@@ -510,7 +678,10 @@
     "boltDiameter": 42,
     "steelFlangeThickness": 66,
     "wafer017WLength": 165,
-    "source": "�������� �� �������.xlsm: Полезная инфа!E69, I69, N69, C93"
+    "source": "Калькулятор по ОБВЯЗКЕ.xlsm: Полезная инфа!E69, I69, N69, C93",
+    "wafer010CLength": 229.0,
+    "flange012FThickness": 42.0,
+    "checkValveSource": "Калькулятор по ОБВЯЗКЕ.xlsm: Полезная инфа!C141, D165; пакет 10С: F141:H141"
   },
   {
     "dn": 800,
@@ -519,7 +690,10 @@
     "boltDiameter": 30,
     "steelFlangeThickness": 44,
     "wafer017WLength": 190,
-    "source": "�������� �� �������.xlsm: Полезная инфа!C70, G70, L70, C94"
+    "source": "Калькулятор по ОБВЯЗКЕ.xlsm: Полезная инфа!C70, G70, L70, C94",
+    "wafer010CLength": 241.0,
+    "flange012FThickness": 44.0,
+    "checkValveSource": "Калькулятор по ОБВЯЗКЕ.xlsm: Полезная инфа!C142, D166; пакет 10С: F142:H142"
   },
   {
     "dn": 800,
@@ -528,7 +702,10 @@
     "boltDiameter": 36,
     "steelFlangeThickness": 55,
     "wafer017WLength": 190,
-    "source": "�������� �� �������.xlsm: Полезная инфа!D70, H70, M70, C94"
+    "source": "Калькулятор по ОБВЯЗКЕ.xlsm: Полезная инфа!D70, H70, M70, C94",
+    "wafer010CLength": 241.0,
+    "flange012FThickness": 44.0,
+    "checkValveSource": "Калькулятор по ОБВЯЗКЕ.xlsm: Полезная инфа!C142, D166; пакет 10С: F142:H142"
   },
   {
     "dn": 800,
@@ -537,6 +714,9 @@
     "boltDiameter": 45,
     "steelFlangeThickness": 74,
     "wafer017WLength": 190,
-    "source": "�������� �� �������.xlsm: Полезная инфа!E70, I70, N70, C94"
+    "source": "Калькулятор по ОБВЯЗКЕ.xlsm: Полезная инфа!E70, I70, N70, C94",
+    "wafer010CLength": 241.0,
+    "flange012FThickness": 44.0,
+    "checkValveSource": "Калькулятор по ОБВЯЗКЕ.xlsm: Полезная инфа!C142, D166; пакет 10С: F142:H142"
   }
 ]

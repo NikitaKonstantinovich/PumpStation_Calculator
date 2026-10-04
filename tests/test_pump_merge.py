@@ -3,15 +3,42 @@ import importlib.util
 import unittest
 import json
 import sqlite3
+import sys
 from contextlib import closing
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'scripts'))
 spec = importlib.util.spec_from_file_location('pump_merge', Path(__file__).resolve().parents[1] / 'scripts/merge-pump-catalogs.py')
 merge = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(merge)
 
 
 class MergeTests(unittest.TestCase):
+    def test_text_cleanup_keeps_distinct_source_identities_and_is_idempotent(self):
+        import hashlib
+        models = ['350WQ900-26-90(I)(无隔离罩)', '350WQ900-26-90(I)无隔离罩',
+                  '40WQ12-18-1.5(II）']
+        pumps = [{'id': 'nu-' + hashlib.sha256('|'.join(merge.identity({'manufacturer':'CNP','model':model})).encode()).hexdigest()[:16],
+                  'manufacturer':'CNP','model':model,'curve':[[0,20],[2,15]],'price':123.45}
+                 for model in models]
+        records = {p['id']:{'sources':[{'record':{'model':p['model'],
+            'variants':[{'phase':'三相','properties_raw':'8:三相|141:F法兰|112:二代'}],
+            'documents':[{'file_path':'/assets/无隔离罩.png'}]}}]} for p in pumps}
+        ids = [p['id'] for p in pumps]
+        originals = merge.normalize_pump_catalog(pumps,records)
+        self.assertEqual([p['id'] for p in pumps],ids)
+        self.assertEqual(len({p['model'] for p in pumps}),3)
+        self.assertEqual([originals[p['id']]['pump.model'] for p in pumps],models)
+        for p in pumps:
+            self.assertEqual(p['curve'],[[0,20],[2,15]])
+            self.assertEqual(p['price'],123.45)
+            raw = records[p['id']]['sources'][0]['record']
+            self.assertEqual(raw['variants'][0]['phase'],'трёхфазный')
+            self.assertEqual(raw['documents'][0]['file_path'],'/assets/无隔离罩.png')
+        before = merge.deepcopy((pumps,records,originals))
+        self.assertEqual(merge.normalize_pump_catalog(pumps,records,originals),originals)
+        self.assertEqual((pumps,records,originals),before)
+
     def test_cnp_browser_and_sqlite_physical_records_match(self):
         path = merge.FRONTEND.parent / 'database/pumps-merged.sqlite'
         if not path.exists():

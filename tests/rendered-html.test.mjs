@@ -4,7 +4,7 @@ import test from "node:test";
 import { loadTs } from "./load-ts.mjs";
 
 const templateRoot = new URL("../", import.meta.url);
-const readPage = async () => (await Promise.all(["page.tsx", "pump-sketches.ts"].map(name => readFile(new URL(`../app/${name}`, import.meta.url), "utf8")))).join("\n");
+const readPage = async () => (await Promise.all(["page.tsx", "pump-sketches.ts", "tool-registry.ts"].map(name => readFile(new URL(`../app/${name}`, import.meta.url), "utf8")))).join("\n");
 
 async function loadProjectConfig() {
   return loadTs(new URL("../app/project-config.ts", import.meta.url));
@@ -66,7 +66,7 @@ test("keeps the production surface free of the starter preview", async () => {
   assert.match(page, /Свернутые инструменты/);
   assert.match(page, /Закрыть инструмент/);
   assert.match(page, /Свернуть инструмент/);
-  assert.match(page, /pumps\.slice\(0,2\)/);
+  assert.match(page, /visibleSpecificationItems\(entity,\s*settings\)/);
   assert.match(page, /onDoubleClick=/);
   assert.doesNotMatch(page, /pump-chart__svg" onClick=/);
   assert.match(page, /ChartExportFormat = "png" \| "jpeg" \| "pdf"/);
@@ -147,7 +147,7 @@ test("provides a persisted DN calculator with SP velocity defaults", async () =>
   ]);
 
   assert.match(page, /dn: \{ title: "Расчёт DN"/);
-  assert.match(page, /dn:"station-dn"/);
+  assert.match(page, /dn:\s*"station-dn"/);
   const dnDefaults = await loadTs(new URL("../app/dn-defaults.ts", import.meta.url));
   assert.deepEqual(dnDefaults.STANDARD_DN.slice(0,12), [25,32,40,50,65,80,100,125,150,200,250,300]);
   assert.equal(dnDefaults.dnVelocityLimit(250), 2);
@@ -223,7 +223,7 @@ test("ships the discounted control-cabinet catalogue and selection rules", async
   assert.match(page, /spec-table__row--cabinet-oversized/);
   assert.match(page, /spec-table__warning--power/);
   assert.match(page, /spec-table__row--cabinet-missing/);
-  assert.match(page, /role="tooltip"/);
+  assert.match(page, /aria-label="Ошибки и предупреждения по позиции"/);
   assert.match(styles, /\.spec-table__row--cabinet-oversized/);
   const bpTwoPumps = cabinets.filter(item => item.type === "bp" && item.pumpCount === 2);
   const nearestAbove = power => bpTwoPumps.filter(item => item.powerKw >= power).sort((a,b)=>a.powerKw-b.powerKw)[0];
@@ -470,7 +470,7 @@ test("provides a component-database tool with category-specific characteristics 
   assert.match(projectConfig, /"components" \| "cabinet" \| "collectors" \| "model"/);
   assert.match(projectConfig, /"station-components": \{ kind: "components" \}/);
   assert.match(page, /components: \{ title: "База комплектующих"/);
-  assert.match(page, /components:"station-components"/);
+  assert.match(page, /components:\s*"station-components"/);
   assert.match(page, /fetch\("\/binding-components\.json",\{cache:"no-store"\}\)/);
   assert.match(page, /fetch\("\/control-cabinet-database\.json",\{cache:"no-store"\}\)/);
   assert.match(page, /Сборочный комплект гидравлики/);

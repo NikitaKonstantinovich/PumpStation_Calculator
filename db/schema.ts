@@ -6,10 +6,12 @@ export const users = sqliteTable("users", {
   email: text("email").notNull(),
   name: text("name").notNull(),
   passwordHash: text("password_hash").notNull(),
+  role: text("role", { enum: ["admin", "user"] }).notNull().default("user"),
+  revision: integer("revision").notNull().default(0),
   emailVerifiedAt: text("email_verified_at"),
   createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
   updatedAt: text("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
-}, table => [uniqueIndex("uq_users_email").on(table.email)]);
+}, table => [uniqueIndex("uq_users_email").on(table.email), check("ck_users_role", sql`${table.role} IN ('admin', 'user')`)]);
 
 export const collectors = sqliteTable("collectors", {
   id: text("id").primaryKey(),
@@ -60,6 +62,7 @@ export const sessions = sqliteTable("sessions", {
   userId: text("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
   tokenHash: text("token_hash").notNull(),
   expiresAt: text("expires_at").notNull(),
+  lastSeenAt: text("last_seen_at"),
   createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
 }, table => [
   uniqueIndex("uq_sessions_token_hash").on(table.tokenHash),

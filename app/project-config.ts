@@ -2,7 +2,7 @@ import { createCollectors, normalizeCollectors, synchronizeCollectors, type Coll
 import { normalizeSpecificationItems, specificationOption } from "./specification-items";
 import type { PumpPortOverride } from "./pump-ports";
 
-export type PanelKind = "input" | "chart" | "sketch" | "input2" | "chart2" | "sketch2" | "settings" | "dn" | "spec" | "components" | "cabinet" | "collectors" | "model";
+export type PanelKind = "input" | "chart" | "sketch" | "input2" | "chart2" | "sketch2" | "settings" | "dn" | "spec" | "components" | "cabinet" | "collectors" | "model" | "issues";
 export type WorkspaceMode = "free" | "mobile" | "grid";
 export type WorkspaceGrid = { columns:number; rows:number; columnSizes:number[]; rowSizes:number[]; cells:Array<string|null> };
 
@@ -53,7 +53,8 @@ export type SpecSection = "pump" | "control" | "suction" | "discharge" | "frame"
 export type SpecOption = "suctionCollector" | "dischargeCollector" | "secondaryPump" | "membraneTank" | "vibrationCompensators" | "collectorPlugs" | "isolatingValves" | "primarySuctionValve" | "primaryDischargeValve" | "primaryCheckValve" | "secondarySuctionValve" | "secondaryDischargeValve" | "secondaryCheckValve";
 export type SpecItem = {
   inletPressureCheck?: { checks: import("./dn-defaults").InletPressureCheck[]; baseStatus: "selected" | "clarify" | "confirmation" };
-  generatedBy?: "suction-line";
+  dischargePressureCheck?: SpecItem["inletPressureCheck"];
+  generatedBy?: "suction-line" | "discharge-line";
   assemblyRole?: string;
   sourceFingerprint?: string;
   position: string;
@@ -71,10 +72,11 @@ export type SpecItem = {
   option?: SpecOption;
   status: "selected" | "clarify" | "confirmation";
 };
-export type SpecEntity = { kind: "spec"; items: SpecItem[] };
+export type SpecEntity = { kind: "spec"; items: SpecItem[]; autoHydraulics?: boolean };
 export type ModelEntity = { kind: "model"; view: { rotation: number; zoom: number } };
 export type ComponentsEntity = { kind:"components" };
 export type CabinetEntity = { kind:"cabinet" };
+export type IssuesEntity = { kind:"issues" };
 export type CollectorMaterial = "st20" | "aisi304";
 export type ValveConnection = "threaded" | "flanged";
 export type ValvePn = 10 | 16 | 25;
@@ -103,7 +105,7 @@ export type DnEntity = {
   secondarySuctionValveType:ShutoffValveType|null;
   secondaryDischargeValveType:ShutoffValveType|null;
 };
-export type ProjectEntity = InputEntity | ChartEntity | SketchEntity | SettingsEntity | DnEntity | SpecEntity | ComponentsEntity | CabinetEntity | ModelEntity | CollectorsEntity;
+export type ProjectEntity = InputEntity | ChartEntity | SketchEntity | SettingsEntity | DnEntity | SpecEntity | ComponentsEntity | CabinetEntity | ModelEntity | CollectorsEntity | IssuesEntity;
 
 export type ProjectConfig = {
   schemaVersion: 1;
@@ -164,6 +166,7 @@ export function createProject(name = "Новая насосная станция
       "station-spec": { kind: "spec", items: DEFAULT_SPEC_ITEMS.map(item => ({ ...item })) },
       "station-components": { kind: "components" },
       "station-control-cabinet": { kind: "cabinet" },
+      "station-issues": { kind: "issues" },
       "station-collectors": createCollectors(),
       "station-model": { kind: "model", view: { rotation: 0, zoom: 1 } },
     },
@@ -185,7 +188,7 @@ export function parseProjectConfig(raw: unknown): ProjectConfig {
   if (candidate.schemaVersion !== 1) throw new Error("Неподдерживаемая версия файла проекта");
   if (!candidate.project || typeof candidate.project.name !== "string" || typeof candidate.project.id !== "string") throw new Error("В файле отсутствуют данные проекта");
   if (!candidate.workspace || !Array.isArray(candidate.workspace.windows) || !candidate.entities || typeof candidate.entities !== "object") throw new Error("В файле отсутствует рабочее пространство");
-  const allowed = new Set<PanelKind>(["input", "chart", "sketch", "input2", "chart2", "sketch2", "settings", "dn", "spec", "components", "cabinet", "collectors", "model"]);
+  const allowed = new Set<PanelKind>(["input", "chart", "sketch", "input2", "chart2", "sketch2", "settings", "dn", "spec", "components", "cabinet", "collectors", "model", "issues"]);
   const windows = candidate.workspace.windows.map((window, index) => {
     if (!window || typeof window.id !== "string" || typeof window.entityId !== "string" || !candidate.entities?.[window.entityId]) throw new Error(`Некорректное окно № ${index + 1}`);
     const legacyTool = allowed.has(window.id as PanelKind) ? window.id as PanelKind : undefined;

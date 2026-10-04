@@ -1,15 +1,17 @@
 import type { InputEntity } from "./project-config";
+import { IssueNotice } from "./diagnostics-ui";
 
-export function CircuitInputFields({ input, onChange, showStaticHead = true }: {
+export function CircuitInputFields({ input, onChange, showStaticHead = true, issueTool }: {
   input: InputEntity;
   onChange: (patch: Partial<InputEntity>) => void;
   showStaticHead?: boolean;
+  issueTool?: "input" | "input2";
 }) {
   const numberField = (key: "flowRate" | "head" | "staticHead" | "workingPumpCount" | "reservePumpCount", label: string, unit: string, min: number, max?: number) => (
     <label className="data-form__field" key={key}><span>{label}</span><span className="data-form__control">
       <input aria-label={label} type="number" min={min} max={max} step={key.endsWith("Count") ? 1 : "any"} value={input[key] ?? ""}
         onChange={event => onChange({ [key]: Number.isFinite(event.target.valueAsNumber) ? event.target.valueAsNumber : null })}/><b>{unit}</b>
-    </span></label>
+    </span>{issueTool && <IssueNotice id={`${issueTool}/${key}`}/>}</label>
   );
   return <div className="pump-selector__inputs">
     <label className="data-form__field"><span>Перекачиваемая среда</span><select aria-label="Перекачиваемая среда" value={input.medium}

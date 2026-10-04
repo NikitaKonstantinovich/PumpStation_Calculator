@@ -5,6 +5,7 @@ import type { ProjectConfig } from "./project-config";
 import { calculateCollector, collectorFlow, collectorLength, collectorVelocityWarning, collectorPressureChecks, configurationFingerprint, pumpCount, type CollectorCatalog, type CollectorType } from "./collector-calculations";
 import { pressureCheckWarning } from "./dn-defaults";
 import { synchronizeCollectors, type CollectorCardState, type CollectorOverrides, type CollectorsEntity, type SavedCollector } from "./collector-project";
+import { useRuntimeDiagnostic, useStoredDiagnostic } from "./diagnostics-ui";
 
 const money = (v: number | null | undefined) => v == null ? "—" : `${v.toLocaleString("ru-RU", { maximumFractionDigits: 2 })} ₽`;
 const measure = (v: number | null | undefined, unit: string) => v == null ? "—" : `${v.toLocaleString("ru-RU", { maximumFractionDigits: 3 })} ${unit}`;
@@ -54,7 +55,10 @@ export function CollectorConstructor(props: Props) {
   return <div className="collector-constructor">{(["suction", "discharge"] as const).map(type => <CollectorCard key={type} {...props} type={type} state={props.entity[type]}/>)}</div>;
 }
 function CollectorCard({ type, state, inletHead, catalog, catalogError, onCatalog, onChange }: Props & { type: CollectorType; state: CollectorCardState }) {
-  const [busy, setBusy] = useState(false), [message, setMessage] = useState("");
+  const storedError = useStoredDiagnostic("collectors",`${type}/action`)?.message ?? "";
+  const [busy, setBusy] = useState(false), [message, setMessage] = useState(storedError);
+  const [actionError, setActionError] = useState(storedError);
+  useRuntimeDiagnostic("collectors",`${type}/action`,actionError);
   const c = state.configuration, recommended = state.recommended;
   if (!c || !recommended) return <article className="collector-card">Подготовка параметров…</article>;
   const fingerprint = configurationFingerprint(c), preview = catalog ? calculateCollector(c, catalog) : null;
@@ -69,7 +73,7 @@ function CollectorCard({ type, state, inletHead, catalog, catalogError, onCatalo
   const dnControl = (label: string, key: "dn" | "primaryDn" | "secondaryDn", value: number | null, source: number | null) => <label className="collector-field"><span>{label}</span><input type="number" min="15" max="1200" step="1" value={value ?? ""} onChange={e => override(key, e.target.value ? Number(e.target.value) : 0)}/><small>Из расчёта DN: {source ?? "не задано"}{state.overrides[key] !== undefined ? " · Вручную" : " · Автоматически"}</small>{state.overrides[key] !== undefined && <button className="collector-reset" onClick={() => override(key, undefined)}>Вернуть значение из расчёта DN</button>}</label>;
   const connectionControl = (label: string, key: "connection" | "primaryConnection" | "secondaryConnection", value: string, dn: number | null) => <label className="collector-field"><span>{label}</span><select value={value} onChange={e => override(key, e.target.value)}><option value="flanged">Фланцевое</option><option value="threaded" disabled={!dn || dn > 50}>Резьбовое · до 2&quot;</option></select>{state.overrides[key] !== undefined && <button className="collector-reset" onClick={() => override(key, undefined)}>Вернуть из расчёта DN</button>}</label>;
   const run = async (action: "calculate" | "create" | "refresh" | "lookup") => {
-    setBusy(true); setMessage("");
+    setBusy(true); setMessage(""); setActionError("");
     try {
       if (action === "lookup") {
         const data = await api(`/api/collectors?code=${encodeURIComponent(state.code!)}`);
@@ -84,11 +88,11 @@ function CollectorCard({ type, state, inletHead, catalog, catalogError, onCatalo
           setMessage(action === "create" ? "Коллектор сохранён в базе" : "Цена и состав обновлены");
         }
       }
-    } catch (error) { setMessage(error instanceof Error ? error.message : "Не удалось выполнить действие"); }
+    } catch (error) { const failure=error instanceof Error ? error.message : "Не удалось выполнить действие"; setActionError(failure); setMessage(failure); }
     finally { setBusy(false); }
   };
   return <article className="collector-card" aria-label={type === "suction" ? "Всасывающий коллектор" : "Напорный коллектор"}>
-    <header><h2>{type === "suction" ? "Всасывающий коллектор" : "Напорный коллектор"}</h2><code>{state.code ?? "Заполните параметры для формирования кода"}</code><p className={saved ? "collector-success" : "collector-warning"}>{saved ? "Есть в базе" : state.databaseStatus === "error" ? state.databaseError : state.databaseStatus === "unchecked" && state.code ? "Проверка базы…" : "Коллектор отсутствует в базе — выполните расчёт в конструкторе"}</p></header>
+    <header><h2>{type === "suction" ? "Всасывающий коллектор" : "Напорный коллектор"}</h2><code>{state.code ?? "Заполните параметры для формирования кода"}</code><p data-issue-id={`collectors/${type}/database`} className={saved ? "collector-success" : state.databaseStatus === "error" ? "issue-notice issue-notice--error" : "collector-warning"}>{saved ? "Есть в базе" : state.databaseStatus === "error" ? state.databaseError : state.databaseStatus === "unchecked" && state.code ? "Проверка базы…" : "Коллектор отсутствует в базе — выполните расчёт в конструкторе"}</p></header>
     <p className="collector-mode">{collectorFlow(c).mode}</p>
     <div className="collector-fields">
       {dnControl("DN коллектора", "dn", c.dn, recommended.dn)}
@@ -104,17 +108,18 @@ function CollectorCard({ type, state, inletHead, catalog, catalogError, onCatalo
       {i === 1 && <label className="collector-field"><span>PN контура 2</span><select value={circuit.pn} onChange={e => override("secondaryPn", Number(e.target.value))}>{[10,16,25].map(pn => <option key={pn} value={pn}>PN{pn}</option>)}</select><small>Из расчёта DN: PN{recommended.secondary?.pn}</small>{state.overrides.secondaryPn && <button className="collector-reset" onClick={() => override("secondaryPn", undefined)}>Вернуть из расчёта DN</button>}</label>}
     </div><p>Длина патрубка: {measure(values?.branchLengthsMm[i], "мм")} · скорость: {measure(i ? values?.velocities.secondary : values?.velocities.primary, "м/с")}</p></section>)}
     <dl className="collector-metrics"><div><dt>Расчётный расход</dt><dd>{measure(collectorFlow(c).flow, "м³/ч")}</dd></div><div><dt>Длина коллектора</dt><dd>{measure(collectorLength(c), "мм")}</dd></div><div><dt>Скорость в коллекторе</dt><dd>{measure(values?.velocities.collector, "м/с")}</dd></div></dl>
-    {velocityWarning && <p role="alert" className="collector-warning">{velocityWarning}</p>}
-    {type === "suction" && <section aria-label="Проверка давления по напору на входе"><h3>Давление по напору на входе</h3>{collectorPressureChecks(c,inletHead,catalog).map((check,index)=><p key={index} className={pressureCheckWarning(check)?"collector-warning":"collector-note"}>{check.message}</p>)}<p className="collector-note">Проверка по указанному напору на входе. Прочность, гидроудары и пригодность к работе под вакуумом не оцениваются.</p></section>}
+    {velocityWarning && <p data-issue-id={`collectors/${type}/velocity`} role="alert" className="collector-warning">{velocityWarning}</p>}
+    {type === "suction" && <section aria-label="Проверка давления по напору на входе"><h3>Давление по напору на входе</h3>{collectorPressureChecks(c,inletHead,catalog).map((check,index)=><p data-issue-id={`collectors/${type}/pressure/${index}`} key={index} className={check.status==="exceeded"?"issue-notice issue-notice--error":pressureCheckWarning(check)?"collector-warning":"collector-note"}>{check.message}</p>)}<p className="collector-note">Проверка по указанному напору на входе. Прочность, гидроудары и пригодность к работе под вакуумом не оцениваются.</p></section>}
     <p className="collector-note">Длина патрубка = 0,5 × наружный Ø коллектора + 1,1 × длина болта из таблицы обвязки. Крепёж учитывается отдельно в общей спецификации.</p>
-    {(catalogError || stale) && <p className="collector-warning">{catalogError || "Расчёт устарел — выполните повторный расчёт"}</p>}
-    {!!values?.warnings.length && <div className="collector-warning"><b>Расчёт неполный</b><ul>{values.warnings.map(warning => <li key={warning}>{warning}</li>)}</ul></div>}
+    {catalogError && <p data-issue-id="collectors/catalog" className="issue-notice issue-notice--error">{catalogError}</p>}
+    {stale && <p data-issue-id={`collectors/${type}/stale`} className="collector-warning">Расчёт устарел — выполните повторный расчёт</p>}
+    {!!values?.warnings.length && <div className="collector-warning"><b>Расчёт неполный</b><ul>{values.warnings.map((warning,index) => <li data-issue-id={`collectors/${type}/calculation/${index}`} key={warning}>{warning}</li>)}</ul></div>}
     <details open><summary>Текущий состав</summary>{values && <BomTable items={values.bom}/>}</details>
     <details><summary>Сварные швы · {measure(values?.weldLengthMm, "мм")} · {money(values?.weldCost)}</summary><div className="collector-table-wrap"><table><thead><tr><th>Операция</th><th>Кол-во</th><th>Шов, мм</th><th>Цена</th></tr></thead><tbody>{values?.welds.map(weld => <tr key={weld.role}><td>{weld.name}</td><td>{weld.count}</td><td>{measure(weld.lengthMm, "")}</td><td>{money(weld.cost)}</td></tr>)}</tbody></table></div><p>Тариф: {money(c.material === "aisi304" ? 5000 : 2400)} / м</p></details>
     {saved && <details><summary>Сохранённый состав · {new Date(saved.priceUpdatedAt).toLocaleString("ru-RU")}</summary><p>PN коллектора: {saved.configuration.pn} · PN патрубков: {saved.configuration.primary.pn}{saved.configuration.secondary ? ` / ${saved.configuration.secondary.pn}` : ""}</p><BomTable items={saved.calculation.bom}/></details>}
     <dl className="collector-prices"><div><dt>Цена из базы</dt><dd>{money(saved?.price)}</dd></div><div><dt>{pricedCalculation?.complete ? "Текущая расчётная цена" : "Расчёт неполный · промежуточная сумма"}</dt><dd>{money(pricedCalculation?.complete ? pricedCalculation.price : pricedCalculation?.subtotal)}</dd></div><div><dt>Разница с базой</dt><dd>{money(saved && pricedCalculation?.price != null ? pricedCalculation.price - saved.price : null)}</dd></div></dl>
     <div className="collector-actions"><button className="button button--primary" disabled={busy || !state.code} onClick={() => void run("calculate")}>Рассчитать</button><button className="button" disabled={busy || !state.code} onClick={() => void run("lookup")}>Проверить базу</button>{saved ? <button className="button" disabled={busy} onClick={() => void run("refresh")}>Обновить цену в базе</button> : <button className="button" disabled={busy || !calculation?.complete || stale || state.databaseStatus !== "missing"} onClick={() => void run("create")}>Создать позицию в базе</button>}</div>
-    <p role="status">{busy ? "Выполняется расчёт…" : message}</p>
+    <p data-issue-id={`collectors/${type}/action`} role={actionError?"alert":"status"} className={actionError?"issue-notice issue-notice--error":undefined}>{busy ? "Выполняется расчёт…" : message}</p>
   </article>;
 }
 function BomTable({ items }: { items: NonNullable<CollectorCardState["calculation"]>["bom"] }) {

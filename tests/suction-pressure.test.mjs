@@ -132,22 +132,27 @@ test("collector pressure warning preserves a database price and is removed after
   assert.equal(low.inletPressureCheck.checks[0].status, "within-limit");
 });
 
-test("actual specification render keeps priced warning rows yellow and exposes both warnings", async () => {
-  const page = await readFile(new URL("../app/page.tsx", import.meta.url), "utf8");
+test("actual specification render keeps technical descriptions and warnings behind the button", async () => {
+  const pageUrl = new URL("../app/page.tsx", import.meta.url);
+  const page = await readFile(pageUrl, "utf8");
   const source = [
+    `import { useRef, useState } from ${JSON.stringify(import.meta.resolve("react"))};`,
+    'import { specificationItemPresentation, specificationIssueId, specificationSection, visibleSpecificationItems } from "./specification-presentation";',
+    'const IssueNavigationMessage=()=>null; const IssueMessages=()=>null;',
     'const normalizeSpecificationItems=items=>items; const isSecondaryEnabled=()=>false; const pumpPriceRub=()=>0;',
     page.slice(page.indexOf("const SPEC_GROUPS:"), page.indexOf("\n];", page.indexOf("const SPEC_GROUPS:")) + 3),
     page.slice(page.indexOf("function Specification("), page.indexOf("function PumpSketchView(")),
     'export {Specification};',
   ].join("\n");
   const compiled = ts.transpileModule(source, { compilerOptions: { module: ts.ModuleKind.ESNext, jsx: ts.JsxEmit.ReactJSX, target: ts.ScriptTarget.ES2022 } }).outputText.replaceAll('"react/jsx-runtime"', JSON.stringify(import.meta.resolve("react/jsx-runtime")));
-  const { Specification } = await import(`data:text/javascript;base64,${Buffer.from(compiled).toString("base64")}`);
-  const item = withInletPressureChecks(row("Фланец", { description: "Предупреждение: проверить размеры" }), [checkInletPressure(200, "Фланец", 16, "PN16")]);
+  const { Specification } = await loadTs(pageUrl, { [pageUrl.href]: compiled });
+  const item = withInletPressureChecks(row("Фланец", { details: "DN100 · PN16 · Ст20", description: "Предупреждение: проверить размеры" }), [checkInletPressure(200, "Фланец", 16, "PN16")]);
   const html = renderToStaticMarkup(createElement(Specification, { entity: { items: [item] }, settings: project().entities["station-settings"], catalogue: [] }));
   assert.match(html, /spec-table__row--warning/);
   assert.match(html, /spec-table__cell--price[^>]*>125</);
-  assert.match(html, /проверить размеры/);
-  assert.match(html, /200 м.*19,6 бар.*превышает PN16/);
+  assert.match(html, /<button[^>]*aria-label="Ошибка: Фланец"/);
+  assert.match(html, /spec-table__cell--description">DN100 · PN16 · Ст20<\/span>/);
+  assert.doesNotMatch(html, /проверить размеры|200 м|19,6 бар|превышает PN16/);
   const css = await readFile(new URL("../app/globals.css", import.meta.url), "utf8");
   assert.match(css, /\.spec-table__row--warning\s*\{\s*background:var\(--theme-surface-warning, #fff8df\)/);
 });

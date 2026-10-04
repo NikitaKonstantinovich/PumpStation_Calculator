@@ -18,6 +18,8 @@ from collections import Counter, defaultdict
 from copy import deepcopy
 from pathlib import Path
 
+from catalog_text import normalize_pump_catalog
+
 FRONTEND = Path(__file__).resolve().parents[1]
 DATA = FRONTEND / 'data/pump-catalog'
 PUBLIC = FRONTEND / 'public'
@@ -386,6 +388,8 @@ def main():
         if docs:
             details[p['id']]['documents'] = docs
 
+    text_originals = normalize_pump_catalog(result, details)
+    write_json(DATA / 'text-originals.json', text_originals)
     result.sort(key=lambda p: (p['manufacturer'], p['series'], p['model'], p['id']))
     if len({p['id'] for p in result}) != len(result):
         raise ValueError('Duplicate pump IDs')
@@ -434,6 +438,7 @@ def main():
         db.execute('INSERT INTO catalog_metadata VALUES (?,?)', ('merge', json.dumps(report,ensure_ascii=False)))
         if physical_document:
             db.execute('INSERT INTO catalog_metadata VALUES (?,?)', ('cnp_physical_sources', json.dumps(physical_document['sources'],ensure_ascii=False)))
+        db.execute('INSERT INTO catalog_metadata VALUES (?,?)', ('catalog_text_originals', json.dumps(text_originals,ensure_ascii=False)))
         if db.execute('PRAGMA integrity_check').fetchone()[0] != 'ok':
             raise ValueError('Merged SQLite integrity check failed')
     copied_source = FRONTEND.parent / 'database/calculator-nu-source.sqlite'

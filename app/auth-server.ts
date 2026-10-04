@@ -1,4 +1,5 @@
 import { env } from "cloudflare:workers";
+import type { AccountUser } from "./user-types";
 
 type D1Result<T> = { results?: T[]; success: boolean };
 type D1Statement = { bind(...values: unknown[]): D1Statement; first<T>(): Promise<T | null>; run(): Promise<D1Result<unknown>>; all<T>(): Promise<D1Result<T>> };
@@ -40,15 +41,18 @@ export const json = (data: unknown, status=200, headers?: HeadersInit) => Respon
 export const getCookie = (request: Request, name: string) => request.headers.get("cookie")?.split(";").map(part=>part.trim()).find(part=>part.startsWith(`${name}=`))?.slice(name.length+1) ?? null;
 export const sessionCookie = (token: string, maxAge=60*60*24*30) => `${SESSION_COOKIE}=${token}; Path=/; HttpOnly; SameSite=Lax; Secure; Max-Age=${maxAge}`;
 
-export async function currentUser(request: Request) {
+export async function currentUser(request: Request, touch = false) {
   const token = getCookie(request, SESSION_COOKIE); if (!token) return null;
+  await ensureAuthSchema();
   const tokenHash = await sha256(token);
-  return runtime().DB.prepare(`SELECT u.id, u.email, u.name FROM sessions s JOIN users u ON u.id=s.user_id WHERE s.token_hash=? AND datetime(s.expires_at)>CURRENT_TIMESTAMP AND u.email_verified_at IS NOT NULL`).bind(tokenHash).first<{id:string;email:string;name:string}>();
+  const user = await runtime().DB.prepare(`SELECT u.id, u.email, u.name, u.role FROM sessions s JOIN users u ON u.id=s.user_id WHERE s.token_hash=? AND datetime(s.expires_at)>CURRENT_TIMESTAMP AND u.email_verified_at IS NOT NULL`).bind(tokenHash).first<AccountUser>();
+  if (user && touch) await runtime().DB.prepare("UPDATE sessions SET last_seen_at=CURRENT_TIMESTAMP WHERE token_hash=?").bind(tokenHash).run();
+  return user;
 }
 
 export async function createSession(userId: string) {
   const token=randomToken(),hash=await sha256(token),expiresAt=new Date(Date.now()+30*86400_000).toISOString();
-  await runtime().DB.prepare("INSERT INTO sessions (id,user_id,token_hash,expires_at) VALUES (?,?,?,?)").bind(crypto.randomUUID(),userId,hash,expiresAt).run();
+  await runtime().DB.prepare("INSERT INTO sessions (id,user_id,token_hash,expires_at,last_seen_at) VALUES (?,?,?,?,CURRENT_TIMESTAMP)").bind(crypto.randomUUID(),userId,hash,expiresAt).run();
   return token;
 }
 
@@ -78,16 +82,29 @@ export const db = () => runtime().DB;
 let schemaReady:Promise<void>|null=null;
 export function ensureAuthSchema(){
   schemaReady??=(async()=>{const database=db();await database.batch([
-    database.prepare("CREATE TABLE IF NOT EXISTS users (id TEXT PRIMARY KEY NOT NULL,email TEXT NOT NULL,name TEXT NOT NULL,password_hash TEXT NOT NULL,email_verified_at TEXT,created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP)"),
+    database.prepare("CREATE TABLE IF NOT EXISTS users (id TEXT PRIMARY KEY NOT NULL,email TEXT NOT NULL,name TEXT NOT NULL,password_hash TEXT NOT NULL,email_verified_at TEXT,role TEXT NOT NULL DEFAULT 'user' CHECK(role IN ('admin','user')),revision INTEGER NOT NULL DEFAULT 0,created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP)"),
     database.prepare("CREATE UNIQUE INDEX IF NOT EXISTS uq_users_email ON users(email)"),
     database.prepare("CREATE TABLE IF NOT EXISTS auth_tokens (id TEXT PRIMARY KEY NOT NULL,user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,token_hash TEXT NOT NULL,purpose TEXT NOT NULL,expires_at TEXT NOT NULL,used_at TEXT,created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP)"),
     database.prepare("CREATE UNIQUE INDEX IF NOT EXISTS uq_auth_tokens_hash ON auth_tokens(token_hash)"),
     database.prepare("CREATE INDEX IF NOT EXISTS idx_auth_tokens_user_purpose ON auth_tokens(user_id,purpose)"),
-    database.prepare("CREATE TABLE IF NOT EXISTS sessions (id TEXT PRIMARY KEY NOT NULL,user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,token_hash TEXT NOT NULL,expires_at TEXT NOT NULL,created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP)"),
+    database.prepare("CREATE TABLE IF NOT EXISTS sessions (id TEXT PRIMARY KEY NOT NULL,user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,token_hash TEXT NOT NULL,expires_at TEXT NOT NULL,last_seen_at TEXT,created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP)"),
     database.prepare("CREATE UNIQUE INDEX IF NOT EXISTS uq_sessions_token_hash ON sessions(token_hash)"),
     database.prepare("CREATE INDEX IF NOT EXISTS idx_sessions_user_id ON sessions(user_id)"),
     database.prepare("CREATE TABLE IF NOT EXISTS user_projects (id TEXT PRIMARY KEY NOT NULL,user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,name TEXT NOT NULL,config_json TEXT NOT NULL,created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP)"),
     database.prepare("CREATE INDEX IF NOT EXISTS idx_user_projects_user_updated ON user_projects(user_id,updated_at)"),
-  ]);await database.prepare("PRAGMA optimize").run();})();
+  ]);
+  // Existing local installations also initialize auth without the migration CLI.
+  for (const [table, column, definition] of [
+    ["users", "role", "TEXT NOT NULL DEFAULT 'user' CHECK(role IN ('admin','user'))"],
+    ["users", "revision", "INTEGER NOT NULL DEFAULT 0"],
+    ["sessions", "last_seen_at", "TEXT"],
+  ]) {
+    const hasColumn = async () => (await database.prepare(`PRAGMA table_info(${table})`).all<{ name: string }>()).results?.some(item => item.name === column);
+    if (!await hasColumn()) {
+      try { await database.prepare(`ALTER TABLE ${table} ADD COLUMN ${column} ${definition}`).run(); }
+      catch (error) { if (!await hasColumn()) throw error; }
+    }
+  }
+  await database.prepare("PRAGMA optimize").run();})().catch(error => { schemaReady = null; throw error; });
   return schemaReady;
 }

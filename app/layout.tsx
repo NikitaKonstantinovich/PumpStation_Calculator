@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import "./theme.css";
+import "./ui-polish.css";
+import "./diagnostics.css";
+import "./users.css";
 import { THEME_INIT_SCRIPT } from "./theme";
 
 export const metadata: Metadata = {

@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 import type { Pump } from "./pump-catalog";
 import { pumpCardCurves, pumpCardPhysicalData, pumpCardSections, pumpCardValue, PUMP_TYPE_LABELS } from "./pump-card-data";
 
-export function PumpCard({ pump, children }: { pump: Pump; children?: ReactNode }) {
+export function PumpCard({ pump, children, issueTool = "sketch" }: { pump: Pump; children?: ReactNode; issueTool?: "sketch"|"sketch2" }) {
   const curves = pumpCardCurves(pump);
   const physical = pumpCardPhysicalData(pump);
   return <article className="pump-card" aria-label={`Карточка насоса ${pump.manufacturer} ${pump.model}`}>
@@ -23,8 +23,8 @@ export function PumpCard({ pump, children }: { pump: Pump; children?: ReactNode 
       </dl>
     </header>
     {(pump.selectable === false || pump.active === false || Boolean(pump.dataWarnings?.length)) && <aside className="pump-card__notice">
-      {(pump.selectable === false || pump.active === false) && <p>Модель недоступна для подбора.</p>}
-      {pump.dataWarnings?.map((warning, index) => <p key={index}>{warning}</p>)}
+      {(pump.selectable === false || pump.active === false) && <p data-issue-id={`${issueTool}/availability`}>Модель недоступна для подбора.</p>}
+      {pump.dataWarnings?.map((warning, index) => <p data-issue-id={`${issueTool}/data/${index}`} key={index}>{warning}</p>)}
     </aside>}
     <div className="pump-card__characteristics">
       <p className="pump-card__hint">Характеристики одного насоса по данным каталога. «—» — значение не указано.</p>
@@ -46,7 +46,7 @@ export function PumpCard({ pump, children }: { pump: Pump; children?: ReactNode 
     </div>
     <section className="pump-card__drawing" aria-label="Эскиз с габаритами">
       <h3>Эскиз с габаритами</h3>
-      {children ?? <div className="pump-sketch__empty"><span aria-hidden="true">⌁</span><b>Чертёж не найден</b><p>Для насоса {pump.manufacturer} {pump.model} в подключённых каталогах нет подтверждённого габаритного листа.</p></div>}
+      {children ?? <div data-issue-id={`${issueTool}/drawing`} className="pump-sketch__empty"><span aria-hidden="true">⌁</span><b>Чертёж не найден</b><p>Для насоса {pump.manufacturer} {pump.model} в подключённых каталогах нет подтверждённого габаритного листа.</p></div>}
     </section>
   </article>;
 }

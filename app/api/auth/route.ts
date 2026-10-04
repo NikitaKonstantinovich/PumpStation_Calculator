@@ -6,12 +6,18 @@ const parseBody=async(request:Request)=>{try{return await request.json() as Reco
 export async function GET(request:Request) {
   await ensureAuthSchema();
   const user=await currentUser(request);
-  return user?json({user}):json({user:null},401);
+  return user?json({user},200,{"Cache-Control":"no-store"}):json({user:null},401,{"Cache-Control":"no-store"});
 }
 
 export async function POST(request:Request) {
   await ensureAuthSchema();
   const body=await parseBody(request),action=String(body.action??"");
+  if(action==="heartbeat"){
+    const origin=request.headers.get("origin");
+    if(origin && origin!==new URL(request.url).origin)return json({error:"Недопустимый источник запроса."},403);
+    const user=await currentUser(request,true);
+    return user?json({user},200,{"Cache-Control":"no-store"}):json({user:null},401,{"Cache-Control":"no-store"});
+  }
   if(action==="register"){
     const name=String(body.name??"").trim(),email=normalizeEmail(String(body.email??"")),password=String(body.password??""),confirmation=String(body.passwordConfirmation??"");
     if(name.length<2||!emailPattern.test(email)||password.length<10)return json({error:"Укажите имя, корректную почту и пароль не короче 10 символов."},400);

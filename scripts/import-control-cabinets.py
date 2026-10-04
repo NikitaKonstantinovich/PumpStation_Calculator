@@ -10,6 +10,8 @@ from typing import Any
 
 from openpyxl import load_workbook
 
+from catalog_text import normalize_control_component
+
 
 ROOT = Path(__file__).resolve().parents[2]
 SOURCE_ROOT = ROOT / "Equipment" / "наработки для конфигуратора ШУ"
@@ -161,7 +163,7 @@ def read_components() -> list[dict[str, Any]]:
         "sourceSheet": "Smart_НС",
         "sourceRow": 0,
     })
-    return result
+    return [normalize_control_component(item) for item in result]
 
 
 def attr_number(component: dict[str, Any], pattern: str) -> float | None:
