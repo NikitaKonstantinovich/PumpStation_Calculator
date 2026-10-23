@@ -1,13 +1,14 @@
 import type { CollectorMaterial, StationType, ValveConnection } from "./project-config";
 import { checkInletPressure, dnVelocityLimit, type InletPressureCheck } from "./dn-defaults";
+import type { PipePaintingRate } from "./component-painting";
 
 export type CollectorType = "suction" | "discharge";
 export type CollectorCircuit = { flow: number | null; working: number | null; reserve: number | null; pumpId?: string; pumpModel?: string; dn: number | null; connection: ValveConnection; spacing: number; pn: number };
 export type CollectorConfiguration = { type: CollectorType; dn: number | null; pn: number; material: CollectorMaterial; connection: ValveConnection; eccentric: boolean; stationType: StationType; simultaneous: boolean; jockey: boolean; primary: CollectorCircuit; secondary: CollectorCircuit | null };
 export type ComponentKind = "pipe" | "weldFlange" | "looseFlange" | "collar" | "nipple" | "plug";
 export type CollectorComponent = { id: string; kind: ComponentKind; name: string; dn: number; pn: number | null; material: CollectorMaterial | "brass"; threadGender?: "female" | "male"; price: number | null; outerDiameter: number | null; innerDiameter: number | null; source: string };
-export type CollectorCatalog = { version: string; components: CollectorComponent[]; bolts: Array<{ dn: number; pn: number; length: number; source: string }> };
-export type CollectorBomItem = { role: string; componentId: string | null; kind: ComponentKind | "welding"; name: string; quantity: number; unit: "м" | "шт."; unitPrice: number | null; cost: number | null; source: string | null };
+export type CollectorCatalog = { version: string; components: CollectorComponent[]; bolts: Array<{ dn: number; pn: number; length: number; source: string }>; paintingRates?: PipePaintingRate[] };
+export type CollectorBomItem = { role: string; componentId: string | null; kind: ComponentKind | "welding" | "painting"; name: string; quantity: number | null; unit: "м" | "шт."; unitPrice: number | null; cost: number | null; source: string | null };
 export type WeldOperation = { role: string; name: string; count: number; lengthMm: number; cost: number };
 export type CollectorCalculation = { fingerprint: string; catalogVersion: string; code: string | null; complete: boolean; warnings: string[]; flow: number | null; mode: string; lengthMm: number; branchLengthsMm: Array<number | null>; velocities: { collector: number | null; primary: number | null; secondary: number | null }; bom: CollectorBomItem[]; welds: WeldOperation[]; weldLengthMm: number; weldCost: number; subtotal: number; price: number | null };
 export const THREAD_SIZES: Record<number, string> = { 15: '1/2"', 20: '3/4"', 25: '1"', 32: '1¼"', 40: '1½"', 50: '2"' };
@@ -72,7 +73,7 @@ export function collectorPressureChecks(c: CollectorConfiguration, inletHead: nu
   if (catalog) {
     const bom = calculateCollector(c, catalog).bom;
     for (const row of bom) {
-      if (row.kind === "welding") continue;
+      if (row.kind === "welding" || row.kind === "painting") continue;
       const component = catalog.components.find(item => item.id === row.componentId);
       checks.push(checkInletPressure(inletHead, row.name, component?.pn, component?.pn ? `PN${component.pn}` : undefined));
     }
@@ -108,8 +109,24 @@ export function calculateCollector(c: CollectorConfiguration, catalog: Collector
     const lengthMm = count * factor * Math.PI * diameter;
     welds.push({ role, name, count, lengthMm, cost: lengthMm / 1000 * rate });
   };
+  const paint = (role: string, name: string, dn: number | null, lengthMm: number | null, count = 1) => {
+    if (c.material !== "st20") return;
+    const candidates = catalog.paintingRates?.filter(rate => rate.dn === dn && rate.material === "st20") ?? [];
+    const tariff = candidates.length === 1 ? candidates[0] : undefined;
+    const sourced = typeof tariff?.source === "string" && tariff.source.trim().length > 0;
+    if (!tariff) warnings.push(`${candidates.length ? "Неоднозначный" : "Отсутствует"} тариф окраски СТ20 DN${dn ?? "?"}, ₽/м`);
+    if (tariff) warnings.push(...tariff.warnings);
+    if (tariff && (!positive(tariff.pricePerMeter) || !sourced)) warnings.push(`Нет достоверной цены или источника окраски СТ20 DN${dn ?? "?"}`);
+    const quantity = positive(lengthMm) && countValid(count) && count > 0 ? count * lengthMm / 1000 : null;
+    if (quantity === null) warnings.push(`Не определена длина труб для окраски: ${name}`);
+    const unitPrice = tariff && !tariff.warnings.length && sourced && positive(tariff.pricePerMeter) ? tariff.pricePerMeter : null;
+    bom.push({ role, componentId: tariff?.id ?? null, kind: "painting", name: `Окраска: ${name}, DN${dn ?? "?"} СТ20`, quantity, unit: "м", unitPrice,
+      cost: quantity !== null && unitPrice !== null ? quantity * unitPrice : null,
+      source: `${tariff?.source ?? "Тариф не найден"}; ${count} × ${lengthMm ?? "?"} мм / 1000 × тариф DN${dn ?? "?"}` });
+  };
   const lengthMm = collectorLength(c);
   const main = dimensions(add("collector-pipe", "pipe", c.dn, c.pn, lengthMm / 1000), label("pipe", c.dn, c.pn));
+  paint("painting-collector", "труба коллектора", c.dn, lengthMm);
   const flanges = (role: string, dn: number | null, pn: number, count: number, outer: number | null | undefined) => {
     for (const kind of flangeKinds(c.material, dn ?? 0, pn)) add(`${role}-${kind}`, kind, dn, pn, count);
     weld(role, `${role === "end" ? "Концевые соединения" : role === "branch1" ? "Фланцы / воротники контура 1" : "Фланцы / воротники контура 2"}`, count, 2, outer);
@@ -122,6 +139,7 @@ export function calculateCollector(c: CollectorConfiguration, catalog: Collector
     const length = branchLength(main?.outerDiameter ?? null, bolt?.length ?? null);
     branchLengthsMm.push(length);
     const pipe = dimensions(add(`branch${i + 1}-pipe`, "pipe", circuit.dn, circuit.pn, count * (length ?? 0) / 1000), label("pipe", circuit.dn, circuit.pn));
+    paint(`painting-branch${i + 1}`, `патрубки контура ${i + 1}`, circuit.dn, length, count);
     velocities.push(flowSpeed(positive(circuit.working) && positive(circuit.flow) ? circuit.flow / circuit.working : null, pipe?.innerDiameter ?? null));
     if (circuit.connection === "flanged") flanges(`branch${i + 1}`, circuit.dn, circuit.pn, count, pipe?.outerDiameter);
     weld(`branch${i + 1}-joint`, `Врезка патрубков контура ${i + 1}`, count, 1.4, pipe?.outerDiameter);

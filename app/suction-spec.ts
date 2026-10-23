@@ -7,10 +7,11 @@ import { componentPressureLimit, withInletPressureChecks } from "./suction-press
 import { matingParts, suctionCatalogItems, type AssemblyComponent } from "./suction-catalog";
 import { selectSuctionInstruments } from "./suction-instruments";
 import { lineSpecParts, field, number, itemDn, itemName } from "./line-spec-parts";
+import { addPumpVibrationAssembly } from "./line-vibration";
 
 export function suctionFingerprint(project:ProjectConfig) {
   const e=project.entities, settings=e["station-settings"] as SettingsEntity;
-  return JSON.stringify(["instruments-v2","seals-v2","instrument-valve-v1",settings.inletHead??null,e["station-dn"],e["system-input"],secondaryAllowed({stationType:settings.stationType,jockey:settings.jockeyPump})?e["system-input-2"]:null,settings.stationType,settings.jockeyPump,(e["station-collectors"] as CollectorsEntity).suction.configuration]);
+  return JSON.stringify(["instruments-v2","seals-v2","instrument-valve-v1",settings.vibrationCompensators,settings.inletHead??null,e["station-dn"],e["system-input"],secondaryAllowed({stationType:settings.stationType,jockey:settings.jockeyPump})?e["system-input-2"]:null,settings.stationType,settings.jockeyPump,(e["station-collectors"] as CollectorsEntity).suction.configuration]);
 }
 
 export function buildSuctionSpec(project:ProjectConfig, database:{items:AssemblyComponent[]}, catalog:CollectorCatalog):SpecItem[] {
@@ -18,7 +19,8 @@ export function buildSuctionSpec(project:ProjectConfig, database:{items:Assembly
   const collector=(e["station-collectors"] as CollectorsEntity).suction.configuration;
   if (!collector || !(e["system-input"] as InputEntity).calculated) return [];
   const rows:SpecItem[]=[], fingerprint=suctionFingerprint(project);
-  const { add, gasket, flax, flanges, fasteners } = lineSpecParts(rows, "suction", fingerprint, collector, database, catalog);
+  const parts = lineSpecParts(rows, "suction", fingerprint, collector, database, catalog);
+  const { add, gasket, flax, flanges, fasteners } = parts;
   const circuits=[false,...(secondaryAllowed(collector)?[true]:[])];
   for(const secondary of circuits) {
     const input=e[secondary?"system-input-2":"system-input"] as InputEntity;
@@ -29,7 +31,9 @@ export function buildSuctionSpec(project:ProjectConfig, database:{items:Assembly
     if(errors.length || !h.port) {add(`${prefix}-error`,`${title}: ошибка комплектации всасывающей линии`,1,errors.join(" "),undefined,"компл.");continue;}
     const p=h.port, v=h.dn, pn=h.pn;
     let threads=0;
-    if(p.connection==="threaded" && h.connection==="threaded") {
+    if(settings.vibrationCompensators) {
+      threads=addPumpVibrationAssembly({parts,database,catalog,collector,port:p,valveDn:v,connection:h.connection,pn,count,prefix,title});
+    } else if(p.connection==="threaded" && h.connection==="threaded") {
       const part=pn<=16?suctionCatalogItems.find(x=>x.id===`suction-table:union-${v}`):undefined;
       add(`${prefix}-union`,part?.family??`Американка НР-НР DN${v}`,count,`${title} · DN${v} · PN${pn}`,part);
       threads=3;
@@ -101,7 +105,9 @@ export function checkSuctionSpecPressure(project: ProjectConfig, items: SpecItem
     // Fasteners and limit switches have no independent hydraulic pressure rating.
     if (item.section !== "suction" || /(?:fasteners|limit-switches|error)/.test(item.assemblyRole ?? "")) return item;
     const component = components.get(item.equipmentId ?? "");
-    const rating = componentPressureLimit(component);
+    const componentRating = componentPressureLimit(component);
+    const rating = item.selectedPn && item.selectedPn > 0
+      ? { bar: Math.min(item.selectedPn, componentRating?.bar ?? Infinity), label: `PN${item.selectedPn}` } : componentRating;
     const catalogPart = catalog?.components.find(part => part.id === item.equipmentId);
     const limit = rating ?? (catalogPart?.pn ? { bar: catalogPart.pn, label: `PN${catalogPart.pn}` } : null);
     return withInletPressureChecks(item, [checkInletPressure(settings.inletHead, item.name, limit?.bar, limit?.label)]);

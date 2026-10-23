@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { jpegToPdf } from "./pdf-export";
 import { AppSettings } from "./app-settings";
@@ -8,11 +8,12 @@ import { useTheme } from "./use-theme";
 import { GridHeightControl } from "./grid-height-control";
 import { useCircuitSync } from "./use-circuit-sync";
 import { CircuitInputFields } from "./circuit-input-fields";
-import { createProject, DEFAULT_PANELS, parseProjectConfig, projectFilename, withUpdatedTimestamp, type CollectorMaterial, type DnEntity, type InputEntity, type PanelKind, type PanelState, type ProjectConfig, type ProjectEntity, type SettingsEntity, type ShutoffValveType, type SpecEntity, type SpecItem, type SpecOption, type SpecSection, type ValveConnection, type ValvePn, type WorkspaceGrid, type WorkspaceMode } from "./project-config";
+import { createProject, DEFAULT_PANELS, projectFilename, withUpdatedTimestamp, type CollectorMaterial, type DnEntity, type InputEntity, type PanelKind, type PanelState, type ProjectConfig, type ProjectEntity, type SettingsEntity, type ShutoffValveType, type SpecEntity, type SpecItem, type SpecOption, type SpecSection, type ValveConnection, type ValvePn, type WorkspaceGrid, type WorkspaceMode } from "./project-config";
 import { CollectorConstructor, useCollectorDatabase } from "./collector-constructor";
 import { synchronizeCollectors, type CollectorsEntity } from "./collector-project";
 import { normalizeSpecificationItems, specificationOption } from "./specification-items";
 import { specificationItemPresentation, specificationIssueId, specificationSection, visibleSpecificationItems } from "./specification-presentation";
+import { specificationExportRows, specificationExportBlob, type SpecificationExportFormat } from "./specification-export";
 import { PANEL_INFO, ENTITY_BY_TOOL } from "./tool-registry";
 import { collectProjectIssues, openIssueInFirstPanel, type ToolIssue } from "./diagnostics";
 import { DiagnosticSurface, DiagnosticsProvider, IssuesTool, IssueNotice, IssueMessages, IssueNavigationMessage, useDiagnosticRegistry, useRuntimeDiagnostic, useStoredDiagnostic } from "./diagnostics-ui";
@@ -20,7 +21,9 @@ import { configurationFingerprint } from "./collector-calculations";
 import { STANDARD_DN, dnVelocityLimit, flowVelocity, recommendedDn, defaultCollectorMaterial, resolveDnConnection } from "./dn-defaults";
 import { AccountScreen } from "./account-ui";
 import { UsersPanel } from "./users-panel";
-import type { AccountUser } from "./user-types";
+import { ComponentCalculator } from "./component-calculator";
+import { canEditAllSettings, canEditProjectOptions, type AccountUser, type UserRole } from "./user-types";
+import { canEditSetting, parseAccessibleProject, projectAccessError } from "./project-access";
 import { CabinetConfigurator, smartCabinetSupportsPower, type SmartCabinet } from "./cabinet-configurator";
 import { suctionHydraulics } from "./dn-defaults";
 import { PumpNozzleFields } from "./pump-nozzle-fields";
@@ -34,6 +37,7 @@ import { buildDischargeSpec, replaceDischargeSpec, dischargeFingerprint, checkDi
 import { dischargeHydraulics } from "./dn-defaults";
 import { CURVE_METHODS, curveSegments, curveMaxHead, type CurveMethod } from "./curve-methods";
 import { type Pump, type PumpType, usablePump, interpolateCurve, pumpCurvePath, operatingPoint, cataloguePriceRub, catalogueDiscount, cataloguePurchasePriceRub } from "./pump-catalog";
+import { buildPumpSelection, type PumpSelectionFilters, type PumpSortMode } from "./pump-selection";
 
 const isSecondaryEnabled = (settings: SettingsEntity) => settings.stationType === "combined" || (settings.stationType === "fire" && settings.jockeyPump);
 const SPEC_GROUPS: Array<{ title: string; sections: Array<{ id: SpecSection; title?: string }> }> = [
@@ -80,16 +84,18 @@ const typeLabel = (type:Pump["type"]) => PUMP_TYPE_LABELS[type] ?? "Не ука�
 const pumpListPriceRub = cataloguePriceRub;
 const pumpDiscountPercent = catalogueDiscount;
 const pumpPriceRub = cataloguePurchasePriceRub;
-const headAtFlow = (pump:Pump, flow:number) => interpolateCurve(pump.curve, flow);
-const pumpHead = (pump:Pump,input:CalculatedInput) => headAtFlow(pump,input.flowRate/Math.max(1,input.workingPumpCount));
-const pumpReserve = (pump: Pump, input: CalculatedInput) => { const head=pumpHead(pump,input); return head===null ? Number.NEGATIVE_INFINITY : ((head-input.head)/input.head)*100; };
 const reserveClass = (reserve: number) => reserve < 0 || reserve > 10 ? "danger" : reserve > 5 ? "warning" : "good";
-const reserveZoneRank = (reserve:number) => reserve >= 0 && reserve <= 5 ? 0 : reserve > 5 && reserve <= 10 ? 1 : 2;
+const signedPercent = (value: number) => `${value >= 0 ? "+" : ""}${value.toLocaleString("ru-RU", { minimumFractionDigits: 1, maximumFractionDigits: 1 })}%`;
 
 
 
 const actualOperatingPoint = operatingPoint;
 const curvePath = pumpCurvePath;
+const chartAxisScale = (maximum:number) => {
+  const step=Math.max(1,Math.ceil(maximum/10));
+  const divisions=maximum<10?Math.max(1,Math.ceil(maximum)):10;
+  return {max:divisions*step,ticks:Array.from({length:divisions+1},(_,index)=>index*step)};
+};
 const systemCurveSegments=(pump:Pump,count:number,input:CalculatedInput,maxQ:number,maxH:number,method:CurveMethod="pchip")=>{const k=(input.head-input.staticHead)/(input.flowRate**2),samples=Array.from({length:121},(_,index)=>{const q=maxQ*index/120,h=input.staticHead+k*q*q,pumpH=interpolateCurve(pump.curve,q/count,method);return {q,h,above:pumpH===null||h>pumpH};}),xy=(point:{q:number;h:number})=>`${45+(point.q/maxQ)*435} ${210-(point.h/maxH)*190}`;let solid="",dashed="",previousAbove=samples[0].above;for(let i=0;i<samples.length;i++){const point=samples[i],target=point.above?"dashed":"solid",command=i===0||point.above!==previousAbove?"M":"L",piece=`${command}${xy(point)}`;if(target==="solid")solid+=piece;else dashed+=piece;if(i>0&&point.above!==previousAbove){const previous=samples[i-1],bridge=`M${xy(previous)} L${xy(point)}`;if(point.above)dashed=bridge+dashed;else solid=bridge+solid;}previousAbove=point.above;}return {solid,dashed};};
 type ChartExportFormat = "png" | "jpeg" | "pdf";
 const downloadBlob=(blob:Blob,filename:string)=>{const url=URL.createObjectURL(blob),link=document.createElement("a");link.href=url;link.download=filename;link.click();window.setTimeout(()=>URL.revokeObjectURL(url),1000);};
@@ -103,27 +109,67 @@ function Icon({ name }: { name: string }) {
 }
 
 function PumpSelector({ tool, input, settings, catalogue, onInputChange, onAddToSpec }: { tool:"input"|"input2"; input: InputEntity; settings:SettingsEntity; catalogue:Pump[]; onInputChange?: (patch: Partial<InputEntity>) => void; onAddToSpec?:()=>void }) {
-  const [type,setType]=useState("Все типы"),[manufacturer,setManufacturer]=useState("Все производители"),[series,setSeries]=useState("Все серии"),[sort,setSort]=useState<"distance"|"price">("distance");
+  const [type,setType]=useState("Все типы"),[manufacturer,setManufacturer]=useState("Все производители"),[series,setSeries]=useState("Все серии"),[sort,setSort]=useState<PumpSortMode>("distance");
   const calculated=isCalculated(input)?input:null;
-  const pumps=useMemo(()=>calculated?catalogue.filter(p=>{const reserve=pumpReserve(p,calculated);return usablePump(p, calculated.medium)&&(type==="Все типы"||p.type===type)&&(manufacturer==="Все производители"||p.manufacturer===manufacturer)&&(series==="Все серии"||p.series===series)&&Number.isFinite(reserve)&&reserve>=-5;}).sort((a,b)=>{const reserveA=pumpReserve(a,calculated),reserveB=pumpReserve(b,calculated);if(sort!=="price")return Math.abs(reserveA)-Math.abs(reserveB);const zoneDifference=reserveZoneRank(reserveA)-reserveZoneRank(reserveB);return zoneDifference||(pumpPriceRub(a,settings)??Infinity)-(pumpPriceRub(b,settings)??Infinity);}).slice(0,100):[],[catalogue,type,manufacturer,series,sort,calculated,settings]);
+  const filters=useMemo<PumpSelectionFilters>(()=>({
+    type:type==="Все типы"?undefined:type as PumpType,
+    manufacturer:manufacturer==="Все производители"?undefined:manufacturer,
+    series:series==="Все серии"?undefined:series,
+  }),[type,manufacturer,series]);
+  const pumps=useMemo(()=>calculated?buildPumpSelection(catalogue,calculated,settings,filters,sort).candidates:[],[catalogue,calculated,settings,filters,sort]);
   useRuntimeDiagnostic(tool,"results",calculated&&!pumps.length?"Подходящие насосы в рабочем диапазоне не найдены":"", "warning");
-  const calculate=()=>{const {flowRate:flow,head,workingPumpCount:working,reservePumpCount:reserve}=input,staticHead=input.staticHead??0;if(!(flow!==null&&flow>0&&head!==null&&head>0&&staticHead!==null&&staticHead>=0&&staticHead<=head&&working!==null&&Number.isInteger(working)&&working>0&&working<=6&&reserve!==null&&Number.isInteger(reserve)&&reserve>=0&&reserve<=3)){window.alert("Заполните поля корректно. Статический напор должен быть от 0 до общего напора.");return;}const next:CalculatedInput={...input,flowRate:flow,head,staticHead,workingPumpCount:working,reservePumpCount:reserve,calculated:true};const best=catalogue.filter(p=>usablePump(p,next.medium)&&(type==="Все типы"||p.type===type)&&(manufacturer==="Все производители"||p.manufacturer===manufacturer)&&(series==="Все серии"||p.series===series)&&pumpReserve(p,next)>=-5).sort((a,b)=>Math.abs(pumpReserve(a,next))-Math.abs(pumpReserve(b,next)))[0];onInputChange?.({...next,selectedPumpId:best?.id});};
+  const calculate=()=>{
+    const {flowRate:flow,head,workingPumpCount:working,reservePumpCount:reserve}=input,staticHead=input.staticHead??0;
+    if(!(flow!==null&&flow>0&&head!==null&&head>0&&staticHead!==null&&staticHead>=0&&staticHead<=head&&working!==null&&Number.isInteger(working)&&working>0&&working<=6&&reserve!==null&&Number.isInteger(reserve)&&reserve>=0&&reserve<=3)){
+      window.alert("Заполните поля корректно. Статический напор должен быть от 0 до общего напора.");return;
+    }
+    const next:CalculatedInput={...input,flowRate:flow,head,staticHead,workingPumpCount:working,reservePumpCount:reserve,calculated:true};
+    const {selectedPumpId}=buildPumpSelection(catalogue,next,settings,filters,sort);
+    onInputChange?.({...next,selectedPumpId,selectedPumpModel:undefined});
+  };
   return <div className="pump-selector"><CircuitInputFields issueTool={tool} input={input} onChange={patch=>{if(patch.medium){setType("Все типы");setManufacturer("Все производители");setSeries("Все серии");}onInputChange?.(patch);}}/>
   <div className="pump-selector__actions"><button className="button button--primary" onClick={calculate}>Подобрать оборудование</button><button className="button button--spec" disabled={!input.selectedPumpId} onClick={onAddToSpec}>Записать в спецификацию</button></div>
   <IssueNotice id={`${tool}/database`}/><IssueMessages tool={tool} prefix={`${tool}/selection/`}/>
-  {calculated&&<><div className="pump-selector__toolbar"><select value={type} onChange={e=>setType(e.target.value)}><option value="Все типы">Все типы</option>{([...new Set(catalogue.filter(p=>usablePump(p,input.medium)).map(p=>p.type))] as PumpType[]).sort((a,b)=>typeLabel(a).localeCompare(typeLabel(b),"ru")).map(value=><option key={value} value={value}>{typeLabel(value)}</option>)}</select><select value={manufacturer} onChange={e=>{setManufacturer(e.target.value);setSeries("Все серии");}}><option>Все производители</option>{[...new Set(catalogue.filter(p=>usablePump(p,input.medium)).map(p=>p.manufacturer))].map(v=><option key={v}>{v}</option>)}</select><select value={series} onChange={e=>setSeries(e.target.value)}><option>Все серии</option>{[...new Set(catalogue.filter(p=>usablePump(p,input.medium)&&(manufacturer==="Все производители"||p.manufacturer===manufacturer)).map(p=>p.series))].map(v=><option key={v}>{v}</option>)}</select><select value={sort} onChange={e=>setSort(e.target.value as "distance"|"price")}><option value="distance">По рабочей точке</option><option value="price">По цене</option></select></div><div className="pump-results"><div className="pump-results__head"><span>Насос</span><span>Q / H</span><span>Запас</span><span>Прайсовая цена</span><span>Цена со скидкой</span></div>{pumps.map(pump=>{const head=pumpHead(pump,calculated)!,reserve=pumpReserve(pump,calculated),listPrice=pumpListPriceRub(pump,settings),discountedPrice=pumpPriceRub(pump,settings),discount=pumpDiscountPercent(pump,settings);return <button key={pump.id} className={`pump-results__row pump-results__row--${reserveClass(reserve)} ${input.selectedPumpId===pump.id?"pump-results__row--selected":""}`} onClick={()=>onInputChange?.({selectedPumpId:pump.id})}><span><b>{pump.manufacturer} {pump.model}</b><small>{typeLabel(pump.type)} · {pump.series}</small>{pump.dataWarnings?.map(warning=><small key={warning} className="pump-data-warning">{warning}</small>)}</span><span>{(calculated.flowRate/calculated.workingPumpCount).toFixed(1)} м³/ч<br/>{head.toFixed(1)} м</span><span>{reserve>0?"+":""}{reserve.toFixed(1)}%</span><span>{listPrice===null||pump.priceKind==="net"?"—":`${listPrice.toLocaleString("ru-RU",{maximumFractionDigits:2})} ₽`}</span><span className="pump-results__discount-price">{discountedPrice===null?"":<><b>{discountedPrice.toLocaleString("ru-RU",{maximumFractionDigits:2})} ₽</b><small>{pump.priceKind==="net"?"Готовая цена источника":`−${discount.toLocaleString("ru-RU",{maximumFractionDigits:2})}%`}</small></>}</span></button>})}{!pumps.length&&<div data-issue-id={`${tool}/results`} className="pump-results__empty">Подходящие насосы в рабочем диапазоне не найдены</div>}</div></>}
+  {calculated&&<>
+    <div className="pump-selector__toolbar">
+      <select aria-label="Тип насоса" value={type} onChange={e=>setType(e.target.value)}><option value="Все типы">Все типы</option>{([...new Set(catalogue.filter(p=>usablePump(p,input.medium)).map(p=>p.type))] as PumpType[]).sort((a,b)=>typeLabel(a).localeCompare(typeLabel(b),"ru")).map(value=><option key={value} value={value}>{typeLabel(value)}</option>)}</select>
+      <select aria-label="Производитель насоса" value={manufacturer} onChange={e=>{setManufacturer(e.target.value);setSeries("Все серии");}}><option>Все производители</option>{[...new Set(catalogue.filter(p=>usablePump(p,input.medium)).map(p=>p.manufacturer))].map(v=><option key={v}>{v}</option>)}</select>
+      <select aria-label="Серия насоса" value={series} onChange={e=>setSeries(e.target.value)}><option>Все серии</option>{[...new Set(catalogue.filter(p=>usablePump(p,input.medium)&&(manufacturer==="Все производители"||p.manufacturer===manufacturer)).map(p=>p.series))].map(v=><option key={v}>{v}</option>)}</select>
+      <select aria-label="Сортировка насосов" value={sort} onChange={e=>setSort(e.target.value as PumpSortMode)}><option value="distance">По рабочей точке</option><option value="price">По цене</option></select>
+    </div>
+    <p className="pump-selector__sort-note">{sort==="price"?"Сначала ΔQ и ΔH от −2% до +15%, затем цена":"Ближе к заданной точке по относительным отклонениям расхода и напора"}. Фактическая точка — PCHIP, расход станции.</p>
+    <div className="pump-results">
+      <div className="pump-results__head"><span>Насос</span><span>Фактические Q / H<br/>расход станции</span><span>ΔQ / ΔH</span><span>Запас напора при заданном расходе</span><span>Прайсовая цена</span><span>Цена со скидкой</span></div>
+      {pumps.map(candidate=>{
+        const {pump,point,pointIssue,headReservePercent:reserve,purchasePriceRub:discountedPrice}=candidate;
+        const listPrice=pumpListPriceRub(pump,settings),discount=pumpDiscountPercent(pump,settings);
+        return <button key={pump.id} className={`pump-results__row pump-results__row--${reserveClass(reserve)} ${input.selectedPumpId===pump.id?"pump-results__row--selected":""}`} onClick={()=>onInputChange?.({selectedPumpId:pump.id})}>
+          <span><b>{pump.manufacturer} {pump.model}</b><small>{typeLabel(pump.type)} · {pump.series}</small>{candidate.preferredByOperatingPoint&&<small className="pump-results__priority">ΔQ и ΔH в диапазоне −2…+15%</small>}{pointIssue&&<small className="pump-data-warning">{pointIssue}</small>}{pump.dataWarnings?.map(warning=><small key={warning} className="pump-data-warning">{warning}</small>)}</span>
+          <span>{point?<>{point.flow.toFixed(1)} м³/ч<br/>{point.head.toFixed(1)} м</>:"Оценка недоступна"}</span>
+          <span>{point?<>ΔQ {signedPercent(point.deltaQPercent)}<br/>ΔH {signedPercent(point.deltaHPercent)}</>:"—"}</span>
+          <span>{signedPercent(reserve)}<small>H при Qзад/нас.: {candidate.headAtRequestedFlow.toFixed(1)} м</small></span>
+          <span>{listPrice===null||!Number.isFinite(listPrice)||pump.priceKind==="net"?"—":`${listPrice.toLocaleString("ru-RU",{maximumFractionDigits:2})} ₽`}</span>
+          <span className="pump-results__discount-price">{discountedPrice===null?"—":<><b>{discountedPrice.toLocaleString("ru-RU",{maximumFractionDigits:2})} ₽</b><small>{pump.priceKind==="net"?"Готовая цена источника":`−${discount.toLocaleString("ru-RU",{maximumFractionDigits:2})}%`}</small></>}</span>
+        </button>;
+      })}
+      {!pumps.length&&<div data-issue-id={`${tool}/results`} className="pump-results__empty">Подходящие насосы в рабочем диапазоне не найдены</div>}
+    </div>
+  </>}
   </div>;
 }
 
-function InstallationSettings({ settings, input, secondaryInput, onInputChange, onSecondaryInputChange, onChange }: { settings: SettingsEntity; input: InputEntity; secondaryInput: InputEntity; onInputChange: (patch: Partial<InputEntity>) => void; onSecondaryInputChange: (patch: Partial<InputEntity>) => void; onChange: (patch: Partial<SettingsEntity>) => void }) {
+function InstallationSettings({ role, settings, input, secondaryInput, onInputChange, onSecondaryInputChange, onChange }: { role: UserRole; settings: SettingsEntity; input: InputEntity; secondaryInput: InputEntity; onInputChange: (patch: Partial<InputEntity>) => void; onSecondaryInputChange: (patch: Partial<InputEntity>) => void; onChange: (patch: Partial<SettingsEntity>) => void }) {
+  const fullAccess = canEditAllSettings(role), optionsAccess = canEditProjectOptions(role);
   const isFireRelated = settings.stationType === "fire" || settings.stationType === "combined";
   const changeType = (stationType: SettingsEntity["stationType"]) => onChange({ stationType, combinedCircuitsSimultaneous: stationType === "combined" ? settings.combinedCircuitsSimultaneous : false, isolatingValves: stationType === "fire" || stationType === "combined" ? settings.isolatingValves : false, jockeyPump: stationType === "fire" ? settings.jockeyPump : false });
   const numberValue = (value:string,fallback:number,min:number,max:number) => { const parsed=Number(value.replace(",",".")); return Number.isFinite(parsed)?Math.min(max,Math.max(min,parsed)):fallback; };
   const toggle = (key: keyof Pick<SettingsEntity, "combinedCircuitsSimultaneous" | "membraneTank" | "vibrationCompensators" | "collectorPlugs" | "isolatingValves" | "jockeyPump">, label: string, disabled = false, description?: string) => <label className={`settings-form__option ${disabled ? "settings-form__option--disabled" : ""}`}><span><b>{label}</b>{(description || disabled) && <small>{description ?? "Недоступно для выбранного типа"}</small>}</span><input type="checkbox" checked={Boolean(settings[key])} disabled={disabled} onChange={event=>onChange({ [key]: event.target.checked })}/><i aria-hidden="true"/></label>;
   return <div className="settings-form">
-    <label className="settings-form__field"><span>Тип насосной установки</span><select value={settings.stationType} onChange={event=>changeType(event.target.value as SettingsEntity["stationType"])}><option value="utility">Хоз-пит</option><option value="fire">Пожаротушение</option><option value="combined">Совмещённая</option><option value="smart">SMART</option></select></label>
+    {!fullAccess && <p className="access-note">{role === "base" ? "base: стандартное исполнение. Опции доступны с plus; все настройки — с pro." : "plus: доступны опции проекта. Остальные настройки — с pro."}</p>}
+    <label className="settings-form__field"><span>Тип насосной установки</span><select disabled={!fullAccess} value={settings.stationType} onChange={event=>changeType(event.target.value as SettingsEntity["stationType"])}><option value="utility">Хоз-пит</option><option value="fire">Пожаротушение</option><option value="combined">Совмещённая</option><option value="smart">SMART</option></select></label>
     <section aria-label="Параметры контура 1"><div className="settings-form__heading"><b>Контур 1</b><small>Параметры подбора насосов</small></div><CircuitInputFields input={input} onChange={onInputChange} showStaticHead={false}/></section>
     {isSecondaryEnabled(settings)&&<section aria-label="Параметры контура 2"><div className="settings-form__heading"><b>Контур 2</b><small>{settings.stationType==="fire"?"Жокей-насос":"Второй контур подбора"}</small></div><CircuitInputFields input={secondaryInput} onChange={onSecondaryInputChange} showStaticHead={false}/></section>}
+    <fieldset className="access-fields" disabled={!fullAccess} aria-label="Расширенные настройки проекта">
     <div className="settings-form__heading"><b>Всасывающий коллектор</b><small>Автоподбор КИП</small></div>
     <label className="settings-form__field"><span>Напор на входе</span><span className="settings-form__number"><input aria-label="Напор на входе" type="number" step="any" placeholder="Не указан" value={settings.inletHead??""} onChange={event=>{const value=event.target.valueAsNumber;onChange({inletHead:Number.isFinite(value)?value:null});}}/><i>м</i></span><small>Максимальный статический напор на уровне приборов. При напоре до 5 м включительно или пустом поле учитывается разрежение. Уставки реле задаются при наладке.</small><IssueNotice id="settings/inlet-head"/></label>
     <div className="settings-form__heading"><b>Курсы валют</b><small>Рублей за единицу валюты</small></div>
@@ -133,6 +179,8 @@ function InstallationSettings({ settings, input, secondaryInput, onInputChange, 
     <IssueMessages tool="settings" prefix="settings/discounts/"/>
     <div className="settings-form__numbers"><label aria-label="Скидка CNP"><span><b>CNP</b><small>Скидка производителя</small></span><span className="settings-form__number"><input type="number" min="0" max="100" step="0.1" value={settings.manufacturerDiscounts.cnp} onChange={event=>onChange({manufacturerDiscounts:{...settings.manufacturerDiscounts,cnp:numberValue(event.target.value,settings.manufacturerDiscounts.cnp,0,100)}})}/><i>%</i></span></label><label aria-label="Скидка Aquastrong"><span><b>Aquastrong</b><small>Скидка производителя</small></span><span className="settings-form__number"><input type="number" min="0" max="100" step="0.1" value={settings.manufacturerDiscounts.aquastrong} onChange={event=>onChange({manufacturerDiscounts:{...settings.manufacturerDiscounts,aquastrong:numberValue(event.target.value,settings.manufacturerDiscounts.aquastrong,0,100)}})}/><i>%</i></span></label></div>
     <div className="settings-form__numbers">{([["onis","ONIS",0],["vandjord","VANDJORD",25],["wellmix","Wellmix",35]] as const).map(([key,label,fallback])=><label key={key} aria-label={`Скидка ${label}`}><span><b>{label}</b><small>Скидка производителя</small></span><span className="settings-form__number"><input type="number" min="0" max="100" step="0.1" value={settings.manufacturerDiscounts[key]??fallback} onChange={event=>onChange({manufacturerDiscounts:{...settings.manufacturerDiscounts,[key]:numberValue(event.target.value,settings.manufacturerDiscounts[key]??fallback,0,100)}})}/><i>%</i></span></label>)}</div>
+    </fieldset>
+    <fieldset className="access-fields" disabled={!optionsAccess} aria-label="Опции проекта">
     <div className="settings-form__heading"><b>Опции</b><small>Состав автоматически переносится в спецификацию</small></div>
     {settings.stationType === "combined" && <label className="settings-form__nested"><span>Расчёт всасывающего коллектора</span><select value={settings.combinedCircuitsSimultaneous ? "both" : "fire"} onChange={event=>onChange({combinedCircuitsSimultaneous:event.target.value === "both"})}><option value="fire">Только пожарный контур</option><option value="both">Оба контура одновременно</option></select></label>}
     {toggle("membraneTank", "Мембранный бак")}
@@ -141,13 +189,35 @@ function InstallationSettings({ settings, input, secondaryInput, onInputChange, 
     {toggle("collectorPlugs", "Заглушки на коллектора")}
     {toggle("isolatingValves", "Разделительные затворы на коллекторах", !isFireRelated)}
     {toggle("jockeyPump", "Жокей-насос", settings.stationType !== "fire")}
+    </fieldset>
     <div className={`settings-form__secondary ${isSecondaryEnabled(settings) ? "settings-form__secondary--active" : ""}`}><span aria-hidden="true">{isSecondaryEnabled(settings) ? "✓" : "×"}</span><div><b>Второй контур подбора</b><small>{isSecondaryEnabled(settings) ? "Подбор, гидравлическая кривая и карточка насоса 2 доступны" : "Доступен для совмещённой установки или пожаротушения с жокей-насосом"}</small></div></div>
   </div>;
 }
 
 function Specification({ entity, settings, catalogue }: { entity: SpecEntity; settings: SettingsEntity; catalogue:Pump[] }) {
   const warningDialogRef = useRef<HTMLDialogElement>(null);
+  const exportMenuRef = useRef<HTMLDetailsElement>(null);
+  const exportingRef = useRef(false);
+  const [exporting, setExporting] = useState(false);
+  const [exportError, setExportError] = useState("");
   const [warning, setWarning] = useState<{name:string;message:string;severity:"error"|"warning"}>({ name: "", message: "", severity:"warning" });
+  useEffect(() => {
+    const closeOnOutsideClick = (event: PointerEvent) => {
+      if (event.target instanceof Node && !exportMenuRef.current?.contains(event.target)) exportMenuRef.current?.removeAttribute("open");
+    };
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape" && exportMenuRef.current?.open) {
+        exportMenuRef.current.open = false;
+        exportMenuRef.current.querySelector("summary")?.focus();
+      }
+    };
+    document.addEventListener("pointerdown", closeOnOutsideClick);
+    document.addEventListener("keydown", closeOnEscape);
+    return () => {
+      document.removeEventListener("pointerdown", closeOnOutsideClick);
+      document.removeEventListener("keydown", closeOnEscape);
+    };
+  }, []);
   const formatMoney = (value: number) => value.toLocaleString("ru-RU", { maximumFractionDigits: 2 });
   const sectionFor = specificationSection;
   const visibleItems = visibleSpecificationItems(entity, settings).map(item => {
@@ -158,6 +228,23 @@ function Specification({ entity, settings, catalogue }: { entity: SpecEntity; se
   });
   const pricedItems = visibleItems.filter(item => typeof item.price === "number");
   const knownTotal = pricedItems.reduce((sum, item) => sum + item.price! * item.quantity, 0);
+  const exportSpecification = async (format: SpecificationExportFormat) => {
+    if (exportingRef.current || !visibleItems.length) return;
+    exportingRef.current = true;
+    setExporting(true);
+    setExportError("");
+    exportMenuRef.current?.removeAttribute("open");
+    exportMenuRef.current?.querySelector("summary")?.focus();
+    try {
+      const rows = specificationExportRows(visibleItems, SPEC_GROUPS);
+      downloadBlob(await specificationExportBlob(rows, format), `Спецификация.${format}`);
+    } catch {
+      setExportError("Не удалось выгрузить спецификацию. Попробуйте ещё раз.");
+    } finally {
+      exportingRef.current = false;
+      setExporting(false);
+    }
+  };
   const sectionItems=(sections:SpecSection[])=>visibleItems.filter(item=>sections.includes(sectionFor(item)));
   const subtotal=(items:SpecItem[])=>items.reduce((sum,item)=>sum+(typeof item.price==="number"?item.price*item.quantity:0),0);
   const subtotalLabel=(items:SpecItem[])=>`${formatMoney(subtotal(items))} ₽`;
@@ -185,7 +272,21 @@ function Specification({ entity, settings, catalogue }: { entity: SpecEntity; se
       <p>{warning.message}</p>
       <form method="dialog"><button className="button button--primary">Понятно</button></form>
     </dialog>
-    <div className="spec-sheet__summary"><IssueMessages tool="spec" prefix="spec/database/"/><span><b>{visibleItems.length}</b> позиций в составе установки</span><span><small>Итоговая стоимость{pricedItems.length<visibleItems.length?" · по заполненным ценам":""}</small><b>{formatMoney(knownTotal)} ₽</b></span></div>
+    <div className="spec-sheet__summary">
+      <IssueMessages tool="spec" prefix="spec/database/"/>
+      <span><b>{visibleItems.length}</b> позиций в составе установки</span>
+      <div className="spec-sheet__actions">
+        <span className="spec-sheet__total"><small>Итоговая стоимость{pricedItems.length<visibleItems.length?" · по заполненным ценам":""}</small><b>{formatMoney(knownTotal)} ₽</b></span>
+        <details ref={exportMenuRef} className="chart-export spec-export" onBlur={event=>{if(!event.currentTarget.contains(event.relatedTarget as Node|null))event.currentTarget.open=false;}}>
+          <summary aria-disabled={exporting||!visibleItems.length} aria-busy={exporting} onClick={event=>{if(exporting||!visibleItems.length)event.preventDefault();}}>{exporting?"Выгрузка…":"Выгрузить"} <span aria-hidden="true">⌄</span></summary>
+          <div className="chart-export__menu spec-export__menu" aria-label="Форматы выгрузки спецификации">
+            <button type="button" disabled={exporting||!visibleItems.length} onClick={()=>void exportSpecification("csv")}>CSV</button>
+            <button type="button" disabled={exporting||!visibleItems.length} onClick={()=>void exportSpecification("xlsx")}>XLSX</button>
+          </div>
+        </details>
+      </div>
+      {exportError&&<p className="spec-export__error" role="alert">{exportError}</p>}
+    </div>
     <p className="spec-sheet__note">Давление всасывающей линии проверяется по напору на входе, напорной — по сумме напора на входе и напора насоса. Прочность, гидроудары и пригодность к работе под вакуумом этой проверкой не оцениваются.</p>
     <div className="spec-table" role="table" aria-label="Спецификация насосной установки">
       <div className="spec-table__row spec-table__row--head" role="row"><span>№</span><span>Наименование</span><span>Кол-во</span><span>Ед.</span><span>Цена, ₽</span><span>Сумма, ₽</span><span>Описание</span></div>
@@ -242,11 +343,12 @@ const loadComponentsDatabase=(reload=false)=>{
   return componentsDatabasePromise??=Promise.all([
   fetch("/binding-components.json",{cache:"no-store"}).then(response=>response.ok?response.json():Promise.reject(new Error("Не удалось загрузить базу гидравлики"))) as Promise<RawBindingDatabase>,
   fetch("/control-cabinet-database.json",{cache:"no-store"}).then(response=>response.ok?response.json():Promise.reject(new Error("Не удалось загрузить комплектующие ШУ"))) as Promise<RawControlDatabase>,
-]).then(([binding,control])=>{
+  fetch("/api/components",{cache:"no-store"}).then(async response=>{const result=await response.json() as {items?:ComponentItem[];error?:string};if(!response.ok)throw new Error(result.error??"Не удалось загрузить сохранённые вставки");return result.items??[];}),
+]).then(([binding,control,savedInsertions])=>{
   const categories=[...new Set(control.components.map(item=>item.category))].sort((a,b)=>a.localeCompare(b,"ru"));
   const controlCatalogs:ComponentCatalog[]=categories.map(category=>({id:`control:${category}`,name:category.replaceAll("_"," "),groupId:category==="Работы"?"services":"control"}));
   const controlItems:ComponentItem[]=control.components.map(item=>({id:item.id,catalogId:`control:${item.category}`,family:item.name,fields:[{column:"manufacturer",headerPath:["Производитель"],value:item.manufacturer},{column:"article",headerPath:["Артикул"],value:item.article},{column:"componentType",headerPath:["Тип"],value:item.componentType},...Object.entries(item.attributes).map(([key,value])=>({column:key,headerPath:[key],value}))],prices:typeof item.currentPrice==="number"&&item.currentPrice>0?[{label:"Актуальная цена",amount:item.currentPrice,currency:item.currency}]:[]}));
-  return loadedComponentsDatabase={collectorCatalog:makeCollectorCatalog(binding),catalogs:[...binding.catalogs.map(catalog=>({...catalog,groupId:bindingGroupFor(catalog.id)})),{id:"ответные-части",name:"Ответные части и американки",groupId:"hydraulic"},...controlCatalogs],items:[...binding.items,...suctionCatalogItems,...controlItems],statistics:{componentRows:binding.statistics.componentRows+control.statistics.components+suctionCatalogItems.length,pricedComponentRows:binding.statistics.pricedComponentRows+control.statistics.pricedComponents+suctionCatalogItems.length}};
+  return loadedComponentsDatabase={collectorCatalog:makeCollectorCatalog(binding),catalogs:[...binding.catalogs.map(catalog=>({...catalog,groupId:bindingGroupFor(catalog.id)})),{id:"ответные-части",name:"Ответные части и американки",groupId:"hydraulic"},...controlCatalogs],items:[...binding.items,...suctionCatalogItems,...savedInsertions,...controlItems],statistics:{componentRows:binding.statistics.componentRows+control.statistics.components+suctionCatalogItems.length+savedInsertions.length,pricedComponentRows:binding.statistics.pricedComponentRows+control.statistics.pricedComponents+suctionCatalogItems.length+savedInsertions.filter(item=>item.prices.length).length}};
 }).catch(error=>{componentsDatabasePromise=undefined;throw error;});
 };
 const componentFieldLabel=(field:ComponentField)=>field.headerPath.filter(Boolean).at(-1)?.trim()??"";
@@ -260,7 +362,7 @@ function ComponentsDatabaseView(){
   const selectedId=catalogs.some(item=>item.id===catalogId)?catalogId:catalogs[0]?.id||"",catalog=database?.catalogs.find(item=>item.id===selectedId),items=useMemo(()=>database?.items.filter(item=>item.catalogId===selectedId)??[],[database,selectedId]);
   const columns=useMemo(()=>{const counts=new Map<string,number>();for(const item of items){const labels=new Set(item.fields.map(componentFieldLabel).filter(label=>label&&!/цен|стоимост|ссылк|url/i.test(label)));for(const label of labels)counts.set(label,(counts.get(label)??0)+1);}const priority=(label:string)=>[/^(наименование|название)$/i,/^dn$/i,/^pn$|давлен/i,/диаметр/i,/материал|марка/i,/размер|резьб/i,/толщин|длин|высот|ширин/i,/масс|вес/i].findIndex(pattern=>pattern.test(label));return [...counts].sort((a,b)=>{const pa=priority(a[0]),pb=priority(b[0]),sa=(pa<0?0:10000-pa*500)+a[1],sb=(pb<0?0:10000-pb*500)+b[1];return sb-sa||a[0].localeCompare(b[0],"ru");}).slice(0,6).map(([label])=>label);},[items]);
   const filtered=useMemo(()=>{const needle=query.trim().toLocaleLowerCase("ru-RU");if(!needle)return items;return items.filter(item=>`${item.family} ${item.fields.map(field=>componentValue(field.value)).join(" ")} ${item.prices.map(price=>price.amount).join(" ")}`.toLocaleLowerCase("ru-RU").includes(needle));},[items,query]);
-  const price=(item:ComponentItem)=>item.prices.length?item.prices.map(entry=><span key={`${entry.label}-${entry.amount}`} title={entry.label}>{entry.amount.toLocaleString("ru-RU",{maximumFractionDigits:2})} ₽</span>):<i>—</i>;
+  const price=(item:ComponentItem)=>item.prices.length?item.prices.map(entry=><span key={`${entry.label}-${entry.amount}`} title={entry.label}>{entry.amount.toLocaleString("ru-RU",{maximumFractionDigits:2})} ₽{item.catalogId==="работы"&&item.fields.some(field=>field.column==="PRICE_UNIT"&&field.value==="м")?"/м":""}</span>):<i>—</i>;
   if(error)return <div data-issue-id="components/database" className="components-db__state components-db__state--error"><b>База недоступна</b><span>{error}</span></div>;
   if(!database)return <div className="components-db__state"><span className="components-db__loader"/><b>Загрузка базы комплектующих…</b></div>;
   return <div className="components-db"><div className="components-db__filters"><label><span>Группа комплектующих</span><select value={groupId} onChange={event=>{const next=event.target.value as ComponentGroupId;setGroupId(next);setCatalogId(database.catalogs.find(item=>item.groupId===next)?.id||"");setQuery("");}}>{COMPONENT_GROUPS.map(item=><option key={item.id} value={item.id}>{item.name}</option>)}</select></label><label><span>Тип комплектующего</span><select value={selectedId} onChange={event=>{setCatalogId(event.target.value);setQuery("");}}>{catalogs.map(item=><option key={item.id} value={item.id}>{item.name}</option>)}</select></label><label><span>Поиск в выбранном типе</span><input type="search" value={query} onChange={event=>setQuery(event.target.value)} placeholder="DN, артикул, наименование…"/></label><div className="components-db__count"><b>{filtered.length.toLocaleString("ru-RU")}</b><span>позиций</span></div></div><div className="components-db__table-wrap"><table className="components-db__table"><thead><tr><th>Исполнение</th>{columns.map(column=><th key={column}>{column}</th>)}<th className="components-db__price-head">Цена</th></tr></thead><tbody>{filtered.map(item=><tr key={item.id}><td title={item.family}><b>{item.family}</b></td>{columns.map(column=>{const field=item.fields.find(candidate=>componentFieldLabel(candidate)===column);return <td key={column}>{field?componentValue(field.value):"—"}</td>;})}<td className="components-db__price">{price(item)}</td></tr>)}</tbody></table>{!filtered.length&&<div className="components-db__empty">По выбранным условиям позиции не найдены</div>}</div><footer><span>{COMPONENT_GROUPS.find(item=>item.id===groupId)?.name} · {catalog?.name}</span><span>Всего в базе: {database.statistics.componentRows.toLocaleString("ru-RU")} · с ценами: {database.statistics.pricedComponentRows.toLocaleString("ru-RU")}</span></footer></div>;
@@ -340,27 +442,39 @@ const selectValveComponent=(items:ComponentItem[],kind:ValveSelectionKind,dn:num
   return {item:best.item,price:best.price,execution:kind==="butterfly"?(dn<150?"с рукояткой":"с редуктором"):connection==="threaded"?"резьбовое":"фланцевое",material};
 };
 
-function DnCalculator({entity,input,secondaryInput,settings,onChange,onAddValves}:{entity:DnEntity;input:InputEntity;secondaryInput:InputEntity;settings:SettingsEntity;onChange?:(patch:Partial<DnEntity>)=>void;onAddValves?:()=>void}){
+function DnCalculator({role,entity,input,secondaryInput,settings,onChange,onAddValves}:{role:UserRole;entity:DnEntity;input:InputEntity;secondaryInput:InputEntity;settings:SettingsEntity;onChange?:(patch:Partial<DnEntity>)=>void;onAddValves?:()=>void}){
   const primary=getCircuitDnConfig(entity,input,settings),secondary=isSecondaryEnabled(settings)?getCircuitDnConfig(entity,secondaryInput,settings,true):null;
   if(!primary)return <div data-issue-id="dn/empty" className="dn-calculator__empty"><span aria-hidden="true">Ø</span><b>Сначала задайте рабочую точку</b><p>Укажите расход станции и количество рабочих насосов в инструменте «Подбор насосов».</p></div>;
   const circuits=[primary,...(secondary?[secondary]:[])];
-  const reset=()=>{const patch:Partial<DnEntity>={collectorMaterial:defaultCollectorMaterial(settings)};for(const circuit of circuits){const collectorDn=recommendedDn(circuit.stationFlow),pumpDn=recommendedDn(circuit.pumpFlow),{connection}=resolveDnConnection(settings,pumpDn,circuit.id==="secondary");for(const row of circuit.rows)patch[row.field]=row.subtitle==="Расход контура"?collectorDn:pumpDn;patch[circuit.connectionField]=null;patch[circuit.pnField]=16;patch[circuit.suctionTypeField]=connection==="threaded"?"ball":"butterfly";patch[circuit.dischargeTypeField]=connection==="threaded"?"ball":"butterfly";}onChange?.(patch);};
+  const reset=()=>{
+    const patch:Partial<DnEntity>={collectorMaterial:defaultCollectorMaterial(settings)};
+    for(const circuit of circuits){
+      for(const row of circuit.rows)patch[row.field]=row.subtitle==="Расход контура"?recommendedDn(circuit.stationFlow):null;
+      patch[circuit.connectionField]=null;patch[circuit.pnField]=16;
+      patch[circuit.suctionTypeField]=null;patch[circuit.dischargeTypeField]=null;
+    }
+    onChange?.(patch);
+  };
   const patchField=<K extends keyof DnEntity>(field:K,value:DnEntity[K])=>onChange?.({[field]:value} as Partial<DnEntity>);
   return <div className="dn-calculator">
-    <header className="dn-calculator__summary"><div><small>РАСЧЁТ DN И ПОДБОР АРМАТУРЫ</small><b>{secondary?2:1} {secondary?"контура":"контур"} · {settings.stationType==="fire"||settings.stationType==="combined"?"красное исполнение":"приоритет синего исполнения"}</b><span>DN, материал коллекторов, PN, тип соединения и приводы сохраняются в проекте</span></div><div className="dn-calculator__actions"><button className="button" onClick={reset}>Заполнить по умолчанию</button><button className="button button--primary" onClick={onAddValves}>Добавить арматуру в спецификацию</button></div></header>
+    <header className="dn-calculator__summary"><div><small>РАСЧЁТ DN И ПОДБОР АРМАТУРЫ</small><b>{secondary?2:1} {secondary?"контура":"контур"} · {settings.stationType==="fire"||settings.stationType==="combined"?"красное исполнение":"приоритет синего исполнения"}</b><span>DN, материал коллекторов, PN, тип соединения и приводы сохраняются в проекте</span></div><div className="dn-calculator__actions"><button className="button" disabled={!canEditAllSettings(role)} onClick={reset}>Заполнить по умолчанию</button><button className="button button--primary" onClick={onAddValves}>Добавить арматуру в спецификацию</button></div></header>
+    {!canEditAllSettings(role) && <p className="access-note">Стандартное исполнение подбирается автоматически. Ручные изменения доступны с pro.</p>}
+    <fieldset className="access-fields" disabled={!canEditAllSettings(role)} aria-label="Ручные настройки DN">
     <div className="dn-calculator__material"><label><span>Материал коллекторов</span><select value={entity.collectorMaterial??defaultCollectorMaterial(settings)} onChange={event=>onChange?.({collectorMaterial:event.target.value as CollectorMaterial})}><option value="st20">Ст20</option><option value="aisi304">AISI 304</option></select></label><p><b>{settings.stationType==="fire"?"Пожарная НС":"Стандарт проекта"}</b><span>{settings.stationType==="fire"?"По умолчанию применяется Ст20":"По умолчанию применяется AISI 304"}</span></p></div>
     {circuits.map(circuit=><section className="dn-circuit" key={circuit.id}><header className="dn-circuit__header"><div><small>{circuit.id==="secondary"?"ВТОРОЙ КОНТУР":"КОНТУР 1"}</small><b>{circuit.title}</b><span>Q = {circuit.stationFlow.toLocaleString("ru-RU",{maximumFractionDigits:2})} м³/ч · {circuit.workingPumpCount} раб. + {circuit.totalPumpCount-circuit.workingPumpCount} рез.</span></div><i className={circuit.color==="red"?"dn-circuit__color dn-circuit__color--red":"dn-circuit__color dn-circuit__color--blue"}>{circuit.color==="red"?"Красная арматура":"Синяя в приоритете"}</i></header>
       <div className="dn-calculator__controls"><label><span>Соединение арматуры</span><select value={circuit.connection} onChange={event=>{const connection=event.target.value as ValveConnection;onChange?.({[circuit.connectionField]:connection,[circuit.suctionTypeField]:connection==="threaded"?"ball":"butterfly",[circuit.dischargeTypeField]:connection==="threaded"?"ball":"butterfly"} as Partial<DnEntity>);}}><option value="threaded" disabled={!circuit.threadedAllowed}>Резьбовое · до 2″</option><option value="flanged">Фланцевое</option></select><small>{circuit.forcedFlanged?"Для этого типа НС разрешено только фланцевое соединение":circuit.threadedAllowed?"Резьба — стандарт до DN50":"Для выбранного DN требуется фланец"}</small></label><label><span>Рабочее давление</span><select value={circuit.pn} onChange={event=>patchField(circuit.pnField,Number(event.target.value) as ValvePn)}><option value={10}>PN10</option><option value={16}>PN16</option><option value={25}>PN25</option></select></label><label><span>Запорная арматура на всасе</span><select value={circuit.suctionValveType} onChange={event=>patchField(circuit.suctionTypeField,event.target.value as ShutoffValveType)}><option value="butterfly" disabled={circuit.connection==="threaded"}>Затвор дисковый</option><option value="ball">Шаровой кран</option></select></label><label><span>Запорная арматура на напоре</span><select value={circuit.dischargeValveType} onChange={event=>patchField(circuit.dischargeTypeField,event.target.value as ShutoffValveType)}><option value="butterfly" disabled={circuit.connection==="threaded"}>Затвор дисковый</option><option value="ball">Шаровой кран</option></select></label></div>
 
       <PumpNozzleFields entity={entity} input={circuit.id==="secondary"?secondaryInput:input} secondary={circuit.id==="secondary"} title={circuit.title} onChange={onChange}/>
-      <p>Всас: {circuit.suction.connection==="threaded"?"резьбовая арматура":"фланцевая арматура"}. {circuit.suction.locked?"DN крана равен DN патрубка и изменяется вместе с ним.":"DN арматуры и коллекторов рассчитываются отдельно от патрубков насоса."}</p>
-      <p>Напор: {circuit.discharge.connection==="threaded"?"резьбовая арматура":"фланцевая арматура"}. {circuit.discharge.locked?"DN крана и обратного клапана равен DN напорного патрубка.":"Между обратным клапаном и затвором устанавливается отдельная вставка ФФ."}</p>
+      <p>Всас: {circuit.suction.connection==="threaded"?"резьбовая арматура":"фланцевая арматура"}. {circuit.suction.locked?"DN крана равен DN патрубка и изменяется вместе с ним.":circuit.suction.nozzleDefault?"Для многоступенчатого насоса DN арматуры по умолчанию равен DN впускного патрубка; доступно ручное изменение.":"DN арматуры и коллекторов рассчитываются отдельно от патрубков насоса."}</p>
+      <p>Напор: {circuit.discharge.connection==="threaded"?"резьбовая арматура":"фланцевая арматура"}. {circuit.discharge.locked?"DN крана и обратного клапана равен DN напорного патрубка.":circuit.discharge.nozzleDefault?"Для многоступенчатого насоса DN арматуры по умолчанию равен DN выпускного патрубка; доступно ручное изменение.":"Между обратным клапаном и затвором устанавливается отдельная вставка ФФ."}</p>
+      {settings.vibrationCompensators&&<p>На каждой стороне насоса: патрубок → виброкомпенсатор того же DN → обычная вставка → арматура. Уплотнения и крепёж учитываются для каждого соединения.</p>}
       {circuit.suction.errors.map((error,index)=><p data-issue-id={`dn/${circuit.id}/suction/${index}`} key={error} role="alert" className="dn-calculator__error">{error}</p>)}
       {circuit.discharge.errors.map((error,index)=><p data-issue-id={`dn/${circuit.id}/discharge/${index}`} key={error} role="alert" className="dn-calculator__error">{error}</p>)}
       <p data-issue-id={`dn/${circuit.id}/pressure`} className="collector-note">{circuit.suction.inletPressureCheck.message}</p>
       <div className="dn-calculator__grid">{circuit.rows.map(row=>{const dn=circuit.values[row.field],velocity=flowVelocity(row.flow,dn),limit=dnVelocityLimit(dn),valid=velocity<=limit+1e-9;return <section data-issue-id={`dn/${circuit.id}/${row.field}`} className="dn-calculator__card" key={row.field}><div className="dn-calculator__card-title"><span><b>{row.title}</b><small>{row.subtitle} · {row.flow.toLocaleString("ru-RU",{maximumFractionDigits:2})} м³/ч</small></span><i className={valid?"dn-calculator__status dn-calculator__status--ok":"dn-calculator__status dn-calculator__status--warning"}>{valid?"Норма":"Выше нормы"}</i></div><div className="dn-calculator__values"><label><span>Условный проход</span><select value={dn} disabled={(circuit.suction.locked && /[Ss]uctionValveDn$/.test(row.field)) || (circuit.discharge.locked && /[Dd]ischargeValveDn$/.test(row.field))} onChange={event=>{const next=Number(event.target.value);onChange?.({[row.field]:next} as Partial<DnEntity>);}} aria-label={`Ду: ${circuit.title}, ${row.title}`}>{[15,20,...STANDARD_DN].map(value=><option key={value} value={value}>Ду {value}</option>)}</select></label><span className="dn-calculator__speed"><small>Скорость потока</small><b>{velocity.toLocaleString("ru-RU",{minimumFractionDigits:2,maximumFractionDigits:2})} <i>м/с</i></b><em>Допустимо до {limit} м/с</em></span></div></section>;})}</div>
     </section>)}
     {isSecondaryEnabled(settings)&&!secondary&&<div className="dn-calculator__secondary-empty"><b>Контур 2 ожидает рабочую точку</b><span>Заполните «Подбор насосов 2» — DN и арматура появятся автоматически.</span></div>}
+    </fieldset>
     <footer className="dn-calculator__note"><span>i</span><p><b>Правила автоподбора</b>До DN250 скорость ограничена 2 м/с, выше — 3 м/с. Резьба до DN50 (2″) включительно — по умолчанию для первого контура хоз-пит и SMART и для второго контура. При необходимости можно выбрать фланцевое соединение. Затворы до DN125 подбираются с рукояткой, от DN150 — с редуктором. Обратный клапан подбирается по DN напорной арматуры, PN и материалу коллектора. Шаровой кран — всегда латунный с ручкой-рычагом, независимо от цвета и материала коллектора.</p></footer>
   </div>;
 }
@@ -410,7 +524,7 @@ function refreshSuctionSpecification(project:ProjectConfig,database=loadedCompon
 
 const synchronizeSharedInputs = (project: ProjectConfig) => refreshSuctionSpecification(synchronizeCollectors(project));
 
-function PanelContent({ collectorPanel, id, entity, input, secondaryInput, settings, catalogue, onInputChange, onSecondaryInputChange, onSettingsChange, onDnChange, onAddValves, onAddToSpec, onCabinetConfigured, locked }: { collectorPanel?: React.ReactNode; id: PanelKind; entity: ProjectEntity; input: InputEntity; secondaryInput:InputEntity; settings: SettingsEntity; catalogue:Pump[]; onInputChange?: (patch: Partial<InputEntity>) => void; onSecondaryInputChange: (patch: Partial<InputEntity>) => void; onSettingsChange?: (patch: Partial<SettingsEntity>) => void; onDnChange?:(patch:Partial<DnEntity>)=>void; onAddValves?:()=>void; onAddToSpec?:()=>void; onCabinetConfigured?:(cabinet:SmartCabinet)=>void; locked?:boolean }) {
+function PanelContent({ role, collectorPanel, id, entity, input, secondaryInput, settings, catalogue, onInputChange, onSecondaryInputChange, onSettingsChange, onDnChange, onAddValves, onAddToSpec, onCabinetConfigured, locked }: { role: UserRole; collectorPanel?: React.ReactNode; id: PanelKind; entity: ProjectEntity; input: InputEntity; secondaryInput:InputEntity; settings: SettingsEntity; catalogue:Pump[]; onInputChange?: (patch: Partial<InputEntity>) => void; onSecondaryInputChange: (patch: Partial<InputEntity>) => void; onSettingsChange?: (patch: Partial<SettingsEntity>) => void; onDnChange?:(patch:Partial<DnEntity>)=>void; onAddValves?:()=>void; onAddToSpec?:()=>void; onCabinetConfigured?:(cabinet:SmartCabinet)=>void; locked?:boolean }) {
   const storedExport=useStoredDiagnostic(id,"export"),storedMethod=useStoredDiagnostic(id,"method");
   const [chartMethod,setChartMethod]=useState<CurveMethod>(storedMethod?"polynomial":"pchip");
   const [chartExportError,setChartExportError]=useState(storedExport?.message??"");
@@ -420,12 +534,12 @@ function PanelContent({ collectorPanel, id, entity, input, secondaryInput, setti
   if (id === "issues") return <IssuesTool/>;
   if (locked) return <div className="tool-lock"><span aria-hidden="true">🔒</span><b>Второй контур заблокирован</b><p>Выберите совмещённую установку или пожаротушение и включите жокей-насос в настройках.</p></div>;
   if (id === "input" || id === "input2") return <PumpSelector tool={id} key={input.medium} input={input} settings={settings} catalogue={catalogue} onInputChange={onInputChange} onAddToSpec={onAddToSpec}/>;
-  if (id === "chart" || id === "chart2") { if(!isCalculated(input))return <div data-issue-id={`${id}/empty`} className="pump-chart__empty">Введите параметры и нажмите «Подобрать оборудование»</div>; const selected=catalogue.find(p=>p.id===input.selectedPumpId); if(!selected)return <div data-issue-id={`${id}/empty`} className="pump-chart__empty">Для заданной рабочей точки насос не выбран</div>; if(!usablePump(selected,input.medium))return <div data-issue-id={`${id}/empty`} className="pump-chart__empty">Для этой модели нет подтверждённой рабочей кривой. Выберите другой насос.</div>; const polynomialAvailable=curveSegments(selected.curve,"polynomial").length>0,method:CurveMethod=chartMethod==="polynomial"&&!polynomialAvailable?"pchip":chartMethod,methodInfo=CURVE_METHODS.find(item=>item.value===method)!; const count=input.workingPumpCount,maxQ=Math.max(input.flowRate*1.2,...selected.curve.map(p=>p[0]*count)),maxPumpHead=curveMaxHead(selected.curve,method),maxH=Math.max(maxPumpHead,input.head,1)*1.1,systemSegments=systemCurveSegments(selected,count,input,maxQ,maxH,method),actualPoint=actualOperatingPoint(selected,count,input,method),pointX=(flow:number)=>45+(flow/maxQ)*435,pointY=(head:number)=>210-(head/maxH)*190,clipId=`plot-${id}-${selected.id}-${count}`; return (
+  if (id === "chart" || id === "chart2") { if(!isCalculated(input))return <div data-issue-id={`${id}/empty`} className="pump-chart__empty">Введите параметры и нажмите «Подобрать оборудование»</div>; const selected=catalogue.find(p=>p.id===input.selectedPumpId); if(!selected)return <div data-issue-id={`${id}/empty`} className="pump-chart__empty">Для заданной рабочей точки насос не выбран</div>; if(!usablePump(selected,input.medium))return <div data-issue-id={`${id}/empty`} className="pump-chart__empty">Для этой модели нет подтверждённой рабочей кривой. Выберите другой насос.</div>; const polynomialAvailable=curveSegments(selected.curve,"polynomial").length>0,method:CurveMethod=chartMethod==="polynomial"&&!polynomialAvailable?"pchip":chartMethod,methodInfo=CURVE_METHODS.find(item=>item.value===method)!; const count=input.workingPumpCount,xScale=chartAxisScale(Math.max(input.flowRate*1.2,...selected.curve.map(p=>p[0]*count))),maxPumpHead=curveMaxHead(selected.curve,method),yScale=chartAxisScale(Math.max(maxPumpHead,input.head,1)*1.1),maxQ=xScale.max,maxH=yScale.max,systemSegments=systemCurveSegments(selected,count,input,maxQ,maxH,method),actualPoint=actualOperatingPoint(selected,count,input,method),pointX=(flow:number)=>45+(flow/maxQ)*435,pointY=(head:number)=>210-(head/maxH)*190,clipId=`plot-${id}-${selected.id}-${count}`; return (
     <div className="pump-chart" data-curve-method={method} data-curve-label={methodInfo.label}>
       <div className="pump-chart__top"><label className="pump-chart__method"><span>Кривая</span><select aria-label="Способ отображения кривой" value={method} title={methodInfo.description} onChange={event=>{setChartMethod(event.target.value as CurveMethod);setChartExportError("");}}>{CURVE_METHODS.map(item=><option key={item.value} value={item.value} disabled={item.value==="polynomial"&&!polynomialAvailable}>{item.label}</option>)}</select></label><div className="pump-chart__legend"><span><i className="pump-chart__dot pump-chart__dot--blue" />{selected.manufacturer} {selected.model}</span><span><i className="pump-chart__dot pump-chart__dot--orange" />Система</span><span><i className="pump-chart__point-symbol pump-chart__point-symbol--requested" />Запрашиваемая</span><span><i className="pump-chart__point-symbol pump-chart__point-symbol--actual" />Фактическая</span></div><details className="chart-export"><summary>Export <span>⌄</span></summary><div className="chart-export__menu">{(["png","pdf","jpeg"] as ChartExportFormat[]).map(format=><button key={format} onClick={event=>{const button=event.currentTarget;setChartExportError("");void exportChart(button,format,`hydraulic-curve-${selected.model.replace(/[^a-zа-я0-9]+/gi,"-")}-${method}`).catch(()=>setChartExportError("Не удалось экспортировать график. Попробуйте ещё раз.")).finally(()=>button.closest("details")?.removeAttribute("open"));}}>{format.toUpperCase()}</button>)}</div></details><p data-issue-id={`${id}/method`} className="pump-chart__method-note">{methodInfo.description}{chartMethod==="polynomial"&&!polynomialAvailable&&" Сглаживание недоступно для этой модели; показан PCHIP."}</p>{chartExportError&&<p data-issue-id={`${id}/export`} className="pump-chart__export-error" role="alert">{chartExportError}</p>}</div>
       <div className="pump-chart__canvas" aria-label="График насосной кривой">
         <span className="pump-chart__axis pump-chart__axis--y">H, м</span><span className="pump-chart__axis pump-chart__axis--x">Q, м³/ч</span>
-        <svg viewBox="0 0 500 240" role="img" aria-label={`Гидравлическая кривая: ${methodInfo.label}`} className="pump-chart__svg" onDoubleClick={event=>{const svg=event.currentTarget,point=svg.createSVGPoint();point.x=event.clientX;point.y=event.clientY;const local=point.matrixTransform(svg.getScreenCTM()!.inverse()),q=Math.max(0,Math.min(maxQ,(local.x-45)/435*maxQ)),h=Math.max(0,Math.min(maxH,(210-local.y)/190*maxH));onInputChange?.({flowRate:Number(q.toFixed(1)),head:Number(h.toFixed(1))});}}><defs><clipPath id={clipId}><rect x="45" y="10" width="435" height="200"/></clipPath></defs><path className="pump-chart__grid" d="M45 10V210M45 210H480M45 172H480M45 134H480M45 96H480M45 58H480M132 10V210M219 10V210M306 10V210M393 10V210"/><g clipPath={`url(#${clipId})`}>{Array.from({length:count},(_,i)=><path key={i} className={`pump-chart__line pump-chart__line--blue ${i<count-1?"pump-chart__line--muted":""}`} d={curvePath(selected,i+1,maxQ,maxH,method)}/>)}<path className="pump-chart__line pump-chart__line--orange" d={systemSegments.solid}/><path className="pump-chart__line pump-chart__line--orange pump-chart__line--unavailable" d={systemSegments.dashed}/><circle className="pump-chart__marker pump-chart__marker--requested" cx={pointX(input.flowRate)} cy={pointY(input.head)} r="4"/>{actualPoint&&<><circle className="pump-chart__actual-halo" cx={pointX(actualPoint.flow)} cy={pointY(actualPoint.head)} r="7"/><circle className="pump-chart__marker pump-chart__marker--actual" cx={pointX(actualPoint.flow)} cy={pointY(actualPoint.head)} r="3.5"/></>}</g>{Array.from({length:6},(_,i)=><g key={`tick-${i}`} className="pump-chart__ticks"><text x={45+i*87} y="228" textAnchor="middle">{(maxQ*i/5).toFixed(0)}</text><text x="38" y={214-i*40} textAnchor="end">{(maxH*i/5).toFixed(0)}</text></g>)}</svg>
+        <svg viewBox="0 0 500 240" role="img" aria-label={`Гидравлическая кривая: ${methodInfo.label}`} className="pump-chart__svg" onDoubleClick={event=>{const svg=event.currentTarget,point=svg.createSVGPoint();point.x=event.clientX;point.y=event.clientY;const local=point.matrixTransform(svg.getScreenCTM()!.inverse()),q=Math.max(0,Math.min(maxQ,(local.x-45)/435*maxQ)),h=Math.max(0,Math.min(maxH,(210-local.y)/190*maxH));onInputChange?.({flowRate:Number(q.toFixed(1)),head:Number(h.toFixed(1))});}}><defs><clipPath id={clipId}><rect x="45" y="10" width="435" height="200"/></clipPath></defs><path className="pump-chart__grid" d={[...xScale.ticks.map(flow=>`M${pointX(flow)} 10V210`),...yScale.ticks.map(head=>`M45 ${pointY(head)}H480`)].join("")}/><g clipPath={`url(#${clipId})`}>{Array.from({length:count},(_,i)=><path key={i} className={`pump-chart__line pump-chart__line--blue ${i<count-1?"pump-chart__line--muted":""}`} d={curvePath(selected,i+1,maxQ,maxH,method)}/>)}<path className="pump-chart__line pump-chart__line--orange" d={systemSegments.solid}/><path className="pump-chart__line pump-chart__line--orange pump-chart__line--unavailable" d={systemSegments.dashed}/><circle className="pump-chart__marker pump-chart__marker--requested" cx={pointX(input.flowRate)} cy={pointY(input.head)} r="4"/>{actualPoint&&<><circle className="pump-chart__actual-halo" cx={pointX(actualPoint.flow)} cy={pointY(actualPoint.head)} r="7"/><circle className="pump-chart__marker pump-chart__marker--actual" cx={pointX(actualPoint.flow)} cy={pointY(actualPoint.head)} r="3.5"/></>}</g><g className="pump-chart__ticks">{xScale.ticks.map(flow=><text key={`q-${flow}`} x={pointX(flow)} y="228" textAnchor="middle">{flow.toLocaleString("ru-RU")}</text>)}{yScale.ticks.map(head=><text key={`h-${head}`} x="38" y={pointY(head)+4} textAnchor="end">{head.toLocaleString("ru-RU")}</text>)}</g></svg>
       </div>
       <div className="pump-chart__points"><span><i className="pump-chart__point-symbol pump-chart__point-symbol--requested"/><small>Запрашиваемая точка</small><b>Q = {input.flowRate.toFixed(1)} м³/ч · H = {input.head.toFixed(1)} м</b></span><span><i className="pump-chart__point-symbol pump-chart__point-symbol--actual"/><small>Фактическая точка</small><b>{actualPoint?`Q = ${actualPoint.flow.toFixed(1)} м³/ч · H = ${actualPoint.head.toFixed(1)} м`:"Пересечение не найдено"}</b><IssueNotice id={`${id}/operating-point`}/></span></div>
       <div className="pump-chart__metrics"><span><small>Насосов</small><b>{count} раб.</b></span><span><small>Мощность</small><b>{selected.power===null?"—":`${selected.power*count} кВт`}</b></span><span><small>КПД</small><b>{selected.efficiency===null?"—":`${selected.efficiency}%`}</b></span></div>
@@ -437,8 +551,8 @@ function PanelContent({ collectorPanel, id, entity, input, secondaryInput, setti
     const sketch=pumpSketchFor(selected);
     return <PumpCard key={selected.id} pump={selected} issueTool={id}>{sketch?<PumpSketchView key={sketch.src} tool={id} pump={selected} sketch={sketch}/>:undefined}</PumpCard>;
   }
-  if (id === "settings") return <InstallationSettings settings={settings} input={input} secondaryInput={secondaryInput} onInputChange={patch=>onInputChange?.(patch)} onSecondaryInputChange={onSecondaryInputChange} onChange={patch=>onSettingsChange?.(patch)}/>;
-  if (id === "dn") return <DnCalculator entity={entity as DnEntity} input={input} secondaryInput={secondaryInput} settings={settings} onChange={onDnChange} onAddValves={onAddValves}/>;
+  if (id === "settings") return <InstallationSettings role={role} settings={settings} input={input} secondaryInput={secondaryInput} onInputChange={patch=>onInputChange?.(patch)} onSecondaryInputChange={onSecondaryInputChange} onChange={patch=>onSettingsChange?.(patch)}/>;
+  if (id === "dn") return <DnCalculator role={role} entity={entity as DnEntity} input={input} secondaryInput={secondaryInput} settings={settings} onChange={onDnChange} onAddValves={onAddValves}/>;
   if (id === "collectors") return collectorPanel;
   if (id === "spec") return <Specification entity={entity as SpecEntity} settings={settings} catalogue={catalogue}/>;
   if (id === "components") return <ComponentsDatabaseView/>;
@@ -448,7 +562,7 @@ function PanelContent({ collectorPanel, id, entity, input, secondaryInput, setti
   );
 }
 
-function FloatingPanel({ collectorPanel, panel, zoom, layoutMode="free", entity, input, secondaryInput, settings, catalogue, onInputChange, onSecondaryInputChange, onSettingsChange, onDnChange, onAddValves, onAddToSpec, onCabinetConfigured, onFocus, onChange, onDetach, onMinimize, onClose, secondaryEnabled }: { collectorPanel?: React.ReactNode; panel: PanelState; zoom: number; layoutMode?:WorkspaceMode; entity?: ProjectEntity; input: InputEntity; secondaryInput:InputEntity; settings: SettingsEntity; catalogue:Pump[]; onInputChange: (patch: Partial<InputEntity>) => void; onSecondaryInputChange: (patch: Partial<InputEntity>) => void; onSettingsChange:(patch:Partial<SettingsEntity>)=>void; onDnChange:(patch:Partial<DnEntity>)=>void; onAddValves:()=>void; onAddToSpec:()=>void; onCabinetConfigured:(cabinet:SmartCabinet)=>void; onFocus: () => void; onChange: (p: PanelState) => void; onDetach: () => void; onMinimize:()=>void; onClose:()=>void; secondaryEnabled:boolean }) {
+function FloatingPanel({ role, collectorPanel, panel, zoom, layoutMode="free", entity, input, secondaryInput, settings, catalogue, onInputChange, onSecondaryInputChange, onSettingsChange, onDnChange, onAddValves, onAddToSpec, onCabinetConfigured, onFocus, onChange, onDetach, onMinimize, onClose, secondaryEnabled }: { role: UserRole; collectorPanel?: React.ReactNode; panel: PanelState; zoom: number; layoutMode?:WorkspaceMode; entity?: ProjectEntity; input: InputEntity; secondaryInput:InputEntity; settings: SettingsEntity; catalogue:Pump[]; onInputChange: (patch: Partial<InputEntity>) => void; onSecondaryInputChange: (patch: Partial<InputEntity>) => void; onSettingsChange:(patch:Partial<SettingsEntity>)=>void; onDnChange:(patch:Partial<DnEntity>)=>void; onAddValves:()=>void; onAddToSpec:()=>void; onCabinetConfigured:(cabinet:SmartCabinet)=>void; onFocus: () => void; onChange: (p: PanelState) => void; onDetach: () => void; onMinimize:()=>void; onClose:()=>void; secondaryEnabled:boolean }) {
   const start = useRef<{ mode: "drag" | "resize"; px: number; py: number; panel: PanelState } | null>(null);
   const docked=layoutMode!=="free";
   const begin = (mode: "drag" | "resize", e: React.PointerEvent) => { if (docked||window.innerWidth < 760) return; e.preventDefault(); onFocus(); start.current = { mode, px: e.clientX, py: e.clientY, panel }; e.currentTarget.setPointerCapture(e.pointerId); };
@@ -487,7 +601,7 @@ function FloatingPanel({ collectorPanel, panel, zoom, layoutMode="free", entity,
       <div className="floating-panel__identity"><span className="floating-panel__eyebrow">{tool?PANEL_INFO[tool].eyebrow:"НОВЫЙ ИНСТРУМЕНТ"}</span><select value={tool??""} aria-label="Выбрать инструмент" onPointerDown={e=>e.stopPropagation()} onChange={e=>{const activeTool=e.target.value as PanelKind;onChange({...panel,activeTool,entityId:ENTITY_BY_TOOL[activeTool]})}}><option value="" disabled>Выберите инструмент</option>{(Object.keys(PANEL_INFO) as PanelKind[]).map(kind=>{const secondary=kind==="input2"||kind==="chart2"||kind==="sketch2";return <option key={kind} value={kind} disabled={secondary&&!secondaryEnabled}>{PANEL_INFO[kind].title}{secondary&&!secondaryEnabled?" — заблокирован":""}</option>})}</select></div>
       <div className="floating-panel__tools"><button onPointerDown={(e) => e.stopPropagation()} onClick={onMinimize} aria-label="Свернуть инструмент" title="Свернуть">―</button><button onPointerDown={(e) => e.stopPropagation()} onClick={onDetach} aria-label="Открыть в новой вкладке" title="Открыть в новой вкладке"><Icon name="external" /></button><button className="floating-panel__close" onPointerDown={(e) => e.stopPropagation()} onClick={onClose} aria-label="Закрыть инструмент" title="Закрыть"><Icon name="close" /></button></div>
     </header>
-    <div className="floating-panel__body"><DiagnosticSurface panelId={panel.id}>{tool&&entity?<PanelContent key={tool} collectorPanel={collectorPanel} id={tool} entity={entity} input={input} secondaryInput={secondaryInput} settings={settings} catalogue={catalogue} onInputChange={onInputChange} onSecondaryInputChange={onSecondaryInputChange} onSettingsChange={onSettingsChange} onDnChange={onDnChange} onAddValves={onAddValves} onAddToSpec={onAddToSpec} onCabinetConfigured={onCabinetConfigured} locked={(tool==="input2"||tool==="chart2"||tool==="sketch2")&&!secondaryEnabled}/>:<div className="empty-tool"><span>＋</span><b>Пустой инструмент</b><p>Выберите нужный инструмент в списке заголовка.</p></div>}</DiagnosticSurface></div>
+    <div className="floating-panel__body"><DiagnosticSurface panelId={panel.id}>{tool&&entity?<PanelContent role={role} key={tool} collectorPanel={collectorPanel} id={tool} entity={entity} input={input} secondaryInput={secondaryInput} settings={settings} catalogue={catalogue} onInputChange={onInputChange} onSecondaryInputChange={onSecondaryInputChange} onSettingsChange={onSettingsChange} onDnChange={onDnChange} onAddValves={onAddValves} onAddToSpec={onAddToSpec} onCabinetConfigured={onCabinetConfigured} locked={(tool==="input2"||tool==="chart2"||tool==="sketch2")&&!secondaryEnabled}/>:<div className="empty-tool"><span>＋</span><b>Пустой инструмент</b><p>Выберите нужный инструмент в списке заголовка.</p></div>}</DiagnosticSurface></div>
     {!docked&&<span className="floating-panel__resize" onPointerDown={(e) => begin("resize", e)} onPointerMove={move} onPointerUp={end} />}
   </article>;
 }
@@ -532,9 +646,16 @@ export default function Home() {
   const [detached, setDetached] = useState<string | null>(null);
   const [saveMessage, setSaveMessage] = useState("Все изменения сохранены");
   const [account,setAccount]=useState<AccountUser|null>(null);
+  const role = account?.role ?? "base";
+  const accessError = account ? projectAccessError(config, role) : null;
+  const [accessNotice,setAccessNotice]=useState("");
+  const setAccessibleConfig = useCallback<React.Dispatch<React.SetStateAction<ProjectConfig>>>(change => setConfig(current => {
+    const next = typeof change === "function" ? change(current) : change;
+    return projectAccessError(next, role) ? current : next;
+  }), [role]);
   const [accountLoading,setAccountLoading]=useState(true);
   const [projects,setProjects]=useState<StoredProject[]>([]);
-  const [view,setView]=useState<"workspace"|"projects"|"users">(()=>{const requested=typeof window!=="undefined"?new URLSearchParams(window.location.search).get("view"):null;return requested==="projects"||requested==="users"?requested:"workspace";});
+  const [view,setView]=useState<"workspace"|"projects"|"users"|"component-calculator">(()=>{const requested=typeof window!=="undefined"?new URLSearchParams(window.location.search).get("view"):null;return requested==="projects"||requested==="users"||requested==="component-calculator"?requested:"workspace";});
   const [catalogue,setCatalogue] = useState<Pump[]>([]);
   const [controlCabinets,setControlCabinets] = useState<ControlCabinet[]>([]);
   const [smartCabinets,setSmartCabinets] = useState<SmartCabinet[]>([]);
@@ -553,7 +674,7 @@ export default function Home() {
   const inputEntity2 = config.entities["system-input-2"] as InputEntity;
   const settingsEntity = config.entities["station-settings"] as SettingsEntity;
   const secondaryEnabled = isSecondaryEnabled(settingsEntity);
-  useCircuitSync(config, Boolean(account) && !accountLoading, setConfig, synchronizeSharedInputs);
+  useCircuitSync(config, Boolean(account) && !accountLoading, setAccessibleConfig, synchronizeSharedInputs);
   const { catalog: collectorCatalog, catalogError: collectorCatalogError, setCatalog: setCollectorCatalog } = useCollectorDatabase(config, setConfig, Boolean(account));
   const derivedIssues = useMemo(()=>collectProjectIssues(config,catalogue,collectorCatalog,smartCabinets,{...assetErrors,"collectors/catalog":collectorCatalogError}),[config,catalogue,collectorCatalog,smartCabinets,assetErrors,collectorCatalogError]);
   const diagnostics = useDiagnosticRegistry(config,derivedIssues);
@@ -568,7 +689,7 @@ export default function Home() {
 
   useEffect(() => {
     const params=new URLSearchParams(window.location.search),panel=params.get("panel"),requestedProject=params.get("project");
-    void fetch("/api/auth",{cache:"no-store"}).then(async response=>{if(!response.ok)throw new Error();const {user}=await response.json() as {user:AccountUser};setAccount(user);const projectResponse=await fetch("/api/projects",{cache:"no-store"});if(!projectResponse.ok)throw new Error();const data=await projectResponse.json() as {projects:StoredProject[]};setProjects(data.projects);const selected=data.projects.find(item=>item.id===requestedProject)??data.projects[0],loaded=selected?parseProjectConfig(selected.config):createProject("Новая насосная станция");setConfig(loaded);history.current=[loaded];historyIndex.current=0;if(panel&&loaded.workspace.windows.some(item=>item.id===panel))setDetached(panel);hydrated.current=true;}).catch(()=>setAccount(null)).finally(()=>setAccountLoading(false));
+    void fetch("/api/auth",{cache:"no-store"}).then(async response=>{if(!response.ok)throw new Error();const {user}=await response.json() as {user:AccountUser};setAccount(user);const projectResponse=await fetch("/api/projects",{cache:"no-store"});if(!projectResponse.ok)throw new Error();const data=await projectResponse.json() as {projects:StoredProject[]};setProjects(data.projects);const selected=data.projects.find(item=>item.id===requestedProject)??data.projects[0];let loaded=createProject("Новая насосная станция");if(selected){try{loaded=parseAccessibleProject(selected.config,user.role);}catch(error){setAccessNotice(`Проект «${selected.name}» сохранён без изменений. ${error instanceof Error?error.message:"Не удалось открыть проект."} Открыт новый проект со стандартными настройками.`);}}setConfig(loaded);history.current=[loaded];historyIndex.current=0;if(panel&&loaded.workspace.windows.some(item=>item.id===panel))setDetached(panel);hydrated.current=true;}).catch(()=>setAccount(null)).finally(()=>setAccountLoading(false));
   }, []);
   useEffect(() => {
     if (!account?.id) return;
@@ -590,7 +711,7 @@ export default function Home() {
     return () => { controller.abort(); window.clearInterval(timer); document.removeEventListener("visibilitychange", visible); };
   }, [account?.id]);
   useEffect(() => {
-    const navigate = () => { const requested = new URLSearchParams(window.location.search).get("view"); setView(requested === "projects" || requested === "users" ? requested : "workspace"); setSidebar(false); };
+    const navigate = () => { const requested = new URLSearchParams(window.location.search).get("view"); setView(requested === "projects" || requested === "users" || requested === "component-calculator" ? requested : "workspace"); setSidebar(false); };
     window.addEventListener("popstate", navigate);
     return () => window.removeEventListener("popstate", navigate);
   }, []);
@@ -619,20 +740,22 @@ export default function Home() {
     });
   }
   useEffect(() => {
-    if (!hydrated.current||!account) return;
+    if (!hydrated.current||!account||accessError) return;
     setSaveMessage("Сохранение…");
-    const timer = window.setTimeout(() => { const saved=withUpdatedTimestamp(config);fetch("/api/projects",{method:"PUT",headers:{"Content-Type":"application/json"},body:JSON.stringify({config:saved})}).then(response=>{if(!response.ok)throw new Error();setProjects(current=>{const entry:StoredProject={id:saved.project.id,name:saved.project.name,createdAt:saved.project.createdAt,updatedAt:saved.project.updatedAt,config:saved};return [entry,...current.filter(item=>item.id!==entry.id)].sort((a,b)=>b.updatedAt.localeCompare(a.updatedAt));});setSaveMessage("Все изменения сохранены");}).catch(()=>setSaveMessage("Ошибка сохранения")); }, 500);
+    const timer = window.setTimeout(() => { const saved=withUpdatedTimestamp(config);fetch("/api/projects",{method:"PUT",headers:{"Content-Type":"application/json"},body:JSON.stringify({config:saved})}).then(response=>{if(!response.ok)return response.json().then((result:{error?:string})=>{throw new Error(result.error??"Ошибка сохранения");});setProjects(current=>{const entry:StoredProject={id:saved.project.id,name:saved.project.name,createdAt:saved.project.createdAt,updatedAt:saved.project.updatedAt,config:saved};return [entry,...current.filter(item=>item.id!==entry.id)].sort((a,b)=>b.updatedAt.localeCompare(a.updatedAt));});setSaveMessage("Все изменения сохранены");}).catch(error=>setSaveMessage(error instanceof Error?error.message:"Ошибка сохранения")); }, 500);
     return () => window.clearTimeout(timer);
-  }, [config,account]);
+  }, [config,account,accessError]);
 
   const refreshHistoryState = () => setHistoryState({ canUndo:historyIndex.current>0, canRedo:historyIndex.current<history.current.length-1 });
   const updateConfig = (change: (current: ProjectConfig) => ProjectConfig) => setConfig(current => {
-    const next=withUpdatedTimestamp(refreshSuctionSpecification(synchronizeCollectors(change(current))));
+    const changed=change(current);
+    if(projectAccessError(changed,role))return current;
+    const next=withUpdatedTimestamp(refreshSuctionSpecification(synchronizeCollectors(changed)));
     if (hydrated.current && JSON.stringify(next)!==JSON.stringify(current)) { history.current=history.current.slice(0,historyIndex.current+1); history.current.push(next); historyIndex.current=history.current.length-1; queueMicrotask(refreshHistoryState); }
     return next;
   });
-  const undo = () => { if(historyIndex.current<=0)return; historyIndex.current--; setConfig(history.current[historyIndex.current]); refreshHistoryState(); };
-  const redo = () => { if(historyIndex.current>=history.current.length-1)return; historyIndex.current++; setConfig(history.current[historyIndex.current]); refreshHistoryState(); };
+  const undo = () => { if(historyIndex.current<=0)return; historyIndex.current--; setAccessibleConfig(history.current[historyIndex.current]); refreshHistoryState(); };
+  const redo = () => { if(historyIndex.current>=history.current.length-1)return; historyIndex.current++; setAccessibleConfig(history.current[historyIndex.current]); refreshHistoryState(); };
   const setPanels = (change: (panels: PanelState[]) => PanelState[]) => updateConfig(current => ({ ...current, workspace: { ...current.workspace, windows: change(current.workspace.windows) } }));
   const setZoom = (change: number | ((zoom: number) => number)) => updateConfig(current => ({ ...current, workspace: { ...current.workspace, zoom: typeof change === "function" ? change(current.workspace.zoom) : change } }));
   const setWorkspaceMode=(mode:WorkspaceMode)=>updateConfig(current=>{if(mode!=="grid")return {...current,workspace:{...current.workspace,mode}};const visible=current.workspace.windows.filter(panel=>!panel.minimized),cells=current.workspace.grid.cells.map(id=>visible.some(panel=>panel.id===id)?id:null),assigned=new Set(cells.filter((id):id is string=>Boolean(id))),remaining=visible.filter(panel=>!assigned.has(panel.id));for(let index=0;index<cells.length&&remaining.length;index++)if(!cells[index]){const panel=remaining.shift()!;cells[index]=panel.id;assigned.add(panel.id);}const windows=current.workspace.windows.map(panel=>!panel.minimized&&!assigned.has(panel.id)?{...panel,minimized:true}:panel);return {...current,workspace:{...current.workspace,mode,grid:{...current.workspace.grid,cells},windows}};});
@@ -654,6 +777,7 @@ export default function Home() {
   const updateDn = (patch:Partial<DnEntity>) => updateConfig(current=>({...current,entities:{...current.entities,"station-dn":{...(current.entities["station-dn"] as DnEntity),...patch}}}));
   const addValvesToSpec=()=>{setSaveMessage("Подбор арматуры и комплектация всасывающей и напорной линий…");void loadComponentsDatabase(true).then(database=>{updateConfig(current=>refreshSuctionSpecification(current,database,true));setSaveMessage("Всасывающая и напорная линии заполнены. Позиции без точного исполнения или цены отмечены «Уточнить».");}).catch(()=>setSaveMessage("Не удалось загрузить комплектующие для спецификации"));};
   const updateSettings = (patch: Partial<SettingsEntity>) => updateConfig(current => {
+    if((Object.keys(patch) as Array<keyof SettingsEntity>).some(key=>!canEditSetting(role,key)))return current;
     const settings={ ...(current.entities["station-settings"] as SettingsEntity), ...patch };
     const spec=current.entities["station-spec"] as SpecEntity,pump=catalogue.find(item=>item.id===current.station.selectedPumpId),total=current.station.totalPumpCount;
     const hydraulicSettingsOnly=Object.keys(patch).every(key=>key==="combinedCircuitsSimultaneous"||key==="inletHead");
@@ -682,12 +806,12 @@ export default function Home() {
   };
   const openFile = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]; event.target.value = ""; if (!file) return;
-    try { const loaded=parseProjectConfig(JSON.parse(await file.text())); setConfig(loaded); history.current=[loaded]; historyIndex.current=0; refreshHistoryState(); setSaveMessage(`Загружен файл ${file.name}`); }
+    try { const loaded=parseAccessibleProject(JSON.parse(await file.text()),role);setAccessNotice(""); setConfig(loaded); history.current=[loaded]; historyIndex.current=0; refreshHistoryState(); setSaveMessage(`Загружен файл ${file.name}`); }
     catch (error) { window.alert(error instanceof Error ? error.message : "Не удалось открыть проект"); }
   };
   const rename = () => { const name = window.prompt("Название проекта", config.project.name)?.trim(); if (name) updateConfig(current => ({ ...current, project: { ...current.project, name } })); };
-  const openStoredProject=(project:StoredProject)=>{const loaded=parseProjectConfig(project.config);setConfig(loaded);history.current=[loaded];historyIndex.current=0;refreshHistoryState();setView("workspace");window.history.replaceState({},"",`/?project=${encodeURIComponent(project.id)}`);};
-  const newProject = () => { if (view==="projects"||window.confirm("Создать новый проект? Все изменения текущего проекта уже сохранены.")) { const fresh=createProject(); setConfig(fresh); history.current=[fresh]; historyIndex.current=0; refreshHistoryState();setView("workspace");window.history.replaceState({},"","/"); } };
+  const openStoredProject=(project:StoredProject)=>{let loaded:ProjectConfig;try{loaded=parseAccessibleProject(project.config,role);}catch(error){window.alert(error instanceof Error?error.message:"Не удалось открыть проект");return;}setAccessNotice("");setConfig(loaded);history.current=[loaded];historyIndex.current=0;refreshHistoryState();setView("workspace");window.history.replaceState({},"",`/?project=${encodeURIComponent(project.id)}`);};
+  const newProject = () => { if (view==="projects"||window.confirm("Создать новый проект? Все изменения текущего проекта уже сохранены.")) { const fresh=createProject(); setAccessNotice(""); setConfig(fresh); history.current=[fresh]; historyIndex.current=0; refreshHistoryState();setView("workspace");window.history.replaceState({},"","/"); } };
   const deleteProject=async(project:StoredProject)=>{if(!window.confirm(`Удалить проект «${project.name}»? Это действие нельзя отменить.`))return;const response=await fetch(`/api/projects?id=${encodeURIComponent(project.id)}`,{method:"DELETE"});if(response.ok)setProjects(current=>current.filter(item=>item.id!==project.id));else window.alert("Не удалось удалить проект.");};
   const logout=async()=>{await fetch("/api/auth",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"logout"})});window.location.replace("/");};
 
@@ -705,18 +829,21 @@ export default function Home() {
   if(accountLoading)return <main className="auth-page"><section className="auth-intro"><Link className="brand auth-brand" href="/"><span className="brand__mark">PS</span><span><b>Pump Station</b><small>Calculator</small></span></Link></section><section className="auth-panel"><div className="auth-card"><span className="auth-icon">PS</span><h2>Загрузка</h2><p>Подготавливаем рабочее пространство…</p></div></section></main>;
   if(!account){const auth=new URLSearchParams(window.location.search).get("auth"),mode=auth==="verify"?"verify":auth==="reset"?"reset":"login";return <AccountScreen initialMode={mode}/>;}
   if(view==="projects")return <ProjectsPage user={account} projects={projects} onBack={()=>{setView("workspace");window.history.pushState({},"","/");}} onOpen={openStoredProject} onCreate={newProject} onDelete={deleteProject} onLogout={logout}/>;
+  if(view==="component-calculator")return <ComponentCalculator actor={account} onBack={()=>{setView("workspace");window.history.pushState({},"","/");}} onSaved={()=>{componentsDatabasePromise=undefined;loadedComponentsDatabase=undefined;}}/>;
   if(view==="users")return account.role==="admin"?<UsersPanel actor={account} onAccountChange={setAccount} onBack={()=>{setView("workspace");window.history.pushState({},"","/");}}/>:<main className="users-page"><div className="users-page__content"><h1>Доступ ограничен</h1><p>Список пользователей доступен только для admin.</p><button className="button" onClick={()=>{setView("workspace");window.history.replaceState({},"","/");}}>В рабочее пространство</button></div></main>;
 
-  const collectorPanel = <CollectorConstructor entity={config.entities["station-collectors"] as CollectorsEntity} inletHead={settingsEntity.inletHead} catalog={collectorCatalog} catalogError={collectorCatalogError} onCatalog={setCollectorCatalog} onChange={(type, patch, expectedFingerprint) => updateConfig(current => {
+  if(accessError)return <main className="users-page"><section className="users-page__content"><h1>Настройки проекта недоступны</h1><p>{accessError}</p><p>Сохранённый проект не изменён.</p><button className="button" onClick={()=>setView("projects")}>Мои проекты</button><button className="button" onClick={newProject}>Новый стандартный проект</button></section></main>;
+
+  const collectorPanel = <CollectorConstructor canCustomize={canEditAllSettings(role)} entity={config.entities["station-collectors"] as CollectorsEntity} inletHead={settingsEntity.inletHead} catalog={collectorCatalog} catalogError={collectorCatalogError} onCatalog={setCollectorCatalog} onChange={(type, patch, expectedFingerprint) => updateConfig(current => {
     const entity = current.entities["station-collectors"] as CollectorsEntity, state = entity[type];
     if (current.project.id !== config.project.id) return current;
     if (expectedFingerprint && (!state.configuration || configurationFingerprint(state.configuration) !== expectedFingerprint)) return current;
     return { ...current, entities: { ...current.entities, "station-collectors": { ...entity, [type]: { ...state, ...patch } } } };
   })}/>;
-  if (detached) { const windowState = panels.find(panel => panel.id === detached),tool=windowState?.activeTool; if(!windowState)return null; const secondary=tool==="input2"||tool==="chart2"||tool==="sketch2",entity=tool?config.entities[ENTITY_BY_TOOL[tool]]:undefined,activeInput=secondary?inputEntity2:inputEntity; return <DiagnosticsProvider value={diagnosticsValue}><main className="detached"><header className="detached__header"><div className="brand"><span className="brand__mark">PS</span><span><b>Pump Station</b><small>Calculator</small></span></div><span>{tool?PANEL_INFO[tool].title:"Пустой инструмент"}</span></header><section className="detached__content"><DiagnosticSurface panelId={windowState.id}>{tool&&entity?<PanelContent key={tool} collectorPanel={collectorPanel} id={tool} entity={entity} input={activeInput} secondaryInput={inputEntity2} settings={settingsEntity} catalogue={catalogue} onInputChange={secondary?updateInput2:updateInput} onSecondaryInputChange={updateInput2} onSettingsChange={updateSettings} onDnChange={updateDn} onAddValves={addValvesToSpec} onAddToSpec={()=>addSelectedPumpToSpec(secondary)} onCabinetConfigured={useConfiguredCabinet} locked={secondary&&!secondaryEnabled}/>:<div className="empty-tool"><span>＋</span><b>Пустой инструмент</b></div>}</DiagnosticSurface></section></main></DiagnosticsProvider>; }
+  if (detached) { const windowState = panels.find(panel => panel.id === detached),tool=windowState?.activeTool; if(!windowState)return null; const secondary=tool==="input2"||tool==="chart2"||tool==="sketch2",entity=tool?config.entities[ENTITY_BY_TOOL[tool]]:undefined,activeInput=secondary?inputEntity2:inputEntity; return <DiagnosticsProvider value={diagnosticsValue}><main className="detached"><header className="detached__header"><div className="brand"><span className="brand__mark">PS</span><span><b>Pump Station</b><small>Calculator</small></span></div><span>{tool?PANEL_INFO[tool].title:"Пустой инструмент"}</span></header><section className="detached__content"><DiagnosticSurface panelId={windowState.id}>{tool&&entity?<PanelContent role={account.role} key={tool} collectorPanel={collectorPanel} id={tool} entity={entity} input={activeInput} secondaryInput={inputEntity2} settings={settingsEntity} catalogue={catalogue} onInputChange={secondary?updateInput2:updateInput} onSecondaryInputChange={updateInput2} onSettingsChange={updateSettings} onDnChange={updateDn} onAddValves={addValvesToSpec} onAddToSpec={()=>addSelectedPumpToSpec(secondary)} onCabinetConfigured={useConfiguredCabinet} locked={secondary&&!secondaryEnabled}/>:<div className="empty-tool"><span>＋</span><b>Пустой инструмент</b></div>}</DiagnosticSurface></section></main></DiagnosticsProvider>; }
 
   const minimizedPanels=panels.filter(panel=>panel.minimized);
-  const renderWorkspacePanel=(panel:PanelState,mode:WorkspaceMode="free")=>{const tool=panel.activeTool,secondary=tool==="input2"||tool==="chart2"||tool==="sketch2";return <FloatingPanel collectorPanel={collectorPanel} key={panel.id} panel={panel} zoom={zoom} layoutMode={mode} entity={tool?config.entities[ENTITY_BY_TOOL[tool]]:undefined} input={secondary?inputEntity2:inputEntity} secondaryInput={inputEntity2} settings={settingsEntity} catalogue={catalogue} onInputChange={secondary?updateInput2:updateInput} onSecondaryInputChange={updateInput2} onSettingsChange={updateSettings} onDnChange={updateDn} onAddValves={addValvesToSpec} onAddToSpec={()=>addSelectedPumpToSpec(secondary)} onCabinetConfigured={useConfiguredCabinet} secondaryEnabled={secondaryEnabled} onFocus={()=>focus(panel.id)} onChange={change} onDetach={()=>openPanel(panel.id)} onMinimize={()=>minimizePanel(panel.id)} onClose={()=>closePanel(panel.id)}/>;};
+  const renderWorkspacePanel=(panel:PanelState,mode:WorkspaceMode="free")=>{const tool=panel.activeTool,secondary=tool==="input2"||tool==="chart2"||tool==="sketch2";return <FloatingPanel role={role} collectorPanel={collectorPanel} key={panel.id} panel={panel} zoom={zoom} layoutMode={mode} entity={tool?config.entities[ENTITY_BY_TOOL[tool]]:undefined} input={secondary?inputEntity2:inputEntity} secondaryInput={inputEntity2} settings={settingsEntity} catalogue={catalogue} onInputChange={secondary?updateInput2:updateInput} onSecondaryInputChange={updateInput2} onSettingsChange={updateSettings} onDnChange={updateDn} onAddValves={addValvesToSpec} onAddToSpec={()=>addSelectedPumpToSpec(secondary)} onCabinetConfigured={useConfiguredCabinet} secondaryEnabled={secondaryEnabled} onFocus={()=>focus(panel.id)} onChange={change} onDetach={()=>openPanel(panel.id)} onMinimize={()=>minimizePanel(panel.id)} onClose={()=>closePanel(panel.id)}/>;};
   const workspaceHint=workspaceMode==="free"?"Окна можно перемещать, масштабировать и прикреплять к границам":workspaceMode==="mobile"?"Один инструмент в строке на всю ширину рабочего пространства":`Фиксированная сетка ${workspaceGrid.columns} × ${workspaceGrid.rows}`;
   return <DiagnosticsProvider value={diagnosticsValue}><div className={`app-shell app-shell--${workspaceMode} ${ribbonCollapsed ? "app-shell--ribbon-collapsed" : ""} ${minimizedPanels.length?"app-shell--tasks":""}`}>
     <header className="app-header">
@@ -726,7 +853,8 @@ export default function Home() {
       <div className="app-header__actions"><span className="save-state"><i />{saveMessage}</span><button className="avatar" onClick={()=>{setSidebar(true)}} title={account.name}>{initials(account.name)}</button></div>
     </header>
 
-    <div className={`sidebar ${sidebar ? "sidebar--open" : ""}`} inert={!sidebar}><button className="sidebar__backdrop" onClick={() => setSidebar(false)} aria-label="Закрыть меню"/><aside className="sidebar__panel"><div className="sidebar__top"><div className="brand"><span className="brand__mark">PS</span><span><b>Pump Station</b><small>Calculator</small></span></div><button className="icon-button" onClick={() => setSidebar(false)}><Icon name="close" /></button></div><div className="user-card"><span className="avatar avatar--large">{initials(account.name)}</span><div><div className="user-card__name"><b>{account.name}</b><span className="user-role">{account.role}</span></div><small>{account.email}</small></div></div><nav className="sidebar__nav"><button className="sidebar__link sidebar__link--active" onClick={()=>setSidebar(false)}>▦ <span>Рабочее пространство</span></button><button className="sidebar__link" onClick={()=>{setView("projects");setSidebar(false);window.history.pushState({},"","/?view=projects");}}>▤ <span>Мои проекты</span><em>{projects.length}</em></button><Link className="sidebar__link" href="/?view=equipment">⌁ <span>База оборудования</span></Link>{account.role==="admin"&&<button className="sidebar__link" onClick={()=>{setView("users");setSidebar(false);window.history.pushState({},"","/?view=users");}}>♙ <span>Список пользователей</span></button>}<button className="sidebar__link" onClick={() => { setSidebar(false); setSettingsOpen(true); }}>⚙ <span>Настройки</span></button><button className="sidebar__link" onClick={logout}>↪ <span>Выйти</span></button></nav><div className="sidebar__footer"><button>?</button><span><b>Центр помощи</b><small>Документация и поддержка</small></span></div></aside></div>
+    {accessNotice && <p className="access-note" role="status">{accessNotice}<button className="button" onClick={()=>setAccessNotice("")}>Понятно</button></p>}
+    <div className={`sidebar ${sidebar ? "sidebar--open" : ""}`} inert={!sidebar}><button className="sidebar__backdrop" onClick={() => setSidebar(false)} aria-label="Закрыть меню"/><aside className="sidebar__panel"><div className="sidebar__top"><div className="brand"><span className="brand__mark">PS</span><span><b>Pump Station</b><small>Calculator</small></span></div><button className="icon-button" onClick={() => setSidebar(false)}><Icon name="close" /></button></div><div className="user-card"><span className="avatar avatar--large">{initials(account.name)}</span><div><div className="user-card__name"><b>{account.name}</b><span className="user-role">{account.role}</span></div><small>{account.email}</small></div></div><nav className="sidebar__nav"><button className="sidebar__link sidebar__link--active" onClick={()=>setSidebar(false)}>▦ <span>Рабочее пространство</span></button><button className="sidebar__link" onClick={()=>{setView("projects");setSidebar(false);window.history.pushState({},"","/?view=projects");}}>▤ <span>Мои проекты</span><em>{projects.length}</em></button><Link className="sidebar__link" href="/?view=equipment">⌁ <span>База оборудования</span></Link>{account.role==="admin"&&<button className="sidebar__link" onClick={()=>{setView("component-calculator");setSidebar(false);window.history.pushState({},"","/?view=component-calculator");}}>⌗ <span>Расчёт комплектующих</span></button>}{account.role==="admin"&&<button className="sidebar__link" onClick={()=>{setView("users");setSidebar(false);window.history.pushState({},"","/?view=users");}}>♙ <span>Список пользователей</span></button>}<button className="sidebar__link" onClick={() => { setSidebar(false); setSettingsOpen(true); }}>⚙ <span>Настройки</span></button><button className="sidebar__link" onClick={logout}>↪ <span>Выйти</span></button></nav><div className="sidebar__footer"><button>?</button><span><b>Центр помощи</b><small>Документация и поддержка</small></span></div></aside></div>
 
     <nav className="ribbon">
       <div className="ribbon__tabs">

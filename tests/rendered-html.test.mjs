@@ -89,9 +89,10 @@ test("keeps the production surface free of the starter preview", async () => {
   assert.match(projectConfig, /filter\(item => item\.section !== "pump"/);
   assert.match(projectConfig, /const primaryPump/);
   assert.match(projectConfig, /const secondaryPump/);
-  assert.match(projectConfig, /usdRate: 85/);
-  assert.match(projectConfig, /cnyRate: 13/);
-  assert.match(projectConfig, /manufacturerDiscounts: \{ cnp: 45, aquastrong: 55, onis: 0, vandjord: 25, wellmix: 35 \}/);
+  const settings = (await loadProjectConfig()).createProject().entities["station-settings"];
+  assert.equal(settings.usdRate, 85);
+  assert.equal(settings.cnyRate, 13);
+  assert.deepEqual(settings.manufacturerDiscounts, { cnp: 45, aquastrong: 55, onis: 0, vandjord: 25, wellmix: 35 });
   assert.match(page, /const curvePath\s*=\s*pumpCurvePath/);
   assert.doesNotMatch(page, /polynomialFit|solveLinearSystem/);
   assert.doesNotMatch(page, /pchipTangents/);
@@ -299,7 +300,7 @@ test("ships pump list prices with currencies and uses project pricing in the spe
   ]);
   const pumps = JSON.parse(rawPumps);
   const priced = pumps.filter(pump => Number.isFinite(pump.price));
-  assert.equal(pumps.length, 5758);
+  assert.equal(pumps.length, 5856);
   assert.ok(pumps.filter(pump => pump.selectable).every(pump => Number.isFinite(pump.power) && pump.power > 0));
   assert.equal(pumps.find(pump => pump.model === "CHLF15-30")?.power, 3);
   assert.equal(pumps.filter(pump => pump.manufacturer === "CNP" && pump.series === "CHLF").length, 28);
@@ -312,14 +313,18 @@ test("ships pump list prices with currencies and uses project pricing in the spe
   assert.match(page, /const pumpListPriceRub/);
   assert.match(page, /Прайсовая цена/);
   assert.match(page, /Цена со скидкой/);
-  assert.match(page, /discountedPrice=pumpPriceRub/);
+  assert.match(page, /purchasePriceRub:discountedPrice/);
   assert.match(page, /settings\.usdRate/);
   assert.match(page, /settings\.cnyRate/);
   assert.match(page, /price:pumpPriceRub\(pump,settings\)/);
   assert.match(page, /equipmentId:pump\.id/);
-  assert.match(page, /const reserveZoneRank/);
-  assert.match(page, /Number\.isFinite\(reserve\)&&reserve>=-5/);
-  assert.match(page, /zoneDifference\|\|\(pumpPriceRub/);
+  assert.match(page, /buildPumpSelection\(catalogue,calculated,settings,filters,sort\)/);
+  assert.match(page, /buildPumpSelection\(catalogue,next,settings,filters,sort\)/);
+  assert.match(page, /Фактические Q \/ H/);
+  assert.match(page, /signedPercent\(point\.deltaQPercent\)/);
+  assert.match(page, /signedPercent\(point\.deltaHPercent\)/);
+  assert.match(page, /Запас напора при заданном расходе/);
+  assert.match(page, /Сначала ΔQ и ΔH от −2% до \+15%, затем цена/);
 });
 
 test("binds verified CNP dimensional drawings to pump models", async () => {
@@ -464,7 +469,7 @@ test("provides a component-database tool with category-specific characteristics 
   ]);
   const database = JSON.parse(rawDatabase);
   assert.equal(database.catalogs.length, 25);
-  assert.equal(database.items.length, 1807);
+  assert.equal(database.items.length, 1827);
   assert.ok(!database.catalogs.some(catalog => catalog.id === "обвязка"));
   assert.ok(database.catalogs.some(catalog => catalog.id === "обратные-клапаны"));
   assert.ok(database.catalogs.some(catalog => catalog.id === "пожарная-арматура"));
@@ -522,10 +527,10 @@ test("ships the complete binding-component catalogue with prices and relations",
   assert.equal(catalogue.source.externalLinks.length, 2);
   assert.deepEqual(catalogue.statistics, {
     catalogs: 25,
-    tables: 78,
-    componentRows: 1807,
-    pricedComponentRows: 1778,
-    priceEntries: 4239,
+    tables: 79,
+    componentRows: 1827,
+    pricedComponentRows: 1798,
+    priceEntries: 4259,
     formulaRules: 4785,
     formulaErrorsInSavedValues: 0,
     dataValidations: 23,
@@ -562,7 +567,10 @@ test("defines the normalized D1 schema for binding components", async () => {
     readFile(new URL("../.openai/hosting.json", import.meta.url), "utf8"),
   ]);
 
-  assert.equal([...schema.matchAll(/sqliteTable\("/g)].length, 26);
+  assert.equal([...schema.matchAll(/sqliteTable\("/g)].length, 29);
+  for (const table of ["component_insertions", "component_insertion_items", "component_calculator_source_revision"]) {
+    assert.ok(schema.includes(`sqliteTable("${table}"`));
+  }
   for (const table of [
     "catalog_imports",
     "component_catalogs",

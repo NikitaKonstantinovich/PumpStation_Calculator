@@ -1,6 +1,7 @@
 import { createCollectors, normalizeCollectors, synchronizeCollectors, type CollectorsEntity } from "./collector-project";
 import { normalizeSpecificationItems, specificationOption } from "./specification-items";
 import type { PumpPortOverride } from "./pump-ports";
+import { defaultProjectSettings } from "./default-settings";
 
 export type PanelKind = "input" | "chart" | "sketch" | "input2" | "chart2" | "sketch2" | "settings" | "dn" | "spec" | "components" | "cabinet" | "collectors" | "model" | "issues";
 export type WorkspaceMode = "free" | "mobile" | "grid";
@@ -52,6 +53,7 @@ export type SettingsEntity = {
 export type SpecSection = "pump" | "control" | "suction" | "discharge" | "frame" | "electrical";
 export type SpecOption = "suctionCollector" | "dischargeCollector" | "secondaryPump" | "membraneTank" | "vibrationCompensators" | "collectorPlugs" | "isolatingValves" | "primarySuctionValve" | "primaryDischargeValve" | "primaryCheckValve" | "secondarySuctionValve" | "secondaryDischargeValve" | "secondaryCheckValve";
 export type SpecItem = {
+  selectedPn?: number;
   inletPressureCheck?: { checks: import("./dn-defaults").InletPressureCheck[]; baseStatus: "selected" | "clarify" | "confirmation" };
   dischargePressureCheck?: SpecItem["inletPressureCheck"];
   generatedBy?: "suction-line" | "discharge-line";
@@ -136,7 +138,6 @@ export const DEFAULT_SPEC_ITEMS: SpecItem[] = [
   { position: "04.11", name: "Клапан обратный", details: "Межфланцевый", quantity: 3, unit: "шт.", price: null, description: "На напорной линии каждого насоса", section: "discharge", option: "primaryCheckValve", status: "clarify" },
   { position: "04.10", name: "Затвор дисковый", details: "Межфланцевый", quantity: 3, unit: "шт.", price: null, description: "На напорной линии каждого насоса", section: "discharge", option: "primaryDischargeValve", status: "clarify" },
   { position: "04.02", name: "Коллектор напорный", details: "Нержавеющая сталь", quantity: 1, unit: "шт.", price: null, description: "Общий напорный коллектор", section: "discharge", option: "dischargeCollector", status: "clarify" },
-  { position: "04.03", name: "Вставка гибкая", details: "Виброкомпенсатор, фланцевая", quantity: 3, unit: "шт.", price: null, description: "Компенсация вибраций", section: "discharge", option: "vibrationCompensators", status: "clarify" },
   { position: "04.04", name: "Бак мембранный", details: "Объём уточняется настройками", quantity: 1, unit: "шт.", price: null, description: "Стабилизация давления", section: "discharge", option: "membraneTank", status: "clarify" },
   { position: "04.05", name: "Преобразователь давления", details: "Выход 4–20 мА", quantity: 1, unit: "шт.", price: null, description: "Обратная связь для шкафа управления", section: "discharge", status: "clarify" },
   { position: "04.06", name: "Заглушка коллектора", details: "Комплект для подводящего и напорного коллекторов", quantity: 2, unit: "шт.", price: null, description: "Закрытие резервных патрубков", section: "discharge", option: "collectorPlugs", status: "clarify" },
@@ -161,7 +162,7 @@ export function createProject(name = "Новая насосная станция
       "working-point-2": { kind: "chart", efficiency: 78, power: 22, npsh: 3.2 },
       "pump-sketch": { kind: "sketch" },
       "pump-sketch-2": { kind: "sketch" },
-      "station-settings": { kind: "settings", inletHead: null, stationType: "utility", combinedCircuitsSimultaneous: false, membraneTank: false, membraneTankVolume: 8, vibrationCompensators: false, collectorPlugs: false, isolatingValves: false, jockeyPump: false, usdRate: 85, cnyRate: 13, manufacturerDiscounts: { cnp: 45, aquastrong: 55, onis: 0, vandjord: 25, wellmix: 35 } },
+      "station-settings": defaultProjectSettings(),
       "station-dn": { kind: "dn", suctionCollectorDn: null, dischargeCollectorDn: null, suctionValveDn: null, dischargeValveDn: null, collectorMaterial: null, connectionType:null, pn:null, suctionValveType:null, dischargeValveType:null, secondarySuctionCollectorDn:null, secondaryDischargeCollectorDn:null, secondarySuctionValveDn:null, secondaryDischargeValveDn:null, secondaryConnectionType:null, secondaryPn:null, secondarySuctionValveType:null, secondaryDischargeValveType:null },
       "station-spec": { kind: "spec", items: DEFAULT_SPEC_ITEMS.map(item => ({ ...item })) },
       "station-components": { kind: "components" },

@@ -1,0 +1,7 @@
+.access-fields { min-width: 0; margin: 0; padding: 0; border: 0; }
+.access-fields:disabled input, .access-fields:disabled select, .access-fields:disabled button,
+.settings-form select:disabled { cursor: not-allowed; opacity: .6; }
+.access-fields:disabled .settings-form__option { cursor: not-allowed; opacity: .6; }
+.access-note { margin: 10px 12px; padding: 10px 12px; border: 1px solid var(--theme-border, #cbd6dd); border-radius: 6px; color: var(--theme-text-muted, #5c6d79); background: var(--theme-surface-subtle, #f7f9fa); font-size: 11px; line-height: 1.5; }
+.settings-form > .access-note { margin: 0 0 12px; }
+.access-note .button { width: auto; margin-left: 12px; }

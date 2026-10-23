@@ -138,7 +138,8 @@ const actualSelection=[
   page.slice(page.indexOf("const isJockeyCircuit="),page.indexOf("function DnCalculator(")),
   page.slice(page.indexOf("const HYDRAULIC_SPEC_OPTIONS:"),page.indexOf("function PanelContent(")),
   "let loadedComponentsDatabase; export {refreshSuctionSpecification};",
-  'export function changeCollectorMode(project, simultaneous, database) { let updated=project; loadedComponentsDatabase=database; const updateConfig=change=>{updated=refreshSuctionSpecification(synchronizeCollectors(change(updated)),database);}; const catalogue=[{id:"selected-pump"}]; const controlCabinets=[],smartCabinets=[]; const projectControlCabinetItem=()=>{throw new Error("Collector mode must preserve control cabinet items");};',
+  'import { canEditSetting } from "./project-access";',
+  'export function changeCollectorMode(project, simultaneous, database) { const role="pro"; let updated=project; loadedComponentsDatabase=database; const updateConfig=change=>{updated=refreshSuctionSpecification(synchronizeCollectors(change(updated)),database);}; const catalogue=[{id:"selected-pump"}]; const controlCabinets=[],smartCabinets=[]; const projectControlCabinetItem=()=>{throw new Error("Collector mode must preserve control cabinet items");};',
   page.slice(page.indexOf("  const updateSettings ="),page.indexOf("  const addSelectedPumpToSpec =")),
   'updateSettings({combinedCircuitsSimultaneous:simultaneous}); return updated; }',
 ].join("\n");

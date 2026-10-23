@@ -26,6 +26,7 @@ const componentSource = (await readFile(new URL("../app/pump-nozzle-fields.tsx",
 const { PumpNozzleFields } = await import(moduleUrl(componentSource));
 
 test("generated index tracks current pump database and preserves separate ports", () => {
+  for (const p of pumps) assert.equal(index[p.id]?.type, p.type, `${p.model}: pump type for default valve DN`);
   for (const p of pumps) for (const side of ["inlet", "outlet"]) {
     assert.deepEqual(index[p.id]?.[side] ?? null, catalogNozzle(p, side), `${p.model}: ${side}`);
   }

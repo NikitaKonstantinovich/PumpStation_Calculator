@@ -45,7 +45,7 @@ export async function currentUser(request: Request, touch = false) {
   const token = getCookie(request, SESSION_COOKIE); if (!token) return null;
   await ensureAuthSchema();
   const tokenHash = await sha256(token);
-  const user = await runtime().DB.prepare(`SELECT u.id, u.email, u.name, u.role FROM sessions s JOIN users u ON u.id=s.user_id WHERE s.token_hash=? AND datetime(s.expires_at)>CURRENT_TIMESTAMP AND u.email_verified_at IS NOT NULL`).bind(tokenHash).first<AccountUser>();
+  const user = await runtime().DB.prepare(`SELECT u.id, u.email, u.name, CASE WHEN u.role='admin' THEN 'admin' ELSE u.access_level END AS role FROM sessions s JOIN users u ON u.id=s.user_id WHERE s.token_hash=? AND datetime(s.expires_at)>CURRENT_TIMESTAMP AND u.email_verified_at IS NOT NULL`).bind(tokenHash).first<AccountUser>();
   if (user && touch) await runtime().DB.prepare("UPDATE sessions SET last_seen_at=CURRENT_TIMESTAMP WHERE token_hash=?").bind(tokenHash).run();
   return user;
 }
@@ -82,7 +82,7 @@ export const db = () => runtime().DB;
 let schemaReady:Promise<void>|null=null;
 export function ensureAuthSchema(){
   schemaReady??=(async()=>{const database=db();await database.batch([
-    database.prepare("CREATE TABLE IF NOT EXISTS users (id TEXT PRIMARY KEY NOT NULL,email TEXT NOT NULL,name TEXT NOT NULL,password_hash TEXT NOT NULL,email_verified_at TEXT,role TEXT NOT NULL DEFAULT 'user' CHECK(role IN ('admin','user')),revision INTEGER NOT NULL DEFAULT 0,created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP)"),
+    database.prepare("CREATE TABLE IF NOT EXISTS users (id TEXT PRIMARY KEY NOT NULL,email TEXT NOT NULL,name TEXT NOT NULL,password_hash TEXT NOT NULL,email_verified_at TEXT,role TEXT NOT NULL DEFAULT 'user' CHECK(role IN ('admin','user')),access_level TEXT NOT NULL DEFAULT 'base' CHECK(access_level IN ('base','plus','pro')),revision INTEGER NOT NULL DEFAULT 0,created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP)"),
     database.prepare("CREATE UNIQUE INDEX IF NOT EXISTS uq_users_email ON users(email)"),
     database.prepare("CREATE TABLE IF NOT EXISTS auth_tokens (id TEXT PRIMARY KEY NOT NULL,user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,token_hash TEXT NOT NULL,purpose TEXT NOT NULL,expires_at TEXT NOT NULL,used_at TEXT,created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP)"),
     database.prepare("CREATE UNIQUE INDEX IF NOT EXISTS uq_auth_tokens_hash ON auth_tokens(token_hash)"),
@@ -104,6 +104,17 @@ export function ensureAuthSchema(){
       try { await database.prepare(`ALTER TABLE ${table} ADD COLUMN ${column} ${definition}`).run(); }
       catch (error) { if (!await hasColumn()) throw error; }
     }
+  }
+  // Keep the legacy admin/user CHECK and all foreign keys intact. Public roles
+  // combine admin with the new access level; only pre-existing users become pro.
+  const hasAccessLevel = async () => (await database.prepare("PRAGMA table_info(users)").all<{ name: string }>()).results?.some(item => item.name === "access_level");
+  if (!await hasAccessLevel()) {
+    try {
+      await database.batch([
+        database.prepare("ALTER TABLE users ADD COLUMN access_level TEXT NOT NULL DEFAULT 'base' CHECK(access_level IN ('base','plus','pro'))"),
+        database.prepare("UPDATE users SET access_level='pro' WHERE role='user'"),
+      ]);
+    } catch (error) { if (!await hasAccessLevel()) throw error; }
   }
   await database.prepare("PRAGMA optimize").run();})().catch(error => { schemaReady = null; throw error; });
   return schemaReady;

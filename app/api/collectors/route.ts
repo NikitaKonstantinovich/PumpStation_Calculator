@@ -2,6 +2,7 @@ import { currentUser, db, json } from "../../auth-server";
 import { calculateCollector, collectorCode, configurationWarnings, type CollectorConfiguration } from "../../collector-calculations";
 import type { SavedCollector } from "../../collector-project";
 import { currentCollectorCatalog } from "../../collector-catalog-server";
+import { collectorAccessError } from "../../project-access";
 
 type Row = { id: string; code: string; configuration_json: string; calculation_json: string; cached_price_microunits: number; price_updated_at: string; source: string };
 const mapRow = (row: Row): SavedCollector => ({ id: row.id, code: row.code, configuration: JSON.parse(row.configuration_json), calculation: JSON.parse(row.calculation_json), price: row.cached_price_microunits / 1_000_000, priceUpdatedAt: row.price_updated_at, source: row.source });
@@ -37,6 +38,8 @@ export async function POST(request: Request) {
     if (!body || !["calculate", "create", "refresh"].includes(body.action ?? "")) return json({ error: "Неизвестное действие." }, 400);
     const configuration = parseConfiguration(body.configuration);
     if (!configuration) return json({ error: "Некорректная конфигурация: проверьте DN, соединения, PN и количество насосов." }, 400);
+    const accessError = collectorAccessError(configuration, user.role);
+    if (accessError) return json({ error: accessError }, 403);
     const catalog = await currentCollectorCatalog(), calculation = calculateCollector(configuration, catalog), code = collectorCode(configuration)!;
     if (body.action === "calculate") return json({ calculation, catalog });
     if (!calculation.complete || calculation.price === null) return json({ error: "Расчёт неполный", calculation }, 422);

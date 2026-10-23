@@ -136,7 +136,7 @@ test("actual specification render keeps technical descriptions and warnings behi
   const pageUrl = new URL("../app/page.tsx", import.meta.url);
   const page = await readFile(pageUrl, "utf8");
   const source = [
-    `import { useRef, useState } from ${JSON.stringify(import.meta.resolve("react"))};`,
+    `import { useEffect, useRef, useState } from ${JSON.stringify(import.meta.resolve("react"))};`,
     'import { specificationItemPresentation, specificationIssueId, specificationSection, visibleSpecificationItems } from "./specification-presentation";',
     'const IssueNavigationMessage=()=>null; const IssueMessages=()=>null;',
     'const normalizeSpecificationItems=items=>items; const isSecondaryEnabled=()=>false; const pumpPriceRub=()=>0;',
@@ -149,6 +149,9 @@ test("actual specification render keeps technical descriptions and warnings behi
   const item = withInletPressureChecks(row("Фланец", { details: "DN100 · PN16 · Ст20", description: "Предупреждение: проверить размеры" }), [checkInletPressure(200, "Фланец", 16, "PN16")]);
   const html = renderToStaticMarkup(createElement(Specification, { entity: { items: [item] }, settings: project().entities["station-settings"], catalogue: [] }));
   assert.match(html, /spec-table__row--warning/);
+  assert.match(html, /<summary[^>]*>Выгрузить/);
+  assert.match(html, /<button[^>]*>CSV<\/button>/);
+  assert.match(html, /<button[^>]*>XLSX<\/button>/);
   assert.match(html, /spec-table__cell--price[^>]*>125</);
   assert.match(html, /<button[^>]*aria-label="Ошибка: Фланец"/);
   assert.match(html, /spec-table__cell--description">DN100 · PN16 · Ст20<\/span>/);

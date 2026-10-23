@@ -3,7 +3,7 @@ import type { Pump } from "./pump-catalog";
 import type { CollectorCatalog } from "./collector-calculations";
 import type { CollectorsEntity } from "./collector-project";
 import type { SmartCabinet } from "./cabinet-configurator";
-import { interpolateCurve, operatingPoint, usablePump } from "./pump-catalog";
+import { selectionHeadAtFlow, operatingPoint, usablePump } from "./pump-catalog";
 import { suctionHydraulics, dischargeHydraulics, recommendedDn, flowVelocity, dnVelocityLimit, pressureCheckWarning } from "./dn-defaults";
 import { calculateCollector, configurationFingerprint, configurationWarnings, collectorPressureChecks, collectorVelocityWarning } from "./collector-calculations";
 import { pumpSketchFor } from "./pump-sketches";
@@ -60,7 +60,7 @@ export function collectProjectIssues(project: ProjectConfig, catalogue: Pump[], 
     else if (!selected) add(chart, "empty", "warning", "Для заданной рабочей точки насос не выбран.");
     else if (!usablePump(selected, input.medium)) add(chart, "empty", "error", "Для выбранной модели нет подтверждённой рабочей кривой для этой среды.");
     else {
-      const head = interpolateCurve(selected.curve, input.flowRate! / input.workingPumpCount!);
+      const head = selectionHeadAtFlow(selected, input.flowRate! / input.workingPumpCount!);
       if (head === null) add(tool, "selection/range", "error", "Запрашиваемый расход находится вне рабочего диапазона выбранного насоса.");
       else {
         const reserve = (head - input.head!) / input.head! * 100;

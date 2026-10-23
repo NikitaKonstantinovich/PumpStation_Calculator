@@ -40,6 +40,32 @@ const field = (name, value) => ({ column: name, headerPath: [name], value });
 const rowsOf = p => p.entities["station-spec"].items;
 const role = (rows, name) => rows.find(row => row.generatedBy === "discharge-line" && row.assemblyRole === name);
 const fill = (p, db = database, force = true) => refresh(synchronizeCollectors(p), db, force);
+
+test("vibration option refreshes both lines without legacy duplicates and survives reload and count changes", () => {
+  const p = fixture();
+  p.entities["station-settings"].vibrationCompensators = true;
+  const manual = { position: "04.90", section: "discharge", option: "vibrationCompensators", name: "Виброкомпенсатор заказчика", details: "Ручной подбор", quantity: 1, price: 1234, status: "selected" };
+  rowsOf(p).push(manual, { position: "04.03", name: "Вставка гибкая", details: "Виброкомпенсатор, фланцевая", quantity: 3, unit: "шт.", price: null, description: "Компенсация вибраций", section: "discharge", option: "vibrationCompensators", status: "clarify" });
+  let filled = fill(p);
+  const automatic = project => rowsOf(project).filter(row => row.assemblyRole?.endsWith("vibration-compensator"));
+  assert.equal(automatic(filled).length, 2);
+  assert.ok(rowsOf(filled).some(row => row.name === manual.name));
+  assert.ok(!rowsOf(filled).some(row => row.name === "Вставка гибкая"));
+  assert.deepEqual(rowsOf(fill(filled)), rowsOf(filled));
+  filled = fill(parseProjectConfig(JSON.parse(JSON.stringify(filled))), database, false);
+  assert.equal(automatic(filled).length, 2);
+  assert.ok(automatic(filled).every(row => row.selectedPn === 16));
+  filled.entities["system-input"].workingPumpCount = 3;
+  filled = fill(filled, database, false);
+  assert.ok(automatic(filled).every(row => row.quantity === 4));
+  filled.entities["station-settings"].vibrationCompensators = false;
+  filled = fill(filled, database, false);
+  assert.equal(automatic(filled).length, 0);
+  assert.ok(rowsOf(filled).every(row => !row.assemblyRole?.includes("vibration")));
+  assert.ok(rowsOf(filled).some(row => row.name === manual.name));
+  assert.ok(role(rowsOf(filled), "primary-pump-insertion"));
+});
+
 function build(p, db = database) {
   const e = p.entities;
   const valves = buildValveSpecItems(db, e["station-dn"], e["system-input"], e["system-input-2"], e["station-settings"], e["station-collectors"].discharge.configuration.material);
@@ -333,4 +359,5 @@ test("collector status follows saved catalogue price and clears only the pressur
   assert.equal(row.price, 12345);
   assert.equal(row.dischargePressureCheck.baseStatus, "selected");
   assert.equal(row.dischargePressureCheck.checks[0].status, "within-limit");
+  assert.ok(row.dischargePressureCheck.checks.every(check => !/окраска/i.test(check.message)));
 });

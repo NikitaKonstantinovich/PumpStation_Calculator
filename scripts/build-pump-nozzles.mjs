@@ -44,8 +44,7 @@ export function catalogNozzle(pump, side) {
 async function main() {
   const root = new URL("../", import.meta.url);
   const pumps = JSON.parse(await readFile(new URL("public/pumps.json", root), "utf8"));
-  const result = Object.fromEntries(pumps.map(p => [p.id, { inlet: catalogNozzle(p, "inlet"), outlet: catalogNozzle(p, "outlet") }])
-    .filter(([, ports]) => ports.inlet || ports.outlet));
+  const result = Object.fromEntries(pumps.map(p => [p.id, { type: p.type, inlet: catalogNozzle(p, "inlet"), outlet: catalogNozzle(p, "outlet") }]));
   await writeFile(new URL("app/pump-nozzles.json", root), JSON.stringify(result) + "\n");
   console.log(`Pump nozzle index: ${Object.keys(result).length} models`);
 }

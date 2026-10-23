@@ -8,10 +8,13 @@ import { matingParts, suctionCatalogItems, type AssemblyComponent } from "./suct
 import { field, number, itemDn, itemName, lineSpecParts } from "./line-spec-parts";
 import fastenerReference from "./suction-fasteners.json";
 import { selectDischargeInstruments } from "./suction-instruments";
+import { addPumpVibrationAssembly } from "./line-vibration";
+import { selectLineInsertion as selectDischargeInsertion } from "./line-insertion";
+export { selectDischargeInsertion };
 
 export function dischargeFingerprint(project: ProjectConfig) {
   const e = project.entities, settings = e["station-settings"] as SettingsEntity;
-  return JSON.stringify(["discharge-v1", settings.inletHead ?? null, e["station-dn"], e["system-input"], secondaryAllowed({ stationType: settings.stationType, jockey: settings.jockeyPump }) ? e["system-input-2"] : null, (e["station-collectors"] as CollectorsEntity).discharge.configuration]);
+  return JSON.stringify(["discharge-v1", settings.vibrationCompensators, settings.inletHead ?? null, e["station-dn"], e["system-input"], secondaryAllowed({ stationType: settings.stationType, jockey: settings.jockeyPump }) ? e["system-input-2"] : null, (e["station-collectors"] as CollectorsEntity).discharge.configuration]);
 }
 
 export function dischargeHead(project: ProjectConfig, secondary = false): number | null {
@@ -28,25 +31,13 @@ export function commonDischargeHead(project: ProjectConfig): number | null {
   return heads.some(head => head === null) ? null : Math.max(...heads as number[]);
 }
 
-// Keep the PN16 table price when only material confirmation is missing. Never
-// infer a material or a length from DN, and never extend the table to PN25.
-export function selectDischargeInsertion(items: AssemblyComponent[], dn: number, pn: number, material: "st20" | "aisi304") {
-  const part = [...items, ...suctionCatalogItems].find(item => item.id === `suction-table:ff-${dn}`);
-  const rating = componentPressureLimit(part)?.bar;
-  const requested = material === "aisi304" ? "AISI 304" : "Ст20";
-  if (!part || !rating || rating < pn) return { description: `В таблице вставок нет исполнения DN${dn} PN${pn} · ${requested}. Исполнение, длину и цену уточнить.` };
-  const text = String(field(part, /^Материал$/i) ?? "");
-  const actual = /AISI\s*304/i.test(text) ? "aisi304" : /(?:сталь|ст)\s*20/i.test(text) ? "st20" : null;
-  if (text && actual !== material) return { description: `Материал вставки в таблице (${text}) не соответствует ${requested}. Исполнение и цену уточнить.` };
-  return { item: part, description: actual ? `База комплектующих: ${part.id}; фланцы отдельно.` : `Материал вставки в таблице не указан: применимость к ${requested} и длину уточнить. Цена тела вставки из таблицы; фланцы отдельно.`, status: actual ? undefined : "clarify" as const };
-}
-
 export function buildDischargeSpec(project: ProjectConfig, database: { items: AssemblyComponent[] }, catalog: CollectorCatalog, valves: SpecItem[] = (project.entities["station-spec"] as { items: SpecItem[] }).items): SpecItem[] {
   const e = project.entities, settings = e["station-settings"] as SettingsEntity, dn = e["station-dn"] as DnEntity;
   const collector = (e["station-collectors"] as CollectorsEntity).discharge.configuration;
   if (!collector || !(e["system-input"] as InputEntity).calculated) return [];
   const rows: SpecItem[] = [];
-  const { add, gasket, flax, flanges, fasteners } = lineSpecParts(rows, "discharge", dischargeFingerprint(project), collector, database, catalog);
+  const parts = lineSpecParts(rows, "discharge", dischargeFingerprint(project), collector, database, catalog);
+  const { add, gasket, flax, flanges, fasteners } = parts;
   const insert = (role: string, size: number, pn: number, count: number, location: string) => {
     const selected = selectDischargeInsertion(database.items, size, pn, collector.material);
     add(role, `Вставка ФФ DN${size}–${size}`, count, `${location} · PN${pn} · ${collector.material === "aisi304" ? "AISI 304" : "Ст20"} · фланцы отдельными позициями`, selected.item, "шт.", undefined, selected.description, selected.status);
@@ -85,7 +76,9 @@ export function buildDischargeSpec(project: ProjectConfig, database: { items: As
     }
     const p = h.port, v = h.dn, pn = h.pn;
     let threads = 0;
-    if (p.connection === "threaded" && h.connection === "threaded") {
+    if (settings.vibrationCompensators) {
+      threads = addPumpVibrationAssembly({ parts, database, catalog, collector, port: p, valveDn: v, connection: h.connection, pn, count, prefix, title });
+    } else if (p.connection === "threaded" && h.connection === "threaded") {
       const part = pn <= 16 ? suctionCatalogItems.find(item => item.id === `suction-table:union-${v}`) : undefined;
       add(`${prefix}-union`, part?.family ?? `Американка НР-НР DN${v}`, count, `${title} · насос → обратный клапан · DN${v} · PN${pn}`, part);
       threads = 3;
@@ -143,7 +136,9 @@ export function buildDischargeSpec(project: ProjectConfig, database: { items: As
 }
 
 export function replaceDischargeSpec(items: SpecItem[], generated: SpecItem[]): SpecItem[] {
-  return [...items.filter(item => item.generatedBy !== "discharge-line"), ...generated];
+  const legacyVibration = (item: SpecItem) => !item.generatedBy && !item.equipmentId && item.price == null && item.option === "vibrationCompensators" &&
+    item.name === "Вставка гибкая" && item.details === "Виброкомпенсатор, фланцевая" && item.description === "Компенсация вибраций";
+  return [...items.filter(item => item.generatedBy !== "discharge-line" && !legacyVibration(item)), ...generated];
 }
 
 const checkDischargePressure = (head: number | null, name: string, limit?: number | null, label?: string): InletPressureCheck => {
@@ -159,7 +154,7 @@ export function checkDischargeSpecPressure(project: ProjectConfig, items: SpecIt
     if (item.option === "dischargeCollector" && collector) {
       checks = [checkDischargePressure(common, "Напорный коллектор", collector.pn, `PN${collector.pn}`)];
       if (catalog) for (const row of calculateCollector(collector, catalog).bom) {
-        if (row.kind !== "welding") checks.push(checkDischargePressure(common, row.name, catalog.components.find(part => part.id === row.componentId)?.pn));
+        if (row.kind !== "welding" && row.kind !== "painting") checks.push(checkDischargePressure(common, row.name, catalog.components.find(part => part.id === row.componentId)?.pn));
       }
     } else if (item.section === "pump") {
       const secondary = item.option === "secondaryPump";
@@ -171,7 +166,9 @@ export function checkDischargeSpecPressure(project: ProjectConfig, items: SpecIt
       if (item.section !== "discharge" || /(?:fasteners|limit-switches|error)/.test(item.assemblyRole ?? "") || (!item.generatedBy && !/^(?:primary|secondary)(?:Check|Discharge)Valve$/.test(item.option ?? ""))) return item;
       const role = item.assemblyRole ?? item.option ?? "";
       const head = role.startsWith("primary") ? dischargeHead(project) : role.startsWith("secondary") ? dischargeHead(project, true) : common;
-      const rating = componentPressureLimit(components.get(item.equipmentId ?? ""));
+      const componentRating = componentPressureLimit(components.get(item.equipmentId ?? ""));
+      const rating = item.selectedPn && item.selectedPn > 0
+        ? { bar: Math.min(item.selectedPn, componentRating?.bar ?? Infinity), label: `PN${item.selectedPn}` } : componentRating;
       const part = catalog?.components.find(part => part.id === item.equipmentId);
       checks = [checkDischargePressure(head, item.name, rating?.bar ?? part?.pn, rating?.label)];
     }

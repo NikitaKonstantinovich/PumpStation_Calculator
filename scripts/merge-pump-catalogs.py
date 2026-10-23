@@ -19,6 +19,7 @@ from copy import deepcopy
 from pathlib import Path
 
 from catalog_text import normalize_pump_catalog
+from leo_xst import attach_catalog as attach_leo_xst
 
 FRONTEND = Path(__file__).resolve().parents[1]
 DATA = FRONTEND / 'data/pump-catalog'
@@ -388,6 +389,14 @@ def main():
         if docs:
             details[p['id']]['documents'] = docs
 
+    leo_report = None
+    leo_path = DATA / 'leo-xst-source.json'
+    if leo_path.exists():
+        leo_report = attach_leo_xst(result, details, read_json(leo_path))
+        leo_report['snapshotSha256'] = hashlib.sha256(leo_path.read_bytes()).hexdigest()
+        leo_report['snapshotFile'] = 'data/pump-catalog/leo-xst-source.json'
+        source_metadata['local/leo-xst'] = leo_report
+        write_json(DATA / 'leo-xst-report.json', leo_report)
     text_originals = normalize_pump_catalog(result, details)
     write_json(DATA / 'text-originals.json', text_originals)
     result.sort(key=lambda p: (p['manufacturer'], p['series'], p['model'], p['id']))
@@ -406,6 +415,8 @@ def main():
               'remoteDrawingUrlsCached': sum('path' in r for r in remote_cache.values()),
               'remoteDrawingUrlsUnavailable': sum('error' in r for r in remote_cache.values()),
               'changedFields': dict(Counter(c['field'] for c in changes))}
+    if leo_report:
+        report['leoXst'] = leo_report
     write_json(PUBLIC / 'pumps.json', result)
     write_json(DATA / 'records.json', details)
     write_json(DATA / 'merge-report.json', report)
@@ -439,6 +450,8 @@ def main():
         if physical_document:
             db.execute('INSERT INTO catalog_metadata VALUES (?,?)', ('cnp_physical_sources', json.dumps(physical_document['sources'],ensure_ascii=False)))
         db.execute('INSERT INTO catalog_metadata VALUES (?,?)', ('catalog_text_originals', json.dumps(text_originals,ensure_ascii=False)))
+        if leo_report:
+            db.execute('INSERT INTO catalog_metadata VALUES (?,?)', ('leo_xst', json.dumps(leo_report,ensure_ascii=False)))
         if db.execute('PRAGMA integrity_check').fetchone()[0] != 'ok':
             raise ValueError('Merged SQLite integrity check failed')
     copied_source = FRONTEND.parent / 'database/calculator-nu-source.sqlite'

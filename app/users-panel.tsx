@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { AccountUser, ManagedUser, UserForm, UserRole } from "./user-types";
 
-const emptyForm: UserForm = { email: "", name: "", role: "user", password: "" };
+const emptyForm: UserForm = { email: "", name: "", role: "base", password: "" };
 type Change = { label: string; before: string; after: string };
 
 function UserEditor({ user, actor, onClose, onSaved }: {
@@ -49,7 +49,7 @@ function UserEditor({ user, actor, onClose, onSaved }: {
       <div className="users-form">
         <label><span>Имя</span><input required minLength={2} maxLength={120} autoComplete="off" value={form.name} onChange={event => setForm({ ...form, name: event.target.value })}/></label>
         <label><span>Почта</span><input type="email" required maxLength={254} autoComplete="off" value={form.email} onChange={event => setForm({ ...form, email: event.target.value })}/></label>
-        <label><span>Уровень</span><select value={form.role} disabled={user?.id === actor.id} onChange={event => setForm({ ...form, role: event.target.value as UserRole })}><option value="user">user — Пользователь</option><option value="admin">admin — Администратор</option></select></label>
+        <label><span>Уровень</span><select value={form.role} disabled={user?.id === actor.id} onChange={event => setForm({ ...form, role: event.target.value as UserRole })}><option value="base">base — Стандартное исполнение</option><option value="plus">plus — Опции проекта</option><option value="pro">pro — Все настройки</option><option value="admin">admin — Администратор</option></select></label>
         <label><span>{user ? "Новый пароль" : "Пароль"}</span><input type="password" required={!user} minLength={10} maxLength={256} autoComplete="new-password" value={form.password} placeholder={user ? "Оставьте пустым, чтобы не менять" : "Не менее 10 символов"} onChange={event => setForm({ ...form, password: event.target.value })}/></label>
       </div>
       <p className="users-note">{user ? "Сохранённый пароль скрыт. Чтобы сменить его, введите новый." : "Пользователь сможет сразу войти с указанными почтой и паролем. Подтверждение почты не требуется."}</p>
@@ -88,7 +88,7 @@ export function UsersPanel({ actor, onBack, onAccountChange }: { actor: AccountU
       <div className="users-toolbar"><label><span className="visually-hidden">Поиск пользователей</span><input type="search" value={query} placeholder="Поиск по имени, почте или уровню" onChange={event => setQuery(event.target.value)}/></label><span>{users.length} пользователей</span><button className="button" onClick={() => void load()}>Обновить</button></div>
       {error && <p className="users-error" role="alert">{error}</p>}{notice && <p className="users-notice" role="status">{notice}</p>}
       <div className="users-table-scroll"><table className="users-table"><caption className="visually-hidden">Пользователи калькулятора</caption><thead><tr><th>Почта</th><th>Имя</th><th>Уровень</th><th>Пароль</th><th>Статус</th><th><span className="visually-hidden">Действия</span></th></tr></thead><tbody>
-        {filtered.map(user => <tr key={user.id}><td>{user.email}{user.id === actor.id && <small>Ваш аккаунт</small>}{!user.verified && <small>Почта не подтверждена</small>}</td><td>{user.name}</td><td><span className={`user-role ${user.role === "user" ? "user-role--user" : ""}`}>{user.role}</span></td><td><span aria-label="Пароль скрыт">••••••••</span><small>Можно сменить</small></td><td><span className={`user-presence ${user.online ? "user-presence--online" : ""}`}><i aria-hidden="true"/>{user.online ? "В сети" : "Не в сети"}</span></td><td><button className="button" aria-label={`Изменить ${user.email}`} onClick={() => { setNotice(""); setEditor({ user }); }}>Изменить</button></td></tr>)}
+        {filtered.map(user => <tr key={user.id}><td>{user.email}{user.id === actor.id && <small>Ваш аккаунт</small>}{!user.verified && <small>Почта не подтверждена</small>}</td><td>{user.name}</td><td><span className={`user-role ${user.role !== "admin" ? "user-role--user" : ""}`}>{user.role}</span></td><td><span aria-label="Пароль скрыт">••••••••</span><small>Можно сменить</small></td><td><span className={`user-presence ${user.online ? "user-presence--online" : ""}`}><i aria-hidden="true"/>{user.online ? "В сети" : "Не в сети"}</span></td><td><button className="button" aria-label={`Изменить ${user.email}`} onClick={() => { setNotice(""); setEditor({ user }); }}>Изменить</button></td></tr>)}
         {!filtered.length && <tr><td colSpan={6} className="users-table__empty">{loading ? "Загрузка пользователей…" : error ? "Список недоступен" : "Пользователи не найдены"}</td></tr>}
       </tbody></table></div>
       <p className="users-note">«В сети» — активная сессия с откликом за последние 2 минуты. Список обновляется каждые 30 секунд.</p>

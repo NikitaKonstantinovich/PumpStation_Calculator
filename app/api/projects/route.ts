@@ -1,4 +1,6 @@
 import { currentUser, db, ensureAuthSchema, json } from "../../auth-server";
+import { parseProjectConfig } from "../../project-config";
+import { projectAccessError } from "../../project-access";
 
 export async function GET(request:Request){
   await ensureAuthSchema();
@@ -10,9 +12,13 @@ export async function GET(request:Request){
 export async function PUT(request:Request){
   await ensureAuthSchema();
   const user=await currentUser(request); if(!user)return json({error:"Требуется вход."},401);
-  const body=await request.json() as {config?:unknown},config=body.config as {project?:{id?:string;name?:string}}|undefined;
-  const id=config?.project?.id,name=config?.project?.name?.trim(); if(!id||!name)return json({error:"Некорректный проект."},400);
-  const serialized=JSON.stringify(config); if(serialized.length>2_000_000)return json({error:"Проект слишком большой."},413);
+  let config;
+  try {
+    const text = await request.text(); if(text.length>2_000_000)return json({error:"Проект слишком большой."},413);
+    config = parseProjectConfig(JSON.parse(text)?.config);
+  } catch { return json({error:"Некорректный проект."},400); }
+  const accessError=projectAccessError(config,user.role); if(accessError)return json({error:accessError},403);
+  const id=config.project.id,name=config.project.name,serialized=JSON.stringify(config);
   const existing=await db().prepare("SELECT id FROM user_projects WHERE id=? AND user_id=?").bind(id,user.id).first<{id:string}>();
   if(existing)await db().prepare("UPDATE user_projects SET name=?,config_json=?,updated_at=CURRENT_TIMESTAMP WHERE id=? AND user_id=?").bind(name,serialized,id,user.id).run();
   else await db().prepare("INSERT INTO user_projects (id,user_id,name,config_json) VALUES (?,?,?,?)").bind(id,user.id,name,serialized).run();

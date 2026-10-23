@@ -8,6 +8,7 @@ export type Pump = {
   id: string; manufacturer: string; series: string; group: string; model: string; type: PumpType;
   power: number | null; efficiency: number | null; nominalFlow: number | null;
   minFlow: number | null; maxFlow: number | null; minHead: number | null; maxHead: number | null;
+  selectionFlowRange?: [number, number];
   price: number | null; priceCurrency: "USD" | "CNY" | "RUB" | null;
   priceKind?: "list" | "net"; discountPercent?: number | null;
   priceSource: string | null; source: string | null; drawing: string | null; drawingSource?: string;
@@ -28,6 +29,12 @@ export function usablePump(pump: Pump, medium: "water" | "wastewater" = "water")
   return pump.selectable !== false && pump.active !== false && (pump.medium ?? "water") === medium &&
     pump.curve.length >= 2 && pump.curve.every(([q, h], i, points) =>
       Number.isFinite(q) && Number.isFinite(h) && q >= 0 && h >= 0 && (i === 0 || q > points[i - 1][0]));
+}
+
+export function selectionHeadAtFlow(pump: Pump, flow: number): number | null {
+  const range = pump.selectionFlowRange;
+  if (range && (flow < range[0] || flow > range[1])) return null;
+  return interpolateCurve(pump.curve, flow);
 }
 
 // Selection uses PCHIP by default; chart methods share rendering and intersection math.

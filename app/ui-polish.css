@@ -26,6 +26,14 @@
 .spec-sheet__summary { flex-wrap: wrap; gap: 8px 16px; font-size: 11px; }
 .spec-sheet__summary small { font-size: 9px; line-height: 1.4; text-align: right; }
 .spec-sheet__summary b { font-size: 12px; }
+.spec-sheet__actions { display: flex; align-items: center; flex-wrap: wrap; justify-content: flex-end; gap: 8px 12px; margin-left: auto; }
+.spec-sheet__total { display: grid; justify-items: end; gap: 2px; }
+.spec-export { flex-shrink: 0; }
+.spec-export summary { height: 32px; padding: 0 10px; font-size: 11px; }
+.spec-export summary[aria-disabled="true"] { opacity: .55; cursor: not-allowed; }
+.spec-export__menu { top: 36px; min-width: 120px; }
+.spec-export__menu button { height: 32px; font-size: 11px; }
+.spec-export__error { flex-basis: 100%; margin: 0; color: var(--theme-text-danger, #b43e32); font-size: 11px; }
 .spec-sheet__note { margin: 0; padding: 10px 14px; border-bottom: 1px solid var(--line); color: var(--muted); background: var(--paper); font-size: 11px; line-height: 1.5; overflow-wrap: anywhere; }
 .spec-table__row { min-width: 580px; grid-template-columns: 48px minmax(180px, 1fr) 48px 38px 106px 116px; font-size: 11px; }
 .spec-table__group { min-width: 580px; }
@@ -69,11 +77,14 @@
 .pump-selector__toolbar { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 .pump-selector__toolbar select { min-width: 0; font-size: 11px; }
 .pump-selector__actions { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-.pump-results__head, .pump-results__row { min-width: 700px; grid-template-columns: minmax(210px, 1fr) 88px 60px 140px 142px; gap: 8px; }
+.pump-selector__sort-note { margin: 0 0 8px; color: var(--muted); font-size: 10px; line-height: 1.5; }
+.pump-results__head, .pump-results__row { min-width: 920px; grid-template-columns: minmax(210px, 1fr) 110px 112px 130px 140px 142px; gap: 8px; }
 .pump-results__head { font-size: 9px; }
 .pump-results__row { font-size: 11px; padding: 9px; }
+.pump-results__row > span { min-width: 0; overflow-wrap: anywhere; line-height: 1.5; }
 .pump-results__row b { font-size: 11px; overflow-wrap: anywhere; }
 .pump-results__row small { font-size: 10px; }
+.pump-results__row .pump-results__priority { color: var(--ink); font-weight: 600; }
 .pump-results__discount-price b { font-size: 11px; white-space: nowrap; }
 .pump-results__discount-price small { font-size: 9px; }
 

@@ -21,7 +21,7 @@ test("migration retains every legacy identity and every legacy field as evidence
   assert.equal(pumps.length, report.totalCount);
   assert.equal(legacy.length, report.legacyCount);
   assert.equal(pumps.filter(p => p.selectable).length, report.selectableCount);
-  assert.deepEqual([...new Set(pumps.map(p => p.manufacturer))].sort(), ["Aquastrong", "CNP", "ONIS", "VANDJORD", "Wellmix"]);
+  assert.deepEqual([...new Set(pumps.map(p => p.manufacturer))].sort(), ["Aquastrong", "CNP", "LEO", "ONIS", "VANDJORD", "Wellmix"]);
   for (const old of legacy) {
     assert.ok(byId.has(old.id), old.model);
     assert.equal(normalize(byId.get(old.id)), normalize(old));
