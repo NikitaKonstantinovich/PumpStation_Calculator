@@ -1,3 +1,4 @@
+import { normalizeEditor, type EditorState } from "./model-editor/model";
 import { createCollectors, normalizeCollectors, synchronizeCollectors, type CollectorsEntity } from "./collector-project";
 import { normalizeSpecificationItems, specificationOption } from "./specification-items";
 import type { PumpPortOverride } from "./pump-ports";
@@ -73,7 +74,7 @@ export type SpecItem = {
   status: "selected" | "clarify" | "confirmation";
 };
 export type SpecEntity = { kind: "spec"; items: SpecItem[]; autoHydraulics?: boolean };
-export type ModelEntity = { kind: "model"; view: { rotation: number; zoom: number } };
+export type ModelEntity = { kind: "model"; view: { rotation: number; zoom: number }; mode?: "preview" | "editor"; editor?: EditorState };
 export type ComponentsEntity = { kind:"components" };
 export type CabinetEntity = { kind:"cabinet" };
 export type IssuesEntity = { kind:"issues" };
@@ -199,6 +200,9 @@ export function parseProjectConfig(raw: unknown): ProjectConfig {
   const needsSettingsPanel = !candidate.entities["station-settings"] && !windows.some(window => window.activeTool === "settings");
   const defaults = createProject(candidate.project.name, { id: candidate.project.id, timestamp: candidate.project.createdAt || now() });
   const entities = { ...defaults.entities, ...candidate.entities } as Record<string, ProjectEntity>;
+  const rawModel = entities["station-model"] as Partial<ModelEntity> | null;
+  entities["station-model"] = { kind: "model", view: { rotation: finite(rawModel?.view?.rotation, 0), zoom: finite(rawModel?.view?.zoom, 1) }, mode: rawModel?.mode === "editor" ? "editor" : "preview", ...(rawModel?.editor ? { editor: normalizeEditor(rawModel.editor) } : {}) };
+
   const input = entities["system-input"] as InputEntity & { pumpCount?: number } | undefined;
   if (input?.kind === "input") entities["system-input"] = { ...input, staticHead: input.staticHead ?? 0, workingPumpCount: input.workingPumpCount == null ? null : Math.max(1, finite(input.workingPumpCount, Math.max(1, finite(input.pumpCount, 2) - 1))), reservePumpCount: input.reservePumpCount == null ? null : Math.max(0, finite(input.reservePumpCount, 1)), calculated: input.calculated ?? (input.flowRate != null && input.head != null) };
   const input2 = entities["system-input-2"] as InputEntity | undefined;

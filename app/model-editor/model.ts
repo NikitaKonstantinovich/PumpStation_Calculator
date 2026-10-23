@@ -1,0 +1,295 @@
+import type { ProjectConfig, InputEntity, SettingsEntity, DnEntity, SpecEntity } from "../project-config";
+import type { Pump } from "../pump-catalog";
+import type { CollectorsEntity } from "../collector-project";
+import { catalogPumpPort } from "../pump-ports";
+import { defaultSnaps, normalizeSnaps, type SnapSettings } from "./snap-settings";
+
+/** All positions, source CAD coordinates and dimensions use mm; Euler angles use degrees, XYZ. */
+export type Vec3 = [number, number, number];
+export type Bounds = [number, number, number, number, number, number];
+export type Port = { id: string; point: Vec3; axis?: Vec3; provisional?: boolean };
+export type PortRef = { componentId: string; portId: string };
+export type PumpProfile = {
+  pumpId: string; bounds: Bounds; ports: Port[]; source: string; sourceHash: string;
+  meshUrl?: string; mapping: string; warnings: string[];
+};
+export type ProfileCatalog = { version: 1; profiles: Record<string, PumpProfile> };
+export type Component = {
+  id: string; name: string; kind: "pump" | "collector" | "pipe" | "frame" | "equipment";
+  equipmentId?: string; sourceKey?: string; sourceNote: string;
+  cadSource?: { path: string; hash: string };
+  position: Vec3; rotation: Vec3; hidden: boolean; opacity: number; locked: boolean;
+  parameters: { length: number; width: number; height: number; diameter: number; routeOffset: number };
+  bounds?: Bounds; meshUrl?: string; ports: Port[];
+  routing?: { from: PortRef; to: PortRef; automatic: boolean; points: Vec3[] };
+  orphaned?: boolean;
+};
+export type Assembly = { version: 1; sourceFingerprint: string; components: Component[] };
+export type CameraView = { position: Vec3; target: Vec3 };
+export type EditorState = {
+  version: 1; assembly: Assembly | null; selectedId: string | null;
+  grid: boolean; snap: boolean; snapStep: number; camera?: CameraView;
+  objectSnaps: SnapSettings;
+  referencePoints: Array<{ id: string; componentId: string; point: Vec3; approximate?: boolean }>;
+};
+export const emptyEditor = (): EditorState => ({ version: 1, assembly: null, selectedId: null, grid: true, snap: true, snapStep: 25, objectSnaps: defaultSnaps(), referencePoints: [] });
+export const add = (a: Vec3, b: Vec3): Vec3 => a.map((v, i) => v + b[i]) as Vec3;
+export const subtract = (a: Vec3, b: Vec3): Vec3 => a.map((v, i) => v - b[i]) as Vec3;
+export const distance = (a: Vec3, b: Vec3) => Math.hypot(...subtract(a, b));
+export const finite = (v: unknown): v is number => typeof v === "number" && Number.isFinite(v);
+const positive = (v: unknown, fallback: number) => finite(v) && v > 0 && v <= 1e6 ? v : fallback;
+const object = (v: unknown): Record<string, unknown> => v && typeof v === "object" && !Array.isArray(v) ? v as Record<string, unknown> : {};
+const vec = (v: unknown): v is Vec3 => Array.isArray(v) && v.length === 3 && v.every(n => finite(n) && Math.abs(n) <= 1e7);
+const safeId = (v: unknown): v is string => typeof v === "string" && v.length > 0 && v.length <= 240;
+const safeMesh = (v: unknown): v is string => typeof v === "string" && /^\/model-assets\/[a-zA-Z0-9_-]+\.stl$/.test(v);
+
+export function normalizeEditor(raw: unknown): EditorState {
+  const value = object(raw), result = emptyEditor();
+  if (value.version !== 1) return result;
+  result.objectSnaps = normalizeSnaps(value.objectSnaps);
+  if (Array.isArray(value.referencePoints)) result.referencePoints = value.referencePoints.slice(0, 500).flatMap(raw => {
+    const p = object(raw);
+    return safeId(p.id) && safeId(p.componentId) && vec(p.point) ? [{ id: p.id, componentId: p.componentId, point: [...p.point] as Vec3, ...(p.approximate === true ? { approximate: true } : {}) }] : [];
+  });
+  result.grid = value.grid !== false; result.snap = value.snap !== false;
+  result.snapStep = Math.min(1000, Math.max(1, positive(value.snapStep, 25)));
+  result.selectedId = safeId(value.selectedId) ? value.selectedId : null;
+  const camera = object(value.camera);
+  if (vec(camera.position) && vec(camera.target) && distance(camera.position, camera.target) > .01) result.camera = { position: [...camera.position], target: [...camera.target] };
+  const assembly = object(value.assembly);
+  if (assembly.version !== 1 || !Array.isArray(assembly.components) || assembly.components.length > 500) return result;
+  const components: Component[] = [], ids = new Set<string>();
+  for (const raw of assembly.components) {
+    const c = object(raw), p = object(c.parameters);
+    if (!safeId(c.id) || ids.has(c.id) || !["pump", "collector", "pipe", "frame", "equipment"].includes(String(c.kind)) || !vec(c.position) || !vec(c.rotation)) continue;
+    ids.add(c.id);
+    const ports: Port[] = Array.isArray(c.ports) ? c.ports.slice(0, 100).flatMap(raw => {
+      const port = object(raw);
+      return safeId(port.id) && vec(port.point) ? [{ id: port.id, point: [...port.point] as Vec3, ...(vec(port.axis) ? { axis: [...port.axis] as Vec3 } : {}), provisional: port.provisional === true }] : [];
+    }) : [];
+    const component: Component = {
+      id: c.id, name: typeof c.name === "string" ? c.name.slice(0, 300) : c.id, kind: c.kind as Component["kind"],
+      equipmentId: safeId(c.equipmentId) ? c.equipmentId : undefined, sourceKey: safeId(c.sourceKey) ? c.sourceKey : undefined,
+      sourceNote: typeof c.sourceNote === "string" ? c.sourceNote.slice(0, 2000) : "Источник не указан",
+      position: [...c.position], rotation: [...c.rotation], hidden: c.hidden === true, locked: c.locked === true,
+      opacity: finite(c.opacity) ? Math.min(1, Math.max(.1, c.opacity)) : 1,
+      parameters: { length: positive(p.length, 500), width: positive(p.width, 200), height: positive(p.height, 200), diameter: positive(p.diameter, 50), routeOffset: finite(p.routeOffset) ? p.routeOffset : 0 },
+      ports, meshUrl: safeMesh(c.meshUrl) ? c.meshUrl : undefined, orphaned: c.orphaned === true,
+    };
+    const cadSource = object(c.cadSource);
+    if (typeof cadSource.path === "string" && typeof cadSource.hash === "string" && /^[a-f0-9]{64}$/.test(cadSource.hash)) component.cadSource = { path: cadSource.path.slice(0, 1000), hash: cadSource.hash };
+    const bounds = c.bounds;
+    if (Array.isArray(bounds) && bounds.length === 6 && bounds.every(finite) && [0, 1, 2].every(i => bounds[i + 3] > bounds[i])) component.bounds = [...bounds] as Bounds;
+    const routing = object(c.routing), from = object(routing.from), to = object(routing.to);
+    if (c.kind === "pipe" && safeId(from.componentId) && safeId(from.portId) && safeId(to.componentId) && safeId(to.portId) && Array.isArray(routing.points) && routing.points.length >= 2 && routing.points.length <= 20 && routing.points.every(vec)) {
+      component.routing = { from: { componentId: from.componentId, portId: from.portId }, to: { componentId: to.componentId, portId: to.portId }, automatic: routing.automatic !== false, points: routing.points.map(p => [...p]) as Vec3[] };
+    }
+    components.push(component);
+  }
+  result.assembly = { version: 1, sourceFingerprint: typeof assembly.sourceFingerprint === "string" ? assembly.sourceFingerprint.slice(0, 200000) : "", components };
+  if (!ids.has(result.selectedId ?? "")) result.selectedId = null;
+  return result;
+}
+
+/** Matches Three.js Euler XYZ: the rightmost Z rotation is applied first. */
+export function rotate(point: Vec3, rotation: Vec3): Vec3 {
+  const [x, y, z] = rotation.map(v => v * Math.PI / 180), [a, b, c] = point;
+  const u = a * Math.cos(z) - b * Math.sin(z), v = a * Math.sin(z) + b * Math.cos(z);
+  const w = -u * Math.sin(y) + c * Math.cos(y), t = u * Math.cos(y) + c * Math.sin(y);
+  return [t, v * Math.cos(x) - w * Math.sin(x), v * Math.sin(x) + w * Math.cos(x)];
+}
+export const worldPoint = (c: Component, p: Vec3) => add(c.position, rotate(p, c.rotation));
+export function portPoint(assembly: Assembly, ref: PortRef): Vec3 | null {
+  const c = assembly.components.find(c => c.id === ref.componentId), port = c?.ports.find(p => p.id === ref.portId);
+  return c && port ? worldPoint(c, port.point) : null;
+}
+export function portAxis(assembly: Assembly, ref: PortRef): Vec3 | null {
+  const c = assembly.components.find(c => c.id === ref.componentId), port = c?.ports.find(p => p.id === ref.portId);
+  return c && port?.axis ? rotate(port.axis, c.rotation) : null;
+}
+export function pipePoints(assembly: Assembly, c: Component): Vec3[] {
+  if (c.routing) {
+    const a = portPoint(assembly, c.routing.from), b = portPoint(assembly, c.routing.to);
+    if (c.routing.automatic && !c.locked && a && b) {
+      const lead = Math.min(100, distance(a, b) / 4), axisA = portAxis(assembly, c.routing.from), axisB = portAxis(assembly, c.routing.to);
+      const aLead = axisA ? add(a, axisA.map(v => v * lead) as Vec3) : a;
+      const bLead = axisB ? add(b, axisB.map(v => v * lead) as Vec3) : b;
+      const x = (aLead[0] + bLead[0]) / 2 + c.parameters.routeOffset;
+      const points: Vec3[] = [a, aLead, [x, aLead[1], aLead[2]], [x, bLead[1], aLead[2]], [x, bLead[1], bLead[2]], bLead, b];
+      return points.filter((p, i) => i === 0 || distance(p, points[i - 1]) > .001);
+    }
+    return c.routing.points.map(p => worldPoint(c, p));
+  }
+  return [worldPoint(c, [-c.parameters.length / 2, 0, 0]), worldPoint(c, [c.parameters.length / 2, 0, 0])];
+}
+export function componentBounds(assembly: Assembly, c: Component): Bounds {
+  if (c.kind === "pipe") {
+    const points = pipePoints(assembly, c), r = c.parameters.diameter / 2, boxes: Bounds[] = [];
+    for (let j = 1; j < points.length; j++) {
+      const a = points[j - 1], b = points[j], length = distance(a, b);
+      const radial = [0, 1, 2].map(i => r * Math.sqrt(Math.max(0, 1 - ((b[i] - a[i]) / (length || 1)) ** 2)));
+      boxes.push([...[0, 1, 2].map(i => Math.min(a[i], b[i]) - radial[i]), ...[0, 1, 2].map(i => Math.max(a[i], b[i]) + radial[i])] as Bounds);
+    }
+    for (const p of points.slice(1, -1)) boxes.push([p[0] - r, p[1] - r, p[2] - r, p[0] + r, p[1] + r, p[2] + r]);
+    if (!boxes.length) return [...points[0], ...points[0]] as Bounds;
+    return [...[0, 1, 2].map(i => Math.min(...boxes.map(b => b[i]))), ...[3, 4, 5].map(i => Math.max(...boxes.map(b => b[i])))] as Bounds;
+  }
+  const p = c.parameters, bounds: Bounds = c.bounds ?? (c.kind === "collector" ? [-p.length / 2, -p.diameter / 2, -p.diameter / 2, p.length / 2, p.diameter / 2, p.diameter / 2] : [-p.length / 2, -p.width / 2, -p.height / 2, p.length / 2, p.width / 2, p.height / 2]);
+  const points: Vec3[] = [];
+  for (const x of [bounds[0], bounds[3]]) for (const y of [bounds[1], bounds[4]]) for (const z of [bounds[2], bounds[5]]) points.push(worldPoint(c, [x, y, z]));
+  return [...[0, 1, 2].map(i => Math.min(...points.map(p => p[i]))), ...[0, 1, 2].map(i => Math.max(...points.map(p => p[i])))] as Bounds;
+}
+export function assemblyBounds(assembly: Assembly, visibleOnly = false): Bounds | null {
+  const bounds = assembly.components.filter(c => !visibleOnly || !c.hidden).map(c => componentBounds(assembly, c));
+  return bounds.length ? [...[0, 1, 2].map(i => Math.min(...bounds.map(b => b[i]))), ...[3, 4, 5].map(i => Math.max(...bounds.map(b => b[i])))] as Bounds : null;
+}
+export const dimensions = (b: Bounds): Vec3 => [b[3] - b[0], b[4] - b[1], b[5] - b[2]];
+export const routeLength = (assembly: Assembly, c: Component) => pipePoints(assembly, c).reduce((length, p, i, points) => length + (i ? distance(p, points[i - 1]) : 0), 0);
+
+export type Edit = { id: string; patch: Partial<Pick<Component, "position" | "rotation" | "hidden" | "locked" | "opacity" | "parameters">> };
+/** One command is one immutable transaction; locked geometry cannot be changed by any input path. */
+export function editComponent(assembly: Assembly, edit: Edit): Assembly {
+  return { ...assembly, components: assembly.components.map(c => {
+    if (c.id !== edit.id) return c;
+    const { hidden, opacity, locked } = edit.patch;
+    let next: Component = { ...c, ...(typeof hidden === "boolean" ? { hidden } : {}), ...(finite(opacity) ? { opacity: Math.min(1, Math.max(.1, opacity)) } : {}) };
+    if (!c.locked) {
+      const automatic = c.routing?.automatic;
+      if (vec(edit.patch.position) && !automatic) next.position = [...edit.patch.position];
+      if (vec(edit.patch.rotation) && !automatic) next.rotation = [...edit.patch.rotation];
+      if (edit.patch.parameters && c.kind !== "pump" && c.kind !== "equipment") {
+        const params = { ...c.parameters };
+        for (const key of Object.keys(params) as Array<keyof Component["parameters"]>) {
+          const value = edit.patch.parameters[key];
+          if (finite(value) && Math.abs(value) <= 1e6 && (key === "routeOffset" || value >= 1)) params[key] = value;
+        }
+        // Parametric collector branch ports stay attached to the outside of its wall.
+        if (c.kind === "collector") next.ports = c.ports.map(port => ({ ...port, point: [port.point[0], Math.sign(port.point[1]) * params.diameter / 2, port.point[2]] }));
+        next.parameters = params;
+      }
+    }
+    if (typeof locked === "boolean") {
+      if (locked && !c.locked && c.routing) next = { ...next, position: [0, 0, 0], rotation: [0, 0, 0], routing: { ...c.routing, points: pipePoints(assembly, c) } };
+      next.locked = locked;
+    }
+    return next;
+  }) };
+}
+export function setAutomaticRoute(assembly: Assembly, id: string, automatic: boolean): Assembly {
+  return { ...assembly, components: assembly.components.map(c => c.id === id && c.routing && !c.locked ? { ...c, position: [0, 0, 0], rotation: [0, 0, 0], routing: { ...c.routing, automatic, points: pipePoints(assembly, c) } } : c) };
+}
+export function connectionIssues(assembly: Assembly): Array<{ id: string; message: string }> {
+  const issues: Array<{ id: string; message: string }> = [];
+  for (const c of assembly.components) {
+    if (c.orphaned) issues.push({ id: c.id, message: `${c.name}: отсутствует в текущем составе. Сохранена ручная компоновка.` });
+    if (c.routing) {
+      const a = portPoint(assembly, c.routing.from), b = portPoint(assembly, c.routing.to), points = pipePoints(assembly, c);
+      if (!a || !b) issues.push({ id: c.id, message: `${c.name}: точка подключения не найдена.` });
+      else if (distance(a, points[0]) > 1 || distance(b, points[points.length - 1]) > 1) issues.push({ id: c.id, message: `${c.name}: соединение нарушено. Зазор ${Math.max(distance(a, points[0]), distance(b, points[points.length - 1])).toFixed(1)} мм.` });
+    }
+    if (c.kind === "collector" && c.ports.some(p => Math.abs(p.point[0]) > c.parameters.length / 2)) issues.push({ id: c.id, message: `${c.name}: длина не вмещает все отводы.` });
+  }
+  return issues;
+}
+
+function base(id: string, name: string, kind: Component["kind"]): Component {
+  return { id, name, kind, position: [0, 0, 0], rotation: [0, 0, 0], hidden: false, opacity: 1, locked: false, ports: [], sourceNote: "Параметрическая компоновочная геометрия; монтажные размеры требуют проверки", parameters: { length: 500, width: 300, height: 80, diameter: 60.3, routeOffset: 0 } };
+}
+const outsideDiameter = (dn: number) => ({ 15: 21.3, 20: 26.9, 25: 33.7, 32: 42.4, 40: 48.3, 50: 60.3, 65: 76.1, 80: 88.9, 100: 114.3, 125: 139.7, 150: 168.3, 200: 219.1, 250: 273, 300: 323.9 }[dn] ?? dn * 1.1);
+export function sourceFingerprint(project: ProjectConfig): string {
+  const entities = project.entities;
+  return JSON.stringify([project.station, entities["system-input"], entities["system-input-2"], entities["station-dn"], entities["station-settings"], (entities["station-collectors"] as CollectorsEntity)?.suction.configuration, (entities["station-collectors"] as CollectorsEntity)?.discharge.configuration, (entities["station-spec"] as SpecEntity)?.items.map(i => [i.equipmentId, i.option, i.quantity, i.name, i.position])]);
+}
+export function buildAssembly(project: ProjectConfig, pumps: Pump[], profiles: ProfileCatalog): Assembly {
+  const settings = project.entities["station-settings"] as SettingsEntity, dn = project.entities["station-dn"] as DnEntity, collectors = project.entities["station-collectors"] as CollectorsEntity;
+  const components: Component[] = [], pumpComponents: Component[] = [];
+  let y = 0;
+  for (const circuit of [1, 2]) {
+    if (circuit === 2 && !(settings.stationType === "combined" || settings.stationType === "fire" && settings.jockeyPump)) continue;
+    const input = project.entities[circuit === 1 ? "system-input" : "system-input-2"] as InputEntity;
+    const pumpId = input.selectedPumpId ?? (circuit === 1 ? project.station.selectedPumpId : project.station.secondaryPumpId);
+    const pump = pumps.find(p => p.id === pumpId);
+    if (!pump) continue;
+    const count = Math.min(12, Math.max(1, Math.floor((input.workingPumpCount ?? 1) + (input.reservePumpCount ?? 0))));
+    const profile = profiles.profiles[pump.id], p = pump.dimensions;
+    const length = positive(p?.overall_length, positive(p?.flange_face_to_face, 400)), width = positive(p?.overall_width, positive(p?.base_width, 300)), height = positive(p?.overall_height, 700);
+    const inletHeight = positive(p?.flange_center_height, 100);
+    const bounds: Bounds = profile?.bounds ?? [0, -width / 2, -inletHeight, length, width / 2, height - inletHeight];
+    const pitch = Math.max(positive(collectors.suction.configuration?.[circuit === 1 ? "primary" : "secondary"]?.spacing, 500), bounds[4] - bounds[1] + 150);
+    for (let index = 0; index < count; index++) {
+      const c = base(`pump-${circuit}-${pump.id}-${index}`, `${pump.manufacturer} ${pump.model} · ${circuit}.${index + 1}`, "pump");
+      c.equipmentId = pump.id; c.sourceKey = pump.id; c.bounds = bounds; c.meshUrl = profile?.meshUrl;
+      if (profile) c.cadSource = { path: profile.source, hash: profile.sourceHash };
+      c.position = [0, y, 80 - bounds[2]];
+      c.parameters = { ...c.parameters, length: bounds[3] - bounds[0], width: bounds[4] - bounds[1], height: bounds[5] - bounds[2] };
+      c.ports = profile?.ports.length ? profile.ports.map(port => ({ ...port, point: [...port.point] })) : [{ id: "inlet", point: [0, 0, 0], axis: [-1, 0, 0], provisional: true }, { id: "outlet", point: [length, 0, 0], axis: [1, 0, 0], provisional: true }];
+      c.sourceNote = profile ? `${profile.meshUrl ? "Геометрия STEP" : "Габариты STEP; браузерная копия не подготовлена"}. ${profile.warnings.join(". ")}` : `Габаритное представление. ${p?.overall_length && p?.overall_width && p?.overall_height ? "Размеры из каталога" : "Часть размеров оценочная; уточните паспорт"}. Положения патрубков предварительные`;
+      if (profile) {
+        const mismatches = (["length", "width", "height"] as const).flatMap((key, index) => {
+          const catalogSize = p?.[`overall_${key}`], actualSize = c.parameters[key];
+          return finite(catalogSize) && catalogSize > 0 && Math.abs(catalogSize - actualSize) > 1 ? [`${["длина", "ширина", "высота"][index]} STEP ${actualSize.toFixed(1)} мм / каталог ${catalogSize} мм`] : [];
+        });
+        if (mismatches.length) c.sourceNote += `. Расхождение габаритов требует проверки: ${mismatches.join("; ")}`;
+      }
+      components.push(c); pumpComponents.push(c); y += pitch;
+    }
+  }
+  if (!pumpComponents.length) return { version: 1, sourceFingerprint: sourceFingerprint(project), components: [] };
+  const midY = (pumpComponents[0].position[1] + pumpComponents[pumpComponents.length - 1].position[1]) / 2, spanY = y;
+  const maxX = Math.max(...pumpComponents.map(c => c.position[0] + c.bounds![3]));
+  const frame = base("frame", "Рама установки", "frame");
+  frame.parameters = { ...frame.parameters, length: maxX + 1100, width: spanY + 150, height: 80 };
+  frame.position = [maxX / 2, midY, 40]; components.unshift(frame);
+  for (const type of ["suction", "discharge"] as const) {
+    const discharge = type === "discharge", state = collectors[type];
+    const nominal = state.configuration?.dn ?? (discharge ? dn.dischargeCollectorDn : dn.suctionCollectorDn) ?? 65;
+    const collector = base(`collector-${type}`, `${discharge ? "Напорный" : "Всасывающий"} коллектор DN${nominal}`, "collector");
+    collector.parameters = { ...collector.parameters, length: state.status === "complete" ? positive(state.calculation?.lengthMm, spanY + 50) : spanY + 50, diameter: outsideDiameter(nominal) };
+    collector.position = [discharge ? maxX + 350 : -350, midY, pumpComponents[0].position[2]]; collector.rotation = [0, 0, 90];
+    collector.ports = pumpComponents.map(c => ({ id: c.id, point: [c.position[1] - midY, (discharge ? 1 : -1) * collector.parameters.diameter / 2, 0], axis: [0, discharge ? 1 : -1, 0], provisional: true }));
+    components.push(collector);
+    for (const c of pumpComponents) {
+      const portId = discharge ? "outlet" : "inlet";
+      // PORT_A/PORT_B models awaiting direction review are visible, but not assigned flow roles.
+      if (!c.ports.some(p => p.id === portId)) continue;
+      const pipe = base(`pipe-${type}-${c.id}`, `${discharge ? "Напорная" : "Всасывающая"} труба · ${c.name}`, "pipe");
+      const secondary = c.id.startsWith("pump-2-");
+      const branch = state.configuration?.[secondary ? "secondary" : "primary"];
+      const branchDn = (discharge ? (secondary ? dn.secondaryDischargeValveDn : dn.dischargeValveDn) : (secondary ? dn.secondarySuctionValveDn : dn.suctionValveDn)) ?? branch?.dn ?? catalogPumpPort(c.equipmentId, portId)?.dn;
+      pipe.parameters.diameter = outsideDiameter(branchDn ?? 50);
+      if (!branchDn) pipe.sourceNote += ". DN не задан; для компоновки предварительно принят DN50";
+      pipe.routing = { from: { componentId: c.id, portId }, to: { componentId: collector.id, portId: c.id }, automatic: true, points: [] };
+      components.push(pipe);
+    }
+  }
+  const assembly: Assembly = { version: 1, sourceFingerprint: sourceFingerprint(project), components };
+  for (const c of components) if (c.routing) c.routing.points = pipePoints(assembly, c);
+  return assembly;
+}
+
+/** Synchronization retains manual geometry, removed components, and unsupported connections for review. */
+export function mergeAssembly(current: Assembly, generated: Assembly): Assembly {
+  const ids = new Set(generated.components.map(c => c.id));
+  return { ...generated, components: [...generated.components.map(c => {
+    const previous = current.components.find(old => old.id === c.id);
+    if (!previous) return c;
+    const addedPorts = c.kind === "collector" ? c.ports.filter(port => !previous.ports.some(old => old.id === port.id)).map(port => ({ ...port, point: [port.point[0], Math.sign(port.point[1]) * previous.parameters.diameter / 2, port.point[2]] as Vec3 })) : [];
+    return { ...previous, orphaned: false, name: c.name, ...(c.kind === "collector" ? { ports: [...previous.ports, ...addedPorts] } : {}), ...(c.kind === "pump" ? { bounds: c.bounds, meshUrl: c.meshUrl, ports: c.ports, sourceNote: c.sourceNote, cadSource: c.cadSource } : {}) };
+  }), ...current.components.filter(c => !ids.has(c.id)).map(c => c.sourceKey === "manual" ? c : { ...c, orphaned: true })] };
+}
+export function addManualPipe(assembly: Assembly, id: string): Assembly {
+  const c = base(id, "Труба (ручная)", "pipe"); c.sourceKey = "manual"; c.position = [0, 0, 500];
+  return { ...assembly, components: [...assembly.components, c] };
+}
+
+export type AssemblyHistory = { past: Assembly[]; present: Assembly; future: Assembly[] };
+export const createHistory = (present: Assembly): AssemblyHistory => ({ past: [], present, future: [] });
+export function execute(history: AssemblyHistory, next: Assembly): AssemblyHistory {
+  return JSON.stringify(history.present) === JSON.stringify(next) ? history : { past: [...history.past.slice(-29), history.present], present: next, future: [] };
+}
+export function undo(history: AssemblyHistory): AssemblyHistory {
+  return history.past.length ? { past: history.past.slice(0, -1), present: history.past[history.past.length - 1], future: [history.present, ...history.future] } : history;
+}
+export function redo(history: AssemblyHistory): AssemblyHistory {
+  return history.future.length ? { past: [...history.past, history.present], present: history.future[0], future: history.future.slice(1) } : history;
+}

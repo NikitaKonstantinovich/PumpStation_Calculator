@@ -1,0 +1,517 @@
+{
+  "schemaVersion": 1,
+  "project": {
+    "id": "PS-3D-EDITOR-EXAMPLE",
+    "name": "3D редактор — CNP CDM1-10",
+    "createdAt": "2026-10-23T00:00:00.000Z",
+    "updatedAt": "2026-10-23T00:00:00.000Z"
+  },
+  "station": {
+    "selectedPumpId": "9",
+    "selectedPumpModel": "CDM1-10",
+    "workingPumpCount": 2,
+    "reservePumpCount": 1,
+    "totalPumpCount": 3
+  },
+  "workspace": {
+    "zoom": 100,
+    "mode": "grid",
+    "gridHeightScreens": 1,
+    "grid": {
+      "columns": 1,
+      "rows": 1,
+      "columnSizes": [
+        1
+      ],
+      "rowSizes": [
+        1
+      ],
+      "cells": [
+        "model"
+      ]
+    },
+    "windows": [
+      {
+        "id": "model",
+        "activeTool": "model",
+        "entityId": "station-model",
+        "x": 0,
+        "y": 0,
+        "w": 1100,
+        "h": 700,
+        "z": 4,
+        "minimized": false
+      }
+    ]
+  },
+  "entities": {
+    "system-input": {
+      "kind": "input",
+      "flowRate": 2,
+      "head": 40,
+      "staticHead": 0,
+      "workingPumpCount": 2,
+      "reservePumpCount": 1,
+      "medium": "water",
+      "calculated": true,
+      "selectedPumpId": "9",
+      "selectedPumpModel": "CDM1-10"
+    },
+    "system-input-2": {
+      "kind": "input",
+      "flowRate": null,
+      "head": null,
+      "staticHead": 0,
+      "workingPumpCount": null,
+      "reservePumpCount": null,
+      "medium": "water",
+      "calculated": false
+    },
+    "working-point": {
+      "kind": "chart",
+      "efficiency": 78,
+      "power": 22,
+      "npsh": 3.2
+    },
+    "working-point-2": {
+      "kind": "chart",
+      "efficiency": 78,
+      "power": 22,
+      "npsh": 3.2
+    },
+    "pump-sketch": {
+      "kind": "sketch"
+    },
+    "pump-sketch-2": {
+      "kind": "sketch"
+    },
+    "station-settings": {
+      "kind": "settings",
+      "inletHead": null,
+      "stationType": "utility",
+      "combinedCircuitsSimultaneous": false,
+      "membraneTank": false,
+      "membraneTankVolume": 8,
+      "vibrationCompensators": false,
+      "collectorPlugs": false,
+      "isolatingValves": false,
+      "jockeyPump": false,
+      "usdRate": 85,
+      "cnyRate": 13,
+      "manufacturerDiscounts": {
+        "cnp": 45,
+        "aquastrong": 55,
+        "onis": 0,
+        "vandjord": 25,
+        "wellmix": 35
+      }
+    },
+    "station-dn": {
+      "kind": "dn",
+      "suctionCollectorDn": null,
+      "dischargeCollectorDn": null,
+      "suctionValveDn": null,
+      "dischargeValveDn": null,
+      "collectorMaterial": null,
+      "connectionType": null,
+      "pn": null,
+      "suctionValveType": null,
+      "dischargeValveType": null,
+      "secondarySuctionCollectorDn": null,
+      "secondaryDischargeCollectorDn": null,
+      "secondarySuctionValveDn": null,
+      "secondaryDischargeValveDn": null,
+      "secondaryConnectionType": null,
+      "secondaryPn": null,
+      "secondarySuctionValveType": null,
+      "secondaryDischargeValveType": null
+    },
+    "station-spec": {
+      "kind": "spec",
+      "items": [
+        {
+          "position": "01",
+          "name": "Насос CNP CDM 32-4",
+          "details": "22 кВт · 2900 об/мин",
+          "quantity": 3,
+          "unit": "шт.",
+          "price": null,
+          "description": "Рабочие и резервные насосы",
+          "section": "pump",
+          "status": "selected"
+        },
+        {
+          "position": "03",
+          "name": "Шкаф управления",
+          "details": "ПЧ · IP54",
+          "quantity": 1,
+          "unit": "шт.",
+          "price": null,
+          "description": "Управление насосной установкой",
+          "section": "control",
+          "status": "selected"
+        },
+        {
+          "position": "03.01",
+          "name": "Коллектор подводящий",
+          "details": "В1\"_16_3_500_1\"_AISI304",
+          "quantity": 1,
+          "unit": "шт.",
+          "price": null,
+          "description": "Коллектор отсутствует в базе — выполните расчёт в конструкторе",
+          "section": "suction",
+          "option": "suctionCollector",
+          "status": "confirmation",
+          "inletPressureCheck": {
+            "baseStatus": "clarify",
+            "checks": [
+              {
+                "status": "missing-head",
+                "message": "Всасывающий коллектор: напор на входе не задан — проверка давления по напору на входе не выполнена.",
+                "pressureBar": null,
+                "limitBar": 16
+              }
+            ]
+          }
+        },
+        {
+          "position": "03.02",
+          "name": "Затвор дисковый",
+          "details": "Межфланцевый",
+          "quantity": 3,
+          "unit": "шт.",
+          "price": null,
+          "description": "На подводящей линии каждого насоса",
+          "section": "suction",
+          "option": "primarySuctionValve",
+          "status": "clarify"
+        },
+        {
+          "position": "03.03",
+          "name": "Манометр",
+          "details": "С комплектом подключения",
+          "quantity": 1,
+          "unit": "шт.",
+          "price": null,
+          "description": "Контроль давления на входе",
+          "section": "suction",
+          "status": "clarify"
+        },
+        {
+          "position": "03.04",
+          "name": "Реле давления",
+          "details": "Защита от сухого хода",
+          "quantity": 1,
+          "unit": "шт.",
+          "price": null,
+          "description": "Автоматика подводящей линии",
+          "section": "suction",
+          "status": "clarify"
+        },
+        {
+          "position": "04.01",
+          "name": "Коллектор напорный",
+          "details": "Н1\"_16_3_500_1\"_AISI304",
+          "quantity": 1,
+          "unit": "шт.",
+          "price": null,
+          "description": "Коллектор отсутствует в базе — выполните расчёт в конструкторе",
+          "section": "discharge",
+          "option": "dischargeCollector",
+          "status": "clarify"
+        },
+        {
+          "position": "04.02",
+          "name": "Затвор дисковый",
+          "details": "Межфланцевый",
+          "quantity": 3,
+          "unit": "шт.",
+          "price": null,
+          "description": "На напорной линии каждого насоса",
+          "section": "discharge",
+          "option": "primaryDischargeValve",
+          "status": "clarify"
+        },
+        {
+          "position": "04.03",
+          "name": "Клапан обратный",
+          "details": "Межфланцевый",
+          "quantity": 3,
+          "unit": "шт.",
+          "price": null,
+          "description": "На напорной линии каждого насоса",
+          "section": "discharge",
+          "option": "primaryCheckValve",
+          "status": "clarify"
+        },
+        {
+          "position": "04.04",
+          "name": "Бак мембранный",
+          "details": "Объём уточняется настройками",
+          "quantity": 1,
+          "unit": "шт.",
+          "price": null,
+          "description": "Стабилизация давления",
+          "section": "discharge",
+          "option": "membraneTank",
+          "status": "clarify"
+        },
+        {
+          "position": "04.05",
+          "name": "Преобразователь давления",
+          "details": "Выход 4–20 мА",
+          "quantity": 1,
+          "unit": "шт.",
+          "price": null,
+          "description": "Обратная связь для шкафа управления",
+          "section": "discharge",
+          "status": "clarify"
+        },
+        {
+          "position": "04.06",
+          "name": "Заглушка коллектора",
+          "details": "Комплект для подводящего и напорного коллекторов",
+          "quantity": 2,
+          "unit": "шт.",
+          "price": null,
+          "description": "Закрытие резервных патрубков",
+          "section": "discharge",
+          "option": "collectorPlugs",
+          "status": "clarify"
+        },
+        {
+          "position": "04.07",
+          "name": "Затвор разделительный",
+          "details": "На коллекторах пожаротушения",
+          "quantity": 2,
+          "unit": "шт.",
+          "price": null,
+          "description": "Разделение секций коллекторов",
+          "section": "discharge",
+          "option": "isolatingValves",
+          "status": "clarify"
+        },
+        {
+          "position": "05.01",
+          "name": "Рама насосной установки",
+          "details": "Сталь с защитным покрытием",
+          "quantity": 1,
+          "unit": "шт.",
+          "price": null,
+          "description": "Общая несущая рама",
+          "section": "frame",
+          "status": "clarify"
+        },
+        {
+          "position": "05.02",
+          "name": "Стойка шкафа управления",
+          "details": "Левая и правая",
+          "quantity": 2,
+          "unit": "шт.",
+          "price": null,
+          "description": "Крепление шкафа к раме",
+          "section": "frame",
+          "status": "clarify"
+        },
+        {
+          "position": "05.03",
+          "name": "Комплект крепежа",
+          "details": "Болты, шайбы и заклёпочные гайки",
+          "quantity": 1,
+          "unit": "компл.",
+          "price": null,
+          "description": "Монтаж оборудования",
+          "section": "frame",
+          "status": "clarify"
+        },
+        {
+          "position": "05.04",
+          "name": "Виброопора",
+          "details": "Типоразмер уточняется",
+          "quantity": 4,
+          "unit": "шт.",
+          "price": null,
+          "description": "Установка рамы на основание",
+          "section": "frame",
+          "status": "clarify"
+        }
+      ]
+    },
+    "station-components": {
+      "kind": "components"
+    },
+    "station-control-cabinet": {
+      "kind": "cabinet"
+    },
+    "station-issues": {
+      "kind": "issues"
+    },
+    "station-collectors": {
+      "kind": "collectors",
+      "suction": {
+        "overrides": {},
+        "spacing1": 500,
+        "spacing2": 400,
+        "eccentric": false,
+        "recommended": {
+          "stationType": "utility",
+          "jockey": false,
+          "simultaneous": false,
+          "type": "suction",
+          "dn": 25,
+          "pn": 16,
+          "material": "aisi304",
+          "connection": "threaded",
+          "eccentric": false,
+          "primary": {
+            "flow": 2,
+            "working": 2,
+            "reserve": 1,
+            "pumpId": "9",
+            "pumpModel": "CDM1-10",
+            "dn": 25,
+            "connection": "threaded",
+            "pn": 16,
+            "spacing": 500
+          },
+          "secondary": null
+        },
+        "configuration": {
+          "stationType": "utility",
+          "jockey": false,
+          "simultaneous": false,
+          "type": "suction",
+          "dn": 25,
+          "pn": 16,
+          "material": "aisi304",
+          "connection": "threaded",
+          "eccentric": false,
+          "primary": {
+            "flow": 2,
+            "working": 2,
+            "reserve": 1,
+            "pumpId": "9",
+            "pumpModel": "CDM1-10",
+            "dn": 25,
+            "connection": "threaded",
+            "pn": 16,
+            "spacing": 500
+          },
+          "secondary": null
+        },
+        "code": "В1\"_16_3_500_1\"_AISI304",
+        "calculation": null,
+        "status": "uncalculated",
+        "database": null,
+        "databaseStatus": "unchecked",
+        "dnSource": {
+          "kind": "dn",
+          "suctionCollectorDn": null,
+          "dischargeCollectorDn": null,
+          "suctionValveDn": null,
+          "dischargeValveDn": null,
+          "collectorMaterial": null,
+          "connectionType": null,
+          "pn": null,
+          "suctionValveType": null,
+          "dischargeValveType": null,
+          "secondarySuctionCollectorDn": null,
+          "secondaryDischargeCollectorDn": null,
+          "secondarySuctionValveDn": null,
+          "secondaryDischargeValveDn": null,
+          "secondaryConnectionType": null,
+          "secondaryPn": null,
+          "secondarySuctionValveType": null,
+          "secondaryDischargeValveType": null
+        },
+        "sourceFingerprint": "[{\"stationType\":\"utility\",\"jockey\":false,\"simultaneous\":false,\"type\":\"suction\",\"dn\":25,\"pn\":16,\"material\":\"aisi304\",\"connection\":\"threaded\",\"eccentric\":false,\"primary\":{\"flow\":2,\"working\":2,\"reserve\":1,\"pumpId\":\"9\",\"pumpModel\":\"CDM1-10\",\"dn\":25,\"connection\":\"threaded\",\"pn\":16,\"spacing\":500},\"secondary\":null},{\"kind\":\"dn\",\"suctionCollectorDn\":null,\"dischargeCollectorDn\":null,\"suctionValveDn\":null,\"dischargeValveDn\":null,\"collectorMaterial\":null,\"connectionType\":null,\"pn\":null,\"suctionValveType\":null,\"dischargeValveType\":null,\"secondarySuctionCollectorDn\":null,\"secondaryDischargeCollectorDn\":null,\"secondarySuctionValveDn\":null,\"secondaryDischargeValveDn\":null,\"secondaryConnectionType\":null,\"secondaryPn\":null,\"secondarySuctionValveType\":null,\"secondaryDischargeValveType\":null},{\"kind\":\"input\",\"flowRate\":2,\"head\":40,\"staticHead\":0,\"workingPumpCount\":2,\"reservePumpCount\":1,\"medium\":\"water\",\"calculated\":true,\"selectedPumpId\":\"9\",\"selectedPumpModel\":\"CDM1-10\"},null]"
+      },
+      "discharge": {
+        "overrides": {},
+        "spacing1": 500,
+        "spacing2": 400,
+        "eccentric": false,
+        "recommended": {
+          "stationType": "utility",
+          "jockey": false,
+          "simultaneous": false,
+          "type": "discharge",
+          "dn": 25,
+          "pn": 16,
+          "material": "aisi304",
+          "connection": "threaded",
+          "eccentric": false,
+          "primary": {
+            "flow": 2,
+            "working": 2,
+            "reserve": 1,
+            "pumpId": "9",
+            "pumpModel": "CDM1-10",
+            "dn": 25,
+            "connection": "threaded",
+            "pn": 16,
+            "spacing": 500
+          },
+          "secondary": null
+        },
+        "configuration": {
+          "stationType": "utility",
+          "jockey": false,
+          "simultaneous": false,
+          "type": "discharge",
+          "dn": 25,
+          "pn": 16,
+          "material": "aisi304",
+          "connection": "threaded",
+          "eccentric": false,
+          "primary": {
+            "flow": 2,
+            "working": 2,
+            "reserve": 1,
+            "pumpId": "9",
+            "pumpModel": "CDM1-10",
+            "dn": 25,
+            "connection": "threaded",
+            "pn": 16,
+            "spacing": 500
+          },
+          "secondary": null
+        },
+        "code": "Н1\"_16_3_500_1\"_AISI304",
+        "calculation": null,
+        "status": "uncalculated",
+        "database": null,
+        "databaseStatus": "unchecked",
+        "dnSource": {
+          "kind": "dn",
+          "suctionCollectorDn": null,
+          "dischargeCollectorDn": null,
+          "suctionValveDn": null,
+          "dischargeValveDn": null,
+          "collectorMaterial": null,
+          "connectionType": null,
+          "pn": null,
+          "suctionValveType": null,
+          "dischargeValveType": null,
+          "secondarySuctionCollectorDn": null,
+          "secondaryDischargeCollectorDn": null,
+          "secondarySuctionValveDn": null,
+          "secondaryDischargeValveDn": null,
+          "secondaryConnectionType": null,
+          "secondaryPn": null,
+          "secondarySuctionValveType": null,
+          "secondaryDischargeValveType": null
+        },
+        "sourceFingerprint": "[{\"stationType\":\"utility\",\"jockey\":false,\"simultaneous\":false,\"type\":\"discharge\",\"dn\":25,\"pn\":16,\"material\":\"aisi304\",\"connection\":\"threaded\",\"eccentric\":false,\"primary\":{\"flow\":2,\"working\":2,\"reserve\":1,\"pumpId\":\"9\",\"pumpModel\":\"CDM1-10\",\"dn\":25,\"connection\":\"threaded\",\"pn\":16,\"spacing\":500},\"secondary\":null},{\"kind\":\"dn\",\"suctionCollectorDn\":null,\"dischargeCollectorDn\":null,\"suctionValveDn\":null,\"dischargeValveDn\":null,\"collectorMaterial\":null,\"connectionType\":null,\"pn\":null,\"suctionValveType\":null,\"dischargeValveType\":null,\"secondarySuctionCollectorDn\":null,\"secondaryDischargeCollectorDn\":null,\"secondarySuctionValveDn\":null,\"secondaryDischargeValveDn\":null,\"secondaryConnectionType\":null,\"secondaryPn\":null,\"secondarySuctionValveType\":null,\"secondaryDischargeValveType\":null},{\"kind\":\"input\",\"flowRate\":2,\"head\":40,\"staticHead\":0,\"workingPumpCount\":2,\"reservePumpCount\":1,\"medium\":\"water\",\"calculated\":true,\"selectedPumpId\":\"9\",\"selectedPumpModel\":\"CDM1-10\"},null]"
+      }
+    },
+    "station-model": {
+      "kind": "model",
+      "view": {
+        "rotation": 0,
+        "zoom": 1
+      },
+      "mode": "editor"
+    }
+  }
+}
