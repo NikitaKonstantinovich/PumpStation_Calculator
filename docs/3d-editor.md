@@ -222,6 +222,31 @@ SHA-256 готовых сеток и повторно обрабатывает �
 и запуск команды выше либо готовая папка `public/model-assets` целиком.
 Родные SLDPRT/SLDASM требуют отдельного экспорта в STEP из соответствующей САПР.
 
+Большие STL могут превышать ограничение Cloudflare Workers Assets в 25 МиБ.
+Для локального Miniflare предусмотрен `scripts/local-model-assets.mjs`:
+`localModelAssets(directory, fallback)` создаёт внутренний обработчик `ASSETS`,
+который потоково отдаёт плоскую папку моделей и свежий индекс. Он не запускает
+отдельный HTTP-сервер. Авторизацию выполняет Worker **до** вызова `env.ASSETS`.
+Обработчик разрешает только GET/HEAD для JSON-индексов и STL; другие ресурсы
+передаются обычной привязке `BUNDLED_ASSETS`.
+
+В локальном build добавьте `/model-assets/**` в `dist/client/.assetsignore`,
+назовите встроенную привязку `BUNDLED_ASSETS` и подключите обработчик:
+
+```js
+serviceBindings: {
+  ASSETS: localModelAssets(modelDirectory,
+    async request => (await worker.getBindings()).BUNDLED_ASSETS.fetch(request)),
+},
+```
+
+При этом маршрутизатор Miniflare должен передавать запросы Worker первым
+(`invoke_user_worker_ahead_of_assets: true`), а Worker — направлять разрешённые
+запросы файлов в `env.ASSETS.fetch(request)`. Это сохраняет проверку входа и
+снимает локальное ограничение размера без упрощения геометрии. Для облачного
+развёртывания больших файлов требуется отдельное хранилище с защищённой выдачей;
+локальный обработчик Node.js в Cloudflare Worker не переносится.
+
 ## Архитектура и границы этапа
 
 - `app/model-editor/model.ts`: сериализуемая сборка, порты, команды, история,
