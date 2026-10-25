@@ -3,6 +3,7 @@ import type { Pump } from "../pump-catalog";
 import type { CollectorsEntity } from "../collector-project";
 import { catalogPumpPort } from "../pump-ports";
 import { defaultSnaps, normalizeSnaps, type SnapSettings } from "./snap-settings";
+import { specificationModels } from "./specification-models";
 
 /** All positions, source CAD coordinates and dimensions use mm; Euler angles use degrees, XYZ. */
 export type Vec3 = [number, number, number];
@@ -10,10 +11,10 @@ export type Bounds = [number, number, number, number, number, number];
 export type Port = { id: string; point: Vec3; axis?: Vec3; provisional?: boolean };
 export type PortRef = { componentId: string; portId: string };
 export type PumpProfile = {
-  pumpId: string; bounds: Bounds; ports: Port[]; source: string; sourceHash: string;
+  pumpId?: string; key?: string; bounds: Bounds; ports: Port[]; source: string; sourceHash: string;
   meshUrl?: string; mapping: string; warnings: string[];
 };
-export type ProfileCatalog = { version: 1; profiles: Record<string, PumpProfile> };
+export type ProfileCatalog = { version: 1; profiles: Record<string, PumpProfile>; equipment?: Record<string, PumpProfile> };
 export type Component = {
   id: string; name: string; kind: "pump" | "collector" | "pipe" | "frame" | "equipment";
   equipmentId?: string; sourceKey?: string; sourceNote: string;
@@ -41,7 +42,7 @@ const positive = (v: unknown, fallback: number) => finite(v) && v > 0 && v <= 1e
 const object = (v: unknown): Record<string, unknown> => v && typeof v === "object" && !Array.isArray(v) ? v as Record<string, unknown> : {};
 const vec = (v: unknown): v is Vec3 => Array.isArray(v) && v.length === 3 && v.every(n => finite(n) && Math.abs(n) <= 1e7);
 const safeId = (v: unknown): v is string => typeof v === "string" && v.length > 0 && v.length <= 240;
-const safeMesh = (v: unknown): v is string => typeof v === "string" && /^\/model-assets\/[a-zA-Z0-9_-]+\.stl$/.test(v);
+const safeMesh = (v: unknown): v is string => typeof v === "string" && (/^\/model-assets\/[a-zA-Z0-9_-]+\.stl$/.test(v) || /^\/api\/model-preparation\/assets\/model-[a-f0-9]{64}-v1\.stl$/.test(v));
 
 export function normalizeEditor(raw: unknown): EditorState {
   const value = object(raw), result = emptyEditor();
@@ -234,7 +235,7 @@ export function buildAssembly(project: ProjectConfig, pumps: Pump[], profiles: P
       components.push(c); pumpComponents.push(c); y += pitch;
     }
   }
-  if (!pumpComponents.length) return { version: 1, sourceFingerprint: sourceFingerprint(project), components: [] };
+  if (!pumpComponents.length) return withSpecificationModels({ version: 1, sourceFingerprint: sourceFingerprint(project), components: [] }, project, profiles);
   const midY = (pumpComponents[0].position[1] + pumpComponents[pumpComponents.length - 1].position[1]) / 2, spanY = y;
   const maxX = Math.max(...pumpComponents.map(c => c.position[0] + c.bounds![3]));
   const frame = base("frame", "Рама установки", "frame");
@@ -264,7 +265,52 @@ export function buildAssembly(project: ProjectConfig, pumps: Pump[], profiles: P
   }
   const assembly: Assembly = { version: 1, sourceFingerprint: sourceFingerprint(project), components };
   for (const c of components) if (c.routing) c.routing.points = pipePoints(assembly, c);
-  return assembly;
+  return withSpecificationModels(assembly, project, profiles);
+}
+
+/** Additional purchased equipment waits beside the installation for manual placement.
+ * Port metadata is retained; guessing automatic valve mounting would be unsafe. */
+function withSpecificationModels(assembly: Assembly, project: ProjectConfig, profiles: ProfileCatalog): Assembly {
+  const components = [...assembly.components], represented = new Map<string, number>();
+  for (const c of components) if (c.kind === "pump") represented.set(`pump:${c.equipmentId}`, (represented.get(`pump:${c.equipmentId}`) ?? 0) + 1);
+  let slot = 0;
+  for (const item of specificationModels(project)) {
+    const profile = profiles.equipment?.[item.key] ?? (item.key.startsWith("pump:") ? profiles.profiles[item.equipmentId] : undefined);
+    if (!profile?.meshUrl || !profile.bounds) continue;
+    const count = Math.min(500, Math.floor(item.quantity)), skip = Math.min(represented.get(item.key) ?? 0, count);
+    represented.set(item.key, Math.max(0, (represented.get(item.key) ?? 0) - skip));
+    for (let i = skip; i < count && components.length < 500; i++) {
+      const c = base(`spec-${item.position}-${item.key}-${i}`, `${item.name} · ${item.position}.${i + 1}`, "equipment");
+      if (components.some(existing => existing.id === c.id)) continue;
+      c.equipmentId = item.equipmentId; c.sourceKey = item.key; c.bounds = profile.bounds; c.meshUrl = profile.meshUrl;
+      c.cadSource = { path: profile.source, hash: profile.sourceHash }; c.ports = profile.ports;
+      c.parameters = { ...c.parameters, length: profile.bounds[3] - profile.bounds[0], width: profile.bounds[4] - profile.bounds[1], height: profile.bounds[5] - profile.bounds[2] };
+      c.position = [2000 + (slot % 5) * Math.max(500, c.parameters.length + 100), Math.floor(slot / 5) * Math.max(500, c.parameters.width + 100), -profile.bounds[2]];
+      c.sourceNote = `Геометрия STEP. ${profile.warnings.join(". ")}. Требуется ручное размещение; автоматическое подключение этого оборудования не поддерживается`;
+      components.push(c); slot++;
+    }
+  }
+  return { ...assembly, components };
+}
+
+export function combineProfiles(current: ProfileCatalog, next: ProfileCatalog): ProfileCatalog {
+  return { version: 1, profiles: { ...current.profiles, ...next.profiles }, equipment: { ...current.equipment, ...next.equipment } };
+}
+
+/** Resource refresh is not an edit command. Apply it to history snapshots as well
+ * so Undo/Redo never rolls back a successfully prepared browser resource. */
+export function refreshModelAssets(current: Assembly, project: ProjectConfig, pumps: Pump[], prepared: ProfileCatalog): Assembly {
+  const generated = buildAssembly(project, pumps, prepared);
+  const supported = generated.components.filter(c => c.meshUrl && (c.kind === "pump" ? prepared.profiles[c.equipmentId ?? ""] : prepared.equipment?.[c.sourceKey ?? ""]));
+  const next = current.components.map(c => {
+    const fresh = supported.find(candidate => candidate.id === c.id);
+    if (!fresh) return c;
+    return { ...c, bounds: fresh.bounds, meshUrl: fresh.meshUrl, ports: fresh.ports, cadSource: fresh.cadSource,
+      parameters: fresh.parameters,
+      sourceNote: fresh.sourceNote + (/Расхождение габаритов/.test(c.sourceNote) && !/Расхождение габаритов/.test(fresh.sourceNote) ? `. ${c.sourceNote}` : "") };
+  });
+  for (const c of supported) if (!next.some(old => old.id === c.id) && next.length < 500) next.push(c);
+  return { ...current, components: next };
 }
 
 /** Synchronization retains manual geometry, removed components, and unsupported connections for review. */
@@ -274,7 +320,7 @@ export function mergeAssembly(current: Assembly, generated: Assembly): Assembly 
     const previous = current.components.find(old => old.id === c.id);
     if (!previous) return c;
     const addedPorts = c.kind === "collector" ? c.ports.filter(port => !previous.ports.some(old => old.id === port.id)).map(port => ({ ...port, point: [port.point[0], Math.sign(port.point[1]) * previous.parameters.diameter / 2, port.point[2]] as Vec3 })) : [];
-    return { ...previous, orphaned: false, name: c.name, ...(c.kind === "collector" ? { ports: [...previous.ports, ...addedPorts] } : {}), ...(c.kind === "pump" ? { bounds: c.bounds, meshUrl: c.meshUrl, ports: c.ports, sourceNote: c.sourceNote, cadSource: c.cadSource } : {}) };
+    return { ...previous, orphaned: false, name: c.name, ...(c.kind === "collector" ? { ports: [...previous.ports, ...addedPorts] } : {}), ...(c.kind === "pump" || c.kind === "equipment" ? { bounds: c.bounds, meshUrl: c.meshUrl, ports: c.ports, sourceNote: c.sourceNote, cadSource: c.cadSource } : {}) };
   }), ...current.components.filter(c => !ids.has(c.id)).map(c => c.sourceKey === "manual" ? c : { ...c, orphaned: true })] };
 }
 export function addManualPipe(assembly: Assembly, id: string): Assembly {

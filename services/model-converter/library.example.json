@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "models": [
+    {
+      "key": "equipment:REPLACE_WITH_CATALOGUE_EQUIPMENT_ID",
+      "source": "Equipment/Valves/REPLACE_WITH_REAL_MODEL.step",
+      "units": "mm",
+      "ports": [],
+      "warnings": ["Точки подключения не заданы. Монтажная пригодность модели не подтверждена"],
+      "mapping": "manual_catalogue_link"
+    }
+  ]
+}

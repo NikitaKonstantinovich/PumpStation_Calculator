@@ -45,3 +45,11 @@ yarn-error.log*
 dev-server.*.log
 /.next-dev*.log
 /.site-package*
+
+# Reproducible 3D preparation outputs and private local service configuration
+/.model-converter/
+/.model-library/
+/.venv-models/
+.dev.vars*
+/public/model-assets/model-*-v1.stl
+/public/model-assets/library.json

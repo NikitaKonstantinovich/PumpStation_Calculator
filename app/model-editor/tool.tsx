@@ -7,13 +7,17 @@ import { useRuntimeDiagnostic } from "../diagnostics-ui";
 import {
   addManualPipe, assemblyBounds, buildAssembly, componentBounds, connectionIssues, createHistory, dimensions,
   distance, editComponent, emptyEditor, execute, mergeAssembly, pipePoints, redo, routeLength, setAutomaticRoute,
-  sourceFingerprint, undo, type Assembly, type Component, type Edit, type EditorState, type ProfileCatalog, type Vec3,
+  sourceFingerprint, undo, combineProfiles, refreshModelAssets, type Assembly, type Component, type Edit, type EditorState, type ProfileCatalog, type Vec3,
 } from "./model";
 import type { ViewportHandle, EditorMode } from "./viewport";
 import { SnapDialog } from "./snap-dialog";
+import { ModelLibraryDialog } from "./library-dialog";
+import { addLibraryModel, type LibraryModel } from "./library";
 import { defaultSnaps } from "./snap-settings";
 import { localPoint, snapGeometry, workingPlane, type SnapLine } from "./snap-geometry";
 import { moveByPoints, type SnapPick } from "./snap-engine";
+import { specificationModels } from "./specification-models";
+import { PreparationProgress, useModelPreparation } from "./preparation";
 import "./editor.css";
 
 const Viewport = lazy(() => import("./viewport"));
@@ -41,6 +45,7 @@ export function ModelTool({ project, catalogue, entity, onChange }: {
   const [mode, setMode] = useState<EditorMode>("translate");
   const [measurement, setMeasurement] = useState<SnapPick[]>([]);
   const [snapOpen, setSnapOpen] = useState(false);
+  const [libraryOpen, setLibraryOpen] = useState(false);
   const [references, setReferences] = useState<SnapPick[]>([]);
   const [parallelLine, setParallelLine] = useState<SnapLine>();
   const [move, setMove] = useState<{ id: string; source?: SnapPick; target?: SnapPick }>();
@@ -57,17 +62,39 @@ export function ModelTool({ project, catalogue, entity, onChange }: {
   const displayAssembly = useMemo(() => move?.source && move.target ? moveByPoints(assembly, move.id, move.source.point, move.target.point) : assembly, [assembly, move]);
   const [history, setHistory] = useState(() => createHistory(assembly));
   const currentHistory = history.present === assembly ? history : createHistory(assembly);
+  const latest = useRef({ project, catalogue, assembly, entity, editor, currentHistory, onChange });
+  const mounted = useRef(true);
+  useEffect(() => { latest.current = { project, catalogue, assembly, entity, editor, currentHistory, onChange }; });
+  useEffect(() => { mounted.current = true; return () => { mounted.current = false; }; }, []);
+  const preparation = useModelPreparation(project.project.id, specificationModels(project), !!profiles && !!catalogue.length, async job => {
+    if (job.projectId !== latest.current.project.project.id || !mounted.current) return;
+    const before = latest.current;
+    const planned = refreshModelAssets(before.assembly, before.project, before.catalogue, job.profiles);
+    let loadError: unknown;
+    try { await viewport.current?.prepareMeshes(planned.components.flatMap(c => c.meshUrl ? [c.meshUrl] : [])); }
+    catch (error) { loadError = error; }
+    if (job.projectId !== latest.current.project.project.id || !mounted.current) return;
+    // Read again after loading: users can move/edit components while conversion runs.
+    const now = latest.current;
+    const refresh = (value: Assembly) => refreshModelAssets(value, now.project, now.catalogue, job.profiles);
+    const next = refresh(now.assembly);
+    setProfiles(current => combineProfiles(current ?? EMPTY_PROFILES, job.profiles));
+    setHistory({ past: now.currentHistory.past.map(refresh), present: next, future: now.currentHistory.future.map(refresh) });
+    now.onChange({ ...now.entity, editor: { ...now.editor, assembly: next } });
+    if (loadError) throw new Error("Не все STL удалось загрузить. Сохранена компоновка; для недоступных моделей показаны габариты. Проверьте подключение к сервису.");
+    setAssetError("");
+  });
   const selected = assembly.components.find(c => c.id === editor.selectedId);
   const stale = Boolean(editor.assembly && editor.assembly.sourceFingerprint !== sourceFingerprint(project));
   const issues = useMemo(() => connectionIssues(assembly), [assembly]);
-  const sourceWarnings = assembly.components.filter(c => c.kind === "pump").map(c => c.sourceNote);
+  const sourceWarnings = assembly.components.filter(c => c.kind === "pump" || c.kind === "equipment").map(c => c.sourceNote);
   const diagnostic = [...(stale ? ["Состав установки изменён. Обновите состав в 3D-редакторе; ручная компоновка сохранена."] : []), ...issues.map(i => i.message), catalogError, assetError].filter(Boolean).join("\n");
   useRuntimeDiagnostic("model", "assembly", diagnostic, "warning");
   useEffect(() => {
     const controller = new AbortController();
     void fetch("/model-assets/manifest.json", { signal: controller.signal }).then(r => { if (!r.ok) throw new Error(); return r.json(); }).then((data: ProfileCatalog) => {
       if (data.version !== 1 || !data.profiles || typeof data.profiles !== "object") throw new Error();
-      setProfiles(data);
+      setProfiles(current => combineProfiles(data, current ?? EMPTY_PROFILES));
     }).catch(error => { if (error.name !== "AbortError") { setCatalogError("Библиотека CAD недоступна; используется габаритное представление по каталогу."); setProfiles(EMPTY_PROFILES); } });
     return () => controller.abort();
   }, []);
@@ -94,6 +121,18 @@ export function ModelTool({ project, catalogue, entity, onChange }: {
     update({ assembly: nextHistory.present });
   };
   const edit = (id: string, patch: Edit["patch"]) => commit(editComponent(assembly, { id, patch }));
+  const addFromLibrary = async (model: LibraryModel, signal: AbortSignal) => {
+    const projectId = project.project.id;
+    if (!viewport.current || !model.meshUrl) throw new Error("3D-сцена ещё не готова");
+    await viewport.current.prepareMeshes([model.meshUrl]);
+    signal.throwIfAborted();
+    if (!mounted.current || latest.current.project.project.id !== projectId) throw new Error("Проект изменился во время загрузки модели");
+    const current = latest.current, id = `manual-model-${crypto.randomUUID()}`;
+    const next = addLibraryModel(current.assembly, model, id);
+    setHistory(execute(current.currentHistory, next));
+    current.onChange({ ...current.entity, editor: { ...current.editor, assembly: next, selectedId: id } });
+    requestAnimationFrame(() => viewport.current?.fit());
+  };
   const cancelOperation = () => { if (mode === "between1" || mode === "between2") setReferences([]); setMove(undefined); setMode("translate"); setOperationNote(""); };
   const activate = (next: EditorMode) => { setMove(undefined); setMode(next); setOperationNote(""); };
   const changeMode = (value: string) => {
@@ -141,9 +180,12 @@ export function ModelTool({ project, catalogue, entity, onChange }: {
         <select aria-label="Стандартный вид" defaultValue="" onChange={event => { viewport.current?.standard(event.target.value as "front" | "top" | "right" | "iso"); event.currentTarget.value = ""; }}><option value="" disabled>Вид…</option><option value="iso">Изометрия</option><option value="front">Спереди</option><option value="top">Сверху</option><option value="right">Справа</option></select>
         <label><input type="checkbox" checked={editor.grid} onChange={e => update({ grid: e.target.checked })}/>Сетка</label><label><input type="checkbox" checked={editor.snap} onChange={e => update({ snap: e.target.checked })}/>К сетке</label><label>Шаг <select aria-label="Шаг привязки, мм" value={editor.snapStep} onChange={e => update({ snapStep: Number(e.target.value) })}>{[1, 5, 10, 25, 50, 100, 250, 500, ...(![1, 5, 10, 25, 50, 100, 250, 500].includes(editor.snapStep) ? [editor.snapStep] : [])].sort((a, b) => a - b).map(v => <option key={v} value={v}>{v} мм</option>)}</select></label>
         <button disabled={!catalogue.length || !profiles} onClick={() => commit(mergeAssembly(assembly, generated))}>Обновить состав</button>
+        <button disabled={preparation.busy || !profiles || !catalogue.length} onClick={() => void preparation.start()}>{preparation.busy && !preparation.connecting ? "Подготовка…" : "Подготовить 3D-модели спецификации"}</button>
         <button disabled={!catalogue.length || !profiles} onClick={() => setResetOpen(true)}>Автокомпоновка</button>
         <button disabled={assembly.components.length >= 500} onClick={() => commit(addManualPipe(assembly, `manual-pipe-${crypto.randomUUID()}`))}>＋ Труба</button>
+        <button onClick={() => setLibraryOpen(true)}>＋ Из библиотеки</button>
       </div>
+      <PreparationProgress preparation={preparation}/>
       {missingPlane && <p className="model-editor__notice" role="status">Рабочая грань недоступна: компонент скрыт, удалён или геометрия изменилась. Выберите другую грань либо XY/XZ/YZ в настройках. Проекционный выбор приостановлен.</p>}
       {(operationNote || !["translate", "rotate", "measure"].includes(mode)) && <div className="model-editor__operation" role="status">
         <span>{mode === "move" ? !move?.source ? "1. Выберите базовую точку перемещаемого компонента" : !move.target ? "2. Выберите целевую точку. Tab — перебор близких привязок" : `3. Предпросмотр: ${move.source.label} → ${move.target.label}${move.target.projected ? " · Проекция" : ""}` : mode === "planeFace" ? "Выберите прямоугольную грань рамы или круглый торец трубы" : mode === "parallelEdge" ? "Выберите прямое ребро или осевой сегмент для параллельного направления" : mode === "addReference" ? "Выберите точку компонента для сохранения" : ["reference1", "between1"].includes(mode) ? "Выберите опорную точку в сцене" : mode === "between2" ? "Выберите вторую опорную точку" : operationNote}</span>
@@ -202,12 +244,13 @@ export function ModelTool({ project, catalogue, entity, onChange }: {
         </aside>
       </div>
       <div className="model-editor__status"><span>Габариты установки: <b data-testid="assembly-dimensions">{sizeText(bounds)}</b></span><span>Упрощённая монтажная модель · {issues.length ? `замечаний: ${issues.length}` : "разрывов соединений не обнаружено"}</span></div>
-      <details className="model-editor__diagnostics" open={Boolean(diagnostic)}><summary>Данные и замечания</summary><p>Трубы и рама — параметрическая компоновочная геометрия. Арматура и крепёж пока не моделируются. Ручные размеры редактора не изменяют гидравлический расчёт и спецификацию.</p>{[...new Set(sourceWarnings)].map(note => <p key={note}>{note}</p>)}{diagnostic && <p role="status">{diagnostic}</p>}</details>
+      <details className="model-editor__diagnostics" open={Boolean(diagnostic)}><summary>Данные и замечания</summary><p>Трубы и рама — параметрическая компоновочная геометрия. Покупное оборудование из спецификации с привязанной STEP-моделью появляется рядом с установкой для ручного размещения. Автоматическая врезка арматуры пока не поддерживается. Ручные размеры редактора не изменяют гидравлический расчёт и спецификацию.</p>{[...new Set(sourceWarnings)].map(note => <p key={note}>{note}</p>)}{diagnostic && <p role="status">{diagnostic}</p>}</details>
       <dialog ref={resetDialog} className="model-editor__reset" aria-label="Повторная автокомпоновка" onCancel={() => setResetOpen(false)}><b>Построить новую компоновку?</b><p>Будут заменены ручные положения, размеры, фиксации и добавленные трубы. Текущее состояние можно вернуть кнопкой «Отмена» в редакторе.</p><button onClick={() => { commit(generated); updateSelectionAfterReset(); }}>Построить заново</button><button onClick={() => setResetOpen(false)}>Сохранить ручные правки</button></dialog>
       <SnapDialog open={snapOpen} settings={snaps} grid={editor.snap} gridStep={editor.snapStep} onChange={objectSnaps => {
         if (objectSnaps.plane !== snaps.plane || objectSnaps.types.project !== snaps.types.project) setMeasurement([]);
         update({ objectSnaps });
       }} onGrid={(snap, snapStep) => update({ snap, snapStep })} onClose={() => setSnapOpen(false)} onPlaneFace={() => { setSnapOpen(false); activate("planeFace"); }} references={editor.referencePoints?.length ?? 0} onClearReferences={() => update({ referencePoints: [] })}/>
+      {libraryOpen && <ModelLibraryDialog onClose={() => setLibraryOpen(false)} onAdd={addFromLibrary} full={assembly.components.length >= 500}/>}
     </div>}
   </div>;
 

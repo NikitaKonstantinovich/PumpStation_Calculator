@@ -13,6 +13,10 @@ const eslintConfig = defineConfig([
     "dist/**",
     "out/**",
     "build/**",
+    "work/**",
+    ".model-library/**",
+    ".model-converter/**",
+    ".wrangler/**",
     "next-env.d.ts",
     "worker-configuration.d.ts", // Generated third-party runtime declarations.
   ]),

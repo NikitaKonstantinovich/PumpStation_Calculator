@@ -11,7 +11,7 @@ import { snapGeometry, workingPlane, excludedTargets, onFace, projectPlane, type
 import { candidates, rankedCandidates, rayPlane, closestToRay, type Candidate, type SnapPick, type SnapQuery } from "./snap-engine";
 import type { SnapSettings } from "./snap-settings";
 
-export type ViewportHandle = { fit: () => void; standard: (view: "front" | "top" | "right" | "iso") => void };
+export type ViewportHandle = { fit: () => void; standard: (view: "front" | "top" | "right" | "iso") => void; prepareMeshes: (urls: string[]) => Promise<void> };
 export type EditorMode = "translate" | "rotate" | "measure" | "move" | "reference1" | "between1" | "between2" | "addReference" | "parallelEdge" | "planeFace";
 export type ViewportProps = {
   assembly: Assembly; selectedId: string | null; grid: boolean; snapStep: number | null;
@@ -281,13 +281,15 @@ class Scene {
     }
     this.refreshSnap();
   }
-  loadMesh(c: Component, object: THREE.Group, revision: number) {
-    const url = c.meshUrl!;
+  mesh(url: string) {
     if (!this.cache.has(url)) this.cache.set(url, fetch(url).then(response => {
       if (!response.ok) throw new Error("HTTP " + response.status);
       return response.arrayBuffer();
-    }).then(buffer => { const geometry = new STLLoader().parse(buffer); geometry.computeVertexNormals(); return geometry; }));
-    void this.cache.get(url)!.then(geometry => {
+    }).then(buffer => { const geometry = new STLLoader().parse(buffer); geometry.computeVertexNormals(); return geometry; }).catch(error => { this.cache.delete(url); throw error; }));
+    return this.cache.get(url)!;
+  }
+  loadMesh(c: Component, object: THREE.Group, revision: number) {
+    void this.mesh(c.meshUrl!).then(geometry => {
       if (this.disposed || this.revision !== revision) return;
       for (const child of [...object.children]) { object.remove(child); disposeObject(child); }
       object.add(new THREE.Mesh(geometry.clone(), material(c))); this.highlight();
@@ -305,7 +307,9 @@ class Scene {
 const ModelViewport = forwardRef<ViewportHandle, ViewportProps>(function ModelViewport(props, ref) {
   const host = useRef<HTMLDivElement>(null), runtime = useRef<Scene | null>(null);
   const [error, setError] = useState("");
-  useImperativeHandle(ref, () => ({ fit: () => runtime.current?.fit(), standard: view => runtime.current?.standard(view) }), []);
+  useImperativeHandle(ref, () => ({ fit: () => runtime.current?.fit(), standard: view => runtime.current?.standard(view),
+    prepareMeshes: async urls => { const scene = runtime.current; if (scene) await Promise.all([...new Set(urls)].map(url => scene.mesh(url))); },
+  }), []);
   useEffect(() => {
     if (!host.current) return;
     let scene: Scene;
