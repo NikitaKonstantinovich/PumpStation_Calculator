@@ -106,7 +106,15 @@ def make_library(groups, results, failures, total_files):
 def update_profiles(root, output, groups, results):
     path = output / "manifest.json"
     old = json.loads(path.read_text(encoding="utf-8")) if path.exists() else {"version": 1, "profiles": {}}
-    old.setdefault("equipment", {})
+    # An old index can contain unbounded CAD dimensions even without a mesh.
+    # Failed conversion must not leave those dimensions in automatic assemblies.
+    def valid_profile(profile):
+        bounds = profile.get("bounds") if isinstance(profile, dict) else None
+        return (isinstance(bounds, list) and len(bounds) == 6
+                and all(isinstance(v, (int, float)) and math.isfinite(v) and abs(v) < 1e7 for v in bounds)
+                and all(bounds[i+3] > bounds[i] for i in range(3)))
+    for section in ("profiles", "equipment"):
+        old[section] = {key: value for key, value in old.get(section, {}).items() if valid_profile(value)}
     by_source = {source: digest for digest, sources in groups.items() for source in sources}
     for key, profile in load_library(root).items():
         digest = by_source.get(profile["source"])

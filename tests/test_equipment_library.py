@@ -27,6 +27,26 @@ class TimeoutTests(unittest.TestCase):
             self.assertFalse((folder/'leak').exists(), 'A timed-out CAD descendant must not survive the launcher')
 
 
+class ManifestTests(unittest.TestCase):
+    def test_failed_conversion_does_not_republish_unbounded_legacy_dimensions(self):
+        spec = importlib.util.spec_from_file_location('equipment_batch', SCRIPTS / 'prepare-equipment-library.py')
+        batch = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(batch)
+        with tempfile.TemporaryDirectory(prefix='cad-manifest-test-') as directory:
+            root = Path(directory)
+            output = root / 'browser'; output.mkdir()
+            equipment = root / 'Equipment'; equipment.mkdir()
+            bad = {'bounds': [-300, -1e100, -1e100, 300, 1e100, 1e100]}
+            good = {'bounds': [-20, 0, 0, 40, 60, 100], 'meshUrl': '/model-assets/valid.stl'}
+            (output / 'manifest.json').write_text(json.dumps({'version': 1, 'profiles': {'bad': bad, 'good': good}, 'equipment': {'equipment:bad': bad}}))
+            (equipment / 'model-library.json').write_text(json.dumps({'version': 1, 'models': [
+                {'key': 'pump:bad', 'source': 'Equipment/broken.step', 'units': 'mm', **bad}]}))
+            batch.update_profiles(root, output, {'digest': ['Equipment/broken.step']}, {'digest': {'status': 'error', 'reason': 'Invalid bounds'}})
+            manifest = json.loads((output / 'manifest.json').read_text())
+            self.assertEqual(manifest['profiles'], {'good': good})
+            self.assertEqual(manifest['equipment'], {})
+
+
 @unittest.skipUnless(importlib.util.find_spec("OCP"), "Requires project cadquery-ocp runtime")
 class LibraryTests(unittest.TestCase):
     def test_batch_units_deduplication_failure_isolation_and_resume(self):
