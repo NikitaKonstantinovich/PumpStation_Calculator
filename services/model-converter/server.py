@@ -24,7 +24,7 @@ import uuid
 
 FRONTEND = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(FRONTEND / "scripts"))
-from model_assets import CONVERTER_VERSION, convert_step, file_hash, load_library, source_path, valid_stl  # noqa: E402
+from model_assets import CONVERTER_VERSION, convert_step, file_hash, load_library, run_cad_command, source_path, valid_stl  # noqa: E402
 
 ACTIVE = {"queued", "searching", "converting"}
 ASSET_RE = re.compile(r"model-([a-f0-9]{64})-v1\.stl")
@@ -154,11 +154,10 @@ class Jobs:
                 raise ValueError("Исходный файл изменился после поиска; повторите подготовку")
             with (temporary / "converter.log").open("wb") as log:
                 try:
-                    process = subprocess.run([sys.executable, str(Path(__file__).resolve()), "--convert-file", str(cad), str(stl), str(metadata)],
-                                             stdout=log, stderr=log, timeout=self.timeout, creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0))
+                    returncode = run_cad_command([sys.executable, str(Path(__file__).resolve()), "--convert-file", str(cad), str(stl), str(metadata)], log, self.timeout)
                 except subprocess.TimeoutExpired as error:
                     raise ValueError(f"Превышено время конвертации ({self.timeout} с); остальные модели продолжат обработку") from error
-            if process.returncode or not valid_stl(stl):
+            if returncode or not valid_stl(stl):
                 reason = json.loads(metadata.read_text(encoding="utf-8")).get("error") if metadata.exists() else None
                 raise ValueError(reason or "Конвертер завершился с ошибкой: повреждённый STEP или нехватка памяти")
             if file_hash(source) != digest:

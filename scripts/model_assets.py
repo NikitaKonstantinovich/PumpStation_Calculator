@@ -6,10 +6,32 @@ OpenCascade, never by fitting the mesh to a catalogue bounding box.
 import hashlib
 import json
 import math
+import os
 from pathlib import Path
+import signal
 import struct
+import subprocess
 
 CONVERTER_VERSION = "v1"  # Increment when units/tessellation settings change.
+
+
+def run_cad_command(command, log, timeout):
+    """A Windows venv launcher owns another Python process: kill both on timeout."""
+    options = {"creationflags": subprocess.CREATE_NO_WINDOW} if os.name == "nt" else {"start_new_session": True}
+    with subprocess.Popen(command, stdout=log, stderr=log, **options) as process:
+        try:
+            return process.wait(timeout=timeout)
+        except subprocess.TimeoutExpired:
+            if os.name == "nt":
+                subprocess.run(["taskkill", "/PID", str(process.pid), "/T", "/F"], stdout=subprocess.DEVNULL,
+                               stderr=subprocess.DEVNULL, timeout=10, creationflags=subprocess.CREATE_NO_WINDOW)
+            else:
+                try:
+                    os.killpg(process.pid, signal.SIGKILL)
+                except ProcessLookupError:
+                    pass
+            process.wait(timeout=10)
+            raise
 
 
 def file_hash(path):

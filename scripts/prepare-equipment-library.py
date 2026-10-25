@@ -17,7 +17,7 @@ import sys
 import tempfile
 import time
 
-from model_assets import CONVERTER_VERSION, convert_step, file_hash, load_library, valid_stl
+from model_assets import CONVERTER_VERSION, convert_step, file_hash, load_library, run_cad_command, valid_stl
 
 FRONTEND = Path(__file__).resolve().parents[1]
 ROOT = FRONTEND.parent
@@ -71,9 +71,9 @@ def convert_one(root, output, state, digest, sources, timeout):
             if file_hash(cad) != digest:
                 raise ValueError("STEP changed after inventory; repeat preparation")
             with (folder / "conversion.log").open("w", encoding="utf-8") as log:
-                process = subprocess.run([sys.executable, str(Path(__file__).resolve()), "--convert-file", str(cad), str(mesh), str(metadata)], stdout=log, stderr=log, timeout=timeout, creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0))
+                returncode = run_cad_command([sys.executable, str(Path(__file__).resolve()), "--convert-file", str(cad), str(mesh), str(metadata)], log, timeout)
             result = json.loads(metadata.read_text(encoding="utf-8")) if metadata.exists() else {}
-            if process.returncode or not valid_stl(mesh):
+            if returncode or not valid_stl(mesh):
                 raise ValueError(result.get("error", "CAD process failed or produced an empty mesh"))
             if file_hash(source) != digest:
                 raise ValueError("Source changed during preparation")

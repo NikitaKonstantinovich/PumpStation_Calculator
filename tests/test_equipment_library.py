@@ -5,11 +5,26 @@ from pathlib import Path
 import subprocess
 import sys
 import tempfile
+import time
 import unittest
 
 SCRIPTS = Path(__file__).resolve().parents[1] / "scripts"
 sys.path.insert(0, str(SCRIPTS))
-from model_assets import file_hash, valid_stl
+from model_assets import file_hash, run_cad_command, valid_stl
+
+
+class TimeoutTests(unittest.TestCase):
+    def test_timeout_stops_descendant_process_before_cleaning_temporary_files(self):
+        with tempfile.TemporaryDirectory(prefix="cad-timeout-test-") as directory:
+            folder=Path(directory)
+            child="import pathlib,sys,time; pathlib.Path(sys.argv[1]).write_text('started'); time.sleep(2); pathlib.Path(sys.argv[2]).write_text('orphan')"
+            parent="import subprocess,sys; subprocess.run([sys.executable,'-c',sys.argv[1],sys.argv[2],sys.argv[3]],check=True)"
+            with (folder/'process.log').open('wb') as log:
+                with self.assertRaises(subprocess.TimeoutExpired):
+                    run_cad_command([sys.executable,'-c',parent,child,str(folder/'started'),str(folder/'leak')],log,1.5)
+            self.assertTrue((folder/'started').exists(), 'The test must exercise an actual descendant')
+            time.sleep(2.5)
+            self.assertFalse((folder/'leak').exists(), 'A timed-out CAD descendant must not survive the launcher')
 
 
 @unittest.skipUnless(importlib.util.find_spec("OCP"), "Requires project cadquery-ocp runtime")
