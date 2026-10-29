@@ -1,3 +1,4 @@
+globalThis.__PSC_RELEASE_PROFILE__ = "full";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { DatabaseSync } from "node:sqlite";
@@ -28,11 +29,18 @@ const replacements = { [serverUrl.href]: serverSource };
 const auth = await loadTs(serverUrl, replacements);
 const api = await loadTs(new URL("../app/api/users/route.ts", import.meta.url), replacements);
 const login = await loadTs(new URL("../app/api/auth/route.ts", import.meta.url), replacements);
+const projects = await loadTs(new URL("../app/api/projects/route.ts", import.meta.url), replacements);
+const { createProject } = await loadTs(new URL("../app/project-config.ts", import.meta.url));
 // Start with the previous installation's schema, to exercise upgrade behavior.
 database.exec(`CREATE TABLE users(id TEXT PRIMARY KEY,email TEXT NOT NULL,name TEXT NOT NULL,password_hash TEXT NOT NULL,email_verified_at TEXT,created_at TEXT DEFAULT CURRENT_TIMESTAMP,updated_at TEXT DEFAULT CURRENT_TIMESTAMP);
 CREATE TABLE sessions(id TEXT PRIMARY KEY,user_id TEXT NOT NULL,token_hash TEXT NOT NULL,expires_at TEXT NOT NULL,created_at TEXT DEFAULT CURRENT_TIMESTAMP);`);
+database.prepare("INSERT INTO users(id,email,name,password_hash,email_verified_at) VALUES('legacy','legacy@example.test','Legacy','preserved-hash',CURRENT_TIMESTAMP)").run();
 await auth.ensureAuthSchema();
 await auth.ensureAuthSchema();
+test("legacy users retain pro access and credentials after idempotent migration", () => {
+  const legacy = database.prepare("SELECT access_level,password_hash FROM users WHERE id='legacy'").get();
+  assert.equal(legacy.access_level, "pro"); assert.equal(legacy.password_hash, "preserved-hash");
+});
 const password = "test-password-123";
 const passwordHash = await auth.hashPassword(password);
 database.prepare("INSERT INTO users(id,email,name,password_hash,email_verified_at,role) VALUES(?,?,?,?,CURRENT_TIMESTAMP,?)").run("admin", "admin@example.test", "Администратор", passwordHash, "admin");
@@ -42,10 +50,10 @@ const request = (method, token, body, headers = {}) => new Request("http://local
   method, headers: { "Content-Type": "application/json", ...(token ? { Cookie: `ps_session=${token}` } : {}), ...headers },
   ...(body ? { body: JSON.stringify(body) } : {}),
 });
-const form = { email: "created@example.test", name: "Новый пользователь", role: "user", password, confirmed: true };
+const form = { email: "created@example.test", name: "Новый пользователь", role: "base", password, confirmed: true };
 
-test("schema upgrades old accounts to user without granting admin", () => {
-  assert.equal(database.prepare("SELECT role FROM users WHERE id='reader'").get().role, "user");
+test("new accounts default to base without granting admin", () => {
+  assert.equal(database.prepare("SELECT access_level AS role FROM users WHERE id='reader'").get().role, "base");
   assert.ok(database.prepare("PRAGMA table_info(sessions)").all().some(column => column.name === "last_seen_at"));
 });
 
@@ -64,7 +72,7 @@ test("admin list excludes credentials and presence requires a fresh unexpired se
   assert.equal(result.users.find(user => user.id === "reader").online, false);
   assert.doesNotMatch(JSON.stringify(result), /password|pbkdf2|token_hash/);
   const heartbeat = await login.POST(request("POST", userToken, { action: "heartbeat" }));
-  assert.equal((await heartbeat.json()).user.role, "user");
+  assert.equal((await heartbeat.json()).user.role, "base");
   result = await (await api.GET(request("GET", adminToken))).json();
   assert.equal(result.users.find(user => user.id === "reader").online, true);
   const second = await auth.createSession("reader");
@@ -120,7 +128,7 @@ test("duplicate email rolls back all writes and credential changes revoke sessio
 });
 
 test("an administrator cannot remove their own admin access", async () => {
-  assert.equal((await api.PATCH(request("PATCH", adminToken, { ...form, id: "admin", revision: 0, email: "admin@example.test", role: "user", password: "" }))).status, 400);
+  assert.equal((await api.PATCH(request("PATCH", adminToken, { ...form, id: "admin", revision: 0, email: "admin@example.test", role: "base", password: "" }))).status, 400);
   assert.equal((await auth.currentUser(request("GET", adminToken))).role, "admin");
 });
 
@@ -133,5 +141,58 @@ test("self credential changes require a new sign in", async () => {
 test("public registration cannot request admin access", async () => {
   const response = await login.POST(request("POST", null, { action: "register", name: "Регистрация", email: "registered@example.test", password, passwordConfirmation: password, role: "admin" }));
   assert.equal(response.status, 200);
-  assert.equal(database.prepare("SELECT role FROM users WHERE email='registered@example.test'").get().role, "user");
+  assert.equal(database.prepare("SELECT access_level AS role FROM users WHERE email='registered@example.test'").get().role, "base");
+});
+
+test("admin can assign all tiers; changing tier revokes sessions and never grants admin", async () => {
+  const actor = await auth.createSession("admin");
+  for (const role of ["base", "plus", "pro"]) {
+    const response = await api.POST(request("POST", actor, { ...form, email: `${role}@example.test`, role }));
+    assert.equal(response.status, 201); const user = (await response.json()).user;
+    assert.equal(user.role, role);
+    const session = await auth.createSession(user.id);
+    assert.equal((await auth.currentUser(request("GET", session))).role, role);
+    assert.equal((await api.GET(request("GET", session))).status, 403);
+    const next = role === "base" ? "plus" : "base";
+    const changed = await api.PATCH(request("PATCH", actor, { ...form, id: user.id, revision: user.revision, email: user.email, role: next, password: "" }));
+    assert.equal(changed.status, 200); assert.equal((await changed.json()).user.role, next);
+    assert.equal(await auth.currentUser(request("GET", session)), null);
+    assert.equal(database.prepare("SELECT role FROM users WHERE id=?").get(user.id).role, "user");
+  }
+});
+
+test("project API enforces tiers on every save and preserves existing data when access is denied", async () => {
+  for (const role of ["base", "plus", "pro", "admin"]) {
+    const id = `project-${role}`;
+    database.prepare("INSERT INTO users(id,email,name,password_hash,email_verified_at,role,access_level) VALUES(?,?,?,?,CURRENT_TIMESTAMP,?,?)").run(id, `${id}@example.test`, id, passwordHash, role === "admin" ? "admin" : "user", role === "admin" ? "base" : role);
+    const token = await auth.createSession(id), config = createProject();
+    assert.equal((await projects.PUT(request("PUT", token, { config }))).status, 200);
+    const saved = () => database.prepare("SELECT config_json FROM user_projects WHERE id=?").get(config.project.id).config_json;
+    const original = saved();
+    config.entities["station-settings"].usdRate = 125;
+    assert.equal((await projects.PUT(request("PUT", token, { config }))).status, ["pro", "admin"].includes(role) ? 200 : 403);
+    if (["base", "plus"].includes(role)) assert.equal(saved(), original);
+    config.entities["station-settings"].usdRate = 85;
+    config.entities["station-settings"].membraneTank = true;
+    assert.equal((await projects.PUT(request("PUT", token, { config }))).status, role === "base" ? 403 : 200);
+    config.entities["station-settings"].membraneTank = false;
+    config.entities["station-dn"].pn = 25;
+    assert.equal((await projects.PUT(request("PUT", token, { config }))).status, ["pro", "admin"].includes(role) ? 200 : 403);
+  }
+});
+
+test("SQL migration preserves foreign keys, projects and sessions; future registrations default to base", async () => {
+  const migration = await readFile(new URL("../drizzle/0010_user_access_levels.sql", import.meta.url), "utf8");
+  const old = new DatabaseSync(":memory:");
+  old.exec("PRAGMA foreign_keys=ON; CREATE TABLE users(id TEXT PRIMARY KEY,role TEXT NOT NULL DEFAULT 'user' CHECK(role IN ('admin','user'))); CREATE TABLE projects(id TEXT,user_id TEXT REFERENCES users(id)); CREATE TABLE sessions(id TEXT,user_id TEXT REFERENCES users(id)); INSERT INTO users VALUES('old-user','user'),('old-admin','admin'); INSERT INTO projects VALUES('saved','old-user'); INSERT INTO sessions VALUES('session','old-admin');");
+  old.exec(migration);
+  assert.equal(old.prepare("SELECT access_level FROM users WHERE id='old-user'").get().access_level, "pro");
+  assert.equal(old.prepare("SELECT role FROM users WHERE id='old-admin'").get().role, "admin");
+  assert.equal(old.prepare("SELECT COUNT(*) AS n FROM projects").get().n, 1);
+  assert.equal(old.prepare("SELECT COUNT(*) AS n FROM sessions").get().n, 1);
+  assert.equal(old.prepare("PRAGMA foreign_key_check").all().length, 0);
+  old.exec("INSERT INTO users(id) VALUES('new')");
+  assert.equal(old.prepare("SELECT access_level FROM users WHERE id='new'").get().access_level, "base");
+  assert.throws(() => old.exec("UPDATE users SET access_level='admin' WHERE id='new'"));
+  old.close();
 });

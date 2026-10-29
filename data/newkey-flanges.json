@@ -1,0 +1,163 @@
+{
+  "id": "newkey-flanges-20261026",
+  "sourceSha256": "f68b4519e1e6786982e026472d49553d70159e87154417c02f53b9ced3a1464c",
+  "checkedAt": "2026-10-26",
+  "family": "Фланцы плоские AISI304 — Newkey DIN2503 PN40",
+  "rows": [
+    {
+      "id": "newkey-din2503:NK-FDh32-4",
+      "tableId": "newkey-flanges-20261026",
+      "supplier": "Newkey",
+      "supplierProductId": "NK-FDh32/4",
+      "name": "Фланец плоский DIN2503 DN32 (42.4 мм) PN40 AISI304 (CF8) Newkey",
+      "dn": 32,
+      "pn": 40,
+      "compatiblePns": [
+        25,
+        40
+      ],
+      "standard": "DIN2503:plate:flat-face:PN40",
+      "price": 1847,
+      "priceLabel": "Цена, ₽/шт. (розничная производителя)",
+      "vat": "НДС отдельно не раскрыт в карточке; опубликованная цена без пересчёта, доставки и персональной скидки.",
+      "url": "https://www.newkey.ru/product/flanets-ploskii-din2503-nerzhaveiushchii-aisi304-dn32-114-cf8-rn40/",
+      "dimensions": {
+        "thicknessMm": 18,
+        "boreDiameterMm": 43.1,
+        "pipeOuterDiameterMm": 42.4,
+        "outerDiameterMm": 140,
+        "boltCircleMm": 100,
+        "boltHoleDiameterMm": 18,
+        "holes": 4
+      },
+      "dimensionSource": "https://www.newkey.ru/product/flanets-ploskii-din2503-nerzhaveiushchii-aisi304-dn32-114-cf8-rn40/; Newkey заявляет DIN2503 PN40 и трубу 42.4 мм. Номинальная расчётная геометрия плоского диска DIN2503: https://www.hsflanges.com/DIN_2503_PN40_plate_flanges; независимая сверка https://www.tescoflanges.com/din-2503-pn-40-slip-on-flange; чертёж https://www.tescoflanges.com/img/din-pn-flange.jpg, b=18 мм между плоскими торцами без дополнительного выступа. Вид исполнения сопоставлен с фотографиями артикула Newkey. Отдельного паспорта NK-FDh не найдено; размеры выведены из заявленного стандарта, не измерены на изделии. Проверено 26.10.2026.",
+      "reason": "Расчёт по заявленной Newkey геометрии DIN2503 плоского диска: полная толщина 18 мм, отверстие 43.1 мм; PN25 допускается по совпадающим присоединительным размерам DIN2503. Основание — стандартные таблицы и фото исполнения, не индивидуальный паспорт или обмер партии. Паспорт NK-F PN16 с карточки DN.ru отклонён как относящийся к другой серии. При отличающемся исполнении поставки требуется пересмотр размеров.",
+      "geometryBasis": "declared-standard-nominal",
+      "pressureSource": "Для DN32 размерные таблицы DIN2503 PN25 и PN40 совпадают (D=140, K=100, 4×18 мм). https://www.hsflanges.com/DIN_2503_PN25_plate_flanges; https://www.hsflanges.com/DIN_2503_PN40_plate_flanges. Применение детали PN40 в расчёте вставки PN25 по заявленному стандарту, без изменения PN самой детали. Это не разрешение произвольного понижения PN для других артикулов и не проверка давления при повышенной температуре."
+    },
+    {
+      "id": "newkey-din2503:NK-FDh50-4",
+      "tableId": "newkey-flanges-20261026",
+      "supplier": "Newkey",
+      "supplierProductId": "NK-FDh50/4",
+      "name": "Фланец плоский DIN2503 DN50 (60.3 мм) PN40 AISI304 (CF8) Newkey",
+      "dn": 50,
+      "pn": 40,
+      "compatiblePns": [
+        25,
+        40
+      ],
+      "standard": "DIN2503:plate:flat-face:PN40",
+      "price": 2710,
+      "priceLabel": "Цена, ₽/шт. (розничная производителя)",
+      "vat": "НДС отдельно не раскрыт в карточке; опубликованная цена без пересчёта, доставки и персональной скидки.",
+      "url": "https://www.newkey.ru/product/flanets-ploskii-din2503-nerzhaveiushchii-aisi304-dn50-2-cf8-rn40/",
+      "dimensions": {
+        "thicknessMm": 20,
+        "boreDiameterMm": 61.1,
+        "pipeOuterDiameterMm": 60.3,
+        "outerDiameterMm": 165,
+        "boltCircleMm": 125,
+        "boltHoleDiameterMm": 18,
+        "holes": 4
+      },
+      "dimensionSource": "https://www.newkey.ru/product/flanets-ploskii-din2503-nerzhaveiushchii-aisi304-dn50-2-cf8-rn40/; Newkey заявляет DIN2503 PN40 и трубу 60.3 мм. Номинальная расчётная геометрия плоского диска DIN2503: https://www.hsflanges.com/DIN_2503_PN40_plate_flanges; независимая сверка https://www.tescoflanges.com/din-2503-pn-40-slip-on-flange; чертёж https://www.tescoflanges.com/img/din-pn-flange.jpg, b=20 мм между плоскими торцами без дополнительного выступа. Вид исполнения сопоставлен с фотографиями артикула Newkey. Отдельного паспорта NK-FDh не найдено; размеры выведены из заявленного стандарта, не измерены на изделии. Проверено 26.10.2026.",
+      "reason": "Расчёт по заявленной Newkey геометрии DIN2503 плоского диска: полная толщина 20 мм, отверстие 61.1 мм; PN25 допускается по совпадающим присоединительным размерам DIN2503. Основание — стандартные таблицы и фото исполнения, не индивидуальный паспорт или обмер партии. Паспорт NK-F PN16 с карточки DN.ru отклонён как относящийся к другой серии. При отличающемся исполнении поставки требуется пересмотр размеров.",
+      "geometryBasis": "declared-standard-nominal",
+      "pressureSource": "Для DN50 размерные таблицы DIN2503 PN25 и PN40 совпадают (D=165, K=125, 4×18 мм). https://www.hsflanges.com/DIN_2503_PN25_plate_flanges; https://www.hsflanges.com/DIN_2503_PN40_plate_flanges. Применение детали PN40 в расчёте вставки PN25 по заявленному стандарту, без изменения PN самой детали. Это не разрешение произвольного понижения PN для других артикулов и не проверка давления при повышенной температуре."
+    },
+    {
+      "id": "newkey-din2503:NK-FDh40-4",
+      "tableId": "newkey-flanges-20261026",
+      "supplier": "Newkey",
+      "supplierProductId": "NK-FDh40/4",
+      "name": "Фланец плоский DIN2503 DN40 (48.3 мм) PN40 AISI304 (CF8) Newkey",
+      "dn": 40,
+      "pn": 40,
+      "compatiblePns": [
+        25,
+        40
+      ],
+      "standard": "DIN2503:plate:flat-face:PN40",
+      "price": 2173,
+      "priceLabel": "Цена, ₽/шт. (розничная производителя)",
+      "vat": "НДС отдельно не раскрыт в карточке; опубликованная цена без пересчёта, доставки и персональной скидки.",
+      "url": "https://www.newkey.ru/catalog/flantsy/flantsy-ploskie-din2503/",
+      "dimensions": {
+        "thicknessMm": 18,
+        "boreDiameterMm": 49,
+        "pipeOuterDiameterMm": 48.3,
+        "outerDiameterMm": 150,
+        "boltCircleMm": 110,
+        "boltHoleDiameterMm": 18,
+        "holes": 4
+      },
+      "dimensionSource": "Номинальная расчётная геометрия заявленного Newkey DIN2503 PN40, артикул NK-FDh40/4 под трубу 48.3 мм. https://www.newkey.ru/catalog/flantsy/flantsy-ploskie-din2503/. Таблица изготовителя Hyupshin https://www.hsflanges.com/DIN_2503_PN40_plate_flanges и независимая сверка https://www.tescoflanges.com/din-2503-pn-40-slip-on-flange: DN40, b=18, D5=49, D=150, K=110, 4×18 мм. Принят плоский диск по ранее согласованному подходу для этой серии, b между плоскими торцами, без дополнительного выступа; чертёж https://www.tescoflanges.com/img/din-pn-flange.jpg. Отдельного паспорта NK-FDh не найдено; это геометрия заявленного стандарта/аналога, не обмер партии. Проверено 26.10.2026.",
+      "reason": "Для NK-FDh40/4 принят ранее согласованный подход серии Newkey: номинальная геометрия плоского диска DIN2503, полная толщина 18 мм, готовое отверстие 49 мм, цена производителя 2173 ₽/шт. Паспорт конкретной партии не найден. PN25 допустим по совпадающей сверловке с PN40; наружный диаметр основы 48.3 мм проходит без расточки. Посадка выполняется по отдельному общему проектному правилу отступа 5 мм.",
+      "geometryBasis": "declared-standard-nominal",
+      "pressureSource": "Для DN40 таблицы DIN2503 PN25 и PN40 совпадают: D=150, K=110, 4×18 мм, b=18 мм. https://www.hsflanges.com/DIN_2503_PN25_plate_flanges; https://www.hsflanges.com/DIN_2503_PN40_plate_flanges; сравнительная таблица https://www.tescoflanges.com/din-2503-pn-40-slip-on-flange. Применяется точный артикул NK-FDh40/4 PN40 в сборке PN25 без изменения PN детали. Это не общий допуск PN40 вместо PN25 и не проверка температурного снижения давления."
+    },
+    {
+      "id": "newkey-din2503:NK-FDh125-4",
+      "tableId": "newkey-flanges-20261026",
+      "supplier": "Newkey",
+      "supplierProductId": "NK-FDh125/4",
+      "name": "Фланец плоский DIN2503 DN125 (139.7 мм) PN40 AISI304 (CF8) Newkey",
+      "dn": 125,
+      "pn": 40,
+      "compatiblePns": [
+        25,
+        40
+      ],
+      "standard": "DIN2503:plate:flat-face:PN40",
+      "price": 7365,
+      "priceLabel": "Цена, ₽/шт. (розничная производителя)",
+      "vat": "НДС отдельно не раскрыт в карточке; опубликованная цена без пересчёта, доставки и персональной скидки.",
+      "url": "https://www.newkey.ru/catalog/flantsy/flantsy-ploskie-din2503/",
+      "dimensions": {
+        "thicknessMm": 26,
+        "boreDiameterMm": 141.6,
+        "pipeOuterDiameterMm": 139.7,
+        "outerDiameterMm": 270,
+        "boltCircleMm": 220,
+        "boltHoleDiameterMm": 26,
+        "holes": 8
+      },
+      "dimensionSource": "Номинальная расчётная геометрия заявленного Newkey DIN2503 PN40, артикул NK-FDh125/4. https://www.newkey.ru/catalog/flantsy/flantsy-ploskie-din2503/. Таблица изготовителя Hyupshin https://www.hsflanges.com/DIN_2503_PN40_plate_flanges и независимая сверка https://www.tescoflanges.com/din-2503-pn-40-slip-on-flange: DN125, труба 139.7 мм, b=26, D5=141.6, D=270, K=220, 8×26 мм. Принят плоский диск по ранее согласованному подходу для этой серии, b между плоскими торцами, без дополнительного выступа; чертёж https://www.tescoflanges.com/img/din-pn-flange.jpg. Отдельного паспорта NK-FDh не найдено; это геометрия заявленного стандарта/аналога, не обмер партии. Проверено 26.10.2026.",
+      "reason": "Для NK-FDh125/4 принят ранее согласованный подход серии Newkey: номинальная геометрия плоского диска DIN2503, полная толщина 26 мм, готовое отверстие 141.6 мм, цена производителя 7365 ₽/шт. Паспорт конкретной партии не найден. PN25 допустим по совпадающей сверловке с PN40; наружный диаметр основы 139.7 мм проходит без расточки. Посадка выполняется по отдельному общему проектному правилу отступа 5 мм.",
+      "geometryBasis": "declared-standard-nominal",
+      "pressureSource": "Для DN125 таблицы DIN2503 PN25 и PN40 совпадают: D=270, K=220, 8×26 мм, b=26 мм. https://www.hsflanges.com/DIN_2503_PN25_plate_flanges; https://www.hsflanges.com/DIN_2503_PN40_plate_flanges; сравнительная таблица https://www.tescoflanges.com/din-2503-pn-40-slip-on-flange. Применяется точный артикул NK-FDh125/4 PN40 в сборке PN25 без изменения PN детали. Это не общий допуск PN40 вместо PN25 и не проверка температурного снижения давления."
+    },
+    {
+      "id": "newkey-din2503:NK-FDh150-4",
+      "tableId": "newkey-flanges-20261026",
+      "supplier": "Newkey",
+      "supplierProductId": "NK-FDh150/4",
+      "name": "Фланец плоский DIN2503 DN150 (168.3 мм) PN40 AISI304 (CF8) Newkey",
+      "dn": 150,
+      "pn": 40,
+      "compatiblePns": [
+        25,
+        40
+      ],
+      "standard": "DIN2503:plate:flat-face:PN40",
+      "price": 9487,
+      "priceLabel": "Цена, ₽/шт. (розничная производителя)",
+      "vat": "НДС отдельно не раскрыт в карточке; опубликованная цена без пересчёта, доставки и персональной скидки.",
+      "url": "https://www.newkey.ru/catalog/flantsy/flantsy-ploskie-din2503/",
+      "dimensions": {
+        "thicknessMm": 28,
+        "boreDiameterMm": 170.5,
+        "pipeOuterDiameterMm": 168.3,
+        "outerDiameterMm": 300,
+        "boltCircleMm": 250,
+        "boltHoleDiameterMm": 26,
+        "holes": 8
+      },
+      "dimensionSource": "Номинальная расчётная геометрия заявленного Newkey DIN2503 PN40, артикул NK-FDh150/4. https://www.newkey.ru/catalog/flantsy/flantsy-ploskie-din2503/. Таблица изготовителя Hyupshin https://www.hsflanges.com/DIN_2503_PN40_plate_flanges и независимая сверка https://www.tescoflanges.com/din-2503-pn-40-slip-on-flange: DN150, труба 168.3 мм, b=28, D5=170.5, D=300, K=250, 8×26 мм. Принят плоский диск по ранее согласованному подходу для этой серии, b между плоскими торцами, без дополнительного выступа; чертёж https://www.tescoflanges.com/img/din-pn-flange.jpg. Отдельного паспорта NK-FDh не найдено; это геометрия заявленного стандарта/аналога, не обмер партии. Проверено 26.10.2026.",
+      "reason": "Для NK-FDh150/4 принят ранее согласованный подход серии Newkey: номинальная геометрия плоского диска DIN2503, полная толщина 28 мм, готовое отверстие 170.5 мм, цена производителя 9487 ₽/шт. Паспорт конкретной партии не найден. PN25 допустим по совпадающей сверловке с PN40; наружный диаметр основы 168.3 мм проходит без расточки. Посадка выполняется по отдельному общему проектному правилу отступа 5 мм.",
+      "geometryBasis": "declared-standard-nominal",
+      "pressureSource": "Для DN150 таблицы DIN2503 PN25 и PN40 совпадают: D=300, K=250, 8×26 мм, b=28 мм. https://www.hsflanges.com/DIN_2503_PN25_plate_flanges; https://www.hsflanges.com/DIN_2503_PN40_plate_flanges; сравнительная таблица https://www.tescoflanges.com/din-2503-pn-40-slip-on-flange. Применяется точный артикул NK-FDh150/4 PN40 в сборке PN25 без изменения PN детали. Это не общий допуск PN40 вместо PN25 и не проверка температурного снижения давления."
+    }
+  ]
+}

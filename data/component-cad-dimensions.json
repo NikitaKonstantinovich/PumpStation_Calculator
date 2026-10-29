@@ -1,0 +1,456 @@
+{
+  "version": 1,
+  "sourceSha256": "f68b4519e1e6786982e026472d49553d70159e87154417c02f53b9ced3a1464c",
+  "reviewedAt": "2026-10-25",
+  "policy": "Геометрия моделей пользователя перенесена только на точное концентрическое исполнение с совпадением DN и четырёх размеров. Для ISO-моделей без марки материала принята только геометрия; PN, материал, цены и способ сборки не назначаются по CAD. На эксцентрические переходы эти размеры не распространяются.",
+  "rows": [
+    {
+      "componentId": "переходы-005-r0389",
+      "family": "Переходы концентрические нержавеющие, AISI304",
+      "tableId": "переходы-005",
+      "matchFields": [
+        {
+          "column": "B",
+          "label": "DN",
+          "value": "DN100"
+        },
+        {
+          "column": "C",
+          "label": "PN",
+          "value": "PN10"
+        },
+        {
+          "column": "D",
+          "label": "Диаметр, мм",
+          "value": 114.3
+        },
+        {
+          "column": "E",
+          "label": "Диаметр меньший, мм",
+          "value": 60.3
+        },
+        {
+          "column": "F",
+          "label": "Толщина 1, мм",
+          "value": 3.6
+        },
+        {
+          "column": "G",
+          "label": "Толщина 2, мм",
+          "value": 2.9
+        },
+        {
+          "column": "H",
+          "label": "Наименование",
+          "value": "Переход концентрический (114,3 х 60,3 х 3,6) мм AISI304"
+        }
+      ],
+      "modelPath": "Equipment/Piping/3D/Элементы трубопроводов/Переходы/Переход К исп 1 ГОСТ 17378-2001 ISO/Переход К-1-114,3 x 3,6-60,3 x 2,9 ISO.stp",
+      "modelSha256": "4e6d8974a3c6269d20532fb0a337b197bdc4f9bdd2278f3fca7eb49f45ce5787",
+      "units": "mm",
+      "method": "OpenCascade STEP → B-Rep, один валидный solid; расстояния между торцевыми плоскостями и границами наружных цилиндров. Длины шеек округлены вниз до 0,0001 мм; номинальная CAD-геометрия без производственных допусков",
+      "geometry": "concentric",
+      "outerDiameter": 114.3,
+      "outerDiameterSmall": 60.3,
+      "wallThickness": 3.6,
+      "wallThicknessSmall": 2.9,
+      "dimensions": {
+        "lengthMm": 102.0,
+        "cylindricalLengthLargeMm": 11.3181,
+        "cylindricalLengthSmallMm": 11.5287
+      }
+    },
+    {
+      "componentId": "переходы-005-r0404",
+      "family": "Переходы концентрические нержавеющие, AISI304",
+      "tableId": "переходы-005",
+      "matchFields": [
+        {
+          "column": "B",
+          "label": "DN",
+          "value": "DN125"
+        },
+        {
+          "column": "C",
+          "label": "PN",
+          "value": "PN10"
+        },
+        {
+          "column": "D",
+          "label": "Диаметр, мм",
+          "value": 139.7
+        },
+        {
+          "column": "E",
+          "label": "Диаметр меньший, мм",
+          "value": 114.3
+        },
+        {
+          "column": "F",
+          "label": "Толщина 1, мм",
+          "value": 4
+        },
+        {
+          "column": "G",
+          "label": "Толщина 2, мм",
+          "value": 3.6
+        },
+        {
+          "column": "H",
+          "label": "Наименование",
+          "value": "Переход концентрический (139,7 х 114,3 х 4) мм AISI304"
+        }
+      ],
+      "modelPath": "Equipment/Piping/3D/Элементы трубопроводов/Переходы/Переход К исп 1 ГОСТ 17378-2001 ISO/Переход К-1-139,7 x 4-114,3 x 3,6 ISO.stp",
+      "modelSha256": "de1f17c24d6f9394a0ea001ddf0b1218e991b75851ed3baf40face3ed2154cde",
+      "units": "mm",
+      "method": "OpenCascade STEP → B-Rep, один валидный solid; расстояния между торцевыми плоскостями и границами наружных цилиндров. Длины шеек округлены вниз до 0,0001 мм; номинальная CAD-геометрия без производственных допусков",
+      "geometry": "concentric",
+      "outerDiameter": 139.7,
+      "outerDiameterSmall": 114.3,
+      "wallThickness": 4.0,
+      "wallThicknessSmall": 3.6,
+      "dimensions": {
+        "lengthMm": 127.0,
+        "cylindricalLengthLargeMm": 21.0607,
+        "cylindricalLengthSmallMm": 16.7696
+      }
+    },
+    {
+      "componentId": "переходы-005-r0365",
+      "family": "Переходы концентрические нержавеющие, AISI304",
+      "tableId": "переходы-005",
+      "matchFields": [
+        {
+          "column": "B",
+          "label": "DN",
+          "value": "DN50"
+        },
+        {
+          "column": "C",
+          "label": "PN",
+          "value": "PN10"
+        },
+        {
+          "column": "D",
+          "label": "Диаметр, мм",
+          "value": 60.3
+        },
+        {
+          "column": "E",
+          "label": "Диаметр меньший, мм",
+          "value": 42.4
+        },
+        {
+          "column": "F",
+          "label": "Толщина 1, мм",
+          "value": 2.9
+        },
+        {
+          "column": "G",
+          "label": "Толщина 2, мм",
+          "value": 2.6
+        },
+        {
+          "column": "H",
+          "label": "Наименование",
+          "value": "Переход концентрический (60,3 х 42,4 х 2,9) мм AISI304"
+        }
+      ],
+      "modelPath": "Equipment/Piping/3D/Элементы трубопроводов/Переходы/Переход К исп 1 ГОСТ 17378-2001 ISO/Переход К-1-60,3 x 2,9-42,4 x 2,6 ISO.stp",
+      "modelSha256": "ea62f1fd0db6b4a9022a8c4a0190ee58e54138d259171918aa36c8cf14f7cb0a",
+      "units": "mm",
+      "method": "OpenCascade STEP → B-Rep, один валидный solid; расстояния между торцевыми плоскостями и границами наружных цилиндров. Длины шеек округлены вниз до 0,0001 мм; номинальная CAD-геометрия без производственных допусков",
+      "geometry": "concentric",
+      "outerDiameter": 60.3,
+      "outerDiameterSmall": 42.4,
+      "wallThickness": 2.9,
+      "wallThicknessSmall": 2.6,
+      "dimensions": {
+        "lengthMm": 76.0,
+        "cylindricalLengthLargeMm": 12.9993,
+        "cylindricalLengthSmallMm": 10.6126
+      }
+    },
+    {
+      "componentId": "переходы-005-r0368",
+      "family": "Переходы концентрические нержавеющие, AISI304",
+      "tableId": "переходы-005",
+      "matchFields": [
+        {
+          "column": "B",
+          "label": "DN",
+          "value": "DN50"
+        },
+        {
+          "column": "C",
+          "label": "PN",
+          "value": "PN10"
+        },
+        {
+          "column": "D",
+          "label": "Диаметр, мм",
+          "value": 60.3
+        },
+        {
+          "column": "E",
+          "label": "Диаметр меньший, мм",
+          "value": 48.3
+        },
+        {
+          "column": "F",
+          "label": "Толщина 1, мм",
+          "value": 2.9
+        },
+        {
+          "column": "G",
+          "label": "Толщина 2, мм",
+          "value": 2.6
+        },
+        {
+          "column": "H",
+          "label": "Наименование",
+          "value": "Переход концентрический (60,3 х 48,3 х 2,9) мм AISI304"
+        }
+      ],
+      "modelPath": "Equipment/Piping/3D/Элементы трубопроводов/Переходы/Переход К исп 1 ГОСТ 17378-2001 ISO/Переход К-1-60,3 x 2,9-48,3 x 2,6 AISI304.stp",
+      "modelSha256": "6a547c7af72db573ea7477fac14c8f702fc4642464cef93856fbb23f592d4b44",
+      "units": "mm",
+      "method": "OpenCascade STEP → B-Rep, один валидный solid; расстояния между торцевыми плоскостями и границами наружных цилиндров. Длины шеек округлены вниз до 0,0001 мм; номинальная CAD-геометрия без производственных допусков",
+      "geometry": "concentric",
+      "outerDiameter": 60.3,
+      "outerDiameterSmall": 48.3,
+      "wallThickness": 2.9,
+      "wallThicknessSmall": 2.6,
+      "dimensions": {
+        "lengthMm": 76.0,
+        "cylindricalLengthLargeMm": 13.7179,
+        "cylindricalLengthSmallMm": 10.9728
+      }
+    },
+    {
+      "componentId": "переходы-005-r0392",
+      "family": "Переходы концентрические нержавеющие, AISI304",
+      "tableId": "переходы-005",
+      "matchFields": [
+        {
+          "column": "B",
+          "label": "DN",
+          "value": "DN100"
+        },
+        {
+          "column": "C",
+          "label": "PN",
+          "value": "PN10"
+        },
+        {
+          "column": "D",
+          "label": "Диаметр, мм",
+          "value": 114.3
+        },
+        {
+          "column": "E",
+          "label": "Диаметр меньший, мм",
+          "value": 76.1
+        },
+        {
+          "column": "F",
+          "label": "Толщина 1, мм",
+          "value": 3.6
+        },
+        {
+          "column": "G",
+          "label": "Толщина 2, мм",
+          "value": 2.9
+        },
+        {
+          "column": "H",
+          "label": "Наименование",
+          "value": "Переход концентрический (114,3 х 76,1 х 3,6) мм AISI304"
+        }
+      ],
+      "modelPath": "Equipment/Piping/3D/Элементы трубопроводов/Переходы/Переход К исп 1 ГОСТ 17378-2001 ISO/Переход К-114,3х3.6 - 76,1х2.9 ISO.stp",
+      "modelSha256": "a99b319411e5e521cb3be139b539419f5c167ae74971dc17b21848fbff7b8416",
+      "units": "mm",
+      "method": "OpenCascade STEP → B-Rep, один валидный solid; расстояния между торцевыми плоскостями и границами наружных цилиндров. Длины шеек округлены вниз до 0,0001 мм; номинальная CAD-геометрия без производственных допусков",
+      "geometry": "concentric",
+      "outerDiameter": 114.3,
+      "outerDiameterSmall": 76.1,
+      "wallThickness": 3.6,
+      "wallThicknessSmall": 2.9,
+      "dimensions": {
+        "lengthMm": 102.0,
+        "cylindricalLengthLargeMm": 13.8488,
+        "cylindricalLengthSmallMm": 11.9582
+      }
+    },
+    {
+      "componentId": "переходы-005-r0393",
+      "family": "Переходы концентрические нержавеющие, AISI304",
+      "tableId": "переходы-005",
+      "matchFields": [
+        {
+          "column": "B",
+          "label": "DN",
+          "value": "DN100"
+        },
+        {
+          "column": "C",
+          "label": "PN",
+          "value": "PN16"
+        },
+        {
+          "column": "D",
+          "label": "Диаметр, мм",
+          "value": 114.3
+        },
+        {
+          "column": "E",
+          "label": "Диаметр меньший, мм",
+          "value": 76.1
+        },
+        {
+          "column": "F",
+          "label": "Толщина 1, мм",
+          "value": 6.3
+        },
+        {
+          "column": "G",
+          "label": "Толщина 2, мм",
+          "value": 5
+        },
+        {
+          "column": "H",
+          "label": "Наименование",
+          "value": "Переход концентрический (114,3 х 76,1 х 6,3) мм AISI304"
+        }
+      ],
+      "modelPath": "Equipment/Piping/3D/Элементы трубопроводов/Переходы/Переход К исп 1 ГОСТ 17378-2001 ISO/Переход К-114,3х6.3 - 76,1х5 ISO.stp",
+      "modelSha256": "27aded1b6bb41ebce9507e166c3de0ce73f4e7cd50a90c5ecb8fb8483ec7c426",
+      "units": "mm",
+      "method": "OpenCascade STEP → B-Rep, один валидный solid; расстояния между торцевыми плоскостями и границами наружных цилиндров. Длины шеек округлены вниз до 0,0001 мм; номинальная CAD-геометрия без производственных допусков",
+      "geometry": "concentric",
+      "outerDiameter": 114.3,
+      "outerDiameterSmall": 76.1,
+      "wallThickness": 6.3,
+      "wallThicknessSmall": 5.0,
+      "dimensions": {
+        "lengthMm": 102.0,
+        "cylindricalLengthLargeMm": 13.8488,
+        "cylindricalLengthSmallMm": 11.9582
+      }
+    },
+    {
+      "componentId": "st20-concentric:r0035",
+      "family": "Переходы концентрические стальные, Сталь 20",
+      "tableId": "st20-concentric-reducers-20261028",
+      "matchFields": [
+        {
+          "column": "B",
+          "label": "DN",
+          "value": "DN50"
+        },
+        {
+          "column": "C",
+          "label": "PN",
+          "value": "PN10"
+        },
+        {
+          "column": "D",
+          "label": "Диаметр, мм",
+          "value": 60.3
+        },
+        {
+          "column": "E",
+          "label": "Диаметр меньший, мм",
+          "value": 42.4
+        },
+        {
+          "column": "F",
+          "label": "Толщина 1, мм",
+          "value": 2.9
+        },
+        {
+          "column": "G",
+          "label": "Толщина 2, мм",
+          "value": 2.6
+        },
+        {
+          "column": "H",
+          "label": "Наименование",
+          "value": "Переход концентрический 60.3×2.9–42.4×2.6 СТ20"
+        }
+      ],
+      "modelPath": "Equipment/Piping/3D/Элементы трубопроводов/Переходы/Переход К исп 1 ГОСТ 17378-2001 ISO/Переход К-1-60,3 x 2,9-42,4 x 2,6 ISO.stp",
+      "modelSha256": "ea62f1fd0db6b4a9022a8c4a0190ee58e54138d259171918aa36c8cf14f7cb0a",
+      "units": "mm",
+      "method": "OpenCascade STEP → B-Rep, один валидный solid; расстояния между торцевыми плоскостями и границами наружных цилиндров. Длины шеек округлены вниз до 0,0001 мм; номинальная CAD-геометрия без производственных допусков; геометрический аналог переходы-005-r0365, перенос на СТ20 принят пользователем 28.10.2026",
+      "geometry": "concentric",
+      "outerDiameter": 60.3,
+      "outerDiameterSmall": 42.4,
+      "wallThickness": 2.9,
+      "wallThicknessSmall": 2.6,
+      "dimensions": {
+        "lengthMm": 76.0,
+        "cylindricalLengthLargeMm": 12.9993,
+        "cylindricalLengthSmallMm": 10.6126
+      }
+    },
+    {
+      "componentId": "st20-concentric:r0038",
+      "family": "Переходы концентрические стальные, Сталь 20",
+      "tableId": "st20-concentric-reducers-20261028",
+      "matchFields": [
+        {
+          "column": "B",
+          "label": "DN",
+          "value": "DN50"
+        },
+        {
+          "column": "C",
+          "label": "PN",
+          "value": "PN10"
+        },
+        {
+          "column": "D",
+          "label": "Диаметр, мм",
+          "value": 60.3
+        },
+        {
+          "column": "E",
+          "label": "Диаметр меньший, мм",
+          "value": 48.3
+        },
+        {
+          "column": "F",
+          "label": "Толщина 1, мм",
+          "value": 2.9
+        },
+        {
+          "column": "G",
+          "label": "Толщина 2, мм",
+          "value": 2.6
+        },
+        {
+          "column": "H",
+          "label": "Наименование",
+          "value": "Переход концентрический 60.3×2.9–48.3×2.6 СТ20"
+        }
+      ],
+      "modelPath": "Equipment/Piping/3D/Элементы трубопроводов/Переходы/Переход К исп 1 ГОСТ 17378-2001 ISO/Переход К-1-60,3 x 2,9-48,3 x 2,6 AISI304.stp",
+      "modelSha256": "6a547c7af72db573ea7477fac14c8f702fc4642464cef93856fbb23f592d4b44",
+      "units": "mm",
+      "method": "OpenCascade STEP → B-Rep, один валидный solid; расстояния между торцевыми плоскостями и границами наружных цилиндров. Длины шеек округлены вниз до 0,0001 мм; номинальная CAD-геометрия без производственных допусков; геометрический аналог переходы-005-r0368, перенос на СТ20 принят пользователем 28.10.2026",
+      "geometry": "concentric",
+      "outerDiameter": 60.3,
+      "outerDiameterSmall": 48.3,
+      "wallThickness": 2.9,
+      "wallThicknessSmall": 2.6,
+      "dimensions": {
+        "lengthMm": 76.0,
+        "cylindricalLengthLargeMm": 13.7179,
+        "cylindricalLengthSmallMm": 10.9728
+      }
+    }
+  ]
+}

@@ -1,4 +1,5 @@
 import type { CollectorCatalog, CollectorComponent, ComponentKind } from "./collector-calculations";
+import { readPipePaintingRates } from "./component-painting.ts";
 
 type Field = { column: string; headerPath: string[]; value: unknown };
 type Item = { id: string; catalogId: string; tableId: string; family: string; sourceSheet: string; sourceRow: number; fields: Field[]; prices: Array<{ amount: number; currency: string; sourceColumn: string; label: string }> };
@@ -33,7 +34,7 @@ export function makeCollectorCatalog(data: BindingCatalog): CollectorCatalog {
     components.push({ id: item.id, kind, name: String(field(item, /^Наименование$/i) ?? `${item.family} DN${dn}`), dn, pn, material,
       ...(thread === "ВР" ? { threadGender: "female" as const } : thread === "НР" ? { threadGender: "male" as const } : {}),
       price: price?.amount ?? null, outerDiameter: outer ?? nippleRef?.outerDiameter ?? null, innerDiameter: outer && thickness ? outer - 2 * thickness : null,
-      source: supplierUrl ? `${supplierUrl}; цена с НДС от ${priceDate ?? "неизвестной даты"}${documentUrl ? `; паспорт: ${documentUrl}` : ""}` : `${item.sourceSheet}!строка ${item.sourceRow}${price ? `, цена ${price.sourceColumn}${item.sourceRow}` : ""}${nippleRef ? `; Ø: ${nippleRef.source}` : ""}` });
+      source: supplierUrl ? `${supplierUrl}; ${field(item, /^Условия цены$/i) ?? "цена с НДС"}; дата ${priceDate ?? "неизвестна"}${documentUrl ? `; паспорт: ${documentUrl}` : ""}` : `${item.sourceSheet}!строка ${item.sourceRow}${price ? `, цена ${price.sourceColumn}${item.sourceRow}` : ""}${nippleRef ? `; Ø: ${nippleRef.source}` : ""}` });
   }
-  return { version: `${data.source.sha256}:${data.source.importedAt}`, components, bolts: data.collectorReference?.bolts ?? [] };
+  return { version: `collector:v2:${data.source.sha256}:${data.source.importedAt}`, components, bolts: data.collectorReference?.bolts ?? [], paintingRates: readPipePaintingRates(data) };
 }

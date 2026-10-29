@@ -10,18 +10,20 @@ import { assemblyBounds, distance, type Assembly, type CameraView, type Componen
 import { snapGeometry, workingPlane, excludedTargets, onFace, projectPlane, type SnapGeometry, type SnapLine, type SnapFace } from "./snap-geometry";
 import { candidates, rankedCandidates, rayPlane, closestToRay, type Candidate, type SnapPick, type SnapQuery } from "./snap-engine";
 import type { SnapSettings } from "./snap-settings";
+import { InsertionRenderCache } from "./insertion-renderer";
+import { CollectorRenderCache } from "./collector-renderer";
 
 export type ViewportHandle = { fit: () => void; standard: (view: "front" | "top" | "right" | "iso") => void; prepareMeshes: (urls: string[]) => Promise<void> };
 export type EditorMode = "translate" | "rotate" | "measure" | "move" | "reference1" | "between1" | "between2" | "addReference" | "parallelEdge" | "planeFace";
 export type ViewportProps = {
-  assembly: Assembly; selectedId: string | null; grid: boolean; snapStep: number | null;
+  assembly: Assembly; selectedId: string | null; selectedPieceId?: string; grid: boolean; snapStep: number | null;
   mode: EditorMode; camera?: CameraView;
   measurement: Vec3[];
   snaps: SnapSettings; referencePoints: EditorState["referencePoints"];
   reference?: Vec3; secondReference?: Vec3; parallelLine?: SnapLine;
   referenceApproximate?: boolean; secondReferenceApproximate?: boolean;
   movingId?: string; moveHasSource?: boolean; preview?: boolean;
-  onSelect: (id: string | null) => void;
+  onSelect: (id: string | null, pieceId?: string) => void;
   onTransform: (id: string, position: Vec3, rotation: Vec3) => void;
   onPick: (point: SnapPick) => void; onCancel: () => void;
   onLine: (line: SnapLine) => void; onPlane: (face: SnapFace) => void;
@@ -29,7 +31,11 @@ export type ViewportProps = {
   onAssetError: (message: string) => void;
 };
 
+const visibleHierarchy = (o: THREE.Object3D): boolean => o.visible && (!o.parent || visibleHierarchy(o.parent));
+
 class Scene {
+  insertionCache = new InsertionRenderCache();
+  collectorCache = new CollectorRenderCache();
   renderer: THREE.WebGLRenderer;
   scene = new THREE.Scene();
   camera = new THREE.PerspectiveCamera(40, 1, 1, 1e7);
@@ -114,10 +120,11 @@ class Scene {
       }
       const rect = canvas.getBoundingClientRect(), ray = new THREE.Raycaster();
       ray.setFromCamera(new THREE.Vector2((event.clientX - rect.left) / rect.width * 2 - 1, -(event.clientY - rect.top) / rect.height * 2 + 1), this.camera);
-      const hit = ray.intersectObjects([...this.objects.values()].filter(o => o.visible), true).find(h => h.object instanceof THREE.Mesh);
+      const hit = ray.intersectObjects([...this.objects.values()].filter(o => o.visible), true).find(h => h.object instanceof THREE.Mesh && visibleHierarchy(h.object));
       let object: THREE.Object3D | null = hit?.object ?? null;
-      while (object && !object.userData.componentId) object = object.parent;
-      this.options?.onSelect(object?.userData.componentId ?? null);
+      let pieceId: string | undefined;
+      while (object && !object.userData.componentId) { pieceId ??= object.userData.pieceId; object = object.parent; }
+      this.options?.onSelect(object?.userData.componentId ?? null, pieceId);
     };
     const move = (event: PointerEvent) => { this.pointer = { x: event.clientX, y: event.clientY }; if (!event.buttons) this.refreshSnap(); };
     const leave = () => { this.pointer = undefined; this.clearSnap(); };
@@ -165,7 +172,7 @@ class Scene {
     const onlyComponent = options.mode === "move" && !options.moveHasSource ? options.movingId : undefined;
     const targets = [...this.objects.entries()].filter(([id, o]) => o.visible && !exclude.has(id) && (!onlyComponent || id === onlyComponent)).map(([, o]) => o);
     this.scene.updateMatrixWorld(true);
-    const hit = ray.intersectObjects(targets, true).find(h => h.object instanceof THREE.Mesh);
+    const hit = ray.intersectObjects(targets, true).find(h => h.object instanceof THREE.Mesh && visibleHierarchy(h.object));
     let object: THREE.Object3D | null = hit?.object ?? null;
     while (object && !object.userData.componentId) object = object.parent;
     const surface = hit && object ? { point: hit.point.toArray() as Vec3, componentId: object.userData.componentId as string, vertices: hit.face && hit.object instanceof THREE.Mesh ? [hit.face.a, hit.face.b, hit.face.c].map(i => new THREE.Vector3().fromBufferAttribute(hit.object instanceof THREE.Mesh ? hit.object.geometry.attributes.position : null!, i).applyMatrix4(hit.object.matrixWorld).toArray() as Vec3) : [] } : undefined;
@@ -243,7 +250,8 @@ class Scene {
     this.fit({ front: new THREE.Vector3(0, -1, 0), top: new THREE.Vector3(0, -.00001, 1), right: new THREE.Vector3(1, 0, 0), iso: new THREE.Vector3(1.3, -1.7, 1.2) }[view]);
   }
   highlight() {
-    const object = this.options?.selectedId ? this.objects.get(this.options.selectedId) : undefined;
+    let object: THREE.Object3D | undefined = this.options?.selectedId ? this.objects.get(this.options.selectedId) : undefined;
+    if (object && this.options?.selectedPieceId) object.traverse(o => { if (o.userData.pieceId === this.options?.selectedPieceId) object = o; });
     this.selection.visible = Boolean(object?.visible);
     if (object?.visible) this.selection.box.setFromObject(object);
   }
@@ -259,8 +267,9 @@ class Scene {
       for (const object of this.objects.values()) { this.root.remove(object); disposeObject(object); }
       this.objects.clear();
       for (const c of options.assembly.components) {
-        const object = componentObject(options.assembly, c); this.objects.set(c.id, object); this.root.add(object);
+        const object = componentObject(options.assembly, c, this.insertionCache, this.collectorCache); this.objects.set(c.id, object); this.root.add(object);
         if (c.meshUrl) this.loadMesh(c, object, this.revision);
+        if (c.collector || c.insertion || c.shape?.kind === "mesh") this.loadInsertionMeshes(c, object, this.revision);
       }
       if (!this.hasCamera) this.fit();
     }
@@ -295,10 +304,27 @@ class Scene {
       object.add(new THREE.Mesh(geometry.clone(), material(c))); this.highlight();
     }).catch(() => { if (!this.disposed && this.revision === revision) this.options?.onAssetError(`${c.name}: не удалось загрузить CAD-копию; показаны габариты.`); });
   }
+  loadInsertionMeshes(c: Component, object: THREE.Group, revision: number) {
+    const pieces = c.collector?.template.pieces ?? c.insertion?.template.geometry.pieces ?? (c.shape ? [{ id: "line-body", name: c.name, shape: c.shape }] : []);
+    for (const piece of pieces.filter(p => p.shape.kind === "mesh")) {
+      void this.mesh(piece.shape.meshUrl!).then(geometry => {
+        if (this.disposed || this.revision !== revision) return;
+        let target: THREE.Object3D | undefined;
+        object.traverse(o => { if (o.userData.pieceId === piece.id) target = o; });
+        if (!target) return;
+        for (const child of [...target.children]) { target.remove(child); disposeObject(child); }
+        const mesh = new THREE.Mesh(geometry.clone(), material({ ...c, opacity: c.opacity * (c.collector?.pieceOpacities?.[piece.id] ?? 1) }));
+        mesh.position.fromArray(piece.shape.modelPosition ?? [0, 0, 0]); mesh.rotation.set(...(piece.shape.modelRotation ?? [0, 0, 0]).map(a => a * Math.PI / 180) as Vec3);
+        target.add(mesh); this.highlight();
+      }).catch(() => { if (!this.disposed && this.revision === revision) this.options?.onAssetError(`${piece.name}: CAD-копия недоступна; показан условный габарит, геометрия не полная.`); });
+    }
+  }
   dispose() {
     this.disposed = true; cancelAnimationFrame(this.frame); this.observer.disconnect(); this.themeObserver.disconnect();
     this.cleanup.forEach(fn => fn()); this.transform.dispose(); this.orbit.dispose();
     disposeObject(this.scene);
+    this.insertionCache.dispose();
+    this.collectorCache.dispose();
     for (const geometry of this.cache.values()) void geometry.then(g => g.dispose()).catch(() => {});
     this.renderer.dispose(); this.renderer.domElement.remove(); this.snapLabel.remove();
   }

@@ -18,6 +18,7 @@ import tempfile
 import time
 
 from model_assets import CONVERTER_VERSION, convert_step, file_hash, load_library, run_cad_command, valid_stl
+from native_display_models import native_library_models
 
 FRONTEND = Path(__file__).resolve().parents[1]
 ROOT = FRONTEND.parent
@@ -160,8 +161,14 @@ def main():
     results = {}
     # Small components first; large assemblies cannot starve the usable library.
     ordered = sorted(groups, key=lambda digest: (args.root / groups[digest][0]).stat().st_size)
+    native_models = native_library_models(args.root, args.output)
     def save():
         library = make_library(groups, results, failures, count)
+        library["models"].extend(native_models)
+        library["summary"]["sourceFiles"] += len(native_models)
+        library["summary"]["uniqueModels"] += len(native_models)
+        library["summary"]["ready"] += sum(m["status"] == "ready" for m in native_models)
+        library["summary"]["errors"] += sum(m["status"] == "error" for m in native_models)
         atomic_json(args.output / "library.json", library)
         atomic_json(args.state / "progress.json", library["summary"])
         return library["summary"]

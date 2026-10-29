@@ -1,3 +1,4 @@
+globalThis.__PSC_RELEASE_PROFILE__ = "full";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
@@ -16,7 +17,7 @@ function fixtureCatalog() {
   for (const material of ["aisi304", "st20"]) for (const [size, [outerDiameter, innerDiameter]] of Object.entries(sizes)) for (const pn of [10,16,25]) for (const kind of ["pipe", "weldFlange", "looseFlange", "collar", "nipple", "plug"]) {
     components.push({ id: `${material}-${kind}-${size}-${pn}`, name: `${kind} DN${size}`, kind, dn: Number(size), pn, material, threadGender: kind === "plug" ? "female" : undefined, outerDiameter, innerDiameter, price: kind === "pipe" ? 1000 : 100, source: "TEST FIXTURE ONLY" });
   }
-  return { version: "fixture-1", components, bolts: Object.keys(sizes).flatMap(dn => [10,16,25].map(pn => ({ dn: Number(dn), pn, length: 50, source: "TEST FIXTURE ONLY" }))) };
+  return { version: "fixture-1", components, paintingRates: Object.keys(sizes).map(dn => ({ id: `painting-${dn}`, dn: Number(dn), material: "st20", pricePerMeter: { 100: 800, 80: 650, 50: 450 }[dn] ?? 250, source: "TEST FIXTURE ONLY", warnings: [] })), bolts: Object.keys(sizes).flatMap(dn => [10,16,25].map(pn => ({ dn: Number(dn), pn, length: 50, source: "TEST FIXTURE ONLY" }))) };
 }
 const catalog = fixtureCatalog();
 const near = (actual, expected) => assert.ok(Math.abs(actual - expected) < 1e-6, `${actual} != ${expected}`);
@@ -24,6 +25,14 @@ test("01 single circuit canonical code", () => assert.equal(collectorCode(config
 test("02 two circuit canonical code", () => assert.equal(collectorCode(two()), 'Н100_16_3(1)_500(400)_80(2")_AISI304'));
 test("03 eccentric suction canonical code", () => assert.equal(collectorCode(two({ type: "suction", eccentric: true })), 'В100_16_3(1)_500(400)_80(2")_AISI304_Э'));
 test("04 discharge eccentric rejected", () => { assert.equal(collectorCode(config({ eccentric: true })), null); assert.equal(calculateCollector(config({ eccentric: true }), catalog).complete, false); });
+test("branch larger than the main is an explicit constructor error; equal sizes and inactive circuits remain allowed", () => {
+  for(const type of ["suction","discharge"]){const c=config({type,dn:65});assert.match(calc.collectorBranchDiameterErrors(c)[0],/Контур 1:.*DN80.*больше.*DN65/);assert.equal(collectorCode(c),null);const r=calculateCollector(c,catalog);assert.equal(r.complete,false);assert.equal(r.price,null);}
+  const twoCircuits=two();twoCircuits.secondary.dn=150;assert.match(calc.collectorBranchDiameterErrors(twoCircuits)[0],/Контур 2:.*DN150.*DN100/);
+  twoCircuits.stationType="utility";assert.deepEqual(calc.collectorBranchDiameterErrors(twoCircuits),[]);
+  const equal=config({dn:80});assert.deepEqual(calc.collectorBranchDiameterErrors(equal,catalog),[]);assert.equal(calculateCollector(equal,catalog).complete,true);
+  const dimensions=structuredClone(catalog);dimensions.components.find(p=>p.kind==="pipe"&&p.dn===80&&p.material==="aisi304"&&p.pn===16).outerDiameter=120;
+  assert.match(calc.collectorBranchDiameterErrors(config(),dimensions)[0],/наружный диаметр.*120.*114.3/);assert.equal(calculateCollector(config(),dimensions).price,null);
+});
 test("05 thread above two inches rejected", () => { assert.equal(collectorCode(config({ connection: "threaded" })), null); const c=two(); c.secondary.dn=65; assert.equal(collectorCode(c),null); });
 test("06 exactly two network flanges and two collars for low pressure stainless", () => { const r=calculateCollector(config(),catalog); assert.equal(r.bom.find(i=>i.role==="end-looseFlange").quantity,2); assert.equal(r.bom.find(i=>i.role==="end-collar").quantity,2); });
 test("07 no network flanges on threaded collector", () => assert.equal(calculateCollector(config({dn:50,connection:"threaded"}),catalog).bom.filter(i=>i.role.startsWith("end-")).length,0));
@@ -36,7 +45,77 @@ test("13 combined simultaneous flow is sum", () => assert.equal(collectorFlow(tw
 test("14 jockey always alternating even with simultaneous flag", () => { const r=collectorFlow(two({stationType:"fire",jockey:true,simultaneous:true})); assert.equal(r.flow,60); assert.equal(r.mode,"Основные насосы и жокей работают раздельно"); });
 test("15 stainless welding costs 5000 RUB/m", () => { const r=calculateCollector(config(),catalog); near(r.weldCost,r.weldLengthMm/1000*5000); });
 test("16 steel welding costs 2400 RUB/m", () => { const r=calculateCollector(config({material:"st20"}),catalog); near(r.weldCost,r.weldLengthMm/1000*2400); assert.equal(r.bom.find(i=>i.role==="end-weldFlange").quantity,2); });
+
+test("steel collector paints the body and all working/reserve branches at their own DN rates", () => {
+  for (const type of ["suction", "discharge"]) {
+    const c = config({ material: "st20", type }), result = calculateCollector(c, catalog);
+    assert.equal(result.complete, true, result.warnings.join("; "));
+    const paint = result.bom.filter(item => item.kind === "painting");
+    assert.deepEqual(paint.map(item => item.role), ["painting-collector", "painting-branch1"]);
+    near(paint[0].quantity, 1.5); near(paint[0].cost, 1.5 * 800);
+    near(paint[1].quantity, 3 * (0.5 * 114.3 + 1.1 * 50) / 1000);
+    near(paint[1].cost, 3 * 0.11215 * 650);
+    assert.ok(paint.every(item => item.unit === "м" && item.source.includes("TEST FIXTURE ONLY")));
+    near(result.price, result.bom.filter(item => item.kind !== "painting").reduce((sum, item) => sum + item.cost, 0) + 1418.6925);
+    assert.equal(result.code, collectorCode(c));
+  }
+});
+
+test("two active circuits paint each branch group once, including threaded branches and equal nominal diameters", () => {
+  const c = two({ material: "st20" }), result = calculateCollector(c, catalog);
+  assert.equal(result.complete, true, result.warnings.join("; "));
+  const paint = result.bom.filter(item => item.kind === "painting");
+  assert.equal(paint.length, 3);
+  near(paint[0].quantity, 1.9); near(paint[0].cost, 1.9 * 800);
+  near(paint[1].cost, 3 * 0.11215 * 650); near(paint[2].cost, 0.11215 * 450);
+  c.secondary.dn = c.primary.dn; c.secondary.connection = "flanged";
+  const sameDn = calculateCollector(c, catalog).bom.filter(item => item.kind === "painting");
+  near(sameDn[1].quantity + sameDn[2].quantity, 4 * 0.11215);
+  near(sameDn[1].cost + sameDn[2].cost, 4 * 0.11215 * 650);
+  const inactive = calculateCollector({ ...c, stationType: "utility" }, catalog);
+  assert.equal(inactive.bom.filter(item => item.kind === "painting").length, 2);
+  near(inactive.bom.find(item => item.role === "painting-collector").quantity, 1.5);
+});
+
+test("painting does not affect stainless, geometry, welds or pressure checks", () => {
+  const stainless = calculateCollector(config(), { ...catalog, paintingRates: undefined });
+  assert.equal(stainless.complete, true); assert.ok(stainless.bom.every(item => item.kind !== "painting"));
+  const c = config({ material: "st20", type: "suction" }), before = calculateCollector(c, catalog);
+  const changed = structuredClone(catalog); changed.paintingRates.forEach(rate => { rate.pricePerMeter *= 2; });
+  const after = calculateCollector(c, changed);
+  assert.equal(after.lengthMm, before.lengthMm); assert.deepEqual(after.branchLengthsMm, before.branchLengthsMm);
+  assert.deepEqual(after.welds, before.welds); assert.deepEqual(after.velocities, before.velocities);
+  near(after.price - before.price, before.bom.filter(item => item.kind === "painting").reduce((sum, item) => sum + item.cost, 0));
+  const checks = calc.collectorPressureChecks(c, 10, catalog);
+  assert.equal(checks.length, 1 + before.bom.filter(item => !["painting", "welding"].includes(item.kind)).length);
+  assert.ok(checks.every(check => !/окраска/i.test(check.message)));
+});
+
+test("missing or ambiguous painting rates and missing branch length block final pricing without zero estimates", () => {
+  for (const mutate of [
+    data => { data.paintingRates = undefined; },
+    data => { data.paintingRates = data.paintingRates.filter(rate => rate.dn !== 80); },
+    data => { data.paintingRates.find(rate => rate.dn === 80).pricePerMeter = null; },
+    data => { data.paintingRates.find(rate => rate.dn === 80).source = ""; },
+    data => { data.paintingRates.push({ ...data.paintingRates.find(rate => rate.dn === 80), id: "duplicate" }); },
+  ]) {
+    const data = structuredClone(catalog); mutate(data);
+    const result = calculateCollector(config({ material: "st20" }), data);
+    assert.equal(result.complete, false); assert.equal(result.price, null);
+    assert.ok(result.warnings.some(warning => /окраски/.test(warning)));
+    assert.equal(result.bom.find(item => item.role === "painting-branch1").cost, null);
+  }
+  const result = calculateCollector(config({ material: "st20" }), { ...catalog, bolts: [] });
+  const paint = result.bom.find(item => item.role === "painting-branch1");
+  assert.equal(paint.quantity, null); assert.equal(paint.cost, null); assert.equal(result.price, null);
+});
 function readyProject() { const p=projectModule.createProject(); Object.assign(p.entities["system-input"],{ flowRate:60,workingPumpCount:2,reservePumpCount:1 }); Object.assign(p.entities["station-dn"],{suctionCollectorDn:100,dischargeCollectorDn:100,suctionValveDn:80,dischargeValveDn:80,pn:16,connectionType:"flanged",collectorMaterial:"aisi304"}); return model.synchronizeCollectors(p); }
+test("legacy complete collector with DN80 branches and DN65 main loses its ready status and price without changing manual DN",async()=>{
+  let p=readyProject();const card=p.entities['station-collectors'].discharge;card.overrides.dn=65;p=model.synchronizeCollectors(p);
+  const bad=p.entities['station-collectors'].discharge;bad.calculation={...calculateCollector(bad.configuration,catalog),complete:true,code:'legacy-65-80',price:12345};bad.calculationSourceFingerprint=bad.sourceFingerprint;bad.code='legacy-65-80';bad.status='complete';bad.databaseStatus='found';bad.database={id:'legacy',code:'legacy-65-80',price:12345};
+  const fixed=model.synchronizeCollectors(p),after=fixed.entities['station-collectors'].discharge;assert.equal(after.configuration.dn,65);assert.equal(after.configuration.primary.dn,80);assert.equal(after.status,'incomplete');assert.equal(after.database,null);assert.equal(fixed.entities['station-spec'].items.find(i=>i.option==='dischargeCollector').price,null);
+  const {collectProjectIssues}=await loadTs(new URL('../app/diagnostics.ts',import.meta.url));const issues=collectProjectIssues(fixed,[],null,[]);assert.ok(issues.some(i=>i.tool==='collectors'&&i.severity==='error'&&/DN80.*больше.*DN65/.test(i.message)));
+});
 
 function commonSuctionProject(stationType = "combined") {
   const p = readyProject();
@@ -156,6 +235,27 @@ test("20 missing prices and diameters cannot produce final price", () => { for(c
 test("actual internal diameter, per-working-pump flow and weld quantities", () => { const r=calculateCollector(two(),catalog); near(r.velocities.collector,60/3600/(Math.PI*.1083**2/4)); near(r.velocities.primary,30/3600/(Math.PI*.0839**2/4)); near(r.welds.find(i=>i.role==="end").lengthMm,2*2*Math.PI*114.3); near(r.welds.find(i=>i.role==="branch1-joint").lengthMm,3*1.4*Math.PI*88.9); assert.equal(r.bom.find(i=>i.role==="instrument15").quantity,2); assert.equal(r.bom.find(i=>i.role==="instrument20").quantity,1); assert.equal(flowSpeed(10,null),null); assert.equal(flowSpeed(10,0),null); const c=config();c.primary.working=0;assert.equal(calculateCollector(c,catalog).velocities.primary,null); });
 test("high pressure / large stainless flange rules and inactive secondary", () => { assert.deepEqual(calc.flangeKinds("aisi304",200,16),["collar","looseFlange"]); assert.deepEqual(calc.flangeKinds("aisi304",250,16),["weldFlange"]); assert.deepEqual(calc.flangeKinds("aisi304",80,25),["weldFlange"]); assert.equal(collectorLength(two({stationType:"utility"})),1500); });
 test("catalogue version changes invalidate persisted prices", () => { let p=readyProject(); const card=p.entities["station-collectors"].discharge; card.calculation=calculateCollector(card.configuration,catalog);card.calculationSourceFingerprint=card.sourceFingerprint;card.currentCatalogVersion="fixture-2";p=model.synchronizeCollectors(p);assert.equal(p.entities["station-collectors"].discharge.status,"stale"); });
+
+test("pump-line insertion designs do not invalidate either collector or its saved database selection",()=>{
+  let p=readyProject();
+  for(const side of ["suction","discharge"]){const c=p.entities["station-collectors"][side];c.calculation=calculateCollector(c.configuration,catalog);c.calculationSourceFingerprint=c.sourceFingerprint;c.databaseStatus="found";c.database={id:`saved-${side}`,code:c.code,price:123};}
+  p=model.synchronizeCollectors(p);const before=structuredClone(p.entities["station-collectors"]);
+  p.entities["station-settings"].vibrationCompensators=true;
+  p.entities["station-dn"].insertionDesigns={"suction:primary-after-vibration-insertion":{totalLengthMm:186},"discharge:primary-after-vibration-insertion":{totalLengthMm:186}};
+  p=model.synchronizeCollectors(p);
+  for(const side of ["suction","discharge"]){const c=p.entities["station-collectors"][side];assert.equal(c.status,"complete");assert.deepEqual(c.calculation,before[side].calculation);assert.deepEqual(c.database,before[side].database);assert.equal(c.sourceFingerprint,before[side].sourceFingerprint);}
+  delete p.entities["station-dn"].insertionDesigns;
+  p=model.synchronizeCollectors(p);assert.equal(p.entities["station-collectors"].suction.status,"complete");
+});
+
+test("legacy collector fingerprints heal only insertion-design differences on JSON reload",()=>{
+  let p=projectModule.parseProjectConfig(JSON.parse(JSON.stringify(readyProject())));
+  for(const side of ["suction","discharge"]){const c=p.entities["station-collectors"][side];c.calculation=calculateCollector(c.configuration,catalog);const legacy=JSON.parse(c.sourceFingerprint);legacy[1].insertionDesigns={"discharge:primary-between-valves-insertion":{totalLengthMm:186}};c.calculationSourceFingerprint=JSON.stringify(legacy);}
+  p=projectModule.parseProjectConfig(JSON.parse(JSON.stringify(p)));
+  for(const side of ["suction","discharge"])assert.equal(p.entities["station-collectors"][side].status,"complete");
+  p.entities["system-input"].head+=5;p=model.synchronizeCollectors(p);
+  for(const side of ["suction","discharge"])assert.equal(p.entities["station-collectors"][side].status,"stale","working-point changes still invalidate calculation");
+});
 test("catalog adapter uses correct metre price, merged PN and source bolt table", async () => { const {makeCollectorCatalog}=await loadTs(new URL("../app/collector-catalog.ts",import.meta.url)); const source=JSON.parse(await readFile(new URL("../public/binding-components.json",import.meta.url),"utf8")); const data=makeCollectorCatalog(source); const pipe=data.components.find(i=>i.kind==="pipe"&&i.dn===100&&i.pn===16&&i.material==="aisi304");assert.ok(pipe);near(pipe.innerDiameter,pipe.outerDiameter-6);assert.ok(pipe.price>0); assert.equal(data.bolts.find(i=>i.dn===80&&i.pn===16).length,47);assert.match(data.bolts.find(i=>i.dn===80&&i.pn===16).source,/Q58/); assert.ok(data.components.find(i=>i.kind==="looseFlange"&&i.dn===80&&i.pn===16));const r=calculateCollector(config(),data);assert.ok(r.price>0);assert.deepEqual(r.warnings,[]); });
 
 test("D1 API create, exact lookup, authoritative repricing, auth and migration constraints", async () => {
@@ -163,11 +263,25 @@ test("D1 API create, exact lookup, authoritative repricing, auth and migration c
   for(const file of ["0000_burly_jackpot.sql","0001_organic_lady_bullseye.sql","0002_control_cabinet_configurator.sql","0003_control_cabinet_item_groups.sql","0004_smart_power_ranges.sql","0005_collectors.sql"]) sqlite.exec(await readFile(new URL(`../drizzle/${file}`,import.meta.url),"utf8"));
   sqlite.exec("INSERT INTO users (id,email,name,password_hash) VALUES ('test','test@example.invalid','Test','unused')");
   const database={prepare(sql) { let args=[];return {bind(...values){args=values;return this;},async first(){return sqlite.prepare(sql).get(...args)??null;},async all(){return {success:true,results:sqlite.prepare(sql).all(...args)};},async run(){sqlite.prepare(sql).run(...args);return {success:true};}};},async batch(statements){sqlite.exec("BEGIN");try {const results=[];for(const s of statements) results.push(await s.run());sqlite.exec("COMMIT");return results;}catch(e){sqlite.exec("ROLLBACK");throw e;}}};
-  globalThis.__collectorTest={database,user:{id:"test"}};
+  globalThis.__collectorTest={database,user:{id:"test",role:"pro"}};
   const routeUrl=new URL("../app/api/collectors/route.ts",import.meta.url);
   const route=await loadTs(routeUrl,{[new URL("../app/auth-server.ts",import.meta.url).href]:'export const db=()=>globalThis.__collectorTest.database; export const currentUser=async()=>globalThis.__collectorTest.user; export const json=(body,status=200,headers)=>Response.json(body,{status,headers});',[new URL("../public/collector-catalog.json",import.meta.url).href]:JSON.stringify(catalog)});
   const send=body=>route.POST(new Request("http://local/api/collectors",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)}));
-  globalThis.__collectorTest.user=null;assert.equal((await send({action:"create",configuration:config()})).status,401);globalThis.__collectorTest.user={id:"test"};
+  globalThis.__collectorTest.user=null;assert.equal((await send({action:"create",configuration:config()})).status,401);globalThis.__collectorTest.user={id:"test",role:"pro"};
+  const invalid=await send({action:'create',configuration:config({dn:65}),code:'legacy-65-80'});assert.equal(invalid.status,400);assert.match((await invalid.json()).error,/DN80.*больше.*DN65/);assert.equal(sqlite.prepare('SELECT count(*) AS n FROM collectors').get().n,0);
+  const standardProject=projectModule.createProject();
+  Object.assign(standardProject.entities["system-input"],{flowRate:60,workingPumpCount:2,reservePumpCount:1});
+  const standard=model.synchronizeCollectors(standardProject).entities["station-collectors"].discharge.configuration;
+  for(const role of ["base","plus"]) {
+    globalThis.__collectorTest.user={id:"test",role};
+    assert.equal((await send({action:"calculate",configuration:standard})).status,200);
+    for(const action of ["calculate","create","refresh"]) {
+      const custom={...standard,dn:250};
+      assert.equal((await send({action,configuration:custom,code:collectorCode(custom)})).status,403);
+    }
+    assert.equal(sqlite.prepare("SELECT count(*) AS count FROM collectors").get().count,0);
+  }
+  globalThis.__collectorTest.user={id:"test",role:"pro"};
   assert.equal((await send({action:"create",configuration:config({connection:"threaded"})})).status,400);
   assert.equal((await send({action:"create",configuration:config({eccentric:true})})).status,400);
   const c=config(),code=collectorCode(c); let response=await send({action:"create",configuration:c,code,price:1,bom:[]}); assert.equal(response.status,201);const saved=(await response.json()).collector;near(saved.price,calculateCollector(c,catalog).price);

@@ -1,0 +1,8 @@
+.spec-insertion { grid-column: 1 / -1; min-width: 0; padding: 6px 12px; font-size: 11px; line-height: 1.45; }
+.spec-insertion summary { cursor: pointer; color: var(--theme-accent, #1976bd); }
+.spec-insertion p { margin: 6px 0; overflow-wrap: anywhere; }
+.spec-insertion label { display: block; }
+.spec-insertion select { display: block; width: 100%; max-width: 100%; min-height: 30px; margin-top: 5px; color: var(--theme-text-primary, #283a47); background: var(--theme-surface, white); }
+.spec-insertion ul { padding-left: 16px; overflow-wrap: anywhere; }
+.spec-insertion[data-hydraulic-location] label { margin-top: 8px; }
+.spec-insertion[data-hydraulic-location] input { display: block; width: 180px; max-width: 100%; min-height: 30px; margin-top: 5px; padding: 4px 8px; border: 1px solid var(--theme-border, #ccd6dd); border-radius: 4px; color: var(--theme-text-primary, #283a47); background: var(--theme-surface, white); }

@@ -1,3 +1,5 @@
+import { IS_BETA } from "../../release-policy";
+import { disabledInBeta } from "../../release-server";
 import { createSession, currentUser, db, ensureAuthSchema, hashPassword, issueToken, json, normalizeEmail, sendAuthEmail, sessionCookie, sha256, verifyPassword, SESSION_COOKIE } from "../../auth-server";
 
 const emailPattern=/^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -10,8 +12,11 @@ export async function GET(request:Request) {
 }
 
 export async function POST(request:Request) {
-  await ensureAuthSchema();
   const body=await parseBody(request),action=String(body.action??"");
+  if (IS_BETA && (action === "register" || action === "verify")) return disabledInBeta();
+  const origin = request.headers.get("origin");
+  if ((origin && origin !== new URL(request.url).origin) || request.headers.get("sec-fetch-site") === "cross-site") return json({error:"Недопустимый источник запроса."},403);
+  await ensureAuthSchema();
   if(action==="heartbeat"){
     const origin=request.headers.get("origin");
     if(origin && origin!==new URL(request.url).origin)return json({error:"Недопустимый источник запроса."},403);
@@ -48,7 +53,11 @@ export async function POST(request:Request) {
     const email=normalizeEmail(String(body.email??""));
     const user=await db().prepare("SELECT id,name FROM users WHERE email=? AND email_verified_at IS NOT NULL").bind(email).first<{id:string;name:string}>();
     let developmentLink:string|undefined;
-    if(user){const token=await issueToken(user.id,"reset_password"),mail=await sendAuthEmail(email,user.name,"reset_password",token,request);developmentLink=mail.developmentLink;}
+    if(user){
+      const token=await issueToken(user.id,"reset_password");
+      try { const mail=await sendAuthEmail(email,user.name,"reset_password",token,request);developmentLink=mail.developmentLink; }
+      catch { return json({error:"Отправка письма недоступна. Обратитесь к администратору тестирования."},503,{"Cache-Control":"no-store"}); }
+    }
     return json({ok:true,developmentLink});
   }
   if(action==="reset"){

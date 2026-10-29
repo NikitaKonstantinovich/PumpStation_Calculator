@@ -46,7 +46,9 @@ test("CNP cards show verified nozzle sizes, net mass and traceable sources", () 
   assert.match(renderToStaticMarkup(createElement(PumpCard, {pump: model("CDM125-6")})), /только в исполнении CDMF/);
   // No copying across generations, or from another nominal head.
   assert.equal(pumpCardPhysicalData(model("40WQ10-7-0.55(II)")).weight, "Не указано в базе");
-  assert.equal(pumpCardPhysicalData(model("TD100-11/2")).weight, "Не указано в базе");
+  assert.equal(pumpCardPhysicalData(model("TD100-11/2")).weight, "56");
+  assert.equal(pumpCardPhysicalData(model("TD100-29/2")).weight, "Не указано в базе");
+  assert.equal(model("TD100-29/2").drawing, null);
 });
 
 test("renders characteristics before the drawing and keeps them when the drawing is absent", () => {

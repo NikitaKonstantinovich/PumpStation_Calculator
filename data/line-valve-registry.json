@@ -1,0 +1,3085 @@
+{
+  "version": 1,
+  "models": [
+    {
+      "key": "equipment:затворы-001-r0012",
+      "source": "Equipment/Valves/3D/_extracted/ccae3f1a8a87/Модели STP затворы 017W DENDOR/017W с рукояткой/Затвор 017WDN32 с рукояткой.stp",
+      "sourceHash": "47ec92388ae5e84b9eb648b754c11bac6415cb33d5123da684444eb9e279b910",
+      "units": "mm",
+      "mapping": "series_geometry_review",
+      "ports": [
+        {
+          "id": "inlet",
+          "point": [
+            -16.0,
+            0,
+            0
+          ],
+          "axis": [
+            -1,
+            0,
+            0
+          ],
+          "provisional": true
+        },
+        {
+          "id": "outlet",
+          "point": [
+            16.0,
+            0,
+            0
+          ],
+          "axis": [
+            1,
+            0,
+            0
+          ],
+          "provisional": true
+        }
+      ],
+      "warnings": [
+        "Геометрия серии по STEP; конкретное исполнение PN/материала требует проверки. Привод выбран по существующему правилу спецификации: рукоятка до DN150 включительно, редуктор от DN200."
+      ]
+    },
+    {
+      "key": "equipment:затворы-001-r0013",
+      "source": "Equipment/Valves/3D/_extracted/ccae3f1a8a87/Модели STP затворы 017W DENDOR/017W с рукояткой/Затвор 017WDN40 с рукояткой.stp",
+      "sourceHash": "d02ea72df719322638fbca9163c76a209c6eaab28b1f575301f818550b9bc7f7",
+      "units": "mm",
+      "mapping": "series_geometry_review",
+      "ports": [
+        {
+          "id": "inlet",
+          "point": [
+            -16.5,
+            0,
+            0
+          ],
+          "axis": [
+            -1,
+            0,
+            0
+          ],
+          "provisional": true
+        },
+        {
+          "id": "outlet",
+          "point": [
+            16.5,
+            0,
+            0
+          ],
+          "axis": [
+            1,
+            0,
+            0
+          ],
+          "provisional": true
+        }
+      ],
+      "warnings": [
+        "Геометрия серии по STEP; конкретное исполнение PN/материала требует проверки. Привод выбран по существующему правилу спецификации: рукоятка до DN150 включительно, редуктор от DN200."
+      ]
+    },
+    {
+      "key": "equipment:затворы-001-r0014",
+      "source": "Equipment/Valves/3D/_extracted/ccae3f1a8a87/Модели STP затворы 017W DENDOR/017W с рукояткой/Затвор 017WDN50 с рукояткой.stp",
+      "sourceHash": "3d394c6b257d162ac5be2e2961016215d80b1f6d35b717824ca61441838eab35",
+      "units": "mm",
+      "mapping": "series_geometry_review",
+      "ports": [
+        {
+          "id": "inlet",
+          "point": [
+            -21.5,
+            0,
+            0
+          ],
+          "axis": [
+            -1,
+            0,
+            0
+          ],
+          "provisional": true
+        },
+        {
+          "id": "outlet",
+          "point": [
+            21.5,
+            0,
+            0
+          ],
+          "axis": [
+            1,
+            0,
+            0
+          ],
+          "provisional": true
+        }
+      ],
+      "warnings": [
+        "Геометрия серии по STEP; конкретное исполнение PN/материала требует проверки. Привод выбран по существующему правилу спецификации: рукоятка до DN150 включительно, редуктор от DN200."
+      ]
+    },
+    {
+      "key": "equipment:затворы-001-r0015",
+      "source": "Equipment/Valves/3D/_extracted/ccae3f1a8a87/Модели STP затворы 017W DENDOR/017W с рукояткой/Затвор 017WDN65 с рукояткой.stp",
+      "sourceHash": "33eb90ce2f2536fd5316b8cde5a026425c36129d80c335b668e8968504898a9d",
+      "units": "mm",
+      "mapping": "series_geometry_review",
+      "ports": [
+        {
+          "id": "inlet",
+          "point": [
+            -23.0,
+            0,
+            0
+          ],
+          "axis": [
+            -1,
+            0,
+            0
+          ],
+          "provisional": true
+        },
+        {
+          "id": "outlet",
+          "point": [
+            23.0,
+            0,
+            0
+          ],
+          "axis": [
+            1,
+            0,
+            0
+          ],
+          "provisional": true
+        }
+      ],
+      "warnings": [
+        "Геометрия серии по STEP; конкретное исполнение PN/материала требует проверки. Привод выбран по существующему правилу спецификации: рукоятка до DN150 включительно, редуктор от DN200."
+      ]
+    },
+    {
+      "key": "equipment:затворы-001-r0016",
+      "source": "Equipment/Valves/3D/_extracted/ccae3f1a8a87/Модели STP затворы 017W DENDOR/017W с рукояткой/Затвор 017WDN80 с рукояткой.stp",
+      "sourceHash": "a73520cd01bdb10102d474f3e6ba6f1730d137a044fdfb3f0bab6aaf8e90896f",
+      "units": "mm",
+      "mapping": "series_geometry_review",
+      "ports": [
+        {
+          "id": "inlet",
+          "point": [
+            -23.0,
+            0,
+            0
+          ],
+          "axis": [
+            -1,
+            0,
+            0
+          ],
+          "provisional": true
+        },
+        {
+          "id": "outlet",
+          "point": [
+            23.0,
+            0,
+            0
+          ],
+          "axis": [
+            1,
+            0,
+            0
+          ],
+          "provisional": true
+        }
+      ],
+      "warnings": [
+        "Геометрия серии по STEP; конкретное исполнение PN/материала требует проверки. Привод выбран по существующему правилу спецификации: рукоятка до DN150 включительно, редуктор от DN200."
+      ]
+    },
+    {
+      "key": "equipment:затворы-001-r0017",
+      "source": "Equipment/Valves/3D/_extracted/ccae3f1a8a87/Модели STP затворы 017W DENDOR/017W с рукояткой/Затвор 017WDN100 с рукояткой.stp",
+      "sourceHash": "16d06e41ee68c2e8294ddc37576a2d5cd9714f2f1750c987fe3f2b38251e1499",
+      "units": "mm",
+      "mapping": "series_geometry_review",
+      "ports": [
+        {
+          "id": "inlet",
+          "point": [
+            -26.0,
+            0,
+            0
+          ],
+          "axis": [
+            -1,
+            0,
+            0
+          ],
+          "provisional": true
+        },
+        {
+          "id": "outlet",
+          "point": [
+            26.0,
+            0,
+            0
+          ],
+          "axis": [
+            1,
+            0,
+            0
+          ],
+          "provisional": true
+        }
+      ],
+      "warnings": [
+        "Геометрия серии по STEP; конкретное исполнение PN/материала требует проверки. Привод выбран по существующему правилу спецификации: рукоятка до DN150 включительно, редуктор от DN200."
+      ]
+    },
+    {
+      "key": "equipment:затворы-001-r0018",
+      "source": "Equipment/Valves/3D/_extracted/ccae3f1a8a87/Модели STP затворы 017W DENDOR/017W с рукояткой/Затвор 017WDN125 с рукояткой.stp",
+      "sourceHash": "efb65f76ce05b7d3254e25de4f12ab19d6faa7e9bf2d5e15973c1e5a67d0ab16",
+      "units": "mm",
+      "mapping": "series_geometry_review",
+      "ports": [
+        {
+          "id": "inlet",
+          "point": [
+            -28.0,
+            0,
+            0
+          ],
+          "axis": [
+            -1,
+            0,
+            0
+          ],
+          "provisional": true
+        },
+        {
+          "id": "outlet",
+          "point": [
+            28.0,
+            0,
+            0
+          ],
+          "axis": [
+            1,
+            0,
+            0
+          ],
+          "provisional": true
+        }
+      ],
+      "warnings": [
+        "Геометрия серии по STEP; конкретное исполнение PN/материала требует проверки. Привод выбран по существующему правилу спецификации: рукоятка до DN150 включительно, редуктор от DN200."
+      ]
+    },
+    {
+      "key": "equipment:затворы-001-r0019",
+      "source": "Equipment/Valves/3D/_extracted/ccae3f1a8a87/Модели STP затворы 017W DENDOR/017W с рукояткой/Затвор 017WDN150 с рукояткой.stp",
+      "sourceHash": "717390f58efcf2459d8d1a4bc8b37e3a1dea564121f68176afc0d0cb7bee6f9e",
+      "units": "mm",
+      "mapping": "series_geometry_review",
+      "ports": [
+        {
+          "id": "inlet",
+          "point": [
+            -28.0,
+            0,
+            0
+          ],
+          "axis": [
+            -1,
+            0,
+            0
+          ],
+          "provisional": true
+        },
+        {
+          "id": "outlet",
+          "point": [
+            28.0,
+            0,
+            0
+          ],
+          "axis": [
+            1,
+            0,
+            0
+          ],
+          "provisional": true
+        }
+      ],
+      "warnings": [
+        "Геометрия серии по STEP; конкретное исполнение PN/материала требует проверки. Привод выбран по существующему правилу спецификации: рукоятка до DN150 включительно, редуктор от DN200."
+      ]
+    },
+    {
+      "key": "equipment:затворы-001-r0020",
+      "source": "Equipment/Valves/3D/_extracted/ccae3f1a8a87/Модели STP затворы 017W DENDOR/017W с редуктором/Затвор 017WDN200 редуктор.stp",
+      "sourceHash": "35ca3cfc1965c52bad082dee83ed8e4a60a5acf59f346ff889c4436c9c1428ea",
+      "units": "mm",
+      "mapping": "series_geometry_review",
+      "ports": [
+        {
+          "id": "inlet",
+          "point": [
+            -30.0,
+            0,
+            0
+          ],
+          "axis": [
+            -1,
+            0,
+            0
+          ],
+          "provisional": true
+        },
+        {
+          "id": "outlet",
+          "point": [
+            30.0,
+            0,
+            0
+          ],
+          "axis": [
+            1,
+            0,
+            0
+          ],
+          "provisional": true
+        }
+      ],
+      "warnings": [
+        "Геометрия серии по STEP; конкретное исполнение PN/материала требует проверки. Привод выбран по существующему правилу спецификации: рукоятка до DN150 включительно, редуктор от DN200."
+      ]
+    },
+    {
+      "key": "equipment:затворы-001-r0021",
+      "source": "Equipment/Valves/3D/_extracted/ccae3f1a8a87/Модели STP затворы 017W DENDOR/017W с редуктором/Затвор 017WDN250 редуктор.stp",
+      "sourceHash": "fc907195a141f0123a9323e44adf8a0c915bfe3cce3b3f47b75b7e7c18359d93",
+      "units": "mm",
+      "mapping": "series_geometry_review",
+      "ports": [
+        {
+          "id": "inlet",
+          "point": [
+            -34.0,
+            0,
+            0
+          ],
+          "axis": [
+            -1,
+            0,
+            0
+          ],
+          "provisional": true
+        },
+        {
+          "id": "outlet",
+          "point": [
+            34.0,
+            0,
+            0
+          ],
+          "axis": [
+            1,
+            0,
+            0
+          ],
+          "provisional": true
+        }
+      ],
+      "warnings": [
+        "Геометрия серии по STEP; конкретное исполнение PN/материала требует проверки. Привод выбран по существующему правилу спецификации: рукоятка до DN150 включительно, редуктор от DN200."
+      ]
+    },
+    {
+      "key": "equipment:затворы-001-r0022",
+      "source": "Equipment/Valves/3D/_extracted/ccae3f1a8a87/Модели STP затворы 017W DENDOR/017W с редуктором/Затвор 017WDN300 редуктор.stp",
+      "sourceHash": "74a841a6bdd4ad7646009fd27ac4b376561e6fa72d92ceeaf79392c71a726e13",
+      "units": "mm",
+      "mapping": "series_geometry_review",
+      "ports": [
+        {
+          "id": "inlet",
+          "point": [
+            -39.0,
+            0,
+            0
+          ],
+          "axis": [
+            -1,
+            0,
+            0
+          ],
+          "provisional": true
+        },
+        {
+          "id": "outlet",
+          "point": [
+            39.0,
+            0,
+            0
+          ],
+          "axis": [
+            1,
+            0,
+            0
+          ],
+          "provisional": true
+        }
+      ],
+      "warnings": [
+        "Геометрия серии по STEP; конкретное исполнение PN/материала требует проверки. Привод выбран по существующему правилу спецификации: рукоятка до DN150 включительно, редуктор от DN200."
+      ]
+    },
+    {
+      "key": "equipment:затворы-001-r0023",
+      "source": "Equipment/Valves/3D/_extracted/ccae3f1a8a87/Модели STP затворы 017W DENDOR/017W с редуктором/Затвор 017WDN350 редуктор.stp",
+      "sourceHash": "3abee358e4b493c834aaeef9d765c48e9c67620b4060054132de6cd6296d6940",
+      "units": "mm",
+      "mapping": "series_geometry_review",
+      "ports": [
+        {
+          "id": "inlet",
+          "point": [
+            -39.0,
+            0,
+            0
+          ],
+          "axis": [
+            -1,
+            0,
+            0
+          ],
+          "provisional": true
+        },
+        {
+          "id": "outlet",
+          "point": [
+            39.0,
+            0,
+            0
+          ],
+          "axis": [
+            1,
+            0,
+            0
+          ],
+          "provisional": true
+        }
+      ],
+      "warnings": [
+        "Геометрия серии по STEP; конкретное исполнение PN/материала требует проверки. Привод выбран по существующему правилу спецификации: рукоятка до DN150 включительно, редуктор от DN200."
+      ]
+    },
+    {
+      "key": "equipment:затворы-001-r0024",
+      "source": "Equipment/Valves/3D/_extracted/ccae3f1a8a87/Модели STP затворы 017W DENDOR/017W с редуктором/Затвор 017WDN400 редуктор.stp",
+      "sourceHash": "8eeca6fe9a14b033ab311b34bb55091de258bb252fbe94a41524aa63d2c10a51",
+      "units": "mm",
+      "mapping": "series_geometry_review",
+      "ports": [
+        {
+          "id": "inlet",
+          "point": [
+            -51.0,
+            0,
+            0
+          ],
+          "axis": [
+            -1,
+            0,
+            0
+          ],
+          "provisional": true
+        },
+        {
+          "id": "outlet",
+          "point": [
+            51.0,
+            0,
+            0
+          ],
+          "axis": [
+            1,
+            0,
+            0
+          ],
+          "provisional": true
+        }
+      ],
+      "warnings": [
+        "Геометрия серии по STEP; конкретное исполнение PN/материала требует проверки. Привод выбран по существующему правилу спецификации: рукоятка до DN150 включительно, редуктор от DN200."
+      ]
+    },
+    {
+      "key": "equipment:затворы-001-r0025",
+      "source": "Equipment/Valves/3D/_extracted/ccae3f1a8a87/Модели STP затворы 017W DENDOR/017W с редуктором/Затвор 017WDN500 редуктор.stp",
+      "sourceHash": "0487526df699ddd067f146482c858647ad20f04d89d9f56938159de64688ce81",
+      "units": "mm",
+      "mapping": "series_geometry_review",
+      "ports": [
+        {
+          "id": "inlet",
+          "point": [
+            -63.5,
+            0,
+            0
+          ],
+          "axis": [
+            -1,
+            0,
+            0
+          ],
+          "provisional": true
+        },
+        {
+          "id": "outlet",
+          "point": [
+            63.5,
+            0,
+            0
+          ],
+          "axis": [
+            1,
+            0,
+            0
+          ],
+          "provisional": true
+        }
+      ],
+      "warnings": [
+        "Геометрия серии по STEP; конкретное исполнение PN/материала требует проверки. Привод выбран по существующему правилу спецификации: рукоятка до DN150 включительно, редуктор от DN200."
+      ]
+    },
+    {
+      "key": "equipment:затворы-001-r0026",
+      "source": "Equipment/Valves/3D/_extracted/ccae3f1a8a87/Модели STP затворы 017W DENDOR/017W с редуктором/Затвор 017WDN600 редуктор.stp",
+      "sourceHash": "a3774fd186afce90c06469da9c9e6dfeea5849acf708360bb01012b1d6ad7ce7",
+      "units": "mm",
+      "mapping": "series_geometry_review",
+      "ports": [
+        {
+          "id": "inlet",
+          "point": [
+            -77.0,
+            0,
+            0
+          ],
+          "axis": [
+            -1,
+            0,
+            0
+          ],
+          "provisional": true
+        },
+        {
+          "id": "outlet",
+          "point": [
+            77.0,
+            0,
+            0
+          ],
+          "axis": [
+            1,
+            0,
+            0
+          ],
+          "provisional": true
+        }
+      ],
+      "warnings": [
+        "Геометрия серии по STEP; конкретное исполнение PN/материала требует проверки. Привод выбран по существующему правилу спецификации: рукоятка до DN150 включительно, редуктор от DN200."
+      ]
+    },
+    {
+      "key": "equipment:затворы-001-r0027",
+      "source": "Equipment/Valves/3D/_extracted/ccae3f1a8a87/Модели STP затворы 017W DENDOR/017W с редуктором/Затвор 017WDN700 редуктор.stp",
+      "sourceHash": "6b1f1f2c7f64ec86ed12e1d2449ee2eb829c772533bc9f24757d5b9838b26c6c",
+      "units": "mm",
+      "mapping": "series_geometry_review",
+      "ports": [
+        {
+          "id": "inlet",
+          "point": [
+            -82.5,
+            0,
+            0
+          ],
+          "axis": [
+            -1,
+            0,
+            0
+          ],
+          "provisional": true
+        },
+        {
+          "id": "outlet",
+          "point": [
+            82.5,
+            0,
+            0
+          ],
+          "axis": [
+            1,
+            0,
+            0
+          ],
+          "provisional": true
+        }
+      ],
+      "warnings": [
+        "Геометрия серии по STEP; конкретное исполнение PN/материала требует проверки. Привод выбран по существующему правилу спецификации: рукоятка до DN150 включительно, редуктор от DN200."
+      ]
+    },
+    {
+      "key": "equipment:затворы-001-r0028",
+      "source": "Equipment/Valves/3D/_extracted/ccae3f1a8a87/Модели STP затворы 017W DENDOR/017W с редуктором/Затвор 017WDN800 редуктор.stp",
+      "sourceHash": "2b12f2349b930d160ce6dfda6e87870a628ee70412ac3dc73919671feb85b051",
+      "units": "mm",
+      "mapping": "series_geometry_review",
+      "ports": [
+        {
+          "id": "inlet",
+          "point": [
+            -95.0,
+            0,
+            0
+          ],
+          "axis": [
+            -1,
+            0,
+            0
+          ],
+          "provisional": true
+        },
+        {
+          "id": "outlet",
+          "point": [
+            95.0,
+            0,
+            0
+          ],
+          "axis": [
+            1,
+            0,
+            0
+          ],
+          "provisional": true
+        }
+      ],
+      "warnings": [
+        "Геометрия серии по STEP; конкретное исполнение PN/материала требует проверки. Привод выбран по существующему правилу спецификации: рукоятка до DN150 включительно, редуктор от DN200."
+      ]
+    },
+    {
+      "key": "equipment:затворы-002-r0014",
+      "source": "Equipment/Valves/3D/_extracted/ccae3f1a8a87/Модели STP затворы 017W DENDOR/017W с рукояткой/Затвор 017WDN50 с рукояткой.stp",
+      "sourceHash": "3d394c6b257d162ac5be2e2961016215d80b1f6d35b717824ca61441838eab35",
+      "units": "mm",
+      "mapping": "series_geometry_review",
+      "ports": [
+        {
+          "id": "inlet",
+          "point": [
+            -21.5,
+            0,
+            0
+          ],
+          "axis": [
+            -1,
+            0,
+            0
+          ],
+          "provisional": true
+        },
+        {
+          "id": "outlet",
+          "point": [
+            21.5,
+            0,
+            0
+          ],
+          "axis": [
+            1,
+            0,
+            0
+          ],
+          "provisional": true
+        }
+      ],
+      "warnings": [
+        "Геометрия серии по STEP; конкретное исполнение PN/материала требует проверки. Привод выбран по существующему правилу спецификации: рукоятка до DN150 включительно, редуктор от DN200."
+      ]
+    },
+    {
+      "key": "equipment:затворы-002-r0015",
+      "source": "Equipment/Valves/3D/_extracted/ccae3f1a8a87/Модели STP затворы 017W DENDOR/017W с рукояткой/Затвор 017WDN65 с рукояткой.stp",
+      "sourceHash": "33eb90ce2f2536fd5316b8cde5a026425c36129d80c335b668e8968504898a9d",
+      "units": "mm",
+      "mapping": "series_geometry_review",
+      "ports": [
+        {
+          "id": "inlet",
+          "point": [
+            -23.0,
+            0,
+            0
+          ],
+          "axis": [
+            -1,
+            0,
+            0
+          ],
+          "provisional": true
+        },
+        {
+          "id": "outlet",
+          "point": [
+            23.0,
+            0,
+            0
+          ],
+          "axis": [
+            1,
+            0,
+            0
+          ],
+          "provisional": true
+        }
+      ],
+      "warnings": [
+        "Геометрия серии по STEP; конкретное исполнение PN/материала требует проверки. Привод выбран по существующему правилу спецификации: рукоятка до DN150 включительно, редуктор от DN200."
+      ]
+    },
+    {
+      "key": "equipment:затворы-002-r0016",
+      "source": "Equipment/Valves/3D/_extracted/ccae3f1a8a87/Модели STP затворы 017W DENDOR/017W с рукояткой/Затвор 017WDN80 с рукояткой.stp",
+      "sourceHash": "a73520cd01bdb10102d474f3e6ba6f1730d137a044fdfb3f0bab6aaf8e90896f",
+      "units": "mm",
+      "mapping": "series_geometry_review",
+      "ports": [
+        {
+          "id": "inlet",
+          "point": [
+            -23.0,
+            0,
+            0
+          ],
+          "axis": [
+            -1,
+            0,
+            0
+          ],
+          "provisional": true
+        },
+        {
+          "id": "outlet",
+          "point": [
+            23.0,
+            0,
+            0
+          ],
+          "axis": [
+            1,
+            0,
+            0
+          ],
+          "provisional": true
+        }
+      ],
+      "warnings": [
+        "Геометрия серии по STEP; конкретное исполнение PN/материала требует проверки. Привод выбран по существующему правилу спецификации: рукоятка до DN150 включительно, редуктор от DN200."
+      ]
+    },
+    {
+      "key": "equipment:затворы-002-r0017",
+      "source": "Equipment/Valves/3D/_extracted/ccae3f1a8a87/Модели STP затворы 017W DENDOR/017W с рукояткой/Затвор 017WDN100 с рукояткой.stp",
+      "sourceHash": "16d06e41ee68c2e8294ddc37576a2d5cd9714f2f1750c987fe3f2b38251e1499",
+      "units": "mm",
+      "mapping": "series_geometry_review",
+      "ports": [
+        {
+          "id": "inlet",
+          "point": [
+            -26.0,
+            0,
+            0
+          ],
+          "axis": [
+            -1,
+            0,
+            0
+          ],
+          "provisional": true
+        },
+        {
+          "id": "outlet",
+          "point": [
+            26.0,
+            0,
+            0
+          ],
+          "axis": [
+            1,
+            0,
+            0
+          ],
+          "provisional": true
+        }
+      ],
+      "warnings": [
+        "Геометрия серии по STEP; конкретное исполнение PN/материала требует проверки. Привод выбран по существующему правилу спецификации: рукоятка до DN150 включительно, редуктор от DN200."
+      ]
+    },
+    {
+      "key": "equipment:затворы-002-r0018",
+      "source": "Equipment/Valves/3D/_extracted/ccae3f1a8a87/Модели STP затворы 017W DENDOR/017W с рукояткой/Затвор 017WDN125 с рукояткой.stp",
+      "sourceHash": "efb65f76ce05b7d3254e25de4f12ab19d6faa7e9bf2d5e15973c1e5a67d0ab16",
+      "units": "mm",
+      "mapping": "series_geometry_review",
+      "ports": [
+        {
+          "id": "inlet",
+          "point": [
+            -28.0,
+            0,
+            0
+          ],
+          "axis": [
+            -1,
+            0,
+            0
+          ],
+          "provisional": true
+        },
+        {
+          "id": "outlet",
+          "point": [
+            28.0,
+            0,
+            0
+          ],
+          "axis": [
+            1,
+            0,
+            0
+          ],
+          "provisional": true
+        }
+      ],
+      "warnings": [
+        "Геометрия серии по STEP; конкретное исполнение PN/материала требует проверки. Привод выбран по существующему правилу спецификации: рукоятка до DN150 включительно, редуктор от DN200."
+      ]
+    },
+    {
+      "key": "equipment:затворы-002-r0019",
+      "source": "Equipment/Valves/3D/_extracted/ccae3f1a8a87/Модели STP затворы 017W DENDOR/017W с рукояткой/Затвор 017WDN150 с рукояткой.stp",
+      "sourceHash": "717390f58efcf2459d8d1a4bc8b37e3a1dea564121f68176afc0d0cb7bee6f9e",
+      "units": "mm",
+      "mapping": "series_geometry_review",
+      "ports": [
+        {
+          "id": "inlet",
+          "point": [
+            -28.0,
+            0,
+            0
+          ],
+          "axis": [
+            -1,
+            0,
+            0
+          ],
+          "provisional": true
+        },
+        {
+          "id": "outlet",
+          "point": [
+            28.0,
+            0,
+            0
+          ],
+          "axis": [
+            1,
+            0,
+            0
+          ],
+          "provisional": true
+        }
+      ],
+      "warnings": [
+        "Геометрия серии по STEP; конкретное исполнение PN/материала требует проверки. Привод выбран по существующему правилу спецификации: рукоятка до DN150 включительно, редуктор от DN200."
+      ]
+    },
+    {
+      "key": "equipment:затворы-002-r0020",
+      "source": "Equipment/Valves/3D/_extracted/ccae3f1a8a87/Модели STP затворы 017W DENDOR/017W с редуктором/Затвор 017WDN200 редуктор.stp",
+      "sourceHash": "35ca3cfc1965c52bad082dee83ed8e4a60a5acf59f346ff889c4436c9c1428ea",
+      "units": "mm",
+      "mapping": "series_geometry_review",
+      "ports": [
+        {
+          "id": "inlet",
+          "point": [
+            -30.0,
+            0,
+            0
+          ],
+          "axis": [
+            -1,
+            0,
+            0
+          ],
+          "provisional": true
+        },
+        {
+          "id": "outlet",
+          "point": [
+            30.0,
+            0,
+            0
+          ],
+          "axis": [
+            1,
+            0,
+            0
+          ],
+          "provisional": true
+        }
+      ],
+      "warnings": [
+        "Геометрия серии по STEP; конкретное исполнение PN/материала требует проверки. Привод выбран по существующему правилу спецификации: рукоятка до DN150 включительно, редуктор от DN200."
+      ]
+    },
+    {
+      "key": "equipment:затворы-002-r0021",
+      "source": "Equipment/Valves/3D/_extracted/ccae3f1a8a87/Модели STP затворы 017W DENDOR/017W с редуктором/Затвор 017WDN250 редуктор.stp",
+      "sourceHash": "fc907195a141f0123a9323e44adf8a0c915bfe3cce3b3f47b75b7e7c18359d93",
+      "units": "mm",
+      "mapping": "series_geometry_review",
+      "ports": [
+        {
+          "id": "inlet",
+          "point": [
+            -34.0,
+            0,
+            0
+          ],
+          "axis": [
+            -1,
+            0,
+            0
+          ],
+          "provisional": true
+        },
+        {
+          "id": "outlet",
+          "point": [
+            34.0,
+            0,
+            0
+          ],
+          "axis": [
+            1,
+            0,
+            0
+          ],
+          "provisional": true
+        }
+      ],
+      "warnings": [
+        "Геометрия серии по STEP; конкретное исполнение PN/материала требует проверки. Привод выбран по существующему правилу спецификации: рукоятка до DN150 включительно, редуктор от DN200."
+      ]
+    },
+    {
+      "key": "equipment:затворы-002-r0022",
+      "source": "Equipment/Valves/3D/_extracted/ccae3f1a8a87/Модели STP затворы 017W DENDOR/017W с редуктором/Затвор 017WDN300 редуктор.stp",
+      "sourceHash": "74a841a6bdd4ad7646009fd27ac4b376561e6fa72d92ceeaf79392c71a726e13",
+      "units": "mm",
+      "mapping": "series_geometry_review",
+      "ports": [
+        {
+          "id": "inlet",
+          "point": [
+            -39.0,
+            0,
+            0
+          ],
+          "axis": [
+            -1,
+            0,
+            0
+          ],
+          "provisional": true
+        },
+        {
+          "id": "outlet",
+          "point": [
+            39.0,
+            0,
+            0
+          ],
+          "axis": [
+            1,
+            0,
+            0
+          ],
+          "provisional": true
+        }
+      ],
+      "warnings": [
+        "Геометрия серии по STEP; конкретное исполнение PN/материала требует проверки. Привод выбран по существующему правилу спецификации: рукоятка до DN150 включительно, редуктор от DN200."
+      ]
+    },
+    {
+      "key": "equipment:затворы-002-r0023",
+      "source": "Equipment/Valves/3D/_extracted/ccae3f1a8a87/Модели STP затворы 017W DENDOR/017W с редуктором/Затвор 017WDN350 редуктор.stp",
+      "sourceHash": "3abee358e4b493c834aaeef9d765c48e9c67620b4060054132de6cd6296d6940",
+      "units": "mm",
+      "mapping": "series_geometry_review",
+      "ports": [
+        {
+          "id": "inlet",
+          "point": [
+            -39.0,
+            0,
+            0
+          ],
+          "axis": [
+            -1,
+            0,
+            0
+          ],
+          "provisional": true
+        },
+        {
+          "id": "outlet",
+          "point": [
+            39.0,
+            0,
+            0
+          ],
+          "axis": [
+            1,
+            0,
+            0
+          ],
+          "provisional": true
+        }
+      ],
+      "warnings": [
+        "Геометрия серии по STEP; конкретное исполнение PN/материала требует проверки. Привод выбран по существующему правилу спецификации: рукоятка до DN150 включительно, редуктор от DN200."
+      ]
+    },
+    {
+      "key": "equipment:затворы-002-r0024",
+      "source": "Equipment/Valves/3D/_extracted/ccae3f1a8a87/Модели STP затворы 017W DENDOR/017W с редуктором/Затвор 017WDN400 редуктор.stp",
+      "sourceHash": "8eeca6fe9a14b033ab311b34bb55091de258bb252fbe94a41524aa63d2c10a51",
+      "units": "mm",
+      "mapping": "series_geometry_review",
+      "ports": [
+        {
+          "id": "inlet",
+          "point": [
+            -51.0,
+            0,
+            0
+          ],
+          "axis": [
+            -1,
+            0,
+            0
+          ],
+          "provisional": true
+        },
+        {
+          "id": "outlet",
+          "point": [
+            51.0,
+            0,
+            0
+          ],
+          "axis": [
+            1,
+            0,
+            0
+          ],
+          "provisional": true
+        }
+      ],
+      "warnings": [
+        "Геометрия серии по STEP; конкретное исполнение PN/материала требует проверки. Привод выбран по существующему правилу спецификации: рукоятка до DN150 включительно, редуктор от DN200."
+      ]
+    },
+    {
+      "key": "equipment:затворы-002-r0025",
+      "source": "Equipment/Valves/3D/_extracted/ccae3f1a8a87/Модели STP затворы 017W DENDOR/017W с редуктором/Затвор 017WDN500 редуктор.stp",
+      "sourceHash": "0487526df699ddd067f146482c858647ad20f04d89d9f56938159de64688ce81",
+      "units": "mm",
+      "mapping": "series_geometry_review",
+      "ports": [
+        {
+          "id": "inlet",
+          "point": [
+            -63.5,
+            0,
+            0
+          ],
+          "axis": [
+            -1,
+            0,
+            0
+          ],
+          "provisional": true
+        },
+        {
+          "id": "outlet",
+          "point": [
+            63.5,
+            0,
+            0
+          ],
+          "axis": [
+            1,
+            0,
+            0
+          ],
+          "provisional": true
+        }
+      ],
+      "warnings": [
+        "Геометрия серии по STEP; конкретное исполнение PN/материала требует проверки. Привод выбран по существующему правилу спецификации: рукоятка до DN150 включительно, редуктор от DN200."
+      ]
+    },
+    {
+      "key": "equipment:затворы-002-r0026",
+      "source": "Equipment/Valves/3D/_extracted/ccae3f1a8a87/Модели STP затворы 017W DENDOR/017W с редуктором/Затвор 017WDN600 редуктор.stp",
+      "sourceHash": "a3774fd186afce90c06469da9c9e6dfeea5849acf708360bb01012b1d6ad7ce7",
+      "units": "mm",
+      "mapping": "series_geometry_review",
+      "ports": [
+        {
+          "id": "inlet",
+          "point": [
+            -77.0,
+            0,
+            0
+          ],
+          "axis": [
+            -1,
+            0,
+            0
+          ],
+          "provisional": true
+        },
+        {
+          "id": "outlet",
+          "point": [
+            77.0,
+            0,
+            0
+          ],
+          "axis": [
+            1,
+            0,
+            0
+          ],
+          "provisional": true
+        }
+      ],
+      "warnings": [
+        "Геометрия серии по STEP; конкретное исполнение PN/материала требует проверки. Привод выбран по существующему правилу спецификации: рукоятка до DN150 включительно, редуктор от DN200."
+      ]
+    },
+    {
+      "key": "equipment:затворы-002-r0027",
+      "source": "Equipment/Valves/3D/_extracted/ccae3f1a8a87/Модели STP затворы 017W DENDOR/017W с редуктором/Затвор 017WDN700 редуктор.stp",
+      "sourceHash": "6b1f1f2c7f64ec86ed12e1d2449ee2eb829c772533bc9f24757d5b9838b26c6c",
+      "units": "mm",
+      "mapping": "series_geometry_review",
+      "ports": [
+        {
+          "id": "inlet",
+          "point": [
+            -82.5,
+            0,
+            0
+          ],
+          "axis": [
+            -1,
+            0,
+            0
+          ],
+          "provisional": true
+        },
+        {
+          "id": "outlet",
+          "point": [
+            82.5,
+            0,
+            0
+          ],
+          "axis": [
+            1,
+            0,
+            0
+          ],
+          "provisional": true
+        }
+      ],
+      "warnings": [
+        "Геометрия серии по STEP; конкретное исполнение PN/материала требует проверки. Привод выбран по существующему правилу спецификации: рукоятка до DN150 включительно, редуктор от DN200."
+      ]
+    },
+    {
+      "key": "equipment:затворы-002-r0028",
+      "source": "Equipment/Valves/3D/_extracted/ccae3f1a8a87/Модели STP затворы 017W DENDOR/017W с редуктором/Затвор 017WDN800 редуктор.stp",
+      "sourceHash": "2b12f2349b930d160ce6dfda6e87870a628ee70412ac3dc73919671feb85b051",
+      "units": "mm",
+      "mapping": "series_geometry_review",
+      "ports": [
+        {
+          "id": "inlet",
+          "point": [
+            -95.0,
+            0,
+            0
+          ],
+          "axis": [
+            -1,
+            0,
+            0
+          ],
+          "provisional": true
+        },
+        {
+          "id": "outlet",
+          "point": [
+            95.0,
+            0,
+            0
+          ],
+          "axis": [
+            1,
+            0,
+            0
+          ],
+          "provisional": true
+        }
+      ],
+      "warnings": [
+        "Геометрия серии по STEP; конкретное исполнение PN/материала требует проверки. Привод выбран по существующему правилу спецификации: рукоятка до DN150 включительно, редуктор от DN200."
+      ]
+    },
+    {
+      "key": "equipment:затворы-003-r0014",
+      "source": "Equipment/Valves/3D/_extracted/ccae3f1a8a87/Модели STP затворы 017W DENDOR/017W с рукояткой/Затвор 017WDN50 с рукояткой.stp",
+      "sourceHash": "3d394c6b257d162ac5be2e2961016215d80b1f6d35b717824ca61441838eab35",
+      "units": "mm",
+      "mapping": "series_geometry_review",
+      "ports": [
+        {
+          "id": "inlet",
+          "point": [
+            -21.5,
+            0,
+            0
+          ],
+          "axis": [
+            -1,
+            0,
+            0
+          ],
+          "provisional": true
+        },
+        {
+          "id": "outlet",
+          "point": [
+            21.5,
+            0,
+            0
+          ],
+          "axis": [
+            1,
+            0,
+            0
+          ],
+          "provisional": true
+        }
+      ],
+      "warnings": [
+        "Геометрия серии по STEP; конкретное исполнение PN/материала требует проверки. Привод выбран по существующему правилу спецификации: рукоятка до DN150 включительно, редуктор от DN200."
+      ]
+    },
+    {
+      "key": "equipment:затворы-003-r0015",
+      "source": "Equipment/Valves/3D/_extracted/ccae3f1a8a87/Модели STP затворы 017W DENDOR/017W с рукояткой/Затвор 017WDN65 с рукояткой.stp",
+      "sourceHash": "33eb90ce2f2536fd5316b8cde5a026425c36129d80c335b668e8968504898a9d",
+      "units": "mm",
+      "mapping": "series_geometry_review",
+      "ports": [
+        {
+          "id": "inlet",
+          "point": [
+            -23.0,
+            0,
+            0
+          ],
+          "axis": [
+            -1,
+            0,
+            0
+          ],
+          "provisional": true
+        },
+        {
+          "id": "outlet",
+          "point": [
+            23.0,
+            0,
+            0
+          ],
+          "axis": [
+            1,
+            0,
+            0
+          ],
+          "provisional": true
+        }
+      ],
+      "warnings": [
+        "Геометрия серии по STEP; конкретное исполнение PN/материала требует проверки. Привод выбран по существующему правилу спецификации: рукоятка до DN150 включительно, редуктор от DN200."
+      ]
+    },
+    {
+      "key": "equipment:затворы-003-r0016",
+      "source": "Equipment/Valves/3D/_extracted/ccae3f1a8a87/Модели STP затворы 017W DENDOR/017W с рукояткой/Затвор 017WDN80 с рукояткой.stp",
+      "sourceHash": "a73520cd01bdb10102d474f3e6ba6f1730d137a044fdfb3f0bab6aaf8e90896f",
+      "units": "mm",
+      "mapping": "series_geometry_review",
+      "ports": [
+        {
+          "id": "inlet",
+          "point": [
+            -23.0,
+            0,
+            0
+          ],
+          "axis": [
+            -1,
+            0,
+            0
+          ],
+          "provisional": true
+        },
+        {
+          "id": "outlet",
+          "point": [
+            23.0,
+            0,
+            0
+          ],
+          "axis": [
+            1,
+            0,
+            0
+          ],
+          "provisional": true
+        }
+      ],
+      "warnings": [
+        "Геометрия серии по STEP; конкретное исполнение PN/материала требует проверки. Привод выбран по существующему правилу спецификации: рукоятка до DN150 включительно, редуктор от DN200."
+      ]
+    },
+    {
+      "key": "equipment:затворы-003-r0017",
+      "source": "Equipment/Valves/3D/_extracted/ccae3f1a8a87/Модели STP затворы 017W DENDOR/017W с рукояткой/Затвор 017WDN100 с рукояткой.stp",
+      "sourceHash": "16d06e41ee68c2e8294ddc37576a2d5cd9714f2f1750c987fe3f2b38251e1499",
+      "units": "mm",
+      "mapping": "series_geometry_review",
+      "ports": [
+        {
+          "id": "inlet",
+          "point": [
+            -26.0,
+            0,
+            0
+          ],
+          "axis": [
+            -1,
+            0,
+            0
+          ],
+          "provisional": true
+        },
+        {
+          "id": "outlet",
+          "point": [
+            26.0,
+            0,
+            0
+          ],
+          "axis": [
+            1,
+            0,
+            0
+          ],
+          "provisional": true
+        }
+      ],
+      "warnings": [
+        "Геометрия серии по STEP; конкретное исполнение PN/материала требует проверки. Привод выбран по существующему правилу спецификации: рукоятка до DN150 включительно, редуктор от DN200."
+      ]
+    },
+    {
+      "key": "equipment:затворы-003-r0018",
+      "source": "Equipment/Valves/3D/_extracted/ccae3f1a8a87/Модели STP затворы 017W DENDOR/017W с рукояткой/Затвор 017WDN125 с рукояткой.stp",
+      "sourceHash": "efb65f76ce05b7d3254e25de4f12ab19d6faa7e9bf2d5e15973c1e5a67d0ab16",
+      "units": "mm",
+      "mapping": "series_geometry_review",
+      "ports": [
+        {
+          "id": "inlet",
+          "point": [
+            -28.0,
+            0,
+            0
+          ],
+          "axis": [
+            -1,
+            0,
+            0
+          ],
+          "provisional": true
+        },
+        {
+          "id": "outlet",
+          "point": [
+            28.0,
+            0,
+            0
+          ],
+          "axis": [
+            1,
+            0,
+            0
+          ],
+          "provisional": true
+        }
+      ],
+      "warnings": [
+        "Геометрия серии по STEP; конкретное исполнение PN/материала требует проверки. Привод выбран по существующему правилу спецификации: рукоятка до DN150 включительно, редуктор от DN200."
+      ]
+    },
+    {
+      "key": "equipment:затворы-003-r0019",
+      "source": "Equipment/Valves/3D/_extracted/ccae3f1a8a87/Модели STP затворы 017W DENDOR/017W с рукояткой/Затвор 017WDN150 с рукояткой.stp",
+      "sourceHash": "717390f58efcf2459d8d1a4bc8b37e3a1dea564121f68176afc0d0cb7bee6f9e",
+      "units": "mm",
+      "mapping": "series_geometry_review",
+      "ports": [
+        {
+          "id": "inlet",
+          "point": [
+            -28.0,
+            0,
+            0
+          ],
+          "axis": [
+            -1,
+            0,
+            0
+          ],
+          "provisional": true
+        },
+        {
+          "id": "outlet",
+          "point": [
+            28.0,
+            0,
+            0
+          ],
+          "axis": [
+            1,
+            0,
+            0
+          ],
+          "provisional": true
+        }
+      ],
+      "warnings": [
+        "Геометрия серии по STEP; конкретное исполнение PN/материала требует проверки. Привод выбран по существующему правилу спецификации: рукоятка до DN150 включительно, редуктор от DN200."
+      ]
+    },
+    {
+      "key": "equipment:затворы-003-r0020",
+      "source": "Equipment/Valves/3D/_extracted/ccae3f1a8a87/Модели STP затворы 017W DENDOR/017W с редуктором/Затвор 017WDN200 редуктор.stp",
+      "sourceHash": "35ca3cfc1965c52bad082dee83ed8e4a60a5acf59f346ff889c4436c9c1428ea",
+      "units": "mm",
+      "mapping": "series_geometry_review",
+      "ports": [
+        {
+          "id": "inlet",
+          "point": [
+            -30.0,
+            0,
+            0
+          ],
+          "axis": [
+            -1,
+            0,
+            0
+          ],
+          "provisional": true
+        },
+        {
+          "id": "outlet",
+          "point": [
+            30.0,
+            0,
+            0
+          ],
+          "axis": [
+            1,
+            0,
+            0
+          ],
+          "provisional": true
+        }
+      ],
+      "warnings": [
+        "Геометрия серии по STEP; конкретное исполнение PN/материала требует проверки. Привод выбран по существующему правилу спецификации: рукоятка до DN150 включительно, редуктор от DN200."
+      ]
+    },
+    {
+      "key": "equipment:затворы-003-r0021",
+      "source": "Equipment/Valves/3D/_extracted/ccae3f1a8a87/Модели STP затворы 017W DENDOR/017W с редуктором/Затвор 017WDN250 редуктор.stp",
+      "sourceHash": "fc907195a141f0123a9323e44adf8a0c915bfe3cce3b3f47b75b7e7c18359d93",
+      "units": "mm",
+      "mapping": "series_geometry_review",
+      "ports": [
+        {
+          "id": "inlet",
+          "point": [
+            -34.0,
+            0,
+            0
+          ],
+          "axis": [
+            -1,
+            0,
+            0
+          ],
+          "provisional": true
+        },
+        {
+          "id": "outlet",
+          "point": [
+            34.0,
+            0,
+            0
+          ],
+          "axis": [
+            1,
+            0,
+            0
+          ],
+          "provisional": true
+        }
+      ],
+      "warnings": [
+        "Геометрия серии по STEP; конкретное исполнение PN/материала требует проверки. Привод выбран по существующему правилу спецификации: рукоятка до DN150 включительно, редуктор от DN200."
+      ]
+    },
+    {
+      "key": "equipment:затворы-003-r0022",
+      "source": "Equipment/Valves/3D/_extracted/ccae3f1a8a87/Модели STP затворы 017W DENDOR/017W с редуктором/Затвор 017WDN300 редуктор.stp",
+      "sourceHash": "74a841a6bdd4ad7646009fd27ac4b376561e6fa72d92ceeaf79392c71a726e13",
+      "units": "mm",
+      "mapping": "series_geometry_review",
+      "ports": [
+        {
+          "id": "inlet",
+          "point": [
+            -39.0,
+            0,
+            0
+          ],
+          "axis": [
+            -1,
+            0,
+            0
+          ],
+          "provisional": true
+        },
+        {
+          "id": "outlet",
+          "point": [
+            39.0,
+            0,
+            0
+          ],
+          "axis": [
+            1,
+            0,
+            0
+          ],
+          "provisional": true
+        }
+      ],
+      "warnings": [
+        "Геометрия серии по STEP; конкретное исполнение PN/материала требует проверки. Привод выбран по существующему правилу спецификации: рукоятка до DN150 включительно, редуктор от DN200."
+      ]
+    },
+    {
+      "key": "equipment:затворы-003-r0023",
+      "source": "Equipment/Valves/3D/_extracted/ccae3f1a8a87/Модели STP затворы 017W DENDOR/017W с редуктором/Затвор 017WDN350 редуктор.stp",
+      "sourceHash": "3abee358e4b493c834aaeef9d765c48e9c67620b4060054132de6cd6296d6940",
+      "units": "mm",
+      "mapping": "series_geometry_review",
+      "ports": [
+        {
+          "id": "inlet",
+          "point": [
+            -39.0,
+            0,
+            0
+          ],
+          "axis": [
+            -1,
+            0,
+            0
+          ],
+          "provisional": true
+        },
+        {
+          "id": "outlet",
+          "point": [
+            39.0,
+            0,
+            0
+          ],
+          "axis": [
+            1,
+            0,
+            0
+          ],
+          "provisional": true
+        }
+      ],
+      "warnings": [
+        "Геометрия серии по STEP; конкретное исполнение PN/материала требует проверки. Привод выбран по существующему правилу спецификации: рукоятка до DN150 включительно, редуктор от DN200."
+      ]
+    },
+    {
+      "key": "equipment:затворы-003-r0024",
+      "source": "Equipment/Valves/3D/_extracted/ccae3f1a8a87/Модели STP затворы 017W DENDOR/017W с редуктором/Затвор 017WDN400 редуктор.stp",
+      "sourceHash": "8eeca6fe9a14b033ab311b34bb55091de258bb252fbe94a41524aa63d2c10a51",
+      "units": "mm",
+      "mapping": "series_geometry_review",
+      "ports": [
+        {
+          "id": "inlet",
+          "point": [
+            -51.0,
+            0,
+            0
+          ],
+          "axis": [
+            -1,
+            0,
+            0
+          ],
+          "provisional": true
+        },
+        {
+          "id": "outlet",
+          "point": [
+            51.0,
+            0,
+            0
+          ],
+          "axis": [
+            1,
+            0,
+            0
+          ],
+          "provisional": true
+        }
+      ],
+      "warnings": [
+        "Геометрия серии по STEP; конкретное исполнение PN/материала требует проверки. Привод выбран по существующему правилу спецификации: рукоятка до DN150 включительно, редуктор от DN200."
+      ]
+    },
+    {
+      "key": "equipment:затворы-003-r0025",
+      "source": "Equipment/Valves/3D/_extracted/ccae3f1a8a87/Модели STP затворы 017W DENDOR/017W с редуктором/Затвор 017WDN500 редуктор.stp",
+      "sourceHash": "0487526df699ddd067f146482c858647ad20f04d89d9f56938159de64688ce81",
+      "units": "mm",
+      "mapping": "series_geometry_review",
+      "ports": [
+        {
+          "id": "inlet",
+          "point": [
+            -63.5,
+            0,
+            0
+          ],
+          "axis": [
+            -1,
+            0,
+            0
+          ],
+          "provisional": true
+        },
+        {
+          "id": "outlet",
+          "point": [
+            63.5,
+            0,
+            0
+          ],
+          "axis": [
+            1,
+            0,
+            0
+          ],
+          "provisional": true
+        }
+      ],
+      "warnings": [
+        "Геометрия серии по STEP; конкретное исполнение PN/материала требует проверки. Привод выбран по существующему правилу спецификации: рукоятка до DN150 включительно, редуктор от DN200."
+      ]
+    },
+    {
+      "key": "equipment:затворы-003-r0026",
+      "source": "Equipment/Valves/3D/_extracted/ccae3f1a8a87/Модели STP затворы 017W DENDOR/017W с редуктором/Затвор 017WDN600 редуктор.stp",
+      "sourceHash": "a3774fd186afce90c06469da9c9e6dfeea5849acf708360bb01012b1d6ad7ce7",
+      "units": "mm",
+      "mapping": "series_geometry_review",
+      "ports": [
+        {
+          "id": "inlet",
+          "point": [
+            -77.0,
+            0,
+            0
+          ],
+          "axis": [
+            -1,
+            0,
+            0
+          ],
+          "provisional": true
+        },
+        {
+          "id": "outlet",
+          "point": [
+            77.0,
+            0,
+            0
+          ],
+          "axis": [
+            1,
+            0,
+            0
+          ],
+          "provisional": true
+        }
+      ],
+      "warnings": [
+        "Геометрия серии по STEP; конкретное исполнение PN/материала требует проверки. Привод выбран по существующему правилу спецификации: рукоятка до DN150 включительно, редуктор от DN200."
+      ]
+    },
+    {
+      "key": "equipment:затворы-003-r0027",
+      "source": "Equipment/Valves/3D/_extracted/ccae3f1a8a87/Модели STP затворы 017W DENDOR/017W с редуктором/Затвор 017WDN700 редуктор.stp",
+      "sourceHash": "6b1f1f2c7f64ec86ed12e1d2449ee2eb829c772533bc9f24757d5b9838b26c6c",
+      "units": "mm",
+      "mapping": "series_geometry_review",
+      "ports": [
+        {
+          "id": "inlet",
+          "point": [
+            -82.5,
+            0,
+            0
+          ],
+          "axis": [
+            -1,
+            0,
+            0
+          ],
+          "provisional": true
+        },
+        {
+          "id": "outlet",
+          "point": [
+            82.5,
+            0,
+            0
+          ],
+          "axis": [
+            1,
+            0,
+            0
+          ],
+          "provisional": true
+        }
+      ],
+      "warnings": [
+        "Геометрия серии по STEP; конкретное исполнение PN/материала требует проверки. Привод выбран по существующему правилу спецификации: рукоятка до DN150 включительно, редуктор от DN200."
+      ]
+    },
+    {
+      "key": "equipment:затворы-003-r0028",
+      "source": "Equipment/Valves/3D/_extracted/ccae3f1a8a87/Модели STP затворы 017W DENDOR/017W с редуктором/Затвор 017WDN800 редуктор.stp",
+      "sourceHash": "2b12f2349b930d160ce6dfda6e87870a628ee70412ac3dc73919671feb85b051",
+      "units": "mm",
+      "mapping": "series_geometry_review",
+      "ports": [
+        {
+          "id": "inlet",
+          "point": [
+            -95.0,
+            0,
+            0
+          ],
+          "axis": [
+            -1,
+            0,
+            0
+          ],
+          "provisional": true
+        },
+        {
+          "id": "outlet",
+          "point": [
+            95.0,
+            0,
+            0
+          ],
+          "axis": [
+            1,
+            0,
+            0
+          ],
+          "provisional": true
+        }
+      ],
+      "warnings": [
+        "Геометрия серии по STEP; конкретное исполнение PN/материала требует проверки. Привод выбран по существующему правилу спецификации: рукоятка до DN150 включительно, редуктор от DN200."
+      ]
+    },
+    {
+      "key": "equipment:обратные-клапаны-001-r0066",
+      "source": "Equipment/Valves/3D/Обратные/05. Клапаны обратные/5.2 Тип 010С Двухстворчатый межфланцевый/010С DN50.stp",
+      "sourceHash": "4fee83f4d032aebde7539c0551e836feec45ed87ef03f04d5c2a0824ff0d6a1c",
+      "units": "mm",
+      "mapping": "series_geometry_review",
+      "ports": [
+        {
+          "id": "inlet",
+          "point": [
+            0,
+            0,
+            0
+          ],
+          "axis": [
+            0,
+            0,
+            1
+          ],
+          "provisional": true
+        },
+        {
+          "id": "outlet",
+          "point": [
+            0,
+            0,
+            -43.0
+          ],
+          "axis": [
+            0,
+            0,
+            -1
+          ],
+          "provisional": true
+        }
+      ],
+      "warnings": [
+        "Геометрия серии по STEP; конкретное исполнение PN/материала требует проверки. Привод выбран по существующему правилу спецификации: рукоятка до DN150 включительно, редуктор от DN200."
+      ]
+    },
+    {
+      "key": "equipment:обратные-клапаны-001-r0067",
+      "source": "Equipment/Valves/3D/Обратные/05. Клапаны обратные/5.2 Тип 010С Двухстворчатый межфланцевый/010С DN65.stp",
+      "sourceHash": "96980965ab09af0f9cfacdc79717815c52340fd16997c2d48e290ad8fdf17c17",
+      "units": "mm",
+      "mapping": "series_geometry_review",
+      "ports": [
+        {
+          "id": "inlet",
+          "point": [
+            0,
+            0,
+            0
+          ],
+          "axis": [
+            0,
+            0,
+            1
+          ],
+          "provisional": true
+        },
+        {
+          "id": "outlet",
+          "point": [
+            0,
+            0,
+            -46.0
+          ],
+          "axis": [
+            0,
+            0,
+            -1
+          ],
+          "provisional": true
+        }
+      ],
+      "warnings": [
+        "Геометрия серии по STEP; конкретное исполнение PN/материала требует проверки. Привод выбран по существующему правилу спецификации: рукоятка до DN150 включительно, редуктор от DN200."
+      ]
+    },
+    {
+      "key": "equipment:обратные-клапаны-001-r0068",
+      "source": "Equipment/Valves/3D/Обратные/05. Клапаны обратные/5.2 Тип 010С Двухстворчатый межфланцевый/010С DN80.stp",
+      "sourceHash": "ec8c24d0b2478e96b163494102d5ba0fb27eb84e059dd3d2c8a072fd28c30d4e",
+      "units": "mm",
+      "mapping": "series_geometry_review",
+      "ports": [
+        {
+          "id": "inlet",
+          "point": [
+            0,
+            0,
+            0
+          ],
+          "axis": [
+            0,
+            0,
+            1
+          ],
+          "provisional": true
+        },
+        {
+          "id": "outlet",
+          "point": [
+            0,
+            0,
+            -64.0
+          ],
+          "axis": [
+            0,
+            0,
+            -1
+          ],
+          "provisional": true
+        }
+      ],
+      "warnings": [
+        "Геометрия серии по STEP; конкретное исполнение PN/материала требует проверки. Привод выбран по существующему правилу спецификации: рукоятка до DN150 включительно, редуктор от DN200."
+      ]
+    },
+    {
+      "key": "equipment:обратные-клапаны-001-r0069",
+      "source": "Equipment/Valves/3D/Обратные/05. Клапаны обратные/5.2 Тип 010С Двухстворчатый межфланцевый/010С DN100.stp",
+      "sourceHash": "2332cc566fb56accf195eec3b0cd40c4ff1c7868ad83d123bf31b8db84d5dda6",
+      "units": "mm",
+      "mapping": "series_geometry_review",
+      "ports": [
+        {
+          "id": "inlet",
+          "point": [
+            0,
+            0,
+            0
+          ],
+          "axis": [
+            0,
+            0,
+            1
+          ],
+          "provisional": true
+        },
+        {
+          "id": "outlet",
+          "point": [
+            0,
+            0,
+            -64.0
+          ],
+          "axis": [
+            0,
+            0,
+            -1
+          ],
+          "provisional": true
+        }
+      ],
+      "warnings": [
+        "Геометрия серии по STEP; конкретное исполнение PN/материала требует проверки. Привод выбран по существующему правилу спецификации: рукоятка до DN150 включительно, редуктор от DN200."
+      ]
+    },
+    {
+      "key": "equipment:обратные-клапаны-001-r0070",
+      "source": "Equipment/Valves/3D/Обратные/05. Клапаны обратные/5.2 Тип 010С Двухстворчатый межфланцевый/010С DN125.stp",
+      "sourceHash": "68ca3041ad5eecab181229116ace253855bf494a5df5f101118225422d4a9bcb",
+      "units": "mm",
+      "mapping": "series_geometry_review",
+      "ports": [
+        {
+          "id": "inlet",
+          "point": [
+            0,
+            0,
+            0
+          ],
+          "axis": [
+            0,
+            0,
+            1
+          ],
+          "provisional": true
+        },
+        {
+          "id": "outlet",
+          "point": [
+            0,
+            0,
+            -70.0
+          ],
+          "axis": [
+            0,
+            0,
+            -1
+          ],
+          "provisional": true
+        }
+      ],
+      "warnings": [
+        "Геометрия серии по STEP; конкретное исполнение PN/материала требует проверки. Привод выбран по существующему правилу спецификации: рукоятка до DN150 включительно, редуктор от DN200."
+      ]
+    },
+    {
+      "key": "equipment:обратные-клапаны-001-r0071",
+      "source": "Equipment/Valves/3D/Обратные/05. Клапаны обратные/5.2 Тип 010С Двухстворчатый межфланцевый/010С DN150.stp",
+      "sourceHash": "f56b56fb3036c8a94da2075432ca871e7f997b2c12c8b30a326987bff402e5c1",
+      "units": "mm",
+      "mapping": "series_geometry_review",
+      "ports": [
+        {
+          "id": "inlet",
+          "point": [
+            0,
+            0,
+            0
+          ],
+          "axis": [
+            0,
+            0,
+            1
+          ],
+          "provisional": true
+        },
+        {
+          "id": "outlet",
+          "point": [
+            0,
+            0,
+            -76.0
+          ],
+          "axis": [
+            0,
+            0,
+            -1
+          ],
+          "provisional": true
+        }
+      ],
+      "warnings": [
+        "Геометрия серии по STEP; конкретное исполнение PN/материала требует проверки. Привод выбран по существующему правилу спецификации: рукоятка до DN150 включительно, редуктор от DN200."
+      ]
+    },
+    {
+      "key": "equipment:обратные-клапаны-001-r0072",
+      "source": "Equipment/Valves/3D/Обратные/05. Клапаны обратные/5.2 Тип 010С Двухстворчатый межфланцевый/010С DN200.stp",
+      "sourceHash": "90ac5dcedd057c16feb68f03e113e4ce79d37a2135c444ba943f2cfa64b2bdab",
+      "units": "mm",
+      "mapping": "series_geometry_review",
+      "ports": [
+        {
+          "id": "inlet",
+          "point": [
+            0,
+            0,
+            0
+          ],
+          "axis": [
+            0,
+            0,
+            1
+          ],
+          "provisional": true
+        },
+        {
+          "id": "outlet",
+          "point": [
+            0,
+            0,
+            -89.0
+          ],
+          "axis": [
+            0,
+            0,
+            -1
+          ],
+          "provisional": true
+        }
+      ],
+      "warnings": [
+        "Геометрия серии по STEP; конкретное исполнение PN/материала требует проверки. Привод выбран по существующему правилу спецификации: рукоятка до DN150 включительно, редуктор от DN200."
+      ]
+    },
+    {
+      "key": "equipment:обратные-клапаны-001-r0073",
+      "source": "Equipment/Valves/3D/Обратные/05. Клапаны обратные/5.2 Тип 010С Двухстворчатый межфланцевый/010С DN250.stp",
+      "sourceHash": "896c9137d387062adb3c0472b727c94b8791f7583988472ad9ae52ea33d640af",
+      "units": "mm",
+      "mapping": "series_geometry_review",
+      "ports": [
+        {
+          "id": "inlet",
+          "point": [
+            0,
+            0,
+            0
+          ],
+          "axis": [
+            0,
+            0,
+            1
+          ],
+          "provisional": true
+        },
+        {
+          "id": "outlet",
+          "point": [
+            0,
+            0,
+            -114.0
+          ],
+          "axis": [
+            0,
+            0,
+            -1
+          ],
+          "provisional": true
+        }
+      ],
+      "warnings": [
+        "Геометрия серии по STEP; конкретное исполнение PN/материала требует проверки. Привод выбран по существующему правилу спецификации: рукоятка до DN150 включительно, редуктор от DN200."
+      ]
+    },
+    {
+      "key": "equipment:обратные-клапаны-001-r0074",
+      "source": "Equipment/Valves/3D/Обратные/05. Клапаны обратные/5.2 Тип 010С Двухстворчатый межфланцевый/010С DN300.stp",
+      "sourceHash": "da63df28057a882138af3651629c2ffb77a81c743a251fe339b977e6766b0c49",
+      "units": "mm",
+      "mapping": "series_geometry_review",
+      "ports": [
+        {
+          "id": "inlet",
+          "point": [
+            0,
+            0,
+            0
+          ],
+          "axis": [
+            0,
+            0,
+            1
+          ],
+          "provisional": true
+        },
+        {
+          "id": "outlet",
+          "point": [
+            0,
+            0,
+            -114.0
+          ],
+          "axis": [
+            0,
+            0,
+            -1
+          ],
+          "provisional": true
+        }
+      ],
+      "warnings": [
+        "Геометрия серии по STEP; конкретное исполнение PN/материала требует проверки. Привод выбран по существующему правилу спецификации: рукоятка до DN150 включительно, редуктор от DN200."
+      ]
+    },
+    {
+      "key": "equipment:обратные-клапаны-001-r0075",
+      "source": "Equipment/Valves/3D/Обратные/05. Клапаны обратные/5.2 Тип 010С Двухстворчатый межфланцевый/010С DN350.stp",
+      "sourceHash": "664e3bea06317aab3d5112dbb8ab38f7269f2a6760956c0cadcfc6565037375b",
+      "units": "mm",
+      "mapping": "series_geometry_review",
+      "ports": [
+        {
+          "id": "inlet",
+          "point": [
+            0,
+            0,
+            0
+          ],
+          "axis": [
+            0,
+            0,
+            1
+          ],
+          "provisional": true
+        },
+        {
+          "id": "outlet",
+          "point": [
+            0,
+            0,
+            -127.0
+          ],
+          "axis": [
+            0,
+            0,
+            -1
+          ],
+          "provisional": true
+        }
+      ],
+      "warnings": [
+        "Геометрия серии по STEP; конкретное исполнение PN/материала требует проверки. Привод выбран по существующему правилу спецификации: рукоятка до DN150 включительно, редуктор от DN200."
+      ]
+    },
+    {
+      "key": "equipment:обратные-клапаны-001-r0076",
+      "source": "Equipment/Valves/3D/Обратные/05. Клапаны обратные/5.2 Тип 010С Двухстворчатый межфланцевый/010С DN400.stp",
+      "sourceHash": "a5e4a0a55cd32842a7a07987b5bb217a51426505149f6b9b3a56936db3eb3990",
+      "units": "mm",
+      "mapping": "series_geometry_review",
+      "ports": [
+        {
+          "id": "inlet",
+          "point": [
+            0,
+            0,
+            0
+          ],
+          "axis": [
+            0,
+            0,
+            1
+          ],
+          "provisional": true
+        },
+        {
+          "id": "outlet",
+          "point": [
+            0,
+            0,
+            -140.0
+          ],
+          "axis": [
+            0,
+            0,
+            -1
+          ],
+          "provisional": true
+        }
+      ],
+      "warnings": [
+        "Геометрия серии по STEP; конкретное исполнение PN/материала требует проверки. Привод выбран по существующему правилу спецификации: рукоятка до DN150 включительно, редуктор от DN200."
+      ]
+    },
+    {
+      "key": "equipment:обратные-клапаны-001-r0077",
+      "source": "Equipment/Valves/3D/Обратные/05. Клапаны обратные/5.2 Тип 010С Двухстворчатый межфланцевый/010С DN500.stp",
+      "sourceHash": "d64266764edcdb01a9716a61c3d832c0130e9a270892fe80cfc8bbb64adb6bb4",
+      "units": "mm",
+      "mapping": "series_geometry_review",
+      "ports": [
+        {
+          "id": "inlet",
+          "point": [
+            0,
+            0,
+            0
+          ],
+          "axis": [
+            0,
+            0,
+            1
+          ],
+          "provisional": true
+        },
+        {
+          "id": "outlet",
+          "point": [
+            0,
+            0,
+            -152.0
+          ],
+          "axis": [
+            0,
+            0,
+            -1
+          ],
+          "provisional": true
+        }
+      ],
+      "warnings": [
+        "Геометрия серии по STEP; конкретное исполнение PN/материала требует проверки. Привод выбран по существующему правилу спецификации: рукоятка до DN150 включительно, редуктор от DN200."
+      ]
+    },
+    {
+      "key": "equipment:обратные-клапаны-001-r0078",
+      "source": "Equipment/Valves/3D/Обратные/05. Клапаны обратные/5.2 Тип 010С Двухстворчатый межфланцевый/010С DN600.stp",
+      "sourceHash": "597e55dcd7e03e8ee811db79aec2c82790fa99104e1742cdf145a9124ed59f1a",
+      "units": "mm",
+      "mapping": "series_geometry_review",
+      "ports": [
+        {
+          "id": "inlet",
+          "point": [
+            0,
+            0,
+            0
+          ],
+          "axis": [
+            0,
+            0,
+            1
+          ],
+          "provisional": true
+        },
+        {
+          "id": "outlet",
+          "point": [
+            0,
+            0,
+            -178.0
+          ],
+          "axis": [
+            0,
+            0,
+            -1
+          ],
+          "provisional": true
+        }
+      ],
+      "warnings": [
+        "Геометрия серии по STEP; конкретное исполнение PN/материала требует проверки. Привод выбран по существующему правилу спецификации: рукоятка до DN150 включительно, редуктор от DN200."
+      ]
+    },
+    {
+      "key": "equipment:обратные-клапаны-001-r0079",
+      "source": "Equipment/Valves/3D/Обратные/05. Клапаны обратные/5.2 Тип 010С Двухстворчатый межфланцевый/010С DN700.stp",
+      "sourceHash": "2a444c1d79be1c42c882874f46e7d2c2edd5fad1b6774a78607ef6bf719bbeb1",
+      "units": "mm",
+      "mapping": "series_geometry_review",
+      "ports": [
+        {
+          "id": "inlet",
+          "point": [
+            0,
+            0,
+            0
+          ],
+          "axis": [
+            0,
+            0,
+            1
+          ],
+          "provisional": true
+        },
+        {
+          "id": "outlet",
+          "point": [
+            0,
+            0,
+            -229.0
+          ],
+          "axis": [
+            0,
+            0,
+            -1
+          ],
+          "provisional": true
+        }
+      ],
+      "warnings": [
+        "Геометрия серии по STEP; конкретное исполнение PN/материала требует проверки. Привод выбран по существующему правилу спецификации: рукоятка до DN150 включительно, редуктор от DN200."
+      ]
+    },
+    {
+      "key": "equipment:обратные-клапаны-001-r0080",
+      "source": "Equipment/Valves/3D/Обратные/05. Клапаны обратные/5.2 Тип 010С Двухстворчатый межфланцевый/010С DN800.stp",
+      "sourceHash": "e519b0e8868e6c0087c4837e5f5870d4b52c29b7cfe800dc2f6a6fd0803a5313",
+      "units": "mm",
+      "mapping": "series_geometry_review",
+      "ports": [
+        {
+          "id": "inlet",
+          "point": [
+            0,
+            0,
+            0
+          ],
+          "axis": [
+            0,
+            0,
+            1
+          ],
+          "provisional": true
+        },
+        {
+          "id": "outlet",
+          "point": [
+            0,
+            0,
+            -241.0
+          ],
+          "axis": [
+            0,
+            0,
+            -1
+          ],
+          "provisional": true
+        }
+      ],
+      "warnings": [
+        "Геометрия серии по STEP; конкретное исполнение PN/материала требует проверки. Привод выбран по существующему правилу спецификации: рукоятка до DN150 включительно, редуктор от DN200."
+      ]
+    },
+    {
+      "key": "equipment:обратные-клапаны-002-r0066",
+      "source": "Equipment/Valves/3D/Обратные/05. Клапаны обратные/5.2 Тип 010С Двухстворчатый межфланцевый/010С DN50.stp",
+      "sourceHash": "4fee83f4d032aebde7539c0551e836feec45ed87ef03f04d5c2a0824ff0d6a1c",
+      "units": "mm",
+      "mapping": "series_geometry_review",
+      "ports": [
+        {
+          "id": "inlet",
+          "point": [
+            0,
+            0,
+            0
+          ],
+          "axis": [
+            0,
+            0,
+            1
+          ],
+          "provisional": true
+        },
+        {
+          "id": "outlet",
+          "point": [
+            0,
+            0,
+            -43.0
+          ],
+          "axis": [
+            0,
+            0,
+            -1
+          ],
+          "provisional": true
+        }
+      ],
+      "warnings": [
+        "Геометрия серии по STEP; конкретное исполнение PN/материала требует проверки. Привод выбран по существующему правилу спецификации: рукоятка до DN150 включительно, редуктор от DN200."
+      ]
+    },
+    {
+      "key": "equipment:обратные-клапаны-002-r0067",
+      "source": "Equipment/Valves/3D/Обратные/05. Клапаны обратные/5.2 Тип 010С Двухстворчатый межфланцевый/010С DN65.stp",
+      "sourceHash": "96980965ab09af0f9cfacdc79717815c52340fd16997c2d48e290ad8fdf17c17",
+      "units": "mm",
+      "mapping": "series_geometry_review",
+      "ports": [
+        {
+          "id": "inlet",
+          "point": [
+            0,
+            0,
+            0
+          ],
+          "axis": [
+            0,
+            0,
+            1
+          ],
+          "provisional": true
+        },
+        {
+          "id": "outlet",
+          "point": [
+            0,
+            0,
+            -46.0
+          ],
+          "axis": [
+            0,
+            0,
+            -1
+          ],
+          "provisional": true
+        }
+      ],
+      "warnings": [
+        "Геометрия серии по STEP; конкретное исполнение PN/материала требует проверки. Привод выбран по существующему правилу спецификации: рукоятка до DN150 включительно, редуктор от DN200."
+      ]
+    },
+    {
+      "key": "equipment:обратные-клапаны-002-r0068",
+      "source": "Equipment/Valves/3D/Обратные/05. Клапаны обратные/5.2 Тип 010С Двухстворчатый межфланцевый/010С DN80.stp",
+      "sourceHash": "ec8c24d0b2478e96b163494102d5ba0fb27eb84e059dd3d2c8a072fd28c30d4e",
+      "units": "mm",
+      "mapping": "series_geometry_review",
+      "ports": [
+        {
+          "id": "inlet",
+          "point": [
+            0,
+            0,
+            0
+          ],
+          "axis": [
+            0,
+            0,
+            1
+          ],
+          "provisional": true
+        },
+        {
+          "id": "outlet",
+          "point": [
+            0,
+            0,
+            -64.0
+          ],
+          "axis": [
+            0,
+            0,
+            -1
+          ],
+          "provisional": true
+        }
+      ],
+      "warnings": [
+        "Геометрия серии по STEP; конкретное исполнение PN/материала требует проверки. Привод выбран по существующему правилу спецификации: рукоятка до DN150 включительно, редуктор от DN200."
+      ]
+    },
+    {
+      "key": "equipment:обратные-клапаны-002-r0069",
+      "source": "Equipment/Valves/3D/Обратные/05. Клапаны обратные/5.2 Тип 010С Двухстворчатый межфланцевый/010С DN100.stp",
+      "sourceHash": "2332cc566fb56accf195eec3b0cd40c4ff1c7868ad83d123bf31b8db84d5dda6",
+      "units": "mm",
+      "mapping": "series_geometry_review",
+      "ports": [
+        {
+          "id": "inlet",
+          "point": [
+            0,
+            0,
+            0
+          ],
+          "axis": [
+            0,
+            0,
+            1
+          ],
+          "provisional": true
+        },
+        {
+          "id": "outlet",
+          "point": [
+            0,
+            0,
+            -64.0
+          ],
+          "axis": [
+            0,
+            0,
+            -1
+          ],
+          "provisional": true
+        }
+      ],
+      "warnings": [
+        "Геометрия серии по STEP; конкретное исполнение PN/материала требует проверки. Привод выбран по существующему правилу спецификации: рукоятка до DN150 включительно, редуктор от DN200."
+      ]
+    },
+    {
+      "key": "equipment:обратные-клапаны-002-r0070",
+      "source": "Equipment/Valves/3D/Обратные/05. Клапаны обратные/5.2 Тип 010С Двухстворчатый межфланцевый/010С DN125.stp",
+      "sourceHash": "68ca3041ad5eecab181229116ace253855bf494a5df5f101118225422d4a9bcb",
+      "units": "mm",
+      "mapping": "series_geometry_review",
+      "ports": [
+        {
+          "id": "inlet",
+          "point": [
+            0,
+            0,
+            0
+          ],
+          "axis": [
+            0,
+            0,
+            1
+          ],
+          "provisional": true
+        },
+        {
+          "id": "outlet",
+          "point": [
+            0,
+            0,
+            -70.0
+          ],
+          "axis": [
+            0,
+            0,
+            -1
+          ],
+          "provisional": true
+        }
+      ],
+      "warnings": [
+        "Геометрия серии по STEP; конкретное исполнение PN/материала требует проверки. Привод выбран по существующему правилу спецификации: рукоятка до DN150 включительно, редуктор от DN200."
+      ]
+    },
+    {
+      "key": "equipment:обратные-клапаны-002-r0071",
+      "source": "Equipment/Valves/3D/Обратные/05. Клапаны обратные/5.2 Тип 010С Двухстворчатый межфланцевый/010С DN150.stp",
+      "sourceHash": "f56b56fb3036c8a94da2075432ca871e7f997b2c12c8b30a326987bff402e5c1",
+      "units": "mm",
+      "mapping": "series_geometry_review",
+      "ports": [
+        {
+          "id": "inlet",
+          "point": [
+            0,
+            0,
+            0
+          ],
+          "axis": [
+            0,
+            0,
+            1
+          ],
+          "provisional": true
+        },
+        {
+          "id": "outlet",
+          "point": [
+            0,
+            0,
+            -76.0
+          ],
+          "axis": [
+            0,
+            0,
+            -1
+          ],
+          "provisional": true
+        }
+      ],
+      "warnings": [
+        "Геометрия серии по STEP; конкретное исполнение PN/материала требует проверки. Привод выбран по существующему правилу спецификации: рукоятка до DN150 включительно, редуктор от DN200."
+      ]
+    },
+    {
+      "key": "equipment:обратные-клапаны-002-r0072",
+      "source": "Equipment/Valves/3D/Обратные/05. Клапаны обратные/5.2 Тип 010С Двухстворчатый межфланцевый/010С DN200.stp",
+      "sourceHash": "90ac5dcedd057c16feb68f03e113e4ce79d37a2135c444ba943f2cfa64b2bdab",
+      "units": "mm",
+      "mapping": "series_geometry_review",
+      "ports": [
+        {
+          "id": "inlet",
+          "point": [
+            0,
+            0,
+            0
+          ],
+          "axis": [
+            0,
+            0,
+            1
+          ],
+          "provisional": true
+        },
+        {
+          "id": "outlet",
+          "point": [
+            0,
+            0,
+            -89.0
+          ],
+          "axis": [
+            0,
+            0,
+            -1
+          ],
+          "provisional": true
+        }
+      ],
+      "warnings": [
+        "Геометрия серии по STEP; конкретное исполнение PN/материала требует проверки. Привод выбран по существующему правилу спецификации: рукоятка до DN150 включительно, редуктор от DN200."
+      ]
+    },
+    {
+      "key": "equipment:обратные-клапаны-002-r0073",
+      "source": "Equipment/Valves/3D/Обратные/05. Клапаны обратные/5.2 Тип 010С Двухстворчатый межфланцевый/010С DN250.stp",
+      "sourceHash": "896c9137d387062adb3c0472b727c94b8791f7583988472ad9ae52ea33d640af",
+      "units": "mm",
+      "mapping": "series_geometry_review",
+      "ports": [
+        {
+          "id": "inlet",
+          "point": [
+            0,
+            0,
+            0
+          ],
+          "axis": [
+            0,
+            0,
+            1
+          ],
+          "provisional": true
+        },
+        {
+          "id": "outlet",
+          "point": [
+            0,
+            0,
+            -114.0
+          ],
+          "axis": [
+            0,
+            0,
+            -1
+          ],
+          "provisional": true
+        }
+      ],
+      "warnings": [
+        "Геометрия серии по STEP; конкретное исполнение PN/материала требует проверки. Привод выбран по существующему правилу спецификации: рукоятка до DN150 включительно, редуктор от DN200."
+      ]
+    },
+    {
+      "key": "equipment:обратные-клапаны-002-r0074",
+      "source": "Equipment/Valves/3D/Обратные/05. Клапаны обратные/5.2 Тип 010С Двухстворчатый межфланцевый/010С DN300.stp",
+      "sourceHash": "da63df28057a882138af3651629c2ffb77a81c743a251fe339b977e6766b0c49",
+      "units": "mm",
+      "mapping": "series_geometry_review",
+      "ports": [
+        {
+          "id": "inlet",
+          "point": [
+            0,
+            0,
+            0
+          ],
+          "axis": [
+            0,
+            0,
+            1
+          ],
+          "provisional": true
+        },
+        {
+          "id": "outlet",
+          "point": [
+            0,
+            0,
+            -114.0
+          ],
+          "axis": [
+            0,
+            0,
+            -1
+          ],
+          "provisional": true
+        }
+      ],
+      "warnings": [
+        "Геометрия серии по STEP; конкретное исполнение PN/материала требует проверки. Привод выбран по существующему правилу спецификации: рукоятка до DN150 включительно, редуктор от DN200."
+      ]
+    },
+    {
+      "key": "equipment:обратные-клапаны-002-r0075",
+      "source": "Equipment/Valves/3D/Обратные/05. Клапаны обратные/5.2 Тип 010С Двухстворчатый межфланцевый/010С DN350.stp",
+      "sourceHash": "664e3bea06317aab3d5112dbb8ab38f7269f2a6760956c0cadcfc6565037375b",
+      "units": "mm",
+      "mapping": "series_geometry_review",
+      "ports": [
+        {
+          "id": "inlet",
+          "point": [
+            0,
+            0,
+            0
+          ],
+          "axis": [
+            0,
+            0,
+            1
+          ],
+          "provisional": true
+        },
+        {
+          "id": "outlet",
+          "point": [
+            0,
+            0,
+            -127.0
+          ],
+          "axis": [
+            0,
+            0,
+            -1
+          ],
+          "provisional": true
+        }
+      ],
+      "warnings": [
+        "Геометрия серии по STEP; конкретное исполнение PN/материала требует проверки. Привод выбран по существующему правилу спецификации: рукоятка до DN150 включительно, редуктор от DN200."
+      ]
+    },
+    {
+      "key": "equipment:обратные-клапаны-002-r0076",
+      "source": "Equipment/Valves/3D/Обратные/05. Клапаны обратные/5.2 Тип 010С Двухстворчатый межфланцевый/010С DN400.stp",
+      "sourceHash": "a5e4a0a55cd32842a7a07987b5bb217a51426505149f6b9b3a56936db3eb3990",
+      "units": "mm",
+      "mapping": "series_geometry_review",
+      "ports": [
+        {
+          "id": "inlet",
+          "point": [
+            0,
+            0,
+            0
+          ],
+          "axis": [
+            0,
+            0,
+            1
+          ],
+          "provisional": true
+        },
+        {
+          "id": "outlet",
+          "point": [
+            0,
+            0,
+            -140.0
+          ],
+          "axis": [
+            0,
+            0,
+            -1
+          ],
+          "provisional": true
+        }
+      ],
+      "warnings": [
+        "Геометрия серии по STEP; конкретное исполнение PN/материала требует проверки. Привод выбран по существующему правилу спецификации: рукоятка до DN150 включительно, редуктор от DN200."
+      ]
+    },
+    {
+      "key": "equipment:обратные-клапаны-002-r0077",
+      "source": "Equipment/Valves/3D/Обратные/05. Клапаны обратные/5.2 Тип 010С Двухстворчатый межфланцевый/010С DN500.stp",
+      "sourceHash": "d64266764edcdb01a9716a61c3d832c0130e9a270892fe80cfc8bbb64adb6bb4",
+      "units": "mm",
+      "mapping": "series_geometry_review",
+      "ports": [
+        {
+          "id": "inlet",
+          "point": [
+            0,
+            0,
+            0
+          ],
+          "axis": [
+            0,
+            0,
+            1
+          ],
+          "provisional": true
+        },
+        {
+          "id": "outlet",
+          "point": [
+            0,
+            0,
+            -152.0
+          ],
+          "axis": [
+            0,
+            0,
+            -1
+          ],
+          "provisional": true
+        }
+      ],
+      "warnings": [
+        "Геометрия серии по STEP; конкретное исполнение PN/материала требует проверки. Привод выбран по существующему правилу спецификации: рукоятка до DN150 включительно, редуктор от DN200."
+      ]
+    },
+    {
+      "key": "equipment:обратные-клапаны-002-r0078",
+      "source": "Equipment/Valves/3D/Обратные/05. Клапаны обратные/5.2 Тип 010С Двухстворчатый межфланцевый/010С DN600.stp",
+      "sourceHash": "597e55dcd7e03e8ee811db79aec2c82790fa99104e1742cdf145a9124ed59f1a",
+      "units": "mm",
+      "mapping": "series_geometry_review",
+      "ports": [
+        {
+          "id": "inlet",
+          "point": [
+            0,
+            0,
+            0
+          ],
+          "axis": [
+            0,
+            0,
+            1
+          ],
+          "provisional": true
+        },
+        {
+          "id": "outlet",
+          "point": [
+            0,
+            0,
+            -178.0
+          ],
+          "axis": [
+            0,
+            0,
+            -1
+          ],
+          "provisional": true
+        }
+      ],
+      "warnings": [
+        "Геометрия серии по STEP; конкретное исполнение PN/материала требует проверки. Привод выбран по существующему правилу спецификации: рукоятка до DN150 включительно, редуктор от DN200."
+      ]
+    },
+    {
+      "key": "equipment:обратные-клапаны-002-r0079",
+      "source": "Equipment/Valves/3D/Обратные/05. Клапаны обратные/5.2 Тип 010С Двухстворчатый межфланцевый/010С DN700.stp",
+      "sourceHash": "2a444c1d79be1c42c882874f46e7d2c2edd5fad1b6774a78607ef6bf719bbeb1",
+      "units": "mm",
+      "mapping": "series_geometry_review",
+      "ports": [
+        {
+          "id": "inlet",
+          "point": [
+            0,
+            0,
+            0
+          ],
+          "axis": [
+            0,
+            0,
+            1
+          ],
+          "provisional": true
+        },
+        {
+          "id": "outlet",
+          "point": [
+            0,
+            0,
+            -229.0
+          ],
+          "axis": [
+            0,
+            0,
+            -1
+          ],
+          "provisional": true
+        }
+      ],
+      "warnings": [
+        "Геометрия серии по STEP; конкретное исполнение PN/материала требует проверки. Привод выбран по существующему правилу спецификации: рукоятка до DN150 включительно, редуктор от DN200."
+      ]
+    },
+    {
+      "key": "equipment:обратные-клапаны-002-r0080",
+      "source": "Equipment/Valves/3D/Обратные/05. Клапаны обратные/5.2 Тип 010С Двухстворчатый межфланцевый/010С DN800.stp",
+      "sourceHash": "e519b0e8868e6c0087c4837e5f5870d4b52c29b7cfe800dc2f6a6fd0803a5313",
+      "units": "mm",
+      "mapping": "series_geometry_review",
+      "ports": [
+        {
+          "id": "inlet",
+          "point": [
+            0,
+            0,
+            0
+          ],
+          "axis": [
+            0,
+            0,
+            1
+          ],
+          "provisional": true
+        },
+        {
+          "id": "outlet",
+          "point": [
+            0,
+            0,
+            -241.0
+          ],
+          "axis": [
+            0,
+            0,
+            -1
+          ],
+          "provisional": true
+        }
+      ],
+      "warnings": [
+        "Геометрия серии по STEP; конкретное исполнение PN/материала требует проверки. Привод выбран по существующему правилу спецификации: рукоятка до DN150 включительно, редуктор от DN200."
+      ]
+    }
+  ]
+}

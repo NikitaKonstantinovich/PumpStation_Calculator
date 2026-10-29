@@ -1,13 +1,17 @@
+import { guardDisabledBetaFeature } from "../../release-server";
 import { currentUser, db, json } from "../../auth-server";
 import { calculateCollector, collectorCode, configurationWarnings, type CollectorConfiguration } from "../../collector-calculations";
 import type { SavedCollector } from "../../collector-project";
 import { currentCollectorCatalog } from "../../collector-catalog-server";
+import { collectorAccessError } from "../../project-access";
+import { collectorInstrumentPortIdentity } from "../../hydraulic-port-ledger";
 
 type Row = { id: string; code: string; configuration_json: string; calculation_json: string; cached_price_microunits: number; price_updated_at: string; source: string };
 const mapRow = (row: Row): SavedCollector => ({ id: row.id, code: row.code, configuration: JSON.parse(row.configuration_json), calculation: JSON.parse(row.calculation_json), price: row.cached_price_microunits / 1_000_000, priceUpdatedAt: row.price_updated_at, source: row.source });
 async function find(code: string) { return db().prepare("SELECT * FROM collectors WHERE code=?").bind(code).first<Row>(); }
 
 export async function GET(request: Request) {
+  const betaDenied = await guardDisabledBetaFeature(request); if (betaDenied) return betaDenied;
   try {
     if (!await currentUser(request)) return json({ error: "Требуется вход." }, 401);
     if (new URL(request.url).searchParams.get("catalog") === "1") return json({ catalog: await currentCollectorCatalog() }, 200, { "Cache-Control": "no-store" });
@@ -27,6 +31,7 @@ function parseConfiguration(raw: unknown): CollectorConfiguration | null {
   return c;
 }
 export async function POST(request: Request) {
+  const betaDenied = await guardDisabledBetaFeature(request); if (betaDenied) return betaDenied;
   try {
     const user = await currentUser(request);
     if (!user) return json({ error: "Требуется вход." }, 401);
@@ -36,7 +41,13 @@ export async function POST(request: Request) {
     try { const text = await request.text(); if (text.length > 20000) return json({ error: "Запрос слишком большой." }, 413); body = JSON.parse(text); } catch { return json({ error: "Некорректный JSON." }, 400); }
     if (!body || !["calculate", "create", "refresh"].includes(body.action ?? "")) return json({ error: "Неизвестное действие." }, 400);
     const configuration = parseConfiguration(body.configuration);
-    if (!configuration) return json({ error: "Некорректная конфигурация: проверьте DN, соединения, PN и количество насосов." }, 400);
+    if (!configuration) {
+      const raw = body.configuration as Partial<CollectorConfiguration> | null;
+      const errors = raw && raw.primary && typeof raw.primary === "object" && (raw.secondary === null || typeof raw.secondary === "object") ? configurationWarnings(raw as CollectorConfiguration) : [];
+      return json({ error: errors.length ? errors.join("\n") : "Некорректная конфигурация: проверьте DN, соединения, PN и количество насосов." }, 400);
+    }
+    const accessError = collectorAccessError(configuration, user.role);
+    if (accessError) return json({ error: accessError }, 403);
     const catalog = await currentCollectorCatalog(), calculation = calculateCollector(configuration, catalog), code = collectorCode(configuration)!;
     if (body.action === "calculate") return json({ calculation, catalog });
     if (!calculation.complete || calculation.price === null) return json({ error: "Расчёт неполный", calculation }, 422);
@@ -48,8 +59,9 @@ export async function POST(request: Request) {
     // Never silently overwrite a different physical assembly sharing that code.
     if (previous) {
       const saved = mapRow(previous).configuration;
-      const physical = (c: CollectorConfiguration) => JSON.stringify({ dn: c.dn, pn: c.pn, material: c.material, connection: c.connection, eccentric: c.eccentric, circuits: [c.primary, c.secondary].filter(Boolean).map(v => ({ dn: v!.dn, pn: v!.pn, connection: v!.connection, spacing: v!.spacing, count: (v!.working ?? 0) + (v!.reserve ?? 0) })) });
-      if (physical(saved) !== physical(configuration)) return json({ error: "Этот код уже занят другим исполнением PN/соединений. Проверьте сохранённую конфигурацию." }, 409);
+      const physical = (c: CollectorConfiguration) => JSON.stringify({ sectionBreaks: c.sectionBreaks ?? 0, dn: c.dn, pn: c.pn, material: c.material, connection: c.connection, eccentric: c.eccentric, circuits: [c.primary, c.secondary].filter(Boolean).map(v => ({ dn: v!.dn, pn: v!.pn, connection: v!.connection, spacing: v!.spacing, count: (v!.working ?? 0) + (v!.reserve ?? 0) })) });
+      const ports = (c: CollectorConfiguration) => c.instrumentPorts === undefined ? "legacy" : collectorInstrumentPortIdentity(c.instrumentPorts);
+      if (physical(saved) !== physical(configuration) || ports(saved) !== ports(configuration)) return json({ error: "Этот код уже занят другим исполнением PN/соединений/отводов КИП. Проверьте сохранённую конфигурацию." }, 409);
     }
     const id = previous?.id ?? crypto.randomUUID(), timestamp = new Date().toISOString(), database = db(), micro = (v: number) => Math.round(v * 1_000_000);
     const statements = previous ? [database.prepare("UPDATE collectors SET configuration_json=?,calculation_json=?,cached_price_microunits=?,weld_length_mm=?,weld_cost_microunits=?,price_updated_at=? WHERE id=?").bind(JSON.stringify(configuration), JSON.stringify(calculation), micro(calculation.price), calculation.weldLengthMm, micro(calculation.weldCost), timestamp, id), database.prepare("DELETE FROM collector_items WHERE collector_id=?").bind(id)] : [database.prepare("INSERT INTO collectors (id,code,type,configuration_json,calculation_json,cached_price_microunits,weld_length_mm,weld_cost_microunits,source,created_by_user_id,price_updated_at) VALUES (?,?,?,?,?,?,?,?,?,?,?)").bind(id, code, configuration.type, JSON.stringify(configuration), JSON.stringify(calculation), micro(calculation.price), calculation.weldLengthMm, micro(calculation.weldCost), "Конструктор коллекторов", user.id, timestamp)];

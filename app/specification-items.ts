@@ -7,7 +7,7 @@ const valveOptions = new Set<SpecOption>([
 
 // Legacy templates had no option. Resolve their role before restoring defaults
 // or replacing an automatically selected valve, regardless of its model name.
-export function specificationOption(item: SpecItem): SpecOption | undefined {
+function legacySpecificationOption(item: SpecItem): SpecOption | undefined {
   if (item.option) return item.option;
   const legacyValve = !item.equipmentId && item.price == null && (!item.description || /На (?:подводящей|напорной) линии каждого насоса/i.test(item.description));
   if (legacyValve && /^(?:клапан обратный|обратный клапан)(?: · DN\d+)?$/i.test(item.name)) {
@@ -17,6 +17,53 @@ export function specificationOption(item: SpecItem): SpecOption | undefined {
   if (item.name === "Коллектор подводящий") return "suctionCollector";
   if (item.name === "Коллектор напорный") return "dischargeCollector";
   return undefined;
+}
+
+export const specificationOption = (item: SpecItem) => item.option;
+
+/** Name/position heuristics run only while importing a pre-identity project. */
+export function migrateSpecificationItems(items: SpecItem[]): SpecItem[] {
+  let primaryAssigned = items.some(item => item.option === "primaryPump");
+  let secondaryAssigned = items.some(item => item.option === "secondaryPump");
+  const namedRoles: Record<string, SpecOption> = {
+    "Рама насосной установки": "frame", "Стойка шкафа управления": "cabinetStand",
+    "Комплект крепежа": "mountingKit", "Виброопора": "vibrationMounts",
+    "Преобразователь давления": "pressureTransducer", "Бак мембранный": "membraneTank",
+    "Заглушка коллектора": "collectorPlugs", "Затвор разделительный": "isolatingValves",
+  };
+  const migrated = items.filter(item => !(item.name === "Насос CNP CDM 32-4" &&
+    item.details === "22 кВт · 2900 об/мин" && !item.equipmentId && item.price == null)).map(source => {
+    const item = { ...source, unit: source.unit ?? "шт.", price: source.price ?? null, description: source.description ?? "" };
+    let option = legacySpecificationOption(item) ?? namedRoles[item.name];
+    const section = item.section ?? (/стойк|рам|виброопор|крепеж/i.test(item.name) ? "frame" :
+      /^Насос(?:\s|$)/i.test(item.name) ? "pump" : /шкаф/i.test(item.name) ? "control" :
+      /кабел|электр|клем|наконечн|провод|гофр|лоток/i.test(item.name) ? "electrical" :
+      /подвод|манометр|реле|затвор/i.test(item.name) ? "suction" : "discharge");
+    if (!option && section === "pump") {
+      if (item.position === "02" && !secondaryAssigned) { option = "secondaryPump"; secondaryAssigned = true; }
+      else if (!primaryAssigned) { option = "primaryPump"; primaryAssigned = true; }
+    }
+    if (!option && section === "control" && (item.name === "Шкаф управления" ||
+      /автоматически подобран|Шкаф (?:BP|FP|FPJ)|точного ШУ|стоимость по актуальным комплектующим/i.test(item.description))) option = "controlCabinet";
+    const managed = option === "primaryPump" || option === "secondaryPump" || option === "controlCabinet";
+    const manualCabinet = option === "controlCabinet" && ((source.option === "controlCabinet" && source.generatedBy !== "station") || /стоимость по актуальным комплектующим/i.test(item.description));
+    const placeholder = managed && !item.equipmentId && item.price == null;
+    const legacyInstrument = section === "suction" && !item.equipmentId && item.price == null && (
+      (["Манометр", "Мановакуумметр"].includes(item.name) && item.details === "С комплектом подключения") ||
+      (item.name === "Реле давления" && item.details === "Защита от сухого хода"));
+    const legacyVibration = !item.generatedBy && !item.equipmentId && item.price == null && option === "vibrationCompensators" &&
+      item.name === "Вставка гибкая" && item.details === "Виброкомпенсатор, фланцевая" && item.description === "Компенсация вибраций";
+    return { ...item, section, option, ...(legacyInstrument ? { assemblyRole: "template-suction-instrument" } : {}),
+      ...(legacyVibration ? { assemblyRole: "template-vibration" } : {}), ...(managed && !manualCabinet ? { generatedBy: "station" as const } : {}),
+      ...(placeholder ? { status: "clarify" as const, technicalStatus: "unverified" as const } : {}) };
+  });
+  return normalizeSpecificationItems(migrated);
+}
+
+/** Replace exactly one managed role; manual and unrelated rows survive. */
+export function replaceSpecificationRole(items: SpecItem[], option: SpecOption, replacement?: SpecItem): SpecItem[] {
+  const remaining = items.filter(item => item.option !== option);
+  return normalizeSpecificationItems(replacement ? [...remaining, { ...replacement, option }] : remaining);
 }
 
 export function normalizeSpecificationItems(items: SpecItem[]): SpecItem[] {

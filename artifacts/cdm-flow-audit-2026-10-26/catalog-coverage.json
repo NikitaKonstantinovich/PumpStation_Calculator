@@ -1,0 +1,300 @@
+{
+  "catalogueCount": 374,
+  "withCadCount": 302,
+  "withoutCadCount": 72,
+  "withoutCad": [
+    {
+      "id": "538",
+      "model": "CDM125-1"
+    },
+    {
+      "id": "nu-95f4e23f1520d024",
+      "model": "CDM125-10"
+    },
+    {
+      "id": "541",
+      "model": "CDM125-2"
+    },
+    {
+      "id": "540",
+      "model": "CDM125-2-1"
+    },
+    {
+      "id": "539",
+      "model": "CDM125-2-2"
+    },
+    {
+      "id": "543",
+      "model": "CDM125-3"
+    },
+    {
+      "id": "542",
+      "model": "CDM125-3-1"
+    },
+    {
+      "id": "545",
+      "model": "CDM125-4"
+    },
+    {
+      "id": "544",
+      "model": "CDM125-4-2"
+    },
+    {
+      "id": "546",
+      "model": "CDM125-5"
+    },
+    {
+      "id": "nu-62d9f5fee86c3187",
+      "model": "CDM125-6"
+    },
+    {
+      "id": "nu-e13e2723f1423d63",
+      "model": "CDM125-7"
+    },
+    {
+      "id": "nu-c9afa665df751a65",
+      "model": "CDM125-8"
+    },
+    {
+      "id": "nu-a41615fb0e1c49d1",
+      "model": "CDM125-9"
+    },
+    {
+      "id": "nu-3408a79da2a14d2a",
+      "model": "CDM125-9-2"
+    },
+    {
+      "id": "582",
+      "model": "CDM155-1"
+    },
+    {
+      "id": "581",
+      "model": "CDM155-1-1"
+    },
+    {
+      "id": "584",
+      "model": "CDM155-2"
+    },
+    {
+      "id": "583",
+      "model": "CDM155-2-2"
+    },
+    {
+      "id": "586",
+      "model": "CDM155-3"
+    },
+    {
+      "id": "585",
+      "model": "CDM155-3-2"
+    },
+    {
+      "id": "587",
+      "model": "CDM155-4-1"
+    },
+    {
+      "id": "nu-f5a903ef47a85d63",
+      "model": "CDM155-5"
+    },
+    {
+      "id": "nu-0169e2c3ac037a20",
+      "model": "CDM155-5-2"
+    },
+    {
+      "id": "nu-4763bfdb8afe1788",
+      "model": "CDM155-6"
+    },
+    {
+      "id": "nu-2daee4005de44574",
+      "model": "CDM155-7"
+    },
+    {
+      "id": "nu-36e5c73c9c20f3b3",
+      "model": "CDM155-8-2"
+    },
+    {
+      "id": "589",
+      "model": "CDM185-1-A"
+    },
+    {
+      "id": "588",
+      "model": "CDM185-1-B"
+    },
+    {
+      "id": "591",
+      "model": "CDM185-2-2A"
+    },
+    {
+      "id": "590",
+      "model": "CDM185-2-2B"
+    },
+    {
+      "id": "593",
+      "model": "CDM185-3"
+    },
+    {
+      "id": "592",
+      "model": "CDM185-3-3B"
+    },
+    {
+      "id": "595",
+      "model": "CDM185-4-3A-B"
+    },
+    {
+      "id": "596",
+      "model": "CDM185-4-4A"
+    },
+    {
+      "id": "594",
+      "model": "CDM185-4-A-3B"
+    },
+    {
+      "id": "597",
+      "model": "CDM185-5-2A-3B"
+    },
+    {
+      "id": "598",
+      "model": "CDM185-5-5A"
+    },
+    {
+      "id": "599",
+      "model": "CDM185-6-3A-3B"
+    },
+    {
+      "id": "600",
+      "model": "CDM185-6-6A"
+    },
+    {
+      "id": "601",
+      "model": "CDM185-7-4A-3B"
+    },
+    {
+      "id": "602",
+      "model": "CDM185-7-7A"
+    },
+    {
+      "id": "605",
+      "model": "CDM185-8"
+    },
+    {
+      "id": "604",
+      "model": "CDM185-8-6A"
+    },
+    {
+      "id": "603",
+      "model": "CDM185-8-6A-2B"
+    },
+    {
+      "id": "641",
+      "model": "CDM215-1"
+    },
+    {
+      "id": "640",
+      "model": "CDM215-1-B"
+    },
+    {
+      "id": "644",
+      "model": "CDM215-2"
+    },
+    {
+      "id": "642",
+      "model": "CDM215-2-2B"
+    },
+    {
+      "id": "643",
+      "model": "CDM215-2-A-B"
+    },
+    {
+      "id": "646",
+      "model": "CDM215-3-3A"
+    },
+    {
+      "id": "645",
+      "model": "CDM215-3-A-2B"
+    },
+    {
+      "id": "648",
+      "model": "CDM215-4"
+    },
+    {
+      "id": "647",
+      "model": "CDM215-4-2A-2B"
+    },
+    {
+      "id": "651",
+      "model": "CDM215-5"
+    },
+    {
+      "id": "649",
+      "model": "CDM215-5-3A-2B"
+    },
+    {
+      "id": "650",
+      "model": "CDM215-5-5A"
+    },
+    {
+      "id": "654",
+      "model": "CDM215-6"
+    },
+    {
+      "id": "652",
+      "model": "CDM215-6-3A-3B"
+    },
+    {
+      "id": "653",
+      "model": "CDM215-6-5A-B"
+    },
+    {
+      "id": "655",
+      "model": "CDM215-7-5A-2B"
+    },
+    {
+      "id": "478",
+      "model": "CDM95-1"
+    },
+    {
+      "id": "477",
+      "model": "CDM95-1-1"
+    },
+    {
+      "id": "480",
+      "model": "CDM95-2"
+    },
+    {
+      "id": "479",
+      "model": "CDM95-2-2"
+    },
+    {
+      "id": "482",
+      "model": "CDM95-3"
+    },
+    {
+      "id": "481",
+      "model": "CDM95-3-2"
+    },
+    {
+      "id": "483",
+      "model": "CDM95-4"
+    },
+    {
+      "id": "484",
+      "model": "CDM95-5"
+    },
+    {
+      "id": "485",
+      "model": "CDM95-6"
+    },
+    {
+      "id": "486",
+      "model": "CDM95-7"
+    },
+    {
+      "id": "487",
+      "model": "CDM95-8-2"
+    }
+  ],
+  "selectedProfiles": {
+    "confirmed_matches": 187,
+    "confirmed_corrected": 79,
+    "unconfirmed_no_recognized_marker": 36
+  }
+}

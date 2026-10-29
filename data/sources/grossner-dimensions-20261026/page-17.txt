@@ -1,0 +1,35 @@
+EN 1092-1:2018 (E) 
+17 
+5.7.2 Jointing face finish 
+5.7.2.1 All flange and collar jointing faces, except types 33, 36 and 37, shall be machine finished and 
+shall have a surface finish in accordance with the values given in Table 2 when compared with reference 
+specimens by visual or tactile means. 
+NOTE It is not intended that instrument measurements be taken on the faces themselves; the Ra and Rz values 
+as defined in EN ISO 4287 relate to the reference specimens. 
+5.7.2.2 For flanges and collars (except types 33, 36 and 37) with facing types A, B1, E and F, turning 
+shall be carried out with a round nosed tool in accordance with Table 2. 
+5.7.2.3 If not otherwise agreed between the purchaser and the supplier type 01 and type 05 up to 
+PN 40 and collars (except types 33, 36 and 37) shall have type A facing, other flanges shall have 
+standard facing type B1 for all PN numbers. 
+Table 2 — Surface finish for jointing faces 
+Facing types Method of 
+machining 
+Radius of round 
+nosed tool Ra a Rz a 
+mm µm µm 
+min. min. max. min. max. 
+A, B1 b, E, F Turning c 1,0 3,2 12,5 12,5 50 
+B2 b, C, D, G, H Turning c —  0,8 3,2 3,2 12,5 
+NOTE For certain applications, e.g. low temperature gases, it can be necessary to stipulate closer control to 
+the surface finish. 
+ a Ra and Rz are defined in EN ISO 4287. 
+ b Types B1 and B2 are raised face (type B) flanges with different specified surface roughness values:  
+ B1: Standard facing for all PN numbers. 
+ B2: Only if agreed between the purchaser and the flange manufacturer.  
+ c The term 'turning' includes any method of machine operation producin g either serrated concentric or 
+serrated spiral grooves. 
+5.8 Surface finish of flanges and collars 
+5.8.1 Surface finish 
+The surface finish of flanges and collars shall be according to Table  3. The given surface roughness 
+values apply to as-delivered condition, unless otherwise specified by the purchaser. 
+  

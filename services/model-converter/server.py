@@ -135,6 +135,19 @@ class Jobs:
                     info = {"filename": name, "bounds": old["bounds"], "units": "mm", "converterVersion": CONVERTER_VERSION}
                     self.register(digest, info)
                     return info
+        # Library copies are also reusable before a catalogue link was assigned.
+        library_path = FRONTEND / "public/model-assets/library.json"
+        if library_path.exists():
+            library = json.loads(library_path.read_text(encoding="utf-8"))
+            old = next((m for m in library.get("models", []) if m.get("sourceHash") == digest and m.get("status") == "ready" and m.get("units") == "mm"), None)
+            if old and re.fullmatch(r"/model-assets/[a-zA-Z0-9_-]+\.stl", old.get("meshUrl", "")):
+                source = FRONTEND / "public" / old["meshUrl"].lstrip("/")
+                if valid_stl(source) and old.get("meshHash") and file_hash(source) == old["meshHash"]:
+                    filename = f"model-{digest}-{CONVERTER_VERSION}.stl"
+                    shutil.copyfile(source, self.assets / filename)
+                    info = {"filename": filename, "bounds": old["bounds"], "units": "mm", "converterVersion": CONVERTER_VERSION}
+                    self.register(digest, info)
+                    return info
         return None
 
     def register(self, digest, info):

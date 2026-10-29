@@ -1,0 +1,215 @@
+{
+  "id": "supplier-flanges-20261026",
+  "sourceSha256": "f68b4519e1e6786982e026472d49553d70159e87154417c02f53b9ced3a1464c",
+  "checkedAt": "2026-10-26",
+  "family": "Фланцы плоские AISI304 — прайс поставщиков EN1092-1",
+  "rows": [
+    {
+      "id": "grossner-en01:35547",
+      "tableId": "supplier-flanges-20261026",
+      "supplier": "Grossner",
+      "supplierProductId": "35547",
+      "name": "Фланец плоский EN 1092-1 тип 01 DN32 (42.4 мм) PN10/16 AISI304 Grossner",
+      "dn": 32,
+      "pn": 16,
+      "compatiblePns": [
+        10,
+        16
+      ],
+      "standard": "EN1092-1:2018:01:A:PN10/16 (проектное исполнение)",
+      "price": 1085,
+      "priceLabel": "Цена сайта, ₽/шт.",
+      "vat": "На странице товара НДС отдельно не указан; цена перенесена без пересчёта.",
+      "url": "https://grossner.ru/shop/soedinitelnaya-armatura/flancevye-soedineniya/flanec-ploskij-nerzhaveyushhij/flanec-ploskij-en-1092-1-tip-01/",
+      "dimensions": {
+        "boreDiameterMm": 43.1,
+        "pipeOuterDiameterMm": 42.4,
+        "outerDiameterMm": 140,
+        "boltCircleMm": 100,
+        "holes": 4,
+        "thicknessMm": 18
+      },
+      "dimensionSource": "Решение пользователя 26.10.2026: принять для Grossner DN32 (35547) и DN50 (35551) PN10/16 нормативные толщины 18/20 мм и поверхность A; сохранить отверстия 43,1/61,1 мм и цены поставщика. Нормативный размер EN 1092-1:2018, таблица 13, тип 01 PN16 DN32: C1=18 мм; пункт 5.7.2.3 — поверхность A по умолчанию для типа 01 до PN40. Для принятой плоской поверхности полная толщина b=C1=18 мм, выступ не добавляется. https://www.womicsteel.com/uploads/EN1092-1-2018_Flanges-and-their-joints-Circular-flanges-for-pipes-valvesfittings-and-accessories-PN-designated-Part-1-Steel-flanges.pdf; отверстие 43.1 мм и остальные опубликованные размеры — карточка Grossner https://grossner.ru/shop/soedinitelnaya-armatura/flancevye-soedineniya/flanec-ploskij-nerzhaveyushhij/flanec-ploskij-en-1092-1-tip-01/, вариант 35547. Табличное отверстие 43.5 мм не подставляется вместо значения поставщика. Это принятое проектное исполнение, не паспорт или обмер товара.",
+      "reason": "Принято пользователем 26.10.2026: тип 01/A, полная толщина 18 мм по EN 1092-1:2018. Посадочное отверстие 43.1 мм и цена сохранены по Grossner. Паспорт данного варианта не найден; применено явно согласованное проектное правило."
+    },
+    {
+      "id": "grossner-en01:35549",
+      "tableId": "supplier-flanges-20261026",
+      "supplier": "Grossner",
+      "supplierProductId": "35549",
+      "name": "Фланец плоский EN 1092-1 тип 01 DN40 (48.3 мм) PN10/16 AISI304 Grossner",
+      "dn": 40,
+      "pn": 16,
+      "compatiblePns": [
+        10,
+        16
+      ],
+      "standard": "EN1092-1:2018:01:A:PN10/16 (проектное исполнение)",
+      "price": 1900,
+      "priceLabel": "Цена сайта, ₽/шт.",
+      "vat": "На странице товара НДС отдельно не указан; цена перенесена без пересчёта.",
+      "url": "https://grossner.ru/shop/soedinitelnaya-armatura/flancevye-soedineniya/flanec-ploskij-nerzhaveyushhij/flanec-ploskij-en-1092-1-tip-01/",
+      "dimensions": {
+        "boreDiameterMm": 49,
+        "pipeOuterDiameterMm": 48.3,
+        "outerDiameterMm": 150,
+        "boltCircleMm": 110,
+        "holes": 4,
+        "thicknessMm": 18
+      },
+      "dimensionSource": "Решение пользователя 26.10.2026: недостающие характеристики принимать из аналогов; для серии Grossner используется уже принятое проектное исполнение EN 1092-1:2018 тип 01/A PN10/16. Таблица 13, PDF стр. 56: DN40, C1=18 мм; пункт 5.7.2.3 — поверхность A по умолчанию для типа 01 до PN40. Полная толщина b=C1=18 мм, без выступа. https://www.womicsteel.com/uploads/EN1092-1-2018_Flanges-and-their-joints-Circular-flanges-for-pipes-valvesfittings-and-accessories-PN-designated-Part-1-Steel-flanges.pdf; отверстие 49 мм, остальные опубликованные размеры и цена сохранены по https://grossner.ru/shop/soedinitelnaya-armatura/flancevye-soedineniya/flanec-ploskij-nerzhaveyushhij/flanec-ploskij-en-1092-1-tip-01/, артикул 35549. Табличное отверстие 49.5 мм не подменяет отверстие поставщика. Это нормативный размер принятого проектного исполнения, не паспорт или обмер партии.",
+      "reason": "Для принятого проектного исполнения 01/A PN10/16 полная толщина 18 мм по EN 1092-1:2018, таблица 13. Известные отверстие и цена Grossner сохранены; индивидуальный паспорт не найден."
+    },
+    {
+      "id": "grossner-en01:35551",
+      "tableId": "supplier-flanges-20261026",
+      "supplier": "Grossner",
+      "supplierProductId": "35551",
+      "name": "Фланец плоский EN 1092-1 тип 01 DN50 (60.3 мм) PN10/16 AISI304 Grossner",
+      "dn": 50,
+      "pn": 16,
+      "compatiblePns": [
+        10,
+        16
+      ],
+      "standard": "EN1092-1:2018:01:A:PN10/16 (проектное исполнение)",
+      "price": 1600,
+      "priceLabel": "Цена сайта, ₽/шт.",
+      "vat": "На странице товара НДС отдельно не указан; цена перенесена без пересчёта.",
+      "url": "https://grossner.ru/shop/soedinitelnaya-armatura/flancevye-soedineniya/flanec-ploskij-nerzhaveyushhij/flanec-ploskij-en-1092-1-tip-01/",
+      "dimensions": {
+        "boreDiameterMm": 61.1,
+        "pipeOuterDiameterMm": 60.3,
+        "outerDiameterMm": 165,
+        "boltCircleMm": 125,
+        "holes": 4,
+        "thicknessMm": 20
+      },
+      "dimensionSource": "Решение пользователя 26.10.2026: принять для Grossner DN32 (35547) и DN50 (35551) PN10/16 нормативные толщины 18/20 мм и поверхность A; сохранить отверстия 43,1/61,1 мм и цены поставщика. Нормативный размер EN 1092-1:2018, таблица 13, тип 01 PN16 DN50: C1=20 мм; пункт 5.7.2.3 — поверхность A по умолчанию для типа 01 до PN40. Для принятой плоской поверхности полная толщина b=C1=20 мм, выступ не добавляется. https://www.womicsteel.com/uploads/EN1092-1-2018_Flanges-and-their-joints-Circular-flanges-for-pipes-valvesfittings-and-accessories-PN-designated-Part-1-Steel-flanges.pdf; отверстие 61.1 мм и остальные опубликованные размеры — карточка Grossner https://grossner.ru/shop/soedinitelnaya-armatura/flancevye-soedineniya/flanec-ploskij-nerzhaveyushhij/flanec-ploskij-en-1092-1-tip-01/, вариант 35551. Табличное отверстие 61.5 мм не подставляется вместо значения поставщика. Это принятое проектное исполнение, не паспорт или обмер товара.",
+      "reason": "Принято пользователем 26.10.2026: тип 01/A, полная толщина 20 мм по EN 1092-1:2018. Посадочное отверстие 61.1 мм и цена сохранены по Grossner. Паспорт данного варианта не найден; применено явно согласованное проектное правило."
+    },
+    {
+      "id": "grossner-en01:35553",
+      "tableId": "supplier-flanges-20261026",
+      "supplier": "Grossner",
+      "supplierProductId": "35553",
+      "name": "Фланец плоский EN 1092-1 тип 01 DN65 (76.1 мм) PN10/16 AISI304 Grossner",
+      "dn": 65,
+      "pn": 16,
+      "compatiblePns": [
+        10,
+        16
+      ],
+      "standard": "EN1092-1:2018:01:A:PN10/16 (проектное исполнение)",
+      "price": 2700,
+      "priceLabel": "Цена сайта, ₽/шт.",
+      "vat": "На странице товара НДС отдельно не указан; цена перенесена без пересчёта.",
+      "url": "https://grossner.ru/shop/soedinitelnaya-armatura/flancevye-soedineniya/flanec-ploskij-nerzhaveyushhij/flanec-ploskij-en-1092-1-tip-01/",
+      "dimensions": {
+        "boreDiameterMm": 77.1,
+        "pipeOuterDiameterMm": 76.1,
+        "outerDiameterMm": 185,
+        "boltCircleMm": 145,
+        "holes": 8,
+        "thicknessMm": 20
+      },
+      "dimensionSource": "Решение пользователя 26.10.2026: недостающие характеристики принимать из аналогов; для серии Grossner используется уже принятое проектное исполнение EN 1092-1:2018 тип 01/A PN10/16. Таблица 13, PDF стр. 56: DN65, C1=20 мм; пункт 5.7.2.3 — поверхность A по умолчанию для типа 01 до PN40. Полная толщина b=C1=20 мм, без выступа. https://www.womicsteel.com/uploads/EN1092-1-2018_Flanges-and-their-joints-Circular-flanges-for-pipes-valvesfittings-and-accessories-PN-designated-Part-1-Steel-flanges.pdf; отверстие 77.1 мм, остальные опубликованные размеры и цена сохранены по https://grossner.ru/shop/soedinitelnaya-armatura/flancevye-soedineniya/flanec-ploskij-nerzhaveyushhij/flanec-ploskij-en-1092-1-tip-01/, артикул 35553. Табличное отверстие 77.5 мм не подменяет отверстие поставщика. Это нормативный размер принятого проектного исполнения, не паспорт или обмер партии.",
+      "reason": "Для принятого проектного исполнения 01/A PN10/16 полная толщина 20 мм по EN 1092-1:2018, таблица 13. Известные отверстие и цена Grossner сохранены; индивидуальный паспорт не найден."
+    },
+    {
+      "id": "grossner-en01:35555",
+      "tableId": "supplier-flanges-20261026",
+      "supplier": "Grossner",
+      "supplierProductId": "35555",
+      "name": "Фланец плоский EN 1092-1 тип 01 DN80 (88.9 мм) PN10/16 AISI304 Grossner",
+      "dn": 80,
+      "pn": 16,
+      "compatiblePns": [
+        10,
+        16
+      ],
+      "standard": "EN1092-1:2018:01:A:PN10/16 (проектное исполнение)",
+      "price": 3000,
+      "priceLabel": "Цена сайта, ₽/шт.",
+      "vat": "На странице товара НДС отдельно не указан; цена перенесена без пересчёта.",
+      "url": "https://grossner.ru/shop/soedinitelnaya-armatura/flancevye-soedineniya/flanec-ploskij-nerzhaveyushhij/flanec-ploskij-en-1092-1-tip-01/",
+      "dimensions": {
+        "boreDiameterMm": 90.3,
+        "pipeOuterDiameterMm": 88.9,
+        "outerDiameterMm": 200,
+        "boltCircleMm": 160,
+        "holes": 8,
+        "thicknessMm": 20
+      },
+      "dimensionSource": "Решение пользователя 26.10.2026: недостающие характеристики принимать из аналогов; для серии Grossner используется уже принятое проектное исполнение EN 1092-1:2018 тип 01/A PN10/16. Таблица 13, PDF стр. 56: DN80, C1=20 мм; пункт 5.7.2.3 — поверхность A по умолчанию для типа 01 до PN40. Полная толщина b=C1=20 мм, без выступа. https://www.womicsteel.com/uploads/EN1092-1-2018_Flanges-and-their-joints-Circular-flanges-for-pipes-valvesfittings-and-accessories-PN-designated-Part-1-Steel-flanges.pdf; отверстие 90.3 мм, остальные опубликованные размеры и цена сохранены по https://grossner.ru/shop/soedinitelnaya-armatura/flancevye-soedineniya/flanec-ploskij-nerzhaveyushhij/flanec-ploskij-en-1092-1-tip-01/, артикул 35555. Табличное отверстие 90.5 мм не подменяет отверстие поставщика. Это нормативный размер принятого проектного исполнения, не паспорт или обмер партии.",
+      "reason": "Для принятого проектного исполнения 01/A PN10/16 полная толщина 20 мм по EN 1092-1:2018, таблица 13. Известные отверстие и цена Grossner сохранены; индивидуальный паспорт не найден."
+    },
+    {
+      "id": "grossner-en01:35557",
+      "tableId": "supplier-flanges-20261026",
+      "supplier": "Grossner",
+      "supplierProductId": "35557",
+      "name": "Фланец плоский EN 1092-1 тип 01 DN100 (114.3 мм) PN10/16 AISI304 Grossner",
+      "dn": 100,
+      "pn": 16,
+      "compatiblePns": [
+        10,
+        16
+      ],
+      "standard": "EN1092-1:2018:01:A:PN10/16 (проектное исполнение)",
+      "price": 3500,
+      "priceLabel": "Цена сайта, ₽/шт.",
+      "vat": "На странице товара НДС отдельно не указан; цена перенесена без пересчёта.",
+      "url": "https://grossner.ru/shop/soedinitelnaya-armatura/flancevye-soedineniya/flanec-ploskij-nerzhaveyushhij/flanec-ploskij-en-1092-1-tip-01/",
+      "dimensions": {
+        "boreDiameterMm": 115.9,
+        "pipeOuterDiameterMm": 114.3,
+        "outerDiameterMm": 220,
+        "boltCircleMm": 180,
+        "holes": 8,
+        "thicknessMm": 22
+      },
+      "dimensionSource": "Решение пользователя 26.10.2026: недостающие характеристики принимать из аналогов; для серии Grossner используется уже принятое проектное исполнение EN 1092-1:2018 тип 01/A PN10/16. Таблица 13, PDF стр. 56: DN100, C1=22 мм; пункт 5.7.2.3 — поверхность A по умолчанию для типа 01 до PN40. Полная толщина b=C1=22 мм, без выступа. https://www.womicsteel.com/uploads/EN1092-1-2018_Flanges-and-their-joints-Circular-flanges-for-pipes-valvesfittings-and-accessories-PN-designated-Part-1-Steel-flanges.pdf; отверстие 115.9 мм, остальные опубликованные размеры и цена сохранены по https://grossner.ru/shop/soedinitelnaya-armatura/flancevye-soedineniya/flanec-ploskij-nerzhaveyushhij/flanec-ploskij-en-1092-1-tip-01/, артикул 35557. Табличное отверстие 116 мм не подменяет отверстие поставщика. Это нормативный размер принятого проектного исполнения, не паспорт или обмер партии.",
+      "reason": "Для принятого проектного исполнения 01/A PN10/16 полная толщина 22 мм по EN 1092-1:2018, таблица 13. Известные отверстие и цена Grossner сохранены; индивидуальный паспорт не найден."
+    },
+    {
+      "id": "ifitting-en01:1154",
+      "tableId": "supplier-flanges-20261026",
+      "supplier": "iFitting",
+      "supplierProductId": "1154",
+      "name": "Фланец пл. DN 100 (114,3) PN25/40 геометрия EN 1092-1/01/B1 AISI304",
+      "dn": 100,
+      "pn": 40,
+      "compatiblePns": [
+        25,
+        40
+      ],
+      "standard": "EN1092-1:01:B1:PN25/40",
+      "price": 8730,
+      "priceLabel": "Цена сайта, ₽/шт.",
+      "vat": "Сайт указывает оплату по счёту с НДС; ставка и отдельная сумма НДС в карточке не приведены. Цена без пересчёта.",
+      "url": "https://ifitting.ru/catalog/flantsy_nerzhaveyushchie/flantsy_ploskie/1154/",
+      "dimensions": {
+        "thicknessMm": 29,
+        "boreDiameterMm": 116,
+        "pipeOuterDiameterMm": 114.3,
+        "outerDiameterMm": 235,
+        "boltCircleMm": 190,
+        "boltHoleDiameterMm": 22,
+        "holes": 8
+      },
+      "dimensionSource": "https://ifitting.ru/catalog/flantsy_nerzhaveyushchie/flantsy_ploskie/1154/: поставщик объявляет геометрию EN 1092-1/01/B1 PN25/40, труба 114,3 мм. EN1092-1:2018, табл.15, DN100: C1=26, B1=116, D=235, K=190, L=22, n=8; https://www.zzflange.com/wp-content/uploads/2025/08/EN-1092-1-PN-40-Flanges-Dimension.pdf. Поверхность B1: выступ f1=3 мм; полная осевая толщина до уплотнительной поверхности C1+f1=29 мм (схема и таблица https://incoves.com/en/product/flat-flange-type-01-b1-en1092-1-pn40/). Это нормативная геометрия заявленного исполнения, не измерение поставленной детали.",
+      "reason": "Размеры по объявленной поставщиком геометрии EN1092-1/01/B1; DN100 PN25 и PN40 имеют одинаковую сверловку. Цена 8730 ₽ из видимой карточки; устаревшая SEO-цена «от 6286» не используется."
+    }
+  ],
+  "sources": [
+    {
+      "path": "data/sources/supplier-flanges-2026-10-26/grossner.html",
+      "sha256": "f0d9f64ae7dce8b46724238b15d13e441b894a322bb2306e2b14a510f150a905"
+    },
+    {
+      "path": "data/sources/supplier-flanges-2026-10-26/ifitting-1154.html",
+      "sha256": "1415446c9e8c7c8f406dd26064e9baf74f3042537110c8c00f83ae1f9318c4c5"
+    }
+  ]
+}

@@ -1,0 +1,25 @@
+{
+	default_sni 188.242.166.168
+	storage file_system {
+		root {$PSC_CADDY_DATA_DIR}
+	}
+	log {
+		output file {$PSC_CADDY_LOG_FILE} {
+			roll_size 10MiB
+			roll_keep 5
+		}
+	}
+	servers {
+		protocols h1 h2
+	}
+}
+
+188.242.166.168 {
+	tls {
+		issuer acme {
+			dir https://acme-v02.api.letsencrypt.org/directory
+			profile shortlived
+		}
+	}
+	reverse_proxy 127.0.0.1:3005
+}

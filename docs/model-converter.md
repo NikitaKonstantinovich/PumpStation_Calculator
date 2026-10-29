@@ -21,8 +21,9 @@
 Положения, повороты, видимость, прозрачность, фиксация, ручные трубы и параметры
 рамы сохраняются. Подготовленные ресурсы обновляются также в истории
 отмены/повтора. Новое оборудование размещается рядом с установкой для ручной
-компоновки. Автоматическая врезка арматуры пока не поддерживается. Ограничение
-редактора — 500 компонентов. Перед перезагрузкой страницы дождитесь обычного
+компоновки. Обвязка между насосами и коллекторами строится отдельной командой
+**Добавить обвязку / Обновить состав**, см. [правила и ограничения](3d-line-assemblies.md).
+Для сборок с обвязкой поддерживается до 3000 компонентов. Перед перезагрузкой страницы дождитесь обычного
 сообщения приложения «Все изменения сохранены» либо нажмите «Сохранить».
 
 Закрытие инструмента и страницы не останавливает задание. Статус восстанавливается
@@ -88,13 +89,55 @@ $env:MODEL_CONVERTER_TOKEN = ((Get-Content .dev.vars | Where-Object { $_.StartsW
 `--root`, `--registry`, `--timeout`. Без OCP доступны статусы и готовые копии,
 а конвертация завершится ошибкой зависимости. Запускайте Python именно из venv.
 
+### Локальная полная сборка, используемая при проверке 26.10.2026
+
+`scripts/preview-full.mjs` запускает только профиль `full`, обслуживает STL через
+авторизованный ASSETS и сохраняет текущую D1-базу. Большие модели читаются из
+`public/model-assets`, поэтому их не нужно включать в ограниченный по размеру
+манифест Workers. Миграции этот скрипт не применяет.
+
+Для перезапуска после остановки предыдущих процессов, первый PowerShell:
+
+```powershell
+Set-Location E:\PumpStation_Calculator\frontend
+$env:MODEL_CONVERTER_TOKEN = (Get-Content .model-converter/service-token -Raw).Trim()
+& E:\PumpStation_Calculator\work\3d-audit\.venv\Scripts\python.exe services/model-converter/server.py --root E:\PumpStation_Calculator --state E:\PumpStation_Calculator\frontend\.model-converter --port 8766
+```
+
+Во втором PowerShell:
+
+```powershell
+Set-Location E:\PumpStation_Calculator\frontend
+$env:MODEL_CONVERTER_TOKEN = (Get-Content .model-converter/service-token -Raw).Trim()
+$env:MODEL_CONVERTER_URL = 'http://127.0.0.1:8766'
+node scripts/preview-full.mjs --build-dir work/line-seating-fix-20261026/dist --state-dir .wrangler/state --port 3000
+```
+
+Ключ создан локально, не выводится в журнал и исключён из Git. Для нового
+`npm run dev` используйте тот же ключ в `.dev.vars`; не публикуйте его в клиенте.
+Для дальнейшего обновления кода сначала создайте новую неизменяемую копию:
+
+```powershell
+npm run build:full
+if ($LASTEXITCODE -ne 0) { throw 'Сборка не завершилась' }
+$snapshot = 'work/local-full-' + (Get-Date -Format 'yyyyMMdd-HHmmss') + '/dist'
+node scripts/snapshot-local-full.mjs $snapshot
+```
+
+Затем перезапустите preview с `--build-dir $snapshot` и прежним `--state-dir`.
+Не указывайте общий `dist` работающему серверу: следующая сборка заменяет его.
+
 ## Библиотека и арматура
 
 Насосы подключаются из `Equipment/Pumps/3D_Normalized/normalization-index.json`
 (в исследованной библиотеке 687 профилей). Исходники находятся вне Git-репозитория
-`frontend`; для серверного запуска скопируйте их отдельно. Индексированных STEP
-арматуры в исследованной библиотеке не обнаружено. Случайные похожие файлы
-программа не подставляет.
+`frontend`; для серверного запуска скопируйте их отдельно. Для DENDOR 017W/010C
+реестр `data/line-valve-registry.json` создаёт `scripts/prepare-valve-models.py`.
+Он связывает геометрию серии с каталогом по DN и принятому в спецификации приводу;
+предупреждения о неподтверждённом исполнении PN/материала сохраняются. Готовые
+копии из `public/model-assets/library.json` используются повторно после проверки
+SHA-256 исходного файла и самого STL. Явный `Equipment/model-library.json`
+переопределяет созданные привязки; `--registry` использует только указанный реестр.
 
 Для любого другого оборудования создайте `Equipment/model-library.json`.
 Шаблон: [library.example.json](../services/model-converter/library.example.json).

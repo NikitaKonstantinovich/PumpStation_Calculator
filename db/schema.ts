@@ -7,11 +7,12 @@ export const users = sqliteTable("users", {
   name: text("name").notNull(),
   passwordHash: text("password_hash").notNull(),
   role: text("role", { enum: ["admin", "user"] }).notNull().default("user"),
+  accessLevel: text("access_level", { enum: ["base", "plus", "pro"] }).notNull().default("base"),
   revision: integer("revision").notNull().default(0),
   emailVerifiedAt: text("email_verified_at"),
   createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
   updatedAt: text("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
-}, table => [uniqueIndex("uq_users_email").on(table.email), check("ck_users_role", sql`${table.role} IN ('admin', 'user')`)]);
+}, table => [uniqueIndex("uq_users_email").on(table.email), check("ck_users_role", sql`${table.role} IN ('admin', 'user')`), check("ck_users_access_level", sql`${table.accessLevel} IN ('base', 'plus', 'pro')`)]);
 
 export const collectors = sqliteTable("collectors", {
   id: text("id").primaryKey(),
@@ -43,6 +44,43 @@ export const collectorItems = sqliteTable("collector_items", {
   source: text("source"),
   sortOrder: integer("sort_order").notNull(),
 }, table => [uniqueIndex("uq_collector_items_role").on(table.collectorId, table.role)]);
+
+export const componentInsertions = sqliteTable("component_insertions", {
+  id: text("id").primaryKey(),
+  identityKey: text("identity_key").notNull(),
+  name: text("name").notNull(),
+  configurationJson: text("configuration_json").notNull(),
+  calculationJson: text("calculation_json").notNull(),
+  catalogVersion: text("catalog_version").notNull(),
+  cachedPriceMicrounits: integer("cached_price_microunits").notNull(),
+  baseLengthMm: real("base_length_mm").notNull(),
+  totalLengthMm: real("total_length_mm").notNull(),
+  weldLengthMm: real("weld_length_mm").notNull(),
+  weldCostMicrounits: integer("weld_cost_microunits").notNull(),
+  revision: integer("revision").notNull().default(0),
+  createdByUserId: text("created_by_user_id").references(() => users.id, { onDelete: "set null" }),
+  priceUpdatedAt: text("price_updated_at").notNull(),
+  createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+}, table => [
+  uniqueIndex("uq_component_insertions_identity").on(table.identityKey),
+  check("ck_component_insertions_price", sql`${table.cachedPriceMicrounits} > 0`),
+  check("ck_component_insertions_base_length", sql`${table.baseLengthMm} > 0`),
+  check("ck_component_insertions_total_length", sql`${table.totalLengthMm} > 0`),
+  check("ck_component_insertions_weld_length", sql`${table.weldLengthMm} >= 0`),
+  check("ck_component_insertions_weld_cost", sql`${table.weldCostMicrounits} >= 0`),
+]);
+
+export const componentInsertionItems = sqliteTable("component_insertion_items", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  insertionId: text("insertion_id").notNull().references(() => componentInsertions.id, { onDelete: "cascade" }),
+  sortOrder: integer("sort_order").notNull(),
+  itemJson: text("item_json").notNull(),
+}, table => [uniqueIndex("uq_component_insertion_items_order").on(table.insertionId, table.sortOrder)]);
+
+export const componentCalculatorSourceRevision = sqliteTable("component_calculator_source_revision", {
+  id: integer("id").primaryKey(),
+  revision: integer("revision").notNull().default(0),
+}, table => [check("ck_component_calculator_source_singleton", sql`${table.id} = 1`), check("ck_component_calculator_source_revision", sql`${table.revision} >= 0`)]);
 
 export const authTokens = sqliteTable("auth_tokens", {
   id: text("id").primaryKey(),

@@ -1,5 +1,6 @@
 import type { CollectorMaterial, DnEntity, InputEntity, SettingsEntity, ValveConnection } from "./project-config";
-import { resolvePumpPort, resolvePumpPortData } from "./pump-ports";
+import { isMultistagePump, resolvePumpPort, resolvePumpPortData } from "./pump-ports";
+import { pressureChecksEnabled } from "./pressure-check-policy";
 
 export type InletPressureCheck = { status: "missing-head" | "unknown-limit" | "exceeded" | "within-limit" | "nonpositive"; message: string; pressureBar: number | null; limitBar: number | null };
 export const inletPressureBar = (head: number | null | undefined) => typeof head === "number" && Number.isFinite(head) ? head * 0.0980665 : null;
@@ -41,7 +42,9 @@ function lineHydraulics(entity: DnEntity, input: InputEntity, settings: Settings
   const saved = secondary ? entity.secondaryConnectionType : entity.connectionType;
   const suction = side === "inlet";
   const savedType = suction ? (secondary ? entity.secondarySuctionValveType : entity.suctionValveType) : (secondary ? entity.secondaryDischargeValveType : entity.dischargeValveType);
-  const rawDn = (suction ? (secondary ? entity.secondarySuctionValveDn : entity.suctionValveDn) : (secondary ? entity.secondaryDischargeValveDn : entity.dischargeValveDn)) ?? recommendedDn((input.flowRate ?? 0) / Math.max(1, input.workingPumpCount ?? 1));
+  const savedDn = suction ? (secondary ? entity.secondarySuctionValveDn : entity.suctionValveDn) : (secondary ? entity.secondaryDischargeValveDn : entity.dischargeValveDn);
+  const nozzleDefault = isMultistagePump(input.selectedPumpId);
+  const rawDn = savedDn ?? (nozzleDefault ? port?.dn : undefined) ?? recommendedDn((input.flowRate ?? 0) / Math.max(1, input.workingPumpCount ?? 1));
   const defaultDn = port?.connection === "threaded" && saved !== "flanged" && circuitSupportsThread(settings, secondary) ? port.dn : rawDn;
   const pairDn = suction ? (secondary ? entity.secondaryDischargeValveDn : entity.dischargeValveDn) : (secondary ? entity.secondarySuctionValveDn : entity.suctionValveDn);
   const commonDn = port ? defaultDn : Math.max(rawDn, pairDn ?? recommendedDn((input.flowRate ?? 0) / Math.max(1, input.workingPumpCount ?? 1)));
@@ -55,11 +58,11 @@ function lineHydraulics(entity: DnEntity, input: InputEntity, settings: Settings
   if (!port) errors.push(`Укажите DN и соединение ${suction ? "всасывающего" : "напорного"} патрубка выбранного насоса.`);
   if (connection === "threaded" && dn > 50) errors.push(`Шаровой кран DN${dn}: резьбовое исполнение доступно только до DN50.`);
   if (port?.connection === "flanged" && connection === "flanged" && port.dn > dn) errors.push(`DN патрубка насоса (${port.dn}) больше DN арматуры (${dn}). Увеличьте DN арматуры.`);
-  return { port, dn, connection, valveType, locked, errors, pn };
+  return { port, dn, connection, valveType, locked, errors, pn, nozzleDefault };
 }
 
 export function suctionHydraulics(entity: DnEntity, input: InputEntity, settings: SettingsEntity, secondary = false) {
-  const inletPressureCheck = checkInletPressure(settings.inletHead, `Насос контура ${secondary ? 2 : 1}: допустимое давление на входе`, resolvePumpPortData(entity, input, secondary)?.maxInletPressure);
+  const inletPressureCheck = pressureChecksEnabled(settings) ? checkInletPressure(settings.inletHead, `Насос контура ${secondary ? 2 : 1}: допустимое давление на входе`, resolvePumpPortData(entity, input, secondary)?.maxInletPressure) : null;
   return { ...lineHydraulics(entity, input, settings, secondary, "inlet"), inletPressureCheck };
 }
 

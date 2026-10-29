@@ -1,0 +1,108 @@
+{
+  "id": "grossner-dimensions-20261026",
+  "decision": "Решение пользователя 26.10.2026: принять для Grossner DN32 (35547) и DN50 (35551) PN10/16 нормативные толщины 18/20 мм и поверхность A; сохранить отверстия 43,1/61,1 мм и цены поставщика.",
+  "basis": "user-adopted-normative-geometry",
+  "supplierPassportFound": false,
+  "standard": "EN1092-1:2018",
+  "references": {
+    "standard": "https://www.womicsteel.com/uploads/EN1092-1-2018_Flanges-and-their-joints-Circular-flanges-for-pipes-valvesfittings-and-accessories-PN-designated-Part-1-Steel-flanges.pdf",
+    "supplier": "https://grossner.ru/shop/soedinitelnaya-armatura/flancevye-soedineniya/flanec-ploskij-nerzhaveyushhij/flanec-ploskij-en-1092-1-tip-01/"
+  },
+  "localSources": [
+    {
+      "path": "data/sources/grossner-dimensions-20261026/EN1092-1-2018.pdf",
+      "sha256": "8f4dc582cef888e43170558f23e2bd9c0ab831afa63d28cf23a8a68e539a587c"
+    },
+    {
+      "path": "data/sources/grossner-dimensions-20261026/grossner-en01.html",
+      "sha256": "8d72d4b016544bd97c7f41438a577a09199ce70fd36698a0d582d859692f6ecf"
+    }
+  ],
+  "rows": [
+    {
+      "componentId": "grossner-en01:35547",
+      "dn": 32,
+      "pn": 16,
+      "compatiblePns": [
+        10,
+        16
+      ],
+      "thicknessMm": 18,
+      "facing": "A",
+      "supplierBoreMm": 43.1,
+      "normativeBoreMm": 43.5,
+      "priceRub": 1085
+    },
+    {
+      "componentId": "grossner-en01:35551",
+      "dn": 50,
+      "pn": 16,
+      "compatiblePns": [
+        10,
+        16
+      ],
+      "thicknessMm": 20,
+      "facing": "A",
+      "supplierBoreMm": 61.1,
+      "normativeBoreMm": 61.5,
+      "priceRub": 1600
+    },
+    {
+      "componentId": "grossner-en01:35549",
+      "dn": 40,
+      "pn": 16,
+      "compatiblePns": [
+        10,
+        16
+      ],
+      "thicknessMm": 18,
+      "facing": "A",
+      "supplierBoreMm": 49,
+      "normativeBoreMm": 49.5,
+      "priceRub": 1900
+    },
+    {
+      "componentId": "grossner-en01:35553",
+      "dn": 65,
+      "pn": 16,
+      "compatiblePns": [
+        10,
+        16
+      ],
+      "thicknessMm": 20,
+      "facing": "A",
+      "supplierBoreMm": 77.1,
+      "normativeBoreMm": 77.5,
+      "priceRub": 2700
+    },
+    {
+      "componentId": "grossner-en01:35555",
+      "dn": 80,
+      "pn": 16,
+      "compatiblePns": [
+        10,
+        16
+      ],
+      "thicknessMm": 20,
+      "facing": "A",
+      "supplierBoreMm": 90.3,
+      "normativeBoreMm": 90.5,
+      "priceRub": 3000
+    },
+    {
+      "componentId": "grossner-en01:35557",
+      "dn": 100,
+      "pn": 16,
+      "compatiblePns": [
+        10,
+        16
+      ],
+      "thicknessMm": 22,
+      "facing": "A",
+      "supplierBoreMm": 115.9,
+      "normativeBoreMm": 116,
+      "priceRub": 3500
+    }
+  ],
+  "followUpDecision": "26.10.2026: применение принятого исполнения 01/A ко всей имеющейся серии Grossner по требованию пользователя брать недостающие характеристики из аналогов; толщина каждого DN проверена в EN 1092-1:2018, табл.13, не интерполируется."
+}

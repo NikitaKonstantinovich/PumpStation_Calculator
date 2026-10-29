@@ -1,0 +1,24 @@
+{
+  "checkedAt": "2026-10-26",
+  "files": [
+    {
+      "file": "gost-8969-75.pdf",
+      "url": "https://auremo.biz/files/gosts/gost-8969-75.pdf",
+      "title": "ГОСТ 8969-75, официальное издание 2010, п. 1–3",
+      "pdfPagesVisuallyChecked": [
+        2
+      ],
+      "sha256": "5fa6a52f6508f9f62021b4538f0658e02595d9da346f8b548a9989b4e903e69f"
+    },
+    {
+      "file": "iso-4144-2003.pdf",
+      "url": "https://cdn.standards.iteh.ai/samples/30111/a50ac69221c24896b091e41bc60a11df/ISO-4144-2003.pdf",
+      "title": "ISO 4144:2003, preview, таблицы 2–3, п. 4–7.2",
+      "pdfPagesVisuallyChecked": [
+        9,
+        10
+      ],
+      "sha256": "3f65d0c11e2ddf7a43a5064beb4dceebc3e5942fd393f8955b44eb62b5e91e18"
+    }
+  ]
+}

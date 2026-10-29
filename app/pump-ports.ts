@@ -2,6 +2,12 @@ import evidence from "./pump-connections.json";
 import importedPorts from "./imported-pump-ports.json";
 import catalogNozzles from "./pump-nozzles.json";
 import type { DnEntity, InputEntity, ValveConnection } from "./project-config";
+import type { PumpType } from "./pump-catalog";
+
+export function isMultistagePump(pumpId?: string) {
+  const type = (catalogNozzles as Record<string, { type?: PumpType }>)[pumpId ?? ""]?.type;
+  return type === "vertical_multistage" || type === "horizontal_multistage";
+}
 
 // maxInletPressure is an explicit inlet rating in bar, never inferred from maxPressure.
 export type PumpPort = { dn: number; connection: ValveConnection; maxPressure?: number | null; maxInletPressure?: number | null; source: string; shape?: "oval" | "round" };

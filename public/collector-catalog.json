@@ -1,5 +1,5 @@
 {
-  "version": "7915418311dbbba0ccad35081e88c5c39b6670659ba39d1fc298dc308409645a",
+  "version": "0b0cef01fe7091d80831b696a0bbb2d4d06ea1bc0c2fffb9c80b2c3917cca633",
   "components": [
     {
       "id": "сгоны-резьба-001-r0005",
@@ -106,7 +106,7 @@
       "material": "aisi304",
       "price": 286.7,
       "outerDiameter": 21.3,
-      "innerDiameter": null,
+      "innerDiameter": 16.1,
       "source": "Сгоны резьба!строка 17, цена E17; Ø: Полезная инфа!C28"
     },
     {
@@ -3554,6 +3554,150 @@
       "source": "Воротники!строка 48, цена E48"
     },
     {
+      "id": "grossner-en01:35547",
+      "kind": "weldFlange",
+      "name": "Фланец плоский EN 1092-1 тип 01 DN32 (42.4 мм) PN10/16 AISI304 Grossner",
+      "dn": 32,
+      "pn": 16,
+      "material": "aisi304",
+      "price": 1085,
+      "outerDiameter": null,
+      "innerDiameter": null,
+      "source": "https://grossner.ru/shop/soedinitelnaya-armatura/flancevye-soedineniya/flanec-ploskij-nerzhaveyushhij/flanec-ploskij-en-1092-1-tip-01/; На странице товара НДС отдельно не указан; цена перенесена без пересчёта.; дата 2026-10-26"
+    },
+    {
+      "id": "grossner-en01:35549",
+      "kind": "weldFlange",
+      "name": "Фланец плоский EN 1092-1 тип 01 DN40 (48.3 мм) PN10/16 AISI304 Grossner",
+      "dn": 40,
+      "pn": 16,
+      "material": "aisi304",
+      "price": 1900,
+      "outerDiameter": null,
+      "innerDiameter": null,
+      "source": "https://grossner.ru/shop/soedinitelnaya-armatura/flancevye-soedineniya/flanec-ploskij-nerzhaveyushhij/flanec-ploskij-en-1092-1-tip-01/; На странице товара НДС отдельно не указан; цена перенесена без пересчёта.; дата 2026-10-26"
+    },
+    {
+      "id": "grossner-en01:35551",
+      "kind": "weldFlange",
+      "name": "Фланец плоский EN 1092-1 тип 01 DN50 (60.3 мм) PN10/16 AISI304 Grossner",
+      "dn": 50,
+      "pn": 16,
+      "material": "aisi304",
+      "price": 1600,
+      "outerDiameter": null,
+      "innerDiameter": null,
+      "source": "https://grossner.ru/shop/soedinitelnaya-armatura/flancevye-soedineniya/flanec-ploskij-nerzhaveyushhij/flanec-ploskij-en-1092-1-tip-01/; На странице товара НДС отдельно не указан; цена перенесена без пересчёта.; дата 2026-10-26"
+    },
+    {
+      "id": "grossner-en01:35553",
+      "kind": "weldFlange",
+      "name": "Фланец плоский EN 1092-1 тип 01 DN65 (76.1 мм) PN10/16 AISI304 Grossner",
+      "dn": 65,
+      "pn": 16,
+      "material": "aisi304",
+      "price": 2700,
+      "outerDiameter": null,
+      "innerDiameter": null,
+      "source": "https://grossner.ru/shop/soedinitelnaya-armatura/flancevye-soedineniya/flanec-ploskij-nerzhaveyushhij/flanec-ploskij-en-1092-1-tip-01/; На странице товара НДС отдельно не указан; цена перенесена без пересчёта.; дата 2026-10-26"
+    },
+    {
+      "id": "grossner-en01:35555",
+      "kind": "weldFlange",
+      "name": "Фланец плоский EN 1092-1 тип 01 DN80 (88.9 мм) PN10/16 AISI304 Grossner",
+      "dn": 80,
+      "pn": 16,
+      "material": "aisi304",
+      "price": 3000,
+      "outerDiameter": null,
+      "innerDiameter": null,
+      "source": "https://grossner.ru/shop/soedinitelnaya-armatura/flancevye-soedineniya/flanec-ploskij-nerzhaveyushhij/flanec-ploskij-en-1092-1-tip-01/; На странице товара НДС отдельно не указан; цена перенесена без пересчёта.; дата 2026-10-26"
+    },
+    {
+      "id": "grossner-en01:35557",
+      "kind": "weldFlange",
+      "name": "Фланец плоский EN 1092-1 тип 01 DN100 (114.3 мм) PN10/16 AISI304 Grossner",
+      "dn": 100,
+      "pn": 16,
+      "material": "aisi304",
+      "price": 3500,
+      "outerDiameter": null,
+      "innerDiameter": null,
+      "source": "https://grossner.ru/shop/soedinitelnaya-armatura/flancevye-soedineniya/flanec-ploskij-nerzhaveyushhij/flanec-ploskij-en-1092-1-tip-01/; На странице товара НДС отдельно не указан; цена перенесена без пересчёта.; дата 2026-10-26"
+    },
+    {
+      "id": "ifitting-en01:1154",
+      "kind": "weldFlange",
+      "name": "Фланец пл. DN 100 (114,3) PN25/40 геометрия EN 1092-1/01/B1 AISI304",
+      "dn": 100,
+      "pn": 40,
+      "material": "aisi304",
+      "price": 8730,
+      "outerDiameter": null,
+      "innerDiameter": null,
+      "source": "https://ifitting.ru/catalog/flantsy_nerzhaveyushchie/flantsy_ploskie/1154/; Сайт указывает оплату по счёту с НДС; ставка и отдельная сумма НДС в карточке не приведены. Цена без пересчёта.; дата 2026-10-26"
+    },
+    {
+      "id": "newkey-din2503:NK-FDh32-4",
+      "kind": "weldFlange",
+      "name": "Фланец плоский DIN2503 DN32 (42.4 мм) PN40 AISI304 (CF8) Newkey",
+      "dn": 32,
+      "pn": 40,
+      "material": "aisi304",
+      "price": 1847,
+      "outerDiameter": null,
+      "innerDiameter": null,
+      "source": "https://www.newkey.ru/product/flanets-ploskii-din2503-nerzhaveiushchii-aisi304-dn32-114-cf8-rn40/; НДС отдельно не раскрыт в карточке; опубликованная цена без пересчёта, доставки и персональной скидки.; дата 2026-10-26"
+    },
+    {
+      "id": "newkey-din2503:NK-FDh50-4",
+      "kind": "weldFlange",
+      "name": "Фланец плоский DIN2503 DN50 (60.3 мм) PN40 AISI304 (CF8) Newkey",
+      "dn": 50,
+      "pn": 40,
+      "material": "aisi304",
+      "price": 2710,
+      "outerDiameter": null,
+      "innerDiameter": null,
+      "source": "https://www.newkey.ru/product/flanets-ploskii-din2503-nerzhaveiushchii-aisi304-dn50-2-cf8-rn40/; НДС отдельно не раскрыт в карточке; опубликованная цена без пересчёта, доставки и персональной скидки.; дата 2026-10-26"
+    },
+    {
+      "id": "newkey-din2503:NK-FDh40-4",
+      "kind": "weldFlange",
+      "name": "Фланец плоский DIN2503 DN40 (48.3 мм) PN40 AISI304 (CF8) Newkey",
+      "dn": 40,
+      "pn": 40,
+      "material": "aisi304",
+      "price": 2173,
+      "outerDiameter": null,
+      "innerDiameter": null,
+      "source": "https://www.newkey.ru/catalog/flantsy/flantsy-ploskie-din2503/; НДС отдельно не раскрыт в карточке; опубликованная цена без пересчёта, доставки и персональной скидки.; дата 2026-10-26"
+    },
+    {
+      "id": "newkey-din2503:NK-FDh125-4",
+      "kind": "weldFlange",
+      "name": "Фланец плоский DIN2503 DN125 (139.7 мм) PN40 AISI304 (CF8) Newkey",
+      "dn": 125,
+      "pn": 40,
+      "material": "aisi304",
+      "price": 7365,
+      "outerDiameter": null,
+      "innerDiameter": null,
+      "source": "https://www.newkey.ru/catalog/flantsy/flantsy-ploskie-din2503/; НДС отдельно не раскрыт в карточке; опубликованная цена без пересчёта, доставки и персональной скидки.; дата 2026-10-26"
+    },
+    {
+      "id": "newkey-din2503:NK-FDh150-4",
+      "kind": "weldFlange",
+      "name": "Фланец плоский DIN2503 DN150 (168.3 мм) PN40 AISI304 (CF8) Newkey",
+      "dn": 150,
+      "pn": 40,
+      "material": "aisi304",
+      "price": 9487,
+      "outerDiameter": null,
+      "innerDiameter": null,
+      "source": "https://www.newkey.ru/catalog/flantsy/flantsy-ploskie-din2503/; НДС отдельно не раскрыт в карточке; опубликованная цена без пересчёта, доставки и персональной скидки.; дата 2026-10-26"
+    },
+    {
       "id": "lunda-ld-67-504:LD.67.504.15",
       "kind": "plug",
       "name": "Заглушка 1/2\" ВР, латунь никелированная, LD.67.504.15",
@@ -3564,7 +3708,7 @@
       "price": 56.12,
       "outerDiameter": null,
       "innerDiameter": null,
-      "source": "https://lunda.ru/catalog/category/c21568/product/zaglushka-ld_20582.html; цена с НДС от 2026-09-10; паспорт: https://cdn.lunda.ru/catalog/binary/document/texnicheskij-pasport_d20617.pdf"
+      "source": "https://lunda.ru/catalog/category/c21568/product/zaglushka-ld_20582.html; цена с НДС; дата 2026-09-10; паспорт: https://cdn.lunda.ru/catalog/binary/document/texnicheskij-pasport_d20617.pdf"
     },
     {
       "id": "lunda-ld-67-504:LD.67.504.20",
@@ -3577,7 +3721,7 @@
       "price": 82.96,
       "outerDiameter": null,
       "innerDiameter": null,
-      "source": "https://lunda.ru/catalog/category/c21568/product/zaglushka-ld_20582.html; цена с НДС от 2026-09-10; паспорт: https://cdn.lunda.ru/catalog/binary/document/texnicheskij-pasport_d20617.pdf"
+      "source": "https://lunda.ru/catalog/category/c21568/product/zaglushka-ld_20582.html; цена с НДС; дата 2026-09-10; паспорт: https://cdn.lunda.ru/catalog/binary/document/texnicheskij-pasport_d20617.pdf"
     },
     {
       "id": "lunda-ld-67-504:LD.67.504.25",
@@ -3590,7 +3734,7 @@
       "price": 130.54,
       "outerDiameter": null,
       "innerDiameter": null,
-      "source": "https://lunda.ru/catalog/category/c21568/product/zaglushka-ld_20582.html; цена с НДС от 2026-09-10; паспорт: https://cdn.lunda.ru/catalog/binary/document/texnicheskij-pasport_d20617.pdf"
+      "source": "https://lunda.ru/catalog/category/c21568/product/zaglushka-ld_20582.html; цена с НДС; дата 2026-09-10; паспорт: https://cdn.lunda.ru/catalog/binary/document/texnicheskij-pasport_d20617.pdf"
     },
     {
       "id": "lunda-ld-67-504:LD.67.504.32",
@@ -3603,7 +3747,7 @@
       "price": 222.04,
       "outerDiameter": null,
       "innerDiameter": null,
-      "source": "https://lunda.ru/catalog/category/c21568/product/zaglushka-ld_20582.html; цена с НДС от 2026-09-10; паспорт: https://cdn.lunda.ru/catalog/binary/document/texnicheskij-pasport_d20617.pdf"
+      "source": "https://lunda.ru/catalog/category/c21568/product/zaglushka-ld_20582.html; цена с НДС; дата 2026-09-10; паспорт: https://cdn.lunda.ru/catalog/binary/document/texnicheskij-pasport_d20617.pdf"
     },
     {
       "id": "lunda-ld-67-504:LD.67.504.40",
@@ -3616,7 +3760,7 @@
       "price": 330.62,
       "outerDiameter": null,
       "innerDiameter": null,
-      "source": "https://lunda.ru/catalog/category/c21568/product/zaglushka-ld_20582.html; цена с НДС от 2026-09-10; паспорт: https://cdn.lunda.ru/catalog/binary/document/texnicheskij-pasport_d20617.pdf"
+      "source": "https://lunda.ru/catalog/category/c21568/product/zaglushka-ld_20582.html; цена с НДС; дата 2026-09-10; паспорт: https://cdn.lunda.ru/catalog/binary/document/texnicheskij-pasport_d20617.pdf"
     },
     {
       "id": "lunda-ld-67-504:LD.67.504.50",
@@ -3629,7 +3773,7 @@
       "price": 522.16,
       "outerDiameter": null,
       "innerDiameter": null,
-      "source": "https://lunda.ru/catalog/category/c21568/product/zaglushka-ld_20582.html; цена с НДС от 2026-09-10; паспорт: https://cdn.lunda.ru/catalog/binary/document/texnicheskij-pasport_d20617.pdf"
+      "source": "https://lunda.ru/catalog/category/c21568/product/zaglushka-ld_20582.html; цена с НДС; дата 2026-09-10; паспорт: https://cdn.lunda.ru/catalog/binary/document/texnicheskij-pasport_d20617.pdf"
     }
   ],
   "bolts": [
@@ -3992,6 +4136,168 @@
       "pn": 25,
       "length": 230,
       "source": "Полезная инфа!R70 (два фланца)"
+    }
+  ],
+  "paintingRates": [
+    {
+      "id": "pipe-painting-st20-v1:dn15",
+      "dn": 15,
+      "material": "st20",
+      "pricePerMeter": 250,
+      "source": "Прайс_окраска_труб_до_400.xlsx; Прайс окраски труб!A5:B5; SHA256 5a84d59498c0dae00011e50859146410ea481460b6656a7133e953cc85142662; DN15 → Ø21.3 мм (трубы-001-r0007); Прайс; Цена B5 без дополнительного запаса",
+      "warnings": []
+    },
+    {
+      "id": "pipe-painting-st20-v1:dn20",
+      "dn": 20,
+      "material": "st20",
+      "pricePerMeter": 300,
+      "source": "Прайс_окраска_труб_до_400.xlsx; Прайс окраски труб!A6:B6; SHA256 5a84d59498c0dae00011e50859146410ea481460b6656a7133e953cc85142662; DN20 → Ø26.9 мм (трубы-001-r0010); размер прайса Ø26.8 мм сопоставлен тому же DN; Прайс; Цена B6 без дополнительного запаса",
+      "warnings": []
+    },
+    {
+      "id": "pipe-painting-st20-v1:dn25",
+      "dn": 25,
+      "material": "st20",
+      "pricePerMeter": 300,
+      "source": "Прайс_окраска_труб_до_400.xlsx; Прайс окраски труб!A7:B7; SHA256 5a84d59498c0dae00011e50859146410ea481460b6656a7133e953cc85142662; DN25 → Ø33.7 мм (трубы-001-r0013); размер прайса Ø33.5 мм сопоставлен тому же DN; Прайс; Цена B7 без дополнительного запаса",
+      "warnings": []
+    },
+    {
+      "id": "pipe-painting-st20-v1:dn32",
+      "dn": 32,
+      "material": "st20",
+      "pricePerMeter": 350,
+      "source": "Прайс_окраска_труб_до_400.xlsx; Прайс окраски труб!A8:B8; SHA256 5a84d59498c0dae00011e50859146410ea481460b6656a7133e953cc85142662; DN32 → Ø42.4 мм (трубы-001-r0016); размер прайса Ø42.3 мм сопоставлен тому же DN; Прайс; Цена B8 без дополнительного запаса",
+      "warnings": []
+    },
+    {
+      "id": "pipe-painting-st20-v1:dn40",
+      "dn": 40,
+      "material": "st20",
+      "pricePerMeter": 400,
+      "source": "Прайс_окраска_труб_до_400.xlsx; Прайс окраски труб!A9:B9; SHA256 5a84d59498c0dae00011e50859146410ea481460b6656a7133e953cc85142662; DN40 → Ø48.3 мм (трубы-001-r0019); размер прайса Ø48 мм сопоставлен тому же DN; Прайс; Цена B9 без дополнительного запаса",
+      "warnings": []
+    },
+    {
+      "id": "pipe-painting-st20-v1:dn50",
+      "dn": 50,
+      "material": "st20",
+      "pricePerMeter": 450,
+      "source": "Прайс_окраска_труб_до_400.xlsx; Прайс окраски труб!A10:B10; SHA256 5a84d59498c0dae00011e50859146410ea481460b6656a7133e953cc85142662; DN50 → Ø57 мм (трубы-001-r0022); Прайс; Цена B10 без дополнительного запаса",
+      "warnings": []
+    },
+    {
+      "id": "pipe-painting-st20-v1:dn65",
+      "dn": 65,
+      "material": "st20",
+      "pricePerMeter": 600,
+      "source": "Прайс_окраска_труб_до_400.xlsx; Прайс окраски труб!A12:B12; SHA256 5a84d59498c0dae00011e50859146410ea481460b6656a7133e953cc85142662; DN65 → Ø76 мм (трубы-001-r0025); Прайс; Цена B12 без дополнительного запаса",
+      "warnings": []
+    },
+    {
+      "id": "pipe-painting-st20-v1:dn80",
+      "dn": 80,
+      "material": "st20",
+      "pricePerMeter": 650,
+      "source": "Прайс_окраска_труб_до_400.xlsx; Прайс окраски труб!A13:B13; SHA256 5a84d59498c0dae00011e50859146410ea481460b6656a7133e953cc85142662; DN80 → Ø89 мм (трубы-001-r0028); Прайс; Цена B13 без дополнительного запаса",
+      "warnings": []
+    },
+    {
+      "id": "pipe-painting-st20-v1:dn100",
+      "dn": 100,
+      "material": "st20",
+      "pricePerMeter": 800,
+      "source": "Прайс_окраска_труб_до_400.xlsx; Прайс окраски труб!A15:B15; SHA256 5a84d59498c0dae00011e50859146410ea481460b6656a7133e953cc85142662; DN100 → Ø108 мм (трубы-001-r0031); Прайс; Цена B15 без дополнительного запаса",
+      "warnings": []
+    },
+    {
+      "id": "pipe-painting-st20-v1:dn125",
+      "dn": 125,
+      "material": "st20",
+      "pricePerMeter": 950,
+      "source": "Прайс_окраска_труб_до_400.xlsx; Прайс окраски труб!A18:B18; SHA256 5a84d59498c0dae00011e50859146410ea481460b6656a7133e953cc85142662; DN125 → Ø133 мм (трубы-001-r0034); Прайс; Цена B18 без дополнительного запаса",
+      "warnings": []
+    },
+    {
+      "id": "pipe-painting-st20-v1:dn150",
+      "dn": 150,
+      "material": "st20",
+      "pricePerMeter": 1350,
+      "source": "Прайс_окраска_труб_до_400.xlsx; Прайс окраски труб!A20:B20; SHA256 5a84d59498c0dae00011e50859146410ea481460b6656a7133e953cc85142662; DN150 → Ø159 мм (трубы-001-r0037); Прайс; Цена B20 без дополнительного запаса",
+      "warnings": []
+    },
+    {
+      "id": "pipe-painting-st20-v1:dn200",
+      "dn": 200,
+      "material": "st20",
+      "pricePerMeter": 2350,
+      "source": "Прайс_окраска_труб_до_400.xlsx; Прайс окраски труб!A24:B24; SHA256 5a84d59498c0dae00011e50859146410ea481460b6656a7133e953cc85142662; DN200 → Ø219 мм (трубы-001-r0040); Прайс; Цена B24 без дополнительного запаса",
+      "warnings": []
+    },
+    {
+      "id": "pipe-painting-st20-v1:dn250",
+      "dn": 250,
+      "material": "st20",
+      "pricePerMeter": 3250,
+      "source": "Прайс_окраска_труб_до_400.xlsx; Прайс окраски труб!A26:B26; SHA256 5a84d59498c0dae00011e50859146410ea481460b6656a7133e953cc85142662; DN250 → Ø273 мм (трубы-001-r0043); Прайс; Цена B26 без дополнительного запаса",
+      "warnings": []
+    },
+    {
+      "id": "pipe-painting-st20-v1:dn300",
+      "dn": 300,
+      "material": "st20",
+      "pricePerMeter": 4500,
+      "source": "Прайс_окраска_труб_до_400.xlsx; Прайс окраски труб!A28:B28; SHA256 5a84d59498c0dae00011e50859146410ea481460b6656a7133e953cc85142662; DN300 → Ø325 мм (трубы-001-r0046); Прайс; Цена B28 без дополнительного запаса",
+      "warnings": []
+    },
+    {
+      "id": "pipe-painting-st20-v1:dn350",
+      "dn": 350,
+      "material": "st20",
+      "pricePerMeter": 5750,
+      "source": "Прайс_окраска_труб_до_400.xlsx; Прайс окраски труб!A30:B30; SHA256 5a84d59498c0dae00011e50859146410ea481460b6656a7133e953cc85142662; DN350 → Ø377 мм (трубы-001-r0049); Прайс; Цена B30 без дополнительного запаса",
+      "warnings": []
+    },
+    {
+      "id": "pipe-painting-st20-v1:dn400",
+      "dn": 400,
+      "material": "st20",
+      "pricePerMeter": 7960,
+      "source": "Прайс_окраска_труб_до_400.xlsx; Прайс окраски труб!A30:B30, A31:B31; SHA256 5a84d59498c0dae00011e50859146410ea481460b6656a7133e953cc85142662; DN400 → Ø426 мм (трубы-001-r0052); Экстраполяция; (5750 + (426 − 377) × (6300 − 5750) / (400 − 377)) × (1 + 15/100); округление до 0,01 ₽/м",
+      "warnings": []
+    },
+    {
+      "id": "pipe-painting-st20-v1:dn500",
+      "dn": 500,
+      "material": "st20",
+      "pricePerMeter": 10820,
+      "source": "Прайс_окраска_труб_до_400.xlsx; Прайс окраски труб!A30:B30, A31:B31; SHA256 5a84d59498c0dae00011e50859146410ea481460b6656a7133e953cc85142662; DN500 → Ø530 мм (трубы-001-r0055); Экстраполяция; (5750 + (530 − 377) × (6300 − 5750) / (400 − 377)) × (1 + 15/100); округление до 0,01 ₽/м",
+      "warnings": []
+    },
+    {
+      "id": "pipe-painting-st20-v1:dn600",
+      "dn": 600,
+      "material": "st20",
+      "pricePerMeter": 13570,
+      "source": "Прайс_окраска_труб_до_400.xlsx; Прайс окраски труб!A30:B30, A31:B31; SHA256 5a84d59498c0dae00011e50859146410ea481460b6656a7133e953cc85142662; DN600 → Ø630 мм (трубы-001-r0058); Экстраполяция; (5750 + (630 − 377) × (6300 − 5750) / (400 − 377)) × (1 + 15/100); округление до 0,01 ₽/м",
+      "warnings": []
+    },
+    {
+      "id": "pipe-painting-st20-v1:dn700",
+      "dn": 700,
+      "material": "st20",
+      "pricePerMeter": 16045,
+      "source": "Прайс_окраска_труб_до_400.xlsx; Прайс окраски труб!A30:B30, A31:B31; SHA256 5a84d59498c0dae00011e50859146410ea481460b6656a7133e953cc85142662; DN700 → Ø720 мм (трубы-001-r0061); Экстраполяция; (5750 + (720 − 377) × (6300 − 5750) / (400 − 377)) × (1 + 15/100); округление до 0,01 ₽/м",
+      "warnings": []
+    },
+    {
+      "id": "pipe-painting-st20-v1:dn800",
+      "dn": 800,
+      "material": "st20",
+      "pricePerMeter": 18795,
+      "source": "Прайс_окраска_труб_до_400.xlsx; Прайс окраски труб!A30:B30, A31:B31; SHA256 5a84d59498c0dae00011e50859146410ea481460b6656a7133e953cc85142662; DN800 → Ø820 мм (трубы-001-r0064); Экстраполяция; (5750 + (820 − 377) × (6300 − 5750) / (400 − 377)) × (1 + 15/100); округление до 0,01 ₽/м",
+      "warnings": []
     }
   ],
   "sourceSha256": "f68b4519e1e6786982e026472d49553d70159e87154417c02f53b9ced3a1464c"

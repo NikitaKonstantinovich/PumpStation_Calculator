@@ -1,0 +1,91 @@
+{
+  "sourceSha256": "f68b4519e1e6786982e026472d49553d70159e87154417c02f53b9ced3a1464c",
+  "approvedAt": "2026-10-26",
+  "scope": "Grossner 35551/35547: concentric AISI304 DN50-32 PN10/16; Newkey NK-FDh50/4 + NK-FDh32/4: concentric/eccentric AISI304 DN50-32 PN25; each end independently",
+  "rows": [
+    {
+      "id": "grossner-seating-dn50-32-pn10-left",
+      "reducerId": "переходы-005-r0365",
+      "reducerIdentity": "[\"reducer\",\"aisi304\",50,32,10,\"concentric\",60.3,42.4,2.9,2.6,76,null,null,12.9993,10.6126,null,null,null]",
+      "flangeId": "grossner-en01:35551",
+      "flangeIdentity": "[\"weldFlange\",\"aisi304\",50,null,16,\"straight\",null,null,null,null,null,20,61.1,null,null,null,null,\"EN1092-1:2018:01:A:PN10/16 (проектное исполнение)\",{\"compatiblePns\":[10,16]}]",
+      "side": "left",
+      "depthMm": 15,
+      "source": "Подтверждение пользователя 26.10.2026: принята посадка обсуждавшихся концентрических переходов AISI304 DN50–32 PN10/16 во фланцы Grossner 01/A: 15 мм на DN50 и 13 мм на DN32. Проектное решение не заменяет обмер профиля; исходные цилиндрические участки 3D-модели сохраняются. Дополнительная труба не добавляется."
+    },
+    {
+      "id": "grossner-seating-dn50-32-pn10-right",
+      "reducerId": "переходы-005-r0365",
+      "reducerIdentity": "[\"reducer\",\"aisi304\",50,32,10,\"concentric\",60.3,42.4,2.9,2.6,76,null,null,12.9993,10.6126,null,null,null]",
+      "flangeId": "grossner-en01:35547",
+      "flangeIdentity": "[\"weldFlange\",\"aisi304\",32,null,16,\"straight\",null,null,null,null,null,18,43.1,null,null,null,null,\"EN1092-1:2018:01:A:PN10/16 (проектное исполнение)\",{\"compatiblePns\":[10,16]}]",
+      "side": "right",
+      "depthMm": 13,
+      "source": "Подтверждение пользователя 26.10.2026: принята посадка обсуждавшихся концентрических переходов AISI304 DN50–32 PN10/16 во фланцы Grossner 01/A: 15 мм на DN50 и 13 мм на DN32. Проектное решение не заменяет обмер профиля; исходные цилиндрические участки 3D-модели сохраняются. Дополнительная труба не добавляется."
+    },
+    {
+      "id": "grossner-seating-dn50-32-pn16-left",
+      "reducerId": "переходы-005-r0366",
+      "reducerIdentity": "[\"reducer\",\"aisi304\",50,32,16,\"concentric\",60.3,42.4,4,3.6,76,null,null,null,null,null,null,null]",
+      "flangeId": "grossner-en01:35551",
+      "flangeIdentity": "[\"weldFlange\",\"aisi304\",50,null,16,\"straight\",null,null,null,null,null,20,61.1,null,null,null,null,\"EN1092-1:2018:01:A:PN10/16 (проектное исполнение)\",{\"compatiblePns\":[10,16]}]",
+      "side": "left",
+      "depthMm": 15,
+      "source": "Подтверждение пользователя 26.10.2026: принята посадка обсуждавшихся концентрических переходов AISI304 DN50–32 PN10/16 во фланцы Grossner 01/A: 15 мм на DN50 и 13 мм на DN32. Проектное решение не заменяет обмер профиля; исходные цилиндрические участки 3D-модели сохраняются. Дополнительная труба не добавляется."
+    },
+    {
+      "id": "grossner-seating-dn50-32-pn16-right",
+      "reducerId": "переходы-005-r0366",
+      "reducerIdentity": "[\"reducer\",\"aisi304\",50,32,16,\"concentric\",60.3,42.4,4,3.6,76,null,null,null,null,null,null,null]",
+      "flangeId": "grossner-en01:35547",
+      "flangeIdentity": "[\"weldFlange\",\"aisi304\",32,null,16,\"straight\",null,null,null,null,null,18,43.1,null,null,null,null,\"EN1092-1:2018:01:A:PN10/16 (проектное исполнение)\",{\"compatiblePns\":[10,16]}]",
+      "side": "right",
+      "depthMm": 13,
+      "source": "Подтверждение пользователя 26.10.2026: принята посадка обсуждавшихся концентрических переходов AISI304 DN50–32 PN10/16 во фланцы Grossner 01/A: 15 мм на DN50 и 13 мм на DN32. Проектное решение не заменяет обмер профиля; исходные цилиндрические участки 3D-модели сохраняются. Дополнительная труба не добавляется."
+    },
+    {
+      "id": "newkey-seating-dn50-32-pn25-concentric-left",
+      "reducerId": "переходы-005-r0367",
+      "reducerIdentity": "[\"reducer\",\"aisi304\",50,32,25,\"concentric\",60.3,42.4,5.6,5,76,null,null,null,null,null,null,null]",
+      "flangeId": "newkey-din2503:NK-FDh50-4",
+      "flangeIdentity": "[\"weldFlange\",\"aisi304\",50,null,40,\"straight\",null,null,null,null,null,20,61.1,null,null,null,null,\"DIN2503:plate:flat-face:PN40\",{\"compatiblePns\":[25,40]}]",
+      "side": "left",
+      "depthMm": 15,
+      "source": "Решение пользователя 26.10.2026: для перехода DN50–32 PN25 с Newkey посадка как для других фланцев — торец основы не доходит до привалочной поверхности на 5 мм. Для NK-FDh50/4 (b=20 мм) глубина 15 мм; для NK-FDh32/4 (b=18 мм) — 13 мм. Применяется к концентрическому и эксцентрическому переходам. Проектное решение, не обмер профиля. Дополнительной трубы и сварочного зазора нет."
+    },
+    {
+      "id": "newkey-seating-dn50-32-pn25-concentric-right",
+      "reducerId": "переходы-005-r0367",
+      "reducerIdentity": "[\"reducer\",\"aisi304\",50,32,25,\"concentric\",60.3,42.4,5.6,5,76,null,null,null,null,null,null,null]",
+      "flangeId": "newkey-din2503:NK-FDh32-4",
+      "flangeIdentity": "[\"weldFlange\",\"aisi304\",32,null,40,\"straight\",null,null,null,null,null,18,43.1,null,null,null,null,\"DIN2503:plate:flat-face:PN40\",{\"compatiblePns\":[25,40]}]",
+      "side": "right",
+      "depthMm": 13,
+      "source": "Решение пользователя 26.10.2026: для перехода DN50–32 PN25 с Newkey посадка как для других фланцев — торец основы не доходит до привалочной поверхности на 5 мм. Для NK-FDh50/4 (b=20 мм) глубина 15 мм; для NK-FDh32/4 (b=18 мм) — 13 мм. Применяется к концентрическому и эксцентрическому переходам. Проектное решение, не обмер профиля. Дополнительной трубы и сварочного зазора нет."
+    },
+    {
+      "id": "newkey-seating-dn50-32-pn25-eccentric-left",
+      "reducerId": "переходы-003-r0202",
+      "reducerIdentity": "[\"reducer\",\"aisi304\",50,32,25,\"eccentric\",60.3,42.4,5.6,5,76,null,null,null,null,null,null,null]",
+      "flangeId": "newkey-din2503:NK-FDh50-4",
+      "flangeIdentity": "[\"weldFlange\",\"aisi304\",50,null,40,\"straight\",null,null,null,null,null,20,61.1,null,null,null,null,\"DIN2503:plate:flat-face:PN40\",{\"compatiblePns\":[25,40]}]",
+      "side": "left",
+      "depthMm": 15,
+      "source": "Решение пользователя 26.10.2026: для перехода DN50–32 PN25 с Newkey посадка как для других фланцев — торец основы не доходит до привалочной поверхности на 5 мм. Для NK-FDh50/4 (b=20 мм) глубина 15 мм; для NK-FDh32/4 (b=18 мм) — 13 мм. Применяется к концентрическому и эксцентрическому переходам. Проектное решение, не обмер профиля. Дополнительной трубы и сварочного зазора нет."
+    },
+    {
+      "id": "newkey-seating-dn50-32-pn25-eccentric-right",
+      "reducerId": "переходы-003-r0202",
+      "reducerIdentity": "[\"reducer\",\"aisi304\",50,32,25,\"eccentric\",60.3,42.4,5.6,5,76,null,null,null,null,null,null,null]",
+      "flangeId": "newkey-din2503:NK-FDh32-4",
+      "flangeIdentity": "[\"weldFlange\",\"aisi304\",32,null,40,\"straight\",null,null,null,null,null,18,43.1,null,null,null,null,\"DIN2503:plate:flat-face:PN40\",{\"compatiblePns\":[25,40]}]",
+      "side": "right",
+      "depthMm": 13,
+      "source": "Решение пользователя 26.10.2026: для перехода DN50–32 PN25 с Newkey посадка как для других фланцев — торец основы не доходит до привалочной поверхности на 5 мм. Для NK-FDh50/4 (b=20 мм) глубина 15 мм; для NK-FDh32/4 (b=18 мм) — 13 мм. Применяется к концентрическому и эксцентрическому переходам. Проектное решение, не обмер профиля. Дополнительной трубы и сварочного зазора нет."
+    }
+  ],
+  "readyBorePolicy": {
+    "faceOffsetMm": 5,
+    "source": "Решения пользователя: торец трубы/перехода не доходит до привалочной поверхности приварного фланца на 5 мм; посадка как для остальных фланцев, недостающие данные принимаются из аналогов. Единое проектное правило 26.10.2026 для переходных вставок у насоса: при известной полной толщине и готовом отверстии не меньше фактического наружного диаметра принят заход b−5 мм. Оно применяется к обоим концам, концентрическим и эксцентрическим переходам. Это принятое решение сборки, не измерение или нормативное подтверждение профиля на всей глубине; исходные размеры цилиндрических участков сохраняются. Расточка этим правилом не разрешается, дополнительная труба не добавляется."
+  }
+}

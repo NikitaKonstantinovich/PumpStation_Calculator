@@ -1,0 +1,284 @@
+{
+  "checkedAt": "2026-10-26",
+  "basis": "declared-standard-nominal",
+  "exactManufacturerPassportFound": false,
+  "dimensionsDerivedFrom": [
+    "https://www.hsflanges.com/DIN_2503_PN40_plate_flanges",
+    "https://www.tescoflanges.com/din-2503-pn-40-slip-on-flange"
+  ],
+  "pressureComparisonSources": [
+    "https://www.hsflanges.com/DIN_2503_PN25_plate_flanges",
+    "https://www.hsflanges.com/DIN_2503_PN40_plate_flanges"
+  ],
+  "sources": [
+    {
+      "path": "data/sources/newkey-din2503-2026-10-26/hyupshin-pn40.html",
+      "url": "https://www.hsflanges.com/DIN_2503_PN40_plate_flanges",
+      "role": "standard-dimensions",
+      "sha256": "3e44ff09b002718cdfcfee8a456b73b725cf280b97f2e82bc5a778a3724afc09"
+    },
+    {
+      "path": "data/sources/newkey-din2503-2026-10-26/hyupshin-pn25.html",
+      "url": "https://www.hsflanges.com/DIN_2503_PN25_plate_flanges",
+      "role": "standard-pressure-comparison",
+      "sha256": "bf1892da960e11a63f97c5b105f7fe1a5c52ca06c648f0356a787c6d44b143ca"
+    },
+    {
+      "path": "data/sources/newkey-din2503-2026-10-26/tesco-drawing.jpg",
+      "url": "https://www.tescoflanges.com/img/din-pn-flange.jpg",
+      "role": "standard-flat-plate-drawing",
+      "sha256": "8b0a5f764dc710aa53687448d88d8ec3085e0a2111e08b1e20b28827da5d65af"
+    },
+    {
+      "path": "data/sources/newkey-din2503-2026-10-26/din2502-2503.pdf",
+      "url": "https://www.htpipe.com/d/files/flanges-standard/din2502-2503.pdf",
+      "role": "cross-check-only-not-newkey-passport",
+      "sha256": "564d4b65837a678d7671f1f91671e88040d0ae318cb2d47ce4418a351207b923"
+    },
+    {
+      "path": "data/sources/newkey-din2503-2026-10-26/dnru-linked-newkey.pdf",
+      "url": "https://dn.ru/storage/certificates/newkey/flanets-ploskii-s-zerkalom--nk-f-.pdf",
+      "role": "rejected-NK-F-PN16",
+      "sha256": "9fa9542a6b4f7494cd292fc862b4e070ac01f8fd1e5999d1e284c859c347f10d"
+    },
+    {
+      "path": "data/sources/newkey-din2503-2026-10-26/newkey32-2.png",
+      "url": "https://www.newkey.ru/media/thumb/photo/catalog/flanets-ploskii-din2503-nerzhaveiushchii-aisi304-dn32-114-cf8-rn40_mrAbukQ.webp.600x0_q85.png",
+      "role": "manufacturer-photo-execution-only-not-dimension-measurement",
+      "componentId": "newkey-din2503:NK-FDh32-4",
+      "sha256": "1c8d4d218bc4a611f89a22a6f492612c4676b1c51760ba8ba749038da8c602b9"
+    },
+    {
+      "path": "data/sources/newkey-din2503-2026-10-26/newkey32-3.png",
+      "url": "https://www.newkey.ru/media/thumb/photo/catalog/flanets-ploskii-din2503-nerzhaveiushchii-aisi304-dn32-114-cf8-rn40_wc3HxqU.webp.600x0_q85.png",
+      "role": "manufacturer-photo-execution-only-not-dimension-measurement",
+      "componentId": "newkey-din2503:NK-FDh32-4",
+      "sha256": "80a6b731ad68aa9fa317dd0d5e196b490881e113b7e670581a9212a7145a5e2d"
+    },
+    {
+      "path": "data/sources/newkey-din2503-2026-10-26/newkey32-4.png",
+      "url": "https://www.newkey.ru/media/thumb/photo/catalog/flanets-ploskii-din2503-nerzhaveiushchii-aisi304-dn32-114-cf8-rn40_mziaj6k.webp.600x0_q85.png",
+      "role": "manufacturer-photo-execution-only-not-dimension-measurement",
+      "componentId": "newkey-din2503:NK-FDh32-4",
+      "sha256": "205fc7356f5f0c451e675551547adf774be2c4e3e9916d84f348367b31babaf8"
+    },
+    {
+      "path": "data/sources/newkey-din2503-2026-10-26/newkey50-2.png",
+      "url": "https://www.newkey.ru/media/thumb/photo/catalog/flanets-ploskii-din2503-nerzhaveiushchii-aisi304-dn50-2-cf8-rn40_VtcibNg.webp.600x0_q85.png",
+      "role": "manufacturer-photo-execution-only-not-dimension-measurement",
+      "componentId": "newkey-din2503:NK-FDh50-4",
+      "sha256": "e92b9e90cd2023922b029f8aa65888c8902109cec1770fa8e6e0437053cc4a6b"
+    },
+    {
+      "path": "data/sources/newkey-din2503-2026-10-26/newkey50-3.png",
+      "url": "https://www.newkey.ru/media/thumb/photo/catalog/flanets-ploskii-din2503-nerzhaveiushchii-aisi304-dn50-2-cf8-rn40_vvjSmVf.webp.600x0_q85.png",
+      "role": "manufacturer-photo-execution-only-not-dimension-measurement",
+      "componentId": "newkey-din2503:NK-FDh50-4",
+      "sha256": "accfe2a69456995b3b878ed31da6008c7c3c3cf6674ce5efde50a23692150350"
+    },
+    {
+      "path": "data/sources/newkey-din2503-2026-10-26/newkey50-4.png",
+      "url": "https://www.newkey.ru/media/thumb/photo/catalog/flanets-ploskii-din2503-nerzhaveiushchii-aisi304-dn50-2-cf8-rn40_wuFfYD4.webp.600x0_q85.png",
+      "role": "manufacturer-photo-execution-only-not-dimension-measurement",
+      "componentId": "newkey-din2503:NK-FDh50-4",
+      "sha256": "4203a893434692a1722608cc5c7404f196c7fb78040cba3f263457d6943308a8"
+    }
+  ],
+  "scope": [
+    {
+      "componentId": "newkey-din2503:NK-FDh32-4",
+      "dn": 32,
+      "partPn": 40,
+      "compatiblePns": [
+        25,
+        40
+      ],
+      "dimensions": {
+        "thicknessMm": 18,
+        "boreDiameterMm": 43.1,
+        "pipeOuterDiameterMm": 42.4,
+        "outerDiameterMm": 140,
+        "boltCircleMm": 100,
+        "boltHoleDiameterMm": 18,
+        "holes": 4
+      }
+    },
+    {
+      "componentId": "newkey-din2503:NK-FDh50-4",
+      "dn": 50,
+      "partPn": 40,
+      "compatiblePns": [
+        25,
+        40
+      ],
+      "dimensions": {
+        "thicknessMm": 20,
+        "boreDiameterMm": 61.1,
+        "pipeOuterDiameterMm": 60.3,
+        "outerDiameterMm": 165,
+        "boltCircleMm": 125,
+        "boltHoleDiameterMm": 18,
+        "holes": 4
+      }
+    },
+    {
+      "componentId": "newkey-din2503:NK-FDh40-4",
+      "dn": 40,
+      "partPn": 40,
+      "compatiblePns": [
+        25,
+        40
+      ],
+      "dimensions": {
+        "thicknessMm": 18,
+        "boreDiameterMm": 49,
+        "pipeOuterDiameterMm": 48.3,
+        "outerDiameterMm": 150,
+        "boltCircleMm": 110,
+        "boltHoleDiameterMm": 18,
+        "holes": 4
+      }
+    },
+    {
+      "componentId": "newkey-din2503:NK-FDh125-4",
+      "dn": 125,
+      "partPn": 40,
+      "compatiblePns": [
+        25,
+        40
+      ],
+      "dimensions": {
+        "thicknessMm": 26,
+        "boreDiameterMm": 141.6,
+        "pipeOuterDiameterMm": 139.7,
+        "outerDiameterMm": 270,
+        "boltCircleMm": 220,
+        "boltHoleDiameterMm": 26,
+        "holes": 8
+      }
+    },
+    {
+      "componentId": "newkey-din2503:NK-FDh150-4",
+      "dn": 150,
+      "partPn": 40,
+      "compatiblePns": [
+        25,
+        40
+      ],
+      "dimensions": {
+        "thicknessMm": 28,
+        "boreDiameterMm": 170.5,
+        "pipeOuterDiameterMm": 168.3,
+        "outerDiameterMm": 300,
+        "boltCircleMm": 250,
+        "boltHoleDiameterMm": 26,
+        "holes": 8
+      }
+    }
+  ],
+  "limits": [
+    "Номинальная геометрия заявленного DIN2503, не паспорт конкретной поставки.",
+    "Фотографии использованы только для вида плоского диска; численные размеры по пикселям не измерялись.",
+    "Паспорт NK-F PN16 и прежние STEP с выступом не применены.",
+    "Совместимость PN25 ограничена перечисленными точными артикулами; температурное снижение допустимого давления этим исследованием не определено."
+  ],
+  "followUpDn40": {
+    "checkedAt": "2026-10-26",
+    "componentId": "newkey-din2503:NK-FDh40-4",
+    "supplierProductId": "NK-FDh40/4",
+    "productSource": "https://www.newkey.ru/catalog/flantsy/flantsy-ploskie-din2503/",
+    "priceRub": 2173,
+    "priceBasis": "Опубликованная розничная цена производителя, без персональной скидки и пересчёта НДС.",
+    "partPn": 40,
+    "compatiblePns": [
+      25,
+      40
+    ],
+    "dimensions": {
+      "thicknessMm": 18,
+      "boreDiameterMm": 49,
+      "pipeOuterDiameterMm": 48.3,
+      "outerDiameterMm": 150,
+      "boltCircleMm": 110,
+      "boltHoleDiameterMm": 18,
+      "holes": 4
+    },
+    "geometryBasis": "declared-standard-nominal",
+    "dimensionSources": [
+      "https://www.hsflanges.com/DIN_2503_PN40_plate_flanges",
+      "https://www.tescoflanges.com/din-2503-pn-40-slip-on-flange"
+    ],
+    "pressureSources": [
+      "https://www.hsflanges.com/DIN_2503_PN25_plate_flanges",
+      "https://www.hsflanges.com/DIN_2503_PN40_plate_flanges"
+    ],
+    "individualPassportFound": false,
+    "note": "Применён ранее согласованный подход для серии Newkey и недостающих данных аналогов. Исходный фланец фланцы-007-r0137 не изменён."
+  },
+  "followUpDn125": {
+    "checkedAt": "2026-10-26",
+    "componentId": "newkey-din2503:NK-FDh125-4",
+    "supplierProductId": "NK-FDh125/4",
+    "productSource": "https://www.newkey.ru/catalog/flantsy/flantsy-ploskie-din2503/",
+    "priceRub": 7365,
+    "priceBasis": "Опубликованная розничная цена производителя, без персональной скидки и пересчёта НДС.",
+    "partPn": 40,
+    "compatiblePns": [
+      25,
+      40
+    ],
+    "dimensions": {
+      "thicknessMm": 26,
+      "boreDiameterMm": 141.6,
+      "pipeOuterDiameterMm": 139.7,
+      "outerDiameterMm": 270,
+      "boltCircleMm": 220,
+      "boltHoleDiameterMm": 26,
+      "holes": 8
+    },
+    "geometryBasis": "declared-standard-nominal",
+    "dimensionSources": [
+      "https://www.hsflanges.com/DIN_2503_PN40_plate_flanges",
+      "https://www.tescoflanges.com/din-2503-pn-40-slip-on-flange"
+    ],
+    "pressureSources": [
+      "https://www.hsflanges.com/DIN_2503_PN25_plate_flanges",
+      "https://www.hsflanges.com/DIN_2503_PN40_plate_flanges"
+    ],
+    "individualPassportFound": false,
+    "note": "Применён ранее согласованный подход для серии Newkey и недостающих данных аналогов. Исходный фланец фланцы-007-r0142 не изменён."
+  },
+  "followUpDn150": {
+    "checkedAt": "2026-10-26",
+    "componentId": "newkey-din2503:NK-FDh150-4",
+    "supplierProductId": "NK-FDh150/4",
+    "productSource": "https://www.newkey.ru/catalog/flantsy/flantsy-ploskie-din2503/",
+    "priceRub": 9487,
+    "priceBasis": "Опубликованная розничная цена производителя, без персональной скидки и пересчёта НДС.",
+    "partPn": 40,
+    "compatiblePns": [
+      25,
+      40
+    ],
+    "dimensions": {
+      "thicknessMm": 28,
+      "boreDiameterMm": 170.5,
+      "pipeOuterDiameterMm": 168.3,
+      "outerDiameterMm": 300,
+      "boltCircleMm": 250,
+      "boltHoleDiameterMm": 26,
+      "holes": 8
+    },
+    "geometryBasis": "declared-standard-nominal",
+    "dimensionSources": [
+      "https://www.hsflanges.com/DIN_2503_PN40_plate_flanges",
+      "https://www.tescoflanges.com/din-2503-pn-40-slip-on-flange"
+    ],
+    "pressureSources": [
+      "https://www.hsflanges.com/DIN_2503_PN25_plate_flanges",
+      "https://www.hsflanges.com/DIN_2503_PN40_plate_flanges"
+    ],
+    "individualPassportFound": false,
+    "note": "Применён ранее согласованный подход для серии Newkey и недостающих данных аналогов. Исходный фланец фланцы-007-r0143 не изменён."
+  }
+}

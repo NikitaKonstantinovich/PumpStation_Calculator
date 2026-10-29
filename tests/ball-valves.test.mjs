@@ -5,10 +5,11 @@ import { loadTs } from "./load-ts.mjs";
 
 // Exercise the actual selection and specification functions without mounting
 // the workspace or triggering its project persistence effects.
-const url = new URL("../app/page.tsx", import.meta.url);
+const url = new URL("../app/full-workspace.tsx", import.meta.url);
 const page = await readFile(url, "utf8");
+const shared = await readFile(new URL("../app/allowed-pump-tools.tsx", import.meta.url), "utf8");
 const source = [
-  page.match(/^const componentFieldLabel=.*$/m)[0],
+  shared.match(/^export const componentFieldLabel=.*$/m)[0],
   page.slice(page.indexOf("const componentDn="), page.indexOf("function DnCalculator(")),
   page.slice(page.indexOf("const valveSpecItem="), page.indexOf("const buildValveSpecItems=")),
   "export { selectValveComponent, valveSpecItem };",

@@ -161,6 +161,36 @@ class ConverterTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             self.jobs.submit("other-owner", {"projectId": "station", "requestId": "retry", "items": [], "retryJobId": first["id"]})
 
+    def test_unbound_library_stl_is_reused_only_with_matching_mesh_hash(self):
+        frontend = self.root / "frontend"
+        assets = frontend / "public/model-assets"
+        assets.mkdir(parents=True)
+        mesh = assets / "library-valve.stl"
+        mesh.write_bytes(bytes(80) + struct.pack("<I", 1) + bytes(50))
+        digest = service.file_hash(self.root / "v.step")
+        entry = {"sourceHash": digest, "status": "ready", "units": "mm", "meshUrl": "/model-assets/library-valve.stl", "meshHash": service.file_hash(mesh), "bounds": [0, 0, 0, 10, 20, 30]}
+        (assets / "library.json").write_text(json.dumps({"models": [entry]}))
+        with patch.object(service, "FRONTEND", frontend):
+            result = self.finished(self.submit(["equipment:valve-a", "equipment:valve-b"]))
+        self.assertEqual((result["ready"], result["converted"]), (1, 0))
+        self.assertEqual(self.calls, [])
+        self.assertEqual(len(result["profiles"]["equipment"]), 2)
+        mesh.write_bytes(bytes(80) + struct.pack("<I", 1) + bytes([1])*50)
+        self.jobs.db.execute("DELETE FROM assets")
+        self.jobs.db.commit()
+        with patch.object(service, "FRONTEND", frontend):
+            result = self.finished(self.submit(["equipment:valve-a"]))
+        self.assertEqual(result["converted"], 1)
+
+    def test_generated_valve_registry_preserves_explicit_user_links(self):
+        folder = self.root / "frontend/data"
+        folder.mkdir(parents=True)
+        generated = [{**self.models[1], "source": "wrong.step"}, {**self.models[1], "key": "equipment:new-valve"}]
+        (folder / "line-valve-registry.json").write_text(json.dumps({"version": 1, "models": generated}))
+        library = service.load_library(self.root)
+        self.assertEqual(library["equipment:valve-a"]["source"], "v.step")
+        self.assertIn("equipment:new-valve", library)
+
     def test_invalid_registry_is_a_retryable_error(self):
         self.registry.write_text("broken json")
         first = self.finished(self.submit(["pump:a"]))

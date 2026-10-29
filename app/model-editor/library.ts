@@ -44,7 +44,7 @@ export function addLibraryModel(assembly: Assembly, model: LibraryModel, id: str
   const bounds: Bounds = [...model.bounds], occupied = assemblyBounds(assembly);
   const component: Component = {
     id, name: model.name, kind: "equipment", sourceKey: "manual",
-    sourceNote: `Геометрия STEP, мм. Исходная ориентация сохранена. ${model.warnings.join(". ")}. Ручная компоновка; спецификация не изменяется`,
+    sourceNote: `Геометрия CAD, мм. Исходная ориентация сохранена. ${model.warnings.join(". ")}. Ручная компоновка; спецификация не изменяется`,
     cadSource: { path: model.source, hash: model.sourceHash }, bounds, meshUrl: model.meshUrl,
     position: [(occupied ? occupied[3] + 100 : 0) - bounds[0], -bounds[1], -bounds[2]], rotation: [0, 0, 0],
     hidden: false, opacity: 1, locked: false, ports: [],

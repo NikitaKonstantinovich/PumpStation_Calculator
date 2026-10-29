@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState, type Dispatch, type SetStateAction } from "react";
 import type { ProjectConfig } from "./project-config";
-import { calculateCollector, collectorFlow, collectorLength, collectorVelocityWarning, collectorPressureChecks, configurationFingerprint, pumpCount, type CollectorCatalog, type CollectorType } from "./collector-calculations";
+import { calculateCollector, collectorFlow, collectorLength, collectorVelocityWarning, collectorPressureChecks, configurationFingerprint, configurationWarnings, collectorBranchDiameterErrors, pumpCount, type CollectorCatalog, type CollectorType } from "./collector-calculations";
 import { pressureCheckWarning } from "./dn-defaults";
 import { synchronizeCollectors, type CollectorCardState, type CollectorOverrides, type CollectorsEntity, type SavedCollector } from "./collector-project";
 import { useRuntimeDiagnostic, useStoredDiagnostic } from "./diagnostics-ui";
@@ -50,11 +50,11 @@ export function useCollectorDatabase(project: ProjectConfig, setProject: Dispatc
   return { catalog, catalogError, setCatalog: acceptCatalog };
 }
 
-type Props = { entity: CollectorsEntity; inletHead?: number | null; catalog: CollectorCatalog | null; catalogError: string; onCatalog: (catalog: CollectorCatalog) => void; onChange: (type: CollectorType, patch: Partial<CollectorCardState>, expectedFingerprint?: string) => void };
+type Props = { canCustomize?: boolean; pressureChecksEnabled?: boolean; entity: CollectorsEntity; inletHead?: number | null; catalog: CollectorCatalog | null; catalogError: string; onCatalog: (catalog: CollectorCatalog) => void; onChange: (type: CollectorType, patch: Partial<CollectorCardState>, expectedFingerprint?: string) => void };
 export function CollectorConstructor(props: Props) {
   return <div className="collector-constructor">{(["suction", "discharge"] as const).map(type => <CollectorCard key={type} {...props} type={type} state={props.entity[type]}/>)}</div>;
 }
-function CollectorCard({ type, state, inletHead, catalog, catalogError, onCatalog, onChange }: Props & { type: CollectorType; state: CollectorCardState }) {
+function CollectorCard({ canCustomize = false, pressureChecksEnabled = true, type, state, inletHead, catalog, catalogError, onCatalog, onChange }: Props & { type: CollectorType; state: CollectorCardState }) {
   const storedError = useStoredDiagnostic("collectors",`${type}/action`)?.message ?? "";
   const [busy, setBusy] = useState(false), [message, setMessage] = useState(storedError);
   const [actionError, setActionError] = useState(storedError);
@@ -62,9 +62,10 @@ function CollectorCard({ type, state, inletHead, catalog, catalogError, onCatalo
   const c = state.configuration, recommended = state.recommended;
   if (!c || !recommended) return <article className="collector-card">Подготовка параметров…</article>;
   const fingerprint = configurationFingerprint(c), preview = catalog ? calculateCollector(c, catalog) : null;
+  const diameterErrors = collectorBranchDiameterErrors(c, catalog), configurationErrors = [...new Set([...configurationWarnings(c), ...diameterErrors])];
   const stale = state.status === "stale" || Boolean(state.calculation && catalog && state.calculation.catalogVersion !== catalog.version);
-  const calculation = !stale && state.calculation?.fingerprint === fingerprint ? state.calculation : null;
-  const saved = state.databaseStatus === "found" && state.database?.code === state.code ? state.database : null;
+  const calculation = !stale && !configurationErrors.length && state.calculation?.fingerprint === fingerprint ? state.calculation : null;
+  const saved = !configurationErrors.length && state.databaseStatus === "found" && state.database?.code === state.code ? state.database : null;
   const values = preview ?? calculation;
   const velocityWarning = collectorVelocityWarning(c.dn, values?.velocities.collector);
   const pricedCalculation = calculation ?? (saved ? preview : null);
@@ -94,6 +95,9 @@ function CollectorCard({ type, state, inletHead, catalog, catalogError, onCatalo
   return <article className="collector-card" aria-label={type === "suction" ? "Всасывающий коллектор" : "Напорный коллектор"}>
     <header><h2>{type === "suction" ? "Всасывающий коллектор" : "Напорный коллектор"}</h2><code>{state.code ?? "Заполните параметры для формирования кода"}</code><p data-issue-id={`collectors/${type}/database`} className={saved ? "collector-success" : state.databaseStatus === "error" ? "issue-notice issue-notice--error" : "collector-warning"}>{saved ? "Есть в базе" : state.databaseStatus === "error" ? state.databaseError : state.databaseStatus === "unchecked" && state.code ? "Проверка базы…" : "Коллектор отсутствует в базе — выполните расчёт в конструкторе"}</p></header>
     <p className="collector-mode">{collectorFlow(c).mode}</p>
+    {diameterErrors.length > 0 && <div role="alert" className="issue-notice issue-notice--error" aria-label="Ошибка диаметров коллектора"><b>Невозможно изготовить седловую врезку</b><ul>{diameterErrors.map(error => <li key={error} data-issue-id={`collectors/${type}/configuration/${configurationErrors.indexOf(error)}`}>{error}</li>)}</ul></div>}
+    {!canCustomize && <p className="access-note">Стандартное исполнение. Ручные изменения доступны с pro.</p>}
+    <fieldset className="access-fields" disabled={!canCustomize} aria-label="Ручные настройки коллектора">
     <div className="collector-fields">
       {dnControl("DN коллектора", "dn", c.dn, recommended.dn)}
       {connectionControl("Подключение к сети", "connection", c.connection, c.dn)}
@@ -107,10 +111,12 @@ function CollectorCard({ type, state, inletHead, catalog, catalogError, onCatalo
       <label className="collector-field"><span>Межосевое расстояние, мм</span><input type="number" min="1" max="100000" value={circuit.spacing} onChange={e => patch(i ? { spacing2: Number(e.target.value) } : { spacing1: Number(e.target.value) })}/></label>
       {i === 1 && <label className="collector-field"><span>PN контура 2</span><select value={circuit.pn} onChange={e => override("secondaryPn", Number(e.target.value))}>{[10,16,25].map(pn => <option key={pn} value={pn}>PN{pn}</option>)}</select><small>Из расчёта DN: PN{recommended.secondary?.pn}</small>{state.overrides.secondaryPn && <button className="collector-reset" onClick={() => override("secondaryPn", undefined)}>Вернуть из расчёта DN</button>}</label>}
     </div><p>Длина патрубка: {measure(values?.branchLengthsMm[i], "мм")} · скорость: {measure(i ? values?.velocities.secondary : values?.velocities.primary, "м/с")}</p></section>)}
+    </fieldset>
     <dl className="collector-metrics"><div><dt>Расчётный расход</dt><dd>{measure(collectorFlow(c).flow, "м³/ч")}</dd></div><div><dt>Длина коллектора</dt><dd>{measure(collectorLength(c), "мм")}</dd></div><div><dt>Скорость в коллекторе</dt><dd>{measure(values?.velocities.collector, "м/с")}</dd></div></dl>
     {velocityWarning && <p data-issue-id={`collectors/${type}/velocity`} role="alert" className="collector-warning">{velocityWarning}</p>}
-    {type === "suction" && <section aria-label="Проверка давления по напору на входе"><h3>Давление по напору на входе</h3>{collectorPressureChecks(c,inletHead,catalog).map((check,index)=><p data-issue-id={`collectors/${type}/pressure/${index}`} key={index} className={check.status==="exceeded"?"issue-notice issue-notice--error":pressureCheckWarning(check)?"collector-warning":"collector-note"}>{check.message}</p>)}<p className="collector-note">Проверка по указанному напору на входе. Прочность, гидроудары и пригодность к работе под вакуумом не оцениваются.</p></section>}
+    {pressureChecksEnabled && type === "suction" && <section aria-label="Проверка давления по напору на входе"><h3>Давление по напору на входе</h3>{collectorPressureChecks(c,inletHead,catalog).map((check,index)=><p data-issue-id={`collectors/${type}/pressure/${index}`} key={index} className={check.status==="exceeded"?"issue-notice issue-notice--error":pressureCheckWarning(check)?"collector-warning":"collector-note"}>{check.message}</p>)}<p className="collector-note">Проверка по указанному напору на входе. Прочность, гидроудары и пригодность к работе под вакуумом не оцениваются.</p></section>}
     <p className="collector-note">Длина патрубка = 0,5 × наружный Ø коллектора + 1,1 × длина болта из таблицы обвязки. Крепёж учитывается отдельно в общей спецификации.</p>
+    {c.material === "st20" && <p className="collector-note">Включена окраска трубы коллектора и всех патрубков, в том числе резервных насосов. Для каждой группы: суммарная длина в метрах × тариф её DN. Стоимость и источник тарифа показаны в составе. Сохранённая цена обновляется кнопкой «Обновить цену в базе».</p>}
     {catalogError && <p data-issue-id="collectors/catalog" className="issue-notice issue-notice--error">{catalogError}</p>}
     {stale && <p data-issue-id={`collectors/${type}/stale`} className="collector-warning">Расчёт устарел — выполните повторный расчёт</p>}
     {!!values?.warnings.length && <div className="collector-warning"><b>Расчёт неполный</b><ul>{values.warnings.map((warning,index) => <li data-issue-id={`collectors/${type}/calculation/${index}`} key={warning}>{warning}</li>)}</ul></div>}

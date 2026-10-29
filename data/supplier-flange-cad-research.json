@@ -1,0 +1,253 @@
+{
+  "checkedAt": "2026-10-26",
+  "catalogueMappingApproved": false,
+  "source": "https://www.zelentech.co/zh/tools/cad/en1092-1/",
+  "models": [
+    {
+      "dn": 100,
+      "pn": 16,
+      "path": "data/sources/pn25-flanges-2026-10-26/EN1092-1_Type01_PN16_DN100.step",
+      "url": "https://www.zelentech.co/assets/cad/en1092-1/EN1092-1_Type01_PN16_DN100.step",
+      "sha256": "83b80c6c3841bcfd36ef74711e235db0cec895f2a118dc2e6b1d12896746e326",
+      "measuredDimensions": {
+        "thicknessMm": 22.0,
+        "plateThicknessMm": 20.0,
+        "raisedFaceHeightMm": 2.0,
+        "boreDiameterMm": 115.8,
+        "outerDiameterMm": 220.0,
+        "raisedFaceDiameterMm": 158.0,
+        "boltCircleMm": 180.0,
+        "boltHoleDiameterMm": 18.0,
+        "holes": 8
+      },
+      "status": "reference-only-not-mapped"
+    },
+    {
+      "dn": 32,
+      "pn": 16,
+      "path": "data/sources/pn25-flanges-2026-10-26/EN1092-1_Type01_PN16_DN32.step",
+      "url": "https://www.zelentech.co/assets/cad/en1092-1/EN1092-1_Type01_PN16_DN32.step",
+      "sha256": "2e164af6cc78b009fe3a5da5f011423c87cc76b287ff224d8ccefdb018817080",
+      "measuredDimensions": {
+        "thicknessMm": 18.0,
+        "plateThicknessMm": 16.0,
+        "raisedFaceHeightMm": 2.0,
+        "boreDiameterMm": 43.9,
+        "outerDiameterMm": 140.0,
+        "raisedFaceDiameterMm": 78.0,
+        "boltCircleMm": 100.0,
+        "boltHoleDiameterMm": 18.0,
+        "holes": 4
+      },
+      "status": "reference-only-not-mapped"
+    },
+    {
+      "dn": 40,
+      "pn": 16,
+      "path": "data/sources/pn25-flanges-2026-10-26/EN1092-1_Type01_PN16_DN40.step",
+      "url": "https://www.zelentech.co/assets/cad/en1092-1/EN1092-1_Type01_PN16_DN40.step",
+      "sha256": "8da32f4e6f6749075a2857589ba8ac6b946262dea85f2cee1ee04cffa46e1a42",
+      "measuredDimensions": {
+        "thicknessMm": 18.0,
+        "plateThicknessMm": 16.0,
+        "raisedFaceHeightMm": 2.0,
+        "boreDiameterMm": 49.8,
+        "outerDiameterMm": 150.0,
+        "raisedFaceDiameterMm": 88.0,
+        "boltCircleMm": 110.0,
+        "boltHoleDiameterMm": 18.0,
+        "holes": 4
+      },
+      "status": "reference-only-not-mapped"
+    },
+    {
+      "dn": 50,
+      "pn": 16,
+      "path": "data/sources/pn25-flanges-2026-10-26/EN1092-1_Type01_PN16_DN50.step",
+      "url": "https://www.zelentech.co/assets/cad/en1092-1/EN1092-1_Type01_PN16_DN50.step",
+      "sha256": "2c66308936eefd20077c98df117d92a855145a7f0b21ab5b8f35d991be9350a4",
+      "measuredDimensions": {
+        "thicknessMm": 20.0,
+        "plateThicknessMm": 18.0,
+        "raisedFaceHeightMm": 2.0,
+        "boreDiameterMm": 61.8,
+        "outerDiameterMm": 165.0,
+        "raisedFaceDiameterMm": 102.0,
+        "boltCircleMm": 125.0,
+        "boltHoleDiameterMm": 18.0,
+        "holes": 4
+      },
+      "status": "reference-only-not-mapped"
+    },
+    {
+      "dn": 65,
+      "pn": 16,
+      "path": "data/sources/pn25-flanges-2026-10-26/EN1092-1_Type01_PN16_DN65.step",
+      "url": "https://www.zelentech.co/assets/cad/en1092-1/EN1092-1_Type01_PN16_DN65.step",
+      "sha256": "81d7b67e57afa1f647d5be89431714a7c7d87e210c98b1cced82098876777d5c",
+      "measuredDimensions": {
+        "thicknessMm": 20.0,
+        "plateThicknessMm": 18.0,
+        "raisedFaceHeightMm": 2.0,
+        "boreDiameterMm": 77.6,
+        "outerDiameterMm": 185.0,
+        "raisedFaceDiameterMm": 122.0,
+        "boltCircleMm": 145.0,
+        "boltHoleDiameterMm": 18.0,
+        "holes": 8
+      },
+      "status": "reference-only-not-mapped"
+    },
+    {
+      "dn": 80,
+      "pn": 16,
+      "path": "data/sources/pn25-flanges-2026-10-26/EN1092-1_Type01_PN16_DN80.step",
+      "url": "https://www.zelentech.co/assets/cad/en1092-1/EN1092-1_Type01_PN16_DN80.step",
+      "sha256": "34d75710368a7a2d008bdd1ee2b6efebfd1c69803e800f7b33c598c41d6749fc",
+      "measuredDimensions": {
+        "thicknessMm": 20.0,
+        "plateThicknessMm": 18.0,
+        "raisedFaceHeightMm": 2.0,
+        "boreDiameterMm": 90.4,
+        "outerDiameterMm": 200.0,
+        "raisedFaceDiameterMm": 138.0,
+        "boltCircleMm": 160.0,
+        "boltHoleDiameterMm": 18.0,
+        "holes": 8
+      },
+      "status": "reference-only-not-mapped"
+    },
+    {
+      "dn": 32,
+      "pn": 25,
+      "path": "data/sources/pn25-flanges-2026-10-26/EN1092-1_Type01_PN25_DN32.step",
+      "url": "https://www.zelentech.co/assets/cad/en1092-1/EN1092-1_Type01_PN25_DN32.step",
+      "sha256": "4aae3b6e983abd840cd67d80c05c512b5ffbf88a11621aa4702fd84f77ab8d10",
+      "measuredDimensions": {
+        "thicknessMm": 18.0,
+        "plateThicknessMm": 16.0,
+        "raisedFaceHeightMm": 2.0,
+        "boreDiameterMm": 43.9,
+        "outerDiameterMm": 140.0,
+        "raisedFaceDiameterMm": 78.0,
+        "boltCircleMm": 100.0,
+        "boltHoleDiameterMm": 18.0,
+        "holes": 4
+      },
+      "status": "reference-only-not-mapped"
+    },
+    {
+      "dn": 50,
+      "pn": 25,
+      "path": "data/sources/pn25-flanges-2026-10-26/EN1092-1_Type01_PN25_DN50.step",
+      "url": "https://www.zelentech.co/assets/cad/en1092-1/EN1092-1_Type01_PN25_DN50.step",
+      "sha256": "85210632bab6aabdf5ac1d673c1f756a89027fa52ebf4236b6efa62e801f831f",
+      "measuredDimensions": {
+        "thicknessMm": 20.0,
+        "plateThicknessMm": 18.0,
+        "raisedFaceHeightMm": 2.0,
+        "boreDiameterMm": 61.8,
+        "outerDiameterMm": 165.0,
+        "raisedFaceDiameterMm": 102.0,
+        "boltCircleMm": 125.0,
+        "boltHoleDiameterMm": 18.0,
+        "holes": 4
+      },
+      "status": "reference-only-not-mapped"
+    },
+    {
+      "dn": 100,
+      "pn": 40,
+      "path": "data/sources/pn25-flanges-2026-10-26/EN1092-1_Type01_PN40_DN100.step",
+      "url": "https://www.zelentech.co/assets/cad/en1092-1/EN1092-1_Type01_PN40_DN100.step",
+      "sha256": "7a89d6202ecc4b492199b46c0f6fe0cdc2e6a6f7fbf0c9fd85a716949e01da18",
+      "measuredDimensions": {
+        "thicknessMm": 26.0,
+        "plateThicknessMm": 23.0,
+        "raisedFaceHeightMm": 3.0,
+        "boreDiameterMm": 115.8,
+        "outerDiameterMm": 235.0,
+        "raisedFaceDiameterMm": 162.0,
+        "boltCircleMm": 190.0,
+        "boltHoleDiameterMm": 22.0,
+        "holes": 8
+      },
+      "status": "reference-only-not-mapped"
+    },
+    {
+      "dn": 32,
+      "pn": 40,
+      "path": "data/sources/pn25-flanges-2026-10-26/EN1092-1_Type01_PN40_DN32.step",
+      "url": "https://www.zelentech.co/assets/cad/en1092-1/EN1092-1_Type01_PN40_DN32.step",
+      "sha256": "9d764276278c3f1d91960ae9f92d8a00e5773b6524c1e49a251a3f99de96f51d",
+      "measuredDimensions": {
+        "thicknessMm": 18.0,
+        "plateThicknessMm": 15.0,
+        "raisedFaceHeightMm": 3.0,
+        "boreDiameterMm": 43.9,
+        "outerDiameterMm": 140.0,
+        "raisedFaceDiameterMm": 78.0,
+        "boltCircleMm": 100.0,
+        "boltHoleDiameterMm": 18.0,
+        "holes": 4
+      },
+      "status": "reference-only-not-mapped"
+    },
+    {
+      "dn": 50,
+      "pn": 40,
+      "path": "data/sources/pn25-flanges-2026-10-26/EN1092-1_Type01_PN40_DN50.step",
+      "url": "https://www.zelentech.co/assets/cad/en1092-1/EN1092-1_Type01_PN40_DN50.step",
+      "sha256": "1fa30799f46931df06b6deb938721b52e08b85530a9e392a05b16896515c3947",
+      "measuredDimensions": {
+        "thicknessMm": 20.0,
+        "plateThicknessMm": 17.0,
+        "raisedFaceHeightMm": 3.0,
+        "boreDiameterMm": 61.8,
+        "outerDiameterMm": 165.0,
+        "raisedFaceDiameterMm": 102.0,
+        "boltCircleMm": 125.0,
+        "boltHoleDiameterMm": 18.0,
+        "holes": 4
+      },
+      "status": "reference-only-not-mapped"
+    }
+  ],
+  "notes": [
+    "Модели найдены как общие EN1092-1 type01. Не являются CAD Newkey, Grossner или iFitting.",
+    "Размеры измерены по поверхностям B-Rep в мм. Толщина и отверстия расходятся с проверенными данными. Не применять к базе без уточнения исполнения."
+  ],
+  "researchSources": [
+    {
+      "path": "data/sources/pn25-flanges-2026-10-26/heco-pn40.pdf",
+      "url": "https://www.heco.de/webservice/downloads/product-sheet/1419/en/heco-product-sheet-1419-Stainless-steel-plate-flanges-DIN-EN-PN-40.pdf",
+      "sha256": "e29f19f63574ca89922831c00fe54cd9556f203a54f531f7e8a31791534cfed0",
+      "format": "original-download"
+    },
+    {
+      "path": "data/sources/pn25-flanges-2026-10-26/heco-pn40.xlsx",
+      "url": "https://www.heco.de/webservice/downloads/stock-and-price-list/1419/en/heco_stock_and_price_list_GF.40_1419.xlsx",
+      "sha256": "b2e19bc6c251fd1846009a0e4e2744a9fdcfa5e1365abf0b98b168b8fb94569d",
+      "format": "original-download"
+    },
+    {
+      "path": "data/sources/pn25-flanges-2026-10-26/newkey-din2576.pdf",
+      "url": "https://www.newkey.ru/media/file/sections/flanets-ploskii-din2576--nk-fd-.pdf",
+      "sha256": "4bee780ae75668529b71c22af3fe708017d5452bad16117dd3f2a0ac474a7e89",
+      "format": "original-download"
+    },
+    {
+      "path": "data/sources/pn25-flanges-2026-10-26/newkey-dn32-page.txt",
+      "url": "https://www.newkey.ru/product/flanets-ploskii-din2503-nerzhaveiushchii-aisi304-dn32-114-cf8-rn40/",
+      "sha256": "2b90bf34233169f6661b400c9b74c99fe315467bab08399d2cd04fc50ee92f63",
+      "format": "visible-page-text-without-scripts-or-forms"
+    },
+    {
+      "path": "data/sources/pn25-flanges-2026-10-26/newkey-dn50-page.txt",
+      "url": "https://www.newkey.ru/product/flanets-ploskii-din2503-nerzhaveiushchii-aisi304-dn50-2-cf8-rn40/",
+      "sha256": "c97b8f83846ab7b3a646354e58ca17366577e8a4d735b088847da81d5040e322",
+      "format": "visible-page-text-without-scripts-or-forms"
+    }
+  ],
+  "report": "docs/pn25-flanges-and-cad-2026-10-26.md"
+}

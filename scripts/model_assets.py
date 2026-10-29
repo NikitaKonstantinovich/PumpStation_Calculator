@@ -79,8 +79,10 @@ def load_library(root, registry=None):
         result[key] = {"pumpId": pump_id, "key": key, "bounds": item["normalizedBboxMm"], "ports": ports,
                        "source": item["outputFile"], "sourceHash": item["outputSha256"], "units": "mm",
                        "mapping": mapping, "warnings": warnings}
-    registry = registry or root / "Equipment/model-library.json"
-    if registry.exists():
+    registries = [registry] if registry else [root / "frontend/data/cdm-flow-registry.json", root / "frontend/data/line-valve-registry.json", root / "Equipment/model-library.json"]
+    for registry in registries:
+        if not registry.exists():
+            continue
         custom = json.loads(registry.read_text(encoding="utf-8"))
         if custom.get("version") != 1 or not isinstance(custom.get("models"), list):
             raise ValueError("Некорректный формат реестра Equipment/model-library.json")

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { smartCabinetSupportsPower } from "./control-cabinet-selection";
 import type { InputEntity, SettingsEntity } from "./project-config";
 import { useIssueNavigation, useRuntimeDiagnostic } from "./diagnostics-ui";
 
@@ -29,7 +30,7 @@ const loadDatabase=()=>databasePromise??=(async()=>{
 })();
 const powerLabel=(value:number)=>value.toLocaleString("ru-RU",{maximumFractionDigits:3});
 export const SMART_MAX_PUMP_POWER_KW=7.5;
-export const smartCabinetSupportsPower=(cabinet:SmartCabinet,power:number)=>{const match=cabinet.name.match(/\((\d+(?:,\d+)?)-(\d+(?:,\d+)?)\)/);const min=cabinet.powerMinKw??(match?Number(match[1].replace(",",".")):cabinet.pumpPowerKw),max=cabinet.powerMaxKw??(match?Number(match[2].replace(",",".")):cabinet.pumpPowerKw);return power+1e-7>=min&&power<=max+1e-7;};
+export { smartCabinetSupportsPower } from "./control-cabinet-selection";
 const roleLabel:Record<string,string>={"incoming-switch":"Вводной рубильник","motor-breaker":"Автомат насоса",vfd:"Частотный преобразователь",contactor:"Контактор",enclosure:"Корпус","assembly-kit":"Сборочный комплект",labor:"Сборка шкафа","control-relay":"Реле","relay-socket":"Розетка реле","signal-lamp":"Сигнальная лампа",terminal:"Клемма",filter:"Фильтр","cross-module":"Кросс-модуль","cable-gland":"Кабельный ввод"};
 const componentGroups=[
   {id:"dynamic",label:"Динамические комплектующие",description:"Зависят от количества и мощности насосов"},

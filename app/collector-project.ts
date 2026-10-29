@@ -1,8 +1,11 @@
+import { stationCollectorInstrumentPorts } from "./station-hydraulic-ports";
+import { separationEnabled } from "./hydraulic-option-config";
 import type { DnEntity, InputEntity, ProjectConfig, SettingsEntity, SpecItem } from "./project-config";
 import { normalizeSpecificationItems } from "./specification-items";
 import { defaultCollectorMaterial, recommendedDn, resolveDnConnection, suctionHydraulics, dischargeHydraulics } from "./dn-defaults";
-import { collectorCode, collectorFlow, collectorPressureChecks, configurationFingerprint, positive, secondaryAllowed, type CollectorCalculation, type CollectorCatalog, type CollectorConfiguration, type CollectorType } from "./collector-calculations";
+import { collectorCode, collectorFlow, collectorPressureChecks, configurationFingerprint, configurationWarnings, collectorBranchDiameterErrors, positive, secondaryAllowed, type CollectorCalculation, type CollectorCatalog, type CollectorConfiguration, type CollectorType } from "./collector-calculations";
 import { withInletPressureChecks } from "./suction-pressure";
+import { pressureChecksEnabled, withoutPressureChecks } from "./pressure-check-policy";
 
 export type CollectorOverrides = Partial<Pick<CollectorConfiguration, "dn" | "pn" | "material" | "connection">> & { primaryDn?: number; secondaryDn?: number; primaryConnection?: "threaded" | "flanged"; secondaryConnection?: "threaded" | "flanged"; secondaryPn?: number };
 export type SavedCollector = { id: string; code: string; configuration: CollectorConfiguration; price: number; priceUpdatedAt: string; source: string; calculation: CollectorCalculation };
@@ -53,6 +56,8 @@ export function collectorRecommendation(project: ProjectConfig, type: CollectorT
     const { flow } = collectorFlow(configuration);
     networkDn = positive(flow) ? recommendedDn(flow) : null;
   }
+  configuration.instrumentPorts = stationCollectorInstrumentPorts(settings, type);
+  if (separationEnabled(settings)) configuration.sectionBreaks = Math.max(0, [primary, secondary].reduce((sum, circuit) => sum + (circuit?.working ?? 0) + (circuit?.reserve ?? 0), 0) - 1);
   return { ...configuration, dn: networkDn, connection: resolveDnConnection(settings, networkDn, false, dn.connectionType).connection };
 }
 export function resolveCollector(recommended: CollectorConfiguration, state: CollectorCardState): CollectorConfiguration {
@@ -64,33 +69,48 @@ export function resolveCollector(recommended: CollectorConfiguration, state: Col
   for (const circuit of [result.primary, result.secondary]) if (circuit && (circuit.dn ?? 0) > 50) circuit.connection = "flanged";
   return result;
 }
-export function syncCollectorSpec(items: SpecItem[], collectors: CollectorsEntity, inletHead?: number | null, catalog?: CollectorCatalog): SpecItem[] {
-  let result = [...items];
+export function syncCollectorSpec(items: SpecItem[], collectors: CollectorsEntity, inletHead?: number | null, catalog?: CollectorCatalog, checkPressure = true): SpecItem[] {
+  let result = checkPressure ? [...items] : items.map(withoutPressureChecks);
   for (const type of ["suction", "discharge"] as const) {
     const state = collectors[type], option = type === "suction" ? "suctionCollector" : "dischargeCollector", legacy = type === "suction" ? "Коллектор подводящий" : "Коллектор напорный";
-    const isItem = (item: SpecItem) => item.option === option || (!item.option && item.name === legacy);
+    const isItem = (item: SpecItem) => item.option === option;
     const previous = result.find(isItem), saved = state.databaseStatus === "found" && state.database?.code === state.code ? state.database : null;
-    const calculated = state.status === "complete" && state.calculation?.code === state.code ? state.calculation : null;
+    const calculated = state.code && state.status === "complete" && state.calculation?.code === state.code ? state.calculation : null;
     const description = saved ? "Есть в базе · выбрано" : calculated ? "Требует подтверждения — сохраните коллектор в базе" : state.status === "stale" ? "Расчёт устарел — выполните расчёт в конструкторе" : "Коллектор отсутствует в базе — выполните расчёт в конструкторе";
     result = result.filter(item => !isItem(item));
-    const row: SpecItem = { ...previous, inletPressureCheck: undefined, dischargePressureCheck: undefined, position: type === "suction" ? "03.01" : "04.02", name: legacy, section: type, option, quantity: 1, unit: "шт.", equipmentId: saved?.id, details: state.code ?? "Не заданы параметры коллектора", price: saved?.price ?? calculated?.price ?? null, description, status: saved ? "selected" : calculated ? "confirmation" : "clarify" };
-    result.push(type === "suction" && state.configuration ? withInletPressureChecks(row, collectorPressureChecks(state.configuration, inletHead, catalog)) : row);
+    const row: SpecItem = { ...previous, technicalStatus: saved ? "ready" : state.status === "stale" ? "stale" : "unverified", technicalNotes: [], inletPressureCheck: undefined, dischargePressureCheck: undefined, position: type === "suction" ? "03.01" : "04.02", name: legacy, section: type, option, quantity: 1, unit: "шт.", equipmentId: saved?.id, details: state.code ?? "Не заданы параметры коллектора", price: saved?.price ?? calculated?.price ?? null, description, status: saved ? "selected" : calculated ? "confirmation" : "clarify" };
+    result.push(checkPressure && type === "suction" && state.configuration ? withInletPressureChecks(row, collectorPressureChecks(state.configuration, inletHead, catalog)) : row);
   }
   return normalizeSpecificationItems(result);
+}
+/** Insertion designs size the pump lines, not the collector. Normalize saved
+ * fingerprints too so older projects recover without approving other changes. */
+function collectorSourceFingerprint(value: string | undefined): string | undefined {
+  if (!value) return value;
+  try {
+    const parts = JSON.parse(value);
+    if (!Array.isArray(parts) || parts.length !== 4 || !parts[1] || typeof parts[1] !== "object" || Array.isArray(parts[1])) return value;
+    parts[1] = Object.fromEntries(Object.entries(parts[1]).filter(([key]) => key !== "insertionDesigns"));
+    const canonical = (v: unknown): unknown => Array.isArray(v) ? v.map(canonical) : v && typeof v === "object"
+      ? Object.fromEntries(Object.entries(v).sort(([a], [b]) => a.localeCompare(b)).map(([key, item]) => [key, canonical(item)])) : v;
+    return JSON.stringify(canonical(parts));
+  } catch { return value; }
 }
 export function synchronizeCollectors(project: ProjectConfig, catalog?: CollectorCatalog): ProjectConfig {
   const previous = (project.entities["station-collectors"] as CollectorsEntity | undefined) ?? createCollectors();
   const collectors = { ...previous };
   for (const type of ["suction", "discharge"] as const) {
     const state = previous[type], recommended = collectorRecommendation(project, type), configuration = resolveCollector(recommended, state), code = collectorCode(configuration);
-    const sourceFingerprint = JSON.stringify([recommended, project.entities["station-dn"], project.entities["system-input"], configuration.secondary ? project.entities["system-input-2"] : null]);
-    const sourceChanged = state.sourceFingerprint && state.sourceFingerprint !== sourceFingerprint;
+    const sourceFingerprint = collectorSourceFingerprint(JSON.stringify([recommended, project.entities["station-dn"], project.entities["system-input"], configuration.secondary ? project.entities["system-input-2"] : null]));
+    const calculationSourceFingerprint = collectorSourceFingerprint(state.calculationSourceFingerprint);
+    const sourceChanged = state.sourceFingerprint && collectorSourceFingerprint(state.sourceFingerprint) !== sourceFingerprint;
     const changed = state.configuration && configurationFingerprint(configuration) !== configurationFingerprint(state.configuration);
-    const stale = state.calculation && (state.calculation.flow !== collectorFlow(configuration).flow || state.calculation.fingerprint !== configurationFingerprint(configuration) || state.calculationSourceFingerprint !== sourceFingerprint || (state.currentCatalogVersion && state.calculation.catalogVersion !== state.currentCatalogVersion));
-    collectors[type] = { ...state, dnSource: project.entities["station-dn"] as DnEntity, sourceFingerprint, recommended, configuration, code,
-      status: stale ? "stale" : state.calculation ? state.calculation.complete ? "complete" : "incomplete" : "uncalculated",
-      ...(changed || sourceChanged || state.code !== code ? { database: null, databaseStatus: "unchecked" as const, databaseError: undefined } : {}) };
+    const stale = state.calculation && (state.calculation.flow !== collectorFlow(configuration).flow || state.calculation.fingerprint !== configurationFingerprint(configuration) || calculationSourceFingerprint !== sourceFingerprint || (state.currentCatalogVersion && state.calculation.catalogVersion !== state.currentCatalogVersion));
+    const configurationErrors = [...configurationWarnings(configuration), ...collectorBranchDiameterErrors(configuration, catalog)];
+    collectors[type] = { ...state, dnSource: project.entities["station-dn"] as DnEntity, sourceFingerprint, calculationSourceFingerprint, recommended, configuration, code,
+      status: configurationErrors.length ? "incomplete" : stale ? "stale" : state.calculation ? state.calculation.complete ? "complete" : "incomplete" : "uncalculated",
+      ...(configurationErrors.length || changed || sourceChanged || state.code !== code ? { database: null, databaseStatus: "unchecked" as const, databaseError: undefined } : {}) };
   }
   const spec = project.entities["station-spec"];
-  return { ...project, entities: { ...project.entities, "station-collectors": collectors, ...(spec?.kind === "spec" ? { "station-spec": { ...spec, items: syncCollectorSpec(spec.items, collectors, (project.entities["station-settings"] as SettingsEntity).inletHead, catalog) } } : {}) } };
+  return { ...project, entities: { ...project.entities, "station-collectors": collectors, ...(spec?.kind === "spec" ? { "station-spec": { ...spec, items: syncCollectorSpec(spec.items, collectors, (project.entities["station-settings"] as SettingsEntity).inletHead, catalog, pressureChecksEnabled(project.entities["station-settings"] as SettingsEntity)) } } : {}) } };
 }

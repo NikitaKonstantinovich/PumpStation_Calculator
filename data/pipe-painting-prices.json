@@ -1,0 +1,171 @@
+{
+  "id": "pipe-painting-st20-v1",
+  "source": {
+    "file": "Прайс_окраска_труб_до_400.xlsx",
+    "sha256": "5a84d59498c0dae00011e50859146410ea481460b6656a7133e953cc85142662",
+    "sheet": "Прайс окраски труб",
+    "range": "A5:B31",
+    "unit": "RUB/m",
+    "note": "Цены рассчитаны относительно опорных значений Ø108 = 775 ₽/м, Ø133 = 928 ₽/м, Ø273 = 3 263 ₽/м, Ø377 = 5 769 ₽/м и округлены до ближайших 50 ₽."
+  },
+  "reservePercent": 15,
+  "diameterAliases": [
+    {
+      "dn": 20,
+      "catalogDiameterMm": 26.9,
+      "sourceDiameterMm": 26.8
+    },
+    {
+      "dn": 25,
+      "catalogDiameterMm": 33.7,
+      "sourceDiameterMm": 33.5
+    },
+    {
+      "dn": 32,
+      "catalogDiameterMm": 42.4,
+      "sourceDiameterMm": 42.3
+    },
+    {
+      "dn": 40,
+      "catalogDiameterMm": 48.3,
+      "sourceDiameterMm": 48
+    }
+  ],
+  "rows": [
+    {
+      "diameterMm": 21.3,
+      "pricePerMeter": 250,
+      "row": 5
+    },
+    {
+      "diameterMm": 26.8,
+      "pricePerMeter": 300,
+      "row": 6
+    },
+    {
+      "diameterMm": 33.5,
+      "pricePerMeter": 300,
+      "row": 7
+    },
+    {
+      "diameterMm": 42.3,
+      "pricePerMeter": 350,
+      "row": 8
+    },
+    {
+      "diameterMm": 48,
+      "pricePerMeter": 400,
+      "row": 9
+    },
+    {
+      "diameterMm": 57,
+      "pricePerMeter": 450,
+      "row": 10
+    },
+    {
+      "diameterMm": 60,
+      "pricePerMeter": 500,
+      "row": 11
+    },
+    {
+      "diameterMm": 76,
+      "pricePerMeter": 600,
+      "row": 12
+    },
+    {
+      "diameterMm": 89,
+      "pricePerMeter": 650,
+      "row": 13
+    },
+    {
+      "diameterMm": 102,
+      "pricePerMeter": 750,
+      "row": 14
+    },
+    {
+      "diameterMm": 108,
+      "pricePerMeter": 800,
+      "row": 15
+    },
+    {
+      "diameterMm": 114,
+      "pricePerMeter": 800,
+      "row": 16
+    },
+    {
+      "diameterMm": 127,
+      "pricePerMeter": 900,
+      "row": 17
+    },
+    {
+      "diameterMm": 133,
+      "pricePerMeter": 950,
+      "row": 18
+    },
+    {
+      "diameterMm": 140,
+      "pricePerMeter": 1050,
+      "row": 19
+    },
+    {
+      "diameterMm": 159,
+      "pricePerMeter": 1350,
+      "row": 20
+    },
+    {
+      "diameterMm": 168,
+      "pricePerMeter": 1500,
+      "row": 21
+    },
+    {
+      "diameterMm": 180,
+      "pricePerMeter": 1700,
+      "row": 22
+    },
+    {
+      "diameterMm": 194,
+      "pricePerMeter": 1950,
+      "row": 23
+    },
+    {
+      "diameterMm": 219,
+      "pricePerMeter": 2350,
+      "row": 24
+    },
+    {
+      "diameterMm": 245,
+      "pricePerMeter": 2800,
+      "row": 25
+    },
+    {
+      "diameterMm": 273,
+      "pricePerMeter": 3250,
+      "row": 26
+    },
+    {
+      "diameterMm": 299,
+      "pricePerMeter": 3900,
+      "row": 27
+    },
+    {
+      "diameterMm": 325,
+      "pricePerMeter": 4500,
+      "row": 28
+    },
+    {
+      "diameterMm": 351,
+      "pricePerMeter": 5150,
+      "row": 29
+    },
+    {
+      "diameterMm": 377,
+      "pricePerMeter": 5750,
+      "row": 30
+    },
+    {
+      "diameterMm": 400,
+      "pricePerMeter": 6300,
+      "row": 31
+    }
+  ]
+}

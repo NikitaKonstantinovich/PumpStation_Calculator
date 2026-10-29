@@ -133,22 +133,30 @@ test("collector pressure warning preserves a database price and is removed after
 });
 
 test("actual specification render keeps technical descriptions and warnings behind the button", async () => {
-  const pageUrl = new URL("../app/page.tsx", import.meta.url);
+  const pageUrl = new URL("../app/full-workspace.tsx", import.meta.url);
   const page = await readFile(pageUrl, "utf8");
+  const insertionSource=(await readFile(new URL("../app/specification-insertions.tsx",import.meta.url),"utf8")).replace('import "./specification-insertions.css";',"");
+  const hydraulicSource=(await readFile(new URL("../app/specification-hydraulic-options.tsx",import.meta.url),"utf8")).replace('import "./specification-insertions.css";',"");
   const source = [
-    `import { useRef, useState } from ${JSON.stringify(import.meta.resolve("react"))};`,
+    `import { useEffect, useRef, useState } from ${JSON.stringify(import.meta.resolve("react"))};`,
     'import { specificationItemPresentation, specificationIssueId, specificationSection, visibleSpecificationItems } from "./specification-presentation";',
+    'import { assessSpecification, specificationHasPrice, specificationLineTotal } from "./specification-readiness";',
     'const IssueNavigationMessage=()=>null; const IssueMessages=()=>null;',
+    'const loadedComponentsDatabase=undefined;', insertionSource, hydraulicSource,
     'const normalizeSpecificationItems=items=>items; const isSecondaryEnabled=()=>false; const pumpPriceRub=()=>0;',
     page.slice(page.indexOf("const SPEC_GROUPS:"), page.indexOf("\n];", page.indexOf("const SPEC_GROUPS:")) + 3),
-    page.slice(page.indexOf("function Specification("), page.indexOf("function PumpSketchView(")),
+    page.slice(page.indexOf("function Specification("), page.indexOf("\ntype DnField=")),
     'export {Specification};',
   ].join("\n");
   const compiled = ts.transpileModule(source, { compilerOptions: { module: ts.ModuleKind.ESNext, jsx: ts.JsxEmit.ReactJSX, target: ts.ScriptTarget.ES2022 } }).outputText.replaceAll('"react/jsx-runtime"', JSON.stringify(import.meta.resolve("react/jsx-runtime")));
   const { Specification } = await loadTs(pageUrl, { [pageUrl.href]: compiled });
   const item = withInletPressureChecks(row("Фланец", { details: "DN100 · PN16 · Ст20", description: "Предупреждение: проверить размеры" }), [checkInletPressure(200, "Фланец", 16, "PN16")]);
-  const html = renderToStaticMarkup(createElement(Specification, { entity: { items: [item] }, settings: project().entities["station-settings"], catalogue: [] }));
+  const current = project(); current.entities["station-spec"].items = [item];
+  const html = renderToStaticMarkup(createElement(Specification, { project: current, issues: [], entity: current.entities["station-spec"], settings: current.entities["station-settings"] }));
   assert.match(html, /spec-table__row--warning/);
+  assert.match(html, /<summary[^>]*>Выгрузить/);
+  assert.match(html, /<button[^>]*>CSV<\/button>/);
+  assert.match(html, /<button[^>]*>XLSX<\/button>/);
   assert.match(html, /spec-table__cell--price[^>]*>125</);
   assert.match(html, /<button[^>]*aria-label="Ошибка: Фланец"/);
   assert.match(html, /spec-table__cell--description">DN100 · PN16 · Ст20<\/span>/);

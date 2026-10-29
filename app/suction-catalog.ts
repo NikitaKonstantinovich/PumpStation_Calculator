@@ -1,5 +1,6 @@
 // Transcribed from the user's mating-parts table. PN16 only; no inferred PN25 prices.
-export type AssemblyComponent = { id: string; catalogId: string; family: string; fields: Array<{ column: string; headerPath: string[]; value: unknown }>; prices: Array<{ label: string; amount: number; currency: string }> };
+import { markLegacyNomenclature } from "./component-nomenclature";
+export type AssemblyComponent = { tableId?: string; sourceSheet?: string; sourceRow?: number; id: string; catalogId: string; family: string; fields: Array<{ column: string; headerPath: string[]; value: unknown }>; prices: Array<{ label: string; amount: number; currency: string }>; calculatedInsertion?: import("./calculated-insertion").CalculatedInsertion };
 export const matingParts = [
   { dn:20, threadDn:15, price:920 }, { dn:25, threadDn:25, price:920 },
   { dn:32, threadDn:32, price:920 }, { dn:40, threadDn:40, price:1300 }, { dn:50, threadDn:50, price:1300 },
@@ -13,6 +14,6 @@ const component = (id: string, family: string, dn: number, price: number, extra:
 });
 export const suctionCatalogItems: AssemblyComponent[] = [
   ...matingParts.map(p=>component(`rf-${p.dn}`,`Ответная часть РФ DN${p.dn} — резьба DN${p.threadDn}`,p.dn,p.price,{"DN резьбы":p.threadDn})),
-  ...Object.entries(insertionPrices).map(([dn,price])=>component(`ff-${dn}`,`Вставка ФФ DN${dn}–${dn}`,Number(dn),price)),
+  ...Object.entries(insertionPrices).map(([dn,price])=>markLegacyNomenclature(component(`ff-${dn}`,`Вставка ФФ DN${dn}–${dn}`,Number(dn),price))),
   ...Object.entries(unionPrices).map(([dn,price])=>component(`union-${dn}`,`Американка НР-НР DN${dn}${dn==="50"?", нержавеющая":", никелированная Gappo"}`,Number(dn),price)),
 ];
