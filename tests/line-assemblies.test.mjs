@@ -21,6 +21,7 @@ const source = [
   'import {buildDischargeSpec,replaceDischargeSpec,checkDischargeSpecPressure} from "./discharge-spec";',
   'import {normalizeSpecificationItems,specificationOption} from "./specification-items";',
   'import {synchronizeCollectors} from "./collector-project";',
+  'import {bindProjectComponents} from "./base-values-components";',
   shared.match(/^export const isCalculated =.*$/m)[0], page.match(/^const isSecondaryEnabled =.*$/m)[0], shared.match(/^export const componentFieldLabel=.*$/m)[0],
   page.slice(page.indexOf("const isJockeyCircuit="), page.indexOf("function DnCalculator(")),
   page.slice(page.indexOf("const HYDRAULIC_SPEC_OPTIONS:"), page.indexOf("function PanelContent(")),
@@ -120,6 +121,24 @@ test("real ECH threaded specification becomes three distinct inlet/outlet branch
   assert.ok(model.connectionIssues(a).some(i => /монтажн|геометри/.test(i.message)));
 });
 
+test("ECH threaded discharge follows +Z, suction stays horizontal, and explicit CAD axes keep priority",async()=>{
+  const p=station(),data=await realLineCatalog(p),a=build(p,data);
+  for(const pump of a.components.filter(c=>c.kind==="pump"))for(const side of ["suction","discharge"]){
+    const axis=side==="discharge"?[0,0,1]:[-1,0,0];
+    vecClose(pump.ports.find(p=>p.id===(side==="discharge"?"outlet":"inlet")).axis,axis);
+    for(const c of a.components.filter(c=>c.line?.pumpId===pump.id&&c.line.side===side&&!c.line.auxiliary)){
+      const first=c.ports.find(p=>p.id===c.line.ports[0]),last=c.ports.find(p=>p.id===c.line.ports[1]);
+      vecClose(model.rotate(last.axis,c.rotation),axis);
+      const from=model.worldPoint(c,first.point),to=model.worldPoint(c,last.point);
+      close(model.subtract(to,from).reduce((s,v,i)=>s+v*axis[i],0),c.line.length??0);
+    }
+  }
+  const pr=structuredClone(profiles),id=p.entities["system-input"].selectedPumpId;
+  pr.profiles[id].ports.find(p=>p.id==="outlet").axis=[1,0,0];
+  const explicit=build(p,data,pr);assert.ok(explicit.components.filter(c=>c.kind==="pump").every(c=>JSON.stringify(c.ports.find(p=>p.id==="outlet").axis)==="[1,0,0]"));
+  assert.ok(!model.connectionIssues(a).some(i=>/соединение нарушено/.test(i.message)));
+});
+
 test("flanged parts, individual gaskets and fastener quantities match the real aggregated specification", () => {
   const p = station("9", 80, 80, "flanged"), a = build(p);
   for (const row of p.entities["station-spec"].items.filter(r => r.assemblyRole?.startsWith("primary-") && !/flax|error/.test(r.assemblyRole))) {
@@ -189,6 +208,23 @@ test("a real selected reducer mounts its small end towards the pump without stre
     assert.equal(c.ports.find(p=>p.id===c.line.ports[0]).dn,65);
     assert.equal(c.ports.find(p=>p.id===c.line.ports[1]).dn,80);
     assert.equal(c.line.length,data.items[c.equipmentId].length);
+  }
+});
+
+test("catalog eccentric reducers stay flat on top when the small end faces horizontal pump ports", async () => {
+  const f = await json("./fixtures/insertion-3d.json");
+  const part = f.catalog.parts.find(p => p.geometry === "eccentric"), item = f.source.items.find(i => i.id === part.id);
+  assert.ok(item);
+  const g = lineGeometry(item, f.catalog, {catalog:f.catalog,flanges:{},models:{}}), s = g.shape;
+  assert.equal(s.kind,"reducer-outline");
+  close(s.offset[2]+s.smallOuterMm/2,s.outerMm/2);
+  vecClose(g.ports[1].point,[g.length,0,s.offset[2]]);
+  for (const axis of [[-1,0,0],[1,0,0],[0,-1,0],[0,1,0]]) {
+    const rotation = mountingRotation([-1,0,0],axis,[0,0,1]);
+    const largeTop = model.rotate([0,0,s.outerMm/2],rotation);
+    const smallTop = model.rotate([g.length,0,s.offset[2]+s.smallOuterMm/2],rotation);
+    close(largeTop[2],smallTop[2]);
+    assert.ok(model.rotate([g.length,0,s.offset[2]-s.smallOuterMm/2],rotation)[2] > model.rotate([0,0,-s.outerMm/2],rotation)[2]);
   }
 });
 
@@ -352,7 +388,7 @@ test("prepared CAD refresh preserves the canonical mounting frame and manual pos
   const a=build(p,data), selected=a.components.find(c=>c.line?.role===row.option);
   const moved=model.editComponent(a,{id:selected.id,patch:{position:[10,20,30],rotation:[20,10,15],opacity:.4,hidden:true,locked:true}});
   const hash="f".repeat(64), prepared={version:1,profiles:{},equipment:{[`equipment:${row.equipmentId}`]:{source:"verified.step",sourceHash:hash,bounds:[-30,-30,0,30,30,120],meshUrl:`/model-assets/model-${hash}-v1.stl`,mapping:"reviewed",warnings:[],ports:[{id:"inlet",point:[0,0,0],axis:[0,0,-1],provisional:false},{id:"outlet",point:[0,0,120],axis:[0,0,1],provisional:false}]}}};
-  const updated=model.refreshModelAssets(moved,p,pumps,prepared,data), c=updated.components.find(c=>c.id===selected.id);
+  const updated=model.refreshModelAssets(moved,p,pumps,model.combineProfiles(profiles,prepared),data), c=updated.components.find(c=>c.id===selected.id);
   assert.deepEqual(c.position,[10,20,30]);assert.deepEqual(c.rotation,[20,10,15]);assert.equal(c.opacity,.4);assert.equal(c.hidden,true);assert.equal(c.locked,true);
   vecClose(c.ports[0].point,[0,0,0]);vecClose(c.ports[1].point,[120,0,0]);assert.equal(c.shape.kind,"mesh");
   assert.equal(updated.components.filter(c=>c.equipmentId===row.equipmentId).length,3);
@@ -488,4 +524,62 @@ test("refreshing an old reversed CAD valve corrects its arrow while preserving i
   assert.deepEqual(updated.position,valve.position);assert.deepEqual(updated.rotation,valve.rotation);assert.deepEqual(updated.ports,generated.components.find(c=>c.id===valve.id).ports);
   assert.equal(updated.line.length,valve.line.length);assert.equal(updated.equipmentId,valve.equipmentId);assert.equal(updated.locked,true);assert.equal(updated.hidden,true);assert.equal(updated.opacity,.4);
   vecClose(model.rotate([0,0,-1],updated.shape.modelRotation),[1,0,0]);
+});
+
+
+test("measured MBL recovery assembles all seven branches and replaces staged valve copies", async()=>{
+  const p=station("nu-34f0554f7dc091e4",100,80,"flanged");
+  p.entities["station-settings"].stationType="combined";
+  Object.assign(p.entities["system-input"],{workingPumpCount:3,reservePumpCount:1});
+  Object.assign(p.entities["system-input-2"],p.entities["system-input"],{workingPumpCount:2,reservePumpCount:1});
+  Object.assign(p.entities["station-dn"],{secondarySuctionValveDn:100,secondaryDischargeValveDn:80});
+  const project=refresh(synchronizeCollectors(p),db,true), data=await realLineCatalog(project), a=build(project,data);
+  const pumps=a.components.filter(c=>c.kind==="pump");assert.equal(pumps.length,7);
+  for(const pump of pumps){assert.equal(pump.pumpGeometry.envelope,"catalog");assert.notEqual(pump.pumpGeometry.schematic,true);assert.deepEqual(pump.pumpGeometry.dimensionsMm,[973,450,564]);for(const side of ["suction","discharge"])assert.ok(a.components.some(c=>c.line?.pumpId===pump.id&&c.line.side===side));}
+  const line=a.components.find(c=>c.line&&!c.line.auxiliary&&c.equipmentId);
+  const staged={...line,id:`spec-${line.line.specPosition}-equipment:${line.equipmentId}-0`,line:undefined,position:[2000,0,100]};
+  const manual={...staged,id:"manual-user-valve",sourceKey:"manual"};
+  const old={...a,components:[...pumps,staged,manual]};
+  const recovered=model.mergeAssembly(old,a);
+  assert.equal(recovered.components.some(c=>c.id===staged.id),false);
+  assert.ok(recovered.components.some(c=>c.id===manual.id));
+  assert.equal(recovered.components.filter(c=>c.id.startsWith("spec-")).length,0);
+  for(const j of recovered.lineJoints){const from=model.portPoint(recovered,j.a),to=model.portPoint(recovered,j.b);if(from&&to)vecClose(from,to);}
+});
+
+test("discharge butterfly rolls 90 degrees toward suction without moving either mating plane", async () => {
+  const {addLineAssemblies,dischargeValveUp}=await loadTs(new URL("../app/model-editor/line-assembly.ts",import.meta.url));
+  for (const axis of [[0,0,1],[0,0,-1],[1,0,0]]) for (const toward of [[-1,0,0],[1,0,0],[0,-1,0]]) {
+    const up=dischargeValveUp(axis,toward), before=model.rotate([0,0,1],mountingRotation([1,0,0],axis));
+    close(up.reduce((s,v,i)=>s+v*axis[i],0),0);
+    close(up.reduce((s,v,i)=>s+v*before[i],0),0);
+    assert.ok(up.reduce((s,v,i)=>s+v*toward[i],0)>=-1e-6);
+  }
+  for (const prefix of ["primary","secondary"]) for (const inletX of [-200,200]) {
+    const p=station("9",80,80,"flanged");
+    const circuit=prefix==="primary"?1:2, pumpId=circuit===1?"pump-1-0":"pump-2-0";
+    Object.assign(p.entities[circuit===1?"system-input":"system-input-2"],{workingPumpCount:1,reservePumpCount:0});
+    const rows=[{position:"v",section:"discharge",option:`${prefix}DischargeValve`,name:"Затвор DENDOR 017W",details:"PN16 · редуктор",quantity:1,status:"selected",equipmentId:"valve"},
+      {position:"c",section:"discharge",option:`${prefix}CheckValve`,name:"Обратный клапан",details:"PN16",quantity:1,status:"selected",equipmentId:"check"},
+      {position:"s",section:"suction",option:`${prefix}SuctionValve`,name:"Затвор DENDOR 017W",details:"PN16",quantity:1,status:"selected",equipmentId:"valve"}];
+    p.entities["station-spec"].items=rows;
+    const pump={...build(p).components.find(c=>c.kind==="pump"),id:pumpId,position:[100,200,300],rotation:[0,0,0],ports:[{id:"inlet",point:[inletX,0,0],axis:[Math.sign(inletX),0,0]},{id:"outlet",point:[0,0,100],axis:[0,0,1]}]};
+    const geometry={length:56,ports:[{id:"left",point:[0,0,0],axis:[-1,0,0],up:[0,0,1]},{id:"right",point:[56,0,0],axis:[1,0,0],up:[0,0,1]}],fidelity:"cad",issues:[],source:"test",revision:"1"};
+    const data={...empty,items:{valve:{...geometry,equipmentId:"valve"},check:{...geometry,equipmentId:"check"}}};
+    const base={...build(p),components:[pump]};
+    const turned=addLineAssemblies(base,p,profiles,data);
+    const unchangedProject=structuredClone(p);unchangedProject.entities["station-spec"].items[0].name="Кран";
+    const original=addLineAssemblies(base,unchangedProject,profiles,data);
+    for(const c of turned.components.filter(c=>c.line)) {
+      const old=original.components.find(o=>o.id===c.id);
+      for(const port of c.ports)vecClose(model.worldPoint(c,port.point),model.worldPoint(old,port.point));
+      if(c.line.role===`${prefix}DischargeValve`)vecClose(model.rotate([0,0,1],c.rotation),[Math.sign(inletX),0,0]);
+      else vecClose(c.rotation,old.rotation);
+    }
+    const merged=model.mergeAssembly(original,turned), id=turned.components.find(c=>c.line?.role===`${prefix}DischargeValve`).id;
+    vecClose(merged.components.find(c=>c.id===id).rotation,turned.components.find(c=>c.id===id).rotation);
+    const manual=structuredClone(original), changed=manual.components.find(c=>c.id===id);changed.locked=true;changed.rotation=[12,34,56];
+    vecClose(model.mergeAssembly(manual,turned).components.find(c=>c.id===id).rotation,[12,34,56]);
+    assert.deepEqual(turned.lineJoints,original.lineJoints);
+  }
 });

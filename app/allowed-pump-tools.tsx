@@ -1,4 +1,5 @@
 "use client";
+import { paintingItemForBase } from "./base-values";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { InputEntity, SettingsEntity } from "./project-config";
 import { CircuitInputFields } from "./circuit-input-fields";
@@ -162,8 +163,9 @@ export const loadComponentsDatabase=(reload=false)=>{
 export const componentFieldLabel=(field:ComponentField)=>field.headerPath.filter(Boolean).at(-1)?.trim()??"";
 export const componentValue=(value:unknown)=>typeof value==="number"?value.toLocaleString("ru-RU",{maximumFractionDigits:3}):typeof value==="string"&&value.trim()?value:"—";
 
-function ComponentsDatabaseView(){
-  const [database,setDatabase]=useState<ComponentsDatabase|null>(null),[groupId,setGroupId]=useState<ComponentGroupId>("hydraulic"),[catalogId,setCatalogId]=useState(""),[query,setQuery]=useState(""),[error,setError]=useState("");
+function ComponentsDatabaseView({settings}:{settings:SettingsEntity}){
+  const [sourceDatabase,setDatabase]=useState<ComponentsDatabase|null>(null),[groupId,setGroupId]=useState<ComponentGroupId>("hydraulic"),[catalogId,setCatalogId]=useState(""),[query,setQuery]=useState(""),[error,setError]=useState("");
+  const database=useMemo(()=>sourceDatabase?{...sourceDatabase,items:sourceDatabase.items.map(item=>paintingItemForBase(item,settings.baseValues))}:null,[sourceDatabase,settings.baseValues]);
   useRuntimeDiagnostic("components","database",error, "error", Boolean(database||error));
   useEffect(()=>{let active=true;loadComponentsDatabase().then(data=>{if(!active)return;setDatabase(data);setCatalogId(current=>current||data.catalogs.find(item=>item.groupId==="hydraulic")?.id||data.catalogs[0]?.id||"");}).catch(reason=>active&&setError(reason instanceof Error?reason.message:"Не удалось загрузить базу комплектующих"));return()=>{active=false;};},[]);
   const catalogs=useMemo(()=>database?.catalogs.filter(item=>item.groupId===groupId)??[],[database,groupId]);
@@ -206,7 +208,7 @@ export function AllowedPumpPanel({ id, input, settings, catalogue, onInputChange
     const sketch=pumpSketchFor(selected);
     return <PumpCard key={selected.id} pump={selected} issueTool={id}>{sketch?<PumpSketchView key={sketch.src} tool={id} pump={selected} sketch={sketch}/>:undefined}</PumpCard>;
   }
-  return <ComponentsDatabaseView/>;
+  return <ComponentsDatabaseView settings={settings}/>;
 }
 
 export const resetComponentsDatabase = () => { componentsDatabasePromise = undefined; loadedComponentsDatabase = undefined; };

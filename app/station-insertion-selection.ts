@@ -10,6 +10,7 @@ export type InsertionRequirement = {
   purpose: "between-valves" | "pump-transition" | "after-vibration";
   material: InsertMaterial; pn: number; from: InsertionEnd; to: InsertionEnd;
   geometry: InsertGeometry;
+  withSensorNipple?: boolean;
   design?: InsertionDesign;
 };
 export type InsertionFinding = { code: "missing-product" | "missing-price" | "missing-dimensions" | "incompatible" | "stale" | "engineering-decision" | "incomplete-bom"; message: string };
@@ -30,6 +31,8 @@ const sameEnd = (actual: InsertionEnd, required: InsertionEnd, checkThread: bool
 export function insertionOrientations(item: AssemblyComponent, r: InsertionRequirement): boolean[] {
   const c = item.calculatedInsertion?.calculation;
   if (!c?.configuration || c.material !== r.material || c.pn !== r.pn || c.geometry !== r.geometry) return [];
+  if (r.withSensorNipple !== undefined && (c.withSensorNipple !== r.withSensorNipple || c.configuration.sensor?.requested !== r.withSensorNipple)) return [];
+  if (r.withSensorNipple && c.configuration.sensor?.dn !== 15) return [];
   if (r.purpose === "between-valves" && (c.geometry !== "straight" || c.leftConnection === "threaded" || c.rightConnection === "threaded")) return [];
   if (!["between-valves", "pump-transition", "after-vibration"].includes(r.purpose) || !r.location) return [];
   return [false, true].filter(reversed => sameEnd(end(c, reversed ? "right" : "left"), r.from, false) && sameEnd(end(c, reversed ? "left" : "right"), r.to, false));
@@ -61,7 +64,7 @@ export function selectStationInsertion(items: AssemblyComponent[], r: InsertionR
   const selected = exact[0];
   if (!selected) return { reversed: false, exact: false, technicalStatus: "unverified", candidates: [...new Set(candidates.map(c => c.item.id))],
     findings: [...(missing ? [finding("missing-dimensions", "Не подтверждены монтажная длина, геометрия концов и состав вставки для этого места. Выберите исполнение в спецификации.")] : []),
-      ...(!candidates.length ? [finding("missing-product", "Нет расчётного изделия с требуемыми материалом, PN, обоими DN, соединениями и геометрией.")] : missing ? [] : [finding("incompatible", "Расчётные вставки не соответствуют подтверждённой длине, соединениям, сгону или конфигурации.")])],
+      ...(!candidates.length ? [finding("missing-product", `Нет расчётного изделия с требуемыми материалом, PN, обоими DN, соединениями и геометрией${r.withSensorNipple === undefined ? "" : r.withSensorNipple ? ", со сгоном DN15 под реле давления" : ", без сгона"}.`)] : missing ? [] : [finding("incompatible", "Расчётные вставки не соответствуют подтверждённой длине, соединениям, сгону или конфигурации.")])],
     explanation: "Точное рассчитанное исполнение не выбрано." };
   const s = selected.item.calculatedInsertion!, c = s.calculation, findings: InsertionFinding[] = [];
   if (!fresh(selected.item)) findings.push(finding("stale", s.currentCatalogVersion ? "Расчёт вставки устарел относительно текущего каталога." : "Актуальность расчёта вставки не проверена: текущая версия каталога недоступна."));

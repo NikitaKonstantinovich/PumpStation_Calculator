@@ -8,6 +8,7 @@ export const json = async name => JSON.parse(await read(name));
 const pageUrl = new URL("app/full-workspace.tsx", root), page = await read("app/full-workspace.tsx"), shared = await read("app/allowed-pump-tools.tsx");
 // Exercise the actual hydraulic transaction retained in the UI, not a substitute implementation.
 const source = [
+  'import {bindProjectComponents} from "./base-values-components";',
   'import {recommendedDn,defaultCollectorMaterial,resolveDnConnection,suctionHydraulics,dischargeHydraulics} from "./dn-defaults";',
   'import {buildSuctionSpec,replaceSuctionSpec,checkSuctionSpecPressure} from "./suction-spec";',
   'import {buildDischargeSpec,replaceDischargeSpec,checkDischargeSpecPressure} from "./discharge-spec";',

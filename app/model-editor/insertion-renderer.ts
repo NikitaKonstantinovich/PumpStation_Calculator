@@ -1,16 +1,16 @@
 import * as THREE from "three";
 import type { Component, Vec3 } from "./model";
 import type { InsertionPiece, InsertionShape } from "./insertion-types";
+import { flangeHoleCenters } from "./flange-hole-pattern";
+import { PIPE_APPEARANCE } from "./pipe-appearance";
+import { threadedTubeMesh } from "./threaded-tube";
 
 export function ringGeometry(shape: InsertionShape): THREE.BufferGeometry {
   const s = new THREE.Shape(), radius = shape.outerMm! / 2;
   s.absarc(0, 0, radius, 0, Math.PI * 2, false);
   const hole = (x: number, y: number, r: number) => { const p = new THREE.Path(); p.absarc(x, y, r, 0, Math.PI * 2, true); s.holes.push(p); };
   if (shape.innerMm) hole(0, 0, shape.innerMm / 2);
-  if (shape.boltHoles && shape.boltCircleMm && shape.boltHoleMm) for (let i = 0; i < shape.boltHoles; i++) {
-    const a = 2 * Math.PI * (i + .5) / shape.boltHoles;
-    hole(Math.cos(a) * shape.boltCircleMm / 2, Math.sin(a) * shape.boltCircleMm / 2, shape.boltHoleMm / 2);
-  }
+  for (const p of flangeHoleCenters(shape)) hole(-p[2], p[1], shape.boltHoleMm! / 2);
   return new THREE.ExtrudeGeometry(s, { depth: shape.lengthMm!, bevelEnabled: false, steps: 1, curveSegments: 32 }).rotateY(Math.PI / 2);
 }
 /** Ruled hollow envelope, explicitly marked as layout when the exact reducer profile is unavailable. */
@@ -27,14 +27,24 @@ function reducer(s: InsertionShape): THREE.BufferGeometry {
   const geometry = new THREE.BufferGeometry(); geometry.setAttribute("position", new THREE.Float32BufferAttribute(points, 3)); geometry.setIndex(triangles); geometry.computeVertexNormals(); return geometry;
 }
 export function disposeInsertionObject(object: THREE.Object3D) {
-  object.traverse(o => { if (o instanceof THREE.Mesh || o instanceof THREE.LineSegments) { o.geometry.dispose(); for (const m of Array.isArray(o.material) ? o.material : [o.material]) m.dispose(); } });
+  object.traverse(o => { if (o instanceof THREE.InstancedMesh) o.dispose(); if (o instanceof THREE.Mesh || o instanceof THREE.LineSegments) { o.geometry.dispose(); for (const m of Array.isArray(o.material) ? o.material : [o.material]) m.dispose(); } });
 }
 export function pieceObject(p: InsertionPiece): THREE.Group {
   const group = new THREE.Group(), s = p.shape;
   group.userData.pieceId = p.id;
   const outline = p.fidelity === "outline" || p.fidelity === "missing";
-  const mat = new THREE.MeshStandardMaterial({ color: outline ? 0xd1a24c : p.auxiliary ? 0x6d8ba0 : 0xaabdc6, metalness: .35, roughness: .5, side: THREE.DoubleSide, transparent: outline, opacity: outline ? .55 : 1, wireframe: p.fidelity === "missing" });
-  if (s.kind === "tube" || s.kind === "flange") group.add(new THREE.Mesh(ringGeometry(s), mat));
+  const pipeBody = (s.kind === "tube" || s.kind === "reducer-outline") && p.fidelity !== "missing";
+  const mat = new THREE.MeshStandardMaterial({ ...(pipeBody ? PIPE_APPEARANCE : { color: outline ? 0xd1a24c : p.auxiliary ? 0x6d8ba0 : 0xaabdc6, metalness: .35, roughness: .5 }), side: THREE.DoubleSide, transparent: outline && !pipeBody, opacity: outline && !pipeBody ? .55 : 1, wireframe: p.fidelity === "missing" });
+  if (s.kind === "flange" && s.faceHeightMm && s.faceDiameterMm) {
+    // x=0 is the mating face. The raised face is part of total b, never added to it.
+    group.add(new THREE.Mesh(ringGeometry({ ...s, lengthMm: s.lengthMm! - s.faceHeightMm }).translate(s.faceHeightMm, 0, 0), mat));
+    group.add(new THREE.Mesh(ringGeometry({ kind: "tube", outerMm: s.faceDiameterMm, innerMm: s.innerMm, lengthMm: s.faceHeightMm }), mat));
+  } else if (s.kind === "tube" && s.thread) {
+    const data = threadedTubeMesh(s), geometry = new THREE.BufferGeometry();
+    geometry.setAttribute("position", new THREE.Float32BufferAttribute(data.positions, 3));
+    geometry.setIndex(data.indices); geometry.computeVertexNormals();
+    group.add(new THREE.Mesh(geometry, mat));
+  } else if (s.kind === "tube" || s.kind === "flange") group.add(new THREE.Mesh(ringGeometry(s), mat));
   else if (s.kind === "reducer-outline") { mat.wireframe ||= !s.innerMm || !s.smallInnerMm; group.add(new THREE.Mesh(reducer(s), mat)); }
   else if (s.kind === "collar") {
     group.add(new THREE.Mesh(ringGeometry({ ...s, outerMm: s.lipOuterMm, lengthMm: s.lipThicknessMm }), mat));

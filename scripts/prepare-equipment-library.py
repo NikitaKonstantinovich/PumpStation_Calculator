@@ -1,8 +1,9 @@
-"""Prepare every STEP in Equipment for the browser; resume by source and mesh SHA-256.
+"""Prepare component STEP files in Equipment for the browser; resume by SHA-256.
 
 Each conversion runs in a separate hidden process with a timeout. Original CAD
 is read-only. Duplicate contents share one STL; unbound models remain available
 for manual placement without inventing catalogue IDs or connection ports.
+Complete stations in Equipment/Stations are excluded from the component library.
 """
 import argparse
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -34,7 +35,10 @@ def atomic_json(path, value):
 
 def inventory(root):
     groups, failures = {}, []
-    files = sorted(p for p in (root / "Equipment").rglob("*") if p.is_file() and p.suffix.lower() in (".stp", ".step"))
+    equipment = root / "Equipment"
+    files = sorted(p for p in equipment.rglob("*")
+                   if p.relative_to(equipment).parts[0].casefold() != "stations"
+                   and p.is_file() and p.suffix.lower() in (".stp", ".step"))
     for index, path in enumerate(files, 1):
         relative = path.relative_to(root).as_posix()
         try:

@@ -17,6 +17,7 @@ export type InsertPart = {
   wallThickness: number | null; wallThicknessSmall: number | null; lengthMm: number | null;
   thicknessMm: number | null; thread: string | null; threadGender: "male" | "female" | null;
   boreDiameterMm?: number | null;
+  requiredPipeOuterDiameterMm?: number;
   lipOuterDiameterMm?: number | null;
   cylindricalLengthLargeMm?: number | null; cylindricalLengthSmallMm?: number | null;
   standard: string | null; price: number | null; source: string; dimensionSources: Record<string, string>;
@@ -24,6 +25,7 @@ export type InsertPart = {
   pressureAcceptance?: SensorPressureAcceptance;
   compatiblePns?: number[];
   origin?: "original" | "supplement";
+  lengthAssumptionSource?: string;
 };
 export type InsertEndRule = {
   connection: InsertConnection; material: InsertMaterial; dn: number; pn: number;
@@ -63,10 +65,11 @@ export type InsertEngineering = {
   reducerSeatingApprovals?: InsertReducerSeatingApproval[];
   reducerReadyBoreSeating?: { faceOffsetMm: number; source: string };
   variantSelection?: { source: string };
+  compactThreaded?: { source: string; weldFactor: number };
 };
 export type InsertSensorPlug = { id: string; name: string; dn: number; pn: number | null; threadGender: "male" | "female" | null; physicalIdentity: string | null; price: number | null; source: string };
 export type InsertStandardBolt = { id: string; diameterMm: number; lengthMm: number; source: string };
-export type InsertCatalog = { version: string; parts: InsertPart[]; nominalDns: number[]; materials: InsertMaterial[]; engineering: InsertEngineering; issues: string[]; sensorPlugs?: InsertSensorPlug[]; standardBolts?: InsertStandardBolt[]; valveReferences?: InsertValveReference[]; paintingRates?: InsertPaintingRate[]; flangeBoringRates?: FlangeBoringRate[] };
+export type InsertCatalog = { weldRates?: {aisi304:number;st20:number}; version: string; parts: InsertPart[]; nominalDns: number[]; materials: InsertMaterial[]; engineering: InsertEngineering; issues: string[]; sensorPlugs?: InsertSensorPlug[]; standardBolts?: InsertStandardBolt[]; valveReferences?: InsertValveReference[]; paintingRates?: InsertPaintingRate[]; flangeBoringRates?: FlangeBoringRate[] };
 export type InsertBomItem = { role: string; componentId: string | null; kind: InsertPartKind | "plug" | "welding" | "painting" | "machining"; name: string; quantity: number | null; unit: "м" | "шт."; unitPrice: number | null; cost: number | null; source: string | null };
 export type InsertDimension = { name: string; value: number | null; unit: "мм" | "бар" | "°C"; source: string | null };
 export type InsertWeld = { role: string; name: string; count: number; factor: number | null; diameterMm: number | null; lengthMm: number | null; cost: number | null; source: string };
@@ -80,6 +83,7 @@ export type InsertConfiguration = {
   extension?: { side: "left"; part: string | null; lengthMm: number | null };
   /** Audit-only input: physical identity uses actual axial additions, not this choice. */
   seating?: InsertSeatingSettings;
+  construction?: "compact-threaded";
 };
 export type InsertCalculation = {
   identityKey: string; configuration: InsertConfiguration; catalogVersion: string; name: string;
@@ -91,7 +95,7 @@ export type InsertCalculation = {
   machining?: FlangeBoringOperation[];
   extension?: { side: "left"; componentId: string | null; lengthMm: number | null };
   /** Nonblocking project assumptions, persisted in the audit but not physical identity. */
-  assumptions?: Array<{ code: "extension-wall-mismatch" | "sensor-pn25-pressure"; message: string; source: string }>;
+  assumptions?: Array<{ code: "extension-wall-mismatch" | "sensor-pn25-pressure" | "flange-nominal-fit" | "reducer-analogue-length"; message: string; source: string }>;
   assemblyDecisions?: Array<{ code: "reducer-flange-seating"; ruleId: string; side: "left" | "right"; depthMm: number; message: string; source: string }>;
   selection?: { slot: string; candidateCount: number; reason: string; source: string; alternatives: Array<{ identityKey: string; componentIds: string[]; complete: boolean }> };
 };
@@ -154,6 +158,7 @@ export function insertCatalogMetadata(catalog: InsertCatalog) {
   if (catalog.engineering.variantSelection) connectionNotes.push("На сочетание DN, PN, материала, геометрии, соединений и сгона показывается одна позиция. Приоритет — полный расчёт и комплектующие исходной базы; подходящий аналог используется при необходимости. Разные допустимые типы соединений остаются отдельными строками.");
   if (catalog.engineering.flangeBoring) connectionNotes.push("Предусмотрена расточка приварных фланцев под наружный диаметр трубы/перехода. Обработка учитывается отдельно для каждого конца; до подтверждения посадочного зазора и тарифа строки с расточкой остаются неполными.");
   connectionNotes.push("Переходные вставки устанавливаются у насоса: длина основы равна длине перехода из каталога, без дополнительных труб и требования по длине крепежа 017W/010C. Общая длина включает осевые добавки концов; посадка обоих концов проверяется отдельно.");
+  if (catalog.engineering.compactThreaded) connectionNotes.push("Резьбовые вставки — только одинаковый DN до 2 дюймов: компактная сборка готовых приварных патрубков без дополнительной трубы. Длина определяется деталями и посадкой, без правила по болтам затвора. Нарезка резьбы повторно не оплачивается. PN готовой детали ограничивает PN вставки.");
   if (catalog.engineering.reducerReadyBoreSeating?.source) connectionNotes.push("Для переходов с известной толщиной и подходящим готовым отверстием фланца принят общий отступ торца 5 мм: глубина посадки b−5. Это проектное решение сборки, сохраняемое отдельно от обмеров профиля; нехватка размеров и необходимость расточки продолжают проверяться.");
   if (catalog.engineering.reducerSeatingApprovals?.some(rule => rule.id.startsWith("grossner-seating-") && hasSource(rule.source))) connectionNotes.push("В базе сохранены прежние размеры и решения посадки фланцев Grossner для DN50–32 PN10/16. Новый расчёт этих вставок использует воротники по общему правилу коллекторов.");
   if (catalog.engineering.reducerSeatingApprovals?.some(rule => rule.id.startsWith("newkey-seating-") && hasSource(rule.source))) connectionNotes.push("Для концентрического и эксцентрического переходов AISI304 DN50–32 PN25 с Newkey принята такая же посадка: 15 мм на DN50 и 13 мм на DN32, с отступом торца 5 мм. Решение сохраняется в расчёте; дополнительной трубы нет.");
@@ -194,7 +199,7 @@ export function deduplicateInsertParts(parts: InsertPart[]): InsertPart[] {
 
 type End = { connection: InsertConnection; part?: InsertPart; looseFlange?: InsertPart; warnings: string[] };
 function endsFor(dn: number | null, pn: number | null, material: InsertMaterial, catalog: InsertCatalog): End[] {
-  const parts = catalog.parts.filter(part => part.dn === dn && (part.pn === pn || (pn !== null && part.compatiblePns?.includes(pn))) && part.material === material);
+  const parts = catalog.parts.filter(part => part.dn === dn && (part.pn === pn || (pn !== null && part.compatiblePns?.includes(pn)) || (catalog.engineering.compactThreaded && part.kind === "threadEnd" && positive(pn) && positive(part.pn) && part.pn >= pn)) && part.material === material);
   // Intentional scope exclusions must not become fabricated incomplete flange ends.
   // Evaluate each DN independently so a reducer can keep an eligible mixed pair.
   if (dn !== null && catalog.engineering.flangedEndExclusions?.dns.includes(dn)) {
@@ -226,8 +231,9 @@ export function insertName(geometry: InsertGeometry, dnLarge: number, dnSmall: n
   return `Вставка ${geometry === "eccentric" ? "Э " : ""}${size(dnLarge, left, threadLeft)}-${size(dnSmall, right, threadRight)} ${insertMaterialLabel(material)}${withSensorNipple ? " t" : ""}`;
 }
 
-function calculateVariant(base: InsertPart, left: End, right: End, input: InsertRequest, catalog: InsertCatalog): InsertCalculation {
-  const dnLarge = base.dn, dnSmall = base.kind === "pipe" ? base.dn : base.dnSmall, pn = base.pn, material = base.material;
+function calculateVariant(base: InsertPart, left: End, right: End, input: InsertRequest, catalog: InsertCatalog, operatingPn = base.pn): InsertCalculation {
+  const compact = base.kind === "threadEnd";
+  const dnLarge = base.dn, dnSmall = base.kind === "pipe" || compact ? base.dn : base.dnSmall, pn = operatingPn, material = base.material;
   const engineering = catalog.engineering;
   const seating: InsertSeatingSettings = { ...sourceSeating(), ...input.seating };
   const flangeAssembly = engineering.flangeAssembly;
@@ -244,6 +250,7 @@ function calculateVariant(base: InsertPart, left: End, right: End, input: Insert
   const bom: InsertBomItem[] = [], welds: InsertWeld[] = [], dimensions: InsertDimension[] = [];
   const assemblyDecisions: NonNullable<InsertCalculation["assemblyDecisions"]> = [];
   const assumptions: NonNullable<InsertCalculation["assumptions"]> = [];
+  if (base.lengthAssumptionSource) assumptions.push({ code: "reducer-analogue-length", message: `Длина перехода ${base.lengthMm} мм принята по аналогу как проектное решение; паспорт конкретной детали не подтверждён.`, source: base.lengthAssumptionSource });
   const machining: FlangeBoringOperation[] = [];
   const addDimension = (name: string, value: number | null, source: string | null) => { dimensions.push({ name, value, unit: "мм", source }); };
   const addPart = (role: string, part: InsertPart | undefined, quantity: number | null) => {
@@ -253,7 +260,7 @@ function calculateVariant(base: InsertPart, left: End, right: End, input: Insert
     if (quantity === null) warnings.push(`Не определено количество: ${part.name}`);
     bom.push({ role, componentId: part.id, kind: part.kind, name: part.name, quantity, unit: part.kind === "pipe" ? "м" : "шт.", unitPrice: positive(part.price) ? part.price : null, cost: positive(part.price) && quantity !== null ? quantity * part.price : null, source: part.source });
   };
-  const rate = WELD_RATES[material];
+  const rate = (catalog.weldRates ?? WELD_RATES)[material];
   if (!positive(rate)) warnings.push(`Нет тарифа сварки для ${insertMaterialLabel(material)}`);
   const weld = (role: string, name: string, factor: number | null, diameterMm: number | null, source: string) => {
     if (!positive(diameterMm)) warnings.push(`Нет наружного диаметра для сварки: ${name}`);
@@ -265,7 +272,12 @@ function calculateVariant(base: InsertPart, left: End, right: End, input: Insert
   if (!pair) warnings.push(`Не подтверждено сочетание соединений: ${left.connection} / ${right.connection}`);
 
   let baseLengthMm = base.kind === "reducer" && positive(base.lengthMm) ? base.lengthMm : null;
-  if (base.kind === "reducer") {
+  if (compact) {
+    baseLengthMm = positive(base.lengthMm) ? base.lengthMm : null;
+    if (!baseLengthMm || !hasSource(base.dimensionSources.lengthMm)) warnings.push(`Нет подтверждённой длины готового резьбового патрубка: ${base.id}`);
+    if (!hasSource(engineering.compactThreaded?.source) || !positive(engineering.compactThreaded?.weldFactor)) warnings.push("Не подтверждена компактная сборка резьбовых концов и норма сварки");
+    addDimension("Длина готового резьбового патрубка (без дополнительной трубы)", baseLengthMm, base.dimensionSources.lengthMm ?? null);
+  } else if (base.kind === "reducer") {
     if (positive(base.outerDiameter) && positive(base.outerDiameterSmall) && base.outerDiameterSmall >= base.outerDiameter) warnings.push(`Недостоверная геометрия перехода: меньший наружный диаметр ${base.outerDiameterSmall} мм должен быть меньше большего ${base.outerDiameter} мм`);
     if (!positive(base.lengthMm)) warnings.push(`Нет длины перехода в каталоге: ${base.name} (${base.id})`);
     if (positive(base.lengthMm) && !hasSource(base.dimensionSources.lengthMm)) warnings.push(`Нет источника длины перехода: ${base.name}`);
@@ -305,7 +317,7 @@ function calculateVariant(base: InsertPart, left: End, right: End, input: Insert
     }
     addDimension("Длина трубы", baseLengthMm, ref?.source ?? null);
   }
-  for (const [name, diameter, thickness, source, wallSource] of [["Больший конец", base.outerDiameter, base.wallThickness, base.dimensionSources.outerDiameter, base.dimensionSources.wallThickness], ["Меньший конец", base.kind === "pipe" ? base.outerDiameter : base.outerDiameterSmall, base.kind === "pipe" ? base.wallThickness : base.wallThicknessSmall, base.kind === "pipe" ? base.dimensionSources.outerDiameter : base.dimensionSources.outerDiameterSmall, base.kind === "pipe" ? base.dimensionSources.wallThickness : base.dimensionSources.wallThicknessSmall]] as const) {
+  for (const [name, diameter, thickness, source, wallSource] of [["Больший конец", base.outerDiameter, base.wallThickness, base.dimensionSources.outerDiameter, base.dimensionSources.wallThickness], ["Меньший конец", base.kind === "pipe" || compact ? base.outerDiameter : base.outerDiameterSmall, base.kind === "pipe" || compact ? base.wallThickness : base.wallThicknessSmall, base.kind === "pipe" || compact ? base.dimensionSources.outerDiameter : base.dimensionSources.outerDiameterSmall, base.kind === "pipe" || compact ? base.dimensionSources.wallThickness : base.dimensionSources.wallThicknessSmall]] as const) {
     addDimension(`${name}: наружный диаметр`, diameter, source ?? null);
     addDimension(`${name}: толщина стенки`, thickness, wallSource ?? null);
     if (!positive(diameter) || !positive(thickness) || 2 * thickness >= diameter) warnings.push(`Нет достоверных размеров основной детали: ${name.toLowerCase()}`);
@@ -315,10 +327,14 @@ function calculateVariant(base: InsertPart, left: End, right: End, input: Insert
   // Both reducer ends attach directly; each seating profile needs its own evidence.
   const reducerSeatingChecks: Array<() => void> = [];
   const endAddition = (end: End, dn: number | null, role: "left" | "right", diameter: number | null) => {
-    const thickness = role === "left" || base.kind === "pipe" ? base.wallThickness : base.wallThicknessSmall;
+    // The left threaded end IS the base component, not a second purchased part or weld.
+    if (compact && role === "left") return 0;
+    const thickness = role === "left" || base.kind === "pipe" || compact ? base.wallThickness : base.wallThicknessSmall;
     const eligibleRules = engineering.endRules.filter(rule => rule.connection === end.connection && rule.material === material && rule.dn === dn && rule.pn === pn && hasSource(rule.source) && (!rule.partIdentity || (end.part && rule.partIdentity === insertPartIdentity(end.part))) && (rule.baseOuterDiameter === undefined || rule.baseOuterDiameter === diameter) && (rule.baseWallThickness === undefined || rule.baseWallThickness === thickness));
     const physicalEnds = new Set(endsFor(dn, pn, material, catalog).filter(candidate => candidate.connection === end.connection).map(candidate => candidate.part && insertPartIdentity(candidate.part)));
-    const rule = eligibleRules.find(rule => rule.partIdentity) ?? (physicalEnds.size <= 1 ? eligibleRules[0] : undefined);
+    const compactRule: InsertEndRule | undefined = compact && end.connection === "threaded" && positive(end.part?.lengthMm) && hasSource(end.part?.dimensionSources.lengthMm) && engineering.compactThreaded && dn !== null && pn !== null
+      ? { connection: "threaded", material, dn, pn, axialAdditionMm: end.part.lengthMm, weldFactor: engineering.compactThreaded.weldFactor, source: `${engineering.compactThreaded.source}; ${end.part.dimensionSources.lengthMm}` } : undefined;
+    const rule = compact && end.connection === "threaded" ? compactRule : eligibleRules.find(rule => rule.partIdentity) ?? (physicalEnds.size <= 1 ? eligibleRules[0] : undefined);
     const choice = end.connection === "threaded" ? { mode: "source" as const } : seating[end.connection];
     const endLabel = role === "left" ? "левого" : "правого";
     let addition: number | null = null, additionSource: string | null = null;
@@ -397,8 +413,9 @@ function calculateVariant(base: InsertPart, left: End, right: End, input: Insert
       const plan = planFlangeBoring({ side: role, flangeId: end.part.id, dn: end.part.dn, pn, material,
         originalBoreMm: end.part.boreDiameterMm ?? null, baseOuterDiameterMm: diameter,
         originalSource: end.part.dimensionSources.boreDiameterMm,
-        baseSource: base.dimensionSources[role === "left" || base.kind === "pipe" ? "outerDiameter" : "outerDiameterSmall"] }, engineering.flangeBoring, catalog.flangeBoringRates ?? []);
+        baseSource: base.dimensionSources[role === "left" || base.kind === "pipe" || compact ? "outerDiameter" : "outerDiameterSmall"] }, engineering.flangeBoring, catalog.flangeBoringRates ?? []);
       warnings.push(...plan.warnings);
+      assumptions.push(...plan.assumptions);
       const operation = plan.operation;
       if (operation) {
         machining.push(operation);
@@ -416,6 +433,8 @@ function calculateVariant(base: InsertPart, left: End, right: End, input: Insert
       if (positive(diameter) && diameter > end.part.boreDiameterMm) warnings.push(`Основная деталь Ø${diameter} мм не проходит в посадочное отверстие фланца Ø${end.part.boreDiameterMm} мм (${role === "left" ? "левый" : "правый"} конец)`);
       if (positive(diameter) && diameter === end.part.boreDiameterMm) warnings.push(`Номинальные диаметры основы и отверстия фланца равны ${diameter} мм (${role === "left" ? "левый" : "правый"} конец): фактический посадочный зазор и допуски не подтверждены`);
     }
+    if (end.connection === "flanged" && end.part?.requiredPipeOuterDiameterMm && positive(diameter) && Math.abs(end.part.requiredPipeOuterDiameterMm - diameter) > .001)
+      warnings.push(`${end.part.name}: посадка на основную деталь Ø${diameter} мм не подтверждена; размерный ряд рассчитан под Ø${end.part.requiredPipeOuterDiameterMm} мм (${role === "left" ? "левый" : "правый"} конец). Требуется подходящее отверстие или согласованное исполнение соединения.`);
     addPart(`${role}-${end.connection}`, end.part, 1);
     if (end.connection === "collar") {
       if (!engineering.looseFlangeInBom || !hasSource(engineering.looseFlangeInBom.source)) warnings.push("Не подтверждено включение свободных фланцев в состав и стоимость");
@@ -423,13 +442,16 @@ function calculateVariant(base: InsertPart, left: End, right: End, input: Insert
       if (engineering.looseFlangeInBom?.include !== false) addPart(`${role}-looseFlange`, end.looseFlange, 1);
     }
     if (end.connection === "collar" && positive(end.part?.outerDiameter) && positive(diameter) && Math.abs(end.part.outerDiameter - diameter) > 0.01) warnings.push(`Наружный диаметр воротника ${role} не совпадает с основной деталью`);
+    if (compact && end.connection === "threaded" && (!positive(end.part?.outerDiameter) || !positive(diameter) || Math.abs(end.part.outerDiameter - diameter) > 0.01)) warnings.push(`Не согласованы наружные диаметры стыка готовых резьбовых патрубков DN${dn}`);
+    if (compact && end.connection === "threaded" && (!positive(end.part?.wallThickness) || !hasSource(end.part?.dimensionSources.wallThickness) || end.part.wallThickness !== thickness)) warnings.push(`Не согласованы стенки стыка готовых резьбовых патрубков DN${dn}`);
+    if (compact && end.connection === "flanged" && positive(baseLengthMm) && axialSize !== null && addition !== null && axialSize - addition >= baseLengthMm) warnings.push(`Фланец перекрывает всю длину резьбового патрубка DN${dn}; компактная сборка невозможна`);
     const factor = end.connection === "threaded" ? rule?.weldFactor ?? null : end.connection === "collar" && collarAssembly ? collarAssembly.weldFactor : 2;
     const weldSource = end.connection === "threaded" ? rule?.source ?? "Нет подтверждённой схемы" : end.connection === "collar" && collarAssembly ? collarAssembly.weldSource : "collector-calculations.ts: 2πD на приварной фланец/воротник";
     weld(`${role}-weld`, `Приварка ${role === "left" ? "левого" : "правого"} конца`, factor, diameter, weldSource);
     return addition;
   };
   const axialLeftMm = endAddition(left, dnLarge, "left", base.outerDiameter);
-  const axialRightMm = endAddition(right, dnSmall, "right", base.kind === "pipe" ? base.outerDiameter : base.outerDiameterSmall);
+  const axialRightMm = endAddition(right, dnSmall, "right", base.kind === "pipe" || compact ? base.outerDiameter : base.outerDiameterSmall);
 
   if (checkFlangeClearance && flangeAssembly) {
     const lengths: number[] = [];
@@ -542,7 +564,7 @@ function calculateVariant(base: InsertPart, left: End, right: End, input: Insert
   addDimension("Общая длина вставки", totalLengthMm, "Lосновы + Δлевого конца + Δправого конца");
   const weldLengthMm = welds.every(row => row.lengthMm !== null) ? welds.reduce((sum, row) => sum + row.lengthMm!, 0) : null;
   const weldCost = weldLengthMm !== null && positive(rate) ? weldLengthMm / 1000 * rate : null;
-  bom.push({ role: "welding", componentId: null, kind: "welding", name: "Сварочные работы", quantity: weldLengthMm !== null ? weldLengthMm / 1000 : null, unit: "м", unitPrice: positive(rate) ? rate : null, cost: weldCost, source: "collector-calculations.ts: WELD_RATES, ₽/м" });
+  bom.push({ role: "welding", componentId: null, kind: "welding", name: "Сварочные работы", quantity: weldLengthMm !== null ? weldLengthMm / 1000 : null, unit: "м", unitPrice: positive(rate) ? rate : null, cost: weldCost, source: "Базовые значения применённой версии, ₽/м" });
   if (material === "st20") {
     const rates = catalog.paintingRates?.filter(rate => rate.dn === dnLarge && rate.material === material) ?? [];
     const painting = rates.length === 1 ? rates[0] : undefined;
@@ -550,14 +572,15 @@ function calculateVariant(base: InsertPart, left: End, right: End, input: Insert
     if (painting) warnings.push(...painting.warnings);
     if (painting && (!positive(painting.pricePerMeter) || !hasSource(painting.source))) warnings.push(`Нет достоверной цены или источника окраски СТ20 DN${dnLarge}`);
     if (!positive(baseLengthMm)) warnings.push("Не определена длина основной детали для окраски");
-    const quantity = positive(baseLengthMm) ? baseLengthMm / 1000 : null;
+    const secondLength = compact && right.connection === "threaded" ? right.part?.lengthMm : 0;
+    const quantity = positive(baseLengthMm) && (secondLength === 0 || positive(secondLength)) ? (baseLengthMm + secondLength) / 1000 : null;
     const unitPrice = painting && !painting.warnings.length && hasSource(painting.source) && positive(painting.pricePerMeter) ? painting.pricePerMeter : null;
-    bom.push({ role: "painting", componentId: painting?.id ?? null, kind: "painting", name: `Окраска ${base.kind === "reducer" ? "перехода по большему" : "трубы"} DN${dnLarge} СТ20`, quantity, unit: "м", unitPrice,
+    bom.push({ role: "painting", componentId: painting?.id ?? null, kind: "painting", name: `Окраска ${compact ? "готовых патрубков" : base.kind === "reducer" ? "перехода по большему" : "трубы"} DN${dnLarge} СТ20`, quantity, unit: "м", unitPrice,
       cost: quantity !== null && unitPrice !== null ? quantity * unitPrice : null,
-      source: `${painting?.source ?? "Тариф не найден"}; стоимость = Lосновы / 1000 × тариф DN${dnLarge}; без осевых добавок концевых деталей` });
+      source: `${painting?.source ?? "Тариф не найден"}; стоимость = ${compact ? "сумма длин готовых патрубков" : "Lосновы"} / 1000 × тариф DN${dnLarge}; без фланцев и воротников` });
   }
   const uniqueWarnings = [...new Set(warnings)], complete = !uniqueWarnings.length && totalLengthMm !== null && bom.every(row => row.cost !== null);
-  const physicalConfiguration: InsertConfiguration = { version: 1, dnLarge, dnSmall, pn, material, geometry: base.geometry, base: insertPartIdentity(base), left: { connection: left.connection, part: left.part ? insertPartIdentity(left.part) : null, looseFlange: left.looseFlange && engineering.looseFlangeInBom?.include !== false ? insertPartIdentity(left.looseFlange) : null }, right: { connection: right.connection, part: right.part ? insertPartIdentity(right.part) : null, looseFlange: right.looseFlange && engineering.looseFlangeInBom?.include !== false ? insertPartIdentity(right.looseFlange) : null }, sensor: { requested: input.withSensorNipple, dn: input.withSensorNipple ? engineering.sensorNipple?.dn ?? null : null, gender: input.withSensorNipple ? engineering.sensorNipple?.threadGender ?? null : null, part: sensor ? insertPartIdentity(sensor) : null, plug: sensorPlug?.physicalIdentity ?? null }, baseLengthMm, axialLeftMm, axialRightMm, ...(machining.length ? { flangeBores: machining.map(operation => ({ side: operation.side, targetBoreMm: operation.targetBoreMm })) } : {}) };
+  const physicalConfiguration: InsertConfiguration = { version: 1, ...(compact ? { construction: "compact-threaded" as const } : {}), dnLarge, dnSmall, pn, material, geometry: base.geometry, base: insertPartIdentity(base), left: { connection: left.connection, part: left.part ? insertPartIdentity(left.part) : null, looseFlange: left.looseFlange && engineering.looseFlangeInBom?.include !== false ? insertPartIdentity(left.looseFlange) : null }, right: { connection: right.connection, part: right.part ? insertPartIdentity(right.part) : null, looseFlange: right.looseFlange && engineering.looseFlangeInBom?.include !== false ? insertPartIdentity(right.looseFlange) : null }, sensor: { requested: input.withSensorNipple, dn: input.withSensorNipple ? engineering.sensorNipple?.dn ?? null : null, gender: input.withSensorNipple ? engineering.sensorNipple?.threadGender ?? null : null, part: sensor ? insertPartIdentity(sensor) : null, plug: sensorPlug?.physicalIdentity ?? null }, baseLengthMm, axialLeftMm, axialRightMm, ...(machining.length ? { flangeBores: machining.map(operation => ({ side: operation.side, targetBoreMm: operation.targetBoreMm })) } : {}) };
   const configuration = { ...physicalConfiguration, seating };
   const name = insertName(base.geometry, dnLarge, dnSmall, material, left.connection, right.connection, input.withSensorNipple, left.part?.thread, right.part?.thread);
   return { identityKey: `insert:v1:${JSON.stringify(physicalConfiguration)}`, configuration, catalogVersion: catalog.version, name, dnLarge, dnSmall, pn, material, geometry: base.geometry, leftConnection: left.connection, rightConnection: right.connection, threadLeft: left.connection === "threaded" ? left.part?.thread ?? null : null, threadRight: right.connection === "threaded" ? right.part?.thread ?? null : null, withSensorNipple: input.withSensorNipple, baseLengthMm, totalLengthMm, complete, warnings: uniqueWarnings, ...(assumptions.length ? { assumptions } : {}), ...(assemblyDecisions.length ? { assemblyDecisions } : {}), bom, welds, dimensions, ...(machining.length ? { machining } : {}), weldLengthMm, weldCost, price: complete ? bom.reduce((sum, row) => sum + row.cost!, 0) : null, description: `${insertGeometryLabel(base.geometry)} исполнение; ${insertConnectionLabel(left.connection)} / ${insertConnectionLabel(right.connection)}; PN${pn ?? "?"}; основа: ${base.name}${machining.length ? `; предусмотрена расточка фланцев: ${machining.length} шт.` : ""}; ${input.withSensorNipple ? "со сгоном" : "без сгона"}${assemblyDecisions.length ? `; ${assemblyDecisions.map(item => item.message).join(" ")}` : ""}${sensor?.pressureAcceptance ? `; давление сгона принято ${sensor.pressureAcceptance.pressureBar} бар при температуре среды до +${sensor.pressureAcceptance.maxTemperatureC} °C` : ""}${assumptions.length ? `; ${assumptions.map(item => item.message).join(" ")}` : ""}` };
@@ -573,6 +596,8 @@ export function generateInsertCandidates(request: InsertRequest, originalCatalog
     const dnSmall = base.kind === "pipe" ? base.dn : base.dnSmall;
     const leftEnds = endsFor(base.dn, base.pn, base.material, catalog), rightEnds = endsFor(dnSmall, base.pn, base.material, catalog);
     for (const left of leftEnds) for (const right of rightEnds) {
+      // Project decision: a threaded end is only allowed on an equal-DN straight insert.
+      if ((base.kind !== "pipe" || catalog.engineering.compactThreaded) && (left.connection === "threaded" || right.connection === "threaded")) continue;
       if (catalog.engineering.connectionPairs?.length && !catalog.engineering.connectionPairs.some(pair => pair.left === left.connection && pair.right === right.connection)) continue;
       // Straight inserts have no preferred direction: mirror endpoints are one physical item.
       const signature = (end: End) => JSON.stringify([end.connection, end.part && insertPartIdentity(end.part), catalog.engineering.looseFlangeInBom?.include !== false && end.looseFlange ? insertPartIdentity(end.looseFlange) : null]);
@@ -580,6 +605,19 @@ export function generateInsertCandidates(request: InsertRequest, originalCatalog
       if (base.kind === "pipe" && reverseAllowed && signature(left).localeCompare(signature(right)) > 0) continue;
       const result = calculateVariant(base, left, right, input, catalog);
       rows.set(result.identityKey, result);
+    }
+  }
+  if (catalog.engineering.compactThreaded) {
+    const stubs = catalog.parts.filter(p => p.kind === "threadEnd" && validThreadEnd(p) && dns.has(p.dn) && input.materials.includes(p.material));
+    for (const base of stubs) for (const pn of [10, 16, 25]) {
+      if (!positive(base.pn) || base.pn < pn) continue;
+      const left: End = { connection: "threaded", part: base, warnings: [] };
+      for (const right of endsFor(base.dn, pn, base.material, catalog)) {
+        if (right.connection === "threaded" && right.part && insertPartIdentity(base).localeCompare(insertPartIdentity(right.part)) > 0) continue;
+        if (catalog.engineering.connectionPairs?.length && !catalog.engineering.connectionPairs.some(pair => pair.left === "threaded" && pair.right === right.connection)) continue;
+        const result = calculateVariant(base, left, right, input, catalog, pn);
+        rows.set(result.identityKey, result);
+      }
     }
   }
   return [...rows.values()].sort((a, b) => a.dnLarge - b.dnLarge || (a.dnSmall ?? 0) - (b.dnSmall ?? 0) || a.material.localeCompare(b.material) || (a.pn ?? 0) - (b.pn ?? 0) || a.identityKey.localeCompare(b.identityKey));

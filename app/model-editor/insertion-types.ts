@@ -14,6 +14,8 @@ export type InsertionShape = {
   lengthMm?: number; outerMm?: number; innerMm?: number; smallOuterMm?: number; smallInnerMm?: number;
   offset?: Vec3; lipOuterMm?: number; lipThicknessMm?: number;
   boltCircleMm?: number; boltHoles?: number; boltHoleMm?: number;
+  faceHeightMm?: number; faceDiameterMm?: number;
+  thread?: { pitchMm: number; lengthMm: number; depthMm: number };
   meshUrl?: string; modelHash?: string; meshBounds?: Bounds; modelRotation?: Vec3; modelPosition?: Vec3;
 };
 export type InsertionPiece = {
@@ -38,6 +40,15 @@ const vec = (x: unknown): x is Vec3 => Array.isArray(x) && x.length === 3 && x.e
 const text = (x: unknown, max = 2000): x is string => typeof x === "string" && x.length <= max;
 const id = (x: unknown): x is string => text(x, 240) && x.length > 0;
 const unit = (x: unknown): x is Vec3 => vec(x) && Math.abs(Math.hypot(...x) - 1) < 1e-5;
+/** Bound tessellation and prevent a decorative thread from cutting through the wall. */
+export function validShapeThread(shape: Record<string, unknown>): boolean {
+  if (shape.thread === undefined) return true;
+  const t = obj(shape.thread);
+  return shape.kind === "tube" && [t.pitchMm, t.lengthMm, t.depthMm, shape.lengthMm, shape.outerMm, shape.innerMm].every(finite)
+    && Number(t.pitchMm) > 0 && Number(t.lengthMm) > 0 && Number(t.lengthMm) < Number(shape.lengthMm)
+    && Number(t.lengthMm) / Number(t.pitchMm) <= 100 && Number(t.depthMm) > 0 && Number(shape.innerMm) > 0
+    && Number(t.depthMm) < (Number(shape.outerMm) - Number(shape.innerMm)) / 2;
+}
 export function parseConnectionPoint(raw: unknown): ConnectionPoint | null {
   const p = obj(raw);
   if (typeof p.provisional !== "boolean" || !id(p.id) || !vec(p.point) || !unit(p.axis) || !unit(p.up) || Math.abs(p.axis.reduce((s, n, i) => s + n * (p.up as Vec3)[i], 0)) > 1e-5
@@ -64,7 +75,12 @@ export function parseInsertionTemplate(raw: unknown): InsertionTemplate | null {
       || !["cad", "parametric", "outline", "missing"].includes(String(p.fidelity)) || !["tube", "reducer-outline", "flange", "collar", "marker", "mesh"].includes(String(shape.kind))
       || !Array.isArray(p.ports) || p.ports.length > 8 || p.ports.some(v => !parseConnectionPoint(v))) return null;
     ids.add(p.id);
-    for (const k of ["lengthMm", "outerMm", "innerMm", "smallOuterMm", "smallInnerMm", "lipOuterMm", "lipThicknessMm", "boltCircleMm", "boltHoles", "boltHoleMm"]) if (shape[k] !== undefined && (!finite(shape[k]) || (shape[k] as number) < 0)) return null;
+    if (!validShapeThread(shape)) return null;
+    for (const k of ["lengthMm", "outerMm", "innerMm", "smallOuterMm", "smallInnerMm", "lipOuterMm", "lipThicknessMm", "boltCircleMm", "boltHoles", "boltHoleMm", "faceHeightMm", "faceDiameterMm"]) if (shape[k] !== undefined && (!finite(shape[k]) || (shape[k] as number) < 0)) return null;
+    if (shape.faceHeightMm !== undefined || shape.faceDiameterMm !== undefined) {
+      if (shape.kind !== "flange" || !(Number(shape.faceHeightMm) > 0 && Number(shape.faceHeightMm) < Number(shape.lengthMm))
+        || !(Number(shape.faceDiameterMm) > Number(shape.innerMm) && Number(shape.faceDiameterMm) <= Number(shape.outerMm))) return null;
+    }
     if (shape.innerMm !== undefined && Number(shape.innerMm) >= Number(shape.outerMm)) return null;
     if (shape.lipThicknessMm !== undefined && Number(shape.lipThicknessMm) >= Number(shape.lengthMm)) return null;
     if (shape.boltHoles !== undefined && (!Number.isInteger(shape.boltHoles) || (shape.boltHoles as number) > 128)) return null;

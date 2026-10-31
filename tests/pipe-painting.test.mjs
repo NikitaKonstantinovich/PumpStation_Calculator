@@ -116,12 +116,12 @@ test("painting import persists and updates atomically without duplicates or chan
     const loader = await loadTs(new URL("../app/component-insert-catalog-server.ts", import.meta.url), {
       [new URL("../app/auth-server.ts", import.meta.url).href]: 'import { createHash } from "node:crypto"; export const db=()=>globalThis.__paintingSourceDb; export const sha256=async value=>createHash("sha256").update(value).digest("hex");',
     });
-    const initialCatalog = await loader.currentInsertCatalog();
+    const initialCatalog = await loader.currentInsertSourceCatalog();
     assert.equal(initialCatalog.paintingRates.find(rate => rate.dn === 100).pricePerMeter, 800);
     const changed = structuredClone(reference); changed.rows.find(row => row.diameterMm === 108).pricePerMeter = 900;
     assert.equal(importPipePainting(db, binding, changed).updated, 1); assert.ok(revision() > before);
     assert.equal(rates()[0].amount_microunits, 900e6);
-    const currentCatalog = await loader.currentInsertCatalog();
+    const currentCatalog = await loader.currentInsertSourceCatalog();
     assert.notEqual(currentCatalog.version, initialCatalog.version);
     assert.equal(currentCatalog.paintingRates.find(rate => rate.dn === 100).pricePerMeter, 900);
     assert.deepEqual(db.prepare("SELECT * FROM component_prices WHERE component_id<=3").all(), existingPrices);

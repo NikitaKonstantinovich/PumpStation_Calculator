@@ -4,7 +4,7 @@ export const RELEASE_PROFILE = typeof __PSC_RELEASE_PROFILE__ !== "undefined" &&
 export const IS_BETA = RELEASE_PROFILE === "beta";
 export const RELEASE_VERSION = "0.1.0-beta.1";
 export const RELEASE_LABEL = "beta 0.1";
-export const BETA_TOOLS = ["input", "chart", "sketch", "components"] as const;
+export const BETA_TOOLS = ["input", "chart", "sketch", "components", "assistant"] as const;
 export type BetaTool = typeof BETA_TOOLS[number];
 export const isBetaTool = (value: unknown): value is BetaTool => BETA_TOOLS.some(tool => tool === value);
 export const betaToolFromUrl = (search: string): BetaTool | null => {
@@ -16,7 +16,11 @@ export function betaApiAllowed(path: string, method: string): boolean {
   return (path === "/api/auth" && ["GET", "POST"].includes(method)) ||
     // The users route independently authenticates and requires the admin role.
     (path === "/api/users" && ["GET", "POST", "PATCH"].includes(method)) ||
+    (path === "/api/base-values" && ["GET", "PATCH"].includes(method)) ||
+    (path === "/api/base-values/effective" && method === "GET") ||
     (path === "/api/components" && method === "GET") ||
+    (path === "/api/help" && method === "GET") ||
+    (path === "/api/assistant" && ["GET", "POST"].includes(method)) ||
     (path === "/api/release" && method === "GET");
 }
 

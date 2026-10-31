@@ -1,7 +1,7 @@
 import type { BindingCatalog } from "./collector-catalog";
 
 type Item = Pick<BindingCatalog["items"][number], "id" | "catalogId" | "family" | "fields"> & Partial<Pick<BindingCatalog["items"][number], "tableId" | "sourceRow">>;
-export type FlangeDimensions = Partial<Record<"thicknessMm" | "boreDiameterMm" | "radialChamferMm" | "pipeOuterDiameterMm" | "outerDiameterMm" | "boltCircleMm" | "boltHoleDiameterMm" | "holes", number>>;
+export type FlangeDimensions = Partial<Record<"thicknessMm" | "boreDiameterMm" | "radialChamferMm" | "pipeOuterDiameterMm" | "outerDiameterMm" | "boltCircleMm" | "boltHoleDiameterMm" | "holes" | "faceHeightMm" | "faceDiameterMm", number>>;
 export type FlangeDimensionReference = { sourceSha256: string; rows: Array<{ componentId: string; tableId: string; family: string; name: string; dn: number; pn: number; standard?: string; materialAcceptance?: { materials: string; source: string }; dimensions: FlangeDimensions; source: string; reason: string }> };
 export const FLANGE_FIELDS = {
   thicknessMm: ["CALC_FLANGE_B", "Толщина фланца, мм"],
@@ -12,6 +12,8 @@ export const FLANGE_FIELDS = {
   boltCircleMm: ["CALC_FLANGE_PCD", "Диаметр окружности отверстий фланца, мм"],
   boltHoleDiameterMm: ["CALC_FLANGE_HOLE", "Диаметр отверстия фланца, мм"],
   holes: ["CALC_FLANGE_HOLES", "Количество отверстий фланца"],
+  faceHeightMm: ["CALC_FLANGE_FACE_HEIGHT", "Высота соединительного выступа фланца, мм"],
+  faceDiameterMm: ["CALC_FLANGE_FACE_OD", "Диаметр соединительного выступа фланца, мм"],
 } as const;
 export const FLANGE_SOURCE = "CALC_FLANGE_SOURCE", FLANGE_REVIEW = "CALC_FLANGE_REVIEW";
 export const FLANGE_STANDARD = "CALC_FLANGE_STANDARD", FLANGE_STANDARD_LABEL = "Принятое исполнение фланца";

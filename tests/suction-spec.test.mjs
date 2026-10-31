@@ -146,6 +146,7 @@ const actualSelection=[
   'import {buildDischargeSpec,replaceDischargeSpec,checkDischargeSpecPressure} from "./discharge-spec";',
   'import {normalizeSpecificationItems,specificationOption} from "./specification-items";',
   'import {synchronizeCollectors} from "./collector-project";',
+  'import {bindProjectComponents} from "./base-values-components";',
   shared.match(/^export const isCalculated =.*$/m)[0],page.match(/^const isSecondaryEnabled =.*$/m)[0],
   shared.match(/^export const componentFieldLabel=.*$/m)[0],
   page.slice(page.indexOf("const isJockeyCircuit="),page.indexOf("function DnCalculator(")),

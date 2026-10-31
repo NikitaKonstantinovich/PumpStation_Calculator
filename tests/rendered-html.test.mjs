@@ -563,8 +563,8 @@ test("defines the normalized D1 schema for binding components", async () => {
     readFile(new URL("../.openai/hosting.json", import.meta.url), "utf8"),
   ]);
 
-  assert.equal([...schema.matchAll(/sqliteTable\("/g)].length, 29);
-  for (const table of ["component_insertions", "component_insertion_items", "component_calculator_source_revision"]) {
+  assert.equal([...schema.matchAll(/sqliteTable\("/g)].length, 31);
+  for (const table of ["base_value_versions", "base_value_state", "component_insertions", "component_insertion_items", "component_calculator_source_revision"]) {
     assert.ok(schema.includes(`sqliteTable("${table}"`));
   }
   for (const table of [

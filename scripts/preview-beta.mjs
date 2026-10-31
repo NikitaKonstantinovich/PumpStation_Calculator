@@ -3,6 +3,8 @@ import { readFile, writeFile, mkdir, readdir } from "node:fs/promises";
 import { resolve } from "node:path";
 import { spawnSync } from "node:child_process";
 import { Miniflare } from "miniflare";
+import { loadLocalAIEnv } from "./local-ai-env.mjs";
+import { localAIProvider } from "./local-ai-provider.mjs";
 const release = JSON.parse(await readFile("dist/release.json", "utf8"));
 if (release.profile !== "beta") throw new Error("Run npm run build:beta first");
 const args = process.argv.slice(2);
@@ -39,6 +41,7 @@ if (publicOrigin) console.log(`HTTPS proxy origin: ${publicOrigin}`);
 const paths = (await readdir("dist/server", { recursive: true })).filter(path => /\.m?js$/.test(path));
 paths.sort((a,b) => a === "index.js" ? -1 : b === "index.js" ? 1 : a.localeCompare(b));
 const bindings = { ...config.vars };
+Object.assign(bindings, await loadLocalAIEnv());
 for (const name of ["RESEND_API_KEY", "EMAIL_FROM"]) if (process.env[name]) bindings[name] = process.env[name];
 const worker = new Miniflare({
   name: config.name,
@@ -48,6 +51,7 @@ const worker = new Miniflare({
   compatibilityDate: config.compatibility_date,
   compatibilityFlags: config.compatibility_flags,
   bindings,
+  serviceBindings: { AI_PROVIDER: localAIProvider },
   d1Databases: Object.fromEntries(config.d1_databases.map(database => [database.binding, database.database_id])),
   d1Persist: resolve(state, "v3/d1"),
   assets: { directory: config.assets.directory, binding: "ASSETS", routerConfig: { has_user_worker: true, invoke_user_worker_ahead_of_assets: true } },

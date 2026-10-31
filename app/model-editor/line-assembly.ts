@@ -22,17 +22,24 @@ function transformedBounds(bounds: NonNullable<Component["bounds"]>, rotation: V
 }
 
 /** Frame-to-frame rotation aligns both axis and up, including vertical pump outlets. */
-export function mountingRotation(localAxis: Vec3, targetAxis: Vec3, localUp: Vec3 = [0, 0, 1], targetUp: Vec3 = [0, 0, 1]): Vec3 {
-  const frame = (axis: Vec3, up: Vec3) => {
+function mountingFrame(axis: Vec3, up: Vec3) {
     const x = norm(axis), hint: Vec3 = Math.abs(dot(x, norm(up))) > .999 ? Math.abs(x[2]) < .99 ? [0, 0, 1] : [0, 1, 0] : up;
     const y = norm(cross(hint, x)), z = cross(x, y); return [x, y, z];
-  };
-  const a = frame(localAxis, localUp), b = frame(targetAxis, targetUp);
+}
+export function mountingRotation(localAxis: Vec3, targetAxis: Vec3, localUp: Vec3 = [0, 0, 1], targetUp: Vec3 = [0, 0, 1]): Vec3 {
+  const a = mountingFrame(localAxis, localUp), b = mountingFrame(targetAxis, targetUp);
   const m = [0, 1, 2].map(i => [0, 1, 2].map(j => b.reduce((s, v, k) => s + v[i] * a[k][j], 0)));
   const y = Math.asin(Math.max(-1, Math.min(1, m[0][2])));
   const x = Math.abs(m[0][2]) < .9999999 ? Math.atan2(-m[1][2], m[2][2]) : Math.atan2(m[2][1], m[1][1]);
   const z = Math.abs(m[0][2]) < .9999999 ? Math.atan2(-m[0][1], m[0][0]) : 0;
   return [x, y, z].map(v => Math.abs(v) < 1e-12 ? 0 : v * 180 / Math.PI) as Vec3;
+}
+
+/** Quarter-turn about the flow axis; choose the sign facing the suction port.
+ * Collinear ports have no radial side preference, so use the positive turn. */
+export function dischargeValveUp(axis: Vec3, towardSuction: Vec3): Vec3 {
+  const quarterTurn = norm(cross(norm(axis), mountingFrame(axis, [0, 0, 1])[2]));
+  return dot(quarterTurn, towardSuction) < -1e-6 ? mul(quarterTurn, -1) : quarterTurn;
 }
 
 type Entry = { row: SpecItem; sequence: number; index: number; quantity: number; auxiliary: boolean };
@@ -83,6 +90,9 @@ function geometryFor(row: SpecItem, data: LineCatalog, profiles: ProfileCatalog)
   const source = row.equipmentId && data.items[row.equipmentId];
   const g: LineGeometry = source ? structuredClone(source) : { equipmentId: row.equipmentId ?? "", revision: data.revision, source: row.description ?? "Спецификация", length: null, ports: [], fidelity: "missing", issues: ["Нет геометрии выбранной позиции"] };
   const requestedPn = Number(row.details.match(/соединение PN(\d+)/)?.[1]) || row.selectedPn || Number(row.details.match(/PN(\d+)/)?.[1]);
+  // Multi-pressure flange records have no scalar PN. Preserve the selected
+  // execution from the specification instead of losing it in the 3D ports.
+  if (requestedPn > 0) g.ports = g.ports.map(p => ({ ...p, pn: p.pn ?? requestedPn }));
   if (g.vibrationModels) {
     const mounting = g.vibrationModels.find(model => model.pn === requestedPn);
     Object.assign(g, { length: mounting?.length ?? null, shape: mounting?.shape, bounds: mounting?.bounds, fidelity: mounting?.fidelity ?? "missing", source: mounting?.source ?? g.source,
@@ -198,6 +208,7 @@ export function addLineAssemblies(base: Assembly, project: ProjectConfig, profil
     if (count <= 0) continue;
     for (const side of ["suction", "discharge"] as const) {
       const port = pump.ports.find(p => p.id === (side === "suction" ? "inlet" : "outlet"));
+      if (!port?.axis || Math.abs(Math.hypot(...port.axis) - 1) > 1e-6) continue;
       const entries = lineEntries(rows, prefix, side, count, data);
       const geometries = branchGeometry(entries, data, profiles), branch: Component[] = [];
       let point = port ? world(pump, port.point) : pump.position, axis: Vec3 = port?.axis ? norm(rotate(port.axis, pump.rotation)) : [side === "suction" ? -1 : 1, 0, 0];
@@ -211,13 +222,16 @@ export function addLineAssemblies(base: Assembly, project: ProjectConfig, profil
         let b = ports.find(p => p !== a && /^(right|outlet|small-end)$/.test(p.id)) ?? ports[1];
         // Reducers lead out from the pump's smaller end. Check valves follow actual flow.
         if (g.kind === "reducer" || /reducer$/.test(role) || ["collar", "weldFlange"].includes(g.kind ?? "") && reverseEnd(entry, prefix) || side === "suction" && /CheckValve/.test(role)) [a, b] = [b, a];
-        const rotation = mountingRotation(a.axis ? mul(a.axis, -1) : norm(sub(b.point, a.point)), axis, a.up);
+        const rollDischargeValve = side === "discharge" && row.option === `${prefix}DischargeValve` && /затвор/i.test(row.name);
+        const suctionPort = pump.ports.find(p => p.id === "inlet");
+        const targetUp = rollDischargeValve ? dischargeValveUp(axis, sub(suctionPort ? world(pump, suctionPort.point) : pump.position, point)) : undefined;
+        const rotation = mountingRotation(a.axis ? mul(a.axis, -1) : norm(sub(b.point, a.point)), axis, a.up, targetUp);
         const issues = [...g.issues, ...(row.status !== "selected" ? [row.description || row.details] : [])].filter(Boolean);
         if (auxiliary) issues.push("Положение вспомогательной детали/крепежа не подтверждено; показано отдельно от размерной цепи");
         if (quantity !== 1) issues.push(`Количество на ветвь: ${quantity}. Группа требует размещения отдельных элементов по сверловке`);
         const start = auxiliary && !role.endsWith("-looseFlange") ? add(point, [0, 0, 100 + index * 20]) : point;
         const c: Component = { id, name: row.name, kind: g.kind === "pipe" && g.shape?.kind === "tube" && !g.template ? "pipe" : "equipment", equipmentId: row.equipmentId, sourceKey: `equipment:${row.equipmentId ?? role}`,
-          sourceNote: [g.source, ...issues].join(". "), position: sub(start, rotate(a.point, rotation)), rotation, hidden: false, locked: false, opacity: 1,
+          sourceNote: [g.source, ...(rollDischargeValve ? ["Напорный затвор повёрнут на 90° вокруг оси трубы в сторону всасывающего патрубка; монтажные плоскости сохранены"] : []), ...issues].join(". "), position: sub(start, rotate(a.point, rotation)), rotation, hidden: false, locked: false, opacity: 1,
           parameters: { length: g.length ?? 1, width: 1, height: 1, diameter: g.shape?.outerMm ?? 1, routeOffset: 0, ...(g.wall ? { wallThickness: g.wall } : {}) }, ports,
           bounds: g.bounds, shape: g.shape, meshUrl: g.meshUrl, cadSource: g.cadSource,
           ...(g.template ? { insertion: { template: g.template, hiddenPieceIds: [] } } : {}),

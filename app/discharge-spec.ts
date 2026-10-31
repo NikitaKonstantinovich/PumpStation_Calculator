@@ -1,3 +1,4 @@
+import { baseConfigurationIdentity } from "./base-values";
 import type { DnEntity, InputEntity, ProjectConfig, SettingsEntity, SpecItem } from "./project-config";
 import type { CollectorsEntity } from "./collector-project";
 import { calculateCollector, secondaryAllowed, type CollectorCatalog } from "./collector-calculations";
@@ -18,7 +19,7 @@ export { selectDischargeInsertion };
 
 export function dischargeFingerprint(project: ProjectConfig) {
   const e = project.entities, settings = e["station-settings"] as SettingsEntity;
-  return JSON.stringify([PUMP_LINE_RULES_REVISION,VALVE_LIMIT_SWITCHES_REVISION,"discharge-v1", settings.vibrationCompensators, settings.inletHead ?? null, e["station-dn"], e["system-input"], secondaryAllowed({ stationType: settings.stationType, jockey: settings.jockeyPump }) ? e["system-input-2"] : null, (e["station-collectors"] as CollectorsEntity).discharge.configuration]);
+  return JSON.stringify([PUMP_LINE_RULES_REVISION,VALVE_LIMIT_SWITCHES_REVISION,"discharge-v1", settings.vibrationCompensators, settings.inletHead ?? null, e["station-dn"], e["system-input"], secondaryAllowed({ stationType: settings.stationType, jockey: settings.jockeyPump }) ? e["system-input-2"] : null, baseConfigurationIdentity((e["station-collectors"] as CollectorsEntity).discharge.configuration!)]);
 }
 
 export function dischargeHead(project: ProjectConfig, secondary = false): number | null {
@@ -37,10 +38,13 @@ export function commonDischargeHead(project: ProjectConfig): number | null {
 
 export function buildDischargeSpec(project: ProjectConfig, database: { items: AssemblyComponent[] }, catalog: CollectorCatalog, valves: SpecItem[] = (project.entities["station-spec"] as { items: SpecItem[] }).items): SpecItem[] {
   const e = project.entities, settings = e["station-settings"] as SettingsEntity, dn = e["station-dn"] as DnEntity;
-  const collector = (e["station-collectors"] as CollectorsEntity).discharge.configuration;
+  const collector = baseConfigurationIdentity((e["station-collectors"] as CollectorsEntity).discharge.configuration!);
   if (!collector || !(e["system-input"] as InputEntity).calculated) return [];
   const rows: SpecItem[] = [];
-  const parts = lineSpecParts(rows, "discharge", dischargeFingerprint(project), collector, database, catalog, dn.insertionDesigns);
+  const primaryInput = e["system-input"] as InputEntity;
+  const fireSensor = (settings.stationType === "fire" || settings.stationType === "combined") &&
+    (primaryInput.workingPumpCount ?? 0) >= 2;
+  const parts = lineSpecParts(rows, "discharge", dischargeFingerprint(project), collector, database, catalog, dn.insertionDesigns, fireSensor ? ["primary"] : []);
   const { add, gasket, flax, flanges, fasteners } = parts;
   const insert = (role: string, size: number, pn: number, count: number, location: string) => {
     const selected = selectDischargeInsertion(database.items, size, pn, collector.material);
@@ -130,7 +134,7 @@ const checkDischargePressure = (head: number | null, name: string, limit?: numbe
 };
 export function checkDischargeSpecPressure(project: ProjectConfig, items: SpecItem[], database?: { items: AssemblyComponent[] }, catalog?: CollectorCatalog): SpecItem[] {
   if (!pressureChecksEnabled(project.entities["station-settings"] as SettingsEntity)) return items.map(withoutPressureChecks);
-  const e = project.entities, dn = e["station-dn"] as DnEntity, collector = (e["station-collectors"] as CollectorsEntity).discharge.configuration;
+  const e = project.entities, dn = e["station-dn"] as DnEntity, collector = baseConfigurationIdentity((e["station-collectors"] as CollectorsEntity).discharge.configuration!);
   const components = new Map([...suctionCatalogItems, ...(database?.items ?? [])].map(item => [item.id, item]));
   const common = commonDischargeHead(project);
   return items.map(item => {

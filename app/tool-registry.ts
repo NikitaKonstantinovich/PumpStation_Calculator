@@ -15,6 +15,7 @@ export const PANEL_INFO: Record<PanelKind, { title: string; eyebrow: string }> =
   cabinet: { title: "Конфигуратор ШУ", eyebrow: "ШКАФ УПРАВЛЕНИЯ" },
   model: { title: "3D-модель", eyebrow: "КОМПОНОВКА" },
   issues: { title: "Ошибки и предупреждения", eyebrow: "ДИАГНОСТИКА ПРОЕКТА" },
+  assistant: { title: "AI-assistant", eyebrow: "ПОМОЩНИК" },
 };
 
 export const ENTITY_BY_TOOL: Record<PanelKind, string> = {
@@ -23,4 +24,5 @@ export const ENTITY_BY_TOOL: Record<PanelKind, string> = {
   settings: "station-settings", dn: "station-dn", spec: "station-spec",
   components: "station-components", cabinet: "station-control-cabinet",
   collectors: "station-collectors", model: "station-model", issues: "station-issues",
+  assistant: "station-assistant",
 };

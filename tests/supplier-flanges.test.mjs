@@ -94,12 +94,12 @@ test("changed Newkey thickness/bore blocks a previously complete result", () => 
   }
 });
 
-test("seven supplier SKUs have exact posted prices, independent sources and idempotent supplement IDs", () => {
+test("ten supplier SKUs have exact posted prices, independent sources and idempotent supplement IDs", () => {
   const merged = mergeSupplierFlanges(source, offers);
   assert.deepEqual(mergeSupplierFlanges(merged, offers), merged);
   assert.deepEqual(merged.items.filter(item => item.tableId !== offers.id), source.items.filter(item => item.tableId !== offers.id));
-  assert.equal(merged.items.filter(item => item.tableId === offers.id).length, 7);
-  assert.deepEqual(offers.rows.map(row => row.price), [1085, 1900, 1600, 2700, 3000, 3500, 8730]);
+  assert.equal(merged.items.filter(item => item.tableId === offers.id).length, 10);
+  assert.deepEqual(offers.rows.map(row => row.price), [1085, 1900, 1600, 2700, 3000, 3500, 8730, 6075, 7377, 14148]);
   assert.equal(offers.rows.find(row => row.id === "ifitting-en01:1154").dimensions.thicknessMm, 29); // C1=26 plus B1 face=3
 });
 
@@ -129,7 +129,7 @@ test("adopted Grossner 01/A dimensions and prices remain available without creat
     assert.match(part.dimensionSources.thicknessMm, /Решение пользователя 26.10.2026/);
     assert.deepEqual(part.warnings, []);
     for (const pn of [10,16]) {
-      const direct = rows.find(row => row.geometry === "straight" && row.dnLarge === dn && row.pn === pn);
+      const direct = rows.find(row => row.geometry === "straight" && row.dnLarge === dn && row.pn === pn && row.leftConnection === "collar" && row.rightConnection === "collar");
       assert.ok(direct?.complete, direct?.warnings.join("; "));
       assert.deepEqual([direct.leftConnection, direct.rightConnection], ["collar", "collar"]);
       assert.ok(direct.bom.every(item => item.componentId !== id));

@@ -37,6 +37,60 @@ function fixture() {
 const rows = (catalog = fixture(), patch) => calc.generateInsertCalculations(input({ materials: catalog.materials.length === 1 ? catalog.materials : ["st20"], ...patch }), catalog);
 const near = (actual, expected) => assert.ok(Math.abs(actual - expected) < 1e-7, `${actual} != ${expected}`);
 
+function compactFixture(material = "st20") {
+  const c = fixture();
+  c.parts = [part("threadEnd", 50, 16, { lengthMm: 38, thread: '2"', threadGender: "male" }),
+    ...[10,16].map(pn => part(material === "st20" ? "weldFlange" : "collar", 50, pn, { lengthMm: 23, thicknessMm: 20, boreDiameterMm: 61.1, dimensionSources: { ...dims, thicknessMm: provenance, boreDiameterMm: provenance } }))];
+  c.engineering.compactThreaded = { source: provenance, weldFactor: 2 };
+  c.engineering.flangeAssembly = { faceOffsetMm: 5, clearanceFactor: 1.1, fastenerModels: [], source: provenance };
+  c.engineering.collarAssembly = { insertionDepthMm: 0, weldGapMm: 0, weldFactor: 2, source: provenance, weldSource: provenance };
+  c.engineering.boltReferences = []; c.standardBolts = [];
+  if (material === "aisi304") asStainless(c);
+  return c;
+}
+
+test("compact ready ends: one weld, actual purchased pieces, no pipe or bolt length, PN10/16 only", () => {
+  for (const material of ["st20", "aisi304"]) {
+    const c = compactFixture(material), actual = rows(c);
+    assert.equal(actual.length, 4);
+    for (const row of actual) {
+      assert.equal(row.complete, true, row.warnings.join("; "));
+      assert.equal(row.baseLengthMm, 38); assert.equal(row.configuration.axialLeftMm, 0);
+      const threaded = row.rightConnection === "threaded";
+      assert.equal(row.totalLengthMm, threaded ? 76 : material === "st20" ? 43 : 61);
+      assert.ok([10,16].includes(row.pn)); assert.equal(row.welds.length, 1);
+      near(row.weldLengthMm, 2 * Math.PI * 60.3);
+      assert.equal(row.bom.filter(b => !["welding","painting"].includes(b.kind)).length, 2);
+      assert.ok(row.bom.every(b => b.kind !== "pipe" && b.kind !== "machining"));
+      if (material === "st20") near(row.bom.find(b => b.kind === "painting").quantity, threaded ? .076 : .038);
+      near(row.price, row.bom.reduce((n,b) => n+b.cost,0));
+    }
+  }
+});
+
+test("compact ends reject missing dimensions/prices, mismatched weld ends and oversized threads", () => {
+  for (const patch of [{ lengthMm:null }, { price:null }, { dimensionSources:{} }]) {
+    const c=compactFixture(); Object.assign(c.parts[0],patch);
+    assert.ok(rows(c).every(r => !r.complete && r.price === null));
+  }
+  const c=compactFixture(); c.parts.push({ ...c.parts[0], id:"different-wall", wallThickness:4 });
+  const mixed=rows(c).filter(r => r.rightConnection === "threaded" && r.configuration.base !== r.configuration.right.part);
+  assert.ok(mixed.length); assert.ok(mixed.every(r => !r.complete && r.warnings.some(w => /стенки/.test(w))));
+  c.parts[0].thread='2 1/2"'; c.parts=c.parts.slice(0,1);
+  assert.equal(rows(c).length,0);
+});
+
+test("compact 3D has two actual pieces and one butt joint with no duplicate left stub", async () => {
+  const core=await loadTs(new URL("../app/model-editor/insertion-template.ts",import.meta.url));
+  const c=compactFixture("aisi304"), row=rows(c).find(r => r.pn===16 && r.rightConnection==="threaded");
+  const t=core.prepareInsertionTemplate(row,{catalog:c,flanges:{},models:{}});
+  assert.equal(t.geometry.totalLengthMm,76); assert.equal(t.geometry.pieces.length,2);
+  assert.equal(t.geometry.joints.length,1); assert.equal(t.geometry.joints[0].kind,"butt");
+  assert.deepEqual(t.geometry.ports.map(p=>p.point.map(n=>n || 0)),[[0,0,0],[76,0,0]]);
+  assert.ok(t.geometry.ports.every(p=>p.thread==='2"' && p.gender==="male" && p.provisional));
+  assert.equal(t.geometry.pieces.find(p=>p.id==="base").ports[0].id,"thread");
+});
+
 function asStainless(catalog) {
   catalog.materials = ["aisi304"];
   for (const item of [...catalog.parts, ...catalog.engineering.endRules, ...catalog.engineering.boltReferences]) item.material = "aisi304";
@@ -108,12 +162,14 @@ test("production scope excludes DN15/20/25 flange and collar ends for every mate
     if ([15, 20, 25].includes(row.dnLarge)) assert.equal(row.leftConnection, "threaded");
     if ([15, 20, 25].includes(row.dnSmall)) assert.equal(row.rightConnection, "threaded");
   }
-  assert.deepEqual(rows(catalog, { dnFrom: 15, dnTo: 25, materials: ["st20", "aisi304"] }), [], "no confirmed threaded ends in the current source; no fallback flange rows");
+  const small = rows(catalog, { dnFrom: 15, dnTo: 25, materials: ["st20", "aisi304"] });
+  assert.equal(small.length, 12);
+  assert.ok(small.every(r => r.leftConnection === "threaded" && r.rightConnection === "threaded" && r.dnLarge === r.dnSmall));
   assert.ok(results.some(row => row.dnLarge === 32 && row.dnSmall === 32 && row.leftConnection === "collar"));
   assert.match(calc.insertCatalogMetadata(catalog).connectionNotes.join(" "), /DN15, DN20, DN25.*только в резьбовом/);
 });
 
-test("end restrictions retain confirmed small threaded ends and mixed reducers without duplicates", () => {
+test("threaded inserts require equal DN, preserve straight mixed ends, exclude both reducer geometries", () => {
   const catalog = fixture();
   catalog.engineering.flangedEndExclusions = structuredClone(adapter.CONFIRMED_INSERT_ENGINEERING.flangedEndExclusions);
   for (const pn of [10, 16, 25]) {
@@ -129,9 +185,8 @@ test("end restrictions retain confirmed small threaded ends and mixed reducers w
   }
   for (const pn of [10, 16, 25]) {
     assert.ok(results.some(row => row.dnLarge === 25 && row.pn === pn && row.leftConnection === "threaded" && row.rightConnection === "threaded"));
-    for (const geometry of ["concentric", "eccentric"]) for (const left of ["flanged", "threaded"]) {
-      assert.ok(results.some(row => row.geometry === geometry && row.pn === pn && row.leftConnection === left && row.rightConnection === "threaded"));
-    }
+    assert.ok(results.every(row => row.geometry === "straight" || row.leftConnection !== "threaded" && row.rightConnection !== "threaded"));
+    assert.ok(results.some(row => row.dnLarge === 50 && row.dnSmall === 50 && row.pn === pn && [row.leftConnection,row.rightConnection].includes("threaded") && [row.leftConnection,row.rightConnection].includes("flanged")));
   }
   assert.equal(new Set(results.map(row => row.identityKey)).size, results.length);
 });
@@ -272,10 +327,11 @@ test("manufacturer 017W executions remain scoped to PN and mounting, body is not
 test("threaded and mixed ends format each end, contribute own axial addition and no flange thickness", () => {
   const catalog = fixture();
   for (const dn of [25, 50]) catalog.parts.push(part("threadEnd", dn, 16, { thread: dn === 50 ? '2"' : '1"', threadGender: "male", lengthMm: 35 }));
-  const result = rows(catalog).find(row => row.geometry === "concentric" && row.leftConnection === "threaded" && row.rightConnection === "threaded");
-  assert.equal(result.name, 'Вставка 2"-1" СТ20'); assert.equal(result.totalLengthMm, 145); assert.equal(result.complete, true, result.warnings.join("; "));
+  const result = rows(catalog).find(row => row.geometry === "straight" && row.leftConnection === "threaded" && row.rightConnection === "threaded");
+  assert.equal(result.name, 'Вставка 2"-2" СТ20'); assert.equal(result.totalLengthMm, 200); assert.equal(result.complete, true, result.warnings.join("; "));
   assert.ok(result.bom.every(row => row.kind !== "weldFlange"));
-  assert.ok(rows(catalog).some(row => row.name === 'Вставка Dn50-1" СТ20'));
+  assert.ok(rows(catalog).some(row => row.name === 'Вставка Dn50-2" СТ20' || row.name === 'Вставка 2"-Dn50 СТ20'));
+  assert.ok(rows(catalog).some(row => row.geometry === "concentric" && row.leftConnection === "flanged" && row.rightConnection === "flanged"), "non-threaded reducers remain available");
   assert.equal(calc.insertName("eccentric", 100, 50, "aisi304", "flanged", "threaded", true, null, '2"'), 'Вставка Э Dn100-2" AISI304 t');
 });
 
@@ -408,7 +464,7 @@ test("confirmed user scope excludes loose flanges and does not invent pressure r
   assert.equal(catalog.engineering.connectionPairs.length, 9);
   const results = rows(catalog, { dnFrom: 50, dnTo: 50, materials: ["aisi304"] });
   assert.ok(results.every(row => row.bom.every(item => item.kind !== "looseFlange")));
-  assert.equal(results.find(row => row.geometry === "straight" && row.pn === 10).complete, true);
+  assert.equal(results.find(row => row.geometry === "straight" && row.pn === 10 && row.leftConnection === "collar" && row.rightConnection === "collar").complete, true);
   assert.ok(results.filter(row => row.geometry === "straight" && row.pn === 16 && row.bom.filter(item => /^(left|right)-collar$/.test(item.role)).length === 2).every(row => row.complete));
   const pn25 = results.filter(row => row.geometry === "straight" && row.pn === 25);
   assert.ok(pn25.some(row => row.complete));
@@ -620,4 +676,11 @@ test("without an adopted assembly policy DN80 to DN65 cannot claim flange fit so
     assert.ok(result); assert.equal(result.baseLengthMm, 75); assert.equal(result.complete, false); assert.equal(result.price, null);
     assert.ok(result.warnings.some(message => message.includes("профиля по КД изготовителя")));
   }
+});
+
+test("ready insert thread ends never replace collector sensor sgons", async () => {
+  const {makeCollectorCatalog}=await loadTs(new URL('../app/collector-catalog.ts',import.meta.url));
+  const actual=makeCollectorCatalog(source);
+  const previous=makeCollectorCatalog({...source,items:source.items.filter(i=>!i.id.startsWith('thread-end:'))});
+  assert.deepEqual(actual,previous);
 });

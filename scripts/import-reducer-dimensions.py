@@ -35,6 +35,12 @@ def reference_maps(standards):
                 or not isinstance(reference.get("source"), str) or not reference["source"].strip()):
             raise ValueError(f"Invalid or duplicate sourced reducer length: {source_id}")
         lengths[source_id] = reference
+        if reference.get("basis") == "project-analogue-length":
+            policy = standards.get("reducerAnalogueLengthPolicy", {})
+            keys = ["componentId", "material", "geometry", *DIMENSIONS.values(), "lengthMm"]
+            if (not policy.get("source", "").strip() or not policy.get("id") or reference.get("adoptionId") != policy["id"]
+                    or not any(all(row.get(key) == reference.get(key) for key in keys) for row in policy.get("rows", []))):
+                raise ValueError(f"Invalid project analogue length: {source_id}")
         if reference.get("basis") == "adopted-standard-geometry":
             policy = standards.get("reducerLengthPolicy", {})
             groups = standards.get("referenceGroups", [])
@@ -84,6 +90,8 @@ def numeric_match(family, values, reference):
     if not physical_match(family, values, reference):
         return False
     name = str(values.get("Наименование", family))
+    if reference.get("basis") == "project-analogue-length":
+        return reference["material"] == "aisi304" and bool(reference.get("geometry")) and bool(reference.get("adoptionId"))
     if reference.get("basis") == "adopted-standard-geometry":
         return reference.get("standard") == "ГОСТ 17378-2001" and bool(reference.get("geometry")) and "12Х18Н10Т" not in name.upper()
     if reference["material"] == "st20":

@@ -47,6 +47,39 @@ class ManifestTests(unittest.TestCase):
             self.assertEqual(manifest['equipment'], {})
 
 
+class EquipmentLibraryTests(unittest.TestCase):
+    def test_inventory_excludes_station_assemblies_and_keeps_components(self):
+        spec = importlib.util.spec_from_file_location("equipment_library", SCRIPTS / "prepare-equipment-library.py")
+        library = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(library)
+        with tempfile.TemporaryDirectory(prefix="equipment-inventory-") as directory:
+            root = Path(directory)
+            files = {
+                "Stations/3D/AIKON/complete.stp": "complete station",
+                "Stations/3D/AIKON/duplicate.step": "pump",
+                "Pumps/3D/pump.STEP": "pump",
+                "Valves/3D/valve.stp": "valve",
+                "Frames/Stations/frame.step": "frame",
+                "Pumps/manual.txt": "not CAD",
+            }
+            for name, content in files.items():
+                path = root / "Equipment" / name
+                path.parent.mkdir(parents=True, exist_ok=True)
+                path.write_text(content, encoding="utf-8")
+            groups, failures, total = library.inventory(root)
+            self.assertEqual(failures, [])
+            self.assertEqual(total, 3)
+            self.assertEqual(sorted(source for sources in groups.values() for source in sources), [
+                "Equipment/Frames/Stations/frame.step",
+                "Equipment/Pumps/3D/pump.STEP",
+                "Equipment/Valves/3D/valve.stp",
+            ])
+            result = library.make_library(groups, {}, failures, total)
+            self.assertEqual(result["summary"]["uniqueModels"], 3)
+            self.assertTrue(all(model["status"] == "pending" for model in result["models"]))
+
+
+
 @unittest.skipUnless(importlib.util.find_spec("OCP"), "Requires project cadquery-ocp runtime")
 class LibraryTests(unittest.TestCase):
     def test_batch_units_deduplication_failure_isolation_and_resume(self):

@@ -403,7 +403,7 @@ test("PN25 sensor warning persists through server create/update and shared catal
     catalog.engineering.sensorNipplePn25Allowance = allowance;
     const preview = await calculate(sensorInput);
     assert.equal((await exportRows(beforeAllowance, [preview.rows.find(row => row.pn === 25 && row.exportable).identityKey], { input: sensorInput })).status, 409);
-    const selected = ["st20", "aisi304"].flatMap(material => [16, 25].map(pn => preview.rows.find(row => row.material === material && row.pn === pn && row.geometry === "straight")));
+    const selected = ["st20", "aisi304"].flatMap(material => [16, 25].map(pn => preview.rows.find(row => row.material === material && row.pn === pn && row.geometry === "straight" && row.leftConnection !== "threaded" && row.rightConnection !== "threaded")));
     assert.ok(selected.every(row => row.exportable));
     const steelNipple = catalog.parts.find(part => part.id === "сгоны-резьба-001-r0005");
     const originalPrice = steelNipple.price;
@@ -890,4 +890,29 @@ test("ST20 concentric inserts export all three PN, retain source prices and pain
     globalThis.__insertionsTest.catalog.parts.find(p => p.id === baseId).price += 10;
     assert.equal((await exportRows(result, keys, { input: requested })).status, 409);
   } finally { globalThis.__insertionsTest.catalog = previous; }
+});
+
+test("compact threaded product persists its two parts and updates without duplicate or client price trust", async t => {
+  const previous=globalThis.__insertionsTest.catalog;
+  t.after(()=>{globalThis.__insertionsTest.catalog=previous;});
+  const {makeInsertCatalog}=await loadTs(new URL("../app/component-insert-catalog.ts",import.meta.url));
+  const catalog=makeInsertCatalog(JSON.parse(await readFile(new URL("../public/binding-components.json",import.meta.url),"utf8")));
+  globalThis.__insertionsTest.catalog=catalog;
+  const query={dnFrom:15,dnTo:15,materials:["aisi304"],withSensorNipple:false,includeEccentric:false};
+  const preview=await calculate(query), row=preview.rows.find(r=>r.pn===16);
+  assert.equal(row.exportable,true); assert.equal(row.totalLengthMm,70); assert.equal(row.welds.length,1);
+  const result=await (await exportRows(preview,[row.identityKey],{input:query,price:1})).json();
+  assert.equal(result.created,1);assert.deepEqual(result.failed,[]);
+  const saved=sqlite.prepare("SELECT * FROM component_insertions WHERE identity_key=?").get(row.identityKey);
+  assert.equal(JSON.parse(saved.configuration_json).construction,"compact-threaded");
+  assert.equal(saved.cached_price_microunits,Math.round(row.price*1e6));
+  const bom=sqlite.prepare("SELECT item_json FROM component_insertion_items WHERE insertion_id=?").all(saved.id).map(i=>JSON.parse(i.item_json));
+  assert.equal(bom.filter(b=>b.kind==='threadEnd').length,2);assert.ok(bom.every(b=>b.kind!=='pipe'));
+  catalog.parts.find(p=>p.id==='thread-end:newkey-nk-ne15-4').price+=10;
+  assert.equal((await exportRows(preview,[row.identityKey],{input:query})).status,409);
+  const fresh=await calculate(query), updated=fresh.rows.find(r=>r.identityKey===row.identityKey);
+  assert.ok(Math.abs(updated.price-row.price-20)<1e-7);
+  const repeated=await (await exportRows(fresh,[row.identityKey],{input:query})).json();
+  assert.equal(repeated.updated,1);assert.equal(repeated.created,0);
+  assert.equal(sqlite.prepare("SELECT COUNT(*) n FROM component_insertions WHERE identity_key=?").get(row.identityKey).n,1);
 });

@@ -7,16 +7,17 @@ export function mergeSupplierFlanges(input, reference) {
   const field = (column, label, value) => ({ column, headerPath: [label], value });
   const ids = new Set();
   const items = reference.rows.map((row, index) => {
-    if (ids.has(row.id) || !(row.price > 0) || !row.url.startsWith("https://") || !row.compatiblePns.includes(row.pn)) throw new Error(`Invalid supplier flange: ${row.id}`);
+    const unquoted = row.price === null && row.priceStatus === "on-request";
+    if (ids.has(row.id) || (!(row.price > 0) && !unquoted) || !row.url.startsWith("https://") || !row.compatiblePns.includes(row.pn)) throw new Error(`Invalid supplier flange: ${row.id}`);
     ids.add(row.id);
     return { id: row.id, catalogId: "фланцы", tableId: reference.id, family: reference.family,
       sourceSheet: row.supplier, sourceRow: index + 1,
       fields: [field("name", "Наименование", row.name), field("dn", "DN", row.dn), field("pn", "PN", row.pn),
         field("supplier", "Поставщик", row.supplier), field("supplierId", "ID товара поставщика", row.supplierProductId),
-        field("material", "Материал", "AISI304"), field("compatiblePns", "Подтверждённые PN исполнения", row.compatiblePns.join("/")),
-        field("priceDate", "Дата цены", reference.checkedAt), field("vat", "Условия цены", row.vat),
+        field("material", "Материал", row.material ?? "AISI304"), field("compatiblePns", "Подтверждённые PN исполнения", row.compatiblePns.join("/")),
+        field("priceDate", "Дата цены", row.priceDate ?? reference.checkedAt), field("vat", "Условия цены", row.vat),
         field("sourceUrl", "Источник URL", row.url)],
-      prices: [{ amount: row.price, currency: "RUB", sourceColumn: "price", label: row.priceLabel }],
+      prices: unquoted ? [] : [{ amount: row.price, currency: "RUB", sourceColumn: "price", label: row.priceLabel }],
       sourceUrls: [row.url],
     };
   });

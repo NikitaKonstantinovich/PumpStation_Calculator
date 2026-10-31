@@ -3,13 +3,15 @@ import { componentPressureLimit } from "./suction-pressure";
 import { field, itemDn, number } from "./line-spec-parts";
 import type { CollectorCatalog, CollectorConfiguration } from "./collector-calculations";
 
-export const PUMP_LINE_RULES_REVISION = "pump-connections-v3-calculated-insertions";
+export const PUMP_LINE_RULES_REVISION = "pump-connections-v4-side-geometry-fire-sensor";
 
 /** The same exact reducer selection serves both sides and both vibration modes. */
-export function selectLineReducer(items: AssemblyComponent[], catalog: CollectorCatalog, material: CollectorConfiguration["material"], pumpDn: number, valveDn: number, pn: number) {
+export function selectLineReducer(items: AssemblyComponent[], catalog: CollectorCatalog, material: CollectorConfiguration["material"], pumpDn: number, valveDn: number, pn: number, geometry: "concentric" | "eccentric" = "eccentric") {
   const outer = (dn: number) => catalog.components.find(item => item.kind === "pipe" && item.dn === dn && item.material === material)?.outerDiameter;
-  const large = outer(valveDn), small = outer(pumpDn);
-  return items.find(item => item.catalogId === "переходы" && /эксцентр/i.test(item.family) && itemDn(item) === valveDn && number(field(item, /^PN$/i)) === pn &&
+  const largeDn = Math.max(valveDn, pumpDn), smallDn = Math.min(valveDn, pumpDn);
+  const large = outer(largeDn), small = outer(smallDn);
+  const execution = geometry === "concentric" ? /концентр/i : /эксцентр/i;
+  return items.find(item => item.catalogId === "переходы" && execution.test(item.family) && itemDn(item) === largeDn && number(field(item, /^PN$/i)) === pn &&
     (material === "aisi304" ? /AISI\s*304/i : /Сталь\s*20/i).test(item.family) && large !== undefined && small !== undefined &&
     number(field(item, /^Диаметр, мм$/i)) === large && number(field(item, /^Диаметр меньший, мм$/i)) === small);
 }

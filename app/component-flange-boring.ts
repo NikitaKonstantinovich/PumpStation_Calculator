@@ -1,6 +1,7 @@
 import type { BindingCatalog } from "./collector-catalog";
 
-export type FlangeBoringPolicy = { source: string; diametralClearanceMm: number | null; clearanceSource: string | null };
+export type FlangeBoringPolicy = { source: string; diametralClearanceMm: number | null; clearanceSource: string | null;
+  nominalFit?: { source: string; dn: number; material: "aisi304" | "st20"; pns: number[] } };
 export type FlangeBoringRate = { id: string; material: "st20" | "aisi304"; dn: number; pn: number; pricePerPiece: number | null; source: string; warnings: string[] };
 export type FlangeBoringOperation = {
   side: "left" | "right"; flangeId: string; dn: number; pn: number | null;
@@ -32,7 +33,8 @@ export function planFlangeBoring(input: {
   originalBoreMm: number | null; baseOuterDiameterMm: number | null; originalSource?: string; baseSource?: string;
 }, policy: FlangeBoringPolicy, rates: FlangeBoringRate[]) {
   const warnings: string[] = [], side = input.side === "left" ? "левого" : "правого";
-  const result = (operation: FlangeBoringOperation | null) => ({ operation, warnings });
+  const assumptions: Array<{ code: "flange-nominal-fit"; message: string; source: string }> = [];
+  const result = (operation: FlangeBoringOperation | null) => ({ operation, warnings, assumptions });
   if (!sourced(policy.source)) { warnings.push(`Не подтверждено правило расточки ${side} фланца`); return result(null); }
   if (!positive(input.originalBoreMm) || !positive(input.baseOuterDiameterMm) || !sourced(input.originalSource) || !sourced(input.baseSource)) {
     warnings.push(`Нельзя определить расточку ${side} фланца ${input.flangeId}: нужны исходный диаметр отверстия, наружный диаметр основы и их источники`);
@@ -42,6 +44,12 @@ export function planFlangeBoring(input: {
   const confirmedClearance = typeof clearance === "number" && Number.isFinite(clearance) && clearance >= 0 && sourced(policy.clearanceSource);
   // An existing positive fit remains usable until a different clearance is explicitly adopted.
   const target = confirmedClearance ? Number((input.baseOuterDiameterMm + clearance).toFixed(9)) : null;
+  const nominal = policy.nominalFit;
+  if (!confirmedClearance && nominal?.source.trim() && input.dn === nominal.dn && input.material === nominal.material
+    && input.pn !== null && nominal.pns.includes(input.pn) && input.originalBoreMm === input.baseOuterDiameterMm) {
+    assumptions.push({ code: "flange-nominal-fit", message: `Номинальная посадка ${side} фланца DN${input.dn} PN${input.pn}: отверстие и основа Ø${input.originalBoreMm} мм. Расточка не включена; фактическую посадку проверить при сборке.`, source: nominal.source });
+    return result(null);
+  }
   if (target !== null ? input.originalBoreMm >= target : input.originalBoreMm > input.baseOuterDiameterMm) return result(null);
   if (!confirmedClearance) warnings.push(`Расточка ${side} фланца ${input.flangeId} под Ø${input.baseOuterDiameterMm} мм предусмотрена; не заданы диаметральный посадочный зазор и его основание, окончательный диаметр отверстия не определён`);
   const candidates = rates.filter(rate => rate.material === input.material && rate.dn === input.dn && rate.pn === input.pn);

@@ -1,7 +1,7 @@
 import type { Vec3 } from "./model";
 import type { CollectorBranch, CollectorTemplate } from "./collector-types";
 
-export type SaddleRings = { outer: Vec3[]; inner: Vec3[]; bore: Vec3[]; outerEnd: Vec3[]; innerEnd: Vec3[]; cutLengthMm: number };
+export type SaddleRings = { outer: Vec3[]; inner: Vec3[]; bore: Vec3[]; wallBore?: Vec3[]; outerEnd: Vec3[]; innerEnd: Vec3[]; cutLengthMm: number };
 export const SADDLE_SEGMENTS = 96;
 const TAU = 2 * Math.PI, EPS = 1e-7;
 const add = (a: Vec3, b: Vec3): Vec3 => a.map((v, i) => v + b[i]) as Vec3;
@@ -19,23 +19,37 @@ function cylinderHit(origin: Vec3, axis: Vec3, radius: number): { point: Vec3; t
   const a = axis[1]**2 + axis[2]**2, b = 2*(origin[1]*axis[1]+origin[2]*axis[2]), c = origin[1]**2+origin[2]**2-radius**2;
   const d = b*b-4*a*c;
   if (a < 1e-8 || d < -EPS) throw new Error("ось или контур врезки не пересекает ближнюю стенку цилиндра");
-  const t = (-b+Math.sqrt(Math.max(0,d)))/(2*a); return { point: add(origin, mul(axis,t)), t };
+  const t = (-b+Math.sqrt(d > EPS ? d : 0))/(2*a); return { point: add(origin, mul(axis,t)), t };
 }
 export function saddleRings(main: NonNullable<CollectorTemplate["main"]>, branch: CollectorBranch): SaddleRings {
   if (branch.joint !== "saddle-on-surface") throw new Error("неподдерживаемый тип врезки");
   if (!(main.innerMm > 0 && main.outerMm > main.innerMm && branch.innerMm > 0 && branch.outerMm > branch.innerMm && branch.endMm > 0)
     || Math.abs(Math.hypot(...branch.axis)-1) > 1e-6) throw new Error("некорректные размеры или ось врезки");
   const [u,v] = branchFrame(branch.axis), outer: Vec3[] = [], inner: Vec3[] = [], bore: Vec3[] = [], outerEnd: Vec3[] = [], innerEnd: Vec3[] = [];
-  let minT = Infinity;
-  for (let i=0; i<SADDLE_SEGMENTS; i++) {
-    const a=TAU*i/SADDLE_SEGMENTS, radial=add(mul(u,Math.cos(a)),mul(v,Math.sin(a)));
+  // For a horizontal eccentric saddle, a thinner branch can reach above the
+  // main bore. The near-side cut then ends at the axial plane, leaving the
+  // opposite wall intact; its inner opening is the disk clipped to the bore.
+  const horizontal = Math.abs(branch.axis[0]) < EPS && Math.abs(branch.axis[2]) < EPS && Math.abs(branch.origin[1]) < EPS;
+  const angles = Array.from({length:SADDLE_SEGMENTS},(_,i)=>TAU*i/SADDLE_SEGMENTS);
+  if (horizontal) for (const z of [-main.innerMm/2, main.innerMm/2]) {
+    const sine = (branch.origin[2]-z)/(branch.axis[1]*branch.innerMm/2);
+    if (Math.abs(sine)<1) for (const angle of [Math.asin(sine),Math.PI-Math.asin(sine)]) angles.push((angle+TAU)%TAU);
+  }
+  const samples=angles.sort((a,b)=>a-b).filter((a,i,aList)=>i===0||a-aList[i-1]>EPS), wallBore:Vec3[]=[];
+  let minT = Infinity, clippedBore = false;
+  for (const a of samples) {
+    const radial=add(mul(u,Math.cos(a)),mul(v,Math.sin(a)));
     const op=add(branch.origin,mul(radial,branch.outerMm/2)), ip=add(branch.origin,mul(radial,branch.innerMm/2));
-    const o=cylinderHit(op,branch.axis,main.outerMm/2), n=cylinderHit(ip,branch.axis,main.outerMm/2), inside=cylinderHit(ip,branch.axis,main.innerMm/2);
+    const o=cylinderHit(op,branch.axis,main.outerMm/2), n=cylinderHit(ip,branch.axis,main.outerMm/2);
+    const outsideBore=horizontal&&Math.abs(ip[2])>main.innerMm/2;
+    const inside=outsideBore?{point:[ip[0],0,Math.sign(ip[2])*main.innerMm/2] as Vec3,t:0}:cylinderHit(ip,branch.axis,main.innerMm/2);
+    wallBore.push(outsideBore?[ip[0],0,ip[2]]:inside.point);
+    clippedBore ||= outsideBore;
     if (Math.max(o.t,n.t) >= branch.endMm-EPS) throw new Error("торец патрубка находится внутри седла: недостаточная длина");
     if ([o.point,n.point,inside.point].some(p=>Math.abs(p[0]) >= main.lengthMm/2-EPS)) throw new Error("врезка выходит за торец магистрали");
     if (inside.t >= n.t-EPS) throw new Error("не определена ближняя стенка врезки");
     outer.push(o.point); inner.push(n.point); bore.push(inside.point);
     outerEnd.push(add(op,mul(branch.axis,branch.endMm))); innerEnd.push(add(ip,mul(branch.axis,branch.endMm))); minT=Math.min(minT,o.t);
   }
-  return {outer,inner,bore,outerEnd,innerEnd,cutLengthMm:branch.endMm-minT};
+  return {outer,inner,bore,...(clippedBore?{wallBore}:{}),outerEnd,innerEnd,cutLengthMm:branch.endMm-minT};
 }

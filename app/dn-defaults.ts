@@ -1,6 +1,7 @@
 import type { CollectorMaterial, DnEntity, InputEntity, SettingsEntity, ValveConnection } from "./project-config";
 import { isMultistagePump, resolvePumpPort, resolvePumpPortData } from "./pump-ports";
 import { pressureChecksEnabled } from "./pressure-check-policy";
+import { baseVelocityLimit, type VelocityRule } from "./base-values";
 
 export type InletPressureCheck = { status: "missing-head" | "unknown-limit" | "exceeded" | "within-limit" | "nonpositive"; message: string; pressureBar: number | null; limitBar: number | null };
 export const inletPressureBar = (head: number | null | undefined) => typeof head === "number" && Number.isFinite(head) ? head * 0.0980665 : null;
@@ -20,11 +21,11 @@ export function checkInletPressure(head: number | null | undefined, element: str
 }
 
 export const STANDARD_DN = [25,32,40,50,65,80,100,125,150,200,250,300,350,400,450,500,600,700,800,900,1000,1200] as const;
-export const dnVelocityLimit = (dn: number) => dn <= 250 ? 2 : 3;
+export const dnVelocityLimit = (dn: number, rules?: VelocityRule[]) => baseVelocityLimit(dn,rules);
 // Existing nominal-DN recommendation used by the DN tool. Collector velocities
 // themselves are calculated from catalogue internal diameters.
 export const flowVelocity = (flow: number, dn: number) => flow / 3600 / (Math.PI * (dn / 1000) ** 2 / 4);
-export const recommendedDn = (flow: number) => STANDARD_DN.find(dn => flowVelocity(flow, dn) <= dnVelocityLimit(dn)) ?? STANDARD_DN.at(-1)!;
+export const recommendedDn = (flow: number, rules?: VelocityRule[]) => STANDARD_DN.find(dn => flowVelocity(flow, dn) <= dnVelocityLimit(dn,rules)) ?? STANDARD_DN.at(-1)!;
 export const defaultCollectorMaterial = (settings: SettingsEntity): CollectorMaterial => settings.stationType === "fire" ? "st20" : "aisi304";
 
 export const circuitSupportsThread = (settings: Pick<SettingsEntity, "stationType">, secondary = false) =>
@@ -44,10 +45,10 @@ function lineHydraulics(entity: DnEntity, input: InputEntity, settings: Settings
   const savedType = suction ? (secondary ? entity.secondarySuctionValveType : entity.suctionValveType) : (secondary ? entity.secondaryDischargeValveType : entity.dischargeValveType);
   const savedDn = suction ? (secondary ? entity.secondarySuctionValveDn : entity.suctionValveDn) : (secondary ? entity.secondaryDischargeValveDn : entity.dischargeValveDn);
   const nozzleDefault = isMultistagePump(input.selectedPumpId);
-  const rawDn = savedDn ?? (nozzleDefault ? port?.dn : undefined) ?? recommendedDn((input.flowRate ?? 0) / Math.max(1, input.workingPumpCount ?? 1));
+  const rawDn = savedDn ?? (nozzleDefault ? port?.dn : undefined) ?? recommendedDn((input.flowRate ?? 0) / Math.max(1, input.workingPumpCount ?? 1), settings.baseValues?.values.velocity);
   const defaultDn = port?.connection === "threaded" && saved !== "flanged" && circuitSupportsThread(settings, secondary) ? port.dn : rawDn;
   const pairDn = suction ? (secondary ? entity.secondaryDischargeValveDn : entity.dischargeValveDn) : (secondary ? entity.secondarySuctionValveDn : entity.suctionValveDn);
-  const commonDn = port ? defaultDn : Math.max(rawDn, pairDn ?? recommendedDn((input.flowRate ?? 0) / Math.max(1, input.workingPumpCount ?? 1)));
+  const commonDn = port ? defaultDn : Math.max(rawDn, pairDn ?? recommendedDn((input.flowRate ?? 0) / Math.max(1, input.workingPumpCount ?? 1), settings.baseValues?.values.velocity));
   const resolved = resolveDnConnection(settings, commonDn, secondary, saved);
   const valveType = resolved.connection === "threaded" ? "ball" : savedType ?? "butterfly";
   const connection: ValveConnection = valveType === "ball" ? "threaded" : "flanged";

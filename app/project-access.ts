@@ -18,9 +18,9 @@ const same = (left: unknown, right: unknown): boolean => {
 
 export function projectAccessError(project: ProjectConfig, role: UserRole): string | null {
   if (canEditAllSettings(role)) return null;
-  const settings = project.entities["station-settings"] as SettingsEntity, defaults = defaultProjectSettings();
+  const settings = project.entities["station-settings"] as SettingsEntity, defaults = defaultProjectSettings(settings.baseValues);
   for (const key of Object.keys(defaults) as Array<keyof SettingsEntity>) {
-    if (!canEditSetting(role, key) && !same(settings[key] ?? defaults[key], defaults[key])) {
+    if (key !== "baseValues" && !canEditSetting(role, key) && !same(settings[key] ?? defaults[key], defaults[key])) {
       return role === "base" ? "Уровень base допускает только настройки проекта по умолчанию. Опции доступны с plus, остальные настройки — с pro." : "Уровень plus позволяет менять только блок «Опции». Остальные настройки доступны с pro.";
     }
   }
@@ -30,7 +30,7 @@ export function projectAccessError(project: ProjectConfig, role: UserRole): stri
   const collectors = project.entities["station-collectors"] as CollectorsEntity;
   for (const type of ["suction", "discharge"] as const) {
     const card = collectors[type];
-    if (Object.keys(card.overrides).length || card.spacing1 !== 500 || card.spacing2 !== 400 || card.eccentric) return "Ручное изменение конструкции коллекторов доступно с уровня pro. Используйте стандартное исполнение.";
+    if (Object.keys(card.overrides).length || card.spacing1Manual || card.spacing2Manual || card.spacing1Confirmation || card.spacing2Confirmation || (!settings.baseValues && (card.spacing1 !== 500 || card.spacing2 !== 400)) || card.eccentric) return "Ручное изменение конструкции коллекторов доступно с уровня pro. Используйте стандартное исполнение.";
   }
   return null;
 }
@@ -43,13 +43,13 @@ export function parseAccessibleProject(raw: unknown, role: UserRole): ProjectCon
 
 // Collector requests can arrive directly, without saving a project. Recompute
 // the standard assembly from duty inputs and the trusted pump nozzle catalogue.
-export function collectorAccessError(configuration: CollectorConfiguration, role: UserRole): string | null {
+export function collectorAccessError(configuration: CollectorConfiguration, role: UserRole, applied?: import("./base-values").AppliedBaseValues): string | null {
   if (canEditAllSettings(role)) return null;
-  const project = createProject("Проверка исполнения", { id: "access-check", timestamp: "2000-01-01T00:00:00.000Z" });
+  const project = createProject("Проверка исполнения", { id: "access-check", timestamp: "2000-01-01T00:00:00.000Z", ...(applied ? {baseValues:applied} : {}) });
   if (canEditProjectOptions(role)) {
     const settings = project.entities["station-settings"] as SettingsEntity;
     settings.jockeyPump = configuration.jockey;
-    settings.membraneTank = Boolean(configuration.instrumentPorts?.some(port => port.id === "tank"));
+    settings.membraneTank = Boolean(configuration.instrumentPorts?.some(port => port.id === "tank" && port.state === "occupied"));
     settings.membraneTankVolume = configuration.instrumentPorts?.find(port => port.id === "tank")?.dn === 25 ? 50 : 8;
     settings.combinedCircuitsSimultaneous = configuration.simultaneous;
   }

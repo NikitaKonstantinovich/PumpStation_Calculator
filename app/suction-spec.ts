@@ -1,3 +1,4 @@
+import { baseConfigurationIdentity } from "./base-values";
 import type { DnEntity, InputEntity, ProjectConfig, SettingsEntity, SpecItem } from "./project-config";
 import type { CollectorsEntity } from "./collector-project";
 import { collectorPressureChecks, secondaryAllowed, type CollectorCatalog } from "./collector-calculations";
@@ -18,12 +19,12 @@ import { addValveLimitSwitches, VALVE_LIMIT_SWITCHES_REVISION } from "./valve-li
 
 export function suctionFingerprint(project:ProjectConfig) {
   const e=project.entities, settings=e["station-settings"] as SettingsEntity;
-  return JSON.stringify([PUMP_LINE_RULES_REVISION,VALVE_LIMIT_SWITCHES_REVISION,"instruments-v2","seals-v2","instrument-valve-v1",settings.vibrationCompensators,settings.inletHead??null,e["station-dn"],e["system-input"],secondaryAllowed({stationType:settings.stationType,jockey:settings.jockeyPump})?e["system-input-2"]:null,settings.stationType,settings.jockeyPump,(e["station-collectors"] as CollectorsEntity).suction.configuration]);
+  return JSON.stringify([PUMP_LINE_RULES_REVISION,VALVE_LIMIT_SWITCHES_REVISION,"instruments-v2","seals-v2","instrument-valve-v1",settings.vibrationCompensators,settings.inletHead??null,e["station-dn"],e["system-input"],secondaryAllowed({stationType:settings.stationType,jockey:settings.jockeyPump})?e["system-input-2"]:null,settings.stationType,settings.jockeyPump,baseConfigurationIdentity((e["station-collectors"] as CollectorsEntity).suction.configuration!)]);
 }
 
 export function buildSuctionSpec(project:ProjectConfig, database:{items:AssemblyComponent[]}, catalog:CollectorCatalog, valves:SpecItem[]=(project.entities["station-spec"] as {items:SpecItem[]}).items):SpecItem[] {
   const e=project.entities, settings=e["station-settings"] as SettingsEntity, dn=e["station-dn"] as DnEntity;
-  const collector=(e["station-collectors"] as CollectorsEntity).suction.configuration;
+  const collector=baseConfigurationIdentity((e["station-collectors"] as CollectorsEntity).suction.configuration!);
   if (!collector || !(e["system-input"] as InputEntity).calculated) return [];
   const rows:SpecItem[]=[], fingerprint=suctionFingerprint(project);
   const parts = lineSpecParts(rows, "suction", fingerprint, collector, database, catalog, dn.insertionDesigns);

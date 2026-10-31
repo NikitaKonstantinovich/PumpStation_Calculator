@@ -1,0 +1,314 @@
+{
+  "schemaVersion": 1,
+  "language": "ru",
+  "reviewedOn": "2026-10-30",
+  "scope": "local-working-tree",
+  "releaseVersion": "0.1.0-beta.1",
+  "documents": [
+    {
+      "id": "KB-001",
+      "path": "docs/assistant/knowledge/01-access.md",
+      "title": "Возможности приложения и права доступа",
+      "topic": "access",
+      "profiles": [
+        "full",
+        "beta"
+      ],
+      "roles": [
+        "base",
+        "plus",
+        "pro",
+        "admin"
+      ],
+      "tools": []
+    },
+    {
+      "id": "KB-002",
+      "path": "docs/assistant/knowledge/02-first-project.md",
+      "title": "Первый проект и порядок работы",
+      "topic": "projects",
+      "profiles": [
+        "full"
+      ],
+      "roles": [
+        "base",
+        "plus",
+        "pro",
+        "admin"
+      ],
+      "tools": [
+        "settings",
+        "input",
+        "spec"
+      ]
+    },
+    {
+      "id": "KB-003",
+      "path": "docs/assistant/knowledge/03-pump-selection.md",
+      "title": "Подбор насосов и причины отсутствия результатов",
+      "topic": "selection",
+      "profiles": [
+        "full",
+        "beta"
+      ],
+      "roles": [
+        "base",
+        "plus",
+        "pro",
+        "admin"
+      ],
+      "tools": [
+        "input",
+        "input2"
+      ]
+    },
+    {
+      "id": "KB-004",
+      "path": "docs/assistant/knowledge/04-curves-and-card.md",
+      "title": "Гидравлическая кривая и карточка насоса",
+      "topic": "curves",
+      "profiles": [
+        "full",
+        "beta"
+      ],
+      "roles": [
+        "base",
+        "plus",
+        "pro",
+        "admin"
+      ],
+      "tools": [
+        "chart",
+        "chart2",
+        "sketch",
+        "sketch2"
+      ]
+    },
+    {
+      "id": "KB-005",
+      "path": "docs/assistant/knowledge/05-dn-pressure.md",
+      "title": "Расчёт DN и проверка давления",
+      "topic": "pressure",
+      "profiles": [
+        "full"
+      ],
+      "roles": [
+        "base",
+        "plus",
+        "pro",
+        "admin"
+      ],
+      "tools": [
+        "dn",
+        "settings"
+      ]
+    },
+    {
+      "id": "KB-006",
+      "path": "docs/assistant/knowledge/06-collectors.md",
+      "title": "Конструктор коллекторов",
+      "topic": "collectors",
+      "profiles": [
+        "full"
+      ],
+      "roles": [
+        "base",
+        "plus",
+        "pro",
+        "admin"
+      ],
+      "tools": [
+        "collectors"
+      ]
+    },
+    {
+      "id": "KB-007",
+      "path": "docs/assistant/knowledge/07-specification.md",
+      "title": "Спецификация, готовность и стоимость",
+      "topic": "specification",
+      "profiles": [
+        "full"
+      ],
+      "roles": [
+        "base",
+        "plus",
+        "pro",
+        "admin"
+      ],
+      "tools": [
+        "spec"
+      ]
+    },
+    {
+      "id": "KB-008",
+      "path": "docs/assistant/knowledge/08-insertions.md",
+      "title": "Вставки, уплотнения и крепёж",
+      "topic": "insertions",
+      "profiles": [
+        "full"
+      ],
+      "roles": [
+        "base",
+        "plus",
+        "pro",
+        "admin"
+      ],
+      "tools": [
+        "spec",
+        "dn"
+      ]
+    },
+    {
+      "id": "KB-009",
+      "path": "docs/assistant/knowledge/09-hydraulics.md",
+      "title": "КИП, мембранный бак и подключения",
+      "topic": "hydraulics",
+      "profiles": [
+        "full"
+      ],
+      "roles": [
+        "base",
+        "plus",
+        "pro",
+        "admin"
+      ],
+      "tools": [
+        "settings",
+        "spec",
+        "collectors"
+      ]
+    },
+    {
+      "id": "KB-010",
+      "path": "docs/assistant/knowledge/10-cabinets-frame.md",
+      "title": "Шкаф управления и рама",
+      "topic": "cabinet-frame",
+      "profiles": [
+        "full"
+      ],
+      "roles": [
+        "base",
+        "plus",
+        "pro",
+        "admin"
+      ],
+      "tools": [
+        "cabinet",
+        "spec",
+        "model"
+      ]
+    },
+    {
+      "id": "KB-011",
+      "path": "docs/assistant/knowledge/11-model-editor.md",
+      "title": "Работа с 3D-моделью",
+      "topic": "model",
+      "profiles": [
+        "full"
+      ],
+      "roles": [
+        "base",
+        "plus",
+        "pro",
+        "admin"
+      ],
+      "tools": [
+        "model"
+      ]
+    },
+    {
+      "id": "KB-012",
+      "path": "docs/assistant/knowledge/12-diagnostics.md",
+      "title": "Ошибки, предупреждения и устранение проблем",
+      "topic": "diagnostics",
+      "profiles": [
+        "full"
+      ],
+      "roles": [
+        "base",
+        "plus",
+        "pro",
+        "admin"
+      ],
+      "tools": [
+        "issues"
+      ]
+    },
+    {
+      "id": "KB-013",
+      "path": "docs/assistant/knowledge/13-base-values.md",
+      "title": "Базовые значения и версии проекта",
+      "topic": "base-values",
+      "profiles": [
+        "full",
+        "beta"
+      ],
+      "roles": [
+        "base",
+        "plus",
+        "pro",
+        "admin"
+      ],
+      "tools": [
+        "settings"
+      ]
+    },
+    {
+      "id": "KB-014",
+      "path": "docs/assistant/knowledge/14-admin.md",
+      "title": "Административные инструменты",
+      "topic": "administration",
+      "profiles": [
+        "full",
+        "beta"
+      ],
+      "roles": [
+        "admin"
+      ],
+      "tools": []
+    },
+    {
+      "id": "KB-015",
+      "path": "docs/assistant/knowledge/15-glossary.md",
+      "title": "Термины и единицы калькулятора",
+      "topic": "glossary",
+      "profiles": [
+        "full",
+        "beta"
+      ],
+      "roles": [
+        "base",
+        "plus",
+        "pro",
+        "admin"
+      ],
+      "tools": []
+    },
+    {
+      "id": "KB-016",
+      "path": "docs/assistant/knowledge/16-ai-assistant.md",
+      "title": "AI-assistant и помощник Pump-ик",
+      "topic": "assistant",
+      "profiles": [
+        "full",
+        "beta"
+      ],
+      "roles": [
+        "base",
+        "plus",
+        "pro",
+        "admin"
+      ],
+      "tools": [
+        "assistant"
+      ]
+    }
+  ],
+  "exclusions": [
+    "Планы, задания на аудит и исторические отчёты не используются как действующие инструкции.",
+    "README и исходный код используются для проверки и происхождения; в поисковый пакет попадают только перечисленные статьи.",
+    "Ключи, env-файлы, D1, пользователи, сессии, рабочие проекты и резервные копии не входят в пакет.",
+    "Полные каталоги, текущие цены и состояние открытого проекта должны передаваться отдельными авторизованными инструментами.",
+    "Внешние reference-calculator-nu, database, Equipment и временные снимки не индексируются."
+  ]
+}

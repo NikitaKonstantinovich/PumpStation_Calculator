@@ -1,4 +1,6 @@
 import { synchronizeHydraulicOptions } from "./hydraulic-option-assembly";
+import { baseSettingsIdentity } from "./base-values";
+import { bindProjectComponents } from "./base-values-components";
 import type { InputEntity, ProjectConfig, SettingsEntity, SpecEntity, SpecItem, SpecOption } from "./project-config";
 import type { ComponentsDatabase } from "./allowed-pump-tools";
 import type { SmartCabinet } from "./cabinet-configurator";
@@ -19,7 +21,7 @@ export function validStationInput(input: InputEntity) {
 
 export function specificationSourceFingerprint(project: ProjectConfig) {
   const e = project.entities, settings = e["station-settings"] as SettingsEntity, collectors = e["station-collectors"] as CollectorsEntity;
-  return JSON.stringify([FRAME_RULE_REVISION, e["system-input"], secondaryStationEnabled(settings) ? e["system-input-2"] : null, settings, e["station-dn"],
+  return JSON.stringify([FRAME_RULE_REVISION, e["system-input"], secondaryStationEnabled(settings) ? e["system-input-2"] : null, baseSettingsIdentity(settings), e["station-dn"],
     ...[collectors.suction, collectors.discharge].map(card => [card.overrides, card.spacing1, card.spacing2, card.eccentric])]);
 }
 
@@ -41,6 +43,7 @@ const stale = (item: SpecItem, reason: string): SpecItem => ({ ...item, technica
 
 /** One transaction for a confirmed selection, resource refresh, import or undo. No I/O. */
 export function synchronizeStationSpecification(project: ProjectConfig, resources: StationSpecificationResources, refreshHydraulics: HydraulicRefresh): ProjectConfig {
+  if(resources.components)resources={...resources,components:bindProjectComponents(project,resources.components)};
   const settings = project.entities["station-settings"] as SettingsEntity;
   const spec = project.entities["station-spec"] as SpecEntity;
   const secondary = secondaryStationEnabled(settings);

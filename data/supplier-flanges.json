@@ -200,6 +200,97 @@
       },
       "dimensionSource": "https://ifitting.ru/catalog/flantsy_nerzhaveyushchie/flantsy_ploskie/1154/: поставщик объявляет геометрию EN 1092-1/01/B1 PN25/40, труба 114,3 мм. EN1092-1:2018, табл.15, DN100: C1=26, B1=116, D=235, K=190, L=22, n=8; https://www.zzflange.com/wp-content/uploads/2025/08/EN-1092-1-PN-40-Flanges-Dimension.pdf. Поверхность B1: выступ f1=3 мм; полная осевая толщина до уплотнительной поверхности C1+f1=29 мм (схема и таблица https://incoves.com/en/product/flat-flange-type-01-b1-en1092-1-pn40/). Это нормативная геометрия заявленного исполнения, не измерение поставленной детали.",
       "reason": "Размеры по объявленной поставщиком геометрии EN1092-1/01/B1; DN100 PN25 и PN40 имеют одинаковую сверловку. Цена 8730 ₽ из видимой карточки; устаревшая SEO-цена «от 6286» не используется."
+    },
+    {
+      "id": "bkarm-gost-pn10:dn250",
+      "supplier": "БК-Арматура",
+      "supplierProductId": "250-10-01-1-B",
+      "name": "Фланец нержавеющий плоский 250-10-01-1-B AISI304 ГОСТ 33259 БК-Арматура",
+      "dn": 250,
+      "pn": 10,
+      "compatiblePns": [
+        10
+      ],
+      "material": "AISI304",
+      "standard": "ГОСТ 33259-2015:01:ряд1:B:PN10",
+      "price": 6075,
+      "priceDate": "2026-10-31",
+      "priceLabel": "Цена сайта с НДС, ₽/шт.",
+      "vat": "Цена поставщика с НДС, без пересчёта.",
+      "url": "https://bkarm.ru/product/flanecz-stalnoj-nerzhaveyushhij-ploskij-pn-10-dn-250/",
+      "dimensions": {
+        "boreDiameterMm": 273,
+        "outerDiameterMm": 390,
+        "thicknessMm": 26,
+        "boltCircleMm": 350,
+        "holes": 12,
+        "faceDiameterMm": 320,
+        "faceHeightMm": 3,
+        "boltHoleDiameterMm": 22
+      },
+      "dimensionSource": "https://bkarm.ru/product/flanecz-stalnoj-nerzhaveyushhij-ploskij-pn-10-dn-250/; карточка товара, проверено 31.10.2026: отверстие, D, b, n, d, D1, уплотнительная поверхность. Высота выступа B f1=3 мм: ГОСТ 33259-2015, таблица 1 DN250–500; https://www.htpipe.com/d/files/flanges-standard/gost-33259-2015.pdf. Полная толщина b включает выступ.",
+      "reason": "Подтверждены размеры и цена отдельного исполнения PN10; замена PN16 по одному DN запрещена."
+    },
+    {
+      "id": "bkarm-gost-pn10:dn300",
+      "supplier": "БК-Арматура",
+      "supplierProductId": "300-10-01-1-B",
+      "name": "Фланец нержавеющий плоский 300-10-01-1-B AISI304 ГОСТ 33259 БК-Арматура",
+      "dn": 300,
+      "pn": 10,
+      "compatiblePns": [
+        10
+      ],
+      "material": "AISI304",
+      "standard": "ГОСТ 33259-2015:01:ряд1:B:PN10",
+      "price": 7377,
+      "priceDate": "2026-10-31",
+      "priceLabel": "Цена сайта с НДС, ₽/шт.",
+      "vat": "Цена поставщика с НДС, без пересчёта.",
+      "url": "https://bkarm.ru/product/flanecz-stalnoj-nerzhaveyushhij-ploskij-pn-10-dn-300/",
+      "dimensions": {
+        "boreDiameterMm": 325,
+        "outerDiameterMm": 440,
+        "thicknessMm": 28,
+        "boltCircleMm": 400,
+        "holes": 12,
+        "faceDiameterMm": 370,
+        "faceHeightMm": 3,
+        "boltHoleDiameterMm": 22
+      },
+      "dimensionSource": "https://bkarm.ru/product/flanecz-stalnoj-nerzhaveyushhij-ploskij-pn-10-dn-300/; карточка товара, проверено 31.10.2026: отверстие, D, b, n, d, D1, уплотнительная поверхность. Высота выступа B f1=3 мм: ГОСТ 33259-2015, таблица 1 DN250–500; https://www.htpipe.com/d/files/flanges-standard/gost-33259-2015.pdf. Полная толщина b включает выступ.",
+      "reason": "Подтверждены размеры и цена отдельного исполнения PN10; замена PN16 по одному DN запрещена."
+    },
+    {
+      "id": "bkarm-gost-pn10:dn400",
+      "supplier": "БК-Арматура",
+      "supplierProductId": "400-10-01-1-B",
+      "name": "Фланец нержавеющий плоский 400-10-01-1-B AISI304 ГОСТ 33259 БК-Арматура",
+      "dn": 400,
+      "pn": 10,
+      "compatiblePns": [
+        10
+      ],
+      "material": "AISI304",
+      "standard": "ГОСТ 33259-2015:01:ряд1:B:PN10",
+      "price": 14148,
+      "priceDate": "2026-10-31",
+      "priceLabel": "Цена сайта с НДС, ₽/шт.",
+      "vat": "Цена поставщика с НДС, без пересчёта.",
+      "url": "https://bkarm.ru/product/flanecz-stalnoj-nerzhaveyushhij-ploskij-pn-10-dn-400/",
+      "dimensions": {
+        "boreDiameterMm": 426,
+        "outerDiameterMm": 565,
+        "thicknessMm": 30,
+        "boltCircleMm": 515,
+        "holes": 16,
+        "faceDiameterMm": 482,
+        "faceHeightMm": 3,
+        "boltHoleDiameterMm": 26
+      },
+      "dimensionSource": "https://bkarm.ru/product/flanecz-stalnoj-nerzhaveyushhij-ploskij-pn-10-dn-400/; карточка товара, проверено 31.10.2026: отверстие, D, b, n, d, D1, уплотнительная поверхность. Высота выступа B f1=3 мм: ГОСТ 33259-2015, таблица 1 DN250–500; https://www.htpipe.com/d/files/flanges-standard/gost-33259-2015.pdf. Полная толщина b включает выступ.",
+      "reason": "Подтверждены размеры и цена отдельного исполнения PN10; замена PN16 по одному DN запрещена. Ряд 1 рассчитан под трубу Ø426 мм; для ISO Ø406.4 мм требуется другое исполнение.",
+      "requiredPipeOuterDiameterMm": 426
     }
   ],
   "sources": [

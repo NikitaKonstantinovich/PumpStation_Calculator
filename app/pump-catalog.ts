@@ -4,6 +4,12 @@ import { curveSegments, type CurveMethod } from "./curve-methods";
 export type PumpType = "vertical_multistage" | "horizontal_multistage" | "end_suction" | "inline" | "submersible" | "unknown";
 export type PumpPropertyValue = string | number | boolean | null | PumpPropertyValue[] | { [key: string]: PumpPropertyValue };
 export type PumpProperties = Record<string, PumpPropertyValue>;
+export type PumpSpatialData = {
+  version: 1; units: "mm"; coordinateSystem: "inlet";
+  boundsMm: [number | null, number | null, number | null, number | null, number | null, number | null];
+  ports: Array<{ id: "inlet" | "outlet"; point: [number, number, number]; axis: [number, number, number]; source: string }>;
+  source: string; rule: string; issues: string[];
+};
 export type Pump = {
   id: string; manufacturer: string; series: string; group: string; model: string; type: PumpType;
   power: number | null; efficiency: number | null; nominalFlow: number | null;
@@ -23,6 +29,7 @@ export type Pump = {
   fluid?: PumpProperties; mounting?: PumpProperties;
   inlet?: PumpProperties; outlet?: PumpProperties; connectionSourceValue?: PumpProperties;
   physicalDataSources?: PumpProperties; physicalNote?: string;
+  spatialData?: PumpSpatialData;
 };
 
 export function usablePump(pump: Pump, medium: "water" | "wastewater" = "water") {

@@ -11,11 +11,14 @@ from pathlib import Path
 import sqlite3
 
 
-def import_supplement(db, data, supplier_id, *, add_only=False):
+def import_supplement(db, data, supplier_id, *, add_only=False, manage_transaction=True):
     supplement = [row for row in data["items"] if row["tableId"] == supplier_id]
     if not supplement:
         raise ValueError("Supplier data missing; run npm run prebuild first")
-    db.execute("BEGIN IMMEDIATE")
+    if manage_transaction:
+        db.execute("BEGIN IMMEDIATE")
+    elif not db.in_transaction:
+        raise ValueError("Caller must start a transaction")
     try:
         active = db.execute("SELECT id,source_sha256 FROM catalog_imports WHERE is_active=1 ORDER BY imported_at DESC,id DESC LIMIT 1").fetchone()
         if add_only and (active is None or active[1] != data["source"]["sha256"]):
@@ -93,10 +96,12 @@ def import_supplement(db, data, supplier_id, *, add_only=False):
                 roles = ["documentation"] if url.endswith(".pdf") else ["product", "price"]
                 for role in roles:
                     db.execute("INSERT OR IGNORE INTO component_data_sources (component_id,data_source_id,role) VALUES (?,?,?)", (component_id, source_id, role))
-        db.commit()
+        if manage_transaction:
+            db.commit()
         return {"importId": import_id, "initializedCatalogue": bootstrap, "supplierRows": len(supplement), "created": created, "unchanged": unchanged}
     except Exception:
-        db.rollback()
+        if manage_transaction:
+            db.rollback()
         raise
 
 

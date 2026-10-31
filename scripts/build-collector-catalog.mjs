@@ -1,6 +1,7 @@
 import { readFile, writeFile } from "node:fs/promises";
 import { createHash } from "node:crypto";
-import { makeCollectorCatalog } from "../app/collector-catalog.ts";
+import { loadTs } from "../tests/load-ts.mjs";
+const { makeCollectorCatalog } = await loadTs(new URL("../app/collector-catalog.ts", import.meta.url));
 import { mergeBindingSupplement } from "./binding-supplements.mjs";
 import { mergeSealingSupplement } from "./sealing-supplement.mjs";
 import { mergeInstrumentValve } from "./instrument-valve-supplement.mjs";
@@ -14,6 +15,8 @@ import { mergeSupplierFlanges } from "./supplier-flanges.mjs";
 import { mergeInsertAnalogs } from "../app/component-insert-analog-source.ts";
 import { mergeSt20ConcentricReducers } from "./st20-concentric-reducers.mjs";
 import { mergeVibrationDimensions } from "../app/vibration-dimensions.ts";
+import { mergeThreadEnds } from "./thread-ends.mjs";
+import { mergeStandardStainlessFlanges } from "./standard-stainless-flanges.mjs";
 
 const sourceUrl = new URL("../public/binding-components.json", import.meta.url);
 const original = await readFile(sourceUrl, "utf8");
@@ -31,10 +34,12 @@ const newkeyFlanges = JSON.parse(await readFile(new URL("../data/newkey-flanges.
 const insertAnalogs = JSON.parse(await readFile(new URL("../data/insert-analog-dimensions.json", import.meta.url), "utf8"));
 const st20Reducers = JSON.parse(await readFile(new URL("../data/st20-concentric-reducers.json", import.meta.url), "utf8"));
 const vibrations = JSON.parse(await readFile(new URL("../data/vibration-dimensions.json", import.meta.url), "utf8"));
-const withSupplierFlanges = mergeSt20ConcentricReducers(mergeSupplierFlanges(mergeSupplierFlanges(JSON.parse(original), supplierFlanges), newkeyFlanges), st20Reducers, standards);
+const standardStainlessFlanges = JSON.parse(await readFile(new URL("../data/standard-stainless-flanges.json", import.meta.url), "utf8"));
+const withSupplierFlanges = mergeSt20ConcentricReducers(mergeStandardStainlessFlanges(mergeSupplierFlanges(mergeSupplierFlanges(JSON.parse(original), supplierFlanges), newkeyFlanges), standardStainlessFlanges), st20Reducers, standards);
 const data = mergeCadDimensions(mergePipePainting(mergeSensorNipples(mergeFlangeDimensions(mergeCollarDimensions(mergeReducerDimensions(mergeInstrumentValve(mergeSealingSupplement(mergeBindingSupplement(withSupplierFlanges, supplier), seals), valve), standards), collars), flanges), sensorNipples), painting), cad);
 Object.assign(data, mergeInsertAnalogs(data, insertAnalogs));
 Object.assign(data, mergeVibrationDimensions(data, vibrations));
+Object.assign(data, mergeThreadEnds(data, JSON.parse(await readFile(new URL("../data/thread-ends.json", import.meta.url), "utf8"))));
 const source = JSON.stringify(data, null, 2) + "\n";
 if (source !== original) await writeFile(sourceUrl, source);
 const catalog = makeCollectorCatalog(data);

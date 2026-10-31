@@ -1,3 +1,5 @@
+import { currentBasePublication } from "./base-values-server";
+import { applyBaseTariffs, baseSnapshot, type AppliedBaseValues } from "./base-values";
 import { db, sha256 } from "./auth-server";
 import type { BindingCatalog } from "./collector-catalog";
 import { makeInsertCatalog } from "./component-insert-catalog";
@@ -56,10 +58,15 @@ export async function currentInsertSource(): Promise<InsertSource> {
   throw new Error("Исходный каталог изменяется во время чтения. Повторите расчёт.");
 }
 
-export async function currentInsertCatalog(source?: InsertSource) {
+export async function currentInsertSourceCatalog(source?: InsertSource) {
   const current = source ?? await currentInsertSource();
   const catalog = makeInsertCatalog(current);
   // Include all reference/engineering data and tariff values in the revision.
-  catalog.version = await sha256(JSON.stringify({ algorithmVersion: 29, weldRates: WELD_RATES, databaseRevision: current.databaseRevision, catalog }));
+  catalog.version = await sha256(JSON.stringify({ algorithmVersion: 31, weldRates: WELD_RATES, databaseRevision: current.databaseRevision, catalog }));
   return catalog;
+}
+export async function currentInsertCatalog(source?: InsertSource, applied?:AppliedBaseValues) {
+  const catalog=await currentInsertSourceCatalog(source);
+  const bound=applied??await currentBasePublication().then(p=>baseSnapshot(p.id,p.values));
+  return applyBaseTariffs(catalog,bound);
 }

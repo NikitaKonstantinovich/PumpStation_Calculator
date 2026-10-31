@@ -43,7 +43,8 @@ export const CONFIRMED_INSERT_ENGINEERING: InsertEngineering = {
   ...UNCONFIRMED_INSERT_ENGINEERING,
   sensorNipplePn25Allowance: sensorNipplePn25Policy as InsertEngineering["sensorNipplePn25Allowance"],
   variantSelection: { source: "Решение пользователя 26.10.2026: по одному исполнению для DN, PN, материала, геометрии и сгона; разные соединения отдельно. По возможности используются комплектующие исходной базы, недостающие данные принимаются из аналогов. Полный расчёт имеет приоритет; среди полных вариантов предпочтительна исходная база." },
-  flangeBoring: flangeBoringPolicy,
+  compactThreaded: { source: "Решения пользователя 29.10.2026: готовые приварные резьбовые концы обоих материалов, только одинаковый DN до 2 дюймов; компактная сборка без дополнительной трубы. Норма стыкового соединения наследует принятую методику воротников 2πD; зазор не прибавляется.", weldFactor: 2 },
+  flangeBoring: flangeBoringPolicy as InsertEngineering["flangeBoring"],
   reducerSeatingApprovals: reducerSeatingApprovals.rows as InsertEngineering["reducerSeatingApprovals"],
   reducerReadyBoreSeating: reducerSeatingApprovals.readyBorePolicy,
   flangedEndExclusions: { dns: [15, 20, 25], source: "Уточнение пользователя 26.10.2026: DN15, DN20 и DN25 не используются во фланцевом исполнении вставок. Исключены приварные фланцы и воротники со свободным фланцем на каждом конце; резьбовые концы сохраняются при наличии подтверждённых деталей." },
@@ -87,7 +88,7 @@ export function makeInsertCatalog(data: BindingCatalog, engineering: InsertEngin
     const dimension = (key: string, pattern: RegExp) => {
       const field = findField(item, pattern), value = numeric(field?.value);
       const collarSource = kind === "collar" && field && [COLLAR_COLUMNS.length, COLLAR_COLUMNS.thickness, COLLAR_COLUMNS.diameter].some(column => column === field.column) ? findField(item, /^Источник размеров воротника$/i)?.value : null;
-      const explicitSource = collarSource ?? (key === "lengthMm" ? findField(item, /^Источник длины$/i)?.value : null);
+      const explicitSource = collarSource ?? (key === "lengthMm" ? findField(item, /^Источник длины$/i)?.value : kind === "threadEnd" ? findField(item, /^Источник размеров$/i)?.value : null);
       if (value !== null) dimensionSources[key] = explicitSource ? String(explicitSource) : source(item, field);
       return value;
     };
@@ -110,6 +111,10 @@ export function makeInsertCatalog(data: BindingCatalog, engineering: InsertEngin
     const thread = threadField ? String(threadField.value).trim().replace(/[”″]/g, '"') : null;
     const standard = name.match(/(?:ГОСТ|DIN|EN|ISO)\s*\d+(?:[-.]\d+)*/i)?.[0].toUpperCase().replace(/\s+/g, "") ?? null;
     const warnings: string[] = [];
+    if (kind === "threadEnd") {
+      const issue = findField(item, /^Неподтверждённые данные$/i)?.value;
+      if (issue) warnings.push(String(issue));
+    }
     if (!positive(pn) && (kind === "pipe" || kind === "reducer")) warnings.push(`Не подтверждён PN основной детали: ${name}`);
     const acceptedMaterials = acceptedFlangeMaterials(item, pn, flangeDimensions, data.source.sha256);
     if (material === "aisi304" && /12Х18Н10Т/i.test(name) && !acceptedMaterials) warnings.push(`Материал источника противоречив: семейство AISI304, наименование 12Х18Н10Т (${item.id})`);
@@ -124,11 +129,16 @@ export function makeInsertCatalog(data: BindingCatalog, engineering: InsertEngin
       thread, threadGender: gender === "НР" ? "male" : gender === "ВР" ? "female" : null, standard, price: positive(price?.amount) ? price.amount : null,
       source: `${source(item)}${price ? `; цена ${price.sourceColumn}${item.sourceRow}` : ""}`, dimensionSources, warnings };
     if (acceptedMaterials) part.source += `; ${acceptedMaterials.materials}; ${acceptedMaterials.source}`;
+    if (kind === "threadEnd") {
+      part.origin = "supplement";
+      part.source += `; ${findField(item, /^Источник размеров$/i)?.value ?? ""}; цена: ${findField(item, /^Источник цены$/i)?.value ?? ""}; ${findField(item, /^Дата проверки$/i)?.value ?? ""}`;
+    }
     const supplierFlange = supplierFlangeFor(item, data.source.sha256);
     if (supplierFlange) {
+      if ("requiredPipeOuterDiameterMm" in supplierFlange && typeof supplierFlange.requiredPipeOuterDiameterMm === "number") part.requiredPipeOuterDiameterMm = supplierFlange.requiredPipeOuterDiameterMm;
       part.origin = "supplement";
       part.compatiblePns = supplierFlange.compatiblePns;
-      part.source = `${supplierFlange.url}; цена сайта ${price?.amount ?? "не задана"} ₽/шт., дата ${String(findField(item, /^Дата цены$/i)?.value ?? "не задана")}; ${supplierFlange.vat}`;
+      part.source = `${supplierFlange.url}; ${price?.label ?? "Цена не задана"}: ${price?.amount ?? "не задана"} ₽/шт., дата источника ${String(findField(item, /^Дата цены$/i)?.value ?? "не задана")}; ${supplierFlange.vat}`;
     } else if (item.fields.some(field => field.column === "compatiblePns")) warnings.push(`Подтверждённые PN фланца не соответствуют записи поставщика: ${item.id}`);
     if (kind === "nipple") {
       const reviewed = sensorNippleReferenceFor(item, data.source.sha256, sensorNipples);
@@ -183,6 +193,7 @@ export function makeInsertCatalog(data: BindingCatalog, engineering: InsertEngin
       if (item.fields.some(field => field.column.startsWith("CALC_FLANGE_") && field.column !== "CALC_FLANGE_REVIEW")) {
         part.thicknessMm = measured.dimensions.thicknessMm ?? null;
         part.boreDiameterMm = measured.dimensions.boreDiameterMm ?? null;
+        if (measured.dimensions.pipeOuterDiameterMm) part.requiredPipeOuterDiameterMm = measured.dimensions.pipeOuterDiameterMm;
         if (part.thicknessMm !== null) part.dimensionSources.thicknessMm = measured.source;
         else delete part.dimensionSources.thicknessMm;
         if (part.boreDiameterMm !== null) part.dimensionSources.boreDiameterMm = measured.source;
@@ -194,8 +205,13 @@ export function makeInsertCatalog(data: BindingCatalog, engineering: InsertEngin
     const syntheticLength = findField(item, /^(?:Строительная )?Длина(?: перехода| детали)?, мм$/i)?.column === "CALC_INSERT_LENGTH_MM";
     if (syntheticLength) {
       const reference = data.source.sha256 === standards.sourceSha256 && standards.reducerLengths.find(ref => ref.componentId === part.id && ref.material === material && ref.geometry === part.geometry && ref.outerDiameter === part.outerDiameter && ref.outerDiameterSmall === part.outerDiameterSmall && ref.wallThickness === part.wallThickness && ref.wallThicknessSmall === part.wallThicknessSmall && ref.lengthMm === part.lengthMm
-        && (ref.basis === "adopted-standard-geometry" ? ref.adoptionId === standards.reducerLengthPolicy.id && ref.standard === standards.reducerLengthPolicy.standard : /^ГОСТ17378(?:-|$)/.test(part.standard ?? "")));
-      if (reference) part.dimensionSources.lengthMm = reference.source;
+        && (ref.basis === "project-analogue-length" ? ref.adoptionId === standards.reducerAnalogueLengthPolicy.id
+          && standards.reducerAnalogueLengthPolicy.rows.some(row => row.componentId === ref.componentId && row.material === ref.material && row.geometry === ref.geometry && row.outerDiameter === ref.outerDiameter && row.outerDiameterSmall === ref.outerDiameterSmall && row.wallThickness === ref.wallThickness && row.wallThicknessSmall === ref.wallThicknessSmall && row.lengthMm === ref.lengthMm)
+          : ref.basis === "adopted-standard-geometry" ? ref.adoptionId === standards.reducerLengthPolicy.id && ref.standard === standards.reducerLengthPolicy.standard : /^ГОСТ17378(?:-|$)/.test(part.standard ?? "")));
+      if (reference) {
+        part.dimensionSources.lengthMm = reference.source;
+        if (reference.basis === "project-analogue-length") part.lengthAssumptionSource = reference.source;
+      }
       else { part.lengthMm = null; delete part.dimensionSources.lengthMm; part.warnings.push("Нормативная длина перехода устарела: изменились исходная книга или физические размеры; требуется повторная проверка ГОСТ"); }
     }
     if (part.kind === "reducer" && item.fields.some(field => field.column.startsWith("CALC_CAD_"))) {

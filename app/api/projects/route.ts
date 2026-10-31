@@ -1,6 +1,8 @@
 import { guardDisabledBetaFeature } from "../../release-server";
 import { currentUser, db, ensureAuthSchema, json } from "../../auth-server";
 import { parseProjectConfig } from "../../project-config";
+import { BaseValuesError, verifyAppliedBaseValues } from "../../base-values-server";
+import type { SettingsEntity } from "../../project-config";
 import { projectAccessError } from "../../project-access";
 
 export async function GET(request:Request){
@@ -20,6 +22,8 @@ export async function PUT(request:Request){
     const text = await request.text(); if(text.length>2_000_000)return json({error:"Проект слишком большой."},413);
     config = parseProjectConfig(JSON.parse(text)?.config);
   } catch { return json({error:"Некорректный проект."},400); }
+  try { const settings=config.entities["station-settings"] as SettingsEntity; settings.baseValues=await verifyAppliedBaseValues(settings.baseValues); }
+  catch(error){return json({error:error instanceof BaseValuesError?error.message:"Не удалось проверить версию базовых значений. Проект не записан."},error instanceof BaseValuesError?error.status:503);}
   const accessError=projectAccessError(config,user.role); if(accessError)return json({error:accessError},403);
   const id=config.project.id,name=config.project.name,serialized=JSON.stringify(config);
   const existing=await db().prepare("SELECT id FROM user_projects WHERE id=? AND user_id=?").bind(id,user.id).first<{id:string}>();

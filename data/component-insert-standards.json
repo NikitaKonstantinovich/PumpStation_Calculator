@@ -5994,6 +5994,162 @@
       "source": "ГОСТ 17378-2001, таблица 1, исполнение 1, D=323.9, D1=273, PDF стр. 6; https://files.stroyinf.ru/Data2/1/4294846/4294846097.pdf; проектная длина по указанию пользователя 05.10.2026; материал AISI304 и PN остаются исходными, соответствие материала области ГОСТ не заявляется",
       "basis": "adopted-standard-geometry",
       "adoptionId": "user-gost-17378-20261005"
+    },
+    {
+      "componentId": "переходы-003-r0269",
+      "material": "aisi304",
+      "geometry": "eccentric",
+      "outerDiameter": 323.9,
+      "outerDiameterSmall": 168.3,
+      "wallThickness": 4.5,
+      "wallThicknessSmall": 4.5,
+      "lengthMm": 203,
+      "basis": "project-analogue-length",
+      "adoptionId": "user-analogue-length-20261031",
+      "source": "Решение пользователя 31.10.2026: принять длины аналогов 203 мм DN300–150 и 356 мм DN400–300 для концентрических/эксцентрических переходов AISI304 PN10/16/25. Сохранены исходные стенки, цены и PN. Это проектная длина по аналогу, не паспорт конкретной детали и не подтверждение давления. Аналог: ГОСТ 17378-2001, исполнение 1, таблица 1; https://uzdt.net/media/uploads/doki/perehod/gost_173782001perekhody_besshovnye_privarnye.pdf; нержавеющие аналоги EN10253-3: https://www.heco.de/webservice/downloads/product-sheet/609/en/heco-product-sheet-609-Stainless-steel-Reduzierungen-geschw-konzentrisch-DN-greater-200.pdf"
+    },
+    {
+      "componentId": "переходы-003-r0270",
+      "material": "aisi304",
+      "geometry": "eccentric",
+      "outerDiameter": 323.9,
+      "outerDiameterSmall": 168.3,
+      "wallThickness": 7.1,
+      "wallThicknessSmall": 7.1,
+      "lengthMm": 203,
+      "basis": "project-analogue-length",
+      "adoptionId": "user-analogue-length-20261031",
+      "source": "Решение пользователя 31.10.2026: принять длины аналогов 203 мм DN300–150 и 356 мм DN400–300 для концентрических/эксцентрических переходов AISI304 PN10/16/25. Сохранены исходные стенки, цены и PN. Это проектная длина по аналогу, не паспорт конкретной детали и не подтверждение давления. Аналог: ГОСТ 17378-2001, исполнение 1, таблица 1; https://uzdt.net/media/uploads/doki/perehod/gost_173782001perekhody_besshovnye_privarnye.pdf; нержавеющие аналоги EN10253-3: https://www.heco.de/webservice/downloads/product-sheet/609/en/heco-product-sheet-609-Stainless-steel-Reduzierungen-geschw-konzentrisch-DN-greater-200.pdf"
+    },
+    {
+      "componentId": "переходы-003-r0271",
+      "material": "aisi304",
+      "geometry": "eccentric",
+      "outerDiameter": 323.9,
+      "outerDiameterSmall": 168.3,
+      "wallThickness": 11,
+      "wallThicknessSmall": 11,
+      "lengthMm": 203,
+      "basis": "project-analogue-length",
+      "adoptionId": "user-analogue-length-20261031",
+      "source": "Решение пользователя 31.10.2026: принять длины аналогов 203 мм DN300–150 и 356 мм DN400–300 для концентрических/эксцентрических переходов AISI304 PN10/16/25. Сохранены исходные стенки, цены и PN. Это проектная длина по аналогу, не паспорт конкретной детали и не подтверждение давления. Аналог: ГОСТ 17378-2001, исполнение 1, таблица 1; https://uzdt.net/media/uploads/doki/perehod/gost_173782001perekhody_besshovnye_privarnye.pdf; нержавеющие аналоги EN10253-3: https://www.heco.de/webservice/downloads/product-sheet/609/en/heco-product-sheet-609-Stainless-steel-Reduzierungen-geschw-konzentrisch-DN-greater-200.pdf"
+    },
+    {
+      "componentId": "переходы-003-r0290",
+      "material": "aisi304",
+      "geometry": "eccentric",
+      "outerDiameter": 406.4,
+      "outerDiameterSmall": 323.9,
+      "wallThickness": 7,
+      "wallThicknessSmall": 4.5,
+      "lengthMm": 356,
+      "basis": "project-analogue-length",
+      "adoptionId": "user-analogue-length-20261031",
+      "source": "Решение пользователя 31.10.2026: принять длины аналогов 203 мм DN300–150 и 356 мм DN400–300 для концентрических/эксцентрических переходов AISI304 PN10/16/25. Сохранены исходные стенки, цены и PN. Это проектная длина по аналогу, не паспорт конкретной детали и не подтверждение давления. Аналог: ГОСТ 17378-2001, исполнение 1, таблица 1; https://uzdt.net/media/uploads/doki/perehod/gost_173782001perekhody_besshovnye_privarnye.pdf; нержавеющие аналоги EN10253-3: https://www.heco.de/webservice/downloads/product-sheet/609/en/heco-product-sheet-609-Stainless-steel-Reduzierungen-geschw-konzentrisch-DN-greater-200.pdf"
+    },
+    {
+      "componentId": "переходы-003-r0291",
+      "material": "aisi304",
+      "geometry": "eccentric",
+      "outerDiameter": 406.4,
+      "outerDiameterSmall": 323.9,
+      "wallThickness": 10,
+      "wallThicknessSmall": 7.1,
+      "lengthMm": 356,
+      "basis": "project-analogue-length",
+      "adoptionId": "user-analogue-length-20261031",
+      "source": "Решение пользователя 31.10.2026: принять длины аналогов 203 мм DN300–150 и 356 мм DN400–300 для концентрических/эксцентрических переходов AISI304 PN10/16/25. Сохранены исходные стенки, цены и PN. Это проектная длина по аналогу, не паспорт конкретной детали и не подтверждение давления. Аналог: ГОСТ 17378-2001, исполнение 1, таблица 1; https://uzdt.net/media/uploads/doki/perehod/gost_173782001perekhody_besshovnye_privarnye.pdf; нержавеющие аналоги EN10253-3: https://www.heco.de/webservice/downloads/product-sheet/609/en/heco-product-sheet-609-Stainless-steel-Reduzierungen-geschw-konzentrisch-DN-greater-200.pdf"
+    },
+    {
+      "componentId": "переходы-003-r0292",
+      "material": "aisi304",
+      "geometry": "eccentric",
+      "outerDiameter": 406.4,
+      "outerDiameterSmall": 323.9,
+      "wallThickness": 12,
+      "wallThicknessSmall": 11,
+      "lengthMm": 356,
+      "basis": "project-analogue-length",
+      "adoptionId": "user-analogue-length-20261031",
+      "source": "Решение пользователя 31.10.2026: принять длины аналогов 203 мм DN300–150 и 356 мм DN400–300 для концентрических/эксцентрических переходов AISI304 PN10/16/25. Сохранены исходные стенки, цены и PN. Это проектная длина по аналогу, не паспорт конкретной детали и не подтверждение давления. Аналог: ГОСТ 17378-2001, исполнение 1, таблица 1; https://uzdt.net/media/uploads/doki/perehod/gost_173782001perekhody_besshovnye_privarnye.pdf; нержавеющие аналоги EN10253-3: https://www.heco.de/webservice/downloads/product-sheet/609/en/heco-product-sheet-609-Stainless-steel-Reduzierungen-geschw-konzentrisch-DN-greater-200.pdf"
+    },
+    {
+      "componentId": "переходы-005-r0434",
+      "material": "aisi304",
+      "geometry": "concentric",
+      "outerDiameter": 323.9,
+      "outerDiameterSmall": 168.3,
+      "wallThickness": 4.5,
+      "wallThicknessSmall": 4.5,
+      "lengthMm": 203,
+      "basis": "project-analogue-length",
+      "adoptionId": "user-analogue-length-20261031",
+      "source": "Решение пользователя 31.10.2026: принять длины аналогов 203 мм DN300–150 и 356 мм DN400–300 для концентрических/эксцентрических переходов AISI304 PN10/16/25. Сохранены исходные стенки, цены и PN. Это проектная длина по аналогу, не паспорт конкретной детали и не подтверждение давления. Аналог: ГОСТ 17378-2001, исполнение 1, таблица 1; https://uzdt.net/media/uploads/doki/perehod/gost_173782001perekhody_besshovnye_privarnye.pdf; нержавеющие аналоги EN10253-3: https://www.heco.de/webservice/downloads/product-sheet/609/en/heco-product-sheet-609-Stainless-steel-Reduzierungen-geschw-konzentrisch-DN-greater-200.pdf"
+    },
+    {
+      "componentId": "переходы-005-r0435",
+      "material": "aisi304",
+      "geometry": "concentric",
+      "outerDiameter": 323.9,
+      "outerDiameterSmall": 168.3,
+      "wallThickness": 7.1,
+      "wallThicknessSmall": 7.1,
+      "lengthMm": 203,
+      "basis": "project-analogue-length",
+      "adoptionId": "user-analogue-length-20261031",
+      "source": "Решение пользователя 31.10.2026: принять длины аналогов 203 мм DN300–150 и 356 мм DN400–300 для концентрических/эксцентрических переходов AISI304 PN10/16/25. Сохранены исходные стенки, цены и PN. Это проектная длина по аналогу, не паспорт конкретной детали и не подтверждение давления. Аналог: ГОСТ 17378-2001, исполнение 1, таблица 1; https://uzdt.net/media/uploads/doki/perehod/gost_173782001perekhody_besshovnye_privarnye.pdf; нержавеющие аналоги EN10253-3: https://www.heco.de/webservice/downloads/product-sheet/609/en/heco-product-sheet-609-Stainless-steel-Reduzierungen-geschw-konzentrisch-DN-greater-200.pdf"
+    },
+    {
+      "componentId": "переходы-005-r0436",
+      "material": "aisi304",
+      "geometry": "concentric",
+      "outerDiameter": 323.9,
+      "outerDiameterSmall": 168.3,
+      "wallThickness": 11,
+      "wallThicknessSmall": 11,
+      "lengthMm": 203,
+      "basis": "project-analogue-length",
+      "adoptionId": "user-analogue-length-20261031",
+      "source": "Решение пользователя 31.10.2026: принять длины аналогов 203 мм DN300–150 и 356 мм DN400–300 для концентрических/эксцентрических переходов AISI304 PN10/16/25. Сохранены исходные стенки, цены и PN. Это проектная длина по аналогу, не паспорт конкретной детали и не подтверждение давления. Аналог: ГОСТ 17378-2001, исполнение 1, таблица 1; https://uzdt.net/media/uploads/doki/perehod/gost_173782001perekhody_besshovnye_privarnye.pdf; нержавеющие аналоги EN10253-3: https://www.heco.de/webservice/downloads/product-sheet/609/en/heco-product-sheet-609-Stainless-steel-Reduzierungen-geschw-konzentrisch-DN-greater-200.pdf"
+    },
+    {
+      "componentId": "переходы-005-r0455",
+      "material": "aisi304",
+      "geometry": "concentric",
+      "outerDiameter": 406.4,
+      "outerDiameterSmall": 323.9,
+      "wallThickness": 7,
+      "wallThicknessSmall": 4.5,
+      "lengthMm": 356,
+      "basis": "project-analogue-length",
+      "adoptionId": "user-analogue-length-20261031",
+      "source": "Решение пользователя 31.10.2026: принять длины аналогов 203 мм DN300–150 и 356 мм DN400–300 для концентрических/эксцентрических переходов AISI304 PN10/16/25. Сохранены исходные стенки, цены и PN. Это проектная длина по аналогу, не паспорт конкретной детали и не подтверждение давления. Аналог: ГОСТ 17378-2001, исполнение 1, таблица 1; https://uzdt.net/media/uploads/doki/perehod/gost_173782001perekhody_besshovnye_privarnye.pdf; нержавеющие аналоги EN10253-3: https://www.heco.de/webservice/downloads/product-sheet/609/en/heco-product-sheet-609-Stainless-steel-Reduzierungen-geschw-konzentrisch-DN-greater-200.pdf"
+    },
+    {
+      "componentId": "переходы-005-r0456",
+      "material": "aisi304",
+      "geometry": "concentric",
+      "outerDiameter": 406.4,
+      "outerDiameterSmall": 323.9,
+      "wallThickness": 10,
+      "wallThicknessSmall": 7.1,
+      "lengthMm": 356,
+      "basis": "project-analogue-length",
+      "adoptionId": "user-analogue-length-20261031",
+      "source": "Решение пользователя 31.10.2026: принять длины аналогов 203 мм DN300–150 и 356 мм DN400–300 для концентрических/эксцентрических переходов AISI304 PN10/16/25. Сохранены исходные стенки, цены и PN. Это проектная длина по аналогу, не паспорт конкретной детали и не подтверждение давления. Аналог: ГОСТ 17378-2001, исполнение 1, таблица 1; https://uzdt.net/media/uploads/doki/perehod/gost_173782001perekhody_besshovnye_privarnye.pdf; нержавеющие аналоги EN10253-3: https://www.heco.de/webservice/downloads/product-sheet/609/en/heco-product-sheet-609-Stainless-steel-Reduzierungen-geschw-konzentrisch-DN-greater-200.pdf"
+    },
+    {
+      "componentId": "переходы-005-r0457",
+      "material": "aisi304",
+      "geometry": "concentric",
+      "outerDiameter": 406.4,
+      "outerDiameterSmall": 323.9,
+      "wallThickness": 12,
+      "wallThicknessSmall": 11,
+      "lengthMm": 356,
+      "basis": "project-analogue-length",
+      "adoptionId": "user-analogue-length-20261031",
+      "source": "Решение пользователя 31.10.2026: принять длины аналогов 203 мм DN300–150 и 356 мм DN400–300 для концентрических/эксцентрических переходов AISI304 PN10/16/25. Сохранены исходные стенки, цены и PN. Это проектная длина по аналогу, не паспорт конкретной детали и не подтверждение давления. Аналог: ГОСТ 17378-2001, исполнение 1, таблица 1; https://uzdt.net/media/uploads/doki/perehod/gost_173782001perekhody_besshovnye_privarnye.pdf; нержавеющие аналоги EN10253-3: https://www.heco.de/webservice/downloads/product-sheet/609/en/heco-product-sheet-609-Stainless-steel-Reduzierungen-geschw-konzentrisch-DN-greater-200.pdf"
     }
   ],
   "conflicts": [
@@ -10164,11 +10320,13 @@
       "outerDiameterSmall": 168.3,
       "wallThickness": 4.5,
       "wallThicknessSmall": 4.5,
-      "status": "unconfirmed",
-      "candidateLengthsMm": [],
-      "reason": "Исходная запись не указывает производителя, артикул, стандарт или исполнение перехода. Достоверная длина именно для этих четырёх размеров и исполнения в проверенных источниках не установлена. Не распространять L соседнего DN или производителя. Подтверждённая длина для данного исполнения не найдена. ГОСТ 17378 для углеродистой и низколегированной стали не доказывает размеры нержавеющей детали; нужен чертёж или артикул производителя.",
-      "source": "ISO 5251:1981, область применения и проверенная часть таблицы 4: https://cdn.standards.iteh.ai/samples/11250/618ba484d1ed45f3a56a45da3b246dd6/ISO-5251-1981.pdf; https://www.iso.org/standard/11250.html",
-      "verifiedAt": "2026-10-04"
+      "status": "confirmed",
+      "candidateLengthsMm": [
+        203
+      ],
+      "reason": "Решение пользователя 31.10.2026: принять длины аналогов 203 мм DN300–150 и 356 мм DN400–300 для концентрических/эксцентрических переходов AISI304 PN10/16/25. Сохранены исходные стенки, цены и PN. Это проектная длина по аналогу, не паспорт конкретной детали и не подтверждение давления. Аналог: ГОСТ 17378-2001, исполнение 1, таблица 1; https://uzdt.net/media/uploads/doki/perehod/gost_173782001perekhody_besshovnye_privarnye.pdf; нержавеющие аналоги EN10253-3: https://www.heco.de/webservice/downloads/product-sheet/609/en/heco-product-sheet-609-Stainless-steel-Reduzierungen-geschw-konzentrisch-DN-greater-200.pdf",
+      "source": "Решение пользователя 31.10.2026: принять длины аналогов 203 мм DN300–150 и 356 мм DN400–300 для концентрических/эксцентрических переходов AISI304 PN10/16/25. Сохранены исходные стенки, цены и PN. Это проектная длина по аналогу, не паспорт конкретной детали и не подтверждение давления. Аналог: ГОСТ 17378-2001, исполнение 1, таблица 1; https://uzdt.net/media/uploads/doki/perehod/gost_173782001perekhody_besshovnye_privarnye.pdf; нержавеющие аналоги EN10253-3: https://www.heco.de/webservice/downloads/product-sheet/609/en/heco-product-sheet-609-Stainless-steel-Reduzierungen-geschw-konzentrisch-DN-greater-200.pdf",
+      "verifiedAt": "2026-10-31"
     },
     {
       "componentId": "переходы-003-r0270",
@@ -10178,11 +10336,13 @@
       "outerDiameterSmall": 168.3,
       "wallThickness": 7.1,
       "wallThicknessSmall": 7.1,
-      "status": "unconfirmed",
-      "candidateLengthsMm": [],
-      "reason": "Исходная запись не указывает производителя, артикул, стандарт или исполнение перехода. Достоверная длина именно для этих четырёх размеров и исполнения в проверенных источниках не установлена. Не распространять L соседнего DN или производителя. Подтверждённая длина для данного исполнения не найдена. ГОСТ 17378 для углеродистой и низколегированной стали не доказывает размеры нержавеющей детали; нужен чертёж или артикул производителя.",
-      "source": "ISO 5251:1981, область применения и проверенная часть таблицы 4: https://cdn.standards.iteh.ai/samples/11250/618ba484d1ed45f3a56a45da3b246dd6/ISO-5251-1981.pdf; https://www.iso.org/standard/11250.html",
-      "verifiedAt": "2026-10-04"
+      "status": "confirmed",
+      "candidateLengthsMm": [
+        203
+      ],
+      "reason": "Решение пользователя 31.10.2026: принять длины аналогов 203 мм DN300–150 и 356 мм DN400–300 для концентрических/эксцентрических переходов AISI304 PN10/16/25. Сохранены исходные стенки, цены и PN. Это проектная длина по аналогу, не паспорт конкретной детали и не подтверждение давления. Аналог: ГОСТ 17378-2001, исполнение 1, таблица 1; https://uzdt.net/media/uploads/doki/perehod/gost_173782001perekhody_besshovnye_privarnye.pdf; нержавеющие аналоги EN10253-3: https://www.heco.de/webservice/downloads/product-sheet/609/en/heco-product-sheet-609-Stainless-steel-Reduzierungen-geschw-konzentrisch-DN-greater-200.pdf",
+      "source": "Решение пользователя 31.10.2026: принять длины аналогов 203 мм DN300–150 и 356 мм DN400–300 для концентрических/эксцентрических переходов AISI304 PN10/16/25. Сохранены исходные стенки, цены и PN. Это проектная длина по аналогу, не паспорт конкретной детали и не подтверждение давления. Аналог: ГОСТ 17378-2001, исполнение 1, таблица 1; https://uzdt.net/media/uploads/doki/perehod/gost_173782001perekhody_besshovnye_privarnye.pdf; нержавеющие аналоги EN10253-3: https://www.heco.de/webservice/downloads/product-sheet/609/en/heco-product-sheet-609-Stainless-steel-Reduzierungen-geschw-konzentrisch-DN-greater-200.pdf",
+      "verifiedAt": "2026-10-31"
     },
     {
       "componentId": "переходы-003-r0271",
@@ -10192,11 +10352,13 @@
       "outerDiameterSmall": 168.3,
       "wallThickness": 11,
       "wallThicknessSmall": 11,
-      "status": "unconfirmed",
-      "candidateLengthsMm": [],
-      "reason": "Исходная запись не указывает производителя, артикул, стандарт или исполнение перехода. Достоверная длина именно для этих четырёх размеров и исполнения в проверенных источниках не установлена. Не распространять L соседнего DN или производителя. Подтверждённая длина для данного исполнения не найдена. ГОСТ 17378 для углеродистой и низколегированной стали не доказывает размеры нержавеющей детали; нужен чертёж или артикул производителя.",
-      "source": "ISO 5251:1981, область применения и проверенная часть таблицы 4: https://cdn.standards.iteh.ai/samples/11250/618ba484d1ed45f3a56a45da3b246dd6/ISO-5251-1981.pdf; https://www.iso.org/standard/11250.html",
-      "verifiedAt": "2026-10-04"
+      "status": "confirmed",
+      "candidateLengthsMm": [
+        203
+      ],
+      "reason": "Решение пользователя 31.10.2026: принять длины аналогов 203 мм DN300–150 и 356 мм DN400–300 для концентрических/эксцентрических переходов AISI304 PN10/16/25. Сохранены исходные стенки, цены и PN. Это проектная длина по аналогу, не паспорт конкретной детали и не подтверждение давления. Аналог: ГОСТ 17378-2001, исполнение 1, таблица 1; https://uzdt.net/media/uploads/doki/perehod/gost_173782001perekhody_besshovnye_privarnye.pdf; нержавеющие аналоги EN10253-3: https://www.heco.de/webservice/downloads/product-sheet/609/en/heco-product-sheet-609-Stainless-steel-Reduzierungen-geschw-konzentrisch-DN-greater-200.pdf",
+      "source": "Решение пользователя 31.10.2026: принять длины аналогов 203 мм DN300–150 и 356 мм DN400–300 для концентрических/эксцентрических переходов AISI304 PN10/16/25. Сохранены исходные стенки, цены и PN. Это проектная длина по аналогу, не паспорт конкретной детали и не подтверждение давления. Аналог: ГОСТ 17378-2001, исполнение 1, таблица 1; https://uzdt.net/media/uploads/doki/perehod/gost_173782001perekhody_besshovnye_privarnye.pdf; нержавеющие аналоги EN10253-3: https://www.heco.de/webservice/downloads/product-sheet/609/en/heco-product-sheet-609-Stainless-steel-Reduzierungen-geschw-konzentrisch-DN-greater-200.pdf",
+      "verifiedAt": "2026-10-31"
     },
     {
       "componentId": "переходы-003-r0272",
@@ -10462,11 +10624,13 @@
       "outerDiameterSmall": 323.9,
       "wallThickness": 7,
       "wallThicknessSmall": 4.5,
-      "status": "unconfirmed",
-      "candidateLengthsMm": [],
-      "reason": "Исходная запись не указывает производителя, артикул, стандарт или исполнение перехода. Достоверная длина именно для этих четырёх размеров и исполнения в проверенных источниках не установлена. Не распространять L соседнего DN или производителя. Подтверждённая длина для данного исполнения не найдена. ГОСТ 17378 для углеродистой и низколегированной стали не доказывает размеры нержавеющей детали; нужен чертёж или артикул производителя.",
-      "source": "ISO 5251:1981, область применения и проверенная часть таблицы 4: https://cdn.standards.iteh.ai/samples/11250/618ba484d1ed45f3a56a45da3b246dd6/ISO-5251-1981.pdf; https://www.iso.org/standard/11250.html",
-      "verifiedAt": "2026-10-04"
+      "status": "confirmed",
+      "candidateLengthsMm": [
+        356
+      ],
+      "reason": "Решение пользователя 31.10.2026: принять длины аналогов 203 мм DN300–150 и 356 мм DN400–300 для концентрических/эксцентрических переходов AISI304 PN10/16/25. Сохранены исходные стенки, цены и PN. Это проектная длина по аналогу, не паспорт конкретной детали и не подтверждение давления. Аналог: ГОСТ 17378-2001, исполнение 1, таблица 1; https://uzdt.net/media/uploads/doki/perehod/gost_173782001perekhody_besshovnye_privarnye.pdf; нержавеющие аналоги EN10253-3: https://www.heco.de/webservice/downloads/product-sheet/609/en/heco-product-sheet-609-Stainless-steel-Reduzierungen-geschw-konzentrisch-DN-greater-200.pdf",
+      "source": "Решение пользователя 31.10.2026: принять длины аналогов 203 мм DN300–150 и 356 мм DN400–300 для концентрических/эксцентрических переходов AISI304 PN10/16/25. Сохранены исходные стенки, цены и PN. Это проектная длина по аналогу, не паспорт конкретной детали и не подтверждение давления. Аналог: ГОСТ 17378-2001, исполнение 1, таблица 1; https://uzdt.net/media/uploads/doki/perehod/gost_173782001perekhody_besshovnye_privarnye.pdf; нержавеющие аналоги EN10253-3: https://www.heco.de/webservice/downloads/product-sheet/609/en/heco-product-sheet-609-Stainless-steel-Reduzierungen-geschw-konzentrisch-DN-greater-200.pdf",
+      "verifiedAt": "2026-10-31"
     },
     {
       "componentId": "переходы-003-r0291",
@@ -10476,11 +10640,13 @@
       "outerDiameterSmall": 323.9,
       "wallThickness": 10,
       "wallThicknessSmall": 7.1,
-      "status": "unconfirmed",
-      "candidateLengthsMm": [],
-      "reason": "Исходная запись не указывает производителя, артикул, стандарт или исполнение перехода. Достоверная длина именно для этих четырёх размеров и исполнения в проверенных источниках не установлена. Не распространять L соседнего DN или производителя. Подтверждённая длина для данного исполнения не найдена. ГОСТ 17378 для углеродистой и низколегированной стали не доказывает размеры нержавеющей детали; нужен чертёж или артикул производителя.",
-      "source": "ISO 5251:1981, область применения и проверенная часть таблицы 4: https://cdn.standards.iteh.ai/samples/11250/618ba484d1ed45f3a56a45da3b246dd6/ISO-5251-1981.pdf; https://www.iso.org/standard/11250.html",
-      "verifiedAt": "2026-10-04"
+      "status": "confirmed",
+      "candidateLengthsMm": [
+        356
+      ],
+      "reason": "Решение пользователя 31.10.2026: принять длины аналогов 203 мм DN300–150 и 356 мм DN400–300 для концентрических/эксцентрических переходов AISI304 PN10/16/25. Сохранены исходные стенки, цены и PN. Это проектная длина по аналогу, не паспорт конкретной детали и не подтверждение давления. Аналог: ГОСТ 17378-2001, исполнение 1, таблица 1; https://uzdt.net/media/uploads/doki/perehod/gost_173782001perekhody_besshovnye_privarnye.pdf; нержавеющие аналоги EN10253-3: https://www.heco.de/webservice/downloads/product-sheet/609/en/heco-product-sheet-609-Stainless-steel-Reduzierungen-geschw-konzentrisch-DN-greater-200.pdf",
+      "source": "Решение пользователя 31.10.2026: принять длины аналогов 203 мм DN300–150 и 356 мм DN400–300 для концентрических/эксцентрических переходов AISI304 PN10/16/25. Сохранены исходные стенки, цены и PN. Это проектная длина по аналогу, не паспорт конкретной детали и не подтверждение давления. Аналог: ГОСТ 17378-2001, исполнение 1, таблица 1; https://uzdt.net/media/uploads/doki/perehod/gost_173782001perekhody_besshovnye_privarnye.pdf; нержавеющие аналоги EN10253-3: https://www.heco.de/webservice/downloads/product-sheet/609/en/heco-product-sheet-609-Stainless-steel-Reduzierungen-geschw-konzentrisch-DN-greater-200.pdf",
+      "verifiedAt": "2026-10-31"
     },
     {
       "componentId": "переходы-003-r0292",
@@ -10490,11 +10656,13 @@
       "outerDiameterSmall": 323.9,
       "wallThickness": 12,
       "wallThicknessSmall": 11,
-      "status": "unconfirmed",
-      "candidateLengthsMm": [],
-      "reason": "Исходная запись не указывает производителя, артикул, стандарт или исполнение перехода. Достоверная длина именно для этих четырёх размеров и исполнения в проверенных источниках не установлена. Не распространять L соседнего DN или производителя. Подтверждённая длина для данного исполнения не найдена. ГОСТ 17378 для углеродистой и низколегированной стали не доказывает размеры нержавеющей детали; нужен чертёж или артикул производителя.",
-      "source": "ISO 5251:1981, область применения и проверенная часть таблицы 4: https://cdn.standards.iteh.ai/samples/11250/618ba484d1ed45f3a56a45da3b246dd6/ISO-5251-1981.pdf; https://www.iso.org/standard/11250.html",
-      "verifiedAt": "2026-10-04"
+      "status": "confirmed",
+      "candidateLengthsMm": [
+        356
+      ],
+      "reason": "Решение пользователя 31.10.2026: принять длины аналогов 203 мм DN300–150 и 356 мм DN400–300 для концентрических/эксцентрических переходов AISI304 PN10/16/25. Сохранены исходные стенки, цены и PN. Это проектная длина по аналогу, не паспорт конкретной детали и не подтверждение давления. Аналог: ГОСТ 17378-2001, исполнение 1, таблица 1; https://uzdt.net/media/uploads/doki/perehod/gost_173782001perekhody_besshovnye_privarnye.pdf; нержавеющие аналоги EN10253-3: https://www.heco.de/webservice/downloads/product-sheet/609/en/heco-product-sheet-609-Stainless-steel-Reduzierungen-geschw-konzentrisch-DN-greater-200.pdf",
+      "source": "Решение пользователя 31.10.2026: принять длины аналогов 203 мм DN300–150 и 356 мм DN400–300 для концентрических/эксцентрических переходов AISI304 PN10/16/25. Сохранены исходные стенки, цены и PN. Это проектная длина по аналогу, не паспорт конкретной детали и не подтверждение давления. Аналог: ГОСТ 17378-2001, исполнение 1, таблица 1; https://uzdt.net/media/uploads/doki/perehod/gost_173782001perekhody_besshovnye_privarnye.pdf; нержавеющие аналоги EN10253-3: https://www.heco.de/webservice/downloads/product-sheet/609/en/heco-product-sheet-609-Stainless-steel-Reduzierungen-geschw-konzentrisch-DN-greater-200.pdf",
+      "verifiedAt": "2026-10-31"
     },
     {
       "componentId": "переходы-003-r0293",
@@ -12767,11 +12935,13 @@
       "outerDiameterSmall": 168.3,
       "wallThickness": 4.5,
       "wallThicknessSmall": 4.5,
-      "status": "unconfirmed",
-      "candidateLengthsMm": [],
-      "reason": "Исходная запись не указывает производителя, артикул, стандарт или исполнение перехода. Достоверная длина именно для этих четырёх размеров и исполнения в проверенных источниках не установлена. Не распространять L соседнего DN или производителя. Подтверждённая длина для данного исполнения не найдена. ГОСТ 17378 для углеродистой и низколегированной стали не доказывает размеры нержавеющей детали; нужен чертёж или артикул производителя.",
-      "source": "ISO 5251:1981, область применения и проверенная часть таблицы 4: https://cdn.standards.iteh.ai/samples/11250/618ba484d1ed45f3a56a45da3b246dd6/ISO-5251-1981.pdf; https://www.iso.org/standard/11250.html",
-      "verifiedAt": "2026-10-04"
+      "status": "confirmed",
+      "candidateLengthsMm": [
+        203
+      ],
+      "reason": "Решение пользователя 31.10.2026: принять длины аналогов 203 мм DN300–150 и 356 мм DN400–300 для концентрических/эксцентрических переходов AISI304 PN10/16/25. Сохранены исходные стенки, цены и PN. Это проектная длина по аналогу, не паспорт конкретной детали и не подтверждение давления. Аналог: ГОСТ 17378-2001, исполнение 1, таблица 1; https://uzdt.net/media/uploads/doki/perehod/gost_173782001perekhody_besshovnye_privarnye.pdf; нержавеющие аналоги EN10253-3: https://www.heco.de/webservice/downloads/product-sheet/609/en/heco-product-sheet-609-Stainless-steel-Reduzierungen-geschw-konzentrisch-DN-greater-200.pdf",
+      "source": "Решение пользователя 31.10.2026: принять длины аналогов 203 мм DN300–150 и 356 мм DN400–300 для концентрических/эксцентрических переходов AISI304 PN10/16/25. Сохранены исходные стенки, цены и PN. Это проектная длина по аналогу, не паспорт конкретной детали и не подтверждение давления. Аналог: ГОСТ 17378-2001, исполнение 1, таблица 1; https://uzdt.net/media/uploads/doki/perehod/gost_173782001perekhody_besshovnye_privarnye.pdf; нержавеющие аналоги EN10253-3: https://www.heco.de/webservice/downloads/product-sheet/609/en/heco-product-sheet-609-Stainless-steel-Reduzierungen-geschw-konzentrisch-DN-greater-200.pdf",
+      "verifiedAt": "2026-10-31"
     },
     {
       "componentId": "переходы-005-r0435",
@@ -12781,11 +12951,13 @@
       "outerDiameterSmall": 168.3,
       "wallThickness": 7.1,
       "wallThicknessSmall": 7.1,
-      "status": "unconfirmed",
-      "candidateLengthsMm": [],
-      "reason": "Исходная запись не указывает производителя, артикул, стандарт или исполнение перехода. Достоверная длина именно для этих четырёх размеров и исполнения в проверенных источниках не установлена. Не распространять L соседнего DN или производителя. Подтверждённая длина для данного исполнения не найдена. ГОСТ 17378 для углеродистой и низколегированной стали не доказывает размеры нержавеющей детали; нужен чертёж или артикул производителя.",
-      "source": "ISO 5251:1981, область применения и проверенная часть таблицы 4: https://cdn.standards.iteh.ai/samples/11250/618ba484d1ed45f3a56a45da3b246dd6/ISO-5251-1981.pdf; https://www.iso.org/standard/11250.html",
-      "verifiedAt": "2026-10-04"
+      "status": "confirmed",
+      "candidateLengthsMm": [
+        203
+      ],
+      "reason": "Решение пользователя 31.10.2026: принять длины аналогов 203 мм DN300–150 и 356 мм DN400–300 для концентрических/эксцентрических переходов AISI304 PN10/16/25. Сохранены исходные стенки, цены и PN. Это проектная длина по аналогу, не паспорт конкретной детали и не подтверждение давления. Аналог: ГОСТ 17378-2001, исполнение 1, таблица 1; https://uzdt.net/media/uploads/doki/perehod/gost_173782001perekhody_besshovnye_privarnye.pdf; нержавеющие аналоги EN10253-3: https://www.heco.de/webservice/downloads/product-sheet/609/en/heco-product-sheet-609-Stainless-steel-Reduzierungen-geschw-konzentrisch-DN-greater-200.pdf",
+      "source": "Решение пользователя 31.10.2026: принять длины аналогов 203 мм DN300–150 и 356 мм DN400–300 для концентрических/эксцентрических переходов AISI304 PN10/16/25. Сохранены исходные стенки, цены и PN. Это проектная длина по аналогу, не паспорт конкретной детали и не подтверждение давления. Аналог: ГОСТ 17378-2001, исполнение 1, таблица 1; https://uzdt.net/media/uploads/doki/perehod/gost_173782001perekhody_besshovnye_privarnye.pdf; нержавеющие аналоги EN10253-3: https://www.heco.de/webservice/downloads/product-sheet/609/en/heco-product-sheet-609-Stainless-steel-Reduzierungen-geschw-konzentrisch-DN-greater-200.pdf",
+      "verifiedAt": "2026-10-31"
     },
     {
       "componentId": "переходы-005-r0436",
@@ -12795,11 +12967,13 @@
       "outerDiameterSmall": 168.3,
       "wallThickness": 11,
       "wallThicknessSmall": 11,
-      "status": "unconfirmed",
-      "candidateLengthsMm": [],
-      "reason": "Исходная запись не указывает производителя, артикул, стандарт или исполнение перехода. Достоверная длина именно для этих четырёх размеров и исполнения в проверенных источниках не установлена. Не распространять L соседнего DN или производителя. Подтверждённая длина для данного исполнения не найдена. ГОСТ 17378 для углеродистой и низколегированной стали не доказывает размеры нержавеющей детали; нужен чертёж или артикул производителя.",
-      "source": "ISO 5251:1981, область применения и проверенная часть таблицы 4: https://cdn.standards.iteh.ai/samples/11250/618ba484d1ed45f3a56a45da3b246dd6/ISO-5251-1981.pdf; https://www.iso.org/standard/11250.html",
-      "verifiedAt": "2026-10-04"
+      "status": "confirmed",
+      "candidateLengthsMm": [
+        203
+      ],
+      "reason": "Решение пользователя 31.10.2026: принять длины аналогов 203 мм DN300–150 и 356 мм DN400–300 для концентрических/эксцентрических переходов AISI304 PN10/16/25. Сохранены исходные стенки, цены и PN. Это проектная длина по аналогу, не паспорт конкретной детали и не подтверждение давления. Аналог: ГОСТ 17378-2001, исполнение 1, таблица 1; https://uzdt.net/media/uploads/doki/perehod/gost_173782001perekhody_besshovnye_privarnye.pdf; нержавеющие аналоги EN10253-3: https://www.heco.de/webservice/downloads/product-sheet/609/en/heco-product-sheet-609-Stainless-steel-Reduzierungen-geschw-konzentrisch-DN-greater-200.pdf",
+      "source": "Решение пользователя 31.10.2026: принять длины аналогов 203 мм DN300–150 и 356 мм DN400–300 для концентрических/эксцентрических переходов AISI304 PN10/16/25. Сохранены исходные стенки, цены и PN. Это проектная длина по аналогу, не паспорт конкретной детали и не подтверждение давления. Аналог: ГОСТ 17378-2001, исполнение 1, таблица 1; https://uzdt.net/media/uploads/doki/perehod/gost_173782001perekhody_besshovnye_privarnye.pdf; нержавеющие аналоги EN10253-3: https://www.heco.de/webservice/downloads/product-sheet/609/en/heco-product-sheet-609-Stainless-steel-Reduzierungen-geschw-konzentrisch-DN-greater-200.pdf",
+      "verifiedAt": "2026-10-31"
     },
     {
       "componentId": "переходы-005-r0437",
@@ -13065,11 +13239,13 @@
       "outerDiameterSmall": 323.9,
       "wallThickness": 7,
       "wallThicknessSmall": 4.5,
-      "status": "unconfirmed",
-      "candidateLengthsMm": [],
-      "reason": "Исходная запись не указывает производителя, артикул, стандарт или исполнение перехода. Достоверная длина именно для этих четырёх размеров и исполнения в проверенных источниках не установлена. Не распространять L соседнего DN или производителя. Подтверждённая длина для данного исполнения не найдена. ГОСТ 17378 для углеродистой и низколегированной стали не доказывает размеры нержавеющей детали; нужен чертёж или артикул производителя.",
-      "source": "ISO 5251:1981, область применения и проверенная часть таблицы 4: https://cdn.standards.iteh.ai/samples/11250/618ba484d1ed45f3a56a45da3b246dd6/ISO-5251-1981.pdf; https://www.iso.org/standard/11250.html",
-      "verifiedAt": "2026-10-04"
+      "status": "confirmed",
+      "candidateLengthsMm": [
+        356
+      ],
+      "reason": "Решение пользователя 31.10.2026: принять длины аналогов 203 мм DN300–150 и 356 мм DN400–300 для концентрических/эксцентрических переходов AISI304 PN10/16/25. Сохранены исходные стенки, цены и PN. Это проектная длина по аналогу, не паспорт конкретной детали и не подтверждение давления. Аналог: ГОСТ 17378-2001, исполнение 1, таблица 1; https://uzdt.net/media/uploads/doki/perehod/gost_173782001perekhody_besshovnye_privarnye.pdf; нержавеющие аналоги EN10253-3: https://www.heco.de/webservice/downloads/product-sheet/609/en/heco-product-sheet-609-Stainless-steel-Reduzierungen-geschw-konzentrisch-DN-greater-200.pdf",
+      "source": "Решение пользователя 31.10.2026: принять длины аналогов 203 мм DN300–150 и 356 мм DN400–300 для концентрических/эксцентрических переходов AISI304 PN10/16/25. Сохранены исходные стенки, цены и PN. Это проектная длина по аналогу, не паспорт конкретной детали и не подтверждение давления. Аналог: ГОСТ 17378-2001, исполнение 1, таблица 1; https://uzdt.net/media/uploads/doki/perehod/gost_173782001perekhody_besshovnye_privarnye.pdf; нержавеющие аналоги EN10253-3: https://www.heco.de/webservice/downloads/product-sheet/609/en/heco-product-sheet-609-Stainless-steel-Reduzierungen-geschw-konzentrisch-DN-greater-200.pdf",
+      "verifiedAt": "2026-10-31"
     },
     {
       "componentId": "переходы-005-r0456",
@@ -13079,11 +13255,13 @@
       "outerDiameterSmall": 323.9,
       "wallThickness": 10,
       "wallThicknessSmall": 7.1,
-      "status": "unconfirmed",
-      "candidateLengthsMm": [],
-      "reason": "Исходная запись не указывает производителя, артикул, стандарт или исполнение перехода. Достоверная длина именно для этих четырёх размеров и исполнения в проверенных источниках не установлена. Не распространять L соседнего DN или производителя. Подтверждённая длина для данного исполнения не найдена. ГОСТ 17378 для углеродистой и низколегированной стали не доказывает размеры нержавеющей детали; нужен чертёж или артикул производителя.",
-      "source": "ISO 5251:1981, область применения и проверенная часть таблицы 4: https://cdn.standards.iteh.ai/samples/11250/618ba484d1ed45f3a56a45da3b246dd6/ISO-5251-1981.pdf; https://www.iso.org/standard/11250.html",
-      "verifiedAt": "2026-10-04"
+      "status": "confirmed",
+      "candidateLengthsMm": [
+        356
+      ],
+      "reason": "Решение пользователя 31.10.2026: принять длины аналогов 203 мм DN300–150 и 356 мм DN400–300 для концентрических/эксцентрических переходов AISI304 PN10/16/25. Сохранены исходные стенки, цены и PN. Это проектная длина по аналогу, не паспорт конкретной детали и не подтверждение давления. Аналог: ГОСТ 17378-2001, исполнение 1, таблица 1; https://uzdt.net/media/uploads/doki/perehod/gost_173782001perekhody_besshovnye_privarnye.pdf; нержавеющие аналоги EN10253-3: https://www.heco.de/webservice/downloads/product-sheet/609/en/heco-product-sheet-609-Stainless-steel-Reduzierungen-geschw-konzentrisch-DN-greater-200.pdf",
+      "source": "Решение пользователя 31.10.2026: принять длины аналогов 203 мм DN300–150 и 356 мм DN400–300 для концентрических/эксцентрических переходов AISI304 PN10/16/25. Сохранены исходные стенки, цены и PN. Это проектная длина по аналогу, не паспорт конкретной детали и не подтверждение давления. Аналог: ГОСТ 17378-2001, исполнение 1, таблица 1; https://uzdt.net/media/uploads/doki/perehod/gost_173782001perekhody_besshovnye_privarnye.pdf; нержавеющие аналоги EN10253-3: https://www.heco.de/webservice/downloads/product-sheet/609/en/heco-product-sheet-609-Stainless-steel-Reduzierungen-geschw-konzentrisch-DN-greater-200.pdf",
+      "verifiedAt": "2026-10-31"
     },
     {
       "componentId": "переходы-005-r0457",
@@ -13093,11 +13271,13 @@
       "outerDiameterSmall": 323.9,
       "wallThickness": 12,
       "wallThicknessSmall": 11,
-      "status": "unconfirmed",
-      "candidateLengthsMm": [],
-      "reason": "Исходная запись не указывает производителя, артикул, стандарт или исполнение перехода. Достоверная длина именно для этих четырёх размеров и исполнения в проверенных источниках не установлена. Не распространять L соседнего DN или производителя. Подтверждённая длина для данного исполнения не найдена. ГОСТ 17378 для углеродистой и низколегированной стали не доказывает размеры нержавеющей детали; нужен чертёж или артикул производителя.",
-      "source": "ISO 5251:1981, область применения и проверенная часть таблицы 4: https://cdn.standards.iteh.ai/samples/11250/618ba484d1ed45f3a56a45da3b246dd6/ISO-5251-1981.pdf; https://www.iso.org/standard/11250.html",
-      "verifiedAt": "2026-10-04"
+      "status": "confirmed",
+      "candidateLengthsMm": [
+        356
+      ],
+      "reason": "Решение пользователя 31.10.2026: принять длины аналогов 203 мм DN300–150 и 356 мм DN400–300 для концентрических/эксцентрических переходов AISI304 PN10/16/25. Сохранены исходные стенки, цены и PN. Это проектная длина по аналогу, не паспорт конкретной детали и не подтверждение давления. Аналог: ГОСТ 17378-2001, исполнение 1, таблица 1; https://uzdt.net/media/uploads/doki/perehod/gost_173782001perekhody_besshovnye_privarnye.pdf; нержавеющие аналоги EN10253-3: https://www.heco.de/webservice/downloads/product-sheet/609/en/heco-product-sheet-609-Stainless-steel-Reduzierungen-geschw-konzentrisch-DN-greater-200.pdf",
+      "source": "Решение пользователя 31.10.2026: принять длины аналогов 203 мм DN300–150 и 356 мм DN400–300 для концентрических/эксцентрических переходов AISI304 PN10/16/25. Сохранены исходные стенки, цены и PN. Это проектная длина по аналогу, не паспорт конкретной детали и не подтверждение давления. Аналог: ГОСТ 17378-2001, исполнение 1, таблица 1; https://uzdt.net/media/uploads/doki/perehod/gost_173782001perekhody_besshovnye_privarnye.pdf; нержавеющие аналоги EN10253-3: https://www.heco.de/webservice/downloads/product-sheet/609/en/heco-product-sheet-609-Stainless-steel-Reduzierungen-geschw-konzentrisch-DN-greater-200.pdf",
+      "verifiedAt": "2026-10-31"
     },
     {
       "componentId": "переходы-005-r0458",
@@ -14273,5 +14453,131 @@
     "dimensionMatch": "exact-diameters-and-walls",
     "adoptedAt": "2026-10-05",
     "source": "Указание пользователя 05.10.2026: для переходов длину брать согласно ГОСТ. Для AISI304 принят размер L геометрии ГОСТ 17378-2001; область применения материала и PN этим не подтверждаются."
+  },
+  "reducerAnalogueLengthPolicy": {
+    "id": "user-analogue-length-20261031",
+    "source": "Решение пользователя 31.10.2026: принять длины аналогов 203 мм DN300–150 и 356 мм DN400–300 для концентрических/эксцентрических переходов AISI304 PN10/16/25. Сохранены исходные стенки, цены и PN. Это проектная длина по аналогу, не паспорт конкретной детали и не подтверждение давления. Аналог: ГОСТ 17378-2001, исполнение 1, таблица 1; https://uzdt.net/media/uploads/doki/perehod/gost_173782001perekhody_besshovnye_privarnye.pdf; нержавеющие аналоги EN10253-3: https://www.heco.de/webservice/downloads/product-sheet/609/en/heco-product-sheet-609-Stainless-steel-Reduzierungen-geschw-konzentrisch-DN-greater-200.pdf",
+    "rows": [
+      {
+        "componentId": "переходы-003-r0269",
+        "material": "aisi304",
+        "geometry": "eccentric",
+        "outerDiameter": 323.9,
+        "outerDiameterSmall": 168.3,
+        "wallThickness": 4.5,
+        "wallThicknessSmall": 4.5,
+        "lengthMm": 203
+      },
+      {
+        "componentId": "переходы-003-r0270",
+        "material": "aisi304",
+        "geometry": "eccentric",
+        "outerDiameter": 323.9,
+        "outerDiameterSmall": 168.3,
+        "wallThickness": 7.1,
+        "wallThicknessSmall": 7.1,
+        "lengthMm": 203
+      },
+      {
+        "componentId": "переходы-003-r0271",
+        "material": "aisi304",
+        "geometry": "eccentric",
+        "outerDiameter": 323.9,
+        "outerDiameterSmall": 168.3,
+        "wallThickness": 11,
+        "wallThicknessSmall": 11,
+        "lengthMm": 203
+      },
+      {
+        "componentId": "переходы-003-r0290",
+        "material": "aisi304",
+        "geometry": "eccentric",
+        "outerDiameter": 406.4,
+        "outerDiameterSmall": 323.9,
+        "wallThickness": 7,
+        "wallThicknessSmall": 4.5,
+        "lengthMm": 356
+      },
+      {
+        "componentId": "переходы-003-r0291",
+        "material": "aisi304",
+        "geometry": "eccentric",
+        "outerDiameter": 406.4,
+        "outerDiameterSmall": 323.9,
+        "wallThickness": 10,
+        "wallThicknessSmall": 7.1,
+        "lengthMm": 356
+      },
+      {
+        "componentId": "переходы-003-r0292",
+        "material": "aisi304",
+        "geometry": "eccentric",
+        "outerDiameter": 406.4,
+        "outerDiameterSmall": 323.9,
+        "wallThickness": 12,
+        "wallThicknessSmall": 11,
+        "lengthMm": 356
+      },
+      {
+        "componentId": "переходы-005-r0434",
+        "material": "aisi304",
+        "geometry": "concentric",
+        "outerDiameter": 323.9,
+        "outerDiameterSmall": 168.3,
+        "wallThickness": 4.5,
+        "wallThicknessSmall": 4.5,
+        "lengthMm": 203
+      },
+      {
+        "componentId": "переходы-005-r0435",
+        "material": "aisi304",
+        "geometry": "concentric",
+        "outerDiameter": 323.9,
+        "outerDiameterSmall": 168.3,
+        "wallThickness": 7.1,
+        "wallThicknessSmall": 7.1,
+        "lengthMm": 203
+      },
+      {
+        "componentId": "переходы-005-r0436",
+        "material": "aisi304",
+        "geometry": "concentric",
+        "outerDiameter": 323.9,
+        "outerDiameterSmall": 168.3,
+        "wallThickness": 11,
+        "wallThicknessSmall": 11,
+        "lengthMm": 203
+      },
+      {
+        "componentId": "переходы-005-r0455",
+        "material": "aisi304",
+        "geometry": "concentric",
+        "outerDiameter": 406.4,
+        "outerDiameterSmall": 323.9,
+        "wallThickness": 7,
+        "wallThicknessSmall": 4.5,
+        "lengthMm": 356
+      },
+      {
+        "componentId": "переходы-005-r0456",
+        "material": "aisi304",
+        "geometry": "concentric",
+        "outerDiameter": 406.4,
+        "outerDiameterSmall": 323.9,
+        "wallThickness": 10,
+        "wallThicknessSmall": 7.1,
+        "lengthMm": 356
+      },
+      {
+        "componentId": "переходы-005-r0457",
+        "material": "aisi304",
+        "geometry": "concentric",
+        "outerDiameter": 406.4,
+        "outerDiameterSmall": 323.9,
+        "wallThickness": 12,
+        "wallThicknessSmall": 11,
+        "lengthMm": 356
+      }
+    ]
   }
 }

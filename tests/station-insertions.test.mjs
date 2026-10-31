@@ -50,7 +50,7 @@ test("missing BOM roles, partial costs and engineering assumptions remain incomp
 });
 test("both lines, circuits and vibration modes count the supplied BOM once and preserve external joints", () => {
   for (const material of ["st20", "aisi304"]) for (const pn of [16, 25]) for (const section of ["suction", "discharge"]) for (const prefix of ["primary", "secondary"]) for (const vibration of [false, true]) {
-    const c = valid(material, pn, "eccentric"), item = component(c), result = [];
+    const c = valid(material, pn, section === "suction" ? "eccentric" : "concentric"), item = component(c), result = [];
     const db = { ...resources.components, items: [...resources.components.items, item] };
     const designs = { [`${section}:${prefix}-reducer`]: insertionDesign(c) };
     const collector = { material }, parts = lineSpecParts(result, section, "test", collector, db, db.collectorCatalog, designs);
@@ -138,4 +138,21 @@ test("a sourced compensator thickness and the selected insert define only their 
   const thickness=flangeStack(equipmentFlangeThickness(own),insertionEndThickness(row,"from",resources.components));
   assert.ok(selectJointFasteners(resources.components,"st20",80,16,{gaskets:1,thickness:0,flangeThickness:thickness}).bolt);
   assert.equal(equipmentFlangeThickness({...own,fields:own.fields.slice(0,2)}),null);
+});
+
+test("station sensor policy filters candidates and rejects a saved incompatible execution", async () => {
+  const { insertionOrientations } = await load("station-insertion-selection");
+  const { generateInsertCalculations, catalog } = await import("./fixtures/station-insertions.mjs");
+  const c = generateInsertCalculations({ dnFrom: 80, dnTo: 80, materials: ["st20"], withSensorNipple: true, includeEccentric: false }, catalog).find(c => c.complete && c.pn === 16 && c.geometry === "concentric");
+  assert.ok(c);
+  const item = component(c), req = { ...requirement(c), withSensorNipple: true };
+  assert.equal(selectStationInsertion([item], req).item.id, item.id);
+  assert.ok(insertionOrientations(item, req).length);
+  assert.deepEqual(insertionOrientations(item, { ...req, withSensorNipple: false }), []);
+  assert.equal(selectStationInsertion([item], { ...req, withSensorNipple: false }).item, undefined);
+  assert.equal(selectStationInsertion([item], { ...req, geometry: "eccentric" }).item, undefined);
+  const invalid = component(c); invalid.calculatedInsertion.calculation.configuration.sensor.dn = 20;
+  assert.deepEqual(insertionOrientations(invalid, req), []);
+  const plain = component(valid());
+  assert.equal(selectStationInsertion([plain], { ...requirement(plain.calculatedInsertion.calculation), withSensorNipple: true }).item, undefined);
 });

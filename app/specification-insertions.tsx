@@ -18,7 +18,9 @@ export function SpecificationInsertion({ item, database, designs, onChange }: {
   const location = `${requirement.location.startsWith("suction:") ? "Всас" : "Напор"} · ${requirement.location.includes(":secondary-") ? "Контур 2" : "Контур 1"} · ${{"between-valves":"между арматурой","pump-transition":"у насоса","after-vibration":"после компенсатора"}[requirement.purpose]}`;
   return <details className="spec-insertion" data-insertion-location={requirement.location}>
     <summary>Исполнение и состав вставки</summary>
+    {item.technicalStatus === "stale" && <p role="status">Расчёт вставки устарел. Пересчитайте и выгрузите изделие в «Расчёте комплектующих», затем обновите спецификацию. До обновления итоговая цена не учитывается.</p>}
     <p>Подтвердите монтажную длину и исполнение для этого участка. Направление концов — от насоса к коллектору. Совместимость проверяется при каждом пересчёте.</p>
+    <p>Требуется: {{straight:"прямая вставка",concentric:"концентрический переход",eccentric:"эксцентрический переход"}[requirement.geometry]}{requirement.withSensorNipple === undefined ? "" : requirement.withSensorNipple ? ", со сгоном DN15 под реле давления" : ", без сгона"}.</p>
     <label>{location}
       <select aria-label={`Исполнение вставки: ${location}`} value={current?.id ?? ""} disabled={!onChange} onChange={event => {
         const next = { ...designs };
@@ -33,7 +35,7 @@ export function SpecificationInsertion({ item, database, designs, onChange }: {
         </option>; })}
       </select>
     </label>
-    {!candidates.length && <p>В загруженном каталоге нет расчётных вставок с подходящими DN, PN, материалом и соединениями.</p>}
+    {!candidates.length && <p>В загруженном каталоге нет расчётных вставок с подходящими DN, PN, материалом, соединениями, геометрией и исполнением сгона.</p>}
     {assembly && <>
       <p>Источник: {assembly.snapshot.id}; ревизия {assembly.snapshot.revision}; дата цены {assembly.snapshot.pricedAt}. Учёт: одно готовое изделие. Состав ниже указан на одну вставку и повторно не суммируется.</p>
       <ul>{assembly.snapshot.calculation.bom.map((part, index) => <li key={`${part.role}-${index}`}>{part.name} — {part.quantity?.toLocaleString("ru-RU",{maximumFractionDigits:3}) ?? "?"} {part.unit}; {part.cost === null ? "цена не подтверждена" : `${part.cost.toLocaleString("ru-RU",{maximumFractionDigits:2})} ₽`} · {part.source ?? "источник не указан"}</li>)}</ul>

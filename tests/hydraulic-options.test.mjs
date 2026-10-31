@@ -10,6 +10,22 @@ const options = p => rows(p).filter(row => row.generatedBy === "hydraulic-option
 const role = (p, name) => options(p).find(row => row.assemblyRole === name);
 const part = (row, name) => row.hydraulicAssembly.parts.find(p => p.assemblyRole === name);
 
+test("base preferences choose compatible products in order and retain the project's previous selection",async()=>{
+  const {legacyBaseSnapshot}=await load("base-values");
+  const original=role(sync(fixture()),"discharge:transducer").equipmentId;
+  const source=hydraulicOptionCatalog(resources.components.items).find(item=>item.id===original);
+  const preferred={...structuredClone(source),id:"preferred-compatible-transducer"};
+  const data={...resources,components:{...resources.components,items:[...resources.components.items,preferred]}};
+  const project=fixture();project.entities["station-settings"].baseValues=legacyBaseSnapshot();
+  project.entities["station-settings"].baseValues.values.preferences.rules=[{id:"test",stationType:"all",side:"discharge",role:"transducer",productIds:["missing-preferred-product",preferred.id]}];
+  const selected=sync(project,data),row=role(selected,"discharge:transducer");assert.equal(row.equipmentId,preferred.id);assert.ok(row.hydraulicAssembly.findings.some(f=>/Предпочтительное изделие/.test(f)));
+  assert.strictEqual(sync(selected,data),selected,"warning and selection must remain stable on repeated calculation");
+  selected.entities["station-settings"].baseValues.values.preferences.rules[0].productIds=[original];
+  assert.equal(role(sync(selected,data),"discharge:transducer").equipmentId,preferred.id,"previous choice remains until explicit update");
+  const wrong=fixture();wrong.entities["station-settings"].baseValues=legacyBaseSnapshot();wrong.entities["station-settings"].baseValues.values.preferences.rules=[{id:"wrong-kind",stationType:"all",side:"discharge",role:"transducer",productIds:["not-a-compatible-transducer"]}];
+  const fallback=role(sync(wrong),"discharge:transducer");assert.equal(fallback.equipmentId,original);assert.ok(fallback.hydraulicAssembly.findings.some(f=>/Предпочтительное изделие/.test(f)));
+});
+
 test("confirmed KIP scheme for all station types: relay on suction, transducer on discharge; jockey adds none", () => {
   for (const [type, count] of [["utility", 1], ["smart", 1], ["fire", 2], ["combined", 2]]) for (const jockey of [false, true]) {
     const p = fixture(); Object.assign(p.entities["station-settings"], { stationType: type, jockeyPump: jockey });
@@ -34,8 +50,8 @@ test("confirmed KIP scheme for all station types: relay on suction, transducer o
       assert.equal(entries.find(entry => entry.port.id === `${side}:kip-1/gauge`).port.dn, 15);
       assert.equal(entries.find(entry => entry.port.id === `${side}:kip-1/sensor`).port.dn, 8);
     }
-    assert.equal(result.entities["station-collectors"].suction.configuration.instrumentPorts.length, count);
-    assert.equal(result.entities["station-spec"].hydraulicPorts.complete, true);
+    assert.equal(result.entities["station-collectors"].suction.configuration.instrumentPorts.length, 1);
+    assert.equal(result.entities["station-spec"].hydraulicPorts.complete, count===1);
   }
 });
 
@@ -49,7 +65,7 @@ test("tank defaults off; 8 L direct, 50/100 L hose and three matched mounting se
     assert.equal(Boolean(part(tank, "tank-hose")), volume !== 8);
     assert.equal(Boolean(part(tank, "tank-top-cap")), volume === 100);
     const c = result.entities["station-collectors"].discharge.configuration;
-    assert.equal(c.instrumentPorts.find(port => port.id === "tank").dn, volume === 8 ? 20 : 25);
+    assert.equal(c.instrumentPorts.find(port => port.id === "tank").dn, 20);
     const bom = calculateCollector(c, resources.components.collectorCatalog).bom;
     assert.equal(bom.filter(row => row.role === "instrument-tank").length, 1);
     assert.equal(bom.filter(row => row.role === "instrument-tank-plug").length, 0);
@@ -138,7 +154,7 @@ test("option toggle/import/recalculation are idempotent and preserve manual rows
   result = sync(result);
   assert.ok(!options(result).some(row => ["membraneTank", "collectorPlugs"].includes(row.option)));
   assert.equal(rows(result).find(row => row.name === "Ручная деталь").quantity, 3);
-  assert.equal(result.entities["station-collectors"].discharge.configuration.instrumentPorts.some(port => port.id === "tank"), false);
+  assert.equal(result.entities["station-collectors"].discharge.configuration.instrumentPorts.find(port => port.id === "tank").state, "capped");
 });
 
 test("explicit incompatible or removed choice remains visible; valid product price is not assembly readiness", () => {

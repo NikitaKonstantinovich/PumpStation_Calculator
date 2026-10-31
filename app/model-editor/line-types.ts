@@ -1,5 +1,7 @@
 import type { Bounds, Port, Vec3 } from "./model";
 import type { InsertionShape, InsertionTemplate } from "./insertion-types";
+import { validShapeThread } from "./insertion-types";
+import type { FastenerCatalog } from "./fastener-types";
 
 /** Geometry evidence is separate from catalogue selection and from a component's pose. */
 export type LineGeometry = {
@@ -20,7 +22,7 @@ export type LineGeometry = {
   valveModels?: Array<{ drive: string; shape: InsertionShape; source: string; length: number; catalogLength: number; series: string; flowDirection?: "left-to-right" }>;
   vibrationModels?: Array<{ pn: number; length: number | null; shape?: InsertionShape; bounds?: Bounds; fidelity: LineGeometry["fidelity"]; source: string; issues: string[] }>;
 };
-export type LineCatalog = { version: 1; revision: string; items: Record<string, LineGeometry>; issues: string[] };
+export type LineCatalog = { version: 1; revision: string; items: Record<string, LineGeometry>; issues: string[]; fasteners?: FastenerCatalog };
 export type LineBinding = {
   version: 1; circuit: number; pumpId: string; side: "suction" | "discharge";
   role: string; specPosition: string; equipmentId?: string; instance: number;
@@ -48,6 +50,7 @@ export function parseLineBinding(value: unknown): LineBinding | undefined {
 }
 export function parseLineShape(value: unknown): InsertionShape | undefined {
   const s = obj(value);
+  if (!validShapeThread(s)) return;
   if (!["tube", "flange", "collar", "reducer-outline", "marker", "mesh"].includes(String(s.kind))) return;
   for (const k of ["lengthMm", "outerMm", "innerMm", "smallOuterMm", "smallInnerMm", "lipOuterMm", "lipThicknessMm", "boltCircleMm", "boltHoles", "boltHoleMm"]) if (s[k] !== undefined && (!finite(s[k]) || Number(s[k]) < 0)) return;
   if (s.kind !== "marker" && s.kind !== "mesh" && !(Number(s.lengthMm) > 0 && Number(s.outerMm) > 0)) return;

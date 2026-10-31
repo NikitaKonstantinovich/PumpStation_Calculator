@@ -21,6 +21,7 @@ from pathlib import Path
 from catalog_text import normalize_pump_catalog
 from leo_xst import attach_catalog as attach_leo_xst
 from vertical_physical import enrich_vertical_physical
+from onis_spatial import enrich_onis_spatial
 
 FRONTEND = Path(__file__).resolve().parents[1]
 DATA = FRONTEND / 'data/pump-catalog'
@@ -367,6 +368,8 @@ def main():
     physical_document = read_json(physical_path) if physical_path.exists() else {}
     vertical_path = DATA / 'vertical-physical-data.json'
     vertical_document = read_json(vertical_path) if vertical_path.exists() else {}
+    onis_path = DATA / 'onis-spatial-data.json'
+    onis_document = read_json(onis_path) if onis_path.exists() else {}
     for p in result:
         enrich_cnp_physical(p, details[p['id']], physical_document)
         p.setdefault('medium', 'water')
@@ -403,6 +406,7 @@ def main():
     text_originals = normalize_pump_catalog(result, details)
     for p in result:
         enrich_vertical_physical(p, details[p['id']], vertical_document)
+        enrich_onis_spatial(p, details[p['id']], onis_document)
     write_json(DATA / 'text-originals.json', text_originals)
     result.sort(key=lambda p: (p['manufacturer'], p['series'], p['model'], p['id']))
     if len({p['id'] for p in result}) != len(result):
@@ -456,6 +460,8 @@ def main():
             db.execute('INSERT INTO catalog_metadata VALUES (?,?)', ('cnp_physical_sources', json.dumps(physical_document['sources'],ensure_ascii=False)))
         if vertical_document:
             db.execute('INSERT INTO catalog_metadata VALUES (?,?)', ('vertical_physical_sources', json.dumps(vertical_document['sources'],ensure_ascii=False)))
+        if onis_document:
+            db.execute('INSERT INTO catalog_metadata VALUES (?,?)', ('onis_spatial_sources', json.dumps(onis_document['sources'],ensure_ascii=False)))
         db.execute('INSERT INTO catalog_metadata VALUES (?,?)', ('catalog_text_originals', json.dumps(text_originals,ensure_ascii=False)))
         if leo_report:
             db.execute('INSERT INTO catalog_metadata VALUES (?,?)', ('leo_xst', json.dumps(leo_report,ensure_ascii=False)))

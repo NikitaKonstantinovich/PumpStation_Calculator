@@ -2,7 +2,7 @@ import { env } from "cloudflare:workers";
 import { IS_BETA } from "./release-policy";
 import type { AccountUser } from "./user-types";
 
-type D1Result<T> = { results?: T[]; success: boolean };
+type D1Result<T> = { results?: T[]; success: boolean; meta?: { changes?: number } };
 type D1Statement = { bind(...values: unknown[]): D1Statement; first<T>(): Promise<T | null>; run(): Promise<D1Result<unknown>>; all<T>(): Promise<D1Result<T>> };
 type D1Database = { prepare(sql: string): D1Statement; batch(statements: D1Statement[]): Promise<D1Result<unknown>[]> };
 type RuntimeEnv = { DB: D1Database; RESEND_API_KEY?: string; EMAIL_FROM?: string; APP_BASE_URL?: string };

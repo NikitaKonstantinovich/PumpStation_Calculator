@@ -84,6 +84,7 @@ export function addPumpVibrationAssembly({ parts, database, catalog, collector, 
 
   if (p.connection === "threaded") {
     const part = database.items.find(item => item.catalogId === "сгоны-резьба" && itemDn(item) === p.dn &&
+      !item.fields.some(f => f.headerPath.at(-1) === "Назначение" && f.value === "Резьбовой конец вставки") &&
       (collector.material === "aisi304" ? /AISI\s*304/i : /(?:Сталь|Ст)\s*20/i).test(item.family) &&
       (componentPressureLimit(item)?.bar ?? Infinity) >= pn);
     parts.insertion(`${prefix}-after-vibration-insertion`, `Вставка резьбовая НР-НР DN${p.dn}`, count,
@@ -92,7 +93,7 @@ export function addPumpVibrationAssembly({ parts, database, catalog, collector, 
   }
 
   if (p.dn !== v) {
-    const reducer = selectLineReducer(database.items, catalog, collector.material, p.dn, v, pn);
+    const reducer = selectLineReducer(database.items, catalog, collector.material, p.dn, v, pn, parts.reducerGeometry);
     const insertion=parts.insertion(`${prefix}-reducer`, `Переходная вставка с фланцами DN${v}–${p.dn}`, count,
       `${title} · виброкомпенсатор → переходная вставка → арматура · PN${pn}`,need,reducer);
     flanges(`${prefix}-reducer-small-flange`, p.dn, pn, count,insertion,"from");
@@ -137,7 +138,7 @@ export function addPumpConnectionAssembly(args: Assembly & { vibration: boolean;
   // Matching flanged faces are joined directly; the pump supplies its own flange.
   // Valve gaskets and its bolt stack are emitted once by the caller.
   if (p.dn === v) return 0;
-  const reducer = selectLineReducer(database.items, catalog, collector.material, p.dn, v, pn);
+  const reducer = selectLineReducer(database.items, catalog, collector.material, p.dn, v, pn, parts.reducerGeometry);
   const insertion=parts.insertion(`${prefix}-reducer`, `Переход с фланцами DN${v}–${p.dn}`, count,
     `${title} · насос → переход → арматура · PN${pn} · ${collector.material}`,need,reducer);
   flanges(`${prefix}-pump-flange`, p.dn, pn, count,insertion,"from");

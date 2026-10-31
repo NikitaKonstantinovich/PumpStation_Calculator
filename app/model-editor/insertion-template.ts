@@ -3,9 +3,11 @@ import { insertPartIdentity, insertMaterialLabel } from "../component-insert-cal
 import type { FlangeDimensions } from "../flange-dimensions";
 import type { Bounds, Component, Vec3 } from "./model";
 import type { ConnectionPoint, InsertionGeometry, InsertionPiece, InsertionShape, InsertionTemplate } from "./insertion-types";
+import { eccentricOffset } from "./eccentric-offset";
 
-export const INSERTION_3D_RULE_VERSION = 1;
-export const INSERTION_3D_DECISIONS = "Решения пользователя 26.10.2026: сгон DN15 длиной 110 мм по центру основы вверх; свободный фланец виден как вспомогательная деталь; эксцентриситет по одной прямой наружной образующей.";
+export const INSERTION_3D_RULE_VERSION = 4;
+export const INSERTION_SENSOR_LENGTH_MM = 60;
+export const INSERTION_3D_DECISIONS = "Решения пользователя: сгон DN15 по центру основы вверх; 31.10.2026 длина изменена на 60 мм, добавлена наружная резьба; свободный фланец виден как вспомогательная деталь; эксцентриситет по одной прямой наружной образующей. Уточнение 30.10.2026: при угле 0° ровная сторона сверху, скос снизу.";
 export type InsertModelBinding = { hash: string; bounds: Bounds; rotation: Vec3; position: Vec3; source: string };
 export type InsertGeometryContext = { catalog: InsertCatalog; flanges: Record<string, FlangeDimensions>; models: Record<string, InsertModelBinding> };
 const positive = (n: number | null | undefined): n is number => typeof n === "number" && Number.isFinite(n) && n > 0;
@@ -28,11 +30,14 @@ export function prepareInsertionTemplate(row: InsertCalculation, context: Insert
   };
   const base = lookup("base", cfg.base);
   if (!base || !positive(base.outerDiameter)) throw new Error("Нельзя построить основу: нет подтверждённой детали и наружного диаметра.");
+  const compact = cfg.construction === "compact-threaded";
+  if (compact && (base.kind !== "threadEnd" || cfg.left.connection !== "threaded" || cfg.left.part !== cfg.base || al !== 0 || base.lengthMm !== B || row.dnLarge !== row.dnSmall)) throw new Error("Несогласованная компактная резьбовая сборка; пересчитайте вставку.");
+  if (compact) warnings.push("Резьбовые подключения заданы на свободных торцах готовых патрубков. Глубина навинчивания ответной детали не задана; при сборке её нужно учитывать отдельно.");
   if (base.geometry !== row.geometry || (row.geometry !== "straight" && base.lengthMm !== B)) throw new Error("Геометрия основы не соответствует сохранённому расчёту; пересчитайте вставку.");
   const D = base.outerDiameter, d = row.geometry === "straight" ? D : base.outerDiameterSmall;
   if (!positive(d)) throw new Error("Не указан фактический наружный диаметр малого конца перехода.");
-  const theta = angle * Math.PI / 180, eccentric = row.geometry === "eccentric" ? (D - d) / 2 : 0;
-  const offset: Vec3 = [0, eccentric * Math.sin(theta), -eccentric * Math.cos(theta)];
+  const eccentric = row.geometry === "eccentric" ? (D - d) / 2 : 0;
+  const offset: Vec3 = row.geometry === "eccentric" ? eccentricOffset(D, d, angle) : [0, 0, 0];
   const material = insertMaterialLabel(row.material), pn = row.pn;
   if (!positive(pn)) throw new Error("Не подтверждён PN вставки.");
   const point = (id: string, position: Vec3, axis: Vec3, dn: number, connection: ConnectionPoint["connection"], source: string, purpose: ConnectionPoint["purpose"] = "connection"): ConnectionPoint => ({ id, point: position, axis, up: axis[2] ? [1, 0, 0] : [0, 0, 1], dn, pn, material, connection, source, purpose, plane: purpose === "weld" ? "weld-end" : connection === "threaded" ? "thread-reference" : "mating-face", provisional: false });
@@ -56,27 +61,38 @@ export function prepareInsertionTemplate(row: InsertCalculation, context: Insert
   body.ports = [point("left-weld", [0, 0, 0], [-1, 0, 0], row.dnLarge, "weld", body.source, "weld"), point("right-weld", [B, offset[1], offset[2]], [1, 0, 0], row.dnSmall ?? row.dnLarge, "weld", body.source, "weld")];
   const ends = [{ side: "left", c: cfg.left, axial: al, dn: row.dnLarge, od: D, origin: [0, 0, 0] as Vec3, rotation: [0, 0, 0] as Vec3, axis: [-1, 0, 0] as Vec3 }, { side: "right", c: cfg.right, axial: ar, dn: row.dnSmall ?? row.dnLarge, od: d, origin: [L, offset[1], offset[2]] as Vec3, rotation: [0, 0, 180] as Vec3, axis: [1, 0, 0] as Vec3 }];
   for (const e of ends) {
+    if (compact && e.side === "left") {
+      const external = point("left", [0, 0, 0], [-1, 0, 0], e.dn, "threaded", body.source);
+      external.thread = base.thread ?? undefined; external.gender = base.threadGender ?? undefined;
+      external.provisional = true;
+      ports.push(external);
+      body.ports[0] = { ...external, id: "thread" };
+      continue;
+    }
     const p = lookup(`${e.side}-${e.c.connection}`, e.c.part), fd = p ? context.flanges[p.id] : undefined;
-    if (p && (p.dn !== e.dn || p.material !== row.material || p.pn !== pn && !p.compatiblePns?.includes(pn) && !(p.kind === "collar" && pn === 10 && p.pn === 16))) issues.push(`${p.id}: исполнение конца не согласовано с DN/PN/материалом сохранённой вставки.`);
+    if (p && (p.dn !== e.dn || p.material !== row.material || p.pn !== pn && !p.compatiblePns?.includes(pn) && !(p.kind === "collar" && pn === 10 && p.pn === 16) && !(compact && p.kind === "threadEnd" && positive(p.pn) && p.pn >= pn))) issues.push(`${p.id}: исполнение конца не согласовано с DN/PN/материалом сохранённой вставки.`);
     let shape: InsertionShape = { kind: "marker" }, fidelity: InsertionPiece["fidelity"] = "missing";
     if (p && e.c.connection === "flanged" && positive(p.thicknessMm) && positive(fd?.outerDiameterMm) && positive(p.boreDiameterMm)) {
       const bore = cfg.flangeBores?.find(b => b.side === e.side)?.targetBoreMm ?? p.boreDiameterMm;
-      shape = { kind: "flange", lengthMm: p.thicknessMm, outerMm: fd.outerDiameterMm, innerMm: bore, boltCircleMm: fd.boltCircleMm, boltHoleMm: fd.boltHoleDiameterMm, boltHoles: fd.holes }; fidelity = "parametric";
+      shape = { kind: "flange", lengthMm: p.thicknessMm, outerMm: fd.outerDiameterMm, innerMm: bore, boltCircleMm: fd.boltCircleMm, boltHoleMm: fd.boltHoleDiameterMm, boltHoles: fd.holes,
+        ...(fd.faceHeightMm !== undefined && fd.faceDiameterMm !== undefined ? { faceHeightMm: fd.faceHeightMm, faceDiameterMm: fd.faceDiameterMm } : {}) }; fidelity = "parametric";
       if (!fd.boltCircleMm || !fd.holes || !fd.boltHoleDiameterMm) { issues.push(`${p.id}: нет полной схемы крепёжных отверстий (K/n/d).`); fidelity = "outline"; }
     } else if (p && e.c.connection === "collar" && positive(p.lengthMm) && positive(p.outerDiameter) && positive(p.wallThickness) && positive(p.lipOuterDiameterMm) && positive(p.thicknessMm)) {
       shape = { kind: "collar", lengthMm: p.lengthMm, outerMm: p.outerDiameter, innerMm: p.outerDiameter - 2 * p.wallThickness, lipOuterMm: p.lipOuterDiameterMm, lipThicknessMm: p.thicknessMm }; fidelity = "outline";
+    } else if (compact && p?.kind === "threadEnd" && positive(p.lengthMm) && same(p.lengthMm, e.axial) && positive(p.outerDiameter) && positive(p.wallThickness) && p.outerDiameter > 2 * p.wallThickness) {
+      shape = { kind: "tube", lengthMm: p.lengthMm, outerMm: p.outerDiameter, innerMm: p.outerDiameter - 2 * p.wallThickness }; fidelity = "parametric";
     } else if (e.c.connection === "threaded") issues.push(`${e.side}: резьбовой конец требует подтверждённой модели и плоскости резьбового сопряжения; произвольная резьба не создаётся.`);
     else issues.push(`${p?.id ?? e.side}: не хватает размеров концевой детали для 3D.`);
     const end = add(e.side, p, e.origin, e.rotation, shape, fidelity);
     if (p && e.c.connection === "collar" && !applyModel(end, p)) warnings.push(`${p.id}: контур воротника без неподтверждённых радиусов; несовпадающие по стенке модели не используются.`);
     const external = point(e.side, e.origin, e.axis, e.dn, e.c.connection, end.source);
-    external.provisional = fidelity === "missing";
+    external.provisional = fidelity === "missing" || e.c.connection === "threaded";
     if (fd) Object.assign(external, { boreMm: fd.boreDiameterMm, boltCircleMm: fd.boltCircleMm, boltHoles: fd.holes, boltHoleMm: fd.boltHoleDiameterMm });
     if (p?.thread) external.thread = p.thread;
     if (p?.threadGender) external.gender = p.threadGender;
     ports.push(external);
     end.ports = [point("face", [0, 0, 0], [-1, 0, 0], e.dn, e.c.connection, end.source), point("base-joint", [e.axial, 0, 0], [1, 0, 0], e.dn, "weld", end.source, "weld")];
-    joints.push({ a: { piece: "base", port: `${e.side}-weld` }, b: { piece: e.side, port: "base-joint" }, kind: e.c.connection === "collar" ? "butt" : "seat", confirmed: !!p && fidelity !== "missing" });
+    joints.push({ a: { piece: "base", port: `${e.side}-weld` }, b: { piece: e.side, port: "base-joint" }, kind: e.c.connection === "collar" || compact && e.c.connection === "threaded" ? "butt" : "seat", confirmed: !!p && fidelity !== "missing" });
     if (e.c.connection === "collar") {
       const loose = context.catalog.parts.find(p => insertPartIdentity(p) === e.c.looseFlange) ?? context.catalog.parts.filter(p => p.kind === "looseFlange" && p.dn === e.dn && p.material === row.material && (p.pn === pn || p.compatiblePns?.includes(pn))).sort((a, b) => Number(b.pn === pn) - Number(a.pn === pn) || a.id.localeCompare(b.id))[0], dims = loose ? context.flanges[loose.id] : undefined;
       if (loose && p && positive(p.thicknessMm) && positive(dims?.thicknessMm) && positive(dims.outerDiameterMm) && positive(dims.boreDiameterMm)) {
@@ -92,13 +108,18 @@ export function prepareInsertionTemplate(row: InsertCalculation, context: Insert
   if (row.geometry === "eccentric") warnings.push(`${INSERTION_3D_DECISIONS} Смещение осей ${eccentric} мм; угол ${angle}°. Это не измеренный профиль перехода.`);
   if (row.withSensorNipple) {
     const nipple = lookup("sensor-nipple", cfg.sensor.part);
+    const length = INSERTION_SENSOR_LENGTH_MM;
+    const wall = nipple?.wallThickness;
+    const threaded = positive(wall) && positive(nipple?.outerDiameter) && nipple.outerDiameter > 2 * wall;
     const center: Vec3 = [al + B / 2, offset[1] / 2, offset[2] / 2 + (D + d) / 4];
-    const tube = add("sensor-nipple", nipple, center, [0, -90, 0], nipple && positive(nipple.outerDiameter) ? { kind: "tube", lengthMm: 110, outerMm: nipple.outerDiameter, ...(positive(nipple.wallThickness) ? { innerMm: nipple.outerDiameter - 2 * nipple.wallThickness } : {}) } : { kind: "marker" }, "outline");
+    const tube = add("sensor-nipple", nipple, center, [0, -90, 0], nipple && positive(nipple.outerDiameter) ? { kind: "tube", lengthMm: length, outerMm: nipple.outerDiameter, ...(threaded ? { innerMm: nipple.outerDiameter - 2 * wall, thread: { pitchMm: 25.4 / 14, lengthMm: 18, depthMm: Math.min(.9, wall * .45) } } : {}) } : { kind: "marker" }, "outline");
     tube.source += `; ${INSERTION_3D_DECISIONS}`;
-    const sensor = point("sensor", [center[0], center[1], center[2] + 110], [0, 0, 1], 15, "threaded", tube.source, "sensor");
+    tube.source += "; Резьба 1/2″ наружная правая: шаг 25,4/14 мм, участок 18 мм, условная глубина до 0,9 мм (как у сгонов коллектора). Компоновочный винтовой профиль, не производственный чертёж резьбы.";
+    const sensor = point("sensor", [center[0], center[1], center[2] + length], [0, 0, 1], 15, "threaded", tube.source, "sensor");
     sensor.thread = '1/2"'; sensor.gender = "male"; sensor.provisional = true; sensor.occupiedBy = "sensor-plug";
     ports.push(sensor);
-    tube.ports = [point("thread", [110, 0, 0], [1, 0, 0], 15, "threaded", tube.source, "sensor")];
+    tube.ports = [point("thread", [length, 0, 0], [1, 0, 0], 15, "threaded", tube.source, "sensor")];
+    tube.ports[0].thread = '1/2"'; tube.ports[0].gender = "male";
     tube.ports[0].provisional = true;
     const capId = row.bom.find(b => b.role === "sensor-plug")?.componentId, cap = context.catalog.sensorPlugs?.find(p => p.id === capId);
     const marker = add("sensor-plug", undefined, sensor.point, [0, 0, 0], { kind: "marker" }, "missing");
@@ -106,8 +127,8 @@ export function prepareInsertionTemplate(row: InsertCalculation, context: Insert
     marker.ports = [point("thread", [0, 0, 0], [0, 0, -1], 15, "threaded", marker.source, "sensor")]; marker.ports[0].provisional = true; marker.ports[0].gender = "female"; marker.ports[0].thread = '1/2"';
     joints.push({ a: { piece: tube.id, port: "thread" }, b: { piece: marker.id, port: "thread" }, kind: "thread", confirmed: false });
     issues.push(`${capId ?? "Заглушка DN15"}: нет габаритов и глубины навинчивания; показан условный маркер, подключение занято заглушкой.`);
-    issues.push(`${nipple?.id ?? "Сгон DN15"}: не определены профиль врезки и глубина приварки. Начало 110 мм показано на наружном контуре; плоскость резьбы предварительная.`);
-    if (!positive(nipple?.wallThickness)) issues.push(`${nipple?.id ?? "Сгон DN15"}: не подтверждена толщина стенки для 3D.`);
+    issues.push(`${nipple?.id ?? "Сгон DN15"}: не определены профиль врезки и глубина приварки. Начало ${length} мм показано на наружном контуре; плоскость резьбы предварительная.`);
+    if (!threaded) issues.push(`${nipple?.id ?? "Сгон DN15"}: не подтверждены допустимые OD и стенка для 3D-резьбы; резьба не построена.`);
   }
   // Conservative envelope for fitting the camera; never used as the finished axial length.
   const radius = Math.max(D / 2, ...pieces.map(p => (p.shape.lipOuterMm ?? p.shape.outerMm ?? 0) / 2));

@@ -23,6 +23,7 @@ export function reducerPhysicalMatch(item, reference) {
 export function reducerDimensionsMatch(item, reference) {
   if (!reducerPhysicalMatch(item, reference)) return false;
   const name = String(field(item, "Наименование") ?? item.family);
+  if (reference.basis === "project-analogue-length") return reference.material === "aisi304" && Boolean(reference.geometry) && Boolean(reference.adoptionId);
   // Explicitly adopted geometry defines L only; it does not certify the alloy or PN.
   if (reference.basis === "adopted-standard-geometry") return reference.standard === "ГОСТ 17378-2001" && Boolean(reference.geometry) && !/12Х18Н10Т/i.test(name);
   if (reference.material === "st20") return /ГОСТ\s*17378(?:[-\s]|$)/i.test(name);
@@ -41,6 +42,12 @@ export function reducerReferenceMaps(standards) {
       || ![reference.outerDiameter, reference.outerDiameterSmall, reference.wallThickness, reference.wallThicknessSmall, reference.lengthMm].every(positive)
       || typeof reference.source !== "string" || !reference.source.trim()) throw new Error(`Invalid or duplicate sourced reducer length: ${reference?.componentId}`);
     lengths.set(reference.componentId, reference);
+    if (reference.basis === "project-analogue-length") {
+      const policy = standards.reducerAnalogueLengthPolicy;
+      const keys = ["componentId", "material", "geometry", "outerDiameter", "outerDiameterSmall", "wallThickness", "wallThicknessSmall", "lengthMm"];
+      if (!policy?.source?.trim() || !policy.id || reference.adoptionId !== policy.id || !reference.source.trim()
+        || !policy.rows?.some(row => keys.every(key => row[key] === reference[key]))) throw new Error(`Invalid project analogue length: ${reference.componentId}`);
+    }
     if (reference.basis === "adopted-standard-geometry") {
       const policy = standards.reducerLengthPolicy;
       const groups = standards.referenceGroups ?? [];

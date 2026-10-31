@@ -44,7 +44,7 @@ const snapshot = () => JSON.stringify(database.prepare("SELECT * FROM user_proje
 
 test("unconfigured release is beta and URL/storage cannot enable extra tools", () => {
   assert.equal(policy.IS_BETA, true);
-  assert.deepEqual(policy.BETA_TOOLS, ["input", "chart", "sketch", "components"]);
+  assert.deepEqual(policy.BETA_TOOLS, ["input", "chart", "sketch", "components", "assistant"]);
   for (const tool of ["model", "settings", "input2", "users", "projects", "component-calculator"]) assert.equal(policy.betaToolFromUrl(`?panel=${tool}&profile=full&role=admin`), null);
   const poisoned = state.parseBetaInput({ ...state.emptyBetaInput(), flowRate: 20, head: 30, calculated: true, role: "admin", settings: { stationType: "combined" }, windows: [{ activeTool: "model" }], profile: "full" });
   assert.equal(poisoned.calculated, true);
@@ -180,7 +180,7 @@ test("beta password recovery never reveals local development links and uses sing
 
 test("beta layout keeps full workspace controls but strips forbidden panels and entities", () => {
   const defaults=state.defaultBetaState();
-  assert.deepEqual(defaults.workspace.windows.map(panel=>panel.activeTool),policy.BETA_TOOLS);
+  assert.deepEqual(defaults.workspace.windows.map(panel=>panel.activeTool),policy.BETA_TOOLS.filter(tool=>tool!=="assistant"));
   const hostile={input:{...defaults.input,flowRate:20,head:40,calculated:true},role:"admin",profile:"full",entities:{"station-settings":{stationType:"combined"}},workspace:{...defaults.workspace,mode:"grid",windows:[
     {...defaults.workspace.windows[0],entityId:"station-model",x:123},
     {id:"exploit",activeTool:"model",entityId:"station-model"},
@@ -198,5 +198,5 @@ test("beta layout keeps full workspace controls but strips forbidden panels and 
   assert.deepEqual(parsed.workspace.grid.cells,[null,"input",null,"empty"]);
   assert.deepEqual(state.parseBetaState(JSON.parse(JSON.stringify(parsed))),parsed);
   const recovered=state.parseBetaState({workspace:{windows:[{id:"model",activeTool:"model"}]}});
-  assert.deepEqual(recovered.workspace.windows.map(panel=>panel.activeTool),policy.BETA_TOOLS);
+  assert.deepEqual(recovered.workspace.windows.map(panel=>panel.activeTool),policy.BETA_TOOLS.filter(tool=>tool!=="assistant"));
 });

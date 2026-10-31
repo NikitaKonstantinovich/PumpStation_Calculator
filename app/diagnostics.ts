@@ -96,15 +96,15 @@ export function collectProjectIssues(project: ProjectConfig, catalogue: Pump[], 
     const rows = secondary ? [["secondarySuctionCollectorDn", flow], ["secondaryDischargeCollectorDn", flow], ["secondarySuctionValveDn", perPump], ["secondaryDischargeValveDn", perPump]] as const :
       [["suctionCollectorDn", flow], ["dischargeCollectorDn", flow], ["suctionValveDn", perPump], ["dischargeValveDn", perPump]] as const;
     for (const [field, rowFlow] of rows) {
-      const size = field.endsWith("SuctionValveDn") || field === "suctionValveDn" ? suction.dn : field.endsWith("DischargeValveDn") || field === "dischargeValveDn" ? discharge.dn : dn[field] ?? recommendedDn(rowFlow);
-      const velocity = flowVelocity(rowFlow, size), limit = dnVelocityLimit(size);
+      const size = field.endsWith("SuctionValveDn") || field === "suctionValveDn" ? suction.dn : field.endsWith("DischargeValveDn") || field === "dischargeValveDn" ? discharge.dn : dn[field] ?? recommendedDn(rowFlow,settings.baseValues?.values.velocity);
+      const velocity = flowVelocity(rowFlow, size), limit = dnVelocityLimit(size,settings.baseValues?.values.velocity);
       const rowLabel = field.toLowerCase().includes("suction") ? "Всасывающая линия" : "Напорная линия";
       if (velocity > limit + 1e-9) add("dn", `${circuit}/${field}`, "warning", `DN${size}: скорость ${velocity.toLocaleString("ru-RU", { maximumFractionDigits: 2 })} м/с превышает предел ${limit} м/с. Увеличьте диаметр.`, `${subject} · ${rowLabel}`);
     }
   }
   if (pressureChecksEnabled(settings) && (settings.inletHead === null || settings.inletHead === undefined)) add("settings", "inlet-head", "warning", "Напор на входе не указан; проверка допустимого давления не выполнена.");
   for (const [key, label] of [["usdRate", "Курс доллара"], ["cnyRate", "Курс юаня"]] as const) if (!Number.isFinite(settings[key]) || settings[key] <= 0) add("settings", `rates/${key}`, "error", `${label} должен быть больше нуля.`);
-  for (const [manufacturer, discount] of Object.entries(settings.manufacturerDiscounts)) if (!Number.isFinite(discount) || discount < 0 || discount > 100) add("settings", `discounts/${manufacturer}`, "error", `Скидка ${manufacturer.toUpperCase()} должна быть от 0 до 100%.`);
+  for (const [manufacturer, discount] of Object.entries(settings.manufacturerDiscounts)) if (typeof discount !== "number" || !Number.isFinite(discount) || discount < 0 || discount > 100) add("settings", `discounts/${manufacturer}`, "error", `Скидка ${manufacturer.toUpperCase()} должна быть от 0 до 100%.`);
   for (const item of visibleSpecificationItems(project.entities["station-spec"] as SpecEntity, settings)) {
     const presentation = specificationItemPresentation(item);
     if (presentation.hasWarning) result.push({ id: specificationIssueId(item), tool: "spec", severity: presentation.severity, message: presentation.warningText, subject: `${item.position} · ${item.name}` });
@@ -119,7 +119,7 @@ export function collectProjectIssues(project: ProjectConfig, catalogue: Pump[], 
     if (state.databaseStatus === "error") add("collectors", `${type}/database`, "error", state.databaseError || "Не удалось проверить базу коллекторов.", subject);
     else if (state.databaseStatus === "missing") add("collectors", `${type}/database`, "warning", "Коллектор отсутствует в базе — выполните расчёт в конструкторе.", subject);
     if (stale) add("collectors", `${type}/stale`, "warning", "Расчёт устарел — выполните повторный расчёт.", subject);
-    const velocity = collectorVelocityWarning(c.dn, preview?.velocities.collector);
+    const velocity = collectorVelocityWarning(c.dn, preview?.velocities.collector,c.velocityRules);
     if (velocity) add("collectors", `${type}/velocity`, "warning", velocity, subject);
     const invalidConfiguration = new Set([...configurationWarnings(c), ...collectorBranchDiameterErrors(c, catalog)]);
     [...invalidConfiguration].forEach((message,index) => add("collectors", `${type}/configuration/${index}`, "error", message, subject));

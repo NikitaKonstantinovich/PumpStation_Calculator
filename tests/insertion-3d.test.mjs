@@ -51,21 +51,43 @@ test("straight collar assembly uses exact 3 mm CAD, butt joints and auxiliary lo
 
 test("eccentricity rotates while sensor stays upward at base midpoint; cap occupies its provisional thread port", async () => {
   const t = await build(2, 90), g = t.geometry;
-  closeVec(g.ports[1].point, [137, 31.8, 0]);
+  closeVec(g.ports[1].point, [137, -31.8, 0]);
   const nipple = g.pieces.find(p => p.id === "sensor-nipple"), sensor = g.ports.find(p => p.id === "sensor");
-  close(nipple.position[0], 5 + 127 / 2); close(nipple.position[1], 15.9);
+  close(nipple.position[0], 5 + 127 / 2); close(nipple.position[1], -15.9);
   closeVec(model.rotate([1, 0, 0], nipple.rotation), [0, 0, 1]);
-  closeVec(sensor.axis, [0, 0, 1]); close(sensor.point[2] - nipple.position[2], 110);
+  closeVec(sensor.axis, [0, 0, 1]); close(sensor.point[2] - nipple.position[2], 60);
   assert.equal(sensor.occupiedBy, "sensor-plug"); assert.equal(sensor.thread, '1/2"'); assert.ok(sensor.provisional);
   assert.equal(g.pieces.find(p => p.id === "sensor-plug").shape.kind, "marker");
   assert.equal(t.status, "incomplete"); assert.ok(t.issues.some(s => s.includes("глубины навинчивания")));
   assert.ok(t.warnings.some(s => s.includes("25 бар")));
 });
 
+test("eccentric default has a level top, lower slope, matching joints and the same opaque material as a pipe", async () => {
+  const t = await build(2), body = t.geometry.pieces.find(p => p.id === "base"), s = body.shape;
+  close(s.offset[2] + s.smallOuterMm / 2, s.outerMm / 2);
+  assert.ok(s.offset[2] - s.smallOuterMm / 2 > -s.outerMm / 2);
+  closeVec(t.geometry.ports.find(p => p.id === "right").point, [137, 0, 31.8]);
+  for (const joint of t.geometry.joints) {
+    const a = t.geometry.pieces.find(p => p.id === joint.a.piece), b = t.geometry.pieces.find(p => p.id === joint.b.piece);
+    closeVec(partPose(a, a.ports.find(p => p.id === joint.a.port).point), partPose(b, b.ports.find(p => p.id === joint.b.port).point));
+  }
+  const reducer = renderer.pieceObject(body), pipe = renderer.pieceObject({ ...body, shape:{kind:"tube",lengthMm:127,outerMm:139.7,innerMm:119.7}, fidelity:"parametric" });
+  try {
+    const mesh = reducer.children[0], pipeMat = pipe.children[0].material;
+    for (const key of ["roughness", "metalness", "opacity", "transparent"]) assert.equal(mesh.material[key], pipeMat[key]);
+    assert.equal(mesh.material.color.getHex(), pipeMat.color.getHex());
+    assert.equal(mesh.material.opacity, 1);
+    const positions = mesh.geometry.getAttribute("position");
+    const top = start => Math.max(...Array.from({length:64}, (_,i) => positions.getZ(start+i)));
+    assert.ok(Math.abs(top(0)-top(64)) < 1e-5); // Test the actual rendered mesh, not only the descriptor.
+    assert.equal(body.fidelity,"outline"); assert.ok(t.warnings.some(w => /точной CAD-модели нет/.test(w)));
+  } finally { renderer.disposeInsertionObject(reducer); renderer.disposeInsertionObject(pipe); }
+});
+
 test("whole component transforms all connections and survives project normalization with database link and warnings", async () => {
   const t = await build(2), c = core.insertionComponent(t, "insert-test"); c.position = [100, 200, 300]; c.rotation = [0, 0, 90]; c.insertion.hiddenPieceIds = ["sensor-plug"];
   const assembly = { version: 1, sourceFingerprint: "test", components: [c] };
-  closeVec(model.portPoint(assembly, { componentId: c.id, portId: "right" }), [100, 337, 268.2]);
+  closeVec(model.portPoint(assembly, { componentId: c.id, portId: "right" }), [100, 337, 331.8]);
   closeVec(model.portAxis(assembly, { componentId: c.id, portId: "right" }), [0, 1, 0]);
   const saved = model.normalizeEditor(JSON.parse(JSON.stringify({ ...model.emptyEditor(), assembly, selectedId: c.id })));
   assert.deepEqual(saved.assembly.components[0].insertion, c.insertion);
@@ -115,4 +137,49 @@ test("ports reject occupied/incompatible connections, and project parser rejects
   assert.equal(validation.parseInsertionTemplate(bad), null);
   const nonfinite = await build(0); nonfinite.geometry.ports[0].point[0] = NaN; assert.equal(validation.parseInsertionTemplate(nonfinite), null);
   const ring = await build(0); ring.geometry.pieces[1].shape.innerMm = 500; assert.equal(validation.parseInsertionTemplate(ring), null);
+});
+
+test("60 mm sensor nipple has a closed hollow helical mesh for both materials and survives project reload", async()=>{
+  for(const material of ["aisi304","st20"]){
+    const f=JSON.parse(JSON.stringify(fixture).replaceAll("aisi304",material));
+    const before=JSON.stringify(f.rows[2]),t=await build(2,0,f);
+    assert.equal(JSON.stringify(f.rows[2]),before,"geometry must not mutate engineering calculation");
+    const piece=t.geometry.pieces.find(p=>p.id==="sensor-nipple"),s=piece.shape;
+    assert.equal(s.lengthMm,60);assert.equal(s.thread.lengthMm,18);close(s.thread.pitchMm,25.4/14);
+    assert.ok(s.thread.depthMm<(s.outerMm-s.innerMm)/2);
+    assert.equal(t.source.price,f.rows[2].price);assert.equal(t.geometry.totalLengthMm,f.rows[2].totalLengthMm);
+    const loaded=validation.parseInsertionTemplate(JSON.parse(JSON.stringify(t)));assert.deepEqual(loaded.geometry,t.geometry);
+    const cap=t.geometry.pieces.find(p=>p.id==="sensor-plug"),port=piece.ports[0];
+    closeVec(partPose(piece,port.point),cap.position);
+    assert.equal(port.thread,'1/2"');assert.equal(port.gender,"male");
+    const object=renderer.pieceObject(piece),mesh=object.children.find(c=>c.isMesh),g=mesh.geometry;
+    try{
+      g.computeBoundingBox();close(g.boundingBox.min.x,0);close(g.boundingBox.max.x,60);
+      const positions=g.getAttribute("position"),index=g.index.array,edges=new Map();
+      let groove=false;
+      for(let i=0;i<positions.count;i++){
+        const x=positions.getX(i),r=Math.hypot(positions.getY(i),positions.getZ(i));
+        assert.ok(r>=s.innerMm/2-1e-5 && r<=s.outerMm/2+1e-5);
+        if(x>42&&x<60&&r<s.outerMm/2-.1&&r>s.innerMm/2+.1)groove=true;
+      }
+      assert.ok(groove,"actual mesh contains thread grooves, not just metadata");
+      for(let i=0;i<index.length;i+=3)for(let j=0;j<3;j++){
+        const a=index[i+j],b=index[i+(j+1)%3],k=[Math.min(a,b),Math.max(a,b)].join('/'),v=edges.get(k)??[0,0];
+        v[0]++;v[1]+=a<b?1:-1;edges.set(k,v);
+      }
+      assert.ok([...edges.values()].every(([count,balance])=>count===2&&balance===0),"closed consistently oriented hollow body");
+    }finally{renderer.disposeInsertionObject(object);}
+    const old=structuredClone(t);old.geometry.ruleVersion=3;delete old.geometry.pieces.find(p=>p.id==="sensor-nipple").shape.thread;
+    old.geometry.pieces.find(p=>p.id==="sensor-nipple").shape.lengthMm=110;
+    assert.notEqual(core.insertionGeometrySignature(old),core.insertionGeometrySignature(t),"old cached geometry must not be reused");
+  }
+});
+
+test("saved thread descriptors reject unbounded tessellation and wall penetration",async()=>{
+  const t=await build(2);
+  const {parseLineShape}=await loadTs(new URL('../app/model-editor/line-types.ts',import.meta.url));
+  for(const patch of [{pitchMm:0},{pitchMm:0.00001},{depthMm:99},{lengthMm:61},{pitchMm:NaN}]){
+    const bad=structuredClone(t),s=bad.geometry.pieces.find(p=>p.id==='sensor-nipple').shape;
+    Object.assign(s.thread,patch);assert.equal(validation.parseInsertionTemplate(bad),null);assert.equal(parseLineShape(s),undefined);
+  }
 });

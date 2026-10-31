@@ -4,8 +4,9 @@ import { createCollectors, normalizeCollectors, synchronizeCollectors, type Coll
 import { migrateSpecificationItems } from "./specification-items";
 import type { PumpPortOverride } from "./pump-ports";
 import { defaultProjectSettings } from "./default-settings";
+import { legacyBaseSnapshot, type AppliedBaseValues } from "./base-values";
 
-export type PanelKind = "input" | "chart" | "sketch" | "input2" | "chart2" | "sketch2" | "settings" | "dn" | "spec" | "components" | "cabinet" | "collectors" | "model" | "issues";
+export type PanelKind = "input" | "chart" | "sketch" | "input2" | "chart2" | "sketch2" | "settings" | "dn" | "spec" | "components" | "cabinet" | "collectors" | "model" | "issues" | "assistant";
 export type WorkspaceMode = "free" | "mobile" | "grid";
 export type WorkspaceGrid = { columns:number; rows:number; columnSizes:number[]; rowSizes:number[]; cells:Array<string|null> };
 
@@ -39,6 +40,7 @@ export type SketchEntity = { kind: "sketch" };
 export type StationType = "utility" | "fire" | "combined" | "smart";
 export type SettingsEntity = {
   kind: "settings";
+  baseValues?: AppliedBaseValues;
   inletHead?: number | null;
   pressureChecksEnabled?: boolean;
   stationType: StationType;
@@ -52,7 +54,7 @@ export type SettingsEntity = {
   hydraulicOptions?: import("./hydraulic-option-config").HydraulicOptionsConfig;
   usdRate: number;
   cnyRate: number;
-  manufacturerDiscounts: { cnp: number; aquastrong: number; onis?: number; vandjord?: number; wellmix?: number };
+  manufacturerDiscounts: { cnp: number; aquastrong: number; onis?: number; vandjord?: number; wellmix?: number; [manufacturer: string]: number | undefined };
 };
 export type SpecSection = "pump" | "control" | "suction" | "discharge" | "frame" | "electrical";
 export type SpecOption = "primaryPump" | "controlCabinet" | "frame" | "cabinetStand" | "mountingKit" | "vibrationMounts" | "pressureTransducer" | "externalElectrical" | "suctionCollector" | "dischargeCollector" | "secondaryPump" | "membraneTank" | "vibrationCompensators" | "collectorPlugs" | "isolatingValves" | "primarySuctionValve" | "primaryDischargeValve" | "primaryCheckValve" | "secondarySuctionValve" | "secondaryDischargeValve" | "secondaryCheckValve";
@@ -89,6 +91,7 @@ export type ModelEntity = { kind: "model"; view: { rotation: number; zoom: numbe
 export type ComponentsEntity = { kind:"components" };
 export type CabinetEntity = { kind:"cabinet" };
 export type IssuesEntity = { kind:"issues" };
+export type AssistantEntity = { kind:"assistant" };
 export type CollectorMaterial = "st20" | "aisi304";
 export type ValveConnection = "threaded" | "flanged";
 export type ValvePn = 10 | 16 | 25;
@@ -118,7 +121,7 @@ export type DnEntity = {
   secondarySuctionValveType:ShutoffValveType|null;
   secondaryDischargeValveType:ShutoffValveType|null;
 };
-export type ProjectEntity = InputEntity | ChartEntity | SketchEntity | SettingsEntity | DnEntity | SpecEntity | ComponentsEntity | CabinetEntity | ModelEntity | CollectorsEntity | IssuesEntity;
+export type ProjectEntity = InputEntity | ChartEntity | SketchEntity | SettingsEntity | DnEntity | SpecEntity | ComponentsEntity | CabinetEntity | ModelEntity | CollectorsEntity | IssuesEntity | AssistantEntity;
 
 export type ProjectConfig = {
   schemaVersion: 1;
@@ -158,7 +161,7 @@ export const DEFAULT_SPEC_ITEMS: SpecItem[] = [
   { position: "05.04", name: "Виброопора", details: "Типоразмер уточняется", quantity: 0, unit: "шт.", price: null, description: "Установка рамы на основание", section: "frame", option: "vibrationMounts", technicalStatus: "incomplete", status: "clarify" },
 ];
 
-export function createProject(name = "Новая насосная станция", seed?: { id?: string; timestamp?: string }): ProjectConfig {
+export function createProject(name = "Новая насосная станция", seed?: { id?: string; timestamp?: string; baseValues?: AppliedBaseValues }): ProjectConfig {
   const timestamp = seed?.timestamp ?? now();
   return synchronizeCollectors({
     schemaVersion: 1,
@@ -172,12 +175,13 @@ export function createProject(name = "Новая насосная станция
       "working-point-2": { kind: "chart", efficiency: 78, power: 22, npsh: 3.2 },
       "pump-sketch": { kind: "sketch" },
       "pump-sketch-2": { kind: "sketch" },
-      "station-settings": defaultProjectSettings(),
+      "station-settings": defaultProjectSettings(seed?.baseValues),
       "station-dn": { kind: "dn", suctionCollectorDn: null, dischargeCollectorDn: null, suctionValveDn: null, dischargeValveDn: null, collectorMaterial: null, connectionType:null, pn:null, suctionValveType:null, dischargeValveType:null, secondarySuctionCollectorDn:null, secondaryDischargeCollectorDn:null, secondarySuctionValveDn:null, secondaryDischargeValveDn:null, secondaryConnectionType:null, secondaryPn:null, secondarySuctionValveType:null, secondaryDischargeValveType:null },
       "station-spec": { kind: "spec", identityVersion: 1, items: migrateSpecificationItems(DEFAULT_SPEC_ITEMS) },
       "station-components": { kind: "components" },
       "station-control-cabinet": { kind: "cabinet" },
       "station-issues": { kind: "issues" },
+      "station-assistant": { kind: "assistant" },
       "station-collectors": createCollectors(),
       "station-model": { kind: "model", view: { rotation: 0, zoom: 1 } },
     },
@@ -199,7 +203,7 @@ export function parseProjectConfig(raw: unknown): ProjectConfig {
   if (candidate.schemaVersion !== 1) throw new Error("Неподдерживаемая версия файла проекта");
   if (!candidate.project || typeof candidate.project.name !== "string" || typeof candidate.project.id !== "string") throw new Error("В файле отсутствуют данные проекта");
   if (!candidate.workspace || !Array.isArray(candidate.workspace.windows) || !candidate.entities || typeof candidate.entities !== "object") throw new Error("В файле отсутствует рабочее пространство");
-  const allowed = new Set<PanelKind>(["input", "chart", "sketch", "input2", "chart2", "sketch2", "settings", "dn", "spec", "components", "cabinet", "collectors", "model", "issues"]);
+  const allowed = new Set<PanelKind>(["input", "chart", "sketch", "input2", "chart2", "sketch2", "settings", "dn", "spec", "components", "cabinet", "collectors", "model", "issues", "assistant"]);
   const windows = candidate.workspace.windows.map((window, index) => {
     if (!window || typeof window.id !== "string" || typeof window.entityId !== "string" || !candidate.entities?.[window.entityId]) throw new Error(`Некорректное окно № ${index + 1}`);
     const legacyTool = allowed.has(window.id as PanelKind) ? window.id as PanelKind : undefined;
@@ -210,6 +214,7 @@ export function parseProjectConfig(raw: unknown): ProjectConfig {
   const needsSettingsPanel = !candidate.entities["station-settings"] && !windows.some(window => window.activeTool === "settings");
   const defaults = createProject(candidate.project.name, { id: candidate.project.id, timestamp: candidate.project.createdAt || now() });
   const entities = { ...defaults.entities, ...candidate.entities } as Record<string, ProjectEntity>;
+  entities["station-assistant"] = { kind: "assistant" };
   const rawModel = entities["station-model"] as Partial<ModelEntity> | null;
   entities["station-model"] = { kind: "model", view: { rotation: finite(rawModel?.view?.rotation, 0), zoom: finite(rawModel?.view?.zoom, 1) }, mode: rawModel?.mode === "editor" ? "editor" : "preview", ...(rawModel?.editor ? { editor: normalizeEditor(rawModel.editor) } : {}) };
 
@@ -226,6 +231,10 @@ export function parseProjectConfig(raw: unknown): ProjectConfig {
   const pn = (value:unknown):ValvePn|null => value===10||value===16||value===25?value:null;
   const valveType = (value:unknown):ShutoffValveType|null => value==="butterfly"||value==="ball"?value:null;
   entities["station-dn"] = { kind:"dn", suctionCollectorDn:savedDn(rawDn.suctionCollectorDn), dischargeCollectorDn:savedDn(rawDn.dischargeCollectorDn), suctionValveDn:savedDn(rawDn.suctionValveDn), dischargeValveDn:savedDn(rawDn.dischargeValveDn), collectorMaterial:rawDn.collectorMaterial==="st20"||rawDn.collectorMaterial==="aisi304"?rawDn.collectorMaterial:null, connectionType:connection(rawDn.connectionType), pn:pn(rawDn.pn), suctionValveType:valveType(rawDn.suctionValveType), dischargeValveType:valveType(rawDn.dischargeValveType), secondarySuctionCollectorDn:savedDn(rawDn.secondarySuctionCollectorDn), secondaryDischargeCollectorDn:savedDn(rawDn.secondaryDischargeCollectorDn), secondarySuctionValveDn:savedDn(rawDn.secondarySuctionValveDn), secondaryDischargeValveDn:savedDn(rawDn.secondaryDischargeValveDn), secondaryConnectionType:connection(rawDn.secondaryConnectionType), secondaryPn:pn(rawDn.secondaryPn), secondarySuctionValveType:valveType(rawDn.secondarySuctionValveType), secondaryDischargeValveType:valveType(rawDn.secondaryDischargeValveType) };
+  const parsedSettings = entities["station-settings"] as SettingsEntity;
+  parsedSettings.baseValues = rawSettings.baseValues ?? legacyBaseSnapshot();
+  if (!parsedSettings.baseValues?.versions || !parsedSettings.baseValues.values?.financial) throw new Error("Некорректная версия базовых значений");
+  parsedSettings.manufacturerDiscounts = { ...parsedSettings.baseValues.values.financial.discounts, ...parsedSettings.manufacturerDiscounts, ...Object.fromEntries(Object.entries(rawSettings.manufacturerDiscounts ?? {}).filter(([,v]) => typeof v === "number" && Number.isFinite(v))) };
   entities["station-collectors"] = normalizeCollectors(entities["station-collectors"]);
   const normalizedDn = entities["station-dn"] as DnEntity;
   if (rawDn.insertionDesigns && typeof rawDn.insertionDesigns === "object" && !Array.isArray(rawDn.insertionDesigns)) {

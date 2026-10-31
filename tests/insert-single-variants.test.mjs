@@ -24,7 +24,7 @@ test("one row per size/PN/material/geometry/connection pair; selected physical i
   assert.equal(pn25.length, 2);
   assert.ok(pn25.every(row => row.complete && row.bom.filter(item => item.componentId?.startsWith("newkey-din2503:")).length === 2));
   assert.ok(selected.some(row => row.dnLarge > 200 && row.dnSmall <= 200 && row.pn < 25 && row.material === "aisi304" && row.leftConnection === "flanged" && row.rightConnection === "collar"));
-  assert.ok(selected.filter(row => row.material === "aisi304" && row.dnLarge <= 200 && row.pn < 25).every(row => row.leftConnection === "collar" && row.rightConnection === "collar"));
+  assert.ok(selected.filter(row => row.material === "aisi304" && row.dnLarge <= 200 && row.pn < 25 && row.configuration.construction !== "compact-threaded").every(row => row.leftConnection === "collar" && row.rightConnection === "collar"));
   const sensor = generateInsertCalculations({ ...input, withSensorNipple: true }, catalog);
   assert.equal(sensor.length, selected.length);
   for (const row of sensor) {

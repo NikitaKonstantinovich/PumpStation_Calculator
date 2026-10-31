@@ -3,11 +3,13 @@ import { pipePoints, type Assembly, type Component, type Vec3 } from "./model";
 import { frameBoxes } from "./snap-geometry";
 import { pieceObject, ringGeometry, type InsertionRenderCache } from "./insertion-renderer";
 import { collectorObject, type CollectorRenderCache } from "./collector-renderer";
+import { fastenerObject } from "./fastener-renderer";
+import { PIPE_APPEARANCE } from "./pipe-appearance";
 
-const colors = { pump: 0x4587a6, collector: 0x91a8b5, pipe: 0x91a8b5, frame: 0x405568, equipment: 0x62877b };
+const colors = { pump: 0x4587a6, collector: PIPE_APPEARANCE.color, pipe: PIPE_APPEARANCE.color, frame: 0x405568, equipment: 0x62877b };
 export const vector = (p: Vec3) => new THREE.Vector3(...p);
 export function material(c: Component) {
-  return new THREE.MeshStandardMaterial({ color: colors[c.kind], roughness: .6, metalness: .2, transparent: c.opacity < 1, opacity: c.opacity, side: THREE.DoubleSide });
+  return new THREE.MeshStandardMaterial({ ...PIPE_APPEARANCE, color: colors[c.kind], transparent: c.opacity < 1, opacity: c.opacity, side: THREE.DoubleSide });
 }
 export function cylinder(a: Vec3, b: Vec3, diameter: number, mat: THREE.Material): THREE.Mesh {
   const start = vector(a), end = vector(b), delta = end.clone().sub(start);
@@ -19,7 +21,8 @@ export function cylinder(a: Vec3, b: Vec3, diameter: number, mat: THREE.Material
 export function componentObject(assembly: Assembly, c: Component, insertionCache?: InsertionRenderCache, collectorCache?: CollectorRenderCache): THREE.Group {
   const group = new THREE.Group(), mat = material(c), p = c.parameters;
   group.userData.componentId = c.id; group.visible = !c.hidden;
-  if (c.collector) { mat.dispose(); group.add(collectorObject(c, collectorCache)); }
+  if (c.fastener) { mat.dispose(); group.add(fastenerObject(c)); }
+  else if (c.collector) { mat.dispose(); group.add(collectorObject(c, collectorCache)); }
   else if (c.insertion && insertionCache) {
     mat.dispose(); group.add(insertionCache.get(c));
     // Guides are visual annotations, not physical components or additional dimensions.
@@ -60,6 +63,9 @@ export function componentObject(assembly: Assembly, c: Component, insertionCache
       const beam = new THREE.Mesh(new THREE.BoxGeometry(...box.size), mat); beam.position.copy(vector(box.center)); group.add(beam);
     }
   } else {
+    if (c.kind === "pump" && c.pumpGeometry?.envelope === "incomplete") {
+      mat.wireframe = !c.pumpGeometry.schematic; mat.transparent = true; mat.opacity *= c.pumpGeometry.schematic ? .65 : .5; mat.color.set(0xe3a145);
+    }
     const b = c.bounds ?? [-p.length / 2, -p.width / 2, -p.height / 2, p.length / 2, p.width / 2, p.height / 2];
     const mesh = new THREE.Mesh(new THREE.BoxGeometry(b[3] - b[0], b[4] - b[1], b[5] - b[2]), mat);
     mesh.position.set((b[0] + b[3]) / 2, (b[1] + b[4]) / 2, (b[2] + b[5]) / 2);
@@ -72,6 +78,7 @@ export function componentObject(assembly: Assembly, c: Component, insertionCache
 }
 export function disposeObject(object: THREE.Object3D) {
   object.traverse(o => {
+    if (o instanceof THREE.InstancedMesh) o.dispose();
     if (o instanceof THREE.Mesh || o instanceof THREE.LineSegments) {
       o.geometry.dispose();
       for (const material of Array.isArray(o.material) ? o.material : [o.material]) material.dispose();

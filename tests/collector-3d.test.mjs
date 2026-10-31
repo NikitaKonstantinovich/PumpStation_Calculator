@@ -8,7 +8,7 @@ for(const path of ["collector-mesh","collector-renderer","insertion-renderer"]){
 const {collectorMetal}=await loadTs(new URL("app/model-editor/collector-mesh.ts",root),replacements);
 const {saddleRings}=await loadTs(new URL("app/model-editor/collector-intersection.ts",root));
 const {buildCollectorTemplate,applyCollectorTemplate}=await loadTs(new URL("app/model-editor/collector-template.ts",root));
-const {defaultCollectorMount,parseCollectorBinding}=await loadTs(new URL("app/model-editor/collector-types.ts",root));
+const {defaultCollectorMount,resolveCollectorMount,parseCollectorBinding}=await loadTs(new URL("app/model-editor/collector-types.ts",root));
 const {collectorObject,CollectorRenderCache,metalGeometry}=await loadTs(new URL("app/model-editor/collector-renderer.ts",root),replacements);
 const model=await loadTs(new URL("app/model-editor/model.ts",root));
 const {calculateCollector}=await loadTs(new URL("app/collector-calculations.ts",root));
@@ -61,7 +61,7 @@ function fixture(two=false){
     items[id]={equipmentId:id,kind,source:"GEOMETRY FIXTURE ONLY",revision:"test",length,outerDiameter:od,wall,ports:[],fidelity:"parametric",issues:[],lipThickness:kind==="collar"?5:undefined,
       shape:kind==="collar"?{kind:"collar",outerMm:od,innerMm:od-2*wall,lengthMm:30,lipOuterMm:od+30,lipThicknessMm:5}:kind==="looseFlange"?{kind:"flange",lengthMm:15,outerMm:outer,innerMm:od+2,boltHoles:4,boltCircleMm:od+45,boltHoleMm:10}:undefined};
   }
-  const catalog={version:"test",components,bolts:[{dn:50,pn:16,length:50,source:"GEOMETRY FIXTURE ONLY"}]};
+  const catalog={version:"test",components,valveBolts:[{dn:50,pn:16,material:"aisi304",model:"017W",length:50,minimumLengthMm:49,componentId:"test-bolt",diameter:16,source:"GEOMETRY FIXTURE ONLY",warnings:[]}],bolts:[{dn:50,pn:16,length:50,source:"GEOMETRY FIXTURE ONLY"}]};
   const calculation=calculateCollector(c,catalog),card={configuration:c,calculation,status:"complete"};return {c,calculation,card,catalog,data:{version:1,revision:"test",items,issues:[]}};
 }
 test("template consumes calculated lengths, includes reserves/second circuit, and has no price/BOM side effects",()=>{
@@ -107,26 +107,79 @@ test("all physical branch ends close against both pump circuits, and saved mount
   c.collector.template.mount=mount;p.entities["station-model"].editor={...model.emptyEditor(),assembly:a};
   const fresh=model.buildAssembly(p,[pump],profile,f.data).components.find(c=>c.id==="collector-discharge");assert.deepEqual(fresh.collector.template.mount,mount);
   assert.ok(!model.connectionIssues(a).some(i=>i.id.startsWith("line-")&&i.message.includes("соединение нарушено")));
+  // The eccentric suction collector must move as a whole to the same line ends;
+  // its branch bodies, flanges and ports share the automatically raised axes.
+  f.c.type="suction";f.c.eccentric=true;f.card.calculation=calculateCollector(f.c,f.catalog);
+  p.entities["station-collectors"].suction=f.card;
+  p.entities["station-spec"].items.push(...p.entities["station-spec"].items.map(row=>({...row,section:"suction",position:row.position.replace("04.","03."),option:row.option.replace("Discharge","Suction")})));
+  const suction=model.buildAssembly(p,[pump],profile,f.data),sc=suction.components.find(c=>c.id==="collector-suction"),sj=suction.lineJoints.filter(j=>j.b.componentId===sc.id);
+  assert.equal(sc.collector.template.branches.filter(b=>b.role==="branch").length,4);assert.equal(sj.length,4);
+  for(const j of sj){const from=model.portPoint(suction,j.a),to=model.portPoint(suction,j.b);from.forEach((v,i)=>close(v,to[i]));}
+  const sm=collectorMetal(sc.collector.template);assert.deepEqual(sm.issues,[]);manifold(sm.main);
 });
 test("surface reference, explicit instrument length, eccentric offset and unsupported saved data are explicit",()=>{
   const f=fixture(),mount={...defaultCollectorMount(),branchLengthReference:"surface-to-pipe-end",instrumentLengthsMm:{"instrument15-0":70,"instrument15-1":70,"instrument20-0":70}},t=buildCollectorTemplate(f.card,f.data,[],"discharge",mount);
-  close(t.branches[0].endMm,112.15+57.15);assert.equal(t.branches.filter(b=>b.role==="instrument").length,3);
+  close(t.branches[0].endMm,112.15+57.15);assert.equal(t.branches.filter(b=>b.role==="instrument").length,2);
   const ecc=fixture();ecc.c.type="suction";ecc.c.eccentric=true;ecc.card.configuration=ecc.c;ecc.card.calculation=calculateCollector(ecc.c,{version:"test",components:[],bolts:[]});
   // Preserve a valid dimensional snapshot while changing only the explicitly encoded eccentric variant.
   ecc.card.calculation={...f.calculation,fingerprint:JSON.stringify(ecc.c)};
-  const unresolved=buildCollectorTemplate(ecc.card,ecc.data,[],"suction");assert.equal(unresolved.branches.filter(b=>b.role==="branch").length,0);assert.ok(unresolved.issues.some(i=>i.includes("смещение осей не задано")));
+  const automatic=buildCollectorTemplate(ecc.card,ecc.data,[],"suction");assert.equal(automatic.branches.filter(b=>b.role==="branch").length,3);for(const b of automatic.branches.filter(b=>b.role==="branch"))close(b.origin[2]+b.outerMm/2,automatic.main.outerMm/2);assert.deepEqual(collectorMetal(automatic).issues,[]);assert.equal(automatic.ruleVersion,3);
   const shifted=buildCollectorTemplate(ecc.card,ecc.data,[],"suction",{...defaultCollectorMount(),eccentricOffsetMm:5});assert.equal(shifted.branches.filter(b=>b.role==="branch").length,3);assert.equal(shifted.branches[0].origin[2],5);
   const binding={template:t,hiddenPieceIds:[]};for(const change of [x=>x.template.mount.instrumentLengthsMm=null,x=>x.template.branches[0].axis=[0,2,0],x=>x.template.branches[0].joint="inserted",x=>x.template.ports.push(x.template.ports[0])]){const b=structuredClone(binding);change(b);assert.equal(parseCollectorBinding(b),undefined);}
+});
+
+test("horizontal pump outlets rise into a header with downward branches and upward instrument nipples in both circuits",async()=>{
+  const {createProject}=await loadTs(new URL("app/project-config.ts",root));
+  const pumps=JSON.parse(await readFile(new URL("public/pumps.json",root),"utf8"));
+  const profiles=JSON.parse(await readFile(new URL("public/model-assets/manifest.json",root),"utf8"));
+  for(const pumpId of ["nu-b1879e1e3807d907","979"]){
+    const pump=pumps.find(p=>p.id===pumpId),profile=profiles.profiles[pumpId],original=JSON.stringify(profile);
+    assert.ok(pump&&profile);assert.equal(profile.ports.find(p=>p.id==="outlet").axis,undefined);
+    const f=fixture(true);f.c.secondary.reserve=1;f.card.calculation=calculateCollector(f.c,f.catalog);
+    const p=createProject("Horizontal geometry fixture",{id:"horizontal-test",timestamp:"2026-10-30T00:00:00Z"});
+    p.entities["station-settings"].stationType="combined";
+    for(const [key,working,reserve]of [["system-input",2,1],["system-input-2",1,1]])Object.assign(p.entities[key],{selectedPumpId:pumpId,workingPumpCount:working,reservePumpCount:reserve});
+    p.entities["station-collectors"].discharge=f.card;
+    p.entities["station-spec"].items=[...[['primary',3],['secondary',2]].map(([prefix,quantity])=>({section:"discharge",position:`04.${prefix}`,option:`${prefix}DischargeValve`,name:"FIXTURE VALVE",equipmentId:"fixture-valve",quantity,unit:"шт.",details:"PN16",status:"selected"}))];
+    f.data.items["fixture-valve"]={equipmentId:"fixture-valve",revision:"fixture",source:"GEOMETRY FIXTURE ONLY",length:100,fidelity:"parametric",issues:[],shape:{kind:"tube",lengthMm:100,outerMm:60.3,innerMm:50},ports:[{id:"left",point:[0,0,0],axis:[-1,0,0]},{id:"right",point:[100,0,0],axis:[1,0,0]}]};
+    const snapshot=JSON.stringify([f.card,p.entities["station-spec"]]);
+    const a=model.buildAssembly(p,[pump],profiles,f.data),c=a.components.find(c=>c.id==="collector-discharge");
+    assert.equal(c.collector.template.pumpBranchOrientation,"bottom");
+    const ps=a.components.filter(c=>c.kind==="pump");assert.equal(ps.length,5);
+    for(const instance of ps){
+      const outlet=instance.ports.find(p=>p.id==="outlet"),source=profile.ports.find(p=>p.id==="outlet");
+      assert.deepEqual(outlet.point,source.point);assert.deepEqual(outlet.axis,[0,0,1]);assert.equal(outlet.provisional,source.provisional);
+      const start=model.worldPoint(instance,outlet.point),port=c.ports.find(p=>p.id===instance.id),end=model.worldPoint(c,port.point);
+      close(end[0],start[0]);close(end[1],start[1]);close(end[2]-start[2],100);
+      close(c.position[2]-end[2],c.collector.template.branches.find(b=>b.portId===instance.id).endMm+30);
+      model.rotate(port.axis,c.rotation).forEach((v,i)=>close(v,[0,0,-1][i]));
+    }
+    model.rotate([1,0,0],c.rotation).forEach((v,i)=>close(v,[0,1,0][i]));
+    for(const b of c.collector.template.branches.filter(b=>b.role==="instrument"))model.rotate(b.axis,c.rotation).forEach((v,i)=>close(v,[0,0,1][i]));
+    for(const j of a.lineJoints){const from=model.portPoint(a,j.a),to=model.portPoint(a,j.b);from.forEach((v,i)=>close(v,to[i]));}
+    const metal=collectorMetal(c.collector.template);assert.deepEqual(metal.issues,[]);manifold(metal.main);for(const mesh of Object.values(metal.branches))manifold(mesh);
+    const restored=model.normalizeEditor(JSON.parse(JSON.stringify({...model.emptyEditor(),assembly:a}))).assembly;
+    assert.equal(restored.components.find(v=>v.id===c.id).collector.template.pumpBranchOrientation,"bottom");
+    const rebuilt=buildCollectorTemplate(f.card,f.data,ps.map(v=>({id:v.id,circuit:v.id.startsWith("pump-2-")?2:1,x:c.ports.find(port=>port.id===v.id).point[0]})),"discharge",{...c.collector.template.mount,branchLengthReference:"surface-to-pipe-end"},c.collector.template.pumpBranchOrientation);
+    assert.ok(rebuilt.branches.filter(b=>b.role==="branch").every(b=>b.axis[2]===-1));
+    const resizedComponent=applyCollectorTemplate(c,rebuilt),resizedAssembly={...a,components:a.components.map(v=>v.id===c.id?resizedComponent:v)};
+    const resized=model.editComponent(resizedAssembly,{id:c.id,patch:{parameters:{...resizedComponent.parameters,diameter:124.3}}}).components.find(v=>v.id===c.id);
+    for(const part of rebuilt.pieces.filter(p=>p.id.startsWith("branch-"))){const next=resized.collector.template.pieces.find(p=>p.id===part.id);close(next.position[2],part.position[2]-5);close(next.position[1],part.position[1]);}
+    f.data.items["fixture-valve"].length=140;f.data.items["fixture-valve"].ports[1].point[0]=140;
+    const taller=model.buildAssembly(p,[pump],profiles,f.data),merged=model.mergeAssembly(restored,taller),header=merged.components.find(v=>v.id===c.id);
+    close(header.position[2]-c.position[2],40);close(header.position[0],c.position[0]);
+    assert.equal(JSON.stringify(profile),original);assert.equal(JSON.stringify([f.card,p.entities["station-spec"]]),snapshot);
+  }
 });
 test("old individual sgon dimensions keep their surface reference; new empty mounts receive 60 mm stock lengths",()=>{
   const f=fixture(),legacy={...defaultCollectorMount(),instrumentLengthsMm:{'instrument15-0':70}};delete legacy.instrumentDefaultLengthMm;delete legacy.instrumentLengthReference;
   const t=buildCollectorTemplate(f.card,f.data,[],'discharge',legacy),b=t.branches.find(b=>b.id==='instrument15-0');
   close(b.endMm,t.main.outerMm/2+70);assert.equal(b.blankLengthMm,undefined);assert.equal(t.mount.instrumentLengthReference,'surface-to-pipe-end');
-  const automatic=t.branches.find(b=>b.id==='instrument15-1');assert.equal(automatic.blankLengthMm,60);close(saddleRings(t.main,automatic).cutLengthMm,60);
+  const automatic=t.branches.find(b=>b.id==='instrument20-0');assert.equal(automatic.blankLengthMm,60);close(saddleRings(t.main,automatic).cutLengthMm,60);
 });
 test("60 mm instrument branches occupy gaps between equal-diameter pump branches instead of their saddle footprints",()=>{
   const f=fixture();f.c.dn=50;f.c.primary.working=1;f.card.calculation=calculateCollector(f.c,f.catalog);
-  const t=buildCollectorTemplate(f.card,f.data,[],'discharge');assert.equal(t.branches.filter(b=>b.role==='branch').length,2);assert.equal(t.branches.filter(b=>b.role==='instrument').length,3);
+  const t=buildCollectorTemplate(f.card,f.data,[],'discharge');assert.equal(t.branches.filter(b=>b.role==='branch').length,2);assert.equal(t.branches.filter(b=>b.role==='instrument').length,2);
   const bodies=collectorMetal(t);assert.deepEqual(bodies.issues,[]);manifold(bodies.main);for(const b of t.branches.filter(b=>b.role==='instrument')){assert.equal(b.blankLengthMm,60);assert.ok(t.branches.filter(p=>p.role==='branch').every(p=>Math.abs(p.origin[0]-b.origin[0])>60));}
 });
 
@@ -177,4 +230,111 @@ test("stale pricing preserves compatible collector geometry and exact ports with
   assert.deepEqual(t.main,current.main);assert.deepEqual(t.branches,current.branches);assert.deepEqual(t.ports,current.ports);assert.ok(t.issues.some(i=>/устарел/.test(i)));assert.ok(metal.main);assert.equal(Object.keys(metal.branches).length,t.branches.length);
   const changed=structuredClone(stale);changed.configuration.dn=150;
   const invalid=buildCollectorTemplate(changed,f.data,[],"discharge");assert.equal(invalid.main,null);assert.equal(invalid.branches.length,0,"mismatched engineering sizes must not inherit cached geometry");
+});
+
+test("configured nipple length, thread toggle and pitch reach the real closed 3D metal without phantom caps",()=>{
+  const f=fixture();f.c.instrumentPorts=[{id:"plain",dn:20,state:"occupied",lengthMm:85,threaded:false},{id:"threaded",dn:15,state:"occupied",lengthMm:45,threaded:true,threadPitchMm:1.6,threadLengthMm:10}];f.card.calculation=calculateCollector(f.c,f.catalog);
+  const t=buildCollectorTemplate(f.card,f.data,[],"discharge"),plain=t.branches.find(b=>b.id==="instrument-plain-0"),threaded=t.branches.find(b=>b.id==="instrument-threaded-0");
+  close(saddleRings(t.main,plain).cutLengthMm,85);close(saddleRings(t.main,threaded).cutLengthMm,45);assert.equal(plain.thread,undefined);assert.equal(threaded.thread.pitchMm,1.6);assert.equal(threaded.thread.lengthMm,10);
+  assert.ok(!t.pieces.some(p=>p.id.startsWith("instrument-")&&p.id.endsWith("-plug")));const metal=collectorMetal(t);assert.deepEqual(metal.issues,[]);manifold(metal.main);manifold(metal.branches[plain.id]);manifold(metal.branches[threaded.id]);assert.ok(parseCollectorBinding({template:t,hiddenPieceIds:[]}));
+});
+
+
+test("top-aligned eccentric saddles keep a closed hollow mesh when the branch wall is thinner than the main wall",()=>{
+  for(const [od,wall,bod,bwall] of [[114.3,3,60.3,2],[323.9,4,219.1,3],[219.1,6,88.9,3],[114.3,3,60.3,3],[114.3,2,60.3,3],[114.3,3,114.3,3]])for(const sign of [-1,1]){
+    const tube={...main,outerMm:od,innerMm:od-2*wall},e=(od-bod)/2;
+    const b=branch({origin:[0,0,e],axis:[0,sign,0],outerMm:bod,innerMm:bod-2*bwall,endMm:400});
+    const result=collectorMetal({main:tube,branches:[b]});assert.deepEqual(result.issues,[],JSON.stringify({od,wall,bod,bwall,sign}));
+    assert.ok(result.branches.b1);manifold(result.main);manifold(result.branches.b1);
+    close(Math.max(...result.branches.b1.positions.filter((_,i)=>i%3===2)),od/2);
+    const hits=rayHits(result.main,[0,sign*450,e],[0,-sign,0]);assert.ok(hits.length);close(hits[0].point.y,-sign*Math.sqrt((tube.innerMm/2)**2-e**2),.1); // 128-segment main cylinder: sub-0.1 mm chord error
+    assert.equal(rayHits(result.branches.b1,[0,sign*450,e],[0,-sign,0]).length,0,"branch channel is open");
+    if(wall>bwall){
+      assert.ok(result.rings.b1.wallBore);const z=(tube.innerMm/2+e+b.innerMm/2)/2;
+      const roof=rayHits(result.main,[0,sign*450,z],[0,-sign,0]);assert.ok(roof.length);close(roof[0].point.y,0,1e-3,"the cut must stop at the midplane above the main bore");
+    }
+  }
+});
+
+test("eccentric template aligns each circuit independently, preserves manual offsets and survives JSON reload",()=>{
+  const f=fixture(true);f.c.type="suction";f.c.eccentric=true;f.c.secondary.dn=80;
+  const component={...f.catalog.components.find(p=>p.id==='pipe-50'),id:'pipe-80',dn:80,outerDiameter:88.9,innerDiameter:83.9};f.catalog.components.push(component);
+  f.catalog.valveBolts.push({...f.catalog.valveBolts[0],dn:80});
+  f.data.items['pipe-80']={...f.data.items['pipe-50'],equipmentId:'pipe-80',dn:80,outerDiameter:88.9,wall:2.5};
+  f.card.calculation=calculateCollector(f.c,f.catalog);f.card.configuration=f.c;
+  const original=JSON.stringify(f.card.calculation),t=buildCollectorTemplate(f.card,f.data,[],'suction');
+  const branches=t.branches.filter(b=>b.role==='branch');assert.equal(branches.length,4);
+  for(const b of branches)close(b.origin[2]+b.outerMm/2,t.main.outerMm/2);
+  assert.notEqual(branches[0].origin[2],branches.at(-1).origin[2]);assert.equal(JSON.stringify(f.card.calculation),original);
+  const mesh=collectorMetal(t);assert.deepEqual(mesh.issues,[]);manifold(mesh.main);for(const body of Object.values(mesh.branches))manifold(body);
+  const loaded=parseCollectorBinding(JSON.parse(JSON.stringify({template:t,hiddenPieceIds:[]})));assert.ok(loaded);assert.equal(loaded.template.geometryKey,t.geometryKey);
+  for(const offset of [0,5]){const manual=buildCollectorTemplate(f.card,f.data,[],'suction',{...defaultCollectorMount(),eccentricOffsetMm:offset});assert.ok(manual.branches.filter(b=>b.role==='branch').every(b=>b.origin[2]===offset));}
+  const legacy=structuredClone(t);legacy.ruleVersion=1;assert.ok(parseCollectorBinding({template:legacy,hiddenPieceIds:[]}));
+});
+
+
+test("vertical collector collar neck meets pipe end and loose flange stays behind the mating face",()=>{
+  for(const orientation of ["side","bottom"]){
+    const f=fixture(true),t=buildCollectorTemplate(f.card,f.data,[],"discharge",defaultCollectorMount(),orientation);
+    for(const b of t.branches.filter(b=>b.role==="branch")){
+      const tip=model.add(b.origin,b.axis.map(v=>v*b.endMm)),port=t.ports.find(p=>p.id===b.portId);
+      const collar=t.pieces.find(p=>p.id===b.id+"-collar"),flange=t.pieces.find(p=>p.id===b.id+"-looseFlange");
+      const point=(p,x)=>model.add(p.position,model.rotate([x,0,0],p.rotation));
+      point(collar,collar.shape.lengthMm).forEach((v,i)=>close(v,tip[i]));
+      point(collar,0).forEach((v,i)=>close(v,port.point[i]));
+      point(flange,0).forEach((v,i)=>close(v,point(collar,collar.shape.lipThicknessMm)[i]));
+      // Metal is entirely on the collector side of the mating plane, not in the valve.
+      for(const p of [collar,flange])for(const x of [0,p.shape.lengthMm]){
+        const d=model.subtract(point(p,x),port.point);
+        assert.ok(d.reduce((sum,v,i)=>sum+v*b.axis[i],0)<=1e-6);
+      }
+    }
+  }
+});
+
+test("welded collector end flanges and side/bottom branch faces use the accepted 5 mm seat",()=>{
+  for(const material of ["st20","aisi304"])for(const orientation of ["side","bottom"]){
+    const f=fixture(),pn=material==="st20"?16:25;
+    f.c.material=material;f.c.pn=pn;f.c.primary.pn=pn;
+    for(const c of f.catalog.components){c.material=material;c.pn=pn;}
+    f.catalog.valveBolts=f.catalog.valveBolts.map(b=>({...b,material,pn}));
+    for(const dn of [50,100]){
+      const pipe=f.data.items[`pipe-${dn}`],id=`weld-${dn}`,od=pipe.outerDiameter;
+      f.catalog.components.push({id,kind:"weldFlange",dn,pn,material,name:id,price:20,source:"GEOMETRY FIXTURE ONLY"});
+      f.data.items[id]={equipmentId:id,kind:"weldFlange",length:20,source:"GEOMETRY FIXTURE ONLY",fidelity:"parametric",shape:{kind:"flange",lengthMm:20,innerMm:od+1,outerMm:od+80,boltHoles:4,boltCircleMm:od+45,boltHoleMm:10},ports:[],issues:[]};
+    }
+    f.card.calculation=calculateCollector(f.c,f.catalog);
+    const before=JSON.stringify(f.card.calculation),t=buildCollectorTemplate(f.card,f.data,[],"discharge",defaultCollectorMount(),orientation);
+    const flangePieces=t.pieces.filter(p=>p.id.endsWith("-weldFlange"));assert.equal(flangePieces.length,5);
+    assert.equal(JSON.stringify(f.card.calculation),before);
+    for(const p of flangePieces){
+      assert.equal(p.shape.kind,"flange");
+      const end=p.id.startsWith("end-"),left=p.id.startsWith("end-left");
+      const b=end?null:t.branches.find(b=>p.id===b.id+"-weldFlange");
+      const axis=end?[left?-1:1,0,0]:b.axis;
+      const tip=end?[(left?-1:1)*t.main.lengthMm/2,0,0]:model.add(b.origin,b.axis.map(v=>v*b.endMm));
+      const port=t.ports.find(port=>port.id===(end?`network-${left?"left":"right"}`:b.portId));
+      const pipePoint=model.add(p.position,model.rotate([5,0,0],p.rotation));
+      pipePoint.forEach((v,i)=>close(v,tip[i]));
+      p.position.forEach((v,i)=>close(v,port.point[i]));
+      close(model.subtract(port.point,tip).reduce((sum,v,i)=>sum+v*axis[i],0),5);
+    }
+    const object=collectorObject({collector:{template:t,hiddenPieceIds:[]},opacity:1});
+    for(const p of flangePieces){const group=object.children.find(c=>c.userData.pieceId===p.id);assert.ok(group?.children.some(c=>c.isMesh),p.id);}
+    object.traverse(o=>{if(o.isMesh||o.isLineSegments){o.geometry.dispose();for(const m of Array.isArray(o.material)?o.material:[o.material])m.dispose();}});
+    assert.ok(parseCollectorBinding(JSON.parse(JSON.stringify({template:t,hiddenPieceIds:[]}))));
+    const unknown=buildCollectorTemplate(f.card,f.data,[],"discharge",{...defaultCollectorMount(),flangeFaceToPipeEndMm:null});
+    assert.ok(unknown.pieces.filter(p=>p.id.endsWith("-weldFlange")).every(p=>p.shape.kind==="marker"));
+    f.data.items["weld-100"].shape.innerMm=100;
+    const invalid=buildCollectorTemplate(f.card,f.data,[],"discharge");
+    assert.ok(invalid.pieces.filter(p=>p.id.startsWith("end-")).every(p=>p.shape.kind==="marker"),"5 mm must not bypass bore compatibility");
+  }
+});
+
+test("legacy unset flange seating migrates once; explicit values and cleared current settings survive",()=>{
+  const legacy={...defaultCollectorMount(),flangeFaceToPipeEndMm:null};delete legacy.flangeSeatingRevision;
+  const migrated=resolveCollectorMount(legacy);assert.equal(migrated.flangeFaceToPipeEndMm,5);
+  assert.deepEqual(resolveCollectorMount(migrated),migrated);
+  for(const value of [0,4,8])assert.equal(resolveCollectorMount({...legacy,flangeFaceToPipeEndMm:value}).flangeFaceToPipeEndMm,value);
+  assert.equal(resolveCollectorMount({...migrated,flangeFaceToPipeEndMm:null}).flangeFaceToPipeEndMm,null);
 });

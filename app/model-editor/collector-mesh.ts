@@ -106,7 +106,16 @@ export function collectorMetal(t:Pick<CollectorTemplate,"main"|"branches">):Coll
   const accepted=valid.filter(b=>!invalid.has(b.id)),rings=accepted.map(b=>result.rings[b.id]),m=mesh();
   try{
     const outer=surface(m,t.main.outerMm/2,t.main.lengthMm,rings.map(r=>r.inner),seam,false),inner=surface(m,t.main.innerMm/2,t.main.lengthMm,rings.map(r=>r.bore),seam,true);
-    for(let i=0;i<rings.length;i++)zipBand(m,inner.holes[i],outer.holes[i],true);
+    for(let i=0;i<rings.length;i++) {
+      const wallBore=rings[i].wallBore;
+      if(wallBore){
+        // Match all subdivisions of the inner cylindrical surface. Where the
+        // cut rim coincides with it, a coarser loop would leave T-junctions.
+        const params=inner.holes[i].params,cut={params,points:params.map(t=>{const index=t*wallBore.length,j=Math.floor(index);return mix(wallBore[j%wallBore.length],wallBore[(j+1)%wallBore.length],index-j);})};
+        zipBand(m,inner.holes[i],cut,true);zipBand(m,cut,outer.holes[i],true);
+      }
+      else zipBand(m,inner.holes[i],outer.holes[i],true);
+    }
     zipBand(m,outer.ends[0],inner.ends[0],true);zipBand(m,inner.ends[1],outer.ends[1],true);result.main=m;
     for(const b of accepted)result.branches[b.id]=branchMesh(result.rings[b.id],b);
   }catch(e){result.issues.push(e instanceof Error?e.message:String(e));result.rings={};}

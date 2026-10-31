@@ -44,6 +44,8 @@ test(`built beta enforces access over real HTTP (${publicOrigin ?? "loopback"})`
       catch(error) { throw new Error(`${method} ${path}: ${error.message} (${error.cause?.code ?? "unknown"})`, {cause:error}); }
     };
     assert.equal((await send("/api/auth")).status,401);
+    assert.equal((await send("/api/help")).status,401);
+    assert.equal((await send("/api/assistant")).status,401);
     const database=await worker.getD1Database("DB");
     const password="beta-http-fixture-password",salt=Buffer.alloc(16,42);
     const hash=`pbkdf2_sha256$310000$${salt.toString("base64url")}$${pbkdf2Sync(password,salt,310000,32,"sha256").toString("base64url")}`;
@@ -54,6 +56,17 @@ test(`built beta enforces access over real HTTP (${publicOrigin ?? "loopback"})`
     assert.match(login.headers.get("set-cookie"), /; HttpOnly/);
     assert.match(login.headers.get("set-cookie"), /; SameSite=Lax/);
     const cookie=login.headers.get("set-cookie").split(";")[0];
+    assert.equal((await send("/api/help?document=KB-014","GET",cookie)).status,200);
+    assert.equal((await send("/api/base-values")).status,401);
+    assert.equal((await send("/api/base-values/effective")).status,401);
+    const baseStateResponse=await send("/api/base-values","GET",cookie);
+    assert.equal(baseStateResponse.status,200,baseStateResponse.text);
+    const baseState=JSON.parse(baseStateResponse.text),baseValues=structuredClone(baseState.draft);
+    baseValues.welding.st20=2500;
+    const published=await send("/api/base-values","PATCH",cookie,{action:"publish",revision:baseState.revision,values:baseValues});
+    assert.equal(published.status,200,published.text);
+    assert.equal((await send("/api/base-values","PATCH",cookie,{action:"publish",revision:baseState.revision,values:baseValues})).status,409);
+    assert.equal((await send("/api/base-values","PATCH",cookie,{action:"save",revision:1,values:baseValues},{Origin:"https://evil.example"})).status,403);
     for (const path of ["/api/auth", "/api/users"]) {
       const forged = await send(path,"POST",cookie,{action:"logout"},{Origin:"https://evil.example","X-Forwarded-Host":"evil.example","X-Forwarded-Proto":"https"});
       assert.equal(forged.status,403,`Reject foreign origin: ${path}`);
@@ -71,6 +84,18 @@ test(`built beta enforces access over real HTTP (${publicOrigin ?? "loopback"})`
       const memberLogin=await send("/api/auth","POST",undefined,{action:"login",email:`${role}@example.test`,password});
       assert.equal(memberLogin.status,200);
       const memberCookie=memberLogin.headers.get("set-cookie").split(";")[0];
+      const help=await send("/api/help","GET",memberCookie);
+      assert.equal(help.status,200);
+      assert.ok(JSON.parse(help.text).documents.some(doc=>doc.id==="KB-014"));
+      assert.equal((await send("/api/help?document=KB-014","GET",memberCookie)).status,200);
+      const assistant=await send("/api/assistant","GET",memberCookie);
+      assert.equal(assistant.status,200);
+      assert.deepEqual(JSON.parse(assistant.text),{enabled:false});
+      assert.equal((await send("/api/assistant","POST",memberCookie,{messages:[{role:"user",content:"Как начать?"}]})).status,503);
+      assert.equal((await send("/api/base-values","GET",memberCookie)).status,403);
+      assert.equal((await send("/api/base-values","PATCH",memberCookie,{action:"publish",revision:1,values:baseValues})).status,403);
+      const memberValues=await send("/api/base-values/effective","GET",memberCookie);
+      assert.equal(memberValues.status,200);assert.equal(JSON.parse(memberValues.text).applied.values.welding.st20,2500);
       await database.prepare("UPDATE sessions SET last_seen_at=datetime('now','-3 minutes') WHERE user_id=?").bind(`http-${role}`).run();
       const online = async () => JSON.parse((await send("/api/users","GET",cookie)).text).users.find(user=>user.id===`http-${role}`).online;
       assert.equal(await online(),false,"An old heartbeat must expire");

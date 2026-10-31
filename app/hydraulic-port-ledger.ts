@@ -43,7 +43,7 @@ export function hydraulicPortLedger(ports: HydraulicPort[], uses: HydraulicPortU
   return { entries, findings: [...new Set(findings)], complete: findings.length === 0 };
 }
 
-export type CollectorInstrumentPort = { id: string; dn: number; state: "occupied" | "capped" | "open" };
+export type CollectorInstrumentPort = { id: string; dn: number; state: "occupied" | "capped" | "open"; lengthMm?:number; threaded?:boolean; threadPitchMm?:number; threadLengthMm?:number };
 export function collectorInstrumentPortErrors(raw: unknown): string[] {
   if (raw === undefined) return [];
   if (!Array.isArray(raw) || raw.length > 32) return ["Список отводов КИП должен содержать не более 32 подключений."];
@@ -55,7 +55,13 @@ export function collectorInstrumentPortErrors(raw: unknown): string[] {
     else ids.add(port.id);
     if (![15, 20, 25, 32, 40, 50].includes(port.dn ?? 0)) errors.push(`Отвод ${port.id ?? "?"}: неподдерживаемый DN резьбового сгона.`);
     if (!["occupied", "capped", "open"].includes(port.state ?? "")) errors.push(`Отвод ${port.id ?? "?"}: не определено состояние подключения.`);
+    if(port.lengthMm!==undefined&&(!Number.isFinite(port.lengthMm)||port.lengthMm<=0||port.lengthMm>1000)||port.threaded!==undefined&&typeof port.threaded!=="boolean"
+      ||port.threadPitchMm!==undefined&&(!Number.isFinite(port.threadPitchMm)||port.threadPitchMm<=0||port.threadPitchMm>10)
+      ||port.threadLengthMm!==undefined&&(!Number.isFinite(port.threadLengthMm)||port.threadLengthMm<=0||port.threadLengthMm>=(port.lengthMm??60)))errors.push(`Отвод ${port.id??"?"}: некорректная длина или параметры резьбы.`);
   }
   return [...new Set(errors)];
 }
-export const collectorInstrumentPortIdentity = (ports: CollectorInstrumentPort[]) => JSON.stringify([...ports].sort((a, b) => a.id.localeCompare(b.id)).map(port => [port.id, port.dn, port.state]));
+export const collectorInstrumentPortIdentity = (ports: CollectorInstrumentPort[]) => JSON.stringify([...ports].sort((a, b) => a.id.localeCompare(b.id)).map(port => {
+  const dimensions={...(port.lengthMm!==undefined&&port.lengthMm!==60?{lengthMm:port.lengthMm}:{}),...(port.threaded===false?{threaded:false}:{}),...(port.threadPitchMm!==undefined?{threadPitchMm:port.threadPitchMm}:{}),...(port.threadLengthMm!==undefined?{threadLengthMm:port.threadLengthMm}:{})};
+  return [port.id,port.dn,port.state,...(Object.keys(dimensions).length?[dimensions]:[])];
+}));

@@ -14,6 +14,9 @@ import { PUMP_LINE_RULES_REVISION } from "../line-insertion";
 import { VIBRATION_DIMENSIONS_REVISION } from "../vibration-dimensions";
 import { FRAME_RULE_REVISION, projectFrameSelection } from "../frame-selection";
 import { addValveControls, followValveControls, parseValveControl, VALVE_CONTROL_REVISION, type ValveControl } from "./valve-controls";
+import { isHardwareRow, rebuildFasteners } from "./flange-fasteners";
+import { FASTENER_REVISION, parseFastenerBinding, parseFastenerCatalog, type FastenerBinding, type FastenerCatalog } from "./fastener-types";
+import { resolvePumpLayout, parsePumpGeometry, type PumpGeometryInfo } from "./pump-spatial";
 
 /** All positions, source CAD coordinates and dimensions use mm; Euler angles use degrees, XYZ. */
 export type Vec3 = [number, number, number];
@@ -33,20 +36,23 @@ export type Component = {
   position: Vec3; rotation: Vec3; hidden: boolean; opacity: number; locked: boolean;
   parameters: { length: number; width: number; height: number; diameter: number; routeOffset: number; wallThickness?: number };
   bounds?: Bounds; meshUrl?: string; ports: Port[];
+  pumpGeometry?: PumpGeometryInfo;
   insertion?: { template: InsertionTemplate; hiddenPieceIds: string[] };
   collector?: CollectorBinding;
   line?: LineBinding; shape?: InsertionShape;
   valveControl?: ValveControl;
+  fastener?: FastenerBinding;
   autoPose?: { position: Vec3; rotation: Vec3; parametersKey?: string };
   routing?: { from: PortRef; to: PortRef; automatic: boolean; points: Vec3[] };
   orphaned?: boolean;
 };
-export type Assembly = { version: 1; sourceFingerprint: string; components: Component[]; lineJoints?: LineJoint[]; lineDataRevision?: string };
+export type Assembly = { version: 1; sourceFingerprint: string; components: Component[]; lineJoints?: LineJoint[]; lineDataRevision?: string; fastenerCatalog?: FastenerCatalog };
 export type CameraView = { position: Vec3; target: Vec3 };
 export type EditorState = {
   version: 1; assembly: Assembly | null; selectedId: string | null;
   selectedPieceId?: string;
   grid: boolean; snap: boolean; snapStep: number; camera?: CameraView;
+  showFasteners?: boolean;
   objectSnaps: SnapSettings;
   referencePoints: Array<{ id: string; componentId: string; point: Vec3; approximate?: boolean }>;
 };
@@ -70,6 +76,7 @@ export function normalizeEditor(raw: unknown): EditorState {
     return safeId(p.id) && safeId(p.componentId) && vec(p.point) ? [{ id: p.id, componentId: p.componentId, point: [...p.point] as Vec3, ...(p.approximate === true ? { approximate: true } : {}) }] : [];
   });
   result.grid = value.grid !== false; result.snap = value.snap !== false;
+  result.showFasteners = value.showFasteners !== false;
   result.snapStep = Math.min(1000, Math.max(1, positive(value.snapStep, 25)));
   result.selectedId = safeId(value.selectedId) ? value.selectedId : null;
   if (safeId(value.selectedPieceId)) result.selectedPieceId = value.selectedPieceId;
@@ -105,11 +112,15 @@ export function normalizeEditor(raw: unknown): EditorState {
       ports, meshUrl: safeMesh(c.meshUrl) ? c.meshUrl : undefined, orphaned: c.orphaned === true,
     };
     const cadSource = object(c.cadSource);
+    if (component.kind === "pump") component.pumpGeometry = parsePumpGeometry(c.pumpGeometry);
     const line = parseLineBinding(c.line), shape = parseLineShape(c.shape);
     if (line) component.line = line;
     if (shape) component.shape = shape;
     const valveControl = parseValveControl(c.valveControl);
     if (valveControl && valveControl.parentId !== component.id) component.valveControl = valveControl;
+    const fastener = parseFastenerBinding(c.fastener);
+    if (fastener) { component.fastener = fastener; component.locked = true; }
+    else if (c.fastener !== undefined) continue;
     if (c.collector !== undefined && component.kind === "collector") {
       const collector = parseCollectorBinding(c.collector);
       if (collector) { collector.template = finishCollectorTemplate(collector.template); component.collector = collector; component.ports = collector.template.ports; component.bounds = collector.template.bounds; }
@@ -141,6 +152,8 @@ export function normalizeEditor(raw: unknown): EditorState {
   result.assembly = { version: 1, sourceFingerprint: typeof assembly.sourceFingerprint === "string" ? assembly.sourceFingerprint.slice(0, 200000) : "", components };
   if (Array.isArray(assembly.lineJoints)) result.assembly.lineJoints = parseLineJoints(assembly.lineJoints);
   if (typeof assembly.lineDataRevision === "string") result.assembly.lineDataRevision = assembly.lineDataRevision.slice(0, 1000);
+  result.assembly.fastenerCatalog = parseFastenerCatalog(assembly.fastenerCatalog);
+  result.assembly = rebuildFasteners(result.assembly);
   if (!ids.has(result.selectedId ?? "")) result.selectedId = null;
   return result;
 }
@@ -195,7 +208,7 @@ export function componentBounds(assembly: Assembly, c: Component): Bounds {
   return [...[0, 1, 2].map(i => Math.min(...points.map(p => p[i]))), ...[0, 1, 2].map(i => Math.max(...points.map(p => p[i])))] as Bounds;
 }
 export function assemblyBounds(assembly: Assembly, visibleOnly = false): Bounds | null {
-  const bounds = assembly.components.filter(c => !visibleOnly || !c.hidden).map(c => componentBounds(assembly, c));
+  const bounds = assembly.components.filter(c => !isHardwareRow(c) && c.fastener?.status !== "blocked" && (!visibleOnly || !c.hidden)).map(c => componentBounds(assembly, c));
   return bounds.length ? [...[0, 1, 2].map(i => Math.min(...bounds.map(b => b[i]))), ...[3, 4, 5].map(i => Math.max(...bounds.map(b => b[i])))] as Bounds : null;
 }
 export const dimensions = (b: Bounds): Vec3 => [b[3] - b[0], b[4] - b[1], b[5] - b[2]];
@@ -208,7 +221,7 @@ export function editComponent(assembly: Assembly, edit: Edit): Assembly {
     if (c.id !== edit.id) return c;
     const { hidden, opacity, locked } = edit.patch;
     let next: Component = { ...c, ...(typeof hidden === "boolean" ? { hidden } : {}), ...(finite(opacity) ? { opacity: Math.min(1, Math.max(.1, opacity)) } : {}) };
-    if (!c.locked) {
+    if (!c.locked && !c.fastener) {
       const automatic = c.routing?.automatic;
       if (vec(edit.patch.position) && !automatic) next.position = [...edit.patch.position];
       if (vec(edit.patch.rotation) && !automatic) next.rotation = [...edit.patch.rotation];
@@ -233,7 +246,10 @@ export function editComponent(assembly: Assembly, edit: Edit): Assembly {
           }
           for (const p of template.pieces) {
             if (p.id.startsWith("end-")) { p.position[0] += (p.id.startsWith("end-left") ? -1 : 1) * deltaLength / 2; if (deltaRadius) { p.shape = { kind: "marker" }; p.fidelity = "missing"; } }
-            else if (p.id.startsWith("branch-") && template.mount.branchLengthReference === "surface-to-pipe-end") p.position[1] += Math.sign(p.position[1]) * deltaRadius;
+            else if (p.id.startsWith("branch-") && template.mount.branchLengthReference === "surface-to-pipe-end") {
+              const port = template.ports.find(port => p.id === `branch-${port.id}` || p.id.startsWith(`branch-${port.id}-`));
+              if (port?.axis) p.position = add(p.position, port.axis.map(v => v * deltaRadius) as Vec3);
+            }
             else if (p.id.startsWith("instrument")) p.position[2] += deltaRadius;
           }
           template.issues.push("Размеры коллектора изменены вручную; проверьте соответствие расчёту и концевым деталям.");
@@ -251,12 +267,12 @@ export function editComponent(assembly: Assembly, edit: Edit): Assembly {
     }
     if (typeof locked === "boolean") {
       if (locked && !c.locked && c.routing) next = { ...next, position: [0, 0, 0], rotation: [0, 0, 0], routing: { ...c.routing, points: pipePoints(assembly, c) } };
-      next.locked = locked;
+      next.locked = c.fastener ? true : locked;
     }
     return next;
   }) };
   const previous = assembly.components.find(c => c.id === edit.id);
-  return followValveControls(nextAssembly, !previous?.locked && (edit.patch.position || edit.patch.rotation) ? edit.id : undefined);
+  return rebuildFasteners(followValveControls(nextAssembly, !previous?.locked && (edit.patch.position || edit.patch.rotation) ? edit.id : undefined));
 }
 export function setAutomaticRoute(assembly: Assembly, id: string, automatic: boolean): Assembly {
   return { ...assembly, components: assembly.components.map(c => c.id === id && c.routing && !c.locked ? { ...c, position: [0, 0, 0], rotation: [0, 0, 0], routing: { ...c.routing, automatic, points: pipePoints(assembly, c) } } : c) };
@@ -264,7 +280,14 @@ export function setAutomaticRoute(assembly: Assembly, id: string, automatic: boo
 export function connectionIssues(assembly: Assembly): Array<{ id: string; message: string }> {
   const issues: Array<{ id: string; message: string }> = [];
   for (const c of assembly.components) {
-    if (c.line) for (const message of c.line.issues) issues.push({ id: c.id, message: `${c.name}: ${message}` });
+    if (c.pumpGeometry) for (const message of c.pumpGeometry.issues) issues.push({ id: c.id, message: `${c.name}: ${message}` });
+    if (c.fastener) for (const message of c.fastener.issues) issues.push({ id: c.id, message: `${c.name}: ${message}` });
+    if (c.line) for (const message of c.line.issues) {
+      // Hardware rows remain specification data; their old placeholder-rendering
+      // warnings are superseded by the actual joint group, not catalogue issues.
+      if (isHardwareRow(c) && /^(Нет геометрии выбранной позиции|Положение вспомогательной детали\/крепежа|Количество на ветвь:)/.test(message)) continue;
+      issues.push({ id: c.id, message: `${c.name}: ${message}` });
+    }
     if (c.orphaned) issues.push({ id: c.id, message: `${c.name}: отсутствует в текущем составе. Сохранена ручная компоновка.` });
     if (c.routing) {
       const a = portPoint(assembly, c.routing.from), b = portPoint(assembly, c.routing.to), points = pipePoints(assembly, c);
@@ -301,7 +324,7 @@ function base(id: string, name: string, kind: Component["kind"]): Component {
 const outsideDiameter = (dn: number) => ({ 15: 21.3, 20: 26.9, 25: 33.7, 32: 42.4, 40: 48.3, 50: 60.3, 65: 76.1, 80: 88.9, 100: 114.3, 125: 139.7, 150: 168.3, 200: 219.1, 250: 273, 300: 323.9 }[dn] ?? dn * 1.1);
 export function sourceFingerprint(project: ProjectConfig): string {
   const entities = project.entities;
-  return JSON.stringify(["collector-assembly-v4", VALVE_CONTROL_REVISION, COLLECTOR_INSTRUMENT_RULES_REVISION, "check-valve-flow-v1", PUMP_LINE_RULES_REVISION, VIBRATION_DIMENSIONS_REVISION, FRAME_RULE_REVISION, project.station, entities["system-input"], entities["system-input-2"], entities["station-dn"], entities["station-settings"], ...["suction", "discharge"].map(side => { const c = (entities["station-collectors"] as CollectorsEntity)?.[side as "suction" | "discharge"]; return [c?.configuration, c?.calculation && [c.calculation.fingerprint, c.calculation.lengthMm, c.calculation.branchLengthsMm, c.calculation.bom.map(r => [r.role, r.componentId, r.quantity])], c?.status]; }), (entities["station-spec"] as SpecEntity)?.items.map(i => [i.equipmentId, i.option, i.quantity, i.name, i.position, i.assemblyRole, i.details, i.description, i.status, i.hydraulicAssembly?.parts.map(p => [p.assemblyRole, p.equipmentId, p.quantity])])]);
+  return JSON.stringify([FASTENER_REVISION, "collector-assembly-v12-flange-seating-5mm-insert-sgon60-v4", "pump-spatial-onis-v3-mbl2026-workbook", VALVE_CONTROL_REVISION, COLLECTOR_INSTRUMENT_RULES_REVISION, "check-valve-flow-v1", "discharge-butterfly-roll90-v1", PUMP_LINE_RULES_REVISION, VIBRATION_DIMENSIONS_REVISION, FRAME_RULE_REVISION, project.station, entities["system-input"], entities["system-input-2"], entities["station-dn"], entities["station-settings"], ...["suction", "discharge"].map(side => { const c = (entities["station-collectors"] as CollectorsEntity)?.[side as "suction" | "discharge"]; return [c?.configuration, c?.calculation && [c.calculation.fingerprint, c.calculation.lengthMm, c.calculation.branchLengthsMm, c.calculation.bom.map(r => [r.role, r.componentId, r.quantity])], c?.status]; }), (entities["station-spec"] as SpecEntity)?.items.map(i => [i.equipmentId, i.option, i.quantity, i.name, i.position, i.assemblyRole, i.details, i.description, i.status, i.hydraulicAssembly?.parts.map(p => [p.assemblyRole, p.equipmentId, p.quantity])])]);
 }
 export function buildAssembly(project: ProjectConfig, pumps: Pump[], profiles: ProfileCatalog, lines?: LineCatalog): Assembly {
   const settings = project.entities["station-settings"] as SettingsEntity, dn = project.entities["station-dn"] as DnEntity, collectors = project.entities["station-collectors"] as CollectorsEntity;
@@ -318,24 +341,23 @@ export function buildAssembly(project: ProjectConfig, pumps: Pump[], profiles: P
     if (!pump) continue;
     const count = Math.min(12, Math.max(1, Math.floor((input.workingPumpCount ?? 1) + (input.reservePumpCount ?? 0))));
     const profile = profiles.profiles[pump.id], p = pump.dimensions;
-    const length = positive(p?.overall_length, positive(p?.flange_face_to_face, 400)), width = positive(p?.overall_width, positive(p?.base_width, 300)), height = positive(p?.overall_height, 700);
-    const inletHeight = positive(p?.flange_center_height, 100);
-    const bounds: Bounds = profile?.bounds ?? [0, -width / 2, -inletHeight, length, width / 2, height - inletHeight];
+    const spatial = resolvePumpLayout(pump, profile), bounds = spatial.bounds;
     const pitch = lines ? positive(collectors.suction.configuration?.[circuit === 1 ? "primary" : "secondary"]?.spacing, 500) : Math.max(positive(collectors.suction.configuration?.[circuit === 1 ? "primary" : "secondary"]?.spacing, 500), bounds[4] - bounds[1] + 150);
     for (let index = 0; index < count; index++) {
       const c = base(`pump-${circuit}-${pump.id}-${index}`, `${pump.manufacturer} ${pump.model} · ${circuit}.${index + 1}`, "pump");
-      c.equipmentId = pump.id; c.sourceKey = pump.id; c.bounds = bounds; c.meshUrl = profile?.meshUrl;
-      if (profile) c.cadSource = { path: profile.source, hash: profile.sourceHash };
+      c.equipmentId = pump.id; c.sourceKey = pump.id; c.bounds = bounds; c.meshUrl = spatial.info.envelope === "cad" ? profile?.meshUrl : undefined;
+      if (profile && spatial.info.envelope === "cad") c.cadSource = { path: profile.source, hash: profile.sourceHash };
       c.position = [0, y, frameHeight - bounds[2]];
       c.autoPose = { position: [...c.position], rotation: [...c.rotation] };
       c.parameters = { ...c.parameters, length: bounds[3] - bounds[0], width: bounds[4] - bounds[1], height: bounds[5] - bounds[2] };
-      c.ports = profile?.ports.length ? profile.ports.map(port => ({ ...port, point: [...port.point] })) : [{ id: "inlet", point: [0, 0, 0], axis: [-1, 0, 0], provisional: true }, { id: "outlet", point: [length, 0, 0], axis: [1, 0, 0], provisional: true }];
+      c.pumpGeometry = structuredClone(spatial.info);
+      c.ports = structuredClone(spatial.ports);
       if (lines) c.ports = c.ports.map(port => {
         if (port.id !== "inlet" && port.id !== "outlet") return port;
         const metadata = resolvePumpPortData(dn, { ...input, selectedPumpId: pump.id }, circuit === 2, port.id);
-        return metadata ? { ...port, dn: metadata.dn ?? undefined, connection: metadata.connection ?? undefined, source: metadata.source } : port;
+        return metadata ? { ...port, dn: metadata.dn ?? undefined, connection: metadata.connection ?? undefined, source: [metadata.source, port.source].filter(Boolean).join("; ") } : port;
       });
-      c.sourceNote = profile ? `${profile.meshUrl ? "Геометрия STEP" : "Габариты STEP; браузерная копия не подготовлена"}. ${profile.warnings.join(". ")}` : `Габаритное представление. ${p?.overall_length && p?.overall_width && p?.overall_height ? "Размеры из каталога" : "Часть размеров оценочная; уточните паспорт"}. Положения патрубков предварительные`;
+      c.sourceNote = spatial.note;
       if (profile) {
         const mismatches = (["length", "width", "height"] as const).flatMap((key, index) => {
           const catalogSize = p?.[`overall_${key}`], actualSize = c.parameters[key];
@@ -359,6 +381,10 @@ export function buildAssembly(project: ProjectConfig, pumps: Pump[], profiles: P
   components.unshift(frame);
   for (const type of ["suction", "discharge"] as const) {
     const discharge = type === "discharge", state = collectors[type];
+    const bottomBranches = discharge && pumpComponents.every(p => {
+      const axis = p.ports.find(port => port.id === "outlet")?.axis;
+      return axis && distance(rotate(axis, p.rotation), [0, 0, 1]) < 1e-6;
+    });
     const nominal = state.configuration?.dn ?? (discharge ? dn.dischargeCollectorDn : dn.suctionCollectorDn) ?? 65;
     const collector = base(`collector-${type}`, `${discharge ? "Напорный" : "Всасывающий"} коллектор DN${nominal}`, "collector");
     collector.parameters = { ...collector.parameters, length: state.status === "complete" ? positive(state.calculation?.lengthMm, spanY + 50) : spanY + 50, diameter: outsideDiameter(nominal) };
@@ -375,7 +401,7 @@ export function buildAssembly(project: ProjectConfig, pumps: Pump[], profiles: P
     collector.autoPose = { position: [...collector.position], rotation: [...collector.rotation], parametersKey: JSON.stringify(collector.parameters) };
     collector.ports = pumpComponents.map(c => ({ id: c.id, point: [c.position[1] - midY, (discharge ? 1 : -1) * collector.parameters.diameter / 2, 0], axis: [0, discharge ? 1 : -1, 0], provisional: true }));
     const savedMount = (project.entities["station-model"] as ModelEntity)?.editor?.assembly?.components.find(c => c.id === collector.id)?.collector?.template.mount;
-    const resolvedCollector = lines ? applyCollectorTemplate(collector, buildCollectorTemplate(state, lines, pumpComponents.map(p => ({ id: p.id, circuit: p.id.startsWith("pump-2-") ? 2 : 1, x: p.position[1] - midY })), type, savedMount)) : collector;
+    const resolvedCollector = lines ? applyCollectorTemplate(collector, buildCollectorTemplate(state, lines, pumpComponents.map(p => ({ id: p.id, circuit: p.id.startsWith("pump-2-") ? 2 : 1, x: p.position[1] - midY })), type, savedMount, bottomBranches ? "bottom" : "side")) : collector;
     components.push(resolvedCollector);
     for (const c of pumpComponents) {
       const portId = discharge ? "outlet" : "inlet";
@@ -394,7 +420,7 @@ export function buildAssembly(project: ProjectConfig, pumps: Pump[], profiles: P
   const assembly: Assembly = { version: 1, sourceFingerprint: sourceFingerprint(project), components };
   for (const c of components) if (c.routing) c.routing.points = pipePoints(assembly, c);
   const complete = withSpecificationModels(assembly, project, profiles, lines);
-  return addValveControls(lines ? addLineAssemblies(complete, project, profiles, lines) : complete, project);
+  return rebuildFasteners({ ...addValveControls(lines ? addLineAssemblies(complete, project, profiles, lines) : complete, project), fastenerCatalog: lines?.fasteners });
 }
 
 /** Additional purchased equipment waits beside the installation for manual placement.
@@ -456,7 +482,7 @@ export function refreshModelAssets(current: Assembly, project: ProjectConfig, pu
     const fresh = supported.find(candidate => candidate.id === c.id);
     if (!fresh || c.line?.manualGeometry) return c;
     if (fresh.valveControl) return { ...fresh, hidden: c.hidden, locked: c.locked, opacity: c.opacity, valveControl: c.valveControl?.manual && c.valveControl.revision === fresh.valveControl.revision ? c.valveControl : fresh.valveControl };
-    return { ...c, bounds: fresh.bounds, meshUrl: fresh.meshUrl, ports: fresh.ports, cadSource: fresh.cadSource,
+    return { ...c, bounds: fresh.bounds, meshUrl: fresh.meshUrl, ports: fresh.ports, cadSource: fresh.cadSource, pumpGeometry: fresh.pumpGeometry,
       parameters: fresh.parameters, ...(c.line ? { shape: fresh.shape, line: { ...fresh.line!, baseline: c.line.baseline } } : {}),
       sourceNote: fresh.sourceNote + (/Расхождение габаритов/.test(c.sourceNote) && !/Расхождение габаритов/.test(fresh.sourceNote) ? `. ${c.sourceNote}` : "") };
   });
@@ -465,7 +491,7 @@ export function refreshModelAssets(current: Assembly, project: ProjectConfig, pu
   const replaced = (c: Component) => !c.valveControl && next.some(n => n.valveControl && n.line &&
     (/limit-switches-(bracket|switch)$/.test(c.line?.role ?? "") && n.line.pumpId === c.line?.pumpId && n.line.side === c.line?.side && n.line.role === c.line?.role
       || c.id.startsWith(`spec-${n.line.specPosition}-equipment:${n.equipmentId}-`)));
-  return followValveControls({ ...current, components: next.filter(c => !replaced(c)) });
+  return rebuildFasteners(followValveControls({ ...current, fastenerCatalog: lines?.fasteners ?? current.fastenerCatalog, components: next.filter(c => !replaced(c)) }));
 }
 
 /** Synchronization retains manual geometry, removed components, and unsupported connections for review. */
@@ -475,9 +501,10 @@ export function mergeAssembly(current: Assembly, generated: Assembly): Assembly 
   // moved or locked in a saved scene. Unrelated manual equipment stays intact.
   const supersededPumpPart = (c: Component) => c.line && generated.components.some(p => p.id === c.line!.pumpId) &&
     /^(primary|secondary)-(insertion|pump-insertion|pump-flange|valve-flange|check-flange|pump-gasket|pump-fasteners|reducer|after-vibration-insertion|insertion-reducer|vibration)(-|$)/.test(c.line.role);
-  return followValveControls({ ...generated, components: [...generated.components.map(c => {
+  const merged = followValveControls({ ...generated, components: [...generated.components.map(c => {
     const previous = current.components.find(old => old.id === c.id);
     if (!previous) return c;
+    if (c.fastener) return { ...c, hidden: previous.hidden, opacity: previous.opacity };
     if (c.valveControl) return { ...c, hidden: previous.hidden, locked: previous.locked, opacity: previous.opacity, valveControl: previous.valveControl?.manual && previous.valveControl.revision === c.valveControl.revision ? previous.valveControl : c.valveControl };
     if (c.kind === "frame" || c.kind === "pump") {
       const automatic = previous.autoPose && !previous.locked &&
@@ -503,11 +530,12 @@ export function mergeAssembly(current: Assembly, generated: Assembly): Assembly 
       return { ...c, hidden: previous.hidden, locked: previous.locked, opacity: previous.opacity };
     }
     const addedPorts = c.kind === "collector" ? c.ports.filter(port => !previous.ports.some(old => old.id === port.id)).map(port => ({ ...port, point: [port.point[0], Math.sign(port.point[1]) * previous.parameters.diameter / 2, port.point[2]] as Vec3 })) : [];
-    return { ...previous, orphaned: false, name: c.name, ...(c.kind === "collector" ? { ports: [...previous.ports, ...addedPorts] } : {}), ...(c.kind === "pump" || c.kind === "equipment" ? { bounds: c.bounds, meshUrl: c.meshUrl, ports: c.ports, sourceNote: c.sourceNote, cadSource: c.cadSource } : {}) };
-  }), ...current.components.filter(c => !ids.has(c.id) && !c.valveControl && !supersededPumpPart(c)
+    return { ...previous, orphaned: false, name: c.name, ...(c.kind === "collector" ? { ports: [...previous.ports, ...addedPorts] } : {}), ...(c.kind === "pump" || c.kind === "equipment" ? { bounds: c.bounds, meshUrl: c.meshUrl, ports: c.ports, sourceNote: c.sourceNote, cadSource: c.cadSource, pumpGeometry: c.pumpGeometry } : {}) };
+  }), ...current.components.filter(c => !ids.has(c.id) && !c.fastener && !c.valveControl && !supersededPumpPart(c)
     && !(/limit-switches-(bracket|switch)$/.test(c.line?.role ?? "") && generated.components.some(n => n.valveControl && n.line?.pumpId === c.line?.pumpId && n.line?.side === c.line?.side && n.line?.role === c.line?.role))
-    && !generated.components.some(n => n.valveControl && n.line && c.id.startsWith(`spec-${n.line.specPosition}-equipment:${n.equipmentId}-`))
+    && !generated.components.some(n => n.line && n.equipmentId === c.equipmentId && c.id.startsWith(`spec-${n.line.specPosition}-equipment:${n.equipmentId}-`))
     && !(generated.lineJoints && c.routing?.automatic && !c.locked) && !(c.line && !c.line.manualGeometry && !c.locked && JSON.stringify([c.position, c.rotation]) === JSON.stringify([c.line.baseline.position, c.line.baseline.rotation]))).map(c => c.sourceKey === "manual" ? c : { ...c, orphaned: true })] });
+  return rebuildFasteners(merged);
 }
 export function addManualPipe(assembly: Assembly, id: string): Assembly {
   const c = base(id, "Труба (ручная)", "pipe"); c.sourceKey = "manual"; c.position = [0, 0, 500];
@@ -517,6 +545,7 @@ export function addManualPipe(assembly: Assembly, id: string): Assembly {
 export type AssemblyHistory = { past: Assembly[]; present: Assembly; future: Assembly[] };
 export const createHistory = (present: Assembly): AssemblyHistory => ({ past: [], present, future: [] });
 export function execute(history: AssemblyHistory, next: Assembly): AssemblyHistory {
+  next = rebuildFasteners(next);
   return JSON.stringify(history.present) === JSON.stringify(next) ? history : { past: [...history.past.slice(-29), history.present], present: next, future: [] };
 }
 export function undo(history: AssemblyHistory): AssemblyHistory {

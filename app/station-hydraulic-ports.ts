@@ -2,6 +2,9 @@ import type { ProjectConfig, SettingsEntity } from "./project-config";
 import type { CollectorsEntity } from "./collector-project";
 import { hydraulicPortLedger, type HydraulicPort, type HydraulicPortUse, type CollectorInstrumentPort } from "./hydraulic-port-ledger";
 import { instrumentCount } from "./hydraulic-option-config";
+import { collectorNippleRules } from "./base-values";
+import { resolveNippleRule } from "./collector-nipple-rules";
+import type { CollectorConfiguration } from "./collector-calculations";
 
 export function hydraulicPortLabel(id: string): string {
   const [side, position] = id.split(":");
@@ -15,11 +18,18 @@ export function hydraulicPortLabel(id: string): string {
   return id;
 }
 
-export function stationCollectorInstrumentPorts(settings: SettingsEntity, side: "suction" | "discharge"): CollectorInstrumentPort[] {
-  const ports: CollectorInstrumentPort[] = Array.from({ length: instrumentCount(settings) }, (_, i) => ({ id: `kip-${i + 1}`, dn: 15, state: "occupied" }));
-  if (side === "discharge" && settings.membraneTank) ports.push({ id: "tank", dn: settings.membraneTankVolume === 8 ? 20 : 25, state: "occupied" });
-  return ports;
+export function resolveStationCollectorInstrumentPorts(settings: SettingsEntity, side: "suction" | "discharge", collector?: Pick<CollectorConfiguration, "material" | "secondary" | "stationType" | "jockey" | "dn" | "pn">) {
+  const twoCircuits = collector ? Boolean(collector.secondary && (collector.stationType === "combined" || collector.stationType === "fire" && collector.jockey)) : settings.stationType === "combined" || settings.stationType === "fire" && settings.jockeyPump;
+  const value=collectorNippleRules(settings.baseValues?.values),resolution=resolveNippleRule(value,{side,material:collector?.material??"aisi304",circuits:twoCircuits?2:1,stationType:settings.stationType,pn:collector?.pn??16,dn:collector?.dn??null,tank:settings.membraneTank});
+  const ports:CollectorInstrumentPort[]=[],sequence={instrument:0,tank:0,reserve:0},parameterized="version" in value;
+  for(const output of resolution.outputs)for(let i=0;i<output.quantity;i++){
+    const n=++sequence[output.purpose],id=output.purpose==="instrument"?`kip-${n}`:output.purpose==="tank"?n===1?"tank":`tank-${n}`:`reserve-${n}`;
+    const occupied=output.purpose==="instrument"?n<=instrumentCount(settings):output.purpose==="tank"&&side==="discharge"&&settings.membraneTank&&n===1;
+    ports.push({id,dn:output.dn,state:output.state==="auto"?occupied?"occupied":"capped":output.state,...(parameterized?{lengthMm:output.lengthMm,threaded:output.threaded,...(output.threadPitchMm?{threadPitchMm:output.threadPitchMm}:{}),...(output.threadLengthMm?{threadLengthMm:output.threadLengthMm}:{})}:{})});
+  }
+  return {ports,error:resolution.error};
 }
+export const stationCollectorInstrumentPorts=(settings:SettingsEntity,side:"suction"|"discharge",collector?:Parameters<typeof resolveStationCollectorInstrumentPorts>[2])=>resolveStationCollectorInstrumentPorts(settings,side,collector).ports;
 /** One collector outlet feeds a shared LD valve. Instruments own distinct
  * outlets of that valve, not the same welded sgon. Factory drain caps remain
  * part of the valve; no purchased cap is added to an occupied collector port. */
@@ -32,10 +42,14 @@ export function stationHydraulicPortLedger(project: ProjectConfig) {
   for (const side of ["suction", "discharge"] as const) {
     const c = collectors[side].configuration;
     if (!c) continue;
-    for (const required of stationCollectorInstrumentPorts(settings, side)) {
+    const requiredPorts = stationCollectorInstrumentPorts(settings, side, c);
+    for (const required of requiredPorts) {
       const actual = c.instrumentPorts?.find(port => port.id === required.id);
-      if (!actual || actual.state !== "occupied" || actual.dn !== required.dn) requiredFindings.push(`${side === "suction" ? "Всас" : "Напор"}: подключению ${required.id === "tank" ? "бака" : `КИП №${required.id.slice(4)}`} нужен занятый отвод DN${required.dn}; согласуйте отвод коллектора и присоединение узла.`);
+      if (!actual || actual.state !== required.state || actual.dn !== required.dn) requiredFindings.push(`${side === "suction" ? "Всас" : "Напор"}: отвод ${required.id === "tank" ? "бака" : `КИП №${required.id.slice(4)}`} должен иметь DN${required.dn} и состояние ${required.state === "occupied" ? "занят оборудованием" : "закрыт заглушкой"}; согласуйте отвод коллектора и присоединение узла.`);
+      if(required.state==="occupied"&&required.threaded===false&&/^(kip-\d+|tank)$/.test(required.id))requiredFindings.push(`${side === "suction" ? "Всас" : "Напор"}: отвод ${required.id} задан без резьбы, а выбранное оборудование имеет резьбовое подключение. Подтвердите переходный узел.`);
     }
+    for(let i=0;i<instrumentCount(settings);i++){const port=requiredPorts.find(p=>p.id===`kip-${i+1}`);if(!port||port.dn!==15||port.state!=="occupied")requiredFindings.push(`${side === "suction" ? "Всас" : "Напор"}: для комплекта КИП №${i+1} нужен занятый отвод DN15 или отдельно рассчитанный распределительный/переходный узел; параметры сгонов автоматически не меняются.`);}
+    if(side==="discharge"&&settings.membraneTank){const tank=requiredPorts.find(p=>p.id==="tank"),dn=settings.membraneTankVolume===8?20:25;if(!tank||tank.dn!==dn||tank.state!=="occupied")requiredFindings.push(`Напор: баку требуется занятое подключение DN${dn}; ${tank?`задан сгон DN${tank.dn}`:"отвод отсутствует"}. Требуется согласованное подключение или переход.`);}
     const base = { side, section: "collector", pn: c.pn };
     for (const i of [1, 2]) add({ ...base, id: `${side}:end-${i}`, dn: c.dn ?? 0, connection: c.connection }, i === 2 && settings.collectorPlugs ? `${side}:plug` : `${side}:network-${i}`, i === 2 && settings.collectorPlugs ? "closure" : "network");
     for (const port of c.instrumentPorts ?? []) {

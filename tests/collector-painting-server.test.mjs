@@ -18,7 +18,7 @@ test("collector catalogue shares painting tariffs with inserts, including the si
   const result = calculateCollector(configuration, catalog);
   assert.equal(result.complete, true, result.warnings.join("; "));
   near(result.bom.find(item => item.role === "painting-collector").cost, 1200);
-  near(result.bom.find(item => item.role === "painting-branch1").cost, 3 * 0.1057 * 650);
+  near(result.bom.find(item => item.role === "painting-branch1").cost, 3 * 0.186 * 650);
   const large = calculateCollector({ ...configuration, dn: 400 }, catalog);
   const painting = large.bom.find(item => item.role === "painting-collector");
   assert.equal(painting.unitPrice, 7960); near(painting.cost, 1.5 * 7960);
@@ -35,7 +35,7 @@ test("server persists painting, refreshes from D1 prices, rejects missing tariff
   sqlite.prepare("INSERT INTO catalog_imports(id,source_file,source_sha256,source_size_bytes,source_modified_at) VALUES(1,'fixture',?,1,'fixture')").run(binding.source.sha256);
   // Real source rows for the required DN; supplied bolt/sgon references retain their workbook SHA.
   for (const row of binding.items.filter(item => ["трубы", "фланцы", "сгоны-резьба", "заглушки", "работы"].includes(item.catalogId)
-    && [15, 20, 80, 100].includes(Number(String(item.fields.find(field => field.headerPath.at(-1) === "DN")?.value).replace(/^DN/, ""))))) {
+    && [15, 20, 80, 100].includes(Number(String(item.fields.find(field => field.headerPath.at(-1) === "DN")?.value).replace(/^DN/, ""))) || item.catalogId === "метизы")) {
     sqlite.prepare("INSERT OR IGNORE INTO component_catalogs(import_id,source_id,name,source_sheet) VALUES(1,?,?,?)").run(row.catalogId, row.catalogId, row.sourceSheet);
     const catalogId = sqlite.prepare("SELECT id FROM component_catalogs WHERE source_id=?").get(row.catalogId).id;
     sqlite.prepare("INSERT OR IGNORE INTO component_families(catalog_id,source_id,title,source_range) VALUES(?,?,?,'fixture')").run(catalogId, row.tableId, row.family);
@@ -73,21 +73,34 @@ test("server persists painting, refreshes from D1 prices, rejects missing tariff
   const created = await send("create", { price: 1, bom: [], paintingRates: [] });
   assert.equal(created.status, 201, JSON.stringify(await created.clone().json()));
   const saved = (await created.json()).collector;
+  assert.equal(saved.calculation.branchLengthsMm[0], 186);
+  assert.equal(saved.calculation.branchBoltReferences[0].length, 120);
+  assert.equal(saved.calculation.branchBoltReferences[0].model, "017W");
   const painted = () => sqlite.prepare("SELECT * FROM collector_items WHERE collector_id=? AND kind='painting' ORDER BY role").all(saved.id);
   assert.equal(painted().length, 2);
-  near(painted().reduce((sum, row) => sum + row.cost_microunits / 1e6, 0), 1406.115);
+  near(painted().reduce((sum, row) => sum + row.cost_microunits / 1e6, 0), 1562.7);
   const paintId = sqlite.prepare("SELECT id FROM components WHERE source_id='pipe-painting-st20-v1:dn80'").get().id;
   sqlite.prepare("UPDATE component_prices SET amount_microunits=900000000 WHERE component_id=?").run(paintId);
   const changed = await live(); assert.notEqual(changed.version, initial.version);
   assert.equal(changed.paintingRates.find(rate => rate.dn === 80).pricePerMeter, 900);
   const refresh = await send("refresh"); assert.equal(refresh.status, 200);
   const updated = (await refresh.json()).collector;
-  assert.equal(updated.id, saved.id); near(updated.price - saved.price, 0.3171 * (900 - 650));
+  assert.equal(updated.id, saved.id); near(updated.price - saved.price, 0.558 * (900 - 650));
   assert.equal(painted().length, 2); assert.equal(painted().find(row => row.role === "painting-branch1").unit_price_microunits, 900e6);
   const reloaded = (await (await api.GET(new Request(`http://local/api/collectors?code=${encodeURIComponent(code)}`))).json()).collector;
   assert.deepEqual(reloaded.calculation.bom, updated.calculation.bom);
   assert.equal((await send("refresh")).status, 200);
   assert.equal(sqlite.prepare("SELECT count(*) n FROM collectors").get().n, 1); assert.equal(painted().length, 2);
+  // Changing live hardware must change length, pipe and painting on the same saved collector.
+  const shortBolts = binding.items.filter(item => item.catalogId === "метизы" && item.fields.some(field => field.headerPath.at(-1) === "Наименование" && /^Болт М16х/.test(String(field.value))) && item.fields.some(field => field.headerPath.at(-1) === "Длина болта, мм" && Number(field.value) < 130));
+  for (const bolt of shortBolts) sqlite.prepare("UPDATE components SET is_active=0 WHERE source_id=?").run(bolt.id);
+  assert.notEqual((await live()).version, changed.version);
+  const lengthRefresh = await send("refresh"); assert.equal(lengthRefresh.status, 200);
+  const longer = (await lengthRefresh.json()).collector;
+  assert.equal(longer.id, saved.id); assert.equal(longer.calculation.branchLengthsMm[0], 197);
+  assert.equal(longer.calculation.branchBoltReferences[0].length, 130);
+  near(longer.calculation.bom.find(row => row.role === "painting-branch1").quantity, .591);
+  assert.ok(longer.price > updated.price);
   const before = sqlite.prepare("SELECT * FROM collectors").all(), beforeItems = sqlite.prepare("SELECT * FROM collector_items").all();
   sqlite.prepare("UPDATE component_prices SET amount_microunits=1000000000 WHERE component_id=?").run(paintId);
   sqlite.exec("CREATE TRIGGER fail_paint BEFORE INSERT ON collector_items WHEN NEW.kind='painting' BEGIN SELECT RAISE(ABORT,'fixture failure'); END");

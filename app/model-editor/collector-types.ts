@@ -8,6 +8,7 @@ export type CollectorMount = {
   branchLengthReference: "axis-to-pipe-end" | "surface-to-pipe-end";
   confirmed: false; eccentricOffsetMm: number | null;
   flangeFaceToPipeEndMm: number | null;
+  flangeSeatingRevision?: 1;
   instrumentLengthsMm: Record<string, number>;
   instrumentDefaultLengthMm?: number;
   instrumentLengthReference?: "blank-length" | "surface-to-pipe-end";
@@ -22,7 +23,8 @@ export type CollectorBranch = {
   source: string; joint: "saddle-on-surface";
 };
 export type CollectorTemplate = {
-  version: 1; ruleVersion: 1; side: "suction" | "discharge";
+  version: 1; ruleVersion: 1 | 2 | 3; side: "suction" | "discharge";
+  pumpBranchOrientation?: "side" | "bottom";
   mount: CollectorMount; main: { componentId: string; lengthMm: number; outerMm: number; innerMm: number; source: string } | null;
   branches: CollectorBranch[]; pieces: InsertionPiece[]; ports: Port[];
   issues: string[]; assumptions: string[]; geometryKey: string; bounds: Bounds;
@@ -32,10 +34,13 @@ export type CollectorBinding = {
 };
 export const COLLECTOR_INSTRUMENT_RULES_REVISION = "collector-sgons-60-thread-v2";
 export const DEFAULT_INSTRUMENT_LENGTH_MM = 60;
-export const defaultCollectorMount = (): CollectorMount => ({ version: 1, joint: "saddle-on-surface", branchLengthReference: "axis-to-pipe-end", confirmed: false, eccentricOffsetMm: null, flangeFaceToPipeEndMm: null, instrumentLengthsMm: {}, instrumentDefaultLengthMm: DEFAULT_INSTRUMENT_LENGTH_MM, instrumentLengthReference: "blank-length", instrumentRulesRevision: 2 });
+export const DEFAULT_FLANGE_FACE_TO_PIPE_END_MM = 5;
+export const defaultCollectorMount = (): CollectorMount => ({ version: 1, joint: "saddle-on-surface", branchLengthReference: "axis-to-pipe-end", confirmed: false, eccentricOffsetMm: null, flangeFaceToPipeEndMm: DEFAULT_FLANGE_FACE_TO_PIPE_END_MM, flangeSeatingRevision: 1, instrumentLengthsMm: {}, instrumentDefaultLengthMm: DEFAULT_INSTRUMENT_LENGTH_MM, instrumentLengthReference: "blank-length", instrumentRulesRevision: 2 });
 export function resolveCollectorMount(mount: CollectorMount): CollectorMount {
   const legacyDefault = mount.instrumentRulesRevision === undefined && mount.instrumentDefaultLengthMm === 115;
-  return { ...defaultCollectorMount(), ...mount, instrumentRulesRevision: 2, instrumentDefaultLengthMm: legacyDefault ? DEFAULT_INSTRUMENT_LENGTH_MM : mount.instrumentDefaultLengthMm ?? DEFAULT_INSTRUMENT_LENGTH_MM,
+  return { ...defaultCollectorMount(), ...mount, flangeSeatingRevision: 1,
+    flangeFaceToPipeEndMm: mount.flangeSeatingRevision === undefined && mount.flangeFaceToPipeEndMm === null ? DEFAULT_FLANGE_FACE_TO_PIPE_END_MM : mount.flangeFaceToPipeEndMm,
+    instrumentRulesRevision: 2, instrumentDefaultLengthMm: legacyDefault ? DEFAULT_INSTRUMENT_LENGTH_MM : mount.instrumentDefaultLengthMm ?? DEFAULT_INSTRUMENT_LENGTH_MM,
     instrumentLengthReference: mount.instrumentLengthReference ?? (Object.keys(mount.instrumentLengthsMm).length ? "surface-to-pipe-end" : "blank-length") };
 }
 const finite = (v: unknown): v is number => typeof v === "number" && Number.isFinite(v) && Math.abs(v) <= 1e6;
@@ -44,15 +49,17 @@ const text = (v: unknown): v is string => typeof v === "string" && v.length < 20
 const obj = (v: unknown): Record<string, unknown> => v && typeof v === "object" && !Array.isArray(v) ? v as Record<string, unknown> : {};
 export function parseCollectorBinding(raw: unknown): CollectorBinding | undefined {
   const b = obj(raw), t = obj(b.template), m = obj(t.mount), main = obj(t.main);
-  if (t.version !== 1 || t.ruleVersion !== 1 || !["suction", "discharge"].includes(String(t.side)) || m.version !== 1 || m.joint !== "saddle-on-surface" || m.confirmed !== false
+  if (t.version !== 1 || (t.ruleVersion !== 1 && t.ruleVersion !== 2 && t.ruleVersion !== 3) || !["suction", "discharge"].includes(String(t.side)) || m.version !== 1 || m.joint !== "saddle-on-surface" || m.confirmed !== false
+    || t.pumpBranchOrientation !== undefined && t.pumpBranchOrientation !== "side" && !(t.pumpBranchOrientation === "bottom" && t.side === "discharge")
     || m.instrumentRulesRevision !== undefined && m.instrumentRulesRevision !== 2
+    || m.flangeSeatingRevision !== undefined && m.flangeSeatingRevision !== 1
     || m.instrumentDefaultLengthMm !== undefined && (!finite(m.instrumentDefaultLengthMm) || m.instrumentDefaultLengthMm <= 0)
     || m.instrumentLengthReference !== undefined && !["blank-length", "surface-to-pipe-end"].includes(String(m.instrumentLengthReference))
     || !["axis-to-pipe-end", "surface-to-pipe-end"].includes(String(m.branchLengthReference)) || ![m.eccentricOffsetMm, m.flangeFaceToPipeEndMm].every(v => v === null || finite(v))
     || !m.instrumentLengthsMm || typeof m.instrumentLengthsMm !== "object" || Array.isArray(m.instrumentLengthsMm) || Object.keys(m.instrumentLengthsMm).length > 100 || !Object.values(obj(m.instrumentLengthsMm)).every(v => finite(v) && v > 0)
     || ![t.issues, t.assumptions].every(v => Array.isArray(v) && v.length <= 500 && v.every(text)) || typeof t.geometryKey !== "string" || t.geometryKey.length > 150000
     || !Array.isArray(t.bounds) || t.bounds.length !== 6 || !t.bounds.every(finite) || ![0, 1, 2].every(i => (t.bounds as number[])[i + 3] > (t.bounds as number[])[i])
-    || !Array.isArray(t.branches) || t.branches.length > 100 || !Array.isArray(t.pieces) || t.pieces.length > 300 || !Array.isArray(t.ports) || t.ports.length > 100) return;
+    || !Array.isArray(t.branches) || t.branches.length > 150 || !Array.isArray(t.pieces) || t.pieces.length > 300 || !Array.isArray(t.ports) || t.ports.length > 100) return;
   if (t.main !== null && (!text(main.componentId) || !text(main.source) || ![main.outerMm, main.innerMm, main.lengthMm].every(v => finite(v) && v > 0) || Number(main.innerMm) >= Number(main.outerMm))) return;
   const ids = new Set<string>();
   for (const rawBranch of t.branches) {

@@ -8,6 +8,7 @@ import { lineGeometry } from "../../line-geometry-catalog";
 import binding from "../../../public/binding-components.json";
 import type { LineCatalog } from "../../model-editor/line-types";
 import type { InsertCalculation } from "../../component-insert-calculations";
+import { fastenerCatalog } from "../../fastener-catalog";
 
 /** Read-only selected geometry. No calculation/export or client-supplied geometry is trusted. */
 export async function POST(request: Request) {
@@ -21,7 +22,7 @@ export async function POST(request: Request) {
     const source = await currentInsertSource(), catalog = await currentInsertCatalog(source), context = insertionGeometryContext(source, catalog);
     const saved = await readSavedInsertions();
     const items = new Map([...binding.items, ...source.items, ...suctionCatalogItems, ...saved.map(savedInsertionComponent)].map(item => [item.id, item]));
-    const result: LineCatalog = { version: 1, revision: catalog.version, items: {}, issues: [] };
+    const result: LineCatalog = { version: 1, revision: catalog.version, items: {}, issues: [], fasteners: fastenerCatalog([...items.values()]) };
     for (const id of new Set<string>(body.ids)) {
       const item = items.get(id); if (!item) { result.issues.push(`Нет записи каталога: ${id}`); continue; }
       try {
@@ -36,7 +37,7 @@ export async function POST(request: Request) {
       result.items[id] = geometry;
       } catch (error) { result.issues.push(`${id}: ${error instanceof Error ? error.message : "Не удалось прочитать размеры"}`); }
     }
-    result.revision = await sha256(JSON.stringify([catalog.version, result.items, result.issues]));
+    result.revision = await sha256(JSON.stringify([catalog.version, result.items, result.issues, result.fasteners]));
     return json(result, 200, { "Cache-Control": "no-store" });
   } catch (error) { return json({ error: error instanceof Error ? error.message : "Не удалось загрузить геометрию обвязки." }, 503, { "Cache-Control": "no-store" }); }
 }

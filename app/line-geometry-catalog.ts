@@ -11,6 +11,7 @@ import gasketModels from "../data/line-gasket-models.json";
 import valveModels from "../data/line-valve-models.json";
 import type { Bounds, Vec3 } from "./model-editor/model";
 import { vibrationExecutions } from "./vibration-dimensions";
+import { eccentricOffset } from "./model-editor/eccentric-offset";
 
 const positive = (v: number | null | undefined): v is number => typeof v === "number" && Number.isFinite(v) && v > 0;
 
@@ -78,14 +79,15 @@ export function lineGeometry(item: AssemblyComponent, catalog: InsertCatalog, co
     if (positive(length) && positive(outer) && positive(part.outerDiameterSmall)) {
       shape = { kind: "reducer-outline", lengthMm: length, outerMm: outer, innerMm: positive(inner) ? inner : undefined, smallOuterMm: part.outerDiameterSmall,
         smallInnerMm: positive(part.wallThicknessSmall) ? part.outerDiameterSmall - 2 * part.wallThicknessSmall : undefined,
-        offset: [0, 0, part.geometry === "eccentric" ? -(outer - part.outerDiameterSmall) / 2 : 0] };
+        offset: part.geometry === "eccentric" ? eccentricOffset(outer, part.outerDiameterSmall) : [0, 0, 0] };
       result.fidelity = "outline"; result.issues.push("Профиль перехода показан компоновочной оболочкой; точная форма не подтверждена");
       if (!positive(wall) || !positive(part.wallThicknessSmall)) result.issues.push("Не задана толщина стенки одного или обоих концов перехода; показан только контур");
     }
   } else if (part?.kind === "weldFlange" || part?.kind === "looseFlange") {
     result.length = flange?.thicknessMm ?? part.thicknessMm;
     if (positive(result.length) && positive(flange?.outerDiameterMm) && positive(flange?.boreDiameterMm) && positive(flange?.holes) && positive(flange?.boltCircleMm) && positive(flange?.boltHoleDiameterMm)) {
-      shape = { kind: "flange", lengthMm: result.length, outerMm: flange.outerDiameterMm, innerMm: flange.boreDiameterMm, boltCircleMm: flange.boltCircleMm, boltHoles: flange.holes, boltHoleMm: flange.boltHoleDiameterMm };
+      shape = { kind: "flange", lengthMm: result.length, outerMm: flange.outerDiameterMm, innerMm: flange.boreDiameterMm, boltCircleMm: flange.boltCircleMm, boltHoles: flange.holes, boltHoleMm: flange.boltHoleDiameterMm,
+        ...(flange.faceHeightMm !== undefined && flange.faceDiameterMm !== undefined ? { faceHeightMm: flange.faceHeightMm, faceDiameterMm: flange.faceDiameterMm } : {}) };
     } else result.issues.push("Не подтверждены полный профиль и сверловка фланца");
   } else if (part?.kind === "collar") {
     result.lipThickness = part.thicknessMm ?? undefined;

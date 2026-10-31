@@ -6,6 +6,12 @@ import { pumpIssues } from "./diagnostics";
 import { AllowedPumpPanel } from "./allowed-pump-tools";
 import { FloatingPanel, GridWorkspace, Icon } from "./workspace-panels";
 import { AppSettings } from "./app-settings";
+import { BaseValuesPanel } from "./base-values-panel";
+import { HelpCenter } from "./help-center";
+import { AIAssistant } from "./ai-assistant";
+import { BaseValuesUpdateNotice, usePublishedBaseValues } from "./base-values-update";
+import { useBetaBaseValues } from "./beta-base-values";
+import { createProject, type SettingsEntity } from "./project-config";
 import { UsersPanel } from "./users-panel";
 import { GridHeightControl } from "./grid-height-control";
 import { useTheme } from "./use-theme";
@@ -17,17 +23,19 @@ import type { AccountUser } from "./user-types";
 import type { Pump } from "./pump-catalog";
 import type { InputEntity, ProjectConfig, PanelKind, PanelState, WorkspaceGrid, WorkspaceMode } from "./project-config";
 const BETA_LOCK = "Недоступно в beta 0.1";
-const settings = defaultProjectSettings();
 const initials=(name:string)=>name.split(/\s+/).filter(Boolean).slice(0,2).map(part=>part[0]?.toLocaleUpperCase("ru-RU")).join("")||"ПС";
 
 export default function BetaWorkspace({ account, onAccountChange }: { account: AccountUser; onAccountChange: (user: AccountUser | null) => void }) {
+  const {latest,error:baseValuesError}=usePublishedBaseValues(true);
   const key = betaStorageKey(account.id);
+  const {applied,error:pinnedError,accept}=useBetaBaseValues(key);
+  const settings=useMemo(()=>defaultProjectSettings(applied??undefined),[applied]);
   const [config,setConfig]=useState<BetaState>(()=>{try{return parseBetaState(JSON.parse(localStorage.getItem(key)??"null"));}catch{return defaultBetaState();}});
   const [sidebar,setSidebar]=useState(false);
-  const [view,setView]=useState<"workspace"|"users">("workspace");
-  const navigateView=(next:"workspace"|"users")=>{
-    if(next==="users"&&account.role!=="admin")return;
-    window.history.pushState({},"",next==="users"?"/?view=users":"/");
+  const [view,setView]=useState<"workspace"|"users"|"base-values"|"help">("workspace");
+  const navigateView=(next:"workspace"|"users"|"base-values"|"help")=>{
+    if((next==="users"||next==="base-values")&&account.role!=="admin")return;
+    window.history.pushState({},"",next!=="workspace"?`/?view=${next}`:"/");
     setView(next);setDetached(null);setSidebar(false);setAccessNotice("");
   };
   const [settingsOpen,setSettingsOpen]=useState(false);
@@ -59,9 +67,9 @@ export default function BetaWorkspace({ account, onAccountChange }: { account: A
   useEffect(()=>{
     const navigate=()=>{
       const params=new URLSearchParams(window.location.search),requested=params.get("panel");
-      if(params.get("view")==="users"&&account.role==="admin"&&!requested){
-        setView("users");setDetached(null);
-        if(window.location.search!=="?view=users")window.history.replaceState({},"","/?view=users");
+      if(params.get("view")==="help"){setView("help");setDetached(null);setSidebar(false);return;}
+      if(["users","base-values"].includes(params.get("view")??"")&&account.role==="admin"&&!requested){
+        setView(params.get("view") as "users"|"base-values");setDetached(null);
         return;
       }
       setView("workspace");
@@ -107,12 +115,15 @@ export default function BetaWorkspace({ account, onAccountChange }: { account: A
   const closePanel = (id:string) => updateConfig(current=>({...current,workspace:{...current.workspace,windows:current.workspace.windows.filter(panel=>panel.id!==id),grid:{...current.workspace.grid,cells:current.workspace.grid.cells.map(cell=>cell===id?null:cell)}}}));
   const updateInput=(patch:Partial<InputEntity>)=>updateConfig(current=>({...current,input:{...current.input,...patch}}));
   const logout=async()=>{try{const response=await fetch("/api/auth",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"logout"})});if(!response.ok)throw new Error("Не удалось выйти. Повторите попытку.");window.location.replace("/");}catch(reason){setAccessNotice(reason instanceof Error?reason.message:"Сервер недоступен");}};
-  const diagnosticProject=useMemo<ProjectConfig>(()=>({schemaVersion:1,project:{id:key,name:RELEASE_LABEL,createdAt:"",updatedAt:""},station:{},workspace:config.workspace,entities:{"system-input":config.input,"station-settings":settings}}),[key,config]);
+  const diagnosticProject=useMemo<ProjectConfig>(()=>{const project=createProject(RELEASE_LABEL,{id:key,baseValues:applied??undefined});return {...project,workspace:config.workspace,entities:{...project.entities,"system-input":config.input,"station-settings":settings}};},[key,config,applied,settings]);
   const derivedIssues=useMemo(()=>pumpIssues(config.input,"input",catalogue),[config.input,catalogue]);
   const diagnostics=useDiagnosticRegistry(diagnosticProject,derivedIssues);
   const diagnosticsValue={...diagnostics,onNavigate:()=>{}};
+  if(view==="help")return <HelpCenter onBack={()=>navigateView("workspace")}/>;
+  if(view==="base-values")return <BaseValuesPanel actor={account} onBack={()=>navigateView("workspace")}/>;
+  if(!applied)return <main className="base-page"><h1>Базовые значения</h1><p role="status">{pinnedError||baseValuesError||"Загрузка версии расчёта…"}</p><button className="button" onClick={()=>window.location.reload()}>Повторить</button></main>;
   if(view==="users"&&account.role==="admin")return <UsersPanel actor={account} onBack={()=>navigateView("workspace")} onAccountChange={onAccountChange}/>;
-  const renderTool=(tool:PanelKind|undefined)=>!tool?<div className="empty-tool"><span>＋</span><b>Пустой инструмент</b><p>Выберите нужный инструмент в списке заголовка.</p></div>:!isBetaTool(tool)?<div className="tool-lock"><b>{BETA_LOCK}</b></div>:tool!=="components"&&!catalogue.length?<p role={catalogueError?"alert":"status"}>{catalogueError||"Загружаем каталог насосов…"}</p>:<AllowedPumpPanel id={tool} input={config.input} settings={settings} catalogue={catalogue} onInputChange={updateInput}/>;
+  const renderTool=(tool:PanelKind|undefined)=>!tool?<div className="empty-tool"><span>＋</span><b>Пустой инструмент</b><p>Выберите нужный инструмент в списке заголовка.</p></div>:tool==="assistant"?<AIAssistant userId={account.id} context={{beta:{input:config.input,versions:applied.versions}}}/>:!isBetaTool(tool)?<div className="tool-lock"><b>{BETA_LOCK}</b></div>:tool!=="components"&&!catalogue.length?<p role={catalogueError?"alert":"status"}>{catalogueError||"Загружаем каталог насосов…"}</p>:<AllowedPumpPanel id={tool} input={config.input} settings={settings} catalogue={catalogue} onInputChange={updateInput}/>;
   if(detached){const tool=panels.find(panel=>panel.id===detached)?.activeTool??(isBetaTool(detached)?detached:undefined);return <DiagnosticsProvider value={diagnosticsValue}><main className="detached"><header className="detached__header"><Link className="brand" href="/"><span className="brand__mark">PS</span><span><b>Pump Station</b><small>Calculator</small></span></Link><span>{tool?PANEL_INFO[tool].title:"Пустой инструмент"}</span><span className="beta-release">{RELEASE_LABEL} · Внутреннее тестирование</span></header><section className="detached__content">{renderTool(tool)}</section></main></DiagnosticsProvider>;}
   const minimizedPanels=panels.filter(panel=>panel.minimized);
   const renderWorkspacePanel=(panel:PanelState,mode:WorkspaceMode="free")=><FloatingPanel key={panel.id} panel={panel} zoom={zoom} layoutMode={mode} content={renderTool(panel.activeTool)} isToolEnabled={isBetaTool} secondaryEnabled={false} onFocus={()=>focus(panel.id)} onChange={change} onDetach={()=>openPanel(panel.id)} onMinimize={()=>minimizePanel(panel.id)} onClose={()=>closePanel(panel.id)}/>;
@@ -125,8 +136,9 @@ export default function BetaWorkspace({ account, onAccountChange }: { account: A
       <div className="app-header__actions"><span className="save-state"><i />{saveMessage}</span><button className="avatar" onClick={()=>{setSidebar(true)}} title={account.name}>{initials(account.name)}</button></div>
     </header>
 
+    <BaseValuesUpdateNotice project={diagnosticProject} latest={latest} error={pinnedError||baseValuesError} onApply={next=>accept((next.entities["station-settings"] as SettingsEntity).baseValues!)}/>
     {accessNotice && <p className="access-note" role="status">{accessNotice}<button className="button" onClick={()=>setAccessNotice("")}>Понятно</button></p>}
-    <div className={`sidebar ${sidebar ? "sidebar--open" : ""}`} inert={!sidebar}><button className="sidebar__backdrop" onClick={() => setSidebar(false)} aria-label="Закрыть меню"/><aside className="sidebar__panel"><div className="sidebar__top"><div className="brand"><span className="brand__mark">PS</span><span><b>Pump Station</b><small>Calculator</small></span></div><button className="icon-button" onClick={() => setSidebar(false)}><Icon name="close" /></button></div><div className="user-card"><span className="avatar avatar--large">{initials(account.name)}</span><div><div className="user-card__name"><b>{account.name}</b><span className="user-role">{account.role}</span></div><small>{account.email}</small></div></div><nav className="sidebar__nav"><button className="sidebar__link sidebar__link--active" onClick={()=>setSidebar(false)}>▦ <span>Рабочее пространство</span></button><button className="sidebar__link" disabled title={BETA_LOCK}>▤ <span>Мои проекты</span></button><button className="sidebar__link" disabled title={BETA_LOCK}>⌁ <span>База оборудования</span></button>{account.role==="admin"&&<button className="sidebar__link" disabled title={BETA_LOCK}>⌗ <span>Расчёт комплектующих</span></button>}{account.role==="admin"&&<button className="sidebar__link" onClick={()=>navigateView("users")}>♙ <span>Список пользователей</span></button>}<button className="sidebar__link" onClick={() => { setSidebar(false); setSettingsOpen(true); }}>⚙ <span>Настройки</span></button><Link className="sidebar__link" href="/?auth=forgot">⌘ <span>Сменить пароль</span></Link><button className="sidebar__link" onClick={logout}>↪ <span>Выйти</span></button></nav><div className="sidebar__footer"><button>?</button><span><b>Центр помощи</b><small>Документация и поддержка</small></span></div></aside></div>
+    <div className={`sidebar ${sidebar ? "sidebar--open" : ""}`} inert={!sidebar}><button className="sidebar__backdrop" onClick={() => setSidebar(false)} aria-label="Закрыть меню"/><aside className="sidebar__panel"><div className="sidebar__top"><div className="brand"><span className="brand__mark">PS</span><span><b>Pump Station</b><small>Calculator</small></span></div><button className="icon-button" onClick={() => setSidebar(false)}><Icon name="close" /></button></div><div className="user-card"><span className="avatar avatar--large">{initials(account.name)}</span><div><div className="user-card__name"><b>{account.name}</b><span className="user-role">{account.role}</span></div><small>{account.email}</small></div></div><nav className="sidebar__nav"><button className="sidebar__link sidebar__link--active" onClick={()=>setSidebar(false)}>▦ <span>Рабочее пространство</span></button><button className="sidebar__link" disabled title={BETA_LOCK}>▤ <span>Мои проекты</span></button><button className="sidebar__link" disabled title={BETA_LOCK}>⌁ <span>База оборудования</span></button>{account.role==="admin"&&<button className="sidebar__link" disabled title={BETA_LOCK}>⌗ <span>Расчёт комплектующих</span></button>}{account.role==="admin"&&<button className="sidebar__link" onClick={()=>navigateView("base-values")}>⚙ <span>Базовые значения</span></button>}{account.role==="admin"&&<button className="sidebar__link" onClick={()=>navigateView("users")}>♙ <span>Список пользователей</span></button>}<button className="sidebar__link" onClick={() => { setSidebar(false); setSettingsOpen(true); }}>⚙ <span>Настройки</span></button><Link className="sidebar__link" href="/?auth=forgot">⌘ <span>Сменить пароль</span></Link><button className="sidebar__link" onClick={logout}>↪ <span>Выйти</span></button></nav><button className="sidebar__footer help-center-entry" onClick={()=>navigateView("help")}><span className="help-center-entry__icon" aria-hidden="true">?</span><span><b>Центр помощи</b><small>Документация и поддержка</small></span></button></aside></div>
 
     <nav className="ribbon">
       <div className="ribbon__tabs">

@@ -4,6 +4,7 @@ import test from "node:test";
 import { loadTs } from "./load-ts.mjs";
 
 const { createProject, parseProjectConfig } = await loadTs(new URL("../app/project-config.ts", import.meta.url));
+const { calculateCollector } = await loadTs(new URL("../app/collector-calculations.ts", import.meta.url));
 const { synchronizeCollectors } = await loadTs(new URL("../app/collector-project.ts", import.meta.url));
 const { dischargeHydraulics } = await loadTs(new URL("../app/dn-defaults.ts", import.meta.url));
 const { buildDischargeSpec, selectDischargeInsertion, commonDischargeHead } = await loadTs(new URL("../app/discharge-spec.ts", import.meta.url));
@@ -19,6 +20,7 @@ const source = [
   'import {buildDischargeSpec,replaceDischargeSpec,checkDischargeSpecPressure} from "./discharge-spec";',
   'import {normalizeSpecificationItems,specificationOption} from "./specification-items";',
   'import {synchronizeCollectors} from "./collector-project";',
+  'import {bindProjectComponents} from "./base-values-components";',
   shared.match(/^export const isCalculated =.*$/m)[0], page.match(/^const isSecondaryEnabled =.*$/m)[0],
   shared.match(/^export const componentFieldLabel=.*$/m)[0],
   page.slice(page.indexOf("const isJockeyCircuit="), page.indexOf("function DnCalculator(")),
@@ -414,7 +416,7 @@ test("automatic filling survives a temporarily uncalculated primary circuit and 
 test("collector status follows saved catalogue price and clears only the pressure warning", () => {
   let p = fill(fixture());
   const state = p.entities["station-collectors"].discharge;
-  state.database = { id: "saved-discharge", code: state.code, price: 12345 };
+  state.database = { id: "saved-discharge", code: state.code, price: 12345, calculation: calculateCollector(state.configuration, catalog) };
   state.databaseStatus = "found";
   p.entities["station-settings"].inletHead = 200;
   p = fill(p);
@@ -429,4 +431,44 @@ test("collector status follows saved catalogue price and clears only the pressur
   assert.equal(row.dischargePressureCheck.baseStatus, "selected");
   assert.equal(row.dischargePressureCheck.checks[0].status, "within-limit");
   assert.ok(row.dischargePressureCheck.checks.every(check => !/окраска/i.test(check.message)));
+});
+
+test("discharge transitions are concentric, while suction retains eccentric transitions", async () => {
+  const { buildSuctionSpec } = await loadTs(new URL("../app/suction-spec.ts", import.meta.url));
+  for (const vibration of [false, true]) {
+    const p = fixture({ pumpDn: 50, valveDn: 80 });
+    p.entities["station-settings"].vibrationCompensators = vibration;
+    p.entities["station-dn"].pumpSuctionPort.dn = 65;
+    for (const [section, generated] of [["discharge", build(p)], ["suction", buildSuctionSpec(p, database, catalog)]]) {
+      const reducer = generated.find(r => r.assemblyRole === "primary-reducer");
+      assert.ok(reducer, section);
+      assert.equal(reducer.insertionRequirement.geometry, section === "discharge" ? "concentric" : "eccentric");
+      if (reducer.equipmentId) {
+        const item = database.items.find(i => i.id === reducer.equipmentId);
+        assert.match(item.family, section === "discharge" ? /концентр/i : /эксцентр/i);
+      }
+    }
+  }
+});
+
+test("first fire discharge inserts require sensors only with at least two working pumps; reserve and jockey never trigger the rule", () => {
+  for (const type of ["utility", "fire", "combined"]) for (const working of [1, 2, 3]) for (const reserve of [0, 1, 2]) for (const vibration of [false, true]) for (const pumpDn of [50, 80]) {
+    const count = working + reserve;
+    let p = fixture({ type, count, pumpDn, valveDn: 80 });
+    Object.assign(p.entities["system-input"], { workingPumpCount: working, reservePumpCount: reserve });
+    p.entities["station-settings"].vibrationCompensators = vibration;
+    p.entities["station-settings"].jockeyPump = type === "fire";
+    if (type !== "utility") p = secondCircuit(p, { dn: 80, connection: "flanged", count: 2 });
+    const generated = build(p);
+    const primary = generated.filter(r => r.insertionRequirement && r.assemblyRole.startsWith("primary-"));
+    const required = type !== "utility" && working >= 2;
+    const expectedRole = pumpDn !== 80 ? "primary-reducer" : vibration ? "primary-after-vibration-insertion" : "primary-between-valves-insertion";
+    assert.equal(primary[0].assemblyRole, expectedRole);
+    assert.equal(primary[0].insertionRequirement.withSensorNipple, required, JSON.stringify({ type, working, reserve, vibration, pumpDn }));
+    assert.equal(primary[0].quantity, count);
+    assert.ok(primary.slice(1).every(r => r.insertionRequirement.withSensorNipple === false));
+    const secondary = generated.filter(r => r.insertionRequirement && r.assemblyRole.startsWith("secondary-"));
+    if (type !== "utility") assert.ok(secondary.length);
+    assert.ok(secondary.every(r => r.insertionRequirement.withSensorNipple === false));
+  }
 });

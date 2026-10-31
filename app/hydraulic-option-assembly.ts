@@ -1,4 +1,5 @@
 import { tankMounting } from "./tank-mounting";
+import { baseConfigurationIdentity, baseSettingsIdentity } from "./base-values";
 import { hydraulicPortLabel, stationHydraulicPortLedger } from "./station-hydraulic-ports";
 import importedHydraulics from "../data/hydraulic-v11-source.json";
 import type { ProjectConfig, SettingsEntity, SpecEntity, SpecItem, SpecOption, SpecTechnicalStatus } from "./project-config";
@@ -50,10 +51,10 @@ export function hydraulicOptionCatalog(items: AssemblyComponent[]): AssemblyComp
 const optionRoles = new Set<SpecOption>(["membraneTank", "pressureTransducer", "collectorPlugs", "isolatingValves"]);
 export function buildHydraulicOptions(project: ProjectConfig, resources: { items: AssemblyComponent[]; collectorCatalog: CollectorCatalog }): SpecItem[] {
   const settings = project.entities["station-settings"] as SettingsEntity;
-  const config = normalizeHydraulicOptions(settings.hydraulicOptions), database = { items: hydraulicOptionCatalog(resources.items) };
+  const config = normalizeHydraulicOptions({ ...settings.hydraulicOptions, hoseLengthMm: settings.hydraulicOptions?.hoseLengthMm ?? settings.baseValues?.values.preferences.hoseLengthMm }), database = { items: hydraulicOptionCatalog(resources.items) };
   const collectors = project.entities["station-collectors"] as CollectorsEntity;
   const rows: SpecItem[] = [];
-  const fingerprint = JSON.stringify(["hydraulic-options-v1", settings, collectors.suction.configuration, collectors.discharge.configuration], (_key, value) => value && typeof value === "object" && !Array.isArray(value) ? Object.fromEntries(Object.entries(value).sort(([a], [b]) => a.localeCompare(b))) : value);
+  const fingerprint = JSON.stringify(["hydraulic-options-v1", baseSettingsIdentity(settings), collectors.suction.configuration&&baseConfigurationIdentity(collectors.suction.configuration), collectors.discharge.configuration&&baseConfigurationIdentity(collectors.discharge.configuration)], (_key, value) => value && typeof value === "object" && !Array.isArray(value) ? Object.fromEntries(Object.entries(value).sort(([a], [b]) => a.localeCompare(b))) : value);
   for (const side of ["suction", "discharge"] as const) {
     const collector = collectors[side].configuration;
     if (!collector) continue;
@@ -61,9 +62,18 @@ export function buildHydraulicOptions(project: ProjectConfig, resources: { items
     const pressureBar = settings.pressureChecksEnabled === false || head === null ? null : Math.max(0, head * .0980665);
     const locationLabel = side === "suction" ? "Всас" : "Напор";
     const build = (role: string, option: SpecOption, label: string, quantity: number, requirement: HydraulicProductRequirement, ports: string[], populate: (parts: ReturnType<typeof lineSpecParts>, product: AssemblyComponent | undefined, findings: string[]) => void) => {
-      const location = `${side}:${role}`, selectedId = config.products[location];
+      const location = `${side}:${role}`;
+      const prior = (project.entities["station-spec"] as SpecEntity).items.find(item => item.generatedBy === "hydraulic-options" && item.assemblyRole === location)?.equipmentId;
+      const preferences = settings.baseValues?.values.preferences;
+      const rules = preferences?.rules.filter(r => r.side === side && r.role === role && (r.stationType === "all" || r.stationType === settings.stationType)) ?? [];
+      const ordered = [...rules].sort((a,b) => Number(b.stationType !== "all")-Number(a.stationType !== "all")).flatMap(r => r.productIds);
+      const eligible = selectHydraulicProduct(database.items,requirement).candidates.filter(c => c.technicalStatus === "ready");
+      const preferred = ordered.find(id => eligible.some(c => c.item.id === id));
+      const selectedId = config.products[location] ?? prior ?? preferred;
+      const preferenceNote = !config.products[location] && (!prior || prior === preferred || !preferred) && ordered.length && preferred !== ordered[0] ? "Предпочтительное изделие отсутствует или его совместимость не подтверждена. Использован другой совместимый вариант подбора." : "";
       const selection = selectHydraulicProduct(database.items, requirement, selectedId);
       const product = selection.selected?.item, parts: SpecItem[] = [], findings = [...(selection.selected ? [...selection.selected.incompatible, ...selection.selected.missing] : [selection.explanation])];
+      if(preferenceNote) findings.push(preferenceNote);
       const builder = lineSpecParts(parts, side, fingerprint, collector, database, resources.collectorCatalog);
       const body = builder.add("product", product ? hydraulicProductName(product) : label, 1, product ? `${hydraulicProductSummary(product)}. ${selection.explanation}` : selection.explanation, product);
       body.price = product ? hydraulicProductPrice(product, requirement) : null;
@@ -72,7 +82,7 @@ export function buildHydraulicOptions(project: ProjectConfig, resources: { items
       populate(builder, product, findings);
       for (const part of parts) if (part.technicalStatus !== "ready") findings.push(`${part.name}: ${part.technicalNotes?.join(" ") || part.description || part.details}`);
       const status: SpecTechnicalStatus = parts.some(part => part.technicalStatus === "error") ? "error" : findings.length ? "unverified" : "ready";
-      const assembly: HydraulicAssembly = { version: 1, accounting: "assembly", location, source: "Правила этапа 3, уточнения пользователя 29.10.2026; исходный калькулятор обвязки", ports, parts, requiredRoles: parts.map(part => part.assemblyRole!), findings: [...new Set(findings)], requirement, selectionId: selectedId,
+      const assembly: HydraulicAssembly = { version: 1, accounting: "assembly", location, source: "Правила этапа 3, уточнения пользователя 29.10.2026; исходный калькулятор обвязки", ports, parts, requiredRoles: parts.map(part => part.assemblyRole!), findings: [...new Set(findings)], requirement, selectionId: selectedId ?? product?.id,
         candidates: selection.candidates.map(candidate => ({ id: candidate.item.id, name: hydraulicProductName(candidate.item) + ` · ${candidate.item.id}`, findings: [...candidate.incompatible, ...candidate.missing] })) };
       const amount = hydraulicAssemblyPrice(assembly);
       rows.push({ position: side === "suction" ? "03.90" : "04.90", generatedBy: "hydraulic-options", assemblyRole: location, option, section: side, name: `${label} — ${locationLabel}`, quantity, unit: "компл.", equipmentId: product?.id,
@@ -107,6 +117,8 @@ export function buildHydraulicOptions(project: ProjectConfig, resources: { items
     if (side !== "discharge" || !settings.membraneTank) continue;
     const volume = settings.membraneTankVolume, size = volume === 8 ? 20 : 25;
     build("tank", "membraneTank", `Бак мембранный ${volume} л`, 1, { kind: "tank", pressureBar, volumeLitres: volume, thread: volume === 8 ? "G3/4" : "G1", threadGender: "male" }, ["discharge:tank"], (parts, _product, findings) => {
+      const port=collector.instrumentPorts?.find(p=>p.id==="tank");
+      if(!port||port.dn!==size||port.threaded===false){const detail=port?`Сгон DN${port.dn}${port.threaded===false?" без резьбы":""} → арматура DN${size}: подтвердите комплект перехода.`:"В правиле коллектора отсутствует отвод для бака.";parts.add("tank-diameter-transition",port?`Переход подключения бака DN${port.dn}×DN${size}`:"Подключение бака к коллектору",1,detail);findings.push(detail);}
       const valve = database.items.find(item => item.id === (size === 20 ? "шаровые-краны-001-r0194" : "шаровые-краны-001-r0195"));
       const row = parts.add("tank-valve", `Отсечной шаровой кран DN${size} ВР/ВР`, 1, `Коллектор → кран → ${volume === 8 ? "бак" : "шланг → бак"}`, valve);
       if (!componentPressureLimit(valve)) { row.technicalStatus = "unverified"; row.description = "Исходная книга: кран бака. Не подтверждены PN, стандарт резьбы и точный артикул."; }

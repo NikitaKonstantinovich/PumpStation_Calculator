@@ -21,8 +21,11 @@ const flange = (dn, pn, family) => reference.rows.find(row => row.dn === dn && r
 test("material substitution is scoped to the 17 approved PN25 flanges and preserves source marks, sizes and prices", () => {
   const data = merge(original, reference), pressures = catalogPressures(data.items), catalog = makeInsertCatalog(data);
   const accepted = data.items.filter(item => acceptedFlangeMaterials(item, pressures.get(item.id), reference, data.source.sha256));
-  assert.deepEqual(accepted.map(item => item.id).sort(), Array.from({ length: 17 }, (_, i) => `фланцы-007-r${String(i + 136).padStart(4, "0")}`));
-  for (const item of accepted) {
+  const pn25 = accepted.filter(item => item.tableId === "фланцы-007");
+  assert.deepEqual(pn25.map(item => item.id).sort(), Array.from({ length: 17 }, (_, i) => `фланцы-007-r${String(i + 136).padStart(4, "0")}`));
+  assert.equal(accepted.length, 27); // 17 historical PN25 + 10 individually approved PN16 supplier items.
+  assert.ok(accepted.filter(item => item.tableId !== "фланцы-007").every(item => item.tableId === "standard-stainless-pn16-20261030"));
+  for (const item of pn25) {
     assert.match(field(item, "Наименование"), /12Х18Н10Т/);
     assert.deepEqual(native(item), original.items.find(row => row.id === item.id));
     const part = catalog.parts.find(part => part.id === item.id), grip = jointFlangeThickness(data, "aisi304", part.dn, 25);
@@ -81,11 +84,11 @@ test("accepted PN25 material does not widen bores or waive direct reducer profil
   assert.match(row.bom.find(item => item.role === "left-flanged").source, /Проектная взаимозаменяемость/);
 });
 
-test("124 flange executions get sourced thickness; unapproved large PN16/pressed variants remain pending", () => {
+test("137 flange executions get sourced thickness; unapproved large loose PN16/pressed variants remain pending", () => {
   const enriched = merge(original, reference), pressures = catalogPressures(enriched.items);
-  assert.equal(reference.rows.length, 143);
-  assert.equal(reference.rows.filter(row => row.dimensions.thicknessMm).length, 124);
-  assert.equal(enriched.items.filter(item => field(item, "Толщина фланца, мм")).length, 124);
+  assert.equal(reference.rows.length, 156);
+  assert.equal(reference.rows.filter(row => row.dimensions.thicknessMm).length, 137);
+  assert.equal(enriched.items.filter(item => field(item, "Толщина фланца, мм")).length, 137);
   assert.deepEqual(merge(enriched, reference), enriched);
   for (let i = 0; i < enriched.items.length; i++) assert.deepEqual(native(enriched.items[i]), original.items[i]);
   for (const row of reference.rows) {

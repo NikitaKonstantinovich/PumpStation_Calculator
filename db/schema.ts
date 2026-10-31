@@ -1,6 +1,21 @@
 import { relations, sql } from "drizzle-orm";
 import { check, index, integer, real, sqliteTable, text, uniqueIndex } from "drizzle-orm/sqlite-core";
 
+export const baseValueVersions = sqliteTable("base_value_versions", {
+  id: text("id").primaryKey(),
+  valuesJson: text("values_json").notNull(),
+  author: text("author").notNull(),
+  createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+});
+export const baseValueState = sqliteTable("base_value_state", {
+  id: integer("id").primaryKey(),
+  activeId: text("active_id").notNull().references(()=>baseValueVersions.id),
+  revision: integer("revision").notNull().default(0),
+  draftJson: text("draft_json").notNull(),
+  draftAuthor: text("draft_author").notNull(),
+  updatedAt: text("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+}, table=>[check("base_value_singleton",sql`${table.id}=1`)]);
+
 export const users = sqliteTable("users", {
   id: text("id").primaryKey(),
   email: text("email").notNull(),

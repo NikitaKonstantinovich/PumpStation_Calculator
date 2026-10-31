@@ -79,7 +79,7 @@ def load_library(root, registry=None):
         result[key] = {"pumpId": pump_id, "key": key, "bounds": item["normalizedBboxMm"], "ports": ports,
                        "source": item["outputFile"], "sourceHash": item["outputSha256"], "units": "mm",
                        "mapping": mapping, "warnings": warnings}
-    registries = [registry] if registry else [root / "frontend/data/cdm-flow-registry.json", root / "frontend/data/line-valve-registry.json", root / "Equipment/model-library.json"]
+    registries = [registry] if registry else [root / "frontend/data/cdm-flow-registry.json", root / "frontend/data/line-valve-registry.json", root / "frontend/data/onis-model-registry.json", root / "Equipment/model-library.json"]
     for registry in registries:
         if not registry.exists():
             continue

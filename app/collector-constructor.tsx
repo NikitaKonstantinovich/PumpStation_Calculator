@@ -1,11 +1,12 @@
 "use client";
 
-import { useCallback, useEffect, useState, type Dispatch, type SetStateAction } from "react";
+import { useCallback, useEffect, useId, useState, type Dispatch, type SetStateAction } from "react";
 import type { ProjectConfig } from "./project-config";
-import { calculateCollector, collectorFlow, collectorLength, collectorVelocityWarning, collectorPressureChecks, configurationFingerprint, configurationWarnings, collectorBranchDiameterErrors, pumpCount, type CollectorCatalog, type CollectorType } from "./collector-calculations";
+import { calculateCollector, collectorFlow, collectorLength, collectorVelocityWarning, collectorPressureChecks, configurationFingerprint, configurationWarnings, collectorBranchDiameterErrors, pumpCount, type CollectorCatalog, type CollectorConfiguration, type CollectorType } from "./collector-calculations";
 import { pressureCheckWarning } from "./dn-defaults";
 import { synchronizeCollectors, type CollectorCardState, type CollectorOverrides, type CollectorsEntity, type SavedCollector } from "./collector-project";
 import { useRuntimeDiagnostic, useStoredDiagnostic } from "./diagnostics-ui";
+import { collectorBaseSpacing, collectorSpacingConfirmation, collectorSpacingConfirmed, collectorSpacingIsManual } from "./collector-spacing";
 
 const money = (v: number | null | undefined) => v == null ? "—" : `${v.toLocaleString("ru-RU", { maximumFractionDigits: 2 })} ₽`;
 const measure = (v: number | null | undefined, unit: string) => v == null ? "—" : `${v.toLocaleString("ru-RU", { maximumFractionDigits: 3 })} ${unit}`;
@@ -16,6 +17,8 @@ async function api(url: string, body?: unknown) {
   return data;
 }
 export function useCollectorDatabase(project: ProjectConfig, setProject: Dispatch<SetStateAction<ProjectConfig>>, enabled: boolean) {
+  const settings=project.entities["station-settings"] as import("./project-config").SettingsEntity;
+  const versionsKey=JSON.stringify(settings.baseValues?.versions??null);
   const [catalog, setCatalog] = useState<CollectorCatalog | null>(null), [catalogError, setCatalogError] = useState("");
   const acceptCatalog = useCallback((catalog: CollectorCatalog) => {
     setCatalog(catalog); setCatalogError("");
@@ -27,23 +30,23 @@ export function useCollectorDatabase(project: ProjectConfig, setProject: Dispatc
   useEffect(() => {
     if (!enabled) return;
     let active = true;
-    api("/api/collectors?catalog=1").then(data => { if (active) acceptCatalog(data.catalog); }).catch(error => { if (active) setCatalogError(error.message); });
+    api(`/api/collectors?catalog=1${versionsKey!=="null"?`&versions=${encodeURIComponent(versionsKey)}`:""}`).then(data => { if (active) acceptCatalog(data.catalog); }).catch(error => { if (active) setCatalogError(error.message); });
     return () => { active = false; };
-  }, [enabled, acceptCatalog]);
+  }, [enabled, acceptCatalog, versionsKey]);
   const entity = project.entities["station-collectors"] as CollectorsEntity;
-  const key = JSON.stringify([project.project.id, ...(["suction", "discharge"] as const).map(type => [type, entity[type].code, entity[type].configuration && configurationFingerprint(entity[type].configuration), entity[type].sourceFingerprint])]);
+  const key = JSON.stringify([project.project.id, ...(["suction", "discharge"] as const).map(type => [type, entity[type].code, entity[type].configuration && configurationFingerprint(entity[type].configuration), entity[type].sourceFingerprint, entity[type].configuration])]);
   useEffect(() => {
     if (!enabled) return;
     let active = true;
-    const [, ...entries] = JSON.parse(key) as [string, ...Array<[CollectorType, string | null, string | null]>];
-    for (const [type, code, fingerprint] of entries) {
+    const [, ...entries] = JSON.parse(key) as [string, ...Array<[CollectorType, string | null, string | null, string | undefined, CollectorConfiguration | null]>];
+    for (const [type, code, fingerprint, , configuration] of entries) {
       if (!code) continue;
       const apply = (patch: Partial<CollectorCardState>) => { if (active) setProject(current => {
         const collectors = current.entities["station-collectors"] as CollectorsEntity, state = collectors[type];
         if (current.project.id !== JSON.parse(key)[0] || state.code !== code || !state.configuration || configurationFingerprint(state.configuration) !== fingerprint) return current;
         return synchronizeCollectors({ ...current, entities: { ...current.entities, "station-collectors": { ...collectors, [type]: { ...state, ...(catalog ? { currentCatalogVersion: catalog.version } : {}), ...patch } } } }, catalog ?? undefined);
       }); };
-      api(`/api/collectors?code=${encodeURIComponent(code)}`).then(data => apply({ database: data.collector, databaseStatus: data.collector ? "found" : "missing", databaseError: undefined })).catch(error => apply({ database: null, databaseStatus: "error", databaseError: error.message }));
+      api(`/api/collectors?code=${encodeURIComponent(code)}&configuration=${encodeURIComponent(JSON.stringify(configuration))}`).then(data => apply({ database: data.collector, databaseStatus: data.collector ? "found" : "missing", databaseError: undefined })).catch(error => apply({ database: null, databaseStatus: "error", databaseError: error.message }));
     }
     return () => { active = false; };
   }, [key, enabled, setProject, catalog]);
@@ -58,6 +61,7 @@ function CollectorCard({ canCustomize = false, pressureChecksEnabled = true, typ
   const storedError = useStoredDiagnostic("collectors",`${type}/action`)?.message ?? "";
   const [busy, setBusy] = useState(false), [message, setMessage] = useState(storedError);
   const [actionError, setActionError] = useState(storedError);
+  const spacingFieldId = useId();
   useRuntimeDiagnostic("collectors",`${type}/action`,actionError);
   const c = state.configuration, recommended = state.recommended;
   if (!c || !recommended) return <article className="collector-card">Подготовка параметров…</article>;
@@ -67,17 +71,56 @@ function CollectorCard({ canCustomize = false, pressureChecksEnabled = true, typ
   const calculation = !stale && !configurationErrors.length && state.calculation?.fingerprint === fingerprint ? state.calculation : null;
   const saved = !configurationErrors.length && state.databaseStatus === "found" && state.database?.code === state.code ? state.database : null;
   const values = preview ?? calculation;
-  const velocityWarning = collectorVelocityWarning(c.dn, values?.velocities.collector);
+  const velocityWarning = collectorVelocityWarning(c.dn, values?.velocities.collector,c.velocityRules);
   const pricedCalculation = calculation ?? (saved ? preview : null);
   const patch = (value: Partial<CollectorCardState>) => onChange(type, value);
   const override = (key: keyof CollectorOverrides, value: number | string | undefined) => { const overrides = { ...state.overrides, [key]: value }; if (value === undefined) delete overrides[key]; patch({ overrides }); };
   const dnControl = (label: string, key: "dn" | "primaryDn" | "secondaryDn", value: number | null, source: number | null) => <label className="collector-field"><span>{label}</span><input type="number" min="15" max="1200" step="1" value={value ?? ""} onChange={e => override(key, e.target.value ? Number(e.target.value) : 0)}/><small>Из расчёта DN: {source ?? "не задано"}{state.overrides[key] !== undefined ? " · Вручную" : " · Автоматически"}</small>{state.overrides[key] !== undefined && <button className="collector-reset" onClick={() => override(key, undefined)}>Вернуть значение из расчёта DN</button>}</label>;
   const connectionControl = (label: string, key: "connection" | "primaryConnection" | "secondaryConnection", value: string, dn: number | null) => <label className="collector-field"><span>{label}</span><select value={value} onChange={e => override(key, e.target.value)}><option value="flanged">Фланцевое</option><option value="threaded" disabled={!dn || dn > 50}>Резьбовое · до 2&quot;</option></select>{state.overrides[key] !== undefined && <button className="collector-reset" onClick={() => override(key, undefined)}>Вернуть из расчёта DN</button>}</label>;
+  const spacingControl = (index: number) => {
+    const circuit = index ? c.secondary! : c.primary, baseSpacing = collectorBaseSpacing(circuit,index);
+    const manual = collectorSpacingIsManual(circuit), confirmed = collectorSpacingConfirmed(c,index);
+    const valid = Number.isFinite(circuit.spacing) && circuit.spacing > 0 && circuit.spacing <= 100000 && (!circuit.radius || circuit.spacing-2*circuit.radius >= 150);
+    const accepted = valid && (manual ? confirmed : !circuit.spacingStatus || ["confirmed","legacy"].includes(circuit.spacingStatus));
+    const inputId = `${spacingFieldId}-${index}`;
+    const statusLabel = accepted ? "Межосевое расстояние принято" : "Межосевое расстояние требует внимания";
+    const reset = () => patch(index ? { spacing2:baseSpacing ?? 0, spacing2Manual:false, spacing2Confirmation:undefined } : { spacing1:baseSpacing ?? 0, spacing1Manual:false, spacing1Confirmation:undefined });
+    return <div className="collector-field">
+      <label htmlFor={inputId}>Межосевое расстояние, мм</label>
+      <div className="collector-spacing-input">
+      <input id={inputId} type="number" min="1" max="100000" value={circuit.spacing || ""} onChange={e => patch(index ? { spacing2:Number(e.target.value), spacing2Manual:true, spacing2Confirmation:undefined } : { spacing1:Number(e.target.value), spacing1Manual:true, spacing1Confirmation:undefined })}/>
+      <details className="collector-spacing-details">
+      <summary className={`collector-spacing-status collector-spacing-status--${accepted ? "accepted" : "warning"}`} aria-label={`${statusLabel}. Показать или скрыть подробности`} title={`${statusLabel}. Показать или скрыть подробности`}>
+        {accepted ? <svg aria-hidden="true" viewBox="0 0 20 20"><path d="m4 10 4 4 8-8"/></svg> : <span aria-hidden="true">!</span>}
+      </summary>
+      <div className="collector-warning collector-spacing-warning" role={accepted ? "status" : "alert"}>
+        {manual ? <>
+        <p>{baseSpacing === null ? "Базовое межосевое расстояние для этого насоса не задано." : circuit.spacing !== baseSpacing ? `Введённое расстояние отличается от базового: ${measure(baseSpacing,"мм")} → ${measure(circuit.spacing,"мм")}.` : `Введено вручную: ${measure(circuit.spacing,"мм")}. Значение совпадает с базовым.`}</p>
+        <p>{confirmed ? "Ручное значение подтверждено для этого проекта." : "Подтвердите ручное значение для расчёта коллектора."}</p>
+        </> : <>
+          <p>{baseSpacing === null ? "Базовое межосевое расстояние для этого насоса не задано." : `Используется базовое расстояние: ${measure(baseSpacing,"мм")}.`}</p>
+          <p>{circuit.spacingNote ?? "Сохранённое стандартное исполнение."}</p>
+        </>}
+        {circuit.radius == null && <p>Габариты насоса не подтверждены: зазор 150 мм необходимо проверить отдельно.</p>}
+        {manual && <div className="collector-spacing-actions">
+          {!confirmed && <button type="button" className="button" disabled={!valid || busy} onClick={event => {
+            const details = event.currentTarget.closest("details");
+            if (details) { details.open = false; details.querySelector("summary")?.focus(); }
+            patch(index ? { spacing2Confirmation:collectorSpacingConfirmation(c,index) } : { spacing1Confirmation:collectorSpacingConfirmation(c,index) });
+          }}>Подтвердить изменение</button>}
+          <button type="button" className="collector-reset" onClick={reset}>Вернуть к базовому значению</button>
+        </div>}
+      </div>
+      </details>
+      </div>
+      <small>Свободный зазор: {circuit.radius ? measure(circuit.spacing-2*circuit.radius,"мм") : "не подтверждён"}</small>
+    </div>;
+  };
   const run = async (action: "calculate" | "create" | "refresh" | "lookup") => {
     setBusy(true); setMessage(""); setActionError("");
     try {
       if (action === "lookup") {
-        const data = await api(`/api/collectors?code=${encodeURIComponent(state.code!)}`);
+        const data = await api(`/api/collectors?code=${encodeURIComponent(state.code!)}&configuration=${encodeURIComponent(JSON.stringify(c))}`);
         onChange(type, { database: data.collector, databaseStatus: data.collector ? "found" : "missing", databaseError: undefined }, fingerprint);
       } else {
         const data = await api("/api/collectors", { action, configuration: c, code: state.code });
@@ -108,20 +151,20 @@ function CollectorCard({ canCustomize = false, pressureChecksEnabled = true, typ
     {[c.primary, ...(c.secondary ? [c.secondary] : [])].map((circuit, i) => <section key={i} className="collector-circuit"><h3>Контур {i + 1}</h3><p>DN коллектора этого контура из расчёта DN: {(type === "suction" ? (i ? state.dnSource?.secondarySuctionCollectorDn : state.dnSource?.suctionCollectorDn) : (i ? state.dnSource?.secondaryDischargeCollectorDn : state.dnSource?.dischargeCollectorDn)) ?? "автоподбор"}</p><p>{circuit.pumpModel ?? circuit.pumpId ?? "Модель насоса не выбрана"}</p><p>{circuit.working ?? "—"} рабочих + {circuit.reserve ?? "—"} резервных · {pumpCount(circuit)} патрубков · PN{circuit.pn} · {measure(circuit.flow, "м³/ч")}</p><div className="collector-fields">
       {dnControl("DN патрубков", i ? "secondaryDn" : "primaryDn", circuit.dn, (i ? recommended.secondary : recommended.primary)?.dn ?? null)}
       {connectionControl("Присоединение к насосам", i ? "secondaryConnection" : "primaryConnection", circuit.connection, circuit.dn)}
-      <label className="collector-field"><span>Межосевое расстояние, мм</span><input type="number" min="1" max="100000" value={circuit.spacing} onChange={e => patch(i ? { spacing2: Number(e.target.value) } : { spacing1: Number(e.target.value) })}/></label>
+      {spacingControl(i)}
       {i === 1 && <label className="collector-field"><span>PN контура 2</span><select value={circuit.pn} onChange={e => override("secondaryPn", Number(e.target.value))}>{[10,16,25].map(pn => <option key={pn} value={pn}>PN{pn}</option>)}</select><small>Из расчёта DN: PN{recommended.secondary?.pn}</small>{state.overrides.secondaryPn && <button className="collector-reset" onClick={() => override("secondaryPn", undefined)}>Вернуть из расчёта DN</button>}</label>}
-    </div><p>Длина патрубка: {measure(values?.branchLengthsMm[i], "мм")} · скорость: {measure(i ? values?.velocities.secondary : values?.velocities.primary, "м/с")}</p></section>)}
+    </div><p>Длина патрубка: {measure(values?.branchLengthsMm[i], "мм")} · болт затвора 017W: {measure(values?.branchBoltReferences?.[i]?.length, "мм")} · скорость: {measure(i ? values?.velocities.secondary : values?.velocities.primary, "м/с")}</p></section>)}
     </fieldset>
     <dl className="collector-metrics"><div><dt>Расчётный расход</dt><dd>{measure(collectorFlow(c).flow, "м³/ч")}</dd></div><div><dt>Длина коллектора</dt><dd>{measure(collectorLength(c), "мм")}</dd></div><div><dt>Скорость в коллекторе</dt><dd>{measure(values?.velocities.collector, "м/с")}</dd></div></dl>
     {velocityWarning && <p data-issue-id={`collectors/${type}/velocity`} role="alert" className="collector-warning">{velocityWarning}</p>}
     {pressureChecksEnabled && type === "suction" && <section aria-label="Проверка давления по напору на входе"><h3>Давление по напору на входе</h3>{collectorPressureChecks(c,inletHead,catalog).map((check,index)=><p data-issue-id={`collectors/${type}/pressure/${index}`} key={index} className={check.status==="exceeded"?"issue-notice issue-notice--error":pressureCheckWarning(check)?"collector-warning":"collector-note"}>{check.message}</p>)}<p className="collector-note">Проверка по указанному напору на входе. Прочность, гидроудары и пригодность к работе под вакуумом не оцениваются.</p></section>}
-    <p className="collector-note">Длина патрубка = 0,5 × наружный Ø коллектора + 1,1 × длина болта из таблицы обвязки. Крепёж учитывается отдельно в общей спецификации.</p>
+    <p className="collector-note">Длина патрубка = 0,5 × наружный Ø коллектора + 1,1 × полная длина выбранного стандартного болта затвора 017W. Подбор по DN и PN патрубка и материалу коллектора. Крепёж учитывается отдельно в общей спецификации.</p>
     {c.material === "st20" && <p className="collector-note">Включена окраска трубы коллектора и всех патрубков, в том числе резервных насосов. Для каждой группы: суммарная длина в метрах × тариф её DN. Стоимость и источник тарифа показаны в составе. Сохранённая цена обновляется кнопкой «Обновить цену в базе».</p>}
     {catalogError && <p data-issue-id="collectors/catalog" className="issue-notice issue-notice--error">{catalogError}</p>}
     {stale && <p data-issue-id={`collectors/${type}/stale`} className="collector-warning">Расчёт устарел — выполните повторный расчёт</p>}
     {!!values?.warnings.length && <div className="collector-warning"><b>Расчёт неполный</b><ul>{values.warnings.map((warning,index) => <li data-issue-id={`collectors/${type}/calculation/${index}`} key={warning}>{warning}</li>)}</ul></div>}
     <details open><summary>Текущий состав</summary>{values && <BomTable items={values.bom}/>}</details>
-    <details><summary>Сварные швы · {measure(values?.weldLengthMm, "мм")} · {money(values?.weldCost)}</summary><div className="collector-table-wrap"><table><thead><tr><th>Операция</th><th>Кол-во</th><th>Шов, мм</th><th>Цена</th></tr></thead><tbody>{values?.welds.map(weld => <tr key={weld.role}><td>{weld.name}</td><td>{weld.count}</td><td>{measure(weld.lengthMm, "")}</td><td>{money(weld.cost)}</td></tr>)}</tbody></table></div><p>Тариф: {money(c.material === "aisi304" ? 5000 : 2400)} / м</p></details>
+    <details><summary>Сварные швы · {measure(values?.weldLengthMm, "мм")} · {money(values?.weldCost)}</summary><div className="collector-table-wrap"><table><thead><tr><th>Операция</th><th>Кол-во</th><th>Шов, мм</th><th>Цена</th></tr></thead><tbody>{values?.welds.map(weld => <tr key={weld.role}><td>{weld.name}</td><td>{weld.count}</td><td>{measure(weld.lengthMm, "")}</td><td>{money(weld.cost)}</td></tr>)}</tbody></table></div><p>Тариф: {money(values?.bom.find(row=>row.role==="welding")?.unitPrice)} / м</p></details>
     {saved && <details><summary>Сохранённый состав · {new Date(saved.priceUpdatedAt).toLocaleString("ru-RU")}</summary><p>PN коллектора: {saved.configuration.pn} · PN патрубков: {saved.configuration.primary.pn}{saved.configuration.secondary ? ` / ${saved.configuration.secondary.pn}` : ""}</p><BomTable items={saved.calculation.bom}/></details>}
     <dl className="collector-prices"><div><dt>Цена из базы</dt><dd>{money(saved?.price)}</dd></div><div><dt>{pricedCalculation?.complete ? "Текущая расчётная цена" : "Расчёт неполный · промежуточная сумма"}</dt><dd>{money(pricedCalculation?.complete ? pricedCalculation.price : pricedCalculation?.subtotal)}</dd></div><div><dt>Разница с базой</dt><dd>{money(saved && pricedCalculation?.price != null ? pricedCalculation.price - saved.price : null)}</dd></div></dl>
     <div className="collector-actions"><button className="button button--primary" disabled={busy || !state.code} onClick={() => void run("calculate")}>Рассчитать</button><button className="button" disabled={busy || !state.code} onClick={() => void run("lookup")}>Проверить базу</button>{saved ? <button className="button" disabled={busy} onClick={() => void run("refresh")}>Обновить цену в базе</button> : <button className="button" disabled={busy || !calculation?.complete || stale || state.databaseStatus !== "missing"} onClick={() => void run("create")}>Создать позицию в базе</button>}</div>

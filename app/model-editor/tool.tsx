@@ -6,7 +6,7 @@ import type { Pump } from "../pump-catalog";
 import { useRuntimeDiagnostic } from "../diagnostics-ui";
 import {
   addManualPipe, assemblyBounds, buildAssembly, componentBounds, connectionIssues, createHistory, dimensions,
-  distance, editComponent, emptyEditor, execute, mergeAssembly, pipePoints, redo, routeLength, setAutomaticRoute,
+  distance, worldPoint, editComponent, emptyEditor, execute, mergeAssembly, pipePoints, redo, routeLength, setAutomaticRoute,
   sourceFingerprint, undo, combineProfiles, refreshModelAssets, type Assembly, type Component, type Edit, type EditorState, type ProfileCatalog, type Vec3,
 } from "./model";
 import type { ViewportHandle, EditorMode } from "./viewport";
@@ -22,6 +22,8 @@ import { specificationModels, lineGeometryIds } from "./specification-models";
 import { PreparationProgress, useModelPreparation } from "./preparation";
 import type { LineCatalog } from "./line-types";
 import { CollectorDetails } from "./collector-properties";
+import { FastenerDetails } from "./fastener-details";
+import { isHardwareRow } from "./flange-fasteners";
 import type { CollectorsEntity } from "../collector-project";
 import "./editor.css";
 
@@ -70,7 +72,10 @@ export function ModelTool({ project, catalogue, entity, onChange }: {
   const generated = useMemo(() => buildAssembly(project, catalogue, profiles ?? EMPTY_PROFILES, lineData ?? EMPTY_LINES), [project, catalogue, profiles, lineData]);
   const assembly = editor.assembly ?? generated;
   const missingPlane = useMemo(() => snaps.plane === "face" && !workingPlane(snaps, snapGeometry(assembly)), [snaps, assembly]);
-  const displayAssembly = useMemo(() => move?.source && move.target ? moveByPoints(assembly, move.id, move.source.point, move.target.point) : assembly, [assembly, move]);
+  const displayAssembly = useMemo(() => {
+    const placed = move?.source && move.target ? moveByPoints(assembly, move.id, move.source.point, move.target.point) : assembly;
+    return editor.showFasteners === false ? { ...placed, components: placed.components.map(c => c.fastener ? { ...c, hidden: true } : c) } : placed;
+  }, [assembly, move, editor.showFasteners]);
   const [history, setHistory] = useState(() => createHistory(assembly));
   const currentHistory = history.present === assembly ? history : createHistory(assembly);
   const latest = useRef({ project, catalogue, assembly, entity, editor, currentHistory, onChange, lineData, profiles });
@@ -99,7 +104,7 @@ export function ModelTool({ project, catalogue, entity, onChange }: {
   const selected = assembly.components.find(c => c.id === editor.selectedId);
   const stale = Boolean(editor.assembly && (editor.assembly.sourceFingerprint !== sourceFingerprint(project) || lineData && editor.assembly.lineDataRevision !== lineData.revision));
   const issues = useMemo(() => connectionIssues(assembly), [assembly]);
-  const sourceWarnings = assembly.components.filter(c => c.kind === "pump" || c.kind === "equipment").map(c => c.sourceNote);
+  const sourceWarnings = assembly.components.filter(c => !isHardwareRow(c) && (c.kind === "pump" || c.kind === "equipment")).map(c => c.sourceNote);
   const diagnostic = [...(stale ? ["Состав установки изменён. Обновите состав в 3D-редакторе; ручная компоновка сохранена."] : []), ...issues.map(i => i.message), catalogError, assetError, lineError, ...(lineData?.issues ?? [])].filter(Boolean).join("\n");
   useRuntimeDiagnostic("model", "assembly", diagnostic, "warning");
   useEffect(() => {
@@ -195,7 +200,7 @@ export function ModelTool({ project, catalogue, entity, onChange }: {
   const constructionReference = references[0] ?? (mode === "move" ? move?.source : mode === "measure" && measurement.length === 1 ? measurement[0] : undefined);
 
   return <div className="model-tool" ref={toolRoot}>
-    <div className="model-tool__mode"><label>Режим <select aria-label="Режим 3D модели" value={entity.mode ?? "preview"} disabled={!profiles} onChange={event => changeMode(event.target.value)}><option value="preview">Эскиз установки</option><option value="editor">3D редактор</option></select></label><span>{profiles ? "мм · Z вверх" : "Загрузка библиотеки…"}</span></div>
+    <div className="model-tool__mode"><label>Режим <select aria-label="Режим 3D модели" value={entity.mode ?? "preview"} disabled={!profiles || !lineData} onChange={event => changeMode(event.target.value)}><option value="preview">Эскиз установки</option><option value="editor">3D редактор</option></select></label><span>{profiles ? "мм · Z вверх" : "Загрузка библиотеки…"}</span></div>
     {entity.mode !== "editor" ? <div className="model-view"><div className="model-view__stage"><span className="model-view__pipe model-view__pipe--one"/><span className="model-view__pipe model-view__pipe--two"/><span className="model-view__pump model-view__pump--one"/><span className="model-view__pump model-view__pump--two"/><span className="model-view__pump model-view__pump--three"/><b>3D</b></div><p className="model-tool__preview-note">Условный эскиз. Для работы с составом проекта выберите «3D редактор».</p></div> : <div className="model-editor" aria-label="3D редактор установки">
       {editor.assembly && !editor.assembly.lineJoints && <div className="model-editor__migration" role="status">Сохранена старая сборка без обвязки. Обновите состав, чтобы добавить арматуру из спецификации. Ручные положения сохранятся. <button disabled={!profiles || !lineData} onClick={() => commit(mergeAssembly(assembly, generated))}>Добавить обвязку</button></div>}
       <div className="model-editor__toolbar" role="toolbar" aria-label="Инструменты 3D редактора">
@@ -209,15 +214,17 @@ export function ModelTool({ project, catalogue, entity, onChange }: {
         <button onClick={() => viewport.current?.fit()}>Показать всё</button>
         <select aria-label="Стандартный вид" defaultValue="" onChange={event => { viewport.current?.standard(event.target.value as "front" | "top" | "right" | "iso"); event.currentTarget.value = ""; }}><option value="" disabled>Вид…</option><option value="iso">Изометрия</option><option value="front">Спереди</option><option value="top">Сверху</option><option value="right">Справа</option></select>
         <label><input type="checkbox" checked={editor.grid} onChange={e => update({ grid: e.target.checked })}/>Сетка</label><label><input type="checkbox" checked={editor.snap} onChange={e => update({ snap: e.target.checked })}/>К сетке</label><label>Шаг <select aria-label="Шаг привязки, мм" value={editor.snapStep} onChange={e => update({ snapStep: Number(e.target.value) })}>{[1, 5, 10, 25, 50, 100, 250, 500, ...(![1, 5, 10, 25, 50, 100, 250, 500].includes(editor.snapStep) ? [editor.snapStep] : [])].sort((a, b) => a - b).map(v => <option key={v} value={v}>{v} мм</option>)}</select></label>
+        <label><input type="checkbox" checked={editor.showFasteners !== false} onChange={e => update({ showFasteners: e.target.checked })}/>Показывать крепёж</label>
         <button disabled={!catalogue.length || !profiles || !lineData} onClick={() => commit(mergeAssembly(assembly, generated))}>Обновить состав</button>
         <button onClick={() => setLineReload(value => value + 1)}>Обновить размеры из базы</button>
         <button disabled={preparation.busy || !profiles || !catalogue.length} onClick={() => void preparation.start()}>{preparation.busy && !preparation.connecting ? "Подготовка…" : "Подготовить 3D-модели спецификации"}</button>
-        <button disabled={!catalogue.length || !profiles} onClick={() => setResetOpen(true)}>Автокомпоновка</button>
+        <button disabled={!catalogue.length || !profiles || !lineData} onClick={() => setResetOpen(true)}>Автокомпоновка</button>
         <button disabled={assembly.components.length >= 500} onClick={() => commit(addManualPipe(assembly, `manual-pipe-${crypto.randomUUID()}`))}>＋ Труба</button>
         <button onClick={() => setLibraryOpen(true)}>＋ Из библиотеки</button>
         <button disabled={assembly.components.length >= 500} onClick={() => setInsertDialog({})}>＋ Вставка из базы</button>
       </div>
       <PreparationProgress preparation={preparation}/>
+      {assembly.components.some(c => c.pumpGeometry?.schematic) && <p className="model-editor__notice" role="status">Условная компоновка: габариты и/или точки подключения насосов неточны. Обвязка показана собранной; размеры и координаты условных насосов нельзя использовать для монтажа.</p>}
       {missingPlane && <p className="model-editor__notice" role="status">Рабочая грань недоступна: компонент скрыт, удалён или геометрия изменилась. Выберите другую грань либо XY/XZ/YZ в настройках. Проекционный выбор приостановлен.</p>}
       {(operationNote || !["translate", "rotate", "measure"].includes(mode)) && <div className="model-editor__operation" role="status">
         <span>{mode === "move" ? !move?.source ? "1. Выберите базовую точку перемещаемого компонента" : !move.target ? "2. Выберите целевую точку. Tab — перебор близких привязок" : `3. Предпросмотр: ${move.source.label} → ${move.target.label}${move.target.projected ? " · Проекция" : ""}` : mode === "planeFace" ? "Выберите прямоугольную грань рамы или круглый торец трубы" : mode === "parallelEdge" ? "Выберите прямое ребро или осевой сегмент для параллельного направления" : mode === "addReference" ? "Выберите точку компонента для сохранения" : ["reference1", "between1"].includes(mode) ? "Выберите опорную точку в сцене" : mode === "between2" ? "Выберите вторую опорную точку" : operationNote}</span>
@@ -227,9 +234,10 @@ export function ModelTool({ project, catalogue, entity, onChange }: {
       {references.length > 0 && <div className="model-editor__reference-status">Опоры: {references.map(p => p.point.map(fmt).join("; ")).join(" | ")}{parallelLine && " · Ребро для параллельного направления выбрано"}<button onClick={() => { setReferences([]); setParallelLine(undefined); }}>Сбросить опоры</button></div>}
       {stale && <p className="model-editor__notice" role="status">Состав проекта изменился. Нажмите «Обновить состав»: ручные положения и размеры будут сохранены.</p>}
       <div className="model-editor__layout">
-        <aside className="model-editor__tree" aria-label="Дерево сборки"><h3>Сборка <small>{assembly.components.length}</small></h3>
+        <aside className="model-editor__tree" aria-label="Дерево сборки"><h3>Сборка <small>{assembly.components.filter(c=>!isHardwareRow(c)).length}</small></h3>
           {!assembly.components.length && <p>Выберите насос в подборе, затем нажмите «Обновить состав».</p>}
-          {assembly.components.filter(c => !c.line && c.kind !== "pump").map(treeRow)}
+          {assembly.components.filter(c => !c.line && !c.fastener && c.kind !== "pump").map(treeRow)}
+          <details open className="model-editor__tree-group"><summary>Крепёж соединений ({assembly.components.filter(c=>c.fastener).length})</summary>{assembly.components.filter(c=>c.fastener).map(treeRow)}</details>
           {[1, 2].map(circuit => <details key={circuit} open className="model-editor__tree-group"><summary>Контур {circuit}</summary>{assembly.components.filter(c => c.kind === "pump" && c.id.startsWith(`pump-${circuit}-`)).map(pump => <details open key={pump.id}><summary>{pump.name}</summary>{treeRow(pump)}{(["suction", "discharge"] as const).map(side => <details open key={side}><summary>{side === "suction" ? "Всасывающая линия" : "Напорная линия"}</summary>{assembly.components.filter(c => c.line?.pumpId === pump.id && c.line.side === side).map(treeRow)}</details>)}</details>)}</details>)}
           <p className="model-editor__tree-key">Флажки: видимость / фиксация</p>
         </aside>
@@ -259,7 +267,8 @@ export function ModelTool({ project, catalogue, entity, onChange }: {
             {selected.line && <><p>Спецификация: {selected.line.specPosition} · {selected.line.quantity} шт.</p><p>Геометрия: {{ cad: "CAD", parametric: "По подтверждённым размерам", outline: "Предварительный контур", missing: "Нет геометрии" }[selected.line.fidelity]}</p><p>Монтажная длина: {selected.line.length === null ? "Не задана" : `${fmt(selected.line.length)} мм`}</p>{selected.shape?.innerMm && selected.shape.outerMm && <p>Наружный Ø{fmt(selected.shape.outerMm)} · внутренний Ø{fmt(selected.shape.innerMm)} · стенка {fmt((selected.shape.outerMm - selected.shape.innerMm) / 2)} мм</p>}</>}
             {selected.insertion && <><InsertionDetails template={selected.insertion.template}/><details><summary>Видимость деталей</summary>{selected.insertion.template.geometry.pieces.map(p => <label key={p.id} className="model-editor__toggle"><input type="checkbox" checked={!selected.insertion!.hiddenPieceIds.includes(p.id)} onChange={e => commit({ ...assembly, components: assembly.components.map(c => c.id === selected.id && c.insertion ? { ...c, insertion: { ...c.insertion, hiddenPieceIds: e.target.checked ? c.insertion.hiddenPieceIds.filter(id => id !== p.id) : [...c.insertion.hiddenPieceIds, p.id] } } : c) })}/>{p.name}</label>)}</details>{selected.insertion.template.source.recordId && <button disabled={selected.locked} onClick={() => setInsertDialog({ componentId: selected.id, recordId: selected.insertion!.template.source.recordId!, angle: selected.insertion!.template.geometry.eccentricAngleDeg })}>Обновить из базы / эксцентриситет</button>}</>}
             {selected.cadSource && <details><summary>Источник модели</summary><p className="model-editor__source">{selected.cadSource.path.split("/").pop()}</p></details>}
-            <label className="model-editor__toggle"><input type="checkbox" checked={selected.locked} onChange={e => edit(selected.id, { locked: e.target.checked })}/>Зафиксировать компонент</label>
+            {selected.fastener && <FastenerDetails component={selected} assembly={assembly} onSelect={id=>update({selectedId:id,selectedPieceId:undefined})}/>}
+            <label className="model-editor__toggle"><input type="checkbox" checked={selected.locked} disabled={!!selected.fastener} onChange={e => edit(selected.id, { locked: e.target.checked })}/>Зафиксировать компонент</label>
             <label className="model-editor__toggle"><input type="checkbox" checked={!selected.hidden} onChange={e => edit(selected.id, { hidden: !e.target.checked })}/>Показывать компонент</label>
             <label className="model-editor__opacity">Непрозрачность <input aria-label="Непрозрачность компонента" type="range" min="0.1" max="1" step="0.1" value={selected.opacity} onChange={e => edit(selected.id, { opacity: Number(e.target.value) })}/></label>
             {selected.routing && <label className="model-editor__toggle"><input type="checkbox" checked={selected.routing.automatic} disabled={selected.locked} onChange={e => commit(setAutomaticRoute(assembly, selected.id, e.target.checked))}/>Следовать патрубкам</label>}
@@ -270,13 +279,14 @@ export function ModelTool({ project, catalogue, entity, onChange }: {
             {(selected.kind === "collector" || selected.kind === "pipe") && <><h4>Геометрия, мм</h4>{(!selected.routing) && <NumberField label="Длина, мм" value={selected.parameters.length} disabled={selected.locked} min={1} onCommit={v => changeParameter(selected, "length", v)}/>}<NumberField label="Наружный диаметр, мм" value={selected.parameters.diameter} disabled={selected.locked} min={1} onCommit={v => changeParameter(selected, "diameter", v)}/>{selected.routing?.automatic && <NumberField label="Отступ трассы, мм" value={selected.parameters.routeOffset} disabled={selected.locked} onCommit={v => changeParameter(selected, "routeOffset", v)}/>}</>}
             {selected.kind === "pipe" && <p>Длина по оси: {fmt(routeLength(assembly, selected))} мм</p>}
             {selected.kind === "pipe" && <><NumberField label="Толщина стенки, мм" value={selected.parameters.wallThickness ?? 0} disabled={selected.locked} min={.1} onCommit={v => changeParameter(selected, "wallThickness", v)}/>{!selected.parameters.wallThickness && <p>Толщина стенки не задана: показан предварительный контур.</p>}</>}
-            <h4>Габариты в осях установки</h4><p data-testid="component-dimensions">{selected.collector && !selected.collector.template.main ? "Не подтверждены" : sizeText(selectedBounds)}</p>
-            {selected.ports.length > 0 && <details><summary>Точки подключения ({selected.ports.length})</summary>{selected.ports.map(p => <p key={p.id}>{p.id}: {p.point.map(fmt).join("; ")} мм{p.provisional ? " · предварительно" : ""}</p>)}</details>}
+            <h4>Габариты в осях установки</h4><p data-testid="component-dimensions">{selected.pumpGeometry?.envelope === "incomplete" ? "Не подтверждены полностью" : selected.collector && !selected.collector.template.main ? "Не подтверждены" : sizeText(selectedBounds)}</p>
+            {selected.pumpGeometry && <p>Габариты насоса L × W × H: {selected.pumpGeometry.dimensionsMm.map(v => v === null ? "—" : fmt(v)).join(" × ")} мм{selected.pumpGeometry.envelope === "incomplete" ? " · неизвестные размеры обозначены прочерком" : ""}</p>}
+            {selected.ports.length > 0 && <details><summary>Точки подключения ({selected.ports.length})</summary>{selected.ports.map(p => <p key={p.id}>{p.id}: локальные X/Y/Z = {p.point.map(fmt).join("; ")} мм; в установке X/Y/Z = {worldPoint(selected, p.point).map(fmt).join("; ")} мм{p.provisional ? " · предварительно" : ""}</p>)}</details>}
             {selected.routing && <details><summary>Точки трассы</summary>{pipePoints(assembly, selected).map((p, i) => <p key={i}>{p.map(fmt).join("; ")} мм</p>)}</details>}
           </div> : <p>Выберите компонент в сцене или дереве сборки.</p>}
         </aside>
       </div>
-      <div className="model-editor__status"><span>Габариты установки: <b data-testid="assembly-dimensions">{sizeText(bounds)}</b></span><span>Упрощённая монтажная модель · {issues.length ? `замечаний: ${issues.length}` : "разрывов соединений не обнаружено"}</span></div>
+      <div className="model-editor__status"><span>Габариты установки: <b data-testid="assembly-dimensions">{assembly.components.some(c => c.pumpGeometry?.envelope === "incomplete" || c.pumpGeometry?.schematic) ? "Приблизительно: " : ""}{sizeText(bounds)}</b></span><span>Упрощённая монтажная модель · {issues.length ? `замечаний: ${issues.length}` : "разрывов соединений не обнаружено"}</span></div>
       <details className="model-editor__diagnostics" open={Boolean(diagnostic)}><summary>Данные и замечания</summary><p>Обвязка строится по позициям спецификации. Неподтверждённые размеры, посадки и стыки отмечены; символы отсутствующих деталей не являются физической геометрией. Обновление состава сохраняет ручную компоновку. Явная «Автокомпоновка» перестраивает расположение. Ручные размеры редактора не меняют спецификацию.</p>{[...new Set(sourceWarnings)].map(note => <p key={note}>{note}</p>)}{diagnostic && <p role="status">{diagnostic}</p>}</details>
       <dialog ref={resetDialog} className="model-editor__reset" aria-label="Повторная автокомпоновка" onCancel={() => setResetOpen(false)}><b>Построить новую компоновку?</b><p>Будут заменены ручные положения, размеры, фиксации и добавленные трубы. Текущее состояние можно вернуть кнопкой «Отмена» в редакторе.</p><button onClick={() => { commit(generated); updateSelectionAfterReset(); }}>Построить заново</button><button onClick={() => setResetOpen(false)}>Сохранить ручные правки</button></dialog>
       <SnapDialog open={snapOpen} settings={snaps} grid={editor.snap} gridStep={editor.snapStep} onChange={objectSnaps => {
@@ -301,9 +311,9 @@ export function ModelTool({ project, catalogue, entity, onChange }: {
   </div>;
 
   function updateSelectionAfterReset() { setResetOpen(false); setMeasurement([]); }
-  function treeRow(c: Component) { return <div key={c.id} className={`model-editor__tree-row ${selected?.id === c.id ? "is-selected" : ""}`}>
-    <button className="model-editor__tree-name" aria-pressed={selected?.id === c.id} title={c.sourceNote} onClick={() => update({ selectedId: c.id, selectedPieceId: undefined })}>{c.name}{c.line && c.line.quantity !== 1 ? ` ×${c.line.quantity}` : ""}{c.orphaned || c.line?.fidelity === "missing" ? " ⚠" : ""}</button>
+  function treeRow(c: Component) { if (isHardwareRow(c)) return null; return <div key={c.id} className={`model-editor__tree-row ${selected?.id === c.id ? "is-selected" : ""}`}>
+    <button className="model-editor__tree-name" aria-pressed={selected?.id === c.id} title={c.sourceNote} onClick={() => update({ selectedId: c.id, selectedPieceId: undefined })}>{c.name}{c.line && c.line.quantity !== 1 ? ` ×${c.line.quantity}` : ""}{c.orphaned || c.line?.fidelity === "missing" || c.fastener?.status === "blocked" ? " ⚠" : ""}</button>
     <input aria-label={`Показывать ${c.name}`} type="checkbox" checked={!c.hidden} onChange={e => edit(c.id, { hidden: !e.target.checked })}/>
-    <input aria-label={`Зафиксировать ${c.name}`} title="Зафиксировать" type="checkbox" checked={c.locked} onChange={e => edit(c.id, { locked: e.target.checked })}/>
+    <input aria-label={`Зафиксировать ${c.name}`} title="Зафиксировать" type="checkbox" checked={c.locked} disabled={!!c.fastener} onChange={e => edit(c.id, { locked: e.target.checked })}/>
   </div>; }
 }
