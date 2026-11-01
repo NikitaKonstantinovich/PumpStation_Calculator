@@ -34,7 +34,7 @@ export function composeValvePose(parent: Pose, local: Pose): Pose {
   const m=matrix(parent.rotation), offset=apply(m,local.position);
   return { position: parent.position.map((v,i)=>v+offset[i]) as Vec3, rotation: euler(multiply(m,matrix(local.rotation))) };
 }
-function relativePose(parent: Pose, world: Pose): Pose {
+export function relativePose(parent: Pose, world: Pose): Pose {
   const m=matrix(parent.rotation), inverse=m.map((_,i)=>m.map(r=>r[i]));
   return { position: apply(inverse,world.position.map((v,i)=>v-parent.position[i]) as Vec3), rotation: euler(multiply(inverse,matrix(world.rotation))) };
 }

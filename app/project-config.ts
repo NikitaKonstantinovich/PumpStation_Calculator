@@ -43,10 +43,11 @@ export type SettingsEntity = {
   baseValues?: AppliedBaseValues;
   inletHead?: number | null;
   pressureChecksEnabled?: boolean;
+  geometryEnabled?: boolean;
   stationType: StationType;
   combinedCircuitsSimultaneous: boolean;
   membraneTank: boolean;
-  membraneTankVolume: 8 | 50 | 100;
+  membraneTankVolume: 8 | 50 | 80 | 100;
   vibrationCompensators: boolean;
   collectorPlugs: boolean;
   isolatingValves: boolean;
@@ -65,10 +66,11 @@ export type SpecItem = {
   dischargePressureCheck?: SpecItem["inletPressureCheck"];
   generatedBy?: "suction-line" | "discharge-line" | "station" | "hydraulic-options";
   hydraulicAssembly?: import("./hydraulic-option-assembly").HydraulicAssembly;
+  hydraulicPart?: { location: string; role: string; option: SpecOption };
   technicalStatus?: SpecTechnicalStatus;
   technicalNotes?: string[];
   insertionRequirement?: import("./station-insertion-selection").InsertionRequirement;
-  insertionAssembly?: { snapshot: import("./calculated-insertion").CalculatedInsertion; reversed: boolean; accounting: "assembly"; externalFlanges?: { from?: string; to?: string } };
+  insertionAssembly?: { snapshot: import("./calculated-insertion").CalculatedInsertion; reversed: boolean; accounting: "assembly"; externalFlanges?: { from?: string; to?: string }; sensorConnection?: "fire-pressure-switch" };
   assemblyRole?: string;
   sourceFingerprint?: string;
   position: string;
@@ -123,9 +125,11 @@ export type DnEntity = {
 };
 export type ProjectEntity = InputEntity | ChartEntity | SketchEntity | SettingsEntity | DnEntity | SpecEntity | ComponentsEntity | CabinetEntity | ModelEntity | CollectorsEntity | IssuesEntity | AssistantEntity;
 
+declare const __PSC_CALC_METHOD__:string;
+export const calculationMethod=typeof __PSC_CALC_METHOD__==="string"?__PSC_CALC_METHOD__:"development";
 export type ProjectConfig = {
   schemaVersion: 1;
-  project: { id: string; name: string; createdAt: string; updatedAt: string };
+  project: { id: string; name: string; createdAt: string; updatedAt: string; modelLibraryVersion?: string; recalculatedAt?: string; calculationMethod?: string };
   station: { selectedPumpId?: string; selectedPumpModel?: string; workingPumpCount?: number; reservePumpCount?: number; totalPumpCount?: number; secondaryPumpId?: string; secondaryPumpModel?: string; secondaryWorkingPumpCount?: number; secondaryReservePumpCount?: number; secondaryTotalPumpCount?: number };
   workspace: { zoom: number; mode:WorkspaceMode; gridHeightScreens:number; grid:WorkspaceGrid; windows: PanelState[] };
   entities: Record<string, ProjectEntity>;
@@ -165,7 +169,7 @@ export function createProject(name = "Новая насосная станция
   const timestamp = seed?.timestamp ?? now();
   return synchronizeCollectors({
     schemaVersion: 1,
-    project: { id: seed?.id ?? projectId(), name, createdAt: timestamp, updatedAt: timestamp },
+    project: { calculationMethod, id: seed?.id ?? projectId(), name, createdAt: timestamp, updatedAt: timestamp },
     station: {},
     workspace: { zoom: 100, mode:"free", grid:{columns:2,rows:2,columnSizes:[1,1],rowSizes:[1,1],cells:["input","chart","spec","model"]}, gridHeightScreens:1, windows: DEFAULT_PANELS.map(window => ({ ...window })) },
     entities: {
@@ -197,7 +201,7 @@ export function normalizeGridHeightScreens(value: unknown): number {
   return Math.max(0.1, Number(value.toFixed(1)));
 }
 
-export function parseProjectConfig(raw: unknown): ProjectConfig {
+export function parseProjectConfig(raw: unknown, preserveCalculation = false): ProjectConfig {
   if (!raw || typeof raw !== "object") throw new Error("Файл не содержит объект проекта");
   const candidate = raw as Partial<ProjectConfig>;
   if (candidate.schemaVersion !== 1) throw new Error("Неподдерживаемая версия файла проекта");
@@ -216,7 +220,7 @@ export function parseProjectConfig(raw: unknown): ProjectConfig {
   const entities = { ...defaults.entities, ...candidate.entities } as Record<string, ProjectEntity>;
   entities["station-assistant"] = { kind: "assistant" };
   const rawModel = entities["station-model"] as Partial<ModelEntity> | null;
-  entities["station-model"] = { kind: "model", view: { rotation: finite(rawModel?.view?.rotation, 0), zoom: finite(rawModel?.view?.zoom, 1) }, mode: rawModel?.mode === "editor" ? "editor" : "preview", ...(rawModel?.editor ? { editor: normalizeEditor(rawModel.editor) } : {}) };
+  entities["station-model"] = { kind: "model", view: { rotation: finite(rawModel?.view?.rotation, 0), zoom: finite(rawModel?.view?.zoom, 1) }, mode: rawModel?.mode === "editor" ? "editor" : "preview", ...(rawModel?.editor ? { editor: normalizeEditor(rawModel.editor, false) } : {}) };
 
   const input = entities["system-input"] as InputEntity & { pumpCount?: number } | undefined;
   if (input?.kind === "input") entities["system-input"] = { ...input, staticHead: input.staticHead ?? 0, workingPumpCount: input.workingPumpCount == null ? null : Math.max(1, finite(input.workingPumpCount, Math.max(1, finite(input.pumpCount, 2) - 1))), reservePumpCount: input.reservePumpCount == null ? null : Math.max(0, finite(input.reservePumpCount, 1)), calculated: input.calculated ?? (input.flowRate != null && input.head != null) };
@@ -224,7 +228,7 @@ export function parseProjectConfig(raw: unknown): ProjectConfig {
   if (input2?.kind === "input") entities["system-input-2"] = { ...input2, staticHead: input2.staticHead ?? 0, workingPumpCount: input2.workingPumpCount == null ? null : Math.max(1, finite(input2.workingPumpCount, 1)), reservePumpCount: input2.reservePumpCount == null ? null : Math.max(0, finite(input2.reservePumpCount, 0)), calculated: input2.calculated ?? false };
   const rawSettings = entities["station-settings"] as Partial<SettingsEntity>;
   const stationType = rawSettings.stationType ?? "utility";
-  entities["station-settings"] = { kind: "settings", pressureChecksEnabled: rawSettings.pressureChecksEnabled !== false, inletHead: typeof rawSettings.inletHead === "number" && Number.isFinite(rawSettings.inletHead) ? rawSettings.inletHead : null, stationType, combinedCircuitsSimultaneous: stationType === "combined" && rawSettings.combinedCircuitsSimultaneous === true, membraneTank: rawSettings.membraneTank ?? false, membraneTankVolume: [8, 50, 100].includes(rawSettings.membraneTankVolume ?? 0) ? rawSettings.membraneTankVolume! : 8, vibrationCompensators: rawSettings.vibrationCompensators ?? false, collectorPlugs: rawSettings.collectorPlugs ?? false, isolatingValves: rawSettings.isolatingValves ?? false, jockeyPump: rawSettings.jockeyPump ?? false, ...(rawSettings.hydraulicOptions ? { hydraulicOptions: normalizeHydraulicOptions(rawSettings.hydraulicOptions) } : {}), usdRate: finite(rawSettings.usdRate, 85), cnyRate: finite(rawSettings.cnyRate, 13), manufacturerDiscounts: { cnp: finite(rawSettings.manufacturerDiscounts?.cnp, 45), aquastrong: finite(rawSettings.manufacturerDiscounts?.aquastrong, 55), onis: finite(rawSettings.manufacturerDiscounts?.onis, 0), vandjord: finite(rawSettings.manufacturerDiscounts?.vandjord, 25), wellmix: finite(rawSettings.manufacturerDiscounts?.wellmix, 35) } };
+  entities["station-settings"] = { kind: "settings", pressureChecksEnabled: rawSettings.pressureChecksEnabled !== false, inletHead: typeof rawSettings.inletHead === "number" && Number.isFinite(rawSettings.inletHead) ? rawSettings.inletHead : null, stationType, combinedCircuitsSimultaneous: stationType === "combined" && rawSettings.combinedCircuitsSimultaneous === true, membraneTank: rawSettings.membraneTank ?? false, membraneTankVolume: [8, 50, 80, 100].includes(rawSettings.membraneTankVolume ?? 0) ? rawSettings.membraneTankVolume! : 8, vibrationCompensators: rawSettings.vibrationCompensators ?? false, collectorPlugs: rawSettings.collectorPlugs ?? false, isolatingValves: rawSettings.isolatingValves ?? false, jockeyPump: rawSettings.jockeyPump ?? false, ...(rawSettings.hydraulicOptions ? { hydraulicOptions: normalizeHydraulicOptions(rawSettings.hydraulicOptions) } : {}), usdRate: finite(rawSettings.usdRate, 85), cnyRate: finite(rawSettings.cnyRate, 13), manufacturerDiscounts: { cnp: finite(rawSettings.manufacturerDiscounts?.cnp, 45), aquastrong: finite(rawSettings.manufacturerDiscounts?.aquastrong, 55), onis: finite(rawSettings.manufacturerDiscounts?.onis, 0), vandjord: finite(rawSettings.manufacturerDiscounts?.vandjord, 25), wellmix: finite(rawSettings.manufacturerDiscounts?.wellmix, 35) } };
   const rawDn = entities["station-dn"] as Partial<DnEntity>;
   const savedDn = (value:unknown) => typeof value === "number" && Number.isFinite(value) && value > 0 ? value : null;
   const connection = (value:unknown):ValveConnection|null => value==="threaded"||value==="flanged"?value:null;
@@ -232,6 +236,7 @@ export function parseProjectConfig(raw: unknown): ProjectConfig {
   const valveType = (value:unknown):ShutoffValveType|null => value==="butterfly"||value==="ball"?value:null;
   entities["station-dn"] = { kind:"dn", suctionCollectorDn:savedDn(rawDn.suctionCollectorDn), dischargeCollectorDn:savedDn(rawDn.dischargeCollectorDn), suctionValveDn:savedDn(rawDn.suctionValveDn), dischargeValveDn:savedDn(rawDn.dischargeValveDn), collectorMaterial:rawDn.collectorMaterial==="st20"||rawDn.collectorMaterial==="aisi304"?rawDn.collectorMaterial:null, connectionType:connection(rawDn.connectionType), pn:pn(rawDn.pn), suctionValveType:valveType(rawDn.suctionValveType), dischargeValveType:valveType(rawDn.dischargeValveType), secondarySuctionCollectorDn:savedDn(rawDn.secondarySuctionCollectorDn), secondaryDischargeCollectorDn:savedDn(rawDn.secondaryDischargeCollectorDn), secondarySuctionValveDn:savedDn(rawDn.secondarySuctionValveDn), secondaryDischargeValveDn:savedDn(rawDn.secondaryDischargeValveDn), secondaryConnectionType:connection(rawDn.secondaryConnectionType), secondaryPn:pn(rawDn.secondaryPn), secondarySuctionValveType:valveType(rawDn.secondarySuctionValveType), secondaryDischargeValveType:valveType(rawDn.secondaryDischargeValveType) };
   const parsedSettings = entities["station-settings"] as SettingsEntity;
+  parsedSettings.geometryEnabled = rawSettings.geometryEnabled === true;
   parsedSettings.baseValues = rawSettings.baseValues ?? legacyBaseSnapshot();
   if (!parsedSettings.baseValues?.versions || !parsedSettings.baseValues.values?.financial) throw new Error("Некорректная версия базовых значений");
   parsedSettings.manufacturerDiscounts = { ...parsedSettings.baseValues.values.financial.discounts, ...parsedSettings.manufacturerDiscounts, ...Object.fromEntries(Object.entries(rawSettings.manufacturerDiscounts ?? {}).filter(([,v]) => typeof v === "number" && Number.isFinite(v))) };
@@ -258,13 +263,29 @@ export function parseProjectConfig(raw: unknown): ProjectConfig {
   const hasSavedCells=Array.isArray(rawGrid?.cells),savedCells=hasSavedCells?rawGrid!.cells.slice(0,cellCount).map(id=>typeof id==="string"&&windows.some(panel=>panel.id===id)?id:null):[];
   const fallbackCells=windows.filter(panel=>!panel.minimized).slice(0,cellCount).map(panel=>panel.id);
   const cells=Array.from({length:cellCount},(_,index)=>hasSavedCells?savedCells[index]??null:fallbackCells[index]??null);
-  return synchronizeCollectors({
+  const config:ProjectConfig={
     schemaVersion: 1,
     project: { ...candidate.project, name: candidate.project.name.trim() || "Без названия", createdAt: candidate.project.createdAt || now(), updatedAt: candidate.project.updatedAt || now() },
     station: candidate.station ?? {},
     workspace: { zoom: Math.min(150, Math.max(50, finite(candidate.workspace.zoom, 100))), mode, gridHeightScreens:normalizeGridHeightScreens(rawWorkspace.gridHeightScreens), grid:{columns,rows,columnSizes:normalizeSizes(rawGrid?.columnSizes,columns),rowSizes:normalizeSizes(rawGrid?.rowSizes,rows),cells}, windows: needsSettingsPanel ? [...windows, { ...DEFAULT_PANELS.find(window => window.activeTool === "settings")! }] : windows },
     entities,
-  });
+  };
+  const normalized=synchronizeCollectors(config);
+  if(!preserveCalculation)return normalized;
+  const collectors=normalized.entities["station-collectors"] as CollectorsEntity;
+  const saved=candidate.entities["station-collectors"] as Partial<CollectorsEntity>|undefined;
+  for(const side of ["suction","discharge"] as const){
+    const original=saved?.[side];
+    if(original?.configuration && original.recommended){
+      const checked=collectors[side];
+      collectors[side]={...checked,configuration:original.configuration,recommended:original.recommended,
+        code:original.code,status:original.status,database:original.database,databaseStatus:original.databaseStatus,
+        currentCatalogVersion:original.currentCatalogVersion,sourceFingerprint:original.sourceFingerprint,
+        calculation:(entities["station-collectors"] as CollectorsEntity)[side].calculation};
+    }
+  }
+  // Opening a snapshot must not substitute today's collector pricing in its BOM.
+  return {...normalized,entities:{...normalized.entities,"station-collectors":collectors,"station-spec":entities["station-spec"]}};
 }
 
 export function withUpdatedTimestamp(config: ProjectConfig): ProjectConfig {

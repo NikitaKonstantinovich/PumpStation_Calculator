@@ -26,6 +26,9 @@ globalThis.__usersTestEnv = { DB };
 const serverUrl = new URL("../app/auth-server.ts", import.meta.url);
 const serverSource = (await readFile(serverUrl, "utf8")).replace('import { env } from "cloudflare:workers";', "const env = globalThis.__usersTestEnv;");
 const replacements = { [serverUrl.href]: serverSource };
+const projectRecords=new Map();
+globalThis.__rolesSave=(owner,config)=>{projectRecords.set(owner+config.project.id,JSON.stringify(config));return Response.json({revision:1});};
+replacements[new URL("../app/project-storage-server.ts",import.meta.url).href]='export const projectLimit=()=>10000000;export const storageOperation=(owner,{config})=>globalThis.__rolesSave(owner,config);';
 const auth = await loadTs(serverUrl, replacements);
 const api = await loadTs(new URL("../app/api/users/route.ts", import.meta.url), replacements);
 const login = await loadTs(new URL("../app/api/auth/route.ts", import.meta.url), replacements);
@@ -167,7 +170,7 @@ test("project API enforces tiers on every save and preserves existing data when 
     database.prepare("INSERT INTO users(id,email,name,password_hash,email_verified_at,role,access_level) VALUES(?,?,?,?,CURRENT_TIMESTAMP,?,?)").run(id, `${id}@example.test`, id, passwordHash, role === "admin" ? "admin" : "user", role === "admin" ? "base" : role);
     const token = await auth.createSession(id), config = createProject();
     assert.equal((await projects.PUT(request("PUT", token, { config }))).status, 200);
-    const saved = () => database.prepare("SELECT config_json FROM user_projects WHERE id=?").get(config.project.id).config_json;
+    const saved = () => projectRecords.get(id+config.project.id);
     const original = saved();
     config.entities["station-settings"].usdRate = 125;
     assert.equal((await projects.PUT(request("PUT", token, { config }))).status, ["pro", "admin"].includes(role) ? 200 : 403);

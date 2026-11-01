@@ -1,10 +1,12 @@
 import type { CollectorCardState } from "../collector-project";
-import { activeCircuits, configurationFingerprint, flangeKinds, pumpCount } from "../collector-calculations";
+import { activeCircuits, matchesCollectorConfiguration, flangeKinds, pumpCount } from "../collector-calculations";
 import type { Component, Vec3, Bounds } from "./model";
 import type { LineCatalog, LineGeometry } from "./line-types";
 import type { InsertionPiece } from "./insertion-types";
 import { collectorGeometryKey, defaultCollectorMount, resolveCollectorMount, type CollectorTemplate, type CollectorBranch } from "./collector-types";
 import { saddleRings } from "./collector-intersection";
+import tankModels from "../../data/tank-models.json";
+import { TANK_COLLECTOR_OFFSET_MM } from "../tank-connection";
 
 const positive=(v:unknown):v is number=>typeof v==="number"&&Number.isFinite(v)&&v>0;
 const add=(a:Vec3,b:Vec3):Vec3=>a.map((v,i)=>v+b[i]) as Vec3;
@@ -19,10 +21,24 @@ const turn=(v:Vec3,angles:Vec3):Vec3=>{
 const rotation=(axis:Vec3):Vec3=>[0,
   Math.hypot(axis[0],axis[2])<1e-12?0:Math.atan2(-axis[2],axis[0])*180/Math.PI,
   Math.asin(Math.max(-1,Math.min(1,axis[1])))*180/Math.PI];
-const piece=(id:string,componentId:string,name:string,point:Vec3,axis:Vec3,g?:LineGeometry):InsertionPiece=>({id,componentId,name,position:point,rotation:rotation(axis),role:id,auxiliary:false,
+const piece=(id:string,componentId:string,name:string,point:Vec3,axis:Vec3,g?:LineGeometry):InsertionPiece=>({id,componentId,name,position:[...point],rotation:rotation(axis),role:id,auxiliary:false,
   shape:g?.shape??{kind:"marker"},ports:[],source:g?.source??"Размеры не подтверждены",fidelity:g?.shape?g.fidelity:"missing"});
 
+export function collectorTankX(t:CollectorTemplate):number|undefined {
+  if(t.side!=="discharge")return;
+  const pumps=t.ports.filter(p=>!p.id.startsWith("network-")&&!p.id.startsWith("instrument"));
+  const last=pumps.at(-1),left=t.ports.find(p=>p.id==="network-left"),right=t.ports.find(p=>p.id==="network-right");
+  if(!left||!right)return;
+  const sign=last&&Math.abs(last.point[0]-left.point[0])+1e-6<Math.abs(last.point[0]-right.point[0])?-1:1;
+  return (sign===1?right:left).point[0]-sign*TANK_COLLECTOR_OFFSET_MM;
+}
 export function finishCollectorTemplate(t:CollectorTemplate):CollectorTemplate {
+  const target=collectorTankX(t),tank=t.branches.find(b=>b.id==="instrument-tank-0"),port=t.ports.find(p=>p.id==="instrument-tank-0");
+  if(target!==undefined&&(tank||port)){
+    const old=tank?.origin[0]??port!.point[0],dx=target-old;
+    if(tank)tank.origin[0]=target;if(port)port.point[0]=target;
+    for(const p of t.pieces)if(p.id==="instrument-tank-0"||p.id.startsWith("instrument-tank-0-"))p.position[0]+=dx;
+  }
   const main=t.main, r=main?main.outerMm/2:1, l=main?main.lengthMm/2:1;
   const points:Vec3[]=[[-l,-r,-r],[l,r,r]];
   for(const b of t.branches) if(main)try { const rings=saddleRings(main,b);points.push(...rings.outer,...rings.outerEnd); }catch { points.push(add(b.origin,mul(b.axis,b.endMm))); }
@@ -50,7 +66,7 @@ export function buildCollectorTemplate(card:CollectorCardState, data:LineCatalog
   ],geometryKey:"",bounds:[-1,-1,-1,1,1,1]};
   if(bottom)t.assumptions.push("Напорные линии идут вверх от выходов насосов; насосные патрубки коллектора направлены вниз. Сгоны КИП остаются сверху; длины взяты из расчёта и спецификации.");
   const c=card.configuration,calc=card.calculation;
-  if(!c||!calc||calc.fingerprint!==configurationFingerprint(c)){t.issues.push("Нет расчёта, соответствующего конфигурации коллектора. Рассчитайте коллектор и обновите состав.");return finishCollectorTemplate(t);}
+  if(!c||!calc||!matchesCollectorConfiguration(calc.fingerprint,c)){t.issues.push("Нет расчёта, соответствующего конфигурации коллектора. Рассчитайте коллектор и обновите состав.");return finishCollectorTemplate(t);}
   if(card.status==="stale"||card.currentCatalogVersion&&card.currentCatalogVersion!==calc.catalogVersion)t.issues.push("Расчёт коллектора устарел. Показана геометрия по сохранённому составу и монтажным длинам; актуальность расчёта и цены требует пересчёта в конструкторе.");
   if(activeCircuits(c).reduce((n,g)=>n+pumpCount(g),0)>90){t.issues.push("Больше 90 насосных патрубков: превышен предел монтажного шаблона. Геометрия не построена.");return finishCollectorTemplate(t);}
   const row=(role:string)=>calc.bom.find(b=>b.role===role), geometry=(role:string)=>{const id=row(role)?.componentId;return id?data.items[id]:undefined;};
@@ -103,15 +119,17 @@ export function buildCollectorTemplate(card:CollectorCardState, data:LineCatalog
   if(t.main)for(const [name,s]of [["left",-1],["right",1]] as const){const d:Vec3=[s,0,0],tip:Vec3=[s*t.main.lengthMm/2,0,0],face=c.connection==="flanged"?flange(`end-${name}`,"end",c.dn??0,c.pn,t.main.outerMm,tip,d,s<0?"Левый конец":"Правый конец"):tip;
     t.ports.push({id:`network-${name}`,point:face,axis:d,provisional:true,dn:c.dn??undefined,pn:c.pn,material:c.material,connection:c.connection,plane:c.connection==="threaded"?"thread-reference":"mating-face",source:"Монтажный шаблон коллектора v1"});}
   const instruments=calc.bom.filter(r=>r.kind==="nipple"&&r.role.startsWith("instrument"));
-  let instrumentIndex=0;const count=instruments.reduce((sum,r)=>sum+(r.quantity??0),0);
+  const tankX=instruments.some(r=>r.role==="instrument-tank")?collectorTankX(t):undefined;
+  let instrumentIndex=0;const count=instruments.reduce((sum,r)=>sum+(r.role==="instrument-tank"&&tankX!==undefined?0:r.quantity??0),0);
   const slots=[-calc.lengthMm/2,...t.ports.filter(p=>!p.id.startsWith("network-")).map(p=>p.point[0]),calc.lengthMm/2].sort((a,b)=>a-b);
+  if(tankX!==undefined){slots.push(tankX);slots.sort((a,b)=>a-b);t.assumptions.push("Сгон бака: ось на расстоянии 200 мм от привалочной плоскости торцевого фланца со стороны последнего насоса, по решению пользователя 01.11.2026.");}
   const gaps=slots.slice(1).map((right,i)=>({width:right-slots[i],x:(right+slots[i])/2})).filter(g=>g.width>0).sort((a,b)=>b.width-a.width||a.x-b.x);
   const instrumentXs=gaps.slice(0,count).map(g=>g.x);
   while(instrumentXs.length<count){const available=[...slots,...instrumentXs].sort((a,b)=>a-b);let gap=0;for(let j=1;j<available.length-1;j++)if(available[j+1]-available[j]>available[gap+1]-available[gap])gap=j;instrumentXs.push((available[gap]+available[gap+1])/2);}
   instrumentXs.sort((a,b)=>a-b);
   for(const r of instruments)for(let j=0;j<(r.quantity??0);j++){
     const instrument=c.instrumentPorts?.find(p=>r.role===`instrument-${p.id}`);
-    const id=`${r.role}-${j}`,g=geometry(r.role),override=mount.instrumentLengthsMm[id],length=override??instrument?.lengthMm??mount.instrumentDefaultLengthMm!,reference=override!==undefined?mount.instrumentLengthReference!:"blank-length",x=instrumentXs[instrumentIndex++],origin:Vec3=[x,0,0],a:Vec3=[0,0,1];
+    const id=`${r.role}-${j}`,g=geometry(r.role),override=mount.instrumentLengthsMm[id],length=override??instrument?.lengthMm??mount.instrumentDefaultLengthMm!,reference=override!==undefined?mount.instrumentLengthReference!:"blank-length",x=r.role==="instrument-tank"&&tankX!==undefined?tankX:instrumentXs[instrumentIndex++],origin:Vec3=[x,0,0],a:Vec3=[0,0,1];
     const dn=instrument?.dn??g?.dn??Number(r.role.match(/^instrument(\d+)$/)?.[1]),name=`Сгон DN${dn} · ${j+1}`;
     let end=(t.main?.outerMm??0)/2+length;
     if(positive(length)&&positive(g?.outerDiameter)&&positive(g?.wall)&&g.wall*2<g.outerDiameter){
@@ -126,8 +144,20 @@ export function buildCollectorTemplate(card:CollectorCardState, data:LineCatalog
       addBranch(b,true);
     }else {t.pieces.push(piece(id,r.componentId??id,name,add(origin,mul(a,end)),a));t.issues.push(`${id}: длина ${length} мм задана; не подтверждены ${positive(g?.outerDiameter)?"толщина стенки":"наружный диаметр и толщина стенки"} выбранного сгона. Показан символ.`);}
     const tip=add(origin,mul(a,end));
-    const plug=row(`${r.role}-plug`);if(plug){t.pieces.push(piece(`${id}-plug`,plug.componentId??`${id}-plug`,`Резьбовая заглушка · DN${dn}.${j+1}`,tip,a));
-    t.issues.push(`${id}-plug: не подтверждены габариты и глубина навинчивания заглушки; показан символ`);}
+    const physical=t.branches.find(b=>b.id===id);
+    if(positive(length)&&positive(dn))t.ports.push({id,point:tip,axis:a,provisional:true,dn,pn:c.pn,material:c.material,
+      connection:instrument?.threaded===false?"weld":"threaded",plane:instrument?.threaded===false?"weld-end":"thread-reference",
+      ...(instrument?.threaded!==false?{thread:({15:"G1/2",20:"G3/4",25:"G1",32:"G1¼",40:"G1½",50:"G2"} as Record<number,string>)[dn],gender:"male" as const}:{}),
+      ...(instrument?.state==="occupied"&&/^kip-\d+$/.test(instrument.id)?{occupiedBy:"kip"}:{}),
+      ...(instrument?.state==="occupied"&&instrument.id==="tank"?{occupiedBy:"tank"}:{}),
+      boreMm:physical?.innerMm,source:physical?"Свободный торец сгона коллектора; номинальная база подключения КИП":"Расчётный торец сгона; геометрия стенки не подтверждена, показан символ"});
+    const plug=row(`${r.role}-plug`);if(plug){
+      const p=piece(`${id}-plug`,plug.componentId??`${id}-plug`,`${r.role==="instrument-tank"?"Гайка-заглушка сгона бака":"Резьбовая заглушка"} · DN${dn}.${j+1}`,tip,a);
+      if(r.role==="instrument-tank"&&dn===20){const cap=tankModels.assets.cap20;p.rotation=[0,0,0];p.shape={kind:"mesh",meshUrl:cap.meshUrl,modelHash:cap.sourceHash,meshBounds:cap.bounds as [number,number,number,number,number,number],modelPosition:cap.position as Vec3,modelRotation:cap.rotation as Vec3};p.fidelity="cad";p.source=`${cap.source}; сетка DN20, номинальное навинчивание 10 мм. Материал и PN — по выбранной позиции BOM.`;}
+      else if(r.role==="instrument-tank"){p.position=add(tip,[0,0,-10]);p.shape={kind:"hex-cap",lengthMm:24,outerMm:(g?.outerDiameter??dn+9)+12.5,innerMm:(g?.outerDiameter??dn+9)+.5};p.fidelity="outline";p.source="Компоновочная гайка-заглушка по DN сгона; точные размеры шестигранника, высоты и глубина навинчивания требуют проверки.";t.issues.push(`${id}-plug: показана компоновочная гайка-заглушка, её габариты не подтверждены.`);}
+      else t.issues.push(`${id}-plug: не подтверждены габариты и глубина навинчивания заглушки; показан символ`);
+      t.pieces.push(p);
+    }
   }
   return finishCollectorTemplate(t);
 }

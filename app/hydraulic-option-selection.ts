@@ -16,7 +16,7 @@ export type HydraulicProductRequirement = {
   threadGender?: "male" | "female";
   range?: { min: number; max: number };
   signal?: string;
-  supplyVoltage?: number;
+  pressureBasis?: string;
   overloadBar?: number;
   color?: "red" | "blue";
   actuator?: "handle" | "gear" | "bare";
@@ -105,7 +105,7 @@ export function assessHydraulicProduct(item: AssemblyComponent, need: HydraulicP
   if (hydraulicProductKind(item) !== need.kind) incompatible.push("Изделие другого назначения.");
   if (!(typeof need.pressureBar === "number" && Number.isFinite(need.pressureBar) && need.pressureBar >= 0)) missing.push("Не подтверждено требуемое рабочее давление.");
   if (facts.pressureBar === null) missing.push("Не указано допустимое рабочее давление изделия; измерительный диапазон его не заменяет.");
-  else if (need.pressureBar !== null && facts.pressureBar < need.pressureBar) incompatible.push(`Допустимое давление ${facts.pressureBar} бар ниже требуемого ${need.pressureBar} бар.`);
+  else if (need.pressureBar !== null && facts.pressureBar + 1e-9 < need.pressureBar) incompatible.push(`Допустимое давление ${facts.pressureBar} бар ниже требуемого ${need.pressureBar} бар.`);
   if (need.kind === "tank") equal("объём, л", facts.volumeLitres, need.volumeLitres);
   if (need.kind === "tank" || need.kind === "transducer") {
     if (need.thread) equal("резьба", facts.thread, hydraulicThread(need.thread));
@@ -116,11 +116,8 @@ export function assessHydraulicProduct(item: AssemblyComponent, need: HydraulicP
   if (need.kind === "transducer") {
     if (!need.range || !Number.isFinite(need.range.min) || !Number.isFinite(need.range.max) || need.range.min >= need.range.max) missing.push("Не подтверждён требуемый диапазон измерения.");
     else if (!facts.range) missing.push("Не указан измерительный диапазон изделия.");
-    else if (facts.range.min > need.range.min || facts.range.max < need.range.max) incompatible.push("Измерительный диапазон не покрывает требуемый диапазон.");
+    else if (facts.range.min > need.range.min + 1e-9 || facts.range.max + 1e-9 < need.range.max) incompatible.push("Измерительный диапазон не покрывает требуемый диапазон.");
     equal("выходной сигнал", facts.signal, hydraulicSignal(need.signal));
-    if (!need.supplyVoltage || !Number.isFinite(need.supplyVoltage)) missing.push("Не подтверждено питание от шкафа управления.");
-    else if (!facts.supply) missing.push("Не указано напряжение питания изделия.");
-    else if (need.supplyVoltage < facts.supply.min || need.supplyVoltage > facts.supply.max) incompatible.push("Питание шкафа вне допустимого диапазона преобразователя.");
     if (need.overloadBar !== undefined) {
       if (facts.overloadBar === null) missing.push("Не указано допустимое давление перегрузки.");
       else if (facts.overloadBar < need.overloadBar) incompatible.push("Допустимая перегрузка ниже требуемой.");
@@ -140,7 +137,9 @@ export function assessHydraulicProduct(item: AssemblyComponent, need: HydraulicP
 /** Price never participates in compatibility or candidate ordering. Explicit choices survive catalogue changes. */
 export function selectHydraulicProduct(items: AssemblyComponent[], need: HydraulicProductRequirement, selectedId?: string) {
   const candidates = items.filter(item => hydraulicProductKind(item) === need.kind).map(item => assessHydraulicProduct(item, need));
-  const compatible = candidates.filter(candidate => !candidate.incompatible.length).sort((a, b) => a.missing.length - b.missing.length || a.item.id.localeCompare(b.item.id));
+  const compatible = candidates.filter(candidate => !candidate.incompatible.length).sort((a, b) => a.missing.length - b.missing.length
+    || (need.kind === "transducer" ? (hydraulicProductFacts(a.item).range?.max ?? Infinity) - (hydraulicProductFacts(b.item).range?.max ?? Infinity) : 0)
+    || a.item.id.localeCompare(b.item.id));
   const selected = selectedId ? candidates.find(candidate => candidate.item.id === selectedId) : compatible[0];
   return { selected, candidates, missingSelection: Boolean(selectedId && !selected), explanation: selectedId && !selected
     ? `Выбранное изделие ${selectedId} отсутствует в каталоге этого назначения.`

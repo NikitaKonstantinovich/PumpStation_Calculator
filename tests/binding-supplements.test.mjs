@@ -28,17 +28,21 @@ test("supplier import adds six verified SKUs idempotently after a workbook reimp
 test("LD female caps complete steel and stainless BOMs without adding welds", () => {
   const catalog = makeCollectorCatalog(mergeBindingSupplement(binding, supplier));
   for (const material of ["aisi304", "st20"]) {
-    const c = configuration(material);
+    const c = {...configuration(material),instrumentPorts:[
+      {id:"reserve-15-1",dn:15,state:"capped"},{id:"reserve-15-2",dn:15,state:"capped"},
+      {id:"tank",dn:20,state:"capped"},{id:"kip-1",dn:15,state:"occupied"},
+    ]};
     const result = calculateCollector(c, catalog);
     assert.deepEqual(result.warnings, []);
     assert.equal(result.complete, true);
     const caps = result.bom.filter(v => v.kind === "plug");
-    assert.deepEqual(caps.map(v => [v.componentId, v.quantity, v.unitPrice]), [[`${supplier.id}:LD.67.504.15`,2,56.12],[`${supplier.id}:LD.67.504.20`,1,82.96]]);
+    const grouped=new Map();for(const row of caps){const previous=grouped.get(row.componentId);grouped.set(row.componentId,[row.componentId,(previous?.[1]??0)+row.quantity,row.unitPrice]);}
+    assert.deepEqual([...grouped.values()], [[`${supplier.id}:LD.67.504.15`,2,56.12],[`${supplier.id}:LD.67.504.20`,1,82.96]]);
     assert.ok(result.bom.filter(v => v.kind === "nipple").every(v => catalog.components.find(i => i.id === v.componentId).material === material));
     const withoutCaps = calculateCollector(c, { ...catalog, components: catalog.components.filter(v => v.kind !== "plug") });
     assert.equal(result.weldCost, withoutCaps.weldCost);
     assert.ok(Math.abs(result.price - withoutCaps.subtotal - (2 * 56.12 + 82.96)) < 1e-8);
-    const suction = calculateCollector({ ...c, type: "suction" }, catalog);
+    const suction = calculateCollector({ ...c, type: "suction",instrumentPorts:[{id:"reserve-15",dn:15,state:"capped"}] }, catalog);
     assert.deepEqual(suction.bom.filter(v => v.kind === "plug").map(v => [v.quantity, v.unitPrice]), [[1,56.12]]);
   }
 });

@@ -1,0 +1,12 @@
+.ribbon__tools:has(.cad-export){overflow:visible;flex-wrap:wrap;height:auto;min-height:72px}
+.cad-export{position:relative;display:flex;flex:none;align-items:center;gap:10px;padding:0 12px;border-left:1px solid var(--theme-border,#cbd5e1)}
+.cad-export__options{position:absolute;z-index:1000;top:100%;right:0;width:310px;max-width:calc(100vw - 32px);padding:6px;background:var(--theme-surface,#fff);color:var(--theme-text-primary,#172b3a);border:1px solid var(--theme-border,#cbd5e1);border-radius:10px;box-shadow:0 8px 24px #0002}
+.cad-export__options button{display:block!important;width:100%;height:auto!important;text-align:left;padding:12px!important;border-radius:6px}
+.cad-export__options small{display:block!important;margin-top:5px;opacity:.7}
+.cad-export__status{font-size:12px;max-width:420px}
+.cad-export__options a{display:block;padding:8px}
+.cad-export button:disabled{opacity:.55;cursor:default}
+.cad-warnings{min-height:0;overflow:auto;padding:12px;overflow-wrap:anywhere}
+.cad-warnings p{margin:6px 0}
+.cad-warnings li{border-top:1px solid var(--theme-border,#cbd5e1);padding:8px 0}
+.model-tool__mode [role=tab][aria-selected=true]{font-weight:700;border-bottom:2px solid var(--theme-primary,#2784b4)}

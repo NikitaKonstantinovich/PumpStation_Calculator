@@ -11,7 +11,9 @@ const { componentPressureLimit, withInletPressureChecks } = await loadTs(new URL
 const { checkSuctionSpecPressure } = await loadTs(new URL("../app/suction-spec.ts", import.meta.url));
 const { createProject, parseProjectConfig } = await loadTs(new URL("../app/project-config.ts", import.meta.url));
 const { synchronizeCollectors } = await loadTs(new URL("../app/collector-project.ts", import.meta.url));
-const { collectorPressureChecks } = await loadTs(new URL("../app/collector-calculations.ts", import.meta.url));
+const { collectorPressureChecks, calculateCollector } = await loadTs(new URL("../app/collector-calculations.ts", import.meta.url));
+const { makeCollectorCatalog } = await loadTs(new URL("../app/collector-catalog.ts", import.meta.url));
+const collectorCatalog = makeCollectorCatalog(JSON.parse(await readFile(new URL("../public/binding-components.json", import.meta.url), "utf8")));
 const component = (id, fields = { PN: 16 }, family = id) => ({ id, family, catalogId: "test", fields: Object.entries(fields).map(([label, value]) => ({ column: label, headerPath: [label], value })), prices: [{ label: "Цена", amount: 125, currency: "RUB" }] });
 const row = (id, patch = {}) => ({ position: "03.10", name: id, equipmentId: id, section: "suction", details: "Выбрано пользователем", price: 125, quantity: 2, status: "selected", description: "Существующее описание", ...patch });
 function project(head = 200, pn = 16) {
@@ -117,7 +119,7 @@ test("collector BOM checks actual component ratings and reports missing ratings"
 test("collector pressure warning preserves a database price and is removed after lowering head", () => {
   let p = project(200, 16);
   const state = p.entities["station-collectors"].suction;
-  state.database = { id: "saved-collector", code: state.code, price: 12345 };
+  state.database = { id: "saved-collector", code: state.code, price: 12345, calculation: calculateCollector(state.configuration,collectorCatalog) };
   state.databaseStatus = "found";
   p = synchronizeCollectors(p);
   const high = p.entities["station-spec"].items.find(item => item.option === "suctionCollector");
@@ -163,4 +165,14 @@ test("actual specification render keeps technical descriptions and warnings behi
   assert.doesNotMatch(html, /проверить размеры|200 м|19,6 бар|превышает PN16/);
   const css = await readFile(new URL("../app/globals.css", import.meta.url), "utf8");
   assert.match(css, /\.spec-table__row--warning\s*\{\s*background:var\(--theme-surface-warning, #fff8df\)/);
+  const {fixture,sync,rows}=await import("./fixtures/station-specification.mjs");
+  const flatProject=fixture();flatProject.entities["station-settings"].stationType="fire";
+  const selected=sync(flatProject),parts=rows(selected).filter(r=>r.assemblyRole==="discharge:transducer"||r.hydraulicPart?.location==="discharge:transducer");
+  const flatHtml=renderToStaticMarkup(createElement(Specification,{project:selected,issues:[],entity:{...selected.entities["station-spec"],items:parts},settings:selected.entities["station-settings"]}));
+  assert.equal((flatHtml.match(/spec-table__row--item/g)??[]).length,4);
+  assert.equal((flatHtml.match(/spec-table__cell--quantity">2<\/span>/g)??[]).length,3);
+  assert.match(flatHtml,/spec-table__cell--quantity">0\.6<\/span>/);
+  assert.match(flatHtml,/spec-table__cell--price[^>]*>3\s445,91<\/span>/);
+  assert.doesNotMatch(flatHtml,/spec-table__row--warning|Не подтверждено требуемое рабочее давление|не указано допустимое рабочее давление/i);
+  assert.doesNotMatch(flatHtml,/Стоимость комплекта|Состав на один комплект|Состав на 1 узел/);
 });

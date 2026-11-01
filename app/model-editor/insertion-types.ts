@@ -10,7 +10,7 @@ export type ConnectionPoint = {
   boreMm?: number; boltCircleMm?: number; boltHoles?: number; boltHoleMm?: number;
 };
 export type InsertionShape = {
-  kind: "tube" | "reducer-outline" | "flange" | "collar" | "marker" | "mesh";
+  kind: "tube" | "reducer-outline" | "flange" | "collar" | "marker" | "mesh" | "hex-cap";
   lengthMm?: number; outerMm?: number; innerMm?: number; smallOuterMm?: number; smallInnerMm?: number;
   offset?: Vec3; lipOuterMm?: number; lipThicknessMm?: number;
   boltCircleMm?: number; boltHoles?: number; boltHoleMm?: number;
@@ -72,7 +72,7 @@ export function parseInsertionTemplate(raw: unknown): InsertionTemplate | null {
   for (const rawPiece of g.pieces) {
     const p = obj(rawPiece), shape = obj(p.shape);
     if (typeof p.auxiliary !== "boolean" || !id(p.id) || ids.has(p.id) || !id(p.componentId) || !text(p.name, 1000) || !id(p.role) || !vec(p.position) || !vec(p.rotation) || !text(p.source, 20000)
-      || !["cad", "parametric", "outline", "missing"].includes(String(p.fidelity)) || !["tube", "reducer-outline", "flange", "collar", "marker", "mesh"].includes(String(shape.kind))
+      || !["cad", "parametric", "outline", "missing"].includes(String(p.fidelity)) || !["tube", "reducer-outline", "flange", "collar", "marker", "mesh", "hex-cap"].includes(String(shape.kind))
       || !Array.isArray(p.ports) || p.ports.length > 8 || p.ports.some(v => !parseConnectionPoint(v))) return null;
     ids.add(p.id);
     if (!validShapeThread(shape)) return null;
@@ -86,7 +86,7 @@ export function parseInsertionTemplate(raw: unknown): InsertionTemplate | null {
     if (shape.boltHoles !== undefined && (!Number.isInteger(shape.boltHoles) || (shape.boltHoles as number) > 128)) return null;
     for (const k of ["offset", "modelRotation", "modelPosition"]) if (shape[k] !== undefined && !vec(shape[k])) return null;
     if (shape.kind === "mesh" && (!text(shape.modelHash, 64) || !/^[a-f0-9]{64}$/.test(shape.modelHash) || shape.meshUrl !== `/model-assets/model-${shape.modelHash}-v1.stl` || !Array.isArray(shape.meshBounds) || shape.meshBounds.length !== 6 || !shape.meshBounds.every(finite))) return null;
-    if (["tube", "flange", "collar", "reducer-outline"].includes(String(shape.kind)) && (!(Number(shape.lengthMm) > 0) || !(Number(shape.outerMm) > 0))) return null;
+    if (["tube", "flange", "collar", "reducer-outline", "hex-cap"].includes(String(shape.kind)) && (!(Number(shape.lengthMm) > 0) || !(Number(shape.outerMm) > 0))) return null;
   }
   if (g.ports.some(v => !parseConnectionPoint(v))) return null;
   for (const rawJoint of g.joints) {

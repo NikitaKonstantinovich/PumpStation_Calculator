@@ -56,7 +56,7 @@ test("main and separating valves share the same concrete parts through sync, imp
   const manual = { position: "99", name: "Ручной комплект заказчика", section: "electrical", quantity: 1, price: 3000, status: "selected", details: "" };
   rows(p).push(manual);
   let result = sync(p);
-  const all = rows(result).flatMap(row => row.hydraulicAssembly ? row.hydraulicAssembly.parts.map(part => ({ ...part, quantity: part.quantity * row.quantity })) : [row]);
+  const all = rows(result).flatMap(row => row.hydraulicAssembly?.accounting==="assembly" ? row.hydraulicAssembly.parts.map(part => ({ ...part, quantity: part.quantity * row.quantity })) : [row]);
   const switches = all.filter(row => row.assemblyRole?.endsWith("-limit-switches-switch"));
   const brackets = all.filter(row => row.assemblyRole?.endsWith("-limit-switches-bracket"));
   assert.equal(switches.reduce((sum, row) => sum + row.quantity, 0), 20); // 6 main + 4 separating valves.

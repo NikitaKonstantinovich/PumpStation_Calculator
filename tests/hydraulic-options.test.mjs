@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { fixture, choose, sync, rows, resources, parseProjectConfig, load, assessSpecification } from "./fixtures/station-specification.mjs";
 const { calculateCollector } = await load("collector-calculations");
-const { hydraulicAssemblyPrice, hydraulicOptionCatalog } = await load("hydraulic-option-assembly");
+const { hydraulicProductRowPrice, hydraulicOptionCatalog } = await load("hydraulic-option-assembly");
 const { tankMounting } = await load("tank-mounting");
 const { specificationExportRows, specificationCsv } = await load("specification-export");
 const { stationHydraulicPortLedger } = await load("station-hydraulic-ports");
@@ -10,20 +10,21 @@ const options = p => rows(p).filter(row => row.generatedBy === "hydraulic-option
 const role = (p, name) => options(p).find(row => row.assemblyRole === name);
 const part = (row, name) => row.hydraulicAssembly.parts.find(p => p.assemblyRole === name);
 
-test("base preferences choose compatible products in order and retain the project's previous selection",async()=>{
+test("station transducer policy ignores obsolete preferences and exposes only two ONI variants",async()=>{
   const {legacyBaseSnapshot}=await load("base-values");
   const original=role(sync(fixture()),"discharge:transducer").equipmentId;
-  const source=hydraulicOptionCatalog(resources.components.items).find(item=>item.id===original);
+  const raw=hydraulicOptionCatalog(resources.components.items).find(item=>item.id===original);
+  const source={...raw,fields:[...raw.fields,{column:"TEST_PN",headerPath:["PN"],value:16}]};
   const preferred={...structuredClone(source),id:"preferred-compatible-transducer"};
-  const data={...resources,components:{...resources.components,items:[...resources.components.items,preferred]}};
+  const data={...resources,components:{...resources.components,items:[...resources.components.items.filter(i=>i.id!==original),source,preferred]}};
   const project=fixture();project.entities["station-settings"].baseValues=legacyBaseSnapshot();
   project.entities["station-settings"].baseValues.values.preferences.rules=[{id:"test",stationType:"all",side:"discharge",role:"transducer",productIds:["missing-preferred-product",preferred.id]}];
-  const selected=sync(project,data),row=role(selected,"discharge:transducer");assert.equal(row.equipmentId,preferred.id);assert.ok(row.hydraulicAssembly.findings.some(f=>/Предпочтительное изделие/.test(f)));
+  const selected=sync(project,data),row=role(selected,"discharge:transducer");assert.equal(row.equipmentId,original);assert.equal(row.hydraulicAssembly.candidates.length,2);assert.ok(!row.hydraulicAssembly.candidates.some(c=>c.id===preferred.id));
   assert.strictEqual(sync(selected,data),selected,"warning and selection must remain stable on repeated calculation");
   selected.entities["station-settings"].baseValues.values.preferences.rules[0].productIds=[original];
-  assert.equal(role(sync(selected,data),"discharge:transducer").equipmentId,preferred.id,"previous choice remains until explicit update");
+  assert.equal(role(sync(selected,data),"discharge:transducer").equipmentId,original,"automatic choice follows the 160 m policy");
   const wrong=fixture();wrong.entities["station-settings"].baseValues=legacyBaseSnapshot();wrong.entities["station-settings"].baseValues.values.preferences.rules=[{id:"wrong-kind",stationType:"all",side:"discharge",role:"transducer",productIds:["not-a-compatible-transducer"]}];
-  const fallback=role(sync(wrong),"discharge:transducer");assert.equal(fallback.equipmentId,original);assert.ok(fallback.hydraulicAssembly.findings.some(f=>/Предпочтительное изделие/.test(f)));
+  const fallback=role(sync(wrong),"discharge:transducer");assert.equal(fallback.equipmentId,original);assert.ok(!fallback.hydraulicAssembly.findings.some(f=>/Предпочтительное изделие/.test(f)));
 });
 
 test("confirmed KIP scheme for all station types: relay on suction, transducer on discharge; jockey adds none", () => {
@@ -55,9 +56,9 @@ test("confirmed KIP scheme for all station types: relay on suction, transducer o
   }
 });
 
-test("tank defaults off; 8 L direct, 50/100 L hose and three matched mounting sets", () => {
+test("tank defaults off; 8 L direct, 50/80/100 L hose and three matched mounting sets", () => {
   assert.equal(role(sync(fixture()), "discharge:tank"), undefined);
-  for (const volume of [8, 50, 100]) {
+  for (const volume of [8, 50, 80, 100]) {
     const p = fixture(); Object.assign(p.entities["station-settings"], { membraneTank: true, membraneTankVolume: volume });
     const result = sync(p), tank = role(result, "discharge:tank");
     assert.equal(tank.quantity, 1); assert.match(tank.equipmentId, /мембранный-бак-001/);
@@ -66,10 +67,15 @@ test("tank defaults off; 8 L direct, 50/100 L hose and three matched mounting se
     assert.equal(Boolean(part(tank, "tank-top-cap")), volume === 100);
     const c = result.entities["station-collectors"].discharge.configuration;
     assert.equal(c.instrumentPorts.find(port => port.id === "tank").dn, 20);
+    assert.equal(Boolean(part(tank,"tank-diameter-transition")),volume!==8);
     const bom = calculateCollector(c, resources.components.collectorCatalog).bom;
     assert.equal(bom.filter(row => row.role === "instrument-tank").length, 1);
     assert.equal(bom.filter(row => row.role === "instrument-tank-plug").length, 0);
     if (volume !== 8) {
+      assert.equal(part(tank,"tank-diameter-transition").equipmentId,"резьбовые-фитинги-002-r0227");
+      assert.equal(part(tank,"tank-diameter-transition").price,90.89);
+      assert.equal(part(tank,"tank-diameter-transition").quantity,1);
+      assert.equal(part(tank,"tank-thread-seals").quantity,.3);
       assert.equal(part(tank, "tank-hose").details, "Длина не задана");
       assert.equal(part(tank, "tank-hose").price, 2350.94);
       assert.equal(part(tank, "tank-mount-bolts").quantity, 3);
@@ -101,7 +107,7 @@ test("two optional blind flanges replace one network joint each; unknown blind t
   Object.assign(p.entities["station-dn"], { collectorMaterial: "st20", suctionCollectorDn: 80, dischargeCollectorDn: 100, pn: 16 });
   const result = sync(p), plugs = options(result).filter(row => row.option === "collectorPlugs");
   assert.equal(plugs.length, 2); assert.equal(plugs.reduce((sum, row) => sum + row.quantity, 0), 2);
-  assert.ok(plugs.every(row => row.equipmentId && row.price === null));
+  assert.ok(plugs.every(row => row.equipmentId && typeof row.price === "number"));
   assert.ok(plugs.every(row => part(row, "plug-fasteners-bolts").price === null));
   for (const side of ["suction", "discharge"]) {
     assert.equal(rows(result).find(row => row.section === side && row.assemblyRole === "network-gaskets").quantity, 1);
@@ -127,14 +133,14 @@ test("separators add N-1 valves per collector and exactly two welded ends per ga
       assert.equal(calculated.bom.find(row => row.role === "section-break-weldFlange").quantity, 2 * (pumps - 1));
       assert.equal(calculated.welds.find(row => row.role === "section-break").count, 2 * (pumps - 1));
       assert.equal(part(row, "separator-gaskets").quantity, 2);
-      assert.equal(part(row, "collector-interface").price, 0);
+      assert.equal(part(row, "collector-interface"), undefined,"collector-owned flanges and welding must not become duplicate purchase rows");
       assert.equal(part(row, "separator-limit-switches-bracket").quantity, 1);
       assert.equal(part(row, "separator-limit-switches-bracket").equipmentId, "кронштейны-001-r0006");
       assert.equal(part(row, "separator-limit-switches-bracket").price, 241.15);
       assert.equal(part(row, "separator-limit-switches-switch").quantity, 2);
       assert.equal(part(row, "separator-limit-switches-switch").price, 957);
       assert.equal(part(row, "separator-limit-switches"), undefined);
-      assert.equal(row.price, hydraulicAssemblyPrice(row.hydraulicAssembly));
+      assert.equal(row.price, hydraulicProductRowPrice(row.hydraulicAssembly));
       assert.equal(row.hydraulicAssembly.parts.filter(part => /weldFlange/.test(part.assemblyRole)).length, 0);
     }
   }
@@ -165,19 +171,21 @@ test("explicit incompatible or removed choice remains visible; valid product pri
   tank = role(sync(p), "discharge:tank"); assert.equal(tank.equipmentId, undefined); assert.equal(tank.price, null);
   assert.match(tank.technicalNotes.join(" "), /removed/);
   const sensor = role(result, "discharge:transducer");
-  assert.equal(sensor.price, hydraulicAssemblyPrice(sensor.hydraulicAssembly));
-  assert.notEqual(sensor.technicalStatus, "ready");
+  assert.equal(sensor.price, hydraulicProductRowPrice(sensor.hydraulicAssembly));
+  assert.equal(sensor.technicalStatus, "ready");
+  assert.deepEqual(sensor.technicalNotes, []);
   const catalog = hydraulicOptionCatalog(resources.components.items);
   assert.equal(catalog.filter(item => item.id === "station-v11-oni-ppt10-16").length, 1);
 });
 
-test("draft export includes nested connection details and does not double their prices", () => {
+test("draft export contains standalone connection rows without a priced kit or nested cost list", () => {
   const p = fixture(); p.entities["station-settings"].membraneTank = true;
   const result = sync(p), items = options(result);
   const groups = [{ title: "Гидравлика", sections: [{ id: "suction" }, { id: "discharge" }] }];
   const exported = specificationExportRows(items, groups, assessSpecification(result));
   assert.equal(exported.filter(row => row.kind === "item").length, items.length);
   const csv = specificationCsv(exported);
-  assert.match(csv, /включён в цену, повторно не суммируется/);
+  assert.match(csv, /учтены отдельными позициями/);
+  assert.doesNotMatch(csv, /Состав на 1 узел|включён в цену, повторно не суммируется/);
   assert.match(csv, /Футорка/); assert.match(csv, /Черновик/);
 });

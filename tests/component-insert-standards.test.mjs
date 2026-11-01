@@ -24,7 +24,12 @@ test("reducer supplements retain exact geometry and separate native steel standa
   for (const value of standards.reducerLengths) {
     const item = binding.items.find(item => item.id === value.componentId);
     assert.ok(item, value.componentId);
-    if (value.material === "st20") {
+    if(value.basis==="project-analogue-length"){
+      assert.equal(value.material,"aisi304");
+      assert.equal(value.adoptionId,standards.reducerAnalogueLengthPolicy.id);
+      assert.ok(standards.reducerAnalogueLengthPolicy.rows.some(row=>row.componentId===value.componentId&&row.lengthMm===value.lengthMm));
+      assert.match(value.source,/Решение пользователя 31\.10\.2026/);
+    } else if (value.material === "st20") {
       assert.equal(value.basis, "catalog-standard");
       assert.match(String(field(item, "Наименование")), /ГОСТ\s*17378/);
     } else {
@@ -37,7 +42,7 @@ test("reducer supplements retain exact geometry and separate native steel standa
       ["wallThickness", "Толщина 1, мм"], ["wallThicknessSmall", "Толщина 2, мм"]]) {
       assert.equal(value[key], field(item, header), `${value.componentId}: ${key}`);
     }
-    assert.match(value.source, /таблица [12], исполнение [12].*PDF стр\. \d+; https:/);
+    if(value.basis!=="project-analogue-length")assert.match(value.source, /таблица [12], исполнение [12].*PDF стр\. \d+; https:/);
   }
 });
 
@@ -76,7 +81,8 @@ test("length verification covers every original reducer; supplemental ST20 execu
     }
     assert.ok(review.reason.length > 30);
     assert.match(review.source, /https:\/\//);
-    assert.ok(["2026-10-04", "2026-10-05"].includes(review.verifiedAt));
+    assert.ok(["2026-10-04", "2026-10-05", "2026-10-31"].includes(review.verifiedAt));
+    if(review.verifiedAt==="2026-10-31")assert.equal(standards.reducerLengths.find(value=>value.componentId===review.componentId)?.basis,"project-analogue-length");
     counts[review.status] = (counts[review.status] ?? 0) + 1;
     const numeric = standards.reducerLengths.find(value => value.componentId === review.componentId);
     if (review.status === "confirmed") {
@@ -85,7 +91,7 @@ test("length verification covers every original reducer; supplemental ST20 execu
       assert.equal(numeric, undefined, `${review.componentId}: unconfirmed options must not supply an actual length`);
     }
   }
-  assert.deepEqual(counts, { confirmed: 251, unconfirmed: 221, ambiguous: 2, invalid: 12 });
+  assert.deepEqual(counts, { confirmed: 263, unconfirmed: 209, ambiguous: 2, invalid: 12 });
   assert.deepEqual(standards.reducerLengthReviewSummary.statuses, counts);
 });
 
@@ -106,7 +112,7 @@ test("ambiguous lengths retain both standard options while invalid reducer diame
 
 test("adopted GOST stainless lengths require both walls and a unique verified geometry", () => {
   const reviews = standards.reducerLengthReviews.filter(value => value.material === "aisi304");
-  const confirmed = reviews.filter(value => value.status === "confirmed");
+  const confirmed = reviews.filter(value => value.status === "confirmed"&&standards.reducerLengths.find(reference=>reference.componentId===value.componentId)?.basis==="adopted-standard-geometry");
   assert.equal(confirmed.length, 182);
   assert.equal(standards.reducerLengthReviewSummary.adoptedStainlessLengths, 182);
   for (const review of confirmed) {
@@ -129,6 +135,17 @@ test("adopted GOST stainless lengths require both walls and a unique verified ge
   const concentric = reviews.find(value => value.componentId === "переходы-005-r0335");
   assert.deepEqual(concentric.candidateLengthsMm, [38]);
   assert.match(concentric.reason, /проектная длина.*ГОСТ 17378/);
+});
+
+test("twelve approved project analogues retain their own length policy and are separate from GOST geometry",()=>{
+  const analogues=standards.reducerLengths.filter(value=>value.basis==="project-analogue-length");
+  assert.equal(analogues.length,12);assert.equal(standards.reducerLengthReviewSummary.projectAnalogueLengths,12);
+  for(const value of analogues){
+    assert.equal(value.lengthMm,value.outerDiameter===323.9?203:356);
+    const review=standards.reducerLengthReviews.find(row=>row.componentId===value.componentId);
+    assert.equal(review.status,"confirmed");assert.equal(review.verifiedAt,"2026-10-31");assert.deepEqual(review.candidateLengthsMm,[value.lengthMm]);
+    assert.match(value.source,/не паспорт конкретной детали и не подтверждение давления/);
+  }
 });
 
 test("flat-flange table keeps full thickness, bore and radial chamfer distinct from assembly length", () => {

@@ -1,4 +1,5 @@
 import { env } from "cloudflare:workers";
+import {storageOperation} from "./project-storage-server";
 import { db } from "./auth-server";
 import { BASE_SECTIONS, BASE_LABELS, baseSnapshot, spacingForPump, type AppliedBaseValues, type BaseSection } from "./base-values";
 import { currentBasePublication, resolveBaseVersions } from "./base-values-server";
@@ -61,15 +62,15 @@ export function createAssistantDataTools(access: AssistantDataAccess) {
       return { applied, data: { origin: "Текущая beta-вкладка, ввод пользователя; это не сохранённый проект D1", input: pick(context.beta.input, inputKeys), baseVersions: applied.versions } };
     }
     if (!context?.projectId) throw new DataError("Текущий проект не передан. Для общего вопроса используйте опубликованные правила.");
-    const row = await db().prepare("SELECT config_json AS config,updated_at AS updatedAt FROM user_projects WHERE id=? AND user_id=?")
-      .bind(context.projectId, access.userId).first<{ config: string; updatedAt: string }>();
-    if (!row) throw new DataError("Текущий проект не сохранён или недоступен этой учётной записи.");
-    const raw = object(JSON.parse(row.config)), entities = object(raw.entities), settings = object(entities["station-settings"]);
+    const response=await storageOperation(access.userId,{action:"load",id:context.projectId});
+    if (!response.ok) throw new DataError("Текущий проект не сохранён или недоступен этой учётной записи.");
+    const row=await response.json() as {config:unknown;updatedAt:string};
+    const raw=object(row.config), entities=object(raw.entities), settings=object(entities["station-settings"]);
     if (!raw.schemaVersion || !entities["system-input"] || !entities["station-settings"]) throw new DataError("Не удалось прочитать технические поля проекта.");
     // Resolve version IDs through D1; never trust values embedded in project JSON.
     const applied = await resolveBaseVersions(object(settings.baseValues).versions);
     const collectors = object(entities["station-collectors"]);
-    const data = { origin: "Последняя сохранённая версия собственного проекта D1", savedAt: row.updatedAt,
+    const data = { origin: "Последняя сохранённая версия собственного проекта PostgreSQL", savedAt: row.updatedAt,
       primaryInput: pick(entities["system-input"], inputKeys), secondaryInput: pick(entities["system-input-2"], inputKeys),
       settings: { ...pick(settings, settingKeys), manufacturerDiscounts: safeDiscounts(settings.manufacturerDiscounts) },
       dn: pick(entities["station-dn"], dnKeys),

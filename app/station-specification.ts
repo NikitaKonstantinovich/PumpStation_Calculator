@@ -1,4 +1,5 @@
 import { synchronizeHydraulicOptions } from "./hydraulic-option-assembly";
+import { normalizeHydraulicOptions } from "./hydraulic-option-config";
 import { baseSettingsIdentity } from "./base-values";
 import { bindProjectComponents } from "./base-values-components";
 import type { InputEntity, ProjectConfig, SettingsEntity, SpecEntity, SpecItem, SpecOption } from "./project-config";
@@ -37,12 +38,17 @@ export type StationSpecificationResources = {
   smartCabinets: SmartCabinet[] | null;
   components?: ComponentsDatabase;
 };
-type HydraulicRefresh = (project: ProjectConfig, database?: ComponentsDatabase, force?: boolean) => ProjectConfig;
+type HydraulicRefresh = (project: ProjectConfig, database?: ComponentsDatabase, force?: boolean, pumps?: readonly Pump[] | null) => ProjectConfig;
 const valveRoles = new Set<SpecOption>(["primarySuctionValve", "primaryDischargeValve", "primaryCheckValve", "secondarySuctionValve", "secondaryDischargeValve", "secondaryCheckValve"]);
 const stale = (item: SpecItem, reason: string): SpecItem => ({ ...item, technicalStatus: "stale", technicalNotes: [reason], price: null });
 
 /** One transaction for a confirmed selection, resource refresh, import or undo. No I/O. */
 export function synchronizeStationSpecification(project: ProjectConfig, resources: StationSpecificationResources, refreshHydraulics: HydraulicRefresh): ProjectConfig {
+  const priorSettings=project.entities["station-settings"] as SettingsEntity;
+  if(priorSettings.hydraulicOptions){
+    const hydraulicOptions=normalizeHydraulicOptions(priorSettings.hydraulicOptions);
+    if(JSON.stringify(hydraulicOptions)!==JSON.stringify(priorSettings.hydraulicOptions))project={...project,entities:{...project.entities,"station-settings":{...priorSettings,hydraulicOptions}}};
+  }
   if(resources.components)resources={...resources,components:bindProjectComponents(project,resources.components)};
   const settings = project.entities["station-settings"] as SettingsEntity;
   const spec = project.entities["station-spec"] as SpecEntity;
@@ -120,8 +126,8 @@ export function synchronizeStationSpecification(project: ProjectConfig, resource
   }
   let next = synchronizeCollectors({ ...project, station, entities: { ...entities, "station-spec": { ...spec, items } } }, resources.components?.collectorCatalog);
   if (resources.components) {
-    next = refreshHydraulics(next, resources.components, true);
-    next = synchronizeHydraulicOptions(next, resources.components);
+    next = refreshHydraulics(next, resources.components, true, resources.pumps);
+    next = synchronizeHydraulicOptions(next, {...resources.components,pumps:resources.pumps});
   }
   else reasons.push("Каталог комплектующих недоступен; гидравлические узлы требуют пересчёта.");
   const nextSpec = next.entities["station-spec"] as SpecEntity;

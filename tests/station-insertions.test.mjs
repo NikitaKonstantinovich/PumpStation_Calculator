@@ -4,7 +4,7 @@ import { calculations, component, requirement, insertionDesign, selectStationIns
 import { load, resources, fixture, sync, rows, choose, parseProjectConfig } from "./fixtures/station-specification.mjs";
 const { lineSpecParts, selectJointFasteners } = await load("line-spec-parts");
 const { insertionPrice } = await load("calculated-insertion");
-const { insertionEndThickness } = await load("line-joint-stack");
+const { insertionEndThickness, pumpFlangeReference } = await load("line-joint-stack");
 const { specificationLineTotal, assessSpecification } = await load("specification-readiness");
 const { specificationExportRows, specificationCsv } = await load("specification-export");
 const { addPumpConnectionAssembly } = await load("line-vibration");
@@ -69,7 +69,17 @@ test("both lines, circuits and vibration modes count the supplied BOM once and p
     }
     assert.ok(result.some(row => /fasteners-bolts/.test(row.assemblyRole)));
     assert.ok(result.some(row => /gasket/.test(row.assemblyRole)));
-    assert.ok(result.find(row => /pump-fasteners-bolts/.test(row.assemblyRole)).price === null, "unknown own pump flange never receives invented bolt length");
+    const pumpBolt = result.find(row => /pump-fasteners-bolts/.test(row.assemblyRole));
+    if (vibration) assert.equal(pumpBolt.price, null, "compensator flange thickness is missing");
+    else {
+      const end = insertionEndThickness(assembly, "from", db);
+      assert.ok(end > 0);
+      const selected = selectJointFasteners(db, material, c.dnSmall, pn, {gaskets:1, thickness:0, flangeThickness:2*end});
+      assert.ok(selected.bolt);
+      assert.equal(pumpBolt.equipmentId, selected.bolt.id);
+      assert.match(pumpBolt.description, new RegExp(`равной ${end} мм`));
+      assert.ok(pumpBolt.price > 0);
+    }
   }
 });
 test("confirmed insert dimensions reach the bolt stack and exclude replacement by a generic flange", () => {
@@ -77,6 +87,9 @@ test("confirmed insert dimensions reach the bolt stack and exclude replacement b
   const thickness = insertionEndThickness(row, "from", resources.components); assert.ok(thickness > 0);
   const missing = structuredClone(row); missing.insertionAssembly.snapshot.calculation.bom.find(b => b.role === "left-flanged").componentId = "missing-real-flange";
   assert.equal(insertionEndThickness(missing, "from", resources.components), null);
+  assert.equal(pumpFlangeReference(resources.components, "st20", 80, 16, missing).thickness, null);
+  const stale = structuredClone(row); stale.insertionAssembly.snapshot.currentCatalogVersion = "new-version";
+  assert.equal(pumpFlangeReference(resources.components, "st20", 80, 16, stale).thickness, null);
   assert.equal(selectJointFasteners(resources.components, "st20", 80, 16, { gaskets: 1, thickness: 0, flangeThickness: null }).bolt, undefined);
 });
 test("station sync, save/load, count change and second/jockey circuits retain manual rows and no duplicates", () => {

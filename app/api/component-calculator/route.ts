@@ -1,5 +1,7 @@
 import { guardDisabledBetaFeature } from "../../release-server";
 import { currentUser, json } from "../../auth-server";
+import { storageOperation } from "../../project-storage-server";
+import type { InsertCalculation } from "../../component-insert-calculations";
 import { currentInsertCatalog, currentInsertSource } from "../../component-insert-catalog-server";
 import { generateInsertCalculations, insertCatalogMetadata, parseInsertRequest } from "../../component-insert-calculations";
 import { InsertionSourceChanged, matchInsertionRows, readSavedInsertions, saveInsertion } from "../../component-insert-store-server";
@@ -18,6 +20,15 @@ export async function GET(request: Request) {
   const betaDenied = await guardDisabledBetaFeature(request); if (betaDenied) return betaDenied;
   try {
     const actor = await authorize(request); if (actor instanceof Response) return actor;
+    const jobId=new URL(request.url).searchParams.get("job");
+    if(jobId){
+      const response=await storageOperation(actor.id,{action:"poll",id:jobId});
+      if(response.status!==200)return response;
+      const job=await response.json() as {result:InsertCalculation[];catalog_version:string};
+      const source=await currentInsertSource(),catalog=await currentInsertCatalog(source);
+      if(job.catalog_version!==catalog.version)return reply({error:"Каталог изменился. Повторите расчёт."},409);
+      return reply({catalogVersion:catalog.version,meta:insertCatalogMetadata(catalog),rows:matchInsertionRows(job.result,await readSavedInsertions(),source.items)});
+    }
     const catalog = await currentInsertCatalog(), metadata = insertCatalogMetadata(catalog);
     // Ensure the storage migration exists before presenting an operational form.
     await readSavedInsertions();
@@ -46,6 +57,9 @@ export async function POST(request: Request) {
     catch (error) { return reply({ error: error instanceof Error ? error.message : "Некорректные параметры расчёта." }, 400); }
     if (body.action === "export" && (typeof body.catalogVersion !== "string" || !Array.isArray(body.keys) || !body.keys.length || body.keys.length > 5000 || body.keys.some(key => typeof key !== "string" || !key || key.length > 10000))) return reply({ error: "Выберите от 1 до 5000 рассчитанных позиций и укажите версию каталога." }, 400);
     const source = await currentInsertSource(), catalog = await currentInsertCatalog(source);
+    if(body.action==="calculate" && body.background===true && input.dnFrom!==input.dnTo) {
+      return storageOperation(actor.id,{action:"enqueue",id:crypto.randomUUID(),input,catalog});
+    }
     if (body.action === "export" && body.catalogVersion !== catalog.version) return reply({ error: "Исходные цены, размеры или правила изменились. Выполните расчёт заново перед выгрузкой.", stale: true, catalogVersion: catalog.version }, 409);
     const calculated = generateInsertCalculations(input, catalog);
     const rows = matchInsertionRows(calculated, await readSavedInsertions(), source.items);

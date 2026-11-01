@@ -5,6 +5,7 @@ import { instrumentCount } from "./hydraulic-option-config";
 import { collectorNippleRules } from "./base-values";
 import { resolveNippleRule } from "./collector-nipple-rules";
 import type { CollectorConfiguration } from "./collector-calculations";
+import { tankConnectionDn } from "./tank-connection";
 
 export function hydraulicPortLabel(id: string): string {
   const [side, position] = id.split(":");
@@ -26,6 +27,14 @@ export function resolveStationCollectorInstrumentPorts(settings: SettingsEntity,
     const n=++sequence[output.purpose],id=output.purpose==="instrument"?`kip-${n}`:output.purpose==="tank"?n===1?"tank":`tank-${n}`:`reserve-${n}`;
     const occupied=output.purpose==="instrument"?n<=instrumentCount(settings):output.purpose==="tank"&&side==="discharge"&&settings.membraneTank&&n===1;
     ports.push({id,dn:output.dn,state:output.state==="auto"?occupied?"occupied":"capped":output.state,...(parameterized?{lengthMm:output.lengthMm,threaded:output.threaded,...(output.threadPitchMm?{threadPitchMm:output.threadPitchMm}:{}),...(output.threadLengthMm?{threadLengthMm:output.threadLengthMm}:{})}:{})});
+  }
+  if (side === "discharge") {
+    // The tank takeoff remains on the collector when the optional tank is off.
+    const existing = ports.find(p => p.id === "tank");
+    const tank: CollectorInstrumentPort = { ...existing, id: "tank", dn: tankConnectionDn(),
+      state: settings.membraneTank ? "occupied" : "capped", threaded: true,
+      ...(existing?.threadPitchMm ? {threadPitchMm:25.4/14} : {}) };
+    if(existing)ports[ports.indexOf(existing)]=tank;else ports.push(tank);
   }
   return {ports,error:resolution.error};
 }
@@ -49,7 +58,7 @@ export function stationHydraulicPortLedger(project: ProjectConfig) {
       if(required.state==="occupied"&&required.threaded===false&&/^(kip-\d+|tank)$/.test(required.id))requiredFindings.push(`${side === "suction" ? "Всас" : "Напор"}: отвод ${required.id} задан без резьбы, а выбранное оборудование имеет резьбовое подключение. Подтвердите переходный узел.`);
     }
     for(let i=0;i<instrumentCount(settings);i++){const port=requiredPorts.find(p=>p.id===`kip-${i+1}`);if(!port||port.dn!==15||port.state!=="occupied")requiredFindings.push(`${side === "suction" ? "Всас" : "Напор"}: для комплекта КИП №${i+1} нужен занятый отвод DN15 или отдельно рассчитанный распределительный/переходный узел; параметры сгонов автоматически не меняются.`);}
-    if(side==="discharge"&&settings.membraneTank){const tank=requiredPorts.find(p=>p.id==="tank"),dn=settings.membraneTankVolume===8?20:25;if(!tank||tank.dn!==dn||tank.state!=="occupied")requiredFindings.push(`Напор: баку требуется занятое подключение DN${dn}; ${tank?`задан сгон DN${tank.dn}`:"отвод отсутствует"}. Требуется согласованное подключение или переход.`);}
+    if(side==="discharge"&&settings.membraneTank){const tank=requiredPorts.find(p=>p.id==="tank"),dn=tankConnectionDn();if(!tank||tank.dn!==dn||tank.state!=="occupied")requiredFindings.push(`Напор: баку требуется занятое подключение DN${dn}; ${tank?`задан сгон DN${tank.dn}`:"отвод отсутствует"}. Требуется согласованное подключение или переход.`);}
     const base = { side, section: "collector", pn: c.pn };
     for (const i of [1, 2]) add({ ...base, id: `${side}:end-${i}`, dn: c.dn ?? 0, connection: c.connection }, i === 2 && settings.collectorPlugs ? `${side}:plug` : `${side}:network-${i}`, i === 2 && settings.collectorPlugs ? "closure" : "network");
     for (const port of c.instrumentPorts ?? []) {

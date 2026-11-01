@@ -49,7 +49,14 @@ export function ComponentCalculator({ actor, onBack, onSaved }: { actor: Account
     if (busy) return;
     setBusy("calculate"); setError(""); setReport(null);
     try {
-      const response = await fetch("/api/component-calculator", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "calculate", input }) });
+      let response = await fetch("/api/component-calculator", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "calculate", background:true, input }) });
+      if(response.status===202){
+        const {jobId}=await response.json();
+        do {
+          await new Promise(resolve=>setTimeout(resolve,1000));
+          response=await fetch("/api/component-calculator?job="+encodeURIComponent(jobId),{cache:"no-store"});
+        } while(response.status===202);
+      }
       const data = await response.json() as ResponseData;
       if (!response.ok) throw new Error(data.error ?? "Не удалось рассчитать вставки.");
       if (!data.rows || !data.catalogVersion) throw new Error("Сервер не вернул результаты расчёта.");

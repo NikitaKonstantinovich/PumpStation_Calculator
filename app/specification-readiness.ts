@@ -1,17 +1,17 @@
-import { hydraulicAssemblyPrice } from "./hydraulic-option-assembly";
+import { hydraulicProductRowPrice } from "./hydraulic-option-assembly";
 import { instrumentCount, separationEnabled } from "./hydraulic-option-config";
 import type { InputEntity, ProjectConfig, SettingsEntity, SpecEntity, SpecItem, SpecOption, SpecTechnicalStatus } from "./project-config";
 import { visibleSpecificationItems } from "./specification-presentation";
 import { pressureCheckWarning } from "./dn-defaults";
 import { secondaryStationEnabled, specificationSourceFingerprint, validStationInput } from "./station-specification";
-import { insertionPrice } from "./calculated-insertion";
+import { installedInsertionPrice } from "./calculated-insertion";
 
 export type SpecificationFinding = { id: string; category: "composition" | "technical" | "price"; severity: "error" | "warning"; message: string };
 export type RequiredSpecificationNode = { id: string; label: string; matches: (item: SpecItem) => boolean; quantity?: number; equipmentId?: string };
 // Preserve a manually entered historical price in project data, but never total a stale selection.
 export const specificationHasPrice = (item: SpecItem) => item.technicalStatus !== "stale" && typeof item.price === "number" && Number.isFinite(item.price) && item.price >= 0 &&
-  (!item.insertionAssembly || insertionPrice(item.insertionAssembly.snapshot) === item.price) &&
-  (!item.hydraulicAssembly || hydraulicAssemblyPrice(item.hydraulicAssembly) === item.price);
+  (!item.insertionAssembly || installedInsertionPrice(item.insertionAssembly) === item.price) &&
+  (!item.hydraulicAssembly || hydraulicProductRowPrice(item.hydraulicAssembly) === item.price);
 export const specificationLineTotal = (item: SpecItem) => specificationHasPrice(item) && Number.isFinite(item.quantity) && item.quantity > 0 ? item.price! * item.quantity : 0;
 type ExistingIssue = { id: string; tool: string; severity: "error" | "warning"; message: string; subject?: string };
 
@@ -48,6 +48,11 @@ export function requiredSpecificationNodes(project: ProjectConfig): RequiredSpec
         matches: item => item.generatedBy === `${side}-line` && Boolean(item.assemblyRole?.startsWith(`${prefix}-`)) });
       if (settings.vibrationCompensators) nodes.push({ id: `${prefix}-${side}-vibration`, label: `${title}: виброкомпенсаторы ${side === "suction" ? "всаса" : "напора"}`, quantity: count,
         matches: item => item.generatedBy === `${side}-line` && item.assemblyRole === `${prefix}-vibration-compensator` });
+    }
+    if (!secondary && (settings.stationType === "fire" || settings.stationType === "combined") && (input.workingPumpCount ?? 0) >= 2) {
+      for (const [role, name] of [["valve", "кран"], ["bush", "футорка"], ["relay", "реле давления"], ["seals", "уплотнение резьбовых стыков"]]) nodes.push({
+        id: `${prefix}-sensor-${role}`, label: `Напорные вставки пожарных насосов: ${name}`, quantity: count === undefined ? undefined : role === "seals" ? Number((count * .3).toFixed(3)) : count,
+        matches: item => item.generatedBy === "discharge-line" && item.assemblyRole === `${prefix}-sensor-${role}` });
     }
   }
   if (settings.membraneTank) role("membraneTank", "Бак мембранный", 1);
@@ -97,6 +102,18 @@ export function assessSpecification(project: ProjectConfig, displayedItems?: Spe
   if (settings.pressureChecksEnabled === false) add("technical", "pressure-disabled", "Проверки давления отключены; пригодность по давлению не подтверждена.");
   else if (settings.inletHead == null) add("technical", "pressure-input", "Напор на входе не указан; проверка давления не завершена.");
   for (const [index, item] of items.entries()) {
+    if(item.hydraulicAssembly?.accounting==="parts"){
+      const a=item.hydraulicAssembly;
+      for(const role of a.requiredRoles){
+        const recipe=a.parts.filter(p=>p.assemblyRole===role),part=recipe[0];
+        if(recipe.length!==1){add("composition",`parts/${a.location}/${role}`,`${item.name}: состав роли ${role} не определён однозначно.`);continue;}
+        const rows=role==="product"?[item]:items.filter(p=>p.hydraulicPart?.location===a.location&&p.hydraulicPart.role===role);
+        if(rows.length!==1||rows[0].quantity!==Number((part.quantity*item.quantity).toFixed(3))||rows[0].equipmentId!==part.equipmentId)
+          add("composition",`parts/${a.location}/${role}`,`${item.name}: отдельная позиция «${part.name}» отсутствует, дублируется или не соответствует составу и количеству.`);
+      }
+    }
+    if(item.hydraulicPart&&!items.some(p=>p.hydraulicAssembly?.accounting==="parts"&&p.hydraulicAssembly.location===item.hydraulicPart!.location))
+      add("composition",`parts/orphan/${index}`,`${item.name}: отсутствует связанное изделие гидравлического узла.`);
     if (!Number.isFinite(item.quantity) || item.quantity <= 0) add("composition", `item/${index}/quantity`, `${item.name}: количество не определено; стоимость позиции не рассчитана.`);
     const status = specificationTechnicalStatus(item);
     if (status === "stale") add("composition", `item/${index}/stale`, `${item.name}: соответствие текущей конфигурации не подтверждено.`);

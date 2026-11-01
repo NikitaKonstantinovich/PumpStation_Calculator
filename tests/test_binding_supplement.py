@@ -75,7 +75,11 @@ class SupplierImportTests(unittest.TestCase):
           WHERE f.source_id<>? ORDER BY c.id,p.id""", (supplier,)).fetchall()
         before_ids = self.db.execute("SELECT id FROM components ORDER BY id").fetchall()
         result = module.import_supplement(self.db, self.data, supplier)
-        self.assertEqual(result["supplierRows"], 7)
+        expected_rows = sum(row["tableId"] == supplier for row in self.data["items"])
+        self.assertGreater(expected_rows, 0)
+        self.assertEqual(result["supplierRows"], expected_rows)
+        self.assertEqual(self.db.execute("""SELECT count(*) FROM components c
+          JOIN component_families f ON f.id=c.family_id WHERE f.source_id=?""", (supplier,)).fetchone()[0], expected_rows)
         self.assertEqual(self.db.execute("SELECT id FROM components ORDER BY id").fetchall(), before_ids)
         self.assertEqual(self.db.execute("""SELECT c.id,p.* FROM components c
           JOIN component_families f ON f.id=c.family_id JOIN component_prices p ON p.component_id=c.id

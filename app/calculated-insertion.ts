@@ -37,6 +37,19 @@ export function insertionPrice(snapshot: CalculatedInsertion): number | null {
   return Math.abs(c.bom.reduce((sum, row) => sum + row.cost!, 0) - c.price) <= .01 ? c.price : null;
 }
 
+export type InstalledInsertion = { snapshot: CalculatedInsertion; sensorConnection?: "fire-pressure-switch" };
+/** Keep the purchased insertion snapshot intact. An occupied station port
+ * replaces its reserve cap; the removed cap is neither bought nor drawn. */
+export function installedInsertionBom(assembly: InstalledInsertion) {
+  return assembly.snapshot.calculation.bom.filter(row => assembly.sensorConnection !== "fire-pressure-switch" || row.role !== "sensor-plug");
+}
+export function installedInsertionPrice(assembly: InstalledInsertion): number | null {
+  const price = insertionPrice(assembly.snapshot);
+  if (price === null || assembly.sensorConnection !== "fire-pressure-switch") return price;
+  const removed = assembly.snapshot.calculation.bom.filter(row => row.role === "sensor-plug").reduce((sum, row) => sum + row.cost!, 0);
+  return Math.round((price - removed) * 100) / 100;
+}
+
 /** Seating UI choices are audit data, while actual axial dimensions define identity. */
 export function insertionPhysicalKey(config: InsertConfiguration) {
   const end = (side: InsertConfiguration["left"]) => [side.connection, side.part, side.looseFlange];

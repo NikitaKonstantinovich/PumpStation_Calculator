@@ -44,7 +44,7 @@ export function visibleSpecificationItems(entity: SpecEntity, settings: Settings
   const items = normalizeSpecificationItems(pressureChecksEnabled(settings) ? entity.items : entity.items.map(withoutPressureChecks));
   const secondary = settings.stationType === "combined" || settings.stationType === "fire" && settings.jockeyPump;
   return items.filter(item => {
-    switch (item.option) {
+    switch (item.hydraulicPart?.option ?? item.option) {
       case "membraneTank": return settings.membraneTank;
       case "vibrationCompensators": return settings.vibrationCompensators;
       case "collectorPlugs": return settings.collectorPlugs;

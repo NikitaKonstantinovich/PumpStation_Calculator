@@ -29,6 +29,11 @@ const request = (ids, session = token, headers = {}) => new Request("http://loca
 
 test("geometry endpoint is read-only, authenticated, full-only and does not require calculator admin", async () => {
   assert.equal((await api.POST(request([],null))).status,401);
+  for (const level of ["base", "plus"]) {
+    sqlite.prepare("UPDATE users SET access_level=? WHERE id='line-user'").run(level);
+    assert.equal((await api.POST(request([]))).status,403);
+  }
+  sqlite.prepare("UPDATE users SET access_level='pro' WHERE id='line-user'").run();
   assert.equal((await api.POST(request([],token,{Origin:"https://unrelated.test"}))).status,403);
   assert.equal((await api.POST(request([null]))).status,400);
   const before = sqlite.prepare("SELECT COUNT(*) n FROM component_insertions").get().n;

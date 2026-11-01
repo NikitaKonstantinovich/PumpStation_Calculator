@@ -4,7 +4,7 @@ import { separationEnabled } from "./hydraulic-option-config";
 import type { DnEntity, InputEntity, ProjectConfig, SettingsEntity, SpecItem } from "./project-config";
 import { normalizeSpecificationItems } from "./specification-items";
 import { defaultCollectorMaterial, recommendedDn, resolveDnConnection, suctionHydraulics, dischargeHydraulics } from "./dn-defaults";
-import { currentCollectorLengthRule, collectorCode, collectorStorageCode, collectorFlow, collectorPressureChecks, configurationFingerprint, configurationWarnings, collectorBranchDiameterErrors, positive, secondaryAllowed, type CollectorCalculation, type CollectorCatalog, type CollectorConfiguration, type CollectorType } from "./collector-calculations";
+import { currentCollectorLengthRule, collectorCode, collectorStorageCode, collectorFlow, collectorPressureChecks, configurationFingerprint, matchesCollectorConfiguration, configurationWarnings, collectorBranchDiameterErrors, positive, secondaryAllowed, type CollectorCalculation, type CollectorCatalog, type CollectorConfiguration, type CollectorType } from "./collector-calculations";
 import { withInletPressureChecks } from "./suction-pressure";
 import { pressureChecksEnabled, withoutPressureChecks } from "./pressure-check-policy";
 import { collectorSpacingConfirmed } from "./collector-spacing";
@@ -109,12 +109,12 @@ export function synchronizeCollectors(project: ProjectConfig, catalog?: Collecto
   const collectors = { ...previous };
   for (const type of ["suction", "discharge"] as const) {
     const state = previous[type], recommended = collectorRecommendation(project, type), configuration = resolveCollector(recommended, state, project.entities["station-settings"] as SettingsEntity), code = collectorCode(configuration);
-    const calculation=state.calculation&&state.calculation.code!==code&&state.calculation.code===collectorStorageCode(configuration)&&state.calculation.fingerprint===configurationFingerprint(configuration)?{...state.calculation,code}:state.calculation;
+    const calculation=state.calculation&&state.calculation.code!==code&&state.calculation.code===collectorStorageCode(configuration)&&matchesCollectorConfiguration(state.calculation.fingerprint,configuration)?{...state.calculation,code}:state.calculation;
     const sourceFingerprint = collectorSourceFingerprint(JSON.stringify([recommended, project.entities["station-dn"], project.entities["system-input"], configuration.secondary ? project.entities["system-input-2"] : null]));
     const calculationSourceFingerprint = collectorSourceFingerprint(state.calculationSourceFingerprint);
     const sourceChanged = state.sourceFingerprint && collectorSourceFingerprint(state.sourceFingerprint) !== sourceFingerprint;
     const changed = state.configuration && configurationFingerprint(configuration) !== configurationFingerprint(state.configuration);
-    const stale = (state.database && !currentCollectorLengthRule(state.database.calculation)) || state.calculation && (!currentCollectorLengthRule(state.calculation) || state.calculation.flow !== collectorFlow(configuration).flow || state.calculation.fingerprint !== configurationFingerprint(configuration) || calculationSourceFingerprint !== sourceFingerprint || (state.currentCatalogVersion && state.calculation.catalogVersion !== state.currentCatalogVersion));
+    const stale = (state.database && !currentCollectorLengthRule(state.database.calculation)) || state.calculation && (!currentCollectorLengthRule(state.calculation) || state.calculation.flow !== collectorFlow(configuration).flow || !matchesCollectorConfiguration(state.calculation.fingerprint,configuration) || calculationSourceFingerprint !== sourceFingerprint || (state.currentCatalogVersion && state.calculation.catalogVersion !== state.currentCatalogVersion));
     const configurationErrors = [...configurationWarnings(configuration), ...collectorBranchDiameterErrors(configuration, catalog)];
     collectors[type] = { ...state, calculation, ...(recommended.baseVersions?{spacing1Manual:state.spacing1Manual??false,spacing2Manual:state.spacing2Manual??false}:{}), spacing1Confirmation:collectorSpacingConfirmed(configuration,0)?state.spacing1Confirmation:undefined, spacing2Confirmation:collectorSpacingConfirmed(configuration,1)?state.spacing2Confirmation:undefined, spacing1:configuration.primary.spacing, spacing2:configuration.secondary?.spacing ?? state.spacing2, dnSource: project.entities["station-dn"] as DnEntity, sourceFingerprint, calculationSourceFingerprint, recommended, configuration, code,
       status: configurationErrors.length ? "incomplete" : stale ? "stale" : state.calculation ? state.calculation.complete ? "complete" : "incomplete" : "uncalculated",

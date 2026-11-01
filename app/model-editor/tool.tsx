@@ -6,7 +6,7 @@ import type { Pump } from "../pump-catalog";
 import { useRuntimeDiagnostic } from "../diagnostics-ui";
 import {
   addManualPipe, assemblyBounds, buildAssembly, componentBounds, connectionIssues, createHistory, dimensions,
-  distance, worldPoint, editComponent, emptyEditor, execute, mergeAssembly, pipePoints, redo, routeLength, setAutomaticRoute,
+  distance, worldPoint, editComponent, emptyEditor, normalizeEditor, execute, mergeAssembly, recoverEmptyCollectors, pipePoints, redo, routeLength, setAutomaticRoute,
   sourceFingerprint, undo, combineProfiles, refreshModelAssets, type Assembly, type Component, type Edit, type EditorState, type ProfileCatalog, type Vec3,
 } from "./model";
 import type { ViewportHandle, EditorMode } from "./viewport";
@@ -26,6 +26,7 @@ import { FastenerDetails } from "./fastener-details";
 import { isHardwareRow } from "./flange-fasteners";
 import type { CollectorsEntity } from "../collector-project";
 import "./editor.css";
+import { CadWarnings } from "../cad-export-menu";
 
 const Viewport = lazy(() => import("./viewport"));
 const EMPTY_PROFILES: ProfileCatalog = { version: 1, profiles: {} };
@@ -50,6 +51,7 @@ export function ModelTool({ project, catalogue, entity, onChange }: {
 }) {
   const [profiles, setProfiles] = useState<ProfileCatalog | null>(null), [catalogError, setCatalogError] = useState("");
   const [assetError, setAssetError] = useState("");
+  const [warningsOpen, setWarningsOpen] = useState(false);
   const [lineData, setLineData] = useState<LineCatalog>();
   const [lineError, setLineError] = useState("");
   const [lineReload, setLineReload] = useState(0);
@@ -67,10 +69,11 @@ export function ModelTool({ project, catalogue, entity, onChange }: {
   const resetDialog = useRef<HTMLDialogElement>(null);
   const viewport = useRef<ViewportHandle>(null);
   const toolRoot = useRef<HTMLDivElement>(null);
-  const editor = entity.editor ?? emptyEditor();
+  const [initial] = useState(() => ({ saved: entity.editor, ready: entity.editor ? normalizeEditor(entity.editor) : emptyEditor() }));
+  const editor = entity.editor === initial.saved ? initial.ready : entity.editor ?? emptyEditor();
   const snaps = editor.objectSnaps ?? defaultSnaps();
   const generated = useMemo(() => buildAssembly(project, catalogue, profiles ?? EMPTY_PROFILES, lineData ?? EMPTY_LINES), [project, catalogue, profiles, lineData]);
-  const assembly = editor.assembly ?? generated;
+  const assembly = useMemo(() => editor.assembly ? recoverEmptyCollectors(editor.assembly, generated) : generated, [editor.assembly, generated]);
   const missingPlane = useMemo(() => snaps.plane === "face" && !workingPlane(snaps, snapGeometry(assembly)), [snaps, assembly]);
   const displayAssembly = useMemo(() => {
     const placed = move?.source && move.target ? moveByPoints(assembly, move.id, move.source.point, move.target.point) : assembly;
@@ -117,12 +120,12 @@ export function ModelTool({ project, catalogue, entity, onChange }: {
   }, [lineIds, project.project.id, lineReload]);
   useEffect(() => {
     const controller = new AbortController();
-    void fetch("/model-assets/manifest.json", { signal: controller.signal }).then(r => { if (!r.ok) throw new Error(); return r.json(); }).then((data: ProfileCatalog) => {
+    void fetch("/model-assets/manifest.json"+(project.project.modelLibraryVersion?"?version="+encodeURIComponent(project.project.modelLibraryVersion):""), { signal: controller.signal }).then(r => { if (!r.ok) throw new Error(); return r.json(); }).then((data: ProfileCatalog) => {
       if (data.version !== 1 || !data.profiles || typeof data.profiles !== "object") throw new Error();
       setProfiles(current => combineProfiles(data, current ?? EMPTY_PROFILES));
     }).catch(error => { if (error.name !== "AbortError") { setCatalogError("Библиотека CAD недоступна; используется габаритное представление по каталогу."); setProfiles(EMPTY_PROFILES); } });
     return () => controller.abort();
-  }, []);
+  }, [project.project.modelLibraryVersion]);
   useEffect(() => {
     const dialog = resetDialog.current;
     if (!dialog) return;
@@ -199,7 +202,18 @@ export function ModelTool({ project, catalogue, entity, onChange }: {
   const transformDisabled = !selected || selected.locked || Boolean(selected.routing?.automatic);
   const constructionReference = references[0] ?? (mode === "move" ? move?.source : mode === "measure" && measurement.length === 1 ? measurement[0] : undefined);
 
-  return <div className="model-tool" ref={toolRoot}>
+  const tabs = <div className="model-tool__mode" role="tablist" aria-label="Раздел 3D-модели">
+    <button role="tab" aria-selected={!warningsOpen} onClick={() => setWarningsOpen(false)}>Модель</button>
+    <button role="tab" aria-selected={warningsOpen} onClick={() => setWarningsOpen(true)}>Предупреждения SOLIDWORKS</button>
+  </div>;
+  if (warningsOpen) return <div className="model-tool" ref={toolRoot}>{tabs}
+    <CadWarnings contains={id => assembly.components.some(c => c.id === id)} onSelect={(id, pieceId) => {
+      cancelOperation();
+      onChange({ ...entity, mode: "editor", editor: { ...editor, selectedId: id, selectedPieceId: pieceId } });
+      setWarningsOpen(false);
+    }}/>
+  </div>;
+  return <div className="model-tool" ref={toolRoot}>{tabs}
     <div className="model-tool__mode"><label>Режим <select aria-label="Режим 3D модели" value={entity.mode ?? "preview"} disabled={!profiles || !lineData} onChange={event => changeMode(event.target.value)}><option value="preview">Эскиз установки</option><option value="editor">3D редактор</option></select></label><span>{profiles ? "мм · Z вверх" : "Загрузка библиотеки…"}</span></div>
     {entity.mode !== "editor" ? <div className="model-view"><div className="model-view__stage"><span className="model-view__pipe model-view__pipe--one"/><span className="model-view__pipe model-view__pipe--two"/><span className="model-view__pump model-view__pump--one"/><span className="model-view__pump model-view__pump--two"/><span className="model-view__pump model-view__pump--three"/><b>3D</b></div><p className="model-tool__preview-note">Условный эскиз. Для работы с составом проекта выберите «3D редактор».</p></div> : <div className="model-editor" aria-label="3D редактор установки">
       {editor.assembly && !editor.assembly.lineJoints && <div className="model-editor__migration" role="status">Сохранена старая сборка без обвязки. Обновите состав, чтобы добавить арматуру из спецификации. Ручные положения сохранятся. <button disabled={!profiles || !lineData} onClick={() => commit(mergeAssembly(assembly, generated))}>Добавить обвязку</button></div>}
@@ -306,7 +320,7 @@ export function ModelTool({ project, catalogue, entity, onChange }: {
         }
         commit({ ...assembly, components: old ? assembly.components.map(c => c.id === old.id ? fresh : c) : [...assembly.components, fresh] });
       }}/>}
-      {libraryOpen && <ModelLibraryDialog onClose={() => setLibraryOpen(false)} onAdd={addFromLibrary} full={assembly.components.length >= 500}/>}
+      {libraryOpen && <ModelLibraryDialog version={project.project.modelLibraryVersion} onClose={() => setLibraryOpen(false)} onAdd={addFromLibrary} full={assembly.components.length >= 500}/>}
     </div>}
   </div>;
 

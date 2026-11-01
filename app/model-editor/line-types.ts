@@ -51,7 +51,7 @@ export function parseLineBinding(value: unknown): LineBinding | undefined {
 export function parseLineShape(value: unknown): InsertionShape | undefined {
   const s = obj(value);
   if (!validShapeThread(s)) return;
-  if (!["tube", "flange", "collar", "reducer-outline", "marker", "mesh"].includes(String(s.kind))) return;
+  if (!["tube", "flange", "collar", "reducer-outline", "marker", "mesh", "hex-cap"].includes(String(s.kind))) return;
   for (const k of ["lengthMm", "outerMm", "innerMm", "smallOuterMm", "smallInnerMm", "lipOuterMm", "lipThicknessMm", "boltCircleMm", "boltHoles", "boltHoleMm"]) if (s[k] !== undefined && (!finite(s[k]) || Number(s[k]) < 0)) return;
   if (s.kind !== "marker" && s.kind !== "mesh" && !(Number(s.lengthMm) > 0 && Number(s.outerMm) > 0)) return;
   if (s.innerMm !== undefined && Number(s.innerMm) >= Number(s.outerMm)) return;

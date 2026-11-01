@@ -106,7 +106,22 @@ export function collectorVelocityWarning(dn: number | null, velocity: number | n
 }
 export const branchLength = (outer: number | null, bolt: number | null) => positive(outer) && positive(bolt) ? 0.5 * outer + 1.1 * bolt : null;
 export const flangeKinds = (material: CollectorMaterial, dn: number, pn: number): ComponentKind[] => material === "aisi304" && dn <= 200 && pn < 25 ? ["collar", "looseFlange"] : ["weldFlange"];
-export const configurationFingerprint = (c: CollectorConfiguration) => JSON.stringify(baseConfigurationIdentity(c));
+// JSONB preserves values and array order, but not object key order.
+export const configurationFingerprint = (c: CollectorConfiguration) => JSON.stringify(
+  baseConfigurationIdentity(c),
+  (_key, value) => value && typeof value === "object" && !Array.isArray(value)
+    ? Object.fromEntries(Object.keys(value).sort().map(key => [key, value[key]]))
+    : value,
+);
+export function matchesCollectorConfiguration(saved: string | undefined, config: CollectorConfiguration): boolean {
+  if (!saved) return false;
+  const expected = configurationFingerprint(config);
+  if (saved === expected) return true;
+  try {
+    // Older calculations stored the same identity in the writer's original field order.
+    return configurationFingerprint(JSON.parse(saved)) === expected;
+  } catch { return false; }
+}
 export function collectorPressureChecks(c: CollectorConfiguration, inletHead: number | null | undefined, catalog?: CollectorCatalog | null, enabled = true): InletPressureCheck[] {
   if (!enabled || c.type !== "suction") return [];
   const checks = [checkInletPressure(inletHead, "Всасывающий коллектор", c.pn, `PN${c.pn}`)];

@@ -112,6 +112,14 @@ test("a bare compensator thickness without provenance or a confirmed insert neve
     assert.equal(role(rows, "primary-vibration-insertion-fasteners-bolts").price, null);
     assert.equal(role(rows, "primary-vibration-pump-fasteners-bolts").price, null);
   }
+  selected.item.fields.push(field("Источник толщины фланца", "test drawing"), field("Дата проверки толщины фланца", "2026-10-31"));
+  for (const build of Object.values(builders)) {
+    const rows = build(fixture(), { items }, catalog);
+    const bolts = role(rows, "primary-vibration-pump-fasteners-bolts");
+    assert.ok(bolts.price > 0);
+    assert.match(bolts.description, /Толщина фланца виброкомпенсатора 20 мм/);
+    assert.equal(role(rows, "primary-vibration-pump-gasket"), undefined);
+  }
 });
 
 test("second circuits use their own port sizes, quantities and PN; disabling option removes the assembly", () => {

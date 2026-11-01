@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useId, useState, type Dispatch, type SetStateAction } from "react";
 import type { ProjectConfig } from "./project-config";
-import { calculateCollector, collectorFlow, collectorLength, collectorVelocityWarning, collectorPressureChecks, configurationFingerprint, configurationWarnings, collectorBranchDiameterErrors, pumpCount, type CollectorCatalog, type CollectorConfiguration, type CollectorType } from "./collector-calculations";
+import { calculateCollector, collectorFlow, collectorLength, collectorVelocityWarning, collectorPressureChecks, configurationFingerprint, matchesCollectorConfiguration, configurationWarnings, collectorBranchDiameterErrors, pumpCount, type CollectorCatalog, type CollectorConfiguration, type CollectorType } from "./collector-calculations";
 import { pressureCheckWarning } from "./dn-defaults";
 import { synchronizeCollectors, type CollectorCardState, type CollectorOverrides, type CollectorsEntity, type SavedCollector } from "./collector-project";
 import { useRuntimeDiagnostic, useStoredDiagnostic } from "./diagnostics-ui";
@@ -68,7 +68,7 @@ function CollectorCard({ canCustomize = false, pressureChecksEnabled = true, typ
   const fingerprint = configurationFingerprint(c), preview = catalog ? calculateCollector(c, catalog) : null;
   const diameterErrors = collectorBranchDiameterErrors(c, catalog), configurationErrors = [...new Set([...configurationWarnings(c), ...diameterErrors])];
   const stale = state.status === "stale" || Boolean(state.calculation && catalog && state.calculation.catalogVersion !== catalog.version);
-  const calculation = !stale && !configurationErrors.length && state.calculation?.fingerprint === fingerprint ? state.calculation : null;
+  const calculation = !stale && !configurationErrors.length && matchesCollectorConfiguration(state.calculation?.fingerprint,c) ? state.calculation : null;
   const saved = !configurationErrors.length && state.databaseStatus === "found" && state.database?.code === state.code ? state.database : null;
   const values = preview ?? calculation;
   const velocityWarning = collectorVelocityWarning(c.dn, values?.velocities.collector,c.velocityRules);

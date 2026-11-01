@@ -153,14 +153,14 @@ test("admin API authorization, immutable history, optimistic conflicts and trust
   assert.equal((await send({action:"save",revision:4,values:duplicate})).status,400);
   const nonexistent=structuredClone(expanded);nonexistent.spacing.rules[0].modelIds=["unknown-new-pump"];
   assert.equal((await send({action:"save",revision:4,values:nonexistent})).status,400);
-  sqlite.exec("CREATE TABLE user_projects(id TEXT PRIMARY KEY,user_id TEXT,name TEXT,config_json TEXT,created_at TEXT DEFAULT CURRENT_TIMESTAMP,updated_at TEXT DEFAULT CURRENT_TIMESTAMP)");
+  replacements[new URL("../app/project-storage-server.ts",import.meta.url).href]=`export const projectLimit=()=>10000000;export const storageOperation=async(owner,{config})=>{globalThis.__baseTest.saved=config;return Response.json({ok:true});};`;
   const projectRoute=await loadTs(new URL("../app/api/projects/route.ts",import.meta.url),replacements);
   const put=config=>projectRoute.PUT(new Request("http://local/api/projects",{method:"PUT",body:JSON.stringify({config})}));
   for(const role of ["base","plus"]){
     globalThis.__baseTest.user={id:role,name:role,role};
     const old=projects.createProject(`Old ${role}`);
     assert.equal((await put(old)).status,200,"legacy project saves after a newer publication");
-    const saved=JSON.parse(sqlite.prepare("SELECT config_json FROM user_projects WHERE id=?").get(old.project.id).config_json);
+    const saved=structuredClone(globalThis.__baseTest.saved);
     assert.equal(saved.entities["station-settings"].usdRate,85);assert.equal(saved.entities["station-settings"].baseValues.versions.financial,"legacy-v1");
     assert.equal((await put(saved)).status,200);
     saved.entities["station-settings"].baseValues.values.welding.st20=1;

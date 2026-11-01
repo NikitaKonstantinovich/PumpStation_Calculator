@@ -44,6 +44,13 @@ export function pieceObject(p: InsertionPiece): THREE.Group {
     geometry.setAttribute("position", new THREE.Float32BufferAttribute(data.positions, 3));
     geometry.setIndex(data.indices); geometry.computeVertexNormals();
     group.add(new THREE.Mesh(geometry, mat));
+  } else if (s.kind === "hex-cap") {
+    const length=s.lengthMm!,outer=s.outerMm!,inner=s.innerMm??outer*.7,cover=Math.min(3,length/3),hex=new THREE.Shape();
+    for(let i=0;i<6;i++){const a=i*Math.PI/3,x=Math.cos(a)*outer/2,y=Math.sin(a)*outer/2;if(i===0)hex.moveTo(x,y);else hex.lineTo(x,y);}hex.closePath();
+    const top=new THREE.ExtrudeGeometry(hex,{depth:cover,bevelEnabled:false,steps:1}).rotateY(Math.PI/2).translate(length-cover,0,0);
+    const hole=new THREE.Path();hole.absarc(0,0,inner/2,0,Math.PI*2,true);hex.holes.push(hole);
+    group.add(new THREE.Mesh(new THREE.ExtrudeGeometry(hex,{depth:length-cover,bevelEnabled:false,steps:1,curveSegments:24}).rotateY(Math.PI/2),mat));
+    group.add(new THREE.Mesh(top,mat.clone()));
   } else if (s.kind === "tube" || s.kind === "flange") group.add(new THREE.Mesh(ringGeometry(s), mat));
   else if (s.kind === "reducer-outline") { mat.wireframe ||= !s.innerMm || !s.smallInnerMm; group.add(new THREE.Mesh(reducer(s), mat)); }
   else if (s.kind === "collar") {

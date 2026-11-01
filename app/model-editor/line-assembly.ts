@@ -2,6 +2,7 @@ import type { ProjectConfig, SpecEntity, SpecItem, InputEntity } from "../projec
 import type { Assembly, Component, PortRef, ProfileCatalog, Vec3 } from "./model";
 import type { LineCatalog, LineGeometry, LineJoint } from "./line-types";
 import { applyCollectorTemplate, moveCollectorBranchX } from "./collector-template";
+import { occupyInsertionSensor } from "./insertion-template";
 
 const add = (a: Vec3, b: Vec3): Vec3 => a.map((v, i) => v + b[i]) as Vec3;
 const sub = (a: Vec3, b: Vec3): Vec3 => a.map((v, i) => v - b[i]) as Vec3;
@@ -56,7 +57,7 @@ export function lineEntries(rows: SpecItem[], prefix: string, side: "suction" | 
     const valve = option === `${prefix}${side === "suction" ? "SuctionValve" : "DischargeValve"}`;
     const check = side === "discharge" && option === `${prefix}CheckValve`;
     if (valve || check) { entries.push({ row, sequence: check ? 35 : 75, index: 0, quantity: row.quantity / count, auxiliary: false }); continue; }
-    if (!row.assemblyRole?.startsWith(`${prefix}-`) || /flax|error/.test(role ?? "")) continue;
+    if (!row.assemblyRole?.startsWith(`${prefix}-`) || /flax|error/.test(role ?? "") || role?.startsWith("sensor-")) continue;
     const qty = row.quantity / count;
     if (!Number.isInteger(qty) || qty < 1) { entries.push({ row, sequence: 95, index: 0, quantity: qty, auxiliary: true }); continue; }
     if (/fasteners|limit-switch/.test(role!)) { entries.push({ row, sequence: 95, index: 0, quantity: qty, auxiliary: true }); continue; }
@@ -216,6 +217,11 @@ export function addLineAssemblies(base: Assembly, project: ProjectConfig, profil
       for (const entry of entries) {
         const { row, index, quantity, auxiliary } = entry, role = row.assemblyRole ?? row.option ?? row.position;
         const g = geometries.get(entry)!;
+        if (g.template && row.insertionAssembly?.sensorConnection === "fire-pressure-switch") {
+          g.template = occupyInsertionSensor(g.template);
+          g.issues = g.issues.filter(issue => !issue.includes("подключение занято заглушкой"));
+          for (const port of g.ports) if (port.id === "sensor") { port.occupiedBy = "fire-pressure-switch"; port.thread = "G1/2"; }
+        }
         const id = `line-${pump.id}-${side}-${role}-${index}`;
         const ports = g.ports.length >= 2 ? g.ports : [{ id: "left", point: [0, 0, 0] as Vec3, axis: [-1, 0, 0] as Vec3, provisional: true }, { id: "right", point: [0, 0, 0] as Vec3, axis: [1, 0, 0] as Vec3, provisional: true }];
         let a = ports.find(p => p.id === "left" || p.id === "inlet" || p.id === "large-end") ?? ports[0];

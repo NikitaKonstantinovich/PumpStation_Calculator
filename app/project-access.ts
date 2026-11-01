@@ -2,7 +2,7 @@ import { defaultProjectSettings } from "./default-settings";
 import { createProject, parseProjectConfig, type DnEntity, type InputEntity, type ProjectConfig, type SettingsEntity } from "./project-config";
 import { collectorRecommendation, type CollectorsEntity } from "./collector-project";
 import type { CollectorConfiguration } from "./collector-calculations";
-import { canEditAllSettings, canEditProjectOptions, type UserRole } from "./user-types";
+import { canEditAllSettings, canEditProjectOptions, canUseGeometry, type UserRole } from "./user-types";
 
 export const PROJECT_OPTION_KEYS = ["combinedCircuitsSimultaneous", "membraneTank", "membraneTankVolume", "vibrationCompensators", "collectorPlugs", "isolatingValves", "jockeyPump", "hydraulicOptions"] as const;
 export function canEditSetting(role: UserRole, key: keyof SettingsEntity) {
@@ -36,7 +36,9 @@ export function projectAccessError(project: ProjectConfig, role: UserRole): stri
 }
 
 export function parseAccessibleProject(raw: unknown, role: UserRole): ProjectConfig {
-  const project = parseProjectConfig(raw), error = projectAccessError(project, role);
+  const project = parseProjectConfig(raw,true);
+  if (!canUseGeometry(role)) (project.entities["station-settings"] as SettingsEntity).geometryEnabled = false;
+  const error = projectAccessError(project, role);
   if (error) throw new Error(error);
   return project;
 }

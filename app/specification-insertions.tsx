@@ -1,7 +1,7 @@
 import type { DnEntity, SpecItem } from "./project-config";
 import type { AssemblyComponent } from "./suction-catalog";
 import { insertionDesign, insertionOrientations } from "./station-insertion-selection";
-import { insertionPhysicalKey } from "./calculated-insertion";
+import { insertionPhysicalKey, installedInsertionBom } from "./calculated-insertion";
 import "./specification-insertions.css";
 
 export function SpecificationInsertion({ item, database, designs, onChange }: {
@@ -38,7 +38,8 @@ export function SpecificationInsertion({ item, database, designs, onChange }: {
     {!candidates.length && <p>В загруженном каталоге нет расчётных вставок с подходящими DN, PN, материалом, соединениями, геометрией и исполнением сгона.</p>}
     {assembly && <>
       <p>Источник: {assembly.snapshot.id}; ревизия {assembly.snapshot.revision}; дата цены {assembly.snapshot.pricedAt}. Учёт: одно готовое изделие. Состав ниже указан на одну вставку и повторно не суммируется.</p>
-      <ul>{assembly.snapshot.calculation.bom.map((part, index) => <li key={`${part.role}-${index}`}>{part.name} — {part.quantity?.toLocaleString("ru-RU",{maximumFractionDigits:3}) ?? "?"} {part.unit}; {part.cost === null ? "цена не подтверждена" : `${part.cost.toLocaleString("ru-RU",{maximumFractionDigits:2})} ₽`} · {part.source ?? "источник не указан"}</li>)}</ul>
+      {assembly.sensorConnection && <p>Сгон занят узлом «кран → футорка → реле». Покупная заглушка исключена из установленного состава и цены. Исходный расчёт изделия сохранён.</p>}
+      <ul>{installedInsertionBom(assembly).map((part, index) => <li key={`${part.role}-${index}`}>{part.name} — {part.quantity?.toLocaleString("ru-RU",{maximumFractionDigits:3}) ?? "?"} {part.unit}; {part.cost === null ? "цена не подтверждена" : `${part.cost.toLocaleString("ru-RU",{maximumFractionDigits:2})} ₽`} · {part.source ?? "источник не указан"}</li>)}</ul>
     </>}
   </details>;
 }

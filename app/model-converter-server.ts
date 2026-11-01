@@ -1,5 +1,6 @@
 import { env } from "cloudflare:workers";
 import { currentUser, json } from "./auth-server";
+import { geometryAccessError } from "./geometry-access-server";
 
 type ConverterEnv = { MODEL_CONVERTER_URL?: string; MODEL_CONVERTER_TOKEN?: string };
 
@@ -7,6 +8,7 @@ type ConverterEnv = { MODEL_CONVERTER_URL?: string; MODEL_CONVERTER_TOKEN?: stri
 export async function converterRequest(request: Request, path: string, body?: unknown) {
   const user = await currentUser(request);
   if (!user) return json({ error: "Для подготовки 3D-моделей требуется вход." }, 401);
+  const denied = geometryAccessError(user); if (denied) return denied;
   if (body !== undefined && request.headers.get("origin") && request.headers.get("origin") !== new URL(request.url).origin) return json({ error: "Недопустимый источник запроса." }, 403);
   const config = env as unknown as ConverterEnv;
   if (!config.MODEL_CONVERTER_URL || !config.MODEL_CONVERTER_TOKEN) return json({ error: "Сервис подготовки 3D-моделей не подключён. Настройте MODEL_CONVERTER_URL и MODEL_CONVERTER_TOKEN на сервере приложения; инструкция: docs/model-converter.md." }, 503);

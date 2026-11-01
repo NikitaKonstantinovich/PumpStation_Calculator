@@ -17,6 +17,8 @@ const DB={prepare:sql=>new Statement(sql),async batch(statements){const result=[
 const pumps=JSON.parse(await readFile(new URL("../public/pumps.json",import.meta.url),"utf8"));
 globalThis.__assistantDataTestEnv={DB,OPENAI_API_KEY:"fixture-secret-never-model-context",OPENAI_MODEL:"gpt-6-luna",AI_ASSISTANT_ENABLED:"true",ASSETS:{async fetch(url){assert.equal(url,"https://assets.local/pumps.json");return Response.json(pumps);}}};
 const replacements={};
+globalThis.__assistantProject=(owner,id)=>sqlite.prepare("SELECT config_json,updated_at FROM user_projects WHERE user_id=? AND id=?").get(owner,id);
+replacements[new URL("../app/project-storage-server.ts",import.meta.url).href]=`export const storageOperation=async(owner,{id})=>{const row=globalThis.__assistantProject(owner,id);return row?Response.json({config:JSON.parse(row.config_json),updatedAt:row.updated_at}):new Response(null,{status:404});};`;
 for(const file of ["auth-server","assistant-server","assistant-data-server"]){const url=new URL(`../app/${file}.ts`,import.meta.url);replacements[url.href]=(await readFile(url,"utf8")).replace('import { env } from "cloudflare:workers";','const env=globalThis.__assistantDataTestEnv;');}
 const load=name=>loadTs(new URL(`../app/${name}.ts`,import.meta.url),replacements);
 const auth=await load("auth-server"),base=await load("base-values"),baseServer=await load("base-values-server"),data=await load("assistant-data-server"),server=await load("assistant-server"),knowledge=await load("assistant-knowledge-server");

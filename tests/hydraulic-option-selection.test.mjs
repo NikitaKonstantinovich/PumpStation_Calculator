@@ -19,7 +19,7 @@ const transducer = (id = "sensor") => component(id, "Преобразовате�
   "Исполнение резьбы": "НР", "Выходной сигнал": "4–20 мА", "Питание, В": "10–30 В DC",
   "Давление перегрузки, бар": 20,
 });
-const sensorNeed = { kind: "transducer", pressureBar: 8, range: { min: 0, max: .8 }, signal: "4-20 mA", supplyVoltage: 24, overloadBar: 16 };
+const sensorNeed = { kind: "transducer", pressureBar: 8, range: { min: 0, max: .8 }, signal: "4-20 mA", overloadBar: 16 };
 
 test("real tank catalogue distinguishes four tanks from two hoses and exposes missing ratings", () => {
   assert.equal(binding.items.filter(i => hydraulicProductKind(i) === "tank").length, 4);
@@ -53,20 +53,20 @@ test("explicit incompatible or missing selection is not silently replaced", () =
   assert.equal(selectHydraulicProduct([item], tankNeed, "removed").selected, undefined);
   assert.equal(selectHydraulicProduct([item], tankNeed, "removed").missingSelection, true);
 });
-test("transducer range does not replace pressure, supply, signal and overload checks", () => {
+test("transducer range does not replace pressure, signal and overload checks; supply comes from the cabinet", () => {
   assert.equal(selectHydraulicProduct([transducer()], sensorNeed).selected.technicalStatus, "ready");
-  for (const patch of [{ supplyVoltage: 48 }, { signal: "0-10 V" }, { pressureBar: 16 }, { overloadBar: 25 }, { range: { min: -.1, max: .8 } }]) {
+  for (const patch of [{ signal: "0-10 V" }, { pressureBar: 16 }, { overloadBar: 25 }, { range: { min: -.1, max: .8 } }]) {
     assert.equal(selectHydraulicProduct([transducer()], { ...sensorNeed, ...patch }).selected, undefined);
   }
   const real = selectHydraulicProduct(binding.items, sensorNeed);
   assert.equal(real.selected.technicalStatus, "unverified");
   assert.equal(hydraulicProductFacts(real.selected.item).pressureBar, null);
-  assert.match(real.explanation, /питания/);
+  assert.doesNotMatch(real.explanation, /питани/);
   assert.match(real.explanation, /сигнал/);
 });
 test("missing or invalid requirements cannot certify a product", () => {
   for (const pressureBar of [null, NaN, -1]) assert.equal(selectHydraulicProduct([tank()], { ...tankNeed, pressureBar }).selected?.technicalStatus, "unverified");
-  assert.equal(selectHydraulicProduct([transducer()], { ...sensorNeed, range: undefined, supplyVoltage: undefined }).selected.technicalStatus, "unverified");
+  assert.equal(selectHydraulicProduct([transducer()], { ...sensorNeed, range: undefined }).selected.technicalStatus, "unverified");
 });
 test("valve variant prices are independent and missing handle price is not replaced by bare stem price", () => {
   const valve = binding.items.find(i => i.id === "затворы-001-r0012");

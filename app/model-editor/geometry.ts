@@ -9,7 +9,9 @@ import { PIPE_APPEARANCE } from "./pipe-appearance";
 const colors = { pump: 0x4587a6, collector: PIPE_APPEARANCE.color, pipe: PIPE_APPEARANCE.color, frame: 0x405568, equipment: 0x62877b };
 export const vector = (p: Vec3) => new THREE.Vector3(...p);
 export function material(c: Component) {
-  return new THREE.MeshStandardMaterial({ ...PIPE_APPEARANCE, color: colors[c.kind], transparent: c.opacity < 1, opacity: c.opacity, side: THREE.DoubleSide });
+  const kipColors = { valve: 0xaeb6bb, gauge: 0xc9ced2, adapter: 0xb69a52, bush: 0xb69a52, relay: 0x464c54, transducer: 0xc3cbd0, connector: 0x30343a };
+  const nativeColors = c.instrumentMount?.role === "gauge" || c.instrumentMount?.role === "valve";
+  return new THREE.MeshStandardMaterial({ ...PIPE_APPEARANCE, color: c.tankMount?.role==="tank"?0x22538a:c.tankMount?.role==="valve"?0xb8bec4:nativeColors ? 0xffffff : c.instrumentMount ? kipColors[c.instrumentMount.role] : colors[c.kind], vertexColors: nativeColors, transparent: c.opacity < 1, opacity: c.opacity, side: THREE.DoubleSide });
 }
 export function cylinder(a: Vec3, b: Vec3, diameter: number, mat: THREE.Material): THREE.Mesh {
   const start = vector(a), end = vector(b), delta = end.clone().sub(start);
@@ -32,6 +34,16 @@ export function componentObject(assembly: Assembly, c: Component, insertionCache
       const guide = new THREE.LineSegments(new THREE.BufferGeometry().setFromPoints([vector(port.point), vector(end)]), new THREE.LineBasicMaterial({ color, depthTest: false }));
       guide.renderOrder = 90; group.add(guide);
     }
+  }
+  else if(c.tankMount?.role==="tank"&&c.tankMount.volume===8&&!c.meshUrl){
+    const r=(c.bounds![3]-c.bounds![0])/2,h=c.bounds![5]-c.bounds![2];
+    const profile=[[0,.087],[.35,.087],[.7,.138],[.94,.241],[1,.322],[1,.74],[.95,.82],[.75,.907],[.35,.955],[0,.961]].map(([radius,z])=>new THREE.Vector2(radius*r,z*h));
+    group.add(new THREE.Mesh(new THREE.LatheGeometry(profile,64).rotateX(Math.PI/2),mat));
+    const metal=new THREE.MeshStandardMaterial({color:0xb8bec4,metalness:.6,roughness:.4,transparent:c.opacity<1,opacity:c.opacity});
+    group.add(cylinder([0,0,0],[0,0,h*.058],26.4,metal));
+    group.add(cylinder([0,0,h*.058],[0,0,h*.087],100,metal.clone()));
+    group.add(cylinder([0,0,h*.961],[0,0,h],16,metal.clone()));
+    for(const z of [.43,.45]){const seam=new THREE.Mesh(new THREE.TorusGeometry(r*.995,.45,8,64),mat.clone());seam.position.z=z*h;group.add(seam);}
   }
   else if (c.line || c.shape) {
     mat.dispose();

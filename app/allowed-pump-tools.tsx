@@ -1,5 +1,6 @@
 "use client";
 import { paintingItemForBase } from "./base-values";
+import { pressureTransducerCatalog } from "./pressure-transducers";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { InputEntity, SettingsEntity } from "./project-config";
 import { CircuitInputFields } from "./circuit-input-fields";
@@ -157,7 +158,8 @@ export const loadComponentsDatabase=(reload=false)=>{
   const categories=[...new Set(control.components.map(item=>item.category))].sort((a,b)=>a.localeCompare(b,"ru"));
   const controlCatalogs:ComponentCatalog[]=categories.map(category=>({id:`control:${category}`,name:category.replaceAll("_"," "),groupId:category==="Работы"?"services":"control"}));
   const controlItems:ComponentItem[]=control.components.map(item=>({id:item.id,catalogId:`control:${item.category}`,family:item.name,fields:[{column:"manufacturer",headerPath:["Производитель"],value:item.manufacturer},{column:"article",headerPath:["Артикул"],value:item.article},{column:"componentType",headerPath:["Тип"],value:item.componentType},...Object.entries(item.attributes).map(([key,value])=>({column:key,headerPath:[key],value}))],prices:typeof item.currentPrice==="number"&&item.currentPrice>0?[{label:"Актуальная цена",amount:item.currentPrice,currency:item.currency}]:[]}));
-  return loadedComponentsDatabase={collectorCatalog:makeCollectorCatalog(binding),catalogs:[...binding.catalogs.map(catalog=>({...catalog,groupId:bindingGroupFor(catalog.id)})),{id:"ответные-части",name:"Ответные части и американки",groupId:"hydraulic"},{id:LEGACY_NOMENCLATURE_CATALOG_ID,name:LEGACY_NOMENCLATURE_LABEL,groupId:"hydraulic"},...controlCatalogs],items:[...binding.items,...suctionCatalogItems,...savedInsertions,...controlItems].map(routeNomenclature),statistics:{componentRows:binding.statistics.componentRows+control.statistics.components+suctionCatalogItems.length+savedInsertions.length,pricedComponentRows:binding.statistics.pricedComponentRows+control.statistics.pricedComponents+suctionCatalogItems.length+savedInsertions.filter(item=>item.prices.length).length}};
+  const items=pressureTransducerCatalog([...binding.items,...suctionCatalogItems,...savedInsertions,...controlItems]).map(routeNomenclature);
+  return loadedComponentsDatabase={collectorCatalog:makeCollectorCatalog(binding),catalogs:[...binding.catalogs.map(catalog=>({...catalog,groupId:bindingGroupFor(catalog.id)})),{id:"ответные-части",name:"Ответные части и американки",groupId:"hydraulic"},{id:LEGACY_NOMENCLATURE_CATALOG_ID,name:LEGACY_NOMENCLATURE_LABEL,groupId:"hydraulic"},...controlCatalogs],items,statistics:{componentRows:items.length,pricedComponentRows:items.filter(item=>item.prices.length).length}};
 }).catch(error=>{componentsDatabasePromise=undefined;throw error;});
 };
 export const componentFieldLabel=(field:ComponentField)=>field.headerPath.filter(Boolean).at(-1)?.trim()??"";

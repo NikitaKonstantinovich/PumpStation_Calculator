@@ -36,15 +36,39 @@ def atomic_json(path, value):
     temporary.replace(path)
 
 
+class PgJobDatabase:
+    """Local worker owns one connection and the queue until the process exits."""
+    def __init__(self, url):
+        import psycopg
+        self.connection = psycopg.connect(url, autocommit=True)
+        if not self.connection.execute("SELECT pg_try_advisory_lock(70124319)").fetchone()[0]:
+            self.connection.close()
+            raise RuntimeError("Обработчик очереди уже запущен для этой базы")
+        self.connection.execute("CREATE SCHEMA IF NOT EXISTS cad_worker")
+        self.connection.execute("SET search_path TO cad_worker")
+
+    def execute(self, sql, args=()):
+        return self.connection.execute(sql.replace("?", "%s"), args)
+
+    def commit(self):
+        pass  # Single-statement transitions use autocommit.
+
+    def close(self):
+        self.connection.close()
+
+
 class Jobs:
     def __init__(self, root, state, registry=None, timeout=600, converter=None):
         self.root, self.state, self.registry, self.timeout = root.resolve(), state.resolve(), registry, timeout
         self.assets = self.state / "assets"
         self.assets.mkdir(parents=True, exist_ok=True)
         self.lock = threading.RLock()
-        self.db = sqlite3.connect(self.state / "jobs.sqlite", check_same_thread=False)
-        self.db.execute("PRAGMA journal_mode=WAL")
-        self.db.execute("CREATE TABLE IF NOT EXISTS jobs (id TEXT PRIMARY KEY, owner TEXT, project TEXT, request TEXT, created REAL, body TEXT, UNIQUE(owner,request))")
+        if os.environ.get("PROJECT_DATABASE_URL"):
+            self.db = PgJobDatabase(os.environ["PROJECT_DATABASE_URL"])
+        else:
+            self.db = sqlite3.connect(self.state / "jobs.sqlite", check_same_thread=False)
+            self.db.execute("PRAGMA journal_mode=WAL")
+        self.db.execute("CREATE TABLE IF NOT EXISTS jobs (id TEXT PRIMARY KEY, owner TEXT, project TEXT, request TEXT, created DOUBLE PRECISION, body TEXT, UNIQUE(owner,request))")
         self.db.execute("CREATE TABLE IF NOT EXISTS assets (hash TEXT PRIMARY KEY, body TEXT)")
         self.db.commit()
         self.executor = ThreadPoolExecutor(max_workers=1, thread_name_prefix="step-queue")
@@ -108,6 +132,14 @@ class Jobs:
                    "stage": "searching", "items": items, "tasks": [], "total": 0, "completed": 0,
                    "converted": 0, "ready": 0, "missing": [], "errors": [], "current": "", "progress": None,
                    "profiles": deepcopy(inherited), "inheritedProfiles": inherited, "retryOf": retry_id}
+            if os.environ.get("PROJECT_MODEL_LIBRARY") and isinstance(self.db, PgJobDatabase):
+                row = self.db.execute("""SELECT coalesce(
+                    (SELECT r.model_release FROM public.projects p JOIN public.project_revisions r
+                     ON r.project_id=p.id AND r.revision=p.head WHERE p.id=? AND p.owner_id=? AND p.deleted_at IS NULL),
+                    (SELECT version FROM public.model_releases ORDER BY published_at DESC LIMIT 1))""", (project, owner)).fetchone()
+                if not row[0]:
+                    raise ValueError("Версия библиотеки ещё не опубликована")
+                job["modelRelease"] = row[0]
             self.db.execute("INSERT INTO jobs VALUES (?,?,?,?,?,?)", (job["id"], owner, project, request_id, time.time(), json.dumps(job, ensure_ascii=False)))
             self.db.commit()
             self.executor.submit(self.run, job["id"])
@@ -122,13 +154,13 @@ class Jobs:
             if info.get("converterVersion") == CONVERTER_VERSION and valid_stl(target) and file_hash(target) == info.get("assetHash"):
                 return info
         # Reuse committed browser copies when the actual STEP hash still matches.
-        manifest_path = FRONTEND / "public/model-assets/manifest.json"
+        manifest_path = Path(os.environ.get("PROJECT_MODEL_LIBRARY", FRONTEND / "public/model-assets")) / "manifest.json"
         if manifest_path.exists():
             manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
             old = manifest.get("profiles", {}).get(profile["pumpId"], {}) if profile.get("pumpId") else manifest.get("equipment", {}).get(profile.get("key"), {})
             url = old.get("meshUrl", "")
             if old.get("sourceHash") == digest and re.fullmatch(r"/model-assets/[a-zA-Z0-9_-]+\.stl", url):
-                source = FRONTEND / "public" / url.lstrip("/")
+                source = manifest_path.parent / Path(url).name
                 if valid_stl(source) and (not old.get("meshHash") or file_hash(source) == old["meshHash"]):
                     name = f"model-{digest}-{CONVERTER_VERSION}.stl"
                     shutil.copyfile(source, self.assets / name)
@@ -136,12 +168,12 @@ class Jobs:
                     self.register(digest, info)
                     return info
         # Library copies are also reusable before a catalogue link was assigned.
-        library_path = FRONTEND / "public/model-assets/library.json"
+        library_path = Path(os.environ.get("PROJECT_MODEL_LIBRARY", FRONTEND / "public/model-assets")) / "library.json"
         if library_path.exists():
             library = json.loads(library_path.read_text(encoding="utf-8"))
             old = next((m for m in library.get("models", []) if m.get("sourceHash") == digest and m.get("status") == "ready" and m.get("units") == "mm"), None)
             if old and re.fullmatch(r"/model-assets/[a-zA-Z0-9_-]+\.stl", old.get("meshUrl", "")):
-                source = FRONTEND / "public" / old["meshUrl"].lstrip("/")
+                source = library_path.parent / Path(old["meshUrl"]).name
                 if valid_stl(source) and old.get("meshHash") and file_hash(source) == old["meshHash"]:
                     filename = f"model-{digest}-{CONVERTER_VERSION}.stl"
                     shutil.copyfile(source, self.assets / filename)
@@ -153,7 +185,7 @@ class Jobs:
     def register(self, digest, info):
         info["assetHash"] = file_hash(self.assets / info["filename"])
         with self.lock:
-            self.db.execute("INSERT OR REPLACE INTO assets VALUES (?,?)", (digest, json.dumps(info)))
+            self.db.execute("INSERT INTO assets VALUES (?,?) ON CONFLICT(hash) DO UPDATE SET body=excluded.body", (digest, json.dumps(info)))
             self.db.commit()
 
     def convert(self, source, digest):
@@ -192,6 +224,15 @@ class Jobs:
             job["profiles"]["profiles"][key[5:]] = result
 
     def run(self, job_id):
+        if isinstance(self.db, PgJobDatabase):
+            # A dedicated connection keeps status/HTTP queries independent of the wait.
+            import psycopg
+            with psycopg.connect(os.environ["PROJECT_DATABASE_URL"], autocommit=True) as slot:
+                slot.execute("SELECT pg_advisory_lock(70124321)")
+                return self.run_job(job_id)
+        return self.run_job(job_id)
+
+    def run_job(self, job_id):
         job = self.get(job_id)
         try:
             # Re-search on restart: actual source hashes and durable cached outputs are authoritative.
@@ -199,7 +240,16 @@ class Jobs:
                        profiles=deepcopy(job.get("inheritedProfiles", {"version": 1, "profiles": {}, "equipment": {}})))
             job.pop("fatalError", None)
             self.save(job)
-            library, grouped, ready_hashes = load_library(self.root, self.registry), {}, set()
+            source_root = self.root
+            if job.get("modelRelease"):
+                source_root = Path(os.environ["PROJECT_MODEL_LIBRARY"]).resolve()
+                with self.lock:
+                    rows = self.db.execute("""SELECT model_id, source_path, profile FROM public.model_versions
+                        WHERE version=? AND model_id=ANY(?)""", (job["modelRelease"], [i["key"] for i in job["items"]])).fetchall()
+                library = {key: {**profile, "source": path} for key, path, profile in rows}
+            else:
+                library = load_library(self.root, self.registry)
+            grouped, ready_hashes = {}, set()
             for item in job["items"]:
                 key = item["key"]
                 job["current"] = item["name"]
@@ -209,7 +259,7 @@ class Jobs:
                     job["missing"].append({"name": item["name"], "position": item["position"], "reason": "В библиотеке нет связи с исходной 3D-моделью"})
                     continue
                 try:
-                    source = source_path(self.root, profile["source"])
+                    source = source_path(source_root, profile["source"])
                     digest = file_hash(source)
                     info = self.cached(digest, profile)
                     if info:
@@ -238,7 +288,7 @@ class Jobs:
                     if task["reason"]:
                         raise ValueError(task["reason"])
                     profile = library[task["keys"][0]]
-                    source = source_path(self.root, profile["source"])
+                    source = source_path(source_root, profile["source"])
                     if file_hash(source) != task["hash"]:
                         raise ValueError("Исходный файл изменился после поиска; повторите подготовку")
                     # Other completed jobs may have already converted the same hash.
@@ -326,7 +376,7 @@ class Handler(BaseHTTPRequestHandler):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--root", type=Path, default=FRONTEND.parent)
-    parser.add_argument("--state", type=Path, default=FRONTEND / ".model-converter")
+    parser.add_argument("--state", type=Path, default=Path(os.environ.get("MODEL_CONVERTER_STATE", FRONTEND / ".model-converter")))
     parser.add_argument("--registry", type=Path)
     parser.add_argument("--host", default="127.0.0.1")
     parser.add_argument("--port", type=int, default=8766)

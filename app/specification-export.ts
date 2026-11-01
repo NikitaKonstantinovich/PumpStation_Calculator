@@ -1,3 +1,4 @@
+import { installedInsertionBom } from "./calculated-insertion";
 import { hydraulicAssemblyDescription } from "./hydraulic-option-assembly";
 import type { SpecItem, SpecSection } from "./project-config";
 import { specificationItemPresentation, specificationSection } from "./specification-presentation";
@@ -35,7 +36,7 @@ export function specificationExportRows(items: SpecItem[], groups: Specification
         const presentation = specificationItemPresentation(item);
         rows.push({ kind: "item", cells: [item.position, item.name, item.quantity, item.unit ?? "шт.",
           hasPrice(item) ? item.price! : null, hasPrice(item) && item.quantity > 0 ? specificationLineTotal(item) : null,
-          presentation.description + (item.hydraulicAssembly ? `\n${hydraulicAssemblyDescription(item.hydraulicAssembly)}` : "") + (item.insertionAssembly ? `\nИсточник вставки: ${item.insertionAssembly.snapshot.id}; ревизия ${item.insertionAssembly.snapshot.revision}; версия каталога ${item.insertionAssembly.snapshot.catalogVersion}.\nВложенный состав на 1 изделие (включён в цену, не суммируется повторно):\n${item.insertionAssembly.snapshot.calculation.bom.map(part => `${part.role}: ${part.name}; ${part.quantity ?? "?"} ${part.unit}; стоимость ${part.cost ?? "не подтверждена"}; ${part.source ?? "нет источника"}`).join("\n")}` : ""), presentation.hasWarning ? presentation.warningText : ""] });
+          presentation.description + (item.hydraulicAssembly ? `\n${hydraulicAssemblyDescription(item.hydraulicAssembly)}` : "") + (item.insertionAssembly ? `\nИсточник вставки: ${item.insertionAssembly.snapshot.id}; ревизия ${item.insertionAssembly.snapshot.revision}; версия каталога ${item.insertionAssembly.snapshot.catalogVersion}.\nВложенный состав на 1 изделие (включён в цену, не суммируется повторно):\n${installedInsertionBom(item.insertionAssembly).map(part => `${part.role}: ${part.name}; ${part.quantity ?? "?"} ${part.unit}; стоимость ${part.cost ?? "не подтверждена"}; ${part.source ?? "нет источника"}`).join("\n")}` : ""), presentation.hasWarning ? presentation.warningText : ""] });
       }
     }
   }

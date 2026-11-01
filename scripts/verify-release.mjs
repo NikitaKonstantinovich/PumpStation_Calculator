@@ -1,10 +1,15 @@
-import { readFile, readdir, rm, writeFile } from "node:fs/promises";
+import { cp, readFile, readdir, rm, writeFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 const profile = process.env.PSC_RELEASE_PROFILE ?? "beta";
 if (!["beta", "full"].includes(profile)) throw new Error("Unknown release profile");
 const config = JSON.parse(await readFile("dist/server/wrangler.json", "utf8"));
 if (config.assets?.run_worker_first !== true || config.assets?.binding !== "ASSETS") throw new Error("Asset authentication requires run_worker_first and ASSETS");
 const assets = await readdir("dist/client/_next/static/chunks");
+if (profile === "full") {
+  for (const name of await readdir("public")) {
+    if (name !== "model-assets") await cp(resolve("public",name),resolve("dist/client",name),{recursive:true});
+  }
+}
 if (profile === "beta") {
   // Full-only CAD copies can exceed the Worker static-asset limit. The beta
   // never serves them; remove only the generated copy, preserving public/.

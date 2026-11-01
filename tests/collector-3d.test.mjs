@@ -64,10 +64,34 @@ function fixture(two=false){
   const catalog={version:"test",components,valveBolts:[{dn:50,pn:16,material:"aisi304",model:"017W",length:50,minimumLengthMm:49,componentId:"test-bolt",diameter:16,source:"GEOMETRY FIXTURE ONLY",warnings:[]}],bolts:[{dn:50,pn:16,length:50,source:"GEOMETRY FIXTURE ONLY"}]};
   const calculation=calculateCollector(c,catalog),card={configuration:c,calculation,status:"complete"};return {c,calculation,card,catalog,data:{version:1,revision:"test",items,issues:[]}};
 }
+test("JSONB field order does not hide a previously calculated collector; real configuration edits still invalidate it",()=>{
+  const {card,c,data,calculation}=fixture(true);
+  const reordered=JSON.parse(JSON.stringify(c,(_,v)=>v && typeof v==="object" && !Array.isArray(v)
+    ? Object.fromEntries(Object.entries(v).reverse()) : v));
+  const oldCalculation={...calculation,fingerprint:JSON.stringify(c)};
+  const build=configuration=>buildCollectorTemplate({...card,configuration,calculation:oldCalculation},data,[],"discharge");
+  const ready=build(reordered);
+  assert.ok(ready.main && ready.branches.length);
+  const changed=build({...reordered,primary:{...reordered.primary,spacing:reordered.primary.spacing+100}});
+  assert.equal(changed.main,null);
+  const saved=applyCollectorTemplate({id:"collector-discharge",kind:"collector",position:[17,25,83],rotation:[0,0,90],parameters:{},opacity:1},changed);
+  const snapshot={components:[saved],sourceFingerprint:"saved"};
+  const generated={components:[applyCollectorTemplate({...saved,position:[0,0,0]},ready)]};
+  const restored=model.recoverEmptyCollectors(snapshot,generated);
+  assert.deepEqual(restored.components[0].position,saved.position);
+  assert.equal(saved.collector.template.main,null);
+  assert.ok(collectorObject(restored.components[0]).children.some(child=>child.userData.pieceId==="main" && child.geometry.getAttribute("position").count>0));
+  assert.equal(model.recoverEmptyCollectors(restored,generated),restored);
+  assert.equal(model.recoverEmptyCollectors(snapshot,snapshot),snapshot);
+  for(const protectedComponent of [{...saved,locked:true},{...saved,collector:{...saved.collector,manualGeometry:true}}]){
+    const manual={...snapshot,components:[protectedComponent]};
+    assert.equal(model.recoverEmptyCollectors(manual,generated),manual);
+  }
+});
 test("template consumes calculated lengths, includes reserves/second circuit, and has no price/BOM side effects",()=>{
   const f=fixture(true),snapshot=JSON.stringify(f),t=buildCollectorTemplate(f.card,f.data,[],"discharge");
   close(t.main.lengthMm,1900);assert.equal(t.branches.filter(b=>b.role==="branch").length,4);close(t.branches[0].calculatedLengthMm,112.15);assert.equal(t.pieces.filter(p=>p.id.startsWith("end-")&&p.id.endsWith("collar")).length,2);
-  assert.ok(t.ports.filter(p=>!p.id.startsWith("network")).every(p=>p.point[1]>112.15));assert.equal(JSON.stringify(f),snapshot);
+  assert.ok(t.ports.filter(p=>!p.id.startsWith("network")&&!p.id.startsWith("instrument")).every(p=>p.point[1]>112.15));assert.equal(JSON.stringify(f),snapshot);
   const repriced=structuredClone(f);repriced.card.calculation.price=123456;repriced.data.items["pipe-100"].revision="new-price";
   assert.equal(buildCollectorTemplate(repriced.card,repriced.data,[],"discharge").geometryKey,t.geometryKey);
   assert.equal(t.branches.filter(b=>b.role==="instrument").length,3);for(const b of t.branches.filter(b=>b.role==="instrument")){assert.equal(b.blankLengthMm,60);close(saddleRings(t.main,b).cutLengthMm,60);}

@@ -9,11 +9,12 @@ import binding from "../../../public/binding-components.json";
 import type { LineCatalog } from "../../model-editor/line-types";
 import type { InsertCalculation } from "../../component-insert-calculations";
 import { fastenerCatalog } from "../../fastener-catalog";
+import { geometryAccessError } from "../../geometry-access-server";
 
 /** Read-only selected geometry. No calculation/export or client-supplied geometry is trusted. */
 export async function POST(request: Request) {
   const denied = await guardDisabledBetaFeature(request); if (denied) return denied;
-  if (!await currentUser(request)) return json({ error: "Требуется вход." }, 401);
+  const access = geometryAccessError(await currentUser(request)); if (access) return access;
   if (request.headers.get("sec-fetch-site") === "cross-site" || request.headers.get("origin") && request.headers.get("origin") !== new URL(request.url).origin) return json({ error: "Недопустимый источник запроса." }, 403);
   try {
     const raw = await request.text(); if (raw.length > 100000) return json({ error: "Запрос слишком большой." }, 413);

@@ -35,9 +35,10 @@ test("each collector combination has its own composition in the project and BOM 
     if(c.circuits===2)choose(p,"318",1,0,true);
     p.entities["station-collectors"][c.side].overrides.material=c.material;
     const config=sync(p).entities["station-collectors"][c.side].configuration;
-    assert.equal(config.instrumentPorts.length,i+1,collectorCombinationKey(c));assert.ok(config.instrumentPorts.every(port=>port.lengthMm===60+i*5&&port.threaded===(i%2===0)));
+    const mandatoryTank=c.side==="discharge"?1:0;
+    assert.equal(config.instrumentPorts.length,i+1+mandatoryTank,collectorCombinationKey(c));assert.ok(config.instrumentPorts.filter(p=>p.id!=="tank").every(port=>port.lengthMm===60+i*5&&port.threaded===(i%2===0)));
     const bom=calculateCollector(config,resources.components.collectorCatalog).bom;
-    assert.equal(bom.filter(row=>row.kind==="nipple").reduce((n,row)=>n+row.quantity,0),i+1);
+    assert.equal(bom.filter(row=>row.kind==="nipple").reduce((n,row)=>n+row.quantity,0),i+1+mandatoryTank);
     for(const stationType of ["utility","fire","combined","smart"])for(const pn of [10,16,25])for(const tank of [true,false]){
       const context={...c,stationType,pn,tank,dn:75};
       assert.equal(resolveNippleRule(settings,context).outputs[0].quantity,i+1);
@@ -98,11 +99,11 @@ test("zero output and an unmatched rule are distinct; custom sizes and dimension
   const config={version:2,rules:[{id:"empty",name:"Без сгонов",enabled:true,when:anyNippleConditions(),outputs:[]}]};
   assert.equal(resolveNippleRule(config,context).error,"");assert.deepEqual(resolveNippleRule(config,context).outputs,[]);
   const p=fixture();p.entities["station-settings"].baseValues=legacyBaseSnapshot();p.entities["station-settings"].baseValues.values.preferences.collectorNipples=config;
-  let next=sync(p);for(const side of ["suction","discharge"]){assert.deepEqual(next.entities["station-collectors"][side].configuration.instrumentPorts,[]);assert.equal(calculateCollector(next.entities["station-collectors"][side].configuration,resources.components.collectorCatalog).bom.filter(r=>r.kind==="nipple").length,0);}
+  let next=sync(p);for(const side of ["suction","discharge"]){assert.deepEqual(next.entities["station-collectors"][side].configuration.instrumentPorts,side==="suction"?[]:[{id:"tank",dn:20,state:"capped",threaded:true}]);assert.equal(calculateCollector(next.entities["station-collectors"][side].configuration,resources.components.collectorCatalog).bom.filter(r=>r.kind==="nipple").length,side==="suction"?0:1);}
   config.rules[0].outputs=[{...newNippleOutput("reserved"),dn:25,quantity:3,lengthMm:90,threaded:false,purpose:"reserve",state:"open"}];
-  next=sync(p);const c=next.entities["station-collectors"].discharge.configuration;assert.equal(c.instrumentPorts.length,3);assert.ok(c.instrumentPorts.every(port=>port.dn===25&&port.lengthMm===90&&port.threaded===false&&port.state==="open"));
-  assert.equal(calculateCollector(c,resources.components.collectorCatalog).bom.filter(r=>r.kind==="nipple").reduce((n,r)=>n+r.quantity,0),3);
-  config.rules[0].outputs[0].quantity=0;next=sync(p);assert.deepEqual(next.entities["station-collectors"].discharge.configuration.instrumentPorts,[]);
+  next=sync(p);const c=next.entities["station-collectors"].discharge.configuration;assert.equal(c.instrumentPorts.length,4);assert.ok(c.instrumentPorts.filter(p=>p.id!=="tank").every(port=>port.dn===25&&port.lengthMm===90&&port.threaded===false&&port.state==="open"));
+  assert.equal(calculateCollector(c,resources.components.collectorCatalog).bom.filter(r=>r.kind==="nipple").reduce((n,r)=>n+r.quantity,0),4);
+  config.rules[0].outputs[0].quantity=0;next=sync(p);assert.deepEqual(next.entities["station-collectors"].discharge.configuration.instrumentPorts,[{id:"tank",dn:20,state:"capped",threaded:true}]);
   config.rules[0].enabled=false;next=sync(p);assert.match(next.entities["station-collectors"].discharge.configuration.instrumentRuleIssue,/Не найдено/);assert.equal(next.entities["station-collectors"].discharge.code,null);
 });
 

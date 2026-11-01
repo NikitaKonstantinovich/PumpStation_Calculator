@@ -17,6 +17,17 @@ function flange(id,x,rotation=0){
     shape:{kind:"flange",lengthMm:20,outerMm:200,innerMm:80,boltCircleMm:160,boltHoles:8,boltHoleMm:18},
     ports:[{id:"left",point:[0,0,0],axis:[-1,0,0],connection:"flanged",dn:80,pn:16},{id:"right",point:[20,0,0],axis:[1,0,0],connection:"weld"}]};
 }
+
+test("opening a project with geometry off preserves the scene and defers fastener generation until the editor opens", async()=>{
+  const {createProject,parseProjectConfig}=await loadTs(new URL("../app/project-config.ts",import.meta.url));
+  const project=createProject(), assembly=pair();
+  assembly.components=assembly.components.filter(c=>!c.fastener);
+  project.entities["station-model"].editor={...model.emptyEditor(),assembly};
+  const reopened=parseProjectConfig(JSON.parse(JSON.stringify(project)));
+  const editor=reopened.entities["station-model"].editor;
+  assert.deepEqual(editor.assembly.components.map(c=>c.id),assembly.components.map(c=>c.id));
+  assert.ok(model.normalizeEditor(editor).assembly.components.some(c=>c.fastener));
+});
 function pair(){
   return rebuildFasteners({version:1,sourceFingerprint:"fixture",fastenerCatalog:hardware,components:[flange("a",0,180),flange("b",2),{
     ...flange("gasket",0),name:"Gasket",shape:{kind:"tube",lengthMm:2,outerMm:140,innerMm:80},

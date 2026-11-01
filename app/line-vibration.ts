@@ -4,7 +4,7 @@ import type { SpecItem, ValveConnection } from "./project-config";
 import { matingParts, suctionCatalogItems, type AssemblyComponent } from "./suction-catalog";
 import { componentPressureLimit } from "./suction-pressure";
 import { itemDn, price, lineSpecParts } from "./line-spec-parts";
-import { equipmentFlangeThickness, flangeStack, insertionEndThickness } from "./line-joint-stack";
+import { equipmentFlangeThickness, flangeStack, insertionEndThickness, pumpFlangeReference } from "./line-joint-stack";
 import { selectLineInsertion, selectLineReducer } from "./line-insertion";
 import { vibrationExecution } from "./vibration-dimensions";
 
@@ -58,12 +58,13 @@ export function addPumpVibrationAssembly({ parts, database, catalog, collector, 
       gasket(`${prefix}-vibration-pump-gasket`, p.dn, pn, count);
       gasket(`${prefix}-vibration-insertion-gasket`, p.dn, pn, count);
     } else row.description += ` ${mounting?.sealingSource}`;
-    // Neither a generic pipe flange nor the compensator face-to-face length is
-    // evidence for the pump's flange thickness. Keep that bolt length unresolved.
+    const pump = pumpFlangeReference(database, collector.material, p.dn, pn, insertion);
+    const compensator = equipmentFlangeThickness(selected?.item);
     fasteners(`${prefix}-vibration-pump-fasteners`, p.dn, pn, count,
-      { gaskets: gasketCount, thickness: 0, flangeThickness: null, source: "Стык насос — виброкомпенсатор: уточнить толщины фланцев насоса и виброкомпенсатора." });
+      { gaskets: gasketCount, thickness: 0, flangeThickness: flangeStack(pump.thickness, compensator),
+        source: `${pump.source} ${compensator === null ? "Не подтверждена толщина фланца виброкомпенсатора." : `Толщина фланца виброкомпенсатора ${compensator} мм.`}` });
     fasteners(`${prefix}-vibration-insertion-fasteners`, p.dn, pn, count,
-      { gaskets: gasketCount, thickness: 0, flangeThickness: flangeStack(equipmentFlangeThickness(selected?.item), insertionEndThickness(insertion,"from",database)),
+      { gaskets: gasketCount, thickness: 0, flangeThickness: flangeStack(compensator, insertionEndThickness(insertion,"from",database)),
         source: "Стык виброкомпенсатор — вставка: нужны подтверждённая толщина собственного фланца компенсатора (источник и дата) и фланец выбранной вставки." });
   } };
   const need={fromDn:p.dn,toDn:v,fromConnection:p.connection,toConnection:connection,pn,purpose:"after-vibration" as const};
@@ -116,6 +117,14 @@ export function addPumpConnectionAssembly(args: Assembly & { vibration: boolean;
   const { parts, database, catalog, collector, port: p, valveDn: v, connection, pn, count, prefix, title, terminal } = args;
   const { add, gasket, flanges, fasteners } = parts;
   const need={fromDn:p.dn,toDn:v,fromConnection:p.connection,toConnection:connection,pn,purpose:"pump-transition" as const};
+  const pumpInsertionJoint = (insertion: SpecItem) => {
+    const pump = pumpFlangeReference(database, collector.material, p.dn, pn, insertion);
+    gasket(`${prefix}-pump-gasket`, p.dn, pn, count);
+    fasteners(`${prefix}-pump-fasteners`, p.dn, pn, count, {
+      gaskets: 1, thickness: 0, flangeThickness: flangeStack(pump.thickness, insertion.equipmentId ? pump.thickness : null),
+      source: `Стык насос — вставка. ${pump.source}`,
+    });
+  };
   if (p.connection === "threaded" && connection === "threaded") {
     const part = pn <= 16 ? suctionCatalogItems.find(item => item.id === `suction-table:union-${v}`) : undefined;
     add(`${prefix}-union`, part?.family ?? `Американка НР-НР DN${v}`, count, `${title} · DN${v} · PN${pn} · ответные резьбы`, part);
@@ -129,8 +138,7 @@ export function addPumpConnectionAssembly(args: Assembly & { vibration: boolean;
       `${title} · PN${pn} · ${p.connection === "threaded" ? "развёрнута резьбой к насосу" : "фланцем к насосу"}`,need,part);
     flanges(`${prefix}-adapter-flange`, flangeDn, pn, count,insertion,p.connection==="flanged"?"from":"to");
     if (p.connection === "flanged") {
-      gasket(`${prefix}-pump-gasket`, p.dn, pn, count);
-      fasteners(`${prefix}-pump-fasteners`, p.dn, pn, count,{gaskets:1,thickness:0,flangeThickness:null,source:"Стык насос — вставка РФ: толщина собственного фланца насоса не подтверждена."});
+      pumpInsertionJoint(insertion);
       return 2;
     }
     return 1;
@@ -143,7 +151,6 @@ export function addPumpConnectionAssembly(args: Assembly & { vibration: boolean;
     `${title} · насос → переход → арматура · PN${pn} · ${collector.material}`,need,reducer);
   flanges(`${prefix}-pump-flange`, p.dn, pn, count,insertion,"from");
   flanges(`${prefix}-${terminal}-flange`, v, pn, count,insertion,"to");
-  gasket(`${prefix}-pump-gasket`, p.dn, pn, count);
-  fasteners(`${prefix}-pump-fasteners`, p.dn, pn, count,{gaskets:1,thickness:0,flangeThickness:null,source:"Стык насос — переход: толщина собственного фланца насоса не подтверждена."});
+  pumpInsertionJoint(insertion);
   return 0;
 }

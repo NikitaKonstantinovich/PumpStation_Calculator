@@ -4,12 +4,13 @@ import { currentInsertCatalog, currentInsertSource } from "../../component-inser
 import { readSavedInsertions } from "../../component-insert-store-server";
 import { generateInsertCalculations, parseInsertRequest, type InsertCalculation } from "../../component-insert-calculations";
 import { insertion3d } from "../../component-insert-3d-server";
+import { geometryAccessError } from "../../geometry-access-server";
 const reply = (data: unknown, status = 200) => json(data, status, { "Cache-Control": "no-store" });
 const angleValue = (v: unknown) => { const n = v === undefined || v === null ? 0 : Number(v); if (!Number.isFinite(n) || Math.abs(n) > 360) throw new Error("Угол должен быть от −360 до 360°."); return n; };
 
 export async function GET(request: Request) {
   const denied = await guardDisabledBetaFeature(request); if (denied) return denied;
-  if (!await currentUser(request)) return reply({ error: "Требуется вход." }, 401);
+  const access = geometryAccessError(await currentUser(request)); if (access) return access;
   try {
     const params = new URL(request.url).searchParams, saved = await readSavedInsertions();
     if (!params.has("id")) return reply({ items: saved.map(s => { const c = JSON.parse(s.calculation_json) as InsertCalculation; return { id: s.id, name: s.name, revision: s.revision, pn: c.pn, dnLarge: c.dnLarge, dnSmall: c.dnSmall, geometry: c.geometry, connections: `${c.leftConnection}/${c.rightConnection}`, sensor: c.withSensorNipple }; }) });

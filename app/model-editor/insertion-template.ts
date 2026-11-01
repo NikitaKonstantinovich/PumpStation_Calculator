@@ -140,6 +140,19 @@ export function prepareInsertionTemplate(row: InsertCalculation, context: Insert
 export function insertionGeometrySignature(t: Omit<InsertionTemplate, "geometryKey">): string {
   return JSON.stringify(t.geometry, (key, value) => ["source", "name"].includes(key) ? undefined : value);
 }
+
+/** Station installation replaces the reserve cap; the reusable catalogue
+ * template and its original priced snapshot are left untouched. */
+export function occupyInsertionSensor(template: InsertionTemplate): InsertionTemplate {
+  const copy = structuredClone(template);
+  copy.geometry.pieces = copy.geometry.pieces.filter(p => p.id !== "sensor-plug");
+  copy.geometry.joints = copy.geometry.joints.filter(j => j.a.piece !== "sensor-plug" && j.b.piece !== "sensor-plug");
+  for (const port of copy.geometry.ports) if (port.id === "sensor") { port.occupiedBy = "fire-pressure-switch"; port.thread = "G1/2"; }
+  copy.issues = copy.issues.filter(issue => !issue.includes("подключение занято заглушкой"));
+  // Keep the server source key (SHA256) valid for project normalization. The
+  // render cache also includes effective geometry, including cap occupancy.
+  return copy;
+}
 export function insertionComponent(template: InsertionTemplate, id: string): Component {
   const b = template.geometry.bounds;
   return { id, name: template.source.name, kind: "equipment", equipmentId: template.source.recordId ? `calculated-insertion:${template.source.recordId}` : undefined, sourceKey: "manual", sourceNote: `${template.status === "incomplete" ? "Неполная геометрия" : "Компоновочный шаблон"}. ${template.issues.join(" ")} ${template.warnings.join(" ")}`, position: [0, 0, 0], rotation: [0, 0, 0], hidden: false, locked: false, opacity: 1, bounds: b, parameters: { length: template.geometry.totalLengthMm, width: b[4] - b[1], height: b[5] - b[2], diameter: b[4] - b[1], routeOffset: 0 }, ports: template.geometry.ports, insertion: { template, hiddenPieceIds: [] } };

@@ -13827,17 +13827,18 @@
     }
   ],
   "reducerLengthReviewSummary": {
-    "verifiedAt": "2026-10-05",
+    "verifiedAt": "2026-10-31",
     "catalogRows": 486,
     "standardRowsCompared": 510,
     "statuses": {
-      "confirmed": 251,
-      "unconfirmed": 221,
+      "confirmed": 263,
+      "unconfirmed": 209,
       "ambiguous": 2,
       "invalid": 12
     },
     "stainlessRowsWithCandidate": 0,
-    "adoptedStainlessLengths": 182
+    "adoptedStainlessLengths": 182,
+    "projectAnalogueLengths": 12
   },
   "reducerLengthCandidateGroups": [
     {

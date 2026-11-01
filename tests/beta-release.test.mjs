@@ -22,6 +22,7 @@ globalThis.__betaTestEnv = { DB: {
 } };
 const authUrl = new URL("../app/auth-server.ts", import.meta.url);
 const replacements = {
+  [new URL("../app/project-storage-server.ts", import.meta.url).href]: 'export const projectLimit=()=>10000000; export function storageOperation() { throw new Error("Disabled storage was invoked"); }',
   [authUrl.href]: (await readFile(authUrl, "utf8")).replace('import { env } from "cloudflare:workers";', 'const env = globalThis.__betaTestEnv;'),
   [new URL("../app/model-converter-server.ts", import.meta.url).href]: 'export function converterRequest() { throw new Error("Disabled converter was invoked"); }',
 };

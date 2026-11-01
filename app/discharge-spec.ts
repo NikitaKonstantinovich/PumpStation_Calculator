@@ -1,3 +1,6 @@
+import { INSTRUMENT_CONNECTION_REVISION, isAcceptedInstrumentFitting, acceptInstrumentFitting } from "./instrument-connection";
+import { addFireInsertionInstruments, FIRE_INSERTION_INSTRUMENTS_REVISION } from "./fire-insertion-instruments";
+import { installedInsertionPrice } from "./calculated-insertion";
 import { baseConfigurationIdentity } from "./base-values";
 import type { DnEntity, InputEntity, ProjectConfig, SettingsEntity, SpecItem } from "./project-config";
 import type { CollectorsEntity } from "./collector-project";
@@ -12,14 +15,16 @@ import fastenerReference from "./suction-fasteners.json";
 import { selectDischargeInstruments } from "./suction-instruments";
 import { addPumpConnectionAssembly } from "./line-vibration";
 import { PUMP_LINE_RULES_REVISION, selectLineInsertion as selectDischargeInsertion } from "./line-insertion";
-import { insertionEndThickness, flangeStack, equipmentFlangeThickness } from "./line-joint-stack";
+import { insertionEndThickness, flangeStack, equipmentFlangeThickness, pumpFlangeReference } from "./line-joint-stack";
 import { jointFlangeThickness } from "./joint-flange-dimensions";
+import type { Pump } from "./pump-catalog";
+import { INSTRUMENT_PRESSURE_REVISION, dischargeInstrumentPressure } from "./instrument-pressure";
 import { addValveLimitSwitches, VALVE_LIMIT_SWITCHES_REVISION } from "./valve-limit-switches";
 export { selectDischargeInsertion };
 
 export function dischargeFingerprint(project: ProjectConfig) {
   const e = project.entities, settings = e["station-settings"] as SettingsEntity;
-  return JSON.stringify([PUMP_LINE_RULES_REVISION,VALVE_LIMIT_SWITCHES_REVISION,"discharge-v1", settings.vibrationCompensators, settings.inletHead ?? null, e["station-dn"], e["system-input"], secondaryAllowed({ stationType: settings.stationType, jockey: settings.jockeyPump }) ? e["system-input-2"] : null, baseConfigurationIdentity((e["station-collectors"] as CollectorsEntity).discharge.configuration!)]);
+  return JSON.stringify([FIRE_INSERTION_INSTRUMENTS_REVISION,INSTRUMENT_CONNECTION_REVISION,PUMP_LINE_RULES_REVISION,VALVE_LIMIT_SWITCHES_REVISION,"discharge-v1", settings.vibrationCompensators, settings.inletHead ?? null, e["station-dn"], e["system-input"], secondaryAllowed({ stationType: settings.stationType, jockey: settings.jockeyPump }) ? e["system-input-2"] : null, baseConfigurationIdentity((e["station-collectors"] as CollectorsEntity).discharge.configuration!)]);
 }
 
 export function dischargeHead(project: ProjectConfig, secondary = false): number | null {
@@ -36,7 +41,7 @@ export function commonDischargeHead(project: ProjectConfig): number | null {
   return heads.some(head => head === null) ? null : Math.max(...heads as number[]);
 }
 
-export function buildDischargeSpec(project: ProjectConfig, database: { items: AssemblyComponent[] }, catalog: CollectorCatalog, valves: SpecItem[] = (project.entities["station-spec"] as { items: SpecItem[] }).items): SpecItem[] {
+export function buildDischargeSpec(project: ProjectConfig, database: { items: AssemblyComponent[] }, catalog: CollectorCatalog, valves: SpecItem[] = (project.entities["station-spec"] as { items: SpecItem[] }).items, pumps?:readonly Pump[]|null): SpecItem[] {
   const e = project.entities, settings = e["station-settings"] as SettingsEntity, dn = e["station-dn"] as DnEntity;
   const collector = baseConfigurationIdentity((e["station-collectors"] as CollectorsEntity).discharge.configuration!);
   if (!collector || !(e["system-input"] as InputEntity).calculated) return [];
@@ -44,7 +49,8 @@ export function buildDischargeSpec(project: ProjectConfig, database: { items: As
   const primaryInput = e["system-input"] as InputEntity;
   const fireSensor = (settings.stationType === "fire" || settings.stationType === "combined") &&
     (primaryInput.workingPumpCount ?? 0) >= 2;
-  const parts = lineSpecParts(rows, "discharge", dischargeFingerprint(project), collector, database, catalog, dn.insertionDesigns, fireSensor ? ["primary"] : []);
+  const fingerprint=JSON.stringify([INSTRUMENT_PRESSURE_REVISION,dischargeInstrumentPressure(project,pumps),dischargeFingerprint(project)]);
+  const parts = lineSpecParts(rows, "discharge", fingerprint, collector, database, catalog, dn.insertionDesigns, fireSensor ? ["primary"] : []);
   const { add, gasket, flax, flanges, fasteners } = parts;
   const insert = (role: string, size: number, pn: number, count: number, location: string) => {
     const selected = selectDischargeInsertion(database.items, size, pn, collector.material);
@@ -53,7 +59,7 @@ export function buildDischargeSpec(project: ProjectConfig, database: { items: As
   };
   // Each wafer gets its OWN bolt stack. Integral flanges require two independent
   // joints and their actual flange thickness, not the wafer's face-to-face size.
-  const valveJoints = (role: string, size: number, pn: number, count: number, item: AssemblyComponent | undefined, before: number | null, after: number | null, directPump = false) => {
+  const valveJoints = (role: string, size: number, pn: number, count: number, item: AssemblyComponent | undefined, before: number | null, after: number | null, pumpSource?: string) => {
     const wafer = Boolean(item && /межфланц|\b017W\b/i.test(item.family));
     const flanged = Boolean(item && !wafer && /фланц/i.test(item.family));
     gasket(`${role}-gaskets`, size, pn, 2 * count);
@@ -68,11 +74,11 @@ export function buildDischargeSpec(project: ProjectConfig, database: { items: As
     const thickness = number(field(item!, /^(?:Строительная длина|Толщина межфланцевого элемента|L), мм$/i))
       ?? (/\b017W\b/i.test(item!.family) ? reference?.wafer017WLength ?? null : check010 ? reference?.wafer010CLength ?? null : null);
     const integral = equipmentFlangeThickness(item) ?? (/\b012F\b/i.test(item!.family) ? reference?.flange012FThickness ?? null : null);
-    const pumpSource = "Прямой стык насос — обратный клапан: толщина собственного фланца насоса не подтверждена; длину крепежа уточнить.";
-    const source=directPump?pumpSource:`${reference?.checkValveSource??reference?.source??"Источник межфланцевого корпуса не подтверждён"}; учитываются фактические концы соседних вставок. Неизвестная толщина не заменяется типовой.`;
-    if(wafer) fasteners(`${role}-fasteners`,size,pn,count,{gaskets:2,thickness,flangeThickness:flangeStack(before,after),fastener:check010?"stud":"bolt",source});
+    const source=`${reference?.checkValveSource??reference?.source??"Источник межфланцевого корпуса не подтверждён"}; учитываются фланцы с обеих сторон стыка.`;
+    const inletSource = [source, pumpSource].filter(Boolean).join(" ");
+    if(wafer) fasteners(`${role}-fasteners`,size,pn,count,{gaskets:2,thickness,flangeThickness:flangeStack(before,after),fastener:check010?"stud":"bolt",source:inletSource});
     else {
-      fasteners(`${role}-pump-fasteners`,size,pn,count,{gaskets:1,thickness:0,flangeThickness:flangeStack(before,integral),source});
+      fasteners(`${role}-pump-fasteners`,size,pn,count,{gaskets:1,thickness:0,flangeThickness:flangeStack(before,integral),source:inletSource});
       fasteners(`${role}-fasteners`,size,pn,count,{gaskets:1,thickness:0,flangeThickness:flangeStack(after,integral),source});
     }
   };
@@ -96,8 +102,9 @@ export function buildDischargeSpec(project: ProjectConfig, database: { items: As
       const generic=jointFlangeThickness(database,collector.material,v,pn).thicknessMm;
       const outward=rows.find(row=>row.insertionRequirement&&row.assemblyRole?.startsWith(`${prefix}-`)&&row!==between);
       const end=(row:SpecItem|undefined,side:"from"|"to")=>row?.insertionAssembly?insertionEndThickness(row,side,database):row&&generic!==null?generic/2:null;
-      const directPump=!settings.vibrationCompensators && p.connection === "flanged" && p.dn === v;
-      valveJoints(`${prefix}-check`, v, pn, count, selected(`${prefix}CheckValve`),end(outward,"to"),end(between,"from"),directPump);
+      const pump = !settings.vibrationCompensators && p.connection === "flanged" && p.dn === v
+        ? pumpFlangeReference(database, collector.material, v, pn) : undefined;
+      valveJoints(`${prefix}-check`, v, pn, count, selected(`${prefix}CheckValve`),pump ? pump.thickness : end(outward,"to"),end(between,"from"),pump?.source);
       valveJoints(`${prefix}-valve`, v, pn, count, selected(`${prefix}DischargeValve`),end(between,"to"),generic===null?null:generic/2);
       if (!secondary && (settings.stationType === "fire" || settings.stationType === "combined") && h.valveType === "butterfly") addValveLimitSwitches(parts, database.items, prefix, count, v, selected(`${prefix}DischargeValve`));
     } else {
@@ -106,6 +113,15 @@ export function buildDischargeSpec(project: ProjectConfig, database: { items: As
       threads += 2;
     }
     if (threads) flax(`${prefix}-flax`, count * threads * .1, `${title} · ${count} нас. × ${threads} резьбовых соединений × 0,1 м`);
+  }
+  for (const insertion of rows.filter(row => row.insertionRequirement?.withSensorNipple)) {
+    if (insertion.insertionAssembly) {
+      insertion.insertionAssembly = { ...insertion.insertionAssembly, sensorConnection: "fire-pressure-switch" };
+      insertion.price = installedInsertionPrice(insertion.insertionAssembly);
+      insertion.details += " · сгон занят реле: покупная заглушка исключена";
+    }
+    const circuit=insertion.assemblyRole?.startsWith("secondary-")?"secondary":"primary",rating=dischargeInstrumentPressure(project,pumps,circuit);
+    addFireInsertionInstruments(parts, database.items, insertion, insertion.insertionRequirement!.pn, rating.headM, rating);
   }
   if (collector.dn) {
     if (collector.connection === "flanged") {
@@ -133,11 +149,15 @@ const checkDischargePressure = (head: number | null, name: string, limit?: numbe
   return { ...check, message: check.message.replaceAll("на входе", "на выходе (напор на входе + напор насоса)") };
 };
 export function checkDischargeSpecPressure(project: ProjectConfig, items: SpecItem[], database?: { items: AssemblyComponent[] }, catalog?: CollectorCatalog): SpecItem[] {
-  if (!pressureChecksEnabled(project.entities["station-settings"] as SettingsEntity)) return items.map(withoutPressureChecks);
+  if (!pressureChecksEnabled(project.entities["station-settings"] as SettingsEntity)) return items.map(item=>acceptInstrumentFitting(withoutPressureChecks(item)));
   const e = project.entities, dn = e["station-dn"] as DnEntity, collector = baseConfigurationIdentity((e["station-collectors"] as CollectorsEntity).discharge.configuration!);
   const components = new Map([...suctionCatalogItems, ...(database?.items ?? [])].map(item => [item.id, item]));
   const common = commonDischargeHead(project);
   return items.map(item => {
+    if(isAcceptedInstrumentFitting(item))return acceptInstrumentFitting(item);
+    // These instruments use the accepted automatic KIP selection policy.
+    // Do not reintroduce generic missing-passport confirmations afterwards.
+    if(item.option==="pressureTransducer"||item.hydraulicPart?.option==="pressureTransducer"||item.generatedBy==="discharge-line"&&/^(?:primary|secondary)-sensor-/.test(item.assemblyRole??""))return withoutPressureChecks(item);
     let checks: InletPressureCheck[];
     if (item.option === "dischargeCollector" && collector) {
       checks = [checkDischargePressure(common, "Напорный коллектор", collector.pn, `PN${collector.pn}`)];

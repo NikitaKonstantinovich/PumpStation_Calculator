@@ -465,7 +465,7 @@ test("provides a component-database tool with category-specific characteristics 
   ]);
   const database = JSON.parse(rawDatabase);
   assert.equal(database.catalogs.length, 25);
-  assert.equal(database.items.length, 2001);
+  assert.equal(database.items.length, 2027);
   assert.ok(!database.catalogs.some(catalog => catalog.id === "обвязка"));
   assert.ok(database.catalogs.some(catalog => catalog.id === "обратные-клапаны"));
   assert.ok(database.catalogs.some(catalog => catalog.id === "пожарная-арматура"));
@@ -523,10 +523,10 @@ test("ships the complete binding-component catalogue with prices and relations",
   assert.equal(catalogue.source.externalLinks.length, 2);
   assert.deepEqual(catalogue.statistics, {
     catalogs: 25,
-    tables: 82,
-    componentRows: 2001,
-    pricedComponentRows: 1972,
-    priceEntries: 4433,
+    tables: 85,
+    componentRows: 2027,
+    pricedComponentRows: 1997,
+    priceEntries: 4458,
     formulaRules: 4785,
     formulaErrorsInSavedValues: 0,
     dataValidations: 23,

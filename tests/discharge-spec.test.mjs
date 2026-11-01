@@ -96,7 +96,7 @@ test("each flanged pump has one separate valve spacer, two spacer flanges and di
   assert.equal(role(rows, "primary-check-fasteners-studs").quantity, 24);
   for (const kind of ["nuts", "washers"]) assert.equal(role(rows, `primary-check-fasteners-${kind}`).quantity, 48);
   assert.match(role(rows, "primary-check-fasteners-studs").name, /Шпилька/);
-  assert.equal(role(rows, "primary-check-fasteners-studs").price, null, "direct pump joint needs pump flange thickness");
+  assert.ok(role(rows, "primary-check-fasteners-studs").price > 0);
   assert.match(role(rows, "primary-valve-fasteners-bolts").name, /М16х120/);
   assert.match(role(rows, "primary-check-fasteners-studs").description, /фланца насоса/);
   assert.equal(role(rows, "network-gaskets").quantity, 2);
@@ -180,7 +180,8 @@ test("integral flanged check uses two joints; its flange thickness controls bolt
   const rows = build(fixture(), db);
   assert.equal(role(rows, "primary-check-fasteners-bolts").quantity, 24);
   assert.equal(role(rows, "primary-check-pump-fasteners-bolts").quantity, 24);
-  assert.equal(role(rows, "primary-check-pump-fasteners-bolts").price, null);
+  assert.ok(role(rows, "primary-check-pump-fasteners-bolts").price > 0);
+  assert.equal(role(rows, "primary-check-pump-fasteners-bolts").equipmentId, role(rows, "primary-check-fasteners-bolts").equipmentId);
   assert.equal(role(rows, "primary-check-gaskets").quantity, 6);
   assert.ok(role(rows, "primary-check-fasteners-bolts").price > 0);
   const unknown = { ...db, items: db.items.map(item => ({ ...item, family: item.family.replace("012F", "XYZ"), fields: item.fields.filter(f => f.headerPath.at(-1) !== "Толщина фланца, мм") })) };

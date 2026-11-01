@@ -11,22 +11,25 @@ import { lineSpecParts, field, number, itemDn, itemName } from "./line-spec-part
 import { addPumpConnectionAssembly } from "./line-vibration";
 import { PUMP_LINE_RULES_REVISION } from "./line-insertion";
 import { pressureChecksEnabled, withoutPressureChecks } from "./pressure-check-policy";
-import { insertionEndThickness, flangeStack, equipmentFlangeThickness } from "./line-joint-stack";
+import { insertionEndThickness, flangeStack, equipmentFlangeThickness, pumpFlangeReference } from "./line-joint-stack";
 import { jointFlangeThickness } from "./joint-flange-dimensions";
 import fastenerReference from "./suction-fasteners.json";
-import { addInstrumentSideConnection } from "./instrument-connection";
+import { INSTRUMENT_CONNECTION_REVISION, addInstrumentSideConnection, isAcceptedInstrumentFitting, acceptInstrumentFitting } from "./instrument-connection";
 import { addValveLimitSwitches, VALVE_LIMIT_SWITCHES_REVISION } from "./valve-limit-switches";
+import type { Pump } from "./pump-catalog";
+import { INSTRUMENT_PRESSURE_REVISION, stationInstrumentPressure } from "./instrument-pressure";
 
 export function suctionFingerprint(project:ProjectConfig) {
   const e=project.entities, settings=e["station-settings"] as SettingsEntity;
-  return JSON.stringify([PUMP_LINE_RULES_REVISION,VALVE_LIMIT_SWITCHES_REVISION,"instruments-v2","seals-v2","instrument-valve-v1",settings.vibrationCompensators,settings.inletHead??null,e["station-dn"],e["system-input"],secondaryAllowed({stationType:settings.stationType,jockey:settings.jockeyPump})?e["system-input-2"]:null,settings.stationType,settings.jockeyPump,baseConfigurationIdentity((e["station-collectors"] as CollectorsEntity).suction.configuration!)]);
+  return JSON.stringify([INSTRUMENT_CONNECTION_REVISION,PUMP_LINE_RULES_REVISION,VALVE_LIMIT_SWITCHES_REVISION,"instruments-v2","seals-v2","instrument-valve-v1",settings.vibrationCompensators,settings.inletHead??null,e["station-dn"],e["system-input"],secondaryAllowed({stationType:settings.stationType,jockey:settings.jockeyPump})?e["system-input-2"]:null,settings.stationType,settings.jockeyPump,baseConfigurationIdentity((e["station-collectors"] as CollectorsEntity).suction.configuration!)]);
 }
 
-export function buildSuctionSpec(project:ProjectConfig, database:{items:AssemblyComponent[]}, catalog:CollectorCatalog, valves:SpecItem[]=(project.entities["station-spec"] as {items:SpecItem[]}).items):SpecItem[] {
+export function buildSuctionSpec(project:ProjectConfig, database:{items:AssemblyComponent[]}, catalog:CollectorCatalog, valves:SpecItem[]=(project.entities["station-spec"] as {items:SpecItem[]}).items, pumps?:readonly Pump[]|null):SpecItem[] {
   const e=project.entities, settings=e["station-settings"] as SettingsEntity, dn=e["station-dn"] as DnEntity;
   const collector=baseConfigurationIdentity((e["station-collectors"] as CollectorsEntity).suction.configuration!);
   if (!collector || !(e["system-input"] as InputEntity).calculated) return [];
-  const rows:SpecItem[]=[], fingerprint=suctionFingerprint(project);
+  const rating=stationInstrumentPressure(project,pumps);
+  const rows:SpecItem[]=[], fingerprint=JSON.stringify([INSTRUMENT_PRESSURE_REVISION,rating,suctionFingerprint(project)]);
   const parts = lineSpecParts(rows, "suction", fingerprint, collector, database, catalog, dn.insertionDesigns);
   const { add, gasket, flax, fasteners } = parts;
   const circuits=[false,...(secondaryAllowed(collector)?[true]:[])];
@@ -43,17 +46,19 @@ export function buildSuctionSpec(project:ProjectConfig, database:{items:Assembly
       gasket(`${prefix}-valve-gaskets`,v,pn,2*count);
       const outward=rows.find(row=>row.insertionRequirement&&row.assemblyRole?.startsWith(`${prefix}-`));
       const generic=jointFlangeThickness(database,collector.material,v,pn).thicknessMm;
-      const before=outward?.insertionAssembly?insertionEndThickness(outward,"to",database):outward&&generic!==null?generic/2:null;
+      const pump = !settings.vibrationCompensators && p.connection === "flanged" && p.dn === v
+        ? pumpFlangeReference(database, collector.material, v, pn) : undefined;
+      const before=pump ? pump.thickness : outward?.insertionAssembly?insertionEndThickness(outward,"to",database):outward&&generic!==null?generic/2:null;
       const after=generic===null?null:generic/2;
       const valve=database.items.find(item=>item.id===valves.find(row=>row.option===`${prefix}SuctionValve`)?.equipmentId);
-      const source="Стык всасывающей арматуры: нужен корпус выбранной арматуры и толщины обоих соседних фланцев; собственный фланец насоса не заменяется каталожным.";
+      const source="Стык всасывающей арматуры. Учитываются корпус выбранной арматуры и толщины обоих соседних фланцев.";
       if(h.valveType==="butterfly"){
         const reference=fastenerReference.find(row=>row.dn===v&&row.pn===pn);
         const thickness=valve?number(field(valve,/^(?:Строительная длина|Толщина межфланцевого элемента|L), мм$/i))??(/\b017W\b/i.test(valve.family)?reference?.wafer017WLength??null:null):null;
-        fasteners(`${prefix}-valve-fasteners`,v,pn,count,{gaskets:2,thickness,flangeThickness:flangeStack(before,after),source:[source,reference?.source].filter(Boolean).join(" ")});
+        fasteners(`${prefix}-valve-fasteners`,v,pn,count,{gaskets:2,thickness,flangeThickness:flangeStack(before,after),source:[source,pump?.source,reference?.source].filter(Boolean).join(" ")});
       }else{
         const integral=equipmentFlangeThickness(valve);
-        fasteners(`${prefix}-valve-inlet-fasteners`,v,pn,count,{gaskets:1,thickness:0,flangeThickness:flangeStack(before,integral),source});
+        fasteners(`${prefix}-valve-inlet-fasteners`,v,pn,count,{gaskets:1,thickness:0,flangeThickness:flangeStack(before,integral),source:[source,pump?.source].filter(Boolean).join(" ")});
         fasteners(`${prefix}-valve-fasteners`,v,pn,count,{gaskets:1,thickness:0,flangeThickness:flangeStack(after,integral),source});
       }
       if(!secondary&&(settings.stationType==="fire"||settings.stationType==="combined")&&h.valveType==="butterfly") addValveLimitSwitches(parts, database.items, prefix, count, v, valve);
@@ -65,7 +70,7 @@ export function buildSuctionSpec(project:ProjectConfig, database:{items:Assembly
     else flax("network-flax",settings.collectorPlugs ? .1 : .2,"Два подключения коллектора к сети × 0,1 м, независимо от числа насосов");
   }
   const instruments=settings.stationType==="fire"||settings.stationType==="combined"?2:1;
-  for (const instrument of selectSuctionInstruments(database.items,settings.inletHead)) {
+  for (const instrument of selectSuctionInstruments(database.items,settings.inletHead,rating)) {
     add(instrument.role,instrument.name,instruments,instrument.details,instrument.item,"шт.",undefined,instrument.description,instrument.warning?"confirmation":undefined);
   }
   const instrumentValve=database.items.find(x=>x.catalogId==="шаровые-краны"&&field(x,/^Артикул$/i)==="44.15.В-В.С.Б"&&itemDn(x)===15&&(number(field(x,/^PN$/i))??0)>=collector.pn);
@@ -81,11 +86,12 @@ export function replaceSuctionSpec(items:SpecItem[],generated:SpecItem[]):SpecIt
 
 export function checkSuctionSpecPressure(project: ProjectConfig, items: SpecItem[], database?: { items: AssemblyComponent[] }, catalog?: CollectorCatalog): SpecItem[] {
   const settings = project.entities["station-settings"] as SettingsEntity;
-  if (!pressureChecksEnabled(settings)) return items.map(withoutPressureChecks);
+  if (!pressureChecksEnabled(settings)) return items.map(item=>acceptInstrumentFitting(withoutPressureChecks(item)));
   const dn = project.entities["station-dn"] as DnEntity;
   const collector = (project.entities["station-collectors"] as CollectorsEntity).suction.configuration;
   const components = new Map([...suctionCatalogItems, ...(database?.items ?? [])].map(item => [item.id, item]));
   return items.map(item => {
+    if(isAcceptedInstrumentFitting(item))return acceptInstrumentFitting(item);
     if (item.option === "suctionCollector" && collector) return withInletPressureChecks(item, collectorPressureChecks(collector, settings.inletHead, catalog));
     if (item.section === "pump") {
       const secondary = item.option === "secondaryPump";

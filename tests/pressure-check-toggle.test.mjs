@@ -8,7 +8,7 @@ import { loadTs } from './load-ts.mjs';
 
 const { createProject, parseProjectConfig } = await loadTs(new URL('../app/project-config.ts', import.meta.url));
 const { synchronizeCollectors } = await loadTs(new URL('../app/collector-project.ts', import.meta.url));
-const { collectorPressureChecks } = await loadTs(new URL('../app/collector-calculations.ts', import.meta.url));
+const { calculateCollector, collectorPressureChecks } = await loadTs(new URL('../app/collector-calculations.ts', import.meta.url));
 const { checkSuctionSpecPressure } = await loadTs(new URL('../app/suction-spec.ts', import.meta.url));
 const { checkDischargeSpecPressure } = await loadTs(new URL('../app/discharge-spec.ts', import.meta.url));
 const { suctionHydraulics } = await loadTs(new URL('../app/dn-defaults.ts', import.meta.url));
@@ -19,7 +19,7 @@ const { specificationExportRows } = await loadTs(new URL('../app/specification-e
 const toggleUrl = new URL('../app/pressure-check-toggle.tsx', import.meta.url);
 const toggleCode = ts.transpileModule(await readFile(toggleUrl, 'utf8'), { fileName: 'toggle.tsx', compilerOptions: { module: ts.ModuleKind.ESNext, jsx: ts.JsxEmit.ReactJSX, target: ts.ScriptTarget.ES2022 } }).outputText.replaceAll('"react/jsx-runtime"', JSON.stringify(import.meta.resolve('react/jsx-runtime')));
 const { PressureCheckToggle } = await loadTs(toggleUrl, { [toggleUrl.href]: toggleCode });
-const { parseAccessibleProject } = await loadTs(new URL('../app/project-access.ts', import.meta.url));
+const { parseAccessibleProject, projectAccessError } = await loadTs(new URL('../app/project-access.ts', import.meta.url));
 const pump = { id: 'pressure-pump', manufacturer: 'Test', model: 'Fixture', series: 'Fixture', type: 'end_suction', power: 3, curve: [[0, 40], [60, 10]], price: 125, priceCurrency: 'RUB' };
 const row = (section = 'pump', extra = {}) => ({ position: '01', name: 'Контрольная позиция', equipmentId: pump.id, details: 'DN50 · PN16', section, quantity: 2, price: 123, status: 'selected', ...extra });
 function project() {
@@ -100,9 +100,11 @@ test('diagnostics and specification/export suppress cached pressure issues even 
   assert.ok(item.inletPressureCheck, 'presentation must not mutate the saved source');
 });
 
-test('collector synchronization and reopening remove obsolete pressure statuses while preserving saved collector price', () => {
+test('collector synchronization and reopening remove obsolete pressure statuses while preserving saved collector price', async () => {
   let p = project(), c = p.entities['station-collectors'].suction;
-  c.databaseStatus = 'found'; c.database = { id: 'collector-saved', code: c.code, price: 12345 };
+  const { makeCollectorCatalog } = await loadTs(new URL('../app/collector-catalog.ts', import.meta.url));
+  const catalog = makeCollectorCatalog(JSON.parse(await readFile(new URL('../public/binding-components.json', import.meta.url), 'utf8')));
+  c.databaseStatus = 'found'; c.database = { id: 'collector-saved', code: c.code, price: 12345, calculation: calculateCollector(c.configuration, catalog) };
   p = synchronizeCollectors(p);
   assert.equal(p.entities['station-spec'].items.find(i => i.option === 'suctionCollector').status, 'confirmation');
   p.entities['station-settings'].pressureChecksEnabled = false;
@@ -119,6 +121,21 @@ test('ribbon switch renders a named accessible control and explicit enabled/disa
     const html = renderToStaticMarkup(createElement(PressureCheckToggle, { enabled, onChange() {} }));
     assert.match(html, /role="switch"/); assert.match(html, /aria-label="Проверка давления"/);
     assert.ok(html.includes(`aria-checked="${enabled}"`));
-    assert.ok(html.includes(enabled ? 'Включена' : 'Выключена'));
+    assert.ok(html.includes(enabled ? 'Включено' : 'Выключено'));
+  }
+});
+
+test('station geometry requires explicit opt-in and elevated project access', () => {
+  const p = createProject(), settings = p.entities['station-settings'];
+  assert.equal(settings.geometryEnabled, false);
+  for (const invalid of [undefined, 'true', 1, false]) {
+    settings.geometryEnabled = invalid;
+    assert.equal(parseProjectConfig(p).entities['station-settings'].geometryEnabled, false);
+  }
+  settings.geometryEnabled = true;
+  for (const role of ['pro','admin']) assert.equal(parseAccessibleProject(p,role).entities['station-settings'].geometryEnabled,true);
+  for (const role of ['base','plus']) {
+    assert.match(projectAccessError(p,role), /pro/);
+    assert.equal(parseAccessibleProject(p,role).entities['station-settings'].geometryEnabled,false);
   }
 });

@@ -6,7 +6,7 @@ import type { SmartCabinet } from "./cabinet-configurator";
 import { selectionHeadAtFlow, operatingPoint, usablePump } from "./pump-catalog";
 import { HEAD_RESERVE_WARNING_PERCENT, headReserveClass } from "./pump-selection";
 import { suctionHydraulics, dischargeHydraulics, recommendedDn, flowVelocity, dnVelocityLimit, pressureCheckWarning } from "./dn-defaults";
-import { calculateCollector, configurationFingerprint, configurationWarnings, collectorBranchDiameterErrors, collectorPressureChecks, collectorVelocityWarning } from "./collector-calculations";
+import { calculateCollector, matchesCollectorConfiguration, configurationWarnings, collectorBranchDiameterErrors, collectorPressureChecks, collectorVelocityWarning } from "./collector-calculations";
 import { pumpSketchFor } from "./pump-sketches";
 import { pressureChecksEnabled } from "./pressure-check-policy";
 import { specificationItemPresentation, specificationIssueId, visibleSpecificationItems } from "./specification-presentation";
@@ -114,7 +114,7 @@ export function collectProjectIssues(project: ProjectConfig, catalogue: Pump[], 
     const state = collectors[type], c = state.configuration, subject = type === "suction" ? "Всасывающий коллектор" : "Напорный коллектор";
     if (!c || !state.recommended) continue;
     const stale = state.status === "stale" || Boolean(state.calculation && catalog && state.calculation.catalogVersion !== catalog.version);
-    const calculation = !stale && state.calculation?.fingerprint === configurationFingerprint(c) ? state.calculation : null;
+    const calculation = !stale && matchesCollectorConfiguration(state.calculation?.fingerprint,c) ? state.calculation : null;
     const preview = catalog ? calculateCollector(c, catalog) : calculation;
     if (state.databaseStatus === "error") add("collectors", `${type}/database`, "error", state.databaseError || "Не удалось проверить базу коллекторов.", subject);
     else if (state.databaseStatus === "missing") add("collectors", `${type}/database`, "warning", "Коллектор отсутствует в базе — выполните расчёт в конструкторе.", subject);

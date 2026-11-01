@@ -1,4 +1,5 @@
 import { currentUser, json } from "./auth-server";
+import { geometryAccessError } from "./geometry-access-server";
 import { IS_BETA, betaApiAllowed, betaDataAsset, publicShellAsset } from "./release-policy";
 
 export const disabledInBeta = () => json({ error: "Эта возможность недоступна в beta 0.1.", code: "FEATURE_DISABLED_IN_BETA" }, 403, { "Cache-Control": "no-store" });
@@ -18,7 +19,9 @@ export async function guardReleaseRequest(request: Request): Promise<Response | 
     return null; // Allowed APIs still perform their own authentication.
   }
   // All other files are private in either profile; fail closed on DB errors.
-  if (!await currentUser(request)) return json({ error: "Требуется вход." }, 401, { "Cache-Control": "no-store" });
+  const user = await currentUser(request);
+  if (!user) return json({ error: "Требуется вход." }, 401, { "Cache-Control": "no-store" });
   if (IS_BETA && (!betaDataAsset(path) || !["GET", "HEAD"].includes(request.method))) return disabledInBeta();
+  if (path.startsWith("/model-assets/")) return geometryAccessError(user);
   return null;
 }

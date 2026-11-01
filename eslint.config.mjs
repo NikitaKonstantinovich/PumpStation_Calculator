@@ -14,6 +14,7 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "work/**",
+    "tmp/**",
     ".model-library/**",
     ".model-converter/**",
     ".wrangler/**",

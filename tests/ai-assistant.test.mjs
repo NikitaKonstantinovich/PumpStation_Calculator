@@ -16,7 +16,7 @@ class Statement {
 const DB = { prepare: sql => new Statement(sql), async batch(statements) { const results = []; for (const statement of statements) results.push(await statement.run()); return results; } };
 globalThis.__assistantTestEnv = { DB, OPENAI_API_KEY: "test-only-secret-not-real", OPENAI_MODEL: "gpt-6-luna", AI_ASSISTANT_ENABLED: "true" };
 const replacements = {};
-for (const file of ["auth-server", "assistant-server", "assistant-data-server"]) {
+for (const file of ["auth-server", "assistant-server", "assistant-data-server","project-storage-server"]) {
   const url = new URL(`../app/${file}.ts`, import.meta.url);
   replacements[url.href] = (await readFile(url, "utf8")).replace('import { env } from "cloudflare:workers";', 'const env = globalThis.__assistantTestEnv;');
 }

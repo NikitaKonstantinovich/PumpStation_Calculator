@@ -1,4 +1,6 @@
 import type { AssemblyComponent } from "./suction-catalog";
+import { componentPressureLimit } from "./suction-pressure";
+import type { InstrumentPressure } from "./instrument-pressure";
 
 // Project selection policy, not a calculated suction-line loss.
 export const LOW_INLET_HEAD_M = 5;
@@ -31,15 +33,15 @@ const format = (n: number) => n.toLocaleString("ru-RU", { maximumFractionDigits:
 const rangeText = (r: Range) => `${format(r.min)}…${format(r.max)} МПа`;
 const model = (item: AssemblyComponent) => item.family.replace(/[,\s]+$/, "");
 
-export function selectSuctionInstruments(items: AssemblyComponent[], inletHead?: number | null): InstrumentSelection[] {
-  return selectLineInstruments(items, inletHead, "suction");
+export function selectSuctionInstruments(items: AssemblyComponent[], inletHead?: number | null, rating?: InstrumentPressure): InstrumentSelection[] {
+  return selectLineInstruments(items, inletHead, "suction", rating);
 }
 
-export function selectDischargeInstruments(items: AssemblyComponent[], outletHead?: number | null): InstrumentSelection[] {
-  return selectLineInstruments(items, outletHead, "discharge");
+export function selectDischargeInstruments(items: AssemblyComponent[], outletHead?: number | null, rating?: InstrumentPressure): InstrumentSelection[] {
+  return selectLineInstruments(items, outletHead, "discharge", rating);
 }
 
-function selectLineInstruments(items: AssemblyComponent[], inletHead: number | null | undefined, side: "suction" | "discharge"): InstrumentSelection[] {
+function selectLineInstruments(items: AssemblyComponent[], inletHead: number | null | undefined, side: "suction" | "discharge", rating?: InstrumentPressure): InstrumentSelection[] {
   const head = typeof inletHead === "number" && Number.isFinite(inletHead) ? inletHead : null;
   const vacuum = side === "suction" ? head === null || head <= LOW_INLET_HEAD_M : head !== null && head < 0;
   const pressure = (head ?? 0) * MPA_PER_METRE_WATER;
@@ -73,9 +75,22 @@ function selectLineInstruments(items: AssemblyComponent[], inletHead: number | n
 
   // Select a switch range covering inlet pressure, with a negative lower limit
   // in vacuum mode. Trip/reset settings require dynamic pressure and NPSH data.
-  const relay = validPressure ? candidates.find(({ item, range }) =>
-    /реле давления/i.test(item.family) && range.max >= Math.max(0, pressure) &&
-    range.min < pressure && (!vacuum || range.min < 0)) : undefined;
+  const relayCandidates=candidates.filter(({item})=>/реле давления/i.test(item.family));
+  const relays = validPressure ? relayCandidates.filter(({ item, range }) =>
+    range.max >= Math.max(0, pressure) &&
+    range.min < pressure && (!vacuum || range.min < 0) &&
+    (rating?.pressureBar == null || componentPressureLimit(item) === null || componentPressureLimit(item)!.bar + 1e-9 >= rating.pressureBar)) : [];
+  const relay = [...relays].sort((a,b) => {
+    if (rating?.pressureBar == null) return 0;
+    const pa=componentPressureLimit(a.item)?.bar,pb=componentPressureLimit(b.item)?.bar;
+    return Number(pa===undefined)-Number(pb===undefined) || (pa??Infinity)-(pb??Infinity) || a.range.max-b.range.max || a.item.id.localeCompare(b.item.id);
+  })[0] ?? (side === "discharge" ? [...relayCandidates].sort((a,b)=>
+    Math.max(0,a.range.min-pressure,pressure-a.range.max)-Math.max(0,b.range.min-pressure,pressure-b.range.max)
+    || a.range.max-b.range.max || a.item.id.localeCompare(b.item.id))[0] : undefined);
+  const relayRating = relay && rating && componentPressureLimit(relay.item);
+  const relayWarning = side === "discharge" ? undefined : rating ? rating.pressureBar === null ? rating.source
+    : !relay ? `Нет реле с подходящим диапазоном уставок и допустимым давлением не ниже ${format(rating.pressureBar)} бар при Q=0.`
+    : !relayRating ? `Допустимое рабочее давление (PN) реле не подтверждено; требуется не менее ${format(rating.pressureBar)} бар при Q=0. Диапазон уставок и давление перегрузки не заменяют PN.` : undefined : undefined;
   const invalid = validPressure ? "" : head === null ? "Для подбора требуется напор на входе и напор насоса. " : `Расчётное давление ниже −0,1 МПа: проверьте напор ${location}. `;
   return [
     {
@@ -84,9 +99,9 @@ function selectLineInstruments(items: AssemblyComponent[], inletHead: number | n
       description: `${warning ? `${warning} ` : ""}${invalid}${basis}. Требуемый запас верхнего предела шкалы 1,5. ${gauge ? `База комплектующих: ${gauge.item.id}.` : "Подходящего прибора в базе нет; указано требуемое исполнение без цены."}`,
     },
     {
-      role: "pressure-switch", name: "Реле давления", item: relay?.item,
-      details: `${relay ? `${model(relay.item)} · ${rangeText(relay.range)}` : "Подходящего диапазона в базе нет · требуется уточнение"} · ${basis} · ${reason} · уставки отключения и возврата — при наладке`,
-      description: `${invalid}Предварительный подбор диапазона для ${side === "suction" ? "защиты по снижению давления. Уставки и дифференциал определяют по минимальному рабочему давлению и условиям всасывания." : "контроля давления напорной линии. Уставки и дифференциал определяют при наладке."}${head === null ? " Максимальный подпор требуется проверить, поскольку напор на входе не указан." : ""}${relay ? ` База комплектующих: ${relay.item.id}.` : " Исполнение и цена требуют уточнения."}`,
+      role: "pressure-switch", name: "Реле давления", item: relay?.item, warning:relayWarning,
+      details: `${relay ? `${model(relay.item)} · ${rangeText(relay.range)}` : "Подходящего диапазона в базе нет · требуется уточнение"} · ${basis} · ${reason} · уставки отключения и возврата — при наладке${rating ? ` · ${rating.source}` : ""}${relayRating ? ` · допустимое давление ${format(relayRating.bar)} бар` : ""}`,
+      description: `${invalid}Предварительный подбор диапазона для ${side === "suction" ? "защиты по снижению давления. Уставки и дифференциал определяют по минимальному рабочему давлению и условиям всасывания." : "контроля давления напорной линии. Уставки и дифференциал определяют при наладке."}${head === null ? " Максимальный подпор требуется проверить, поскольку напор на входе не указан." : ""}${relay ? ` База комплектующих: ${relay.item.id}.` : " Исполнение и цена требуют уточнения."}${relayWarning ? ` ${relayWarning}` : ""}`,
     },
   ];
 }

@@ -149,7 +149,7 @@ test("empty mandatory sections and enabled options are detected even when all pr
   p.entities["station-spec"].items = rows(p).filter(r => !["frame", "electrical"].includes(r.section));
   for (const row of rows(p)) {
     row.price = 1;
-    if (row.hydraulicAssembly) { for (const part of row.hydraulicAssembly.parts) part.price = 1; row.price = row.hydraulicAssembly.parts.reduce((sum, part) => sum + part.quantity, 0); }
+    if (row.hydraulicAssembly) { for (const part of row.hydraulicAssembly.parts) part.price = 1; row.price = row.hydraulicAssembly.accounting==="parts"?1:row.hydraulicAssembly.parts.reduce((sum, part) => sum + part.quantity, 0); }
   }
   let result = assessSpecification(p);
   assert.equal(result.pricesComplete, true);

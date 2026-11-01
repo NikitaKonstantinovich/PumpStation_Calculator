@@ -77,7 +77,8 @@ test("equal flanged diameters join the pump directly with one wafer gasket pair 
   for (const role of ["primary-insertion","primary-pump-flange-weldFlange","primary-valve-flange-weldFlange","primary-pump-gasket"]) assert.equal(byRole(rows,role),undefined);
   assert.equal(byRole(rows,"primary-valve-gaskets").quantity,6);
   assert.equal(byRole(rows,"primary-valve-fasteners-bolts").quantity,24);
-  assert.equal(byRole(rows,"primary-valve-fasteners-bolts").price,null,"pump flange thickness is not known");
+  assert.equal(byRole(rows,"primary-valve-fasteners-bolts").price,null,"no valve model selected");
+  assert.match(byRole(rows,"primary-valve-fasteners-bolts").description,/фланца насоса принята равной/);
   assert.ok(!rows.some(x=>x.assemblyRole.endsWith("flax")));
 });
 
@@ -103,7 +104,7 @@ test("fasteners select piece price and unresolved own flanges never receive a gu
   const actual=selectJointFasteners(binding,"st20",80,16,true);
   assert.ok(actual.standardLength>=actual.length);assert.ok(actual.bolt.prices.some(p=>p.amount>0));
   const project=fixture({pumpConnection:"flanged",material:"aisi304"}), stainless=build(project);
-  assert.equal(byRole(stainless,"primary-pump-fasteners-bolts").price,null);
+  assert.ok(byRole(stainless,"primary-pump-fasteners-bolts").price > 0);
   const missingThickness=structuredClone(binding);
   for(const item of missingThickness.items) if(item.id.startsWith("фланцы-006-")) {
     item.fields=item.fields.filter(value=>value.column!=="CALC_FLANGE_B");
@@ -153,7 +154,7 @@ const actualSelection=[
   page.slice(page.indexOf("const HYDRAULIC_SPEC_OPTIONS:"),page.indexOf("function PanelContent(")),
   "let loadedComponentsDatabase; export {refreshSuctionSpecification};",
   'import { canEditSetting } from "./project-access";',
-  'export function changeCollectorMode(project, simultaneous, database) { const role="pro"; let updated=project; loadedComponentsDatabase=database; const updateConfig=change=>{updated=refreshSuctionSpecification(synchronizeCollectors(change(updated)),database);}; const catalogue=[{id:"selected-pump"}]; const controlCabinets=[],smartCabinets=[]; const projectControlCabinetItem=()=>{throw new Error("Collector mode must preserve control cabinet items");};',
+  'export function changeCollectorMode(project, simultaneous, database) { const role="pro"; let updated=project; loadedComponentsDatabase=database; const updateEngineering=change=>{updated=refreshSuctionSpecification(synchronizeCollectors(change(updated)),database);};',
   page.slice(page.indexOf("  const updateSettings ="),page.indexOf("  const addSelectedPumpToSpec =")),
   'updateSettings({combinedCircuitsSimultaneous:simultaneous}); return updated; }',
 ].join("\n");

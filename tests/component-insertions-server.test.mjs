@@ -55,6 +55,7 @@ globalThis.__insertionsTest = { DB, catalog: makeCatalog(), source: { items: [] 
 const authUrl = new URL("../app/auth-server.ts", import.meta.url);
 const catalogUrl = new URL("../app/component-insert-catalog-server.ts", import.meta.url);
 const replacements = {
+  [new URL("../app/project-storage-server.ts",import.meta.url).href]: 'export const storageOperation=()=>{throw Error("Unexpected background job");};',
   [authUrl.href]: (await readFile(authUrl, "utf8")).replace('import { env } from "cloudflare:workers";', "const env = globalThis.__insertionsTest;"),
   [catalogUrl.href]: `import { sha256 } from "./auth-server";
     export async function currentInsertSource(){const row=await globalThis.__insertionsTest.DB.prepare("SELECT revision FROM component_calculator_source_revision WHERE id=1").first();return {...globalThis.__insertionsTest.source,databaseRevision:row.revision};}
@@ -825,11 +826,12 @@ test("3D API protects previews, reads saved server calculations, ignores client 
     assert.equal((await insert3d.POST(request("POST", admin, { ...body, angle: 361 }))).status, 422);
     await exportRows(calc, [row.identityKey]);
     const saved = sqlite.prepare("SELECT * FROM component_insertions WHERE identity_key=?").get(row.identityKey);
-    const response = await insert3d.GET(new Request(`http://localhost/api/component-insertions-3d?id=${saved.id}`, { headers: { Cookie: `ps_session=${ordinary}` } }));
+    assert.equal((await insert3d.GET(request("GET", ordinary))).status,403);
+    const response = await insert3d.GET(new Request(`http://localhost/api/component-insertions-3d?id=${saved.id}`, { headers: { Cookie: `ps_session=${admin}` } }));
     assert.equal(response.status, 200); const loaded = (await response.json()).template;
     assert.equal(loaded.source.recordId, saved.id); assert.equal(loaded.source.revision, saved.revision); assert.equal(loaded.source.price, row.price);
     assert.equal(loaded.geometryKey, t.geometryKey);
-    assert.equal((await insert3d.GET(new Request("http://localhost/api/component-insertions-3d?id=unknown", { headers: { Cookie: `ps_session=${ordinary}` } }))).status, 404);
+    assert.equal((await insert3d.GET(new Request("http://localhost/api/component-insertions-3d?id=unknown", { headers: { Cookie: `ps_session=${admin}` } }))).status, 404);
     assert.equal(sqlite.prepare("SELECT revision FROM component_insertions WHERE id=?").get(saved.id).revision, saved.revision);
   } finally { globalThis.__insertionsTest.catalog = previous; }
 });
