@@ -1,7 +1,7 @@
 "use client";
 import { createContext, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { cadContents, cadJobActive, cadReady, cadSnapshotData, digestSnapshot, type CadJob, type CadFormat, type CadManifest } from "./cad-export";
-import type { ModelEntity, ProjectConfig, SpecEntity } from "./project-config";
+import type { DnEntity, ModelEntity, ProjectConfig, SettingsEntity, SpecEntity } from "./project-config";
 
 async function receive(response: Response, projectId: string): Promise<CadJob | null> {
   const data = await response.json();
@@ -17,13 +17,15 @@ export const artifactUrl = (job: CadJob, format: CadFormat | "report") =>
 function useBuild(project: ProjectConfig, enabled: boolean) {
   const assembly = (project.entities["station-model"] as ModelEntity)?.editor?.assembly;
   const spec = (project.entities["station-spec"] as SpecEntity)?.items;
+  const stationType=(project.entities["station-settings"] as SettingsEntity)?.stationType;
+  const material=(project.entities["station-dn"] as DnEntity)?.collectorMaterial;
   const snapshot = useMemo(() => {
     if (!enabled || !assembly?.components.length) return null;
     try {
-      const contents = cadContents(assembly, spec);
+      const contents = cadContents(assembly, spec, stationType, material);
       return { contents, canonical: cadSnapshotData(contents.instances) };
     } catch (e) { return { error: String(e) }; }
-  }, [assembly, enabled, spec]);
+  }, [assembly, enabled, spec, stationType, material]);
   const canonical = snapshot?.canonical;
   const [hash, setHash] = useState<{ canonical: string; key: string }>();
   const [job, setJob] = useState<CadJob | null>(null);

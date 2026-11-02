@@ -27,6 +27,16 @@ function prepare(p=fixture()) {
 const parts = a => a.components.filter(c=>c.instrumentMount);
 const jointIssues = a => model.connectionIssues(a).filter(i=>i.id.startsWith("kip-") && /нарушено|соосны|несовместим|не найдена/.test(i.message));
 
+test("unresolved discharge range keeps a labelled layout gauge at its own specification position",async()=>{
+  const input=fixture();input.entities["station-settings"].inletHead=null;
+  const {p,assembly:a}=prepare(input),row=rows(p).find(r=>r.section==="discharge"&&r.assemblyRole==="gauge");
+  assert.ok(!row.equipmentId);const mounted=parts(a).filter(c=>c.id==="kip-discharge-1-gauge");assert.equal(mounted.length,1);
+  assert.equal(mounted[0].instrumentMount.specPosition,row.position);assert.match(mounted[0].name,/компоновочный/);
+  const {cadContents}=await load("cad-export"),{instances}=cadContents(a,rows(p));
+  const physical=instances.filter(i=>i.componentId===mounted[0].id);assert.equal(physical.length,1);assert.equal(physical[0].geometry.hash,mounted[0].cadSource.hash);
+  assert.equal(physical[0].specPosition,row.position);assert.ok(!physical[0].equipmentId);assert.deepEqual(jointIssues(a),[]);
+});
+
 test("actual station mounts one KIP per occupied DN15: gauge above, relay/transducer immediately after bush, no staged duplicates",async()=>{
   const {p,assembly:a}=prepare();
   assert.equal(parts(a).length,11);assert.deepEqual(jointIssues(a),[]);

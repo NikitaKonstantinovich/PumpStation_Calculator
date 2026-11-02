@@ -17,6 +17,15 @@ const source = [
 const { selectValveComponent: select, valveSpecItem: specItem } = await loadTs(url, { [url.href]: source });
 const { items } = JSON.parse(await readFile(new URL("../public/binding-components.json", import.meta.url), "utf8"));
 
+test("valve colour falls back only within compatible sizes and actuator executions",()=>{
+  const select100=(database,color)=>select(database,"butterfly",100,"flanged",16,color,"aisi304");
+  const red=select100(items,"red"),blue=select100(items,"blue");
+  assert.match(red.item.family,/красн/i);assert.match(blue.item.family,/син/i);
+  assert.equal(select100([blue.item],"red").item.id,blue.item.id);
+  assert.equal(select100([red.item],"blue").item.id,red.item.id);
+  assert.equal(select([red.item,blue.item],"butterfly",80,"flanged",16,"red","aisi304"),null);
+});
+
 test("ball valves always use brass lever series for both colours and collector materials", () => {
   for (const dn of [25, 32, 40, 50]) for (const color of ["red", "blue"]) for (const material of ["st20", "aisi304"]) {
     const selected = select(items, "ball", dn, "threaded", 16, color, material);

@@ -2,6 +2,7 @@ import type { InsertCalculation, InsertCatalog, InsertPart } from "../component-
 import { insertPartIdentity, insertMaterialLabel } from "../component-insert-calculations";
 import type { FlangeDimensions } from "../flange-dimensions";
 import type { Bounds, Component, Vec3 } from "./model";
+import { stampedShape, stampMissing } from "./stamped-flanges";
 import type { ConnectionPoint, InsertionGeometry, InsertionPiece, InsertionShape, InsertionTemplate } from "./insertion-types";
 import { eccentricOffset } from "./eccentric-offset";
 
@@ -96,12 +97,15 @@ export function prepareInsertionTemplate(row: InsertCalculation, context: Insert
     if (e.c.connection === "collar") {
       const loose = context.catalog.parts.find(p => insertPartIdentity(p) === e.c.looseFlange) ?? context.catalog.parts.filter(p => p.kind === "looseFlange" && p.dn === e.dn && p.material === row.material && (p.pn === pn || p.compatiblePns?.includes(pn))).sort((a, b) => Number(b.pn === pn) - Number(a.pn === pn) || a.id.localeCompare(b.id))[0], dims = loose ? context.flanges[loose.id] : undefined;
       if (loose && p && positive(p.thicknessMm) && positive(dims?.thicknessMm) && positive(dims.outerDiameterMm) && positive(dims.boreDiameterMm)) {
-        const fits = dims.boreDiameterMm >= e.od && positive(p.lipOuterDiameterMm) && dims.boreDiameterMm < p.lipOuterDiameterMm;
+        const stock=stampedShape(loose.id,{kind:"flange",lengthMm:dims.thicknessMm,outerMm:dims.outerDiameterMm,innerMm:dims.boreDiameterMm,boltCircleMm:dims.boltCircleMm,boltHoleMm:dims.boltHoleDiameterMm,boltHoles:dims.holes},true);
+        const fits = stock.innerMm! >= e.od && positive(p.lipOuterDiameterMm) && stock.innerMm! < p.lipOuterDiameterMm;
+        if(!fits) stock.stampedHash="missing";
+        if(stock.stampedHash==="missing") issues.push(`${loose.id}: ${stampMissing}`);
         if (!fits) issues.push(`${loose.id}: свободный фланец не согласован с шейкой и бортом воротника.`);
         warnings.push(`${loose.id}: положение свободного фланца принято за бортом воротника; контакт со скруглением и необходимость фаски требуют проверки перед изготовлением.`);
         const sign = e.side === "left" ? 1 : -1;
-        add(`${e.side}-loose`, loose, [e.origin[0] + sign * p.thicknessMm, e.origin[1], e.origin[2]], e.rotation, { kind: "flange", lengthMm: dims.thicknessMm, outerMm: dims.outerDiameterMm, innerMm: dims.boreDiameterMm, boltCircleMm: dims.boltCircleMm, boltHoles: dims.holes, boltHoleMm: dims.boltHoleDiameterMm }, "parametric", true);
-        Object.assign(external, { boltCircleMm: dims.boltCircleMm, boltHoles: dims.holes, boltHoleMm: dims.boltHoleDiameterMm });
+        add(`${e.side}-loose`, loose, [e.origin[0] + sign * p.thicknessMm, e.origin[1], e.origin[2]], e.rotation, stock, "parametric", true);
+        Object.assign(external, { boltCircleMm: stock.boltCircleMm, boltHoles: stock.boltHoles, boltHoleMm: stock.boltHoleMm });
       } else issues.push(`${e.side}: нет размеров вспомогательного свободного фланца.`);
     }
   }

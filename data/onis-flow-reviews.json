@@ -1,0 +1,3347 @@
+{
+ "9b289f048a882672c3db3d2dd645a75d240913842046a3d2476d0ad8999a38fc": {
+  "pumpId": "nu-88db48280ab11e49",
+  "source": "Equipment/Pumps/3D_ONIS_Normalized/MH/MH1-4-7d1973757b14.step",
+  "inlet": "inlet",
+  "originalPorts": {
+   "inlet": {
+    "id": "inlet",
+    "point": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "axis": [
+     -1.0,
+     0.0,
+     0.0
+    ],
+    "provisional": true
+   },
+   "outlet": {
+    "id": "outlet",
+    "point": [
+     90.0,
+     0.0,
+     90.0
+    ],
+    "axis": [
+     0.0,
+     0.0,
+     1.0
+    ],
+    "provisional": true
+   }
+  },
+  "mounts": {},
+  "bounds": [
+   -9.997007193996978e-08,
+   -79.0,
+   -75.0,
+   338.0,
+   79.0,
+   105.00000042907958
+  ],
+  "method": "axial_inlet_radial_outlet"
+ },
+ "373d551a212b1dcbb0e6e1d330867fe4b4d3eec48cb95679b4e1463e13cb8d4a": {
+  "pumpId": "nu-406606f25af271e2",
+  "source": "Equipment/Pumps/3D_ONIS_Normalized/MH/MH1-5-143a84ee1e0a.step",
+  "inlet": "inlet",
+  "originalPorts": {
+   "inlet": {
+    "id": "inlet",
+    "point": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "axis": [
+     -1.0,
+     0.0,
+     0.0
+    ],
+    "provisional": true
+   },
+   "outlet": {
+    "id": "outlet",
+    "point": [
+     108.0,
+     0.0,
+     90.0
+    ],
+    "axis": [
+     0.0,
+     0.0,
+     1.0
+    ],
+    "provisional": true
+   }
+  },
+  "mounts": {},
+  "bounds": [
+   -9.997007193996978e-08,
+   -79.0,
+   -75.0,
+   356.0,
+   79.0,
+   105.00000042907958
+  ],
+  "method": "axial_inlet_radial_outlet"
+ },
+ "b97eaa7282ff86a1780b34aa6edb296711443a635a07a77149ddc2e2db1cf1a5": {
+  "pumpId": "nu-d51f69ecc1df582a",
+  "source": "Equipment/Pumps/3D_ONIS_Normalized/MH/MH1-6-a97964a530f0.step",
+  "inlet": "inlet",
+  "originalPorts": {
+   "inlet": {
+    "id": "inlet",
+    "point": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "axis": [
+     -1.0,
+     0.0,
+     0.0
+    ],
+    "provisional": true
+   },
+   "outlet": {
+    "id": "outlet",
+    "point": [
+     144.0,
+     0.0,
+     90.0
+    ],
+    "axis": [
+     0.0,
+     0.0,
+     1.0
+    ],
+    "provisional": true
+   }
+  },
+  "mounts": {},
+  "bounds": [
+   -9.996506971911003e-08,
+   -79.0,
+   -75.0,
+   392.0,
+   79.0,
+   105.00000042907958
+  ],
+  "method": "axial_inlet_radial_outlet"
+ },
+ "b46727cecce03026acd6453d75b5c1e7cf984f9ac9238f11cf20cb0c287e682c": {
+  "pumpId": "nu-4144ab56f15e9132",
+  "source": "Equipment/Pumps/3D_ONIS_Normalized/MH/MH1-3-ff2ae18ce0fb.step",
+  "inlet": "inlet",
+  "originalPorts": {
+   "inlet": {
+    "id": "inlet",
+    "point": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "axis": [
+     -1.0,
+     0.0,
+     0.0
+    ],
+    "provisional": true
+   },
+   "outlet": {
+    "id": "outlet",
+    "point": [
+     72.0,
+     0.0,
+     90.0
+    ],
+    "axis": [
+     0.0,
+     0.0,
+     1.0
+    ],
+    "provisional": true
+   }
+  },
+  "mounts": {},
+  "bounds": [
+   -9.998506439169432e-08,
+   -79.0,
+   -75.0,
+   320.0,
+   79.0,
+   105.00000042907958
+  ],
+  "method": "axial_inlet_radial_outlet"
+ },
+ "88faa47eeb7e59cc1ee7e74b792cf3a732376e18dcbdf0b85f6ed5c68eda0054": {
+  "pumpId": "nu-2986668ec6f1db13",
+  "source": "Equipment/Pumps/3D_ONIS_Normalized/MH/MH10-1-af4c288e242e.step",
+  "inlet": "inlet",
+  "originalPorts": {
+   "inlet": {
+    "id": "inlet",
+    "point": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "axis": [
+     -1.0,
+     0.0,
+     0.0
+    ],
+    "provisional": true
+   },
+   "outlet": {
+    "id": "outlet",
+    "point": [
+     72.00000000000001,
+     0.0,
+     118.0
+    ],
+    "axis": [
+     0.0,
+     0.0,
+     1.0
+    ],
+    "provisional": true
+   }
+  },
+  "mounts": {},
+  "bounds": [
+   -1.000141255895869e-07,
+   -91.00000010000002,
+   -100.00000010097926,
+   356.3000013883855,
+   91.00000010000002,
+   118.0000001
+  ],
+  "method": "axial_inlet_radial_outlet"
+ },
+ "7db58197bdd79aa62202997177a35acd8350ebeb5fa47f3ba9ebca26ffe064d4": {
+  "pumpId": "nu-9f4a8cf1b7428d4b",
+  "source": "Equipment/Pumps/3D_ONIS_Normalized/MH/MH10-2-5ef43fa76a84.step",
+  "inlet": "inlet",
+  "originalPorts": {
+   "inlet": {
+    "id": "inlet",
+    "point": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "axis": [
+     -1.0,
+     0.0,
+     0.0
+    ],
+    "provisional": true
+   },
+   "outlet": {
+    "id": "outlet",
+    "point": [
+     78.00000000000001,
+     0.0,
+     118.0
+    ],
+    "axis": [
+     0.0,
+     0.0,
+     1.0
+    ],
+    "provisional": true
+   }
+  },
+  "mounts": {},
+  "bounds": [
+   -1.000141255895869e-07,
+   -91.00000010000002,
+   -100.00000010097926,
+   356.3000013883855,
+   91.00000010000002,
+   118.0000001
+  ],
+  "method": "axial_inlet_radial_outlet"
+ },
+ "5ddabb1803447abc2f7ffa5b0e5a5113e5d04b6aa6e7e509571489f8014b4ce0": {
+  "pumpId": "nu-4860ea51c37c8b58",
+  "source": "Equipment/Pumps/3D_ONIS_Normalized/MH/MH10-3-cea9c95973f6.step",
+  "inlet": "inlet",
+  "originalPorts": {
+   "inlet": {
+    "id": "inlet",
+    "point": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "axis": [
+     -1.0,
+     0.0,
+     0.0
+    ],
+    "provisional": true
+   },
+   "outlet": {
+    "id": "outlet",
+    "point": [
+     104.00046999999999,
+     0.0,
+     118.0
+    ],
+    "axis": [
+     0.0,
+     0.0,
+     1.0
+    ],
+    "provisional": true
+   }
+  },
+  "mounts": {},
+  "bounds": [
+   -1.0001014655026665e-07,
+   -100.0000001,
+   -100.00000300906213,
+   417.69999998890444,
+   100.0000001,
+   126.000000100002
+  ],
+  "method": "axial_inlet_radial_outlet"
+ },
+ "8a0d0ccdf8c7da5964c58e3be8f9cfa310c8e28e88023e22d481f6d5b19fceee": {
+  "pumpId": "nu-7000395916b83812",
+  "source": "Equipment/Pumps/3D_ONIS_Normalized/MH/MH10-4-5fa6f9ab0425.step",
+  "inlet": "inlet",
+  "originalPorts": {
+   "inlet": {
+    "id": "inlet",
+    "point": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "axis": [
+     -1.0,
+     0.0,
+     0.0
+    ],
+    "provisional": true
+   },
+   "outlet": {
+    "id": "outlet",
+    "point": [
+     136.0,
+     0.0,
+     118.0
+    ],
+    "axis": [
+     0.0,
+     0.0,
+     1.0
+    ],
+    "provisional": true
+   }
+  },
+  "mounts": {},
+  "bounds": [
+   -1.0001014655026665e-07,
+   -100.0000001,
+   -100.00000300906213,
+   449.69999998890444,
+   100.0000001,
+   126.000000100002
+  ],
+  "method": "axial_inlet_radial_outlet"
+ },
+ "54e050a461e4bccf203988a69f71b9b9f06056412c8ff0fc70d8b59e2b188e92": {
+  "pumpId": "nu-857859e4741364c5",
+  "source": "Equipment/Pumps/3D_ONIS_Normalized/MH/MH10-5-bc6acad572ee.step",
+  "inlet": "inlet",
+  "originalPorts": {
+   "inlet": {
+    "id": "inlet",
+    "point": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "axis": [
+     -1.0,
+     0.0,
+     0.0
+    ],
+    "provisional": true
+   },
+   "outlet": {
+    "id": "outlet",
+    "point": [
+     167.99999999999997,
+     0.0,
+     118.0
+    ],
+    "axis": [
+     0.0,
+     0.0,
+     1.0
+    ],
+    "provisional": true
+   }
+  },
+  "mounts": {},
+  "bounds": [
+   -1.0000520117282576e-07,
+   -100.0000001,
+   -100.00000300906213,
+   481.8999999889044,
+   100.0000001,
+   126.000000100002
+  ],
+  "method": "axial_inlet_radial_outlet"
+ },
+ "b34a14091348c1440e220ce623ca8d5dbb345b296d0454adb618e9ee1b3a1ee4": {
+  "pumpId": "nu-c102adecd32db5bc",
+  "source": "Equipment/Pumps/3D_ONIS_Normalized/MH/MH2-2-3bf2ee016b8f.step",
+  "inlet": "inlet",
+  "originalPorts": {
+   "inlet": {
+    "id": "inlet",
+    "point": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "axis": [
+     -1.0,
+     0.0,
+     0.0
+    ],
+    "provisional": true
+   },
+   "outlet": {
+    "id": "outlet",
+    "point": [
+     72.0,
+     0.0,
+     90.0
+    ],
+    "axis": [
+     0.0,
+     0.0,
+     1.0
+    ],
+    "provisional": true
+   }
+  },
+  "mounts": {},
+  "bounds": [
+   -9.998506439169432e-08,
+   -79.0,
+   -75.0,
+   320.0,
+   79.0,
+   105.00000042907958
+  ],
+  "method": "axial_inlet_radial_outlet"
+ },
+ "0d90c7d4450886ef4d128beecc2437b249e21e3dc57c39cdec1664a8db33dcbe": {
+  "pumpId": "nu-7ae4a1f51404aa20",
+  "source": "Equipment/Pumps/3D_ONIS_Normalized/MH/MH2-3-3070b90ccadb.step",
+  "inlet": "inlet",
+  "originalPorts": {
+   "inlet": {
+    "id": "inlet",
+    "point": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "axis": [
+     -1.0,
+     0.0,
+     0.0
+    ],
+    "provisional": true
+   },
+   "outlet": {
+    "id": "outlet",
+    "point": [
+     72.0,
+     0.0,
+     90.0
+    ],
+    "axis": [
+     0.0,
+     0.0,
+     1.0
+    ],
+    "provisional": true
+   }
+  },
+  "mounts": {},
+  "bounds": [
+   -9.998506439169432e-08,
+   -79.0,
+   -75.0,
+   320.0,
+   79.0,
+   105.00000042907958
+  ],
+  "method": "axial_inlet_radial_outlet"
+ },
+ "21372031bae3be0058a0b42d3c8ad7a66ae10d5f006530a5c8553716e2219f2a": {
+  "pumpId": "nu-ebc7dfa1aadafed8",
+  "source": "Equipment/Pumps/3D_ONIS_Normalized/MH/MH2-4-16c79712bdef.step",
+  "inlet": "inlet",
+  "originalPorts": {
+   "inlet": {
+    "id": "inlet",
+    "point": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "axis": [
+     -1.0,
+     0.0,
+     0.0
+    ],
+    "provisional": true
+   },
+   "outlet": {
+    "id": "outlet",
+    "point": [
+     90.0,
+     0.0,
+     90.0
+    ],
+    "axis": [
+     0.0,
+     0.0,
+     1.0
+    ],
+    "provisional": true
+   }
+  },
+  "mounts": {},
+  "bounds": [
+   -9.996006749825028e-08,
+   -79.0,
+   -77.0000001,
+   349.0,
+   79.0,
+   115.00000042907958
+  ],
+  "method": "axial_inlet_radial_outlet"
+ },
+ "9b3df67c4249cad34fbbc6f1b72614bba5552fadd037200c9f0a9cd4d1e74c4b": {
+  "pumpId": "nu-1dd6865d294959db",
+  "source": "Equipment/Pumps/3D_ONIS_Normalized/MH/MH2-5-3c8da400d41f.step",
+  "inlet": "inlet",
+  "originalPorts": {
+   "inlet": {
+    "id": "inlet",
+    "point": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "axis": [
+     -1.0,
+     0.0,
+     0.0
+    ],
+    "provisional": true
+   },
+   "outlet": {
+    "id": "outlet",
+    "point": [
+     108.0,
+     0.0,
+     90.0
+    ],
+    "axis": [
+     0.0,
+     0.0,
+     1.0
+    ],
+    "provisional": true
+   }
+  },
+  "mounts": {},
+  "bounds": [
+   -9.996506971911003e-08,
+   -79.0,
+   -77.0000001,
+   367.0,
+   79.0,
+   115.00000042907958
+  ],
+  "method": "axial_inlet_radial_outlet"
+ },
+ "8ab19d42e9fd59570d51fe761c1d45bdad61ccea8046c246d8a238dd8619f81a": {
+  "pumpId": "nu-4e711eff2680ae95",
+  "source": "Equipment/Pumps/3D_ONIS_Normalized/MH/MH2-6-f6d237e3fccc.step",
+  "inlet": "inlet",
+  "originalPorts": {
+   "inlet": {
+    "id": "inlet",
+    "point": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "axis": [
+     -1.0,
+     0.0,
+     0.0
+    ],
+    "provisional": true
+   },
+   "outlet": {
+    "id": "outlet",
+    "point": [
+     144.0,
+     0.0,
+     90.0
+    ],
+    "axis": [
+     0.0,
+     0.0,
+     1.0
+    ],
+    "provisional": true
+   }
+  },
+  "mounts": {},
+  "bounds": [
+   -9.996006749825028e-08,
+   -79.0,
+   -77.0000001,
+   403.0,
+   79.0,
+   115.00000042907958
+  ],
+  "method": "axial_inlet_radial_outlet"
+ },
+ "6de3f7e496b85eef9bf5a807c174baf9543177fb1d650022d114371c6d3ab853": {
+  "pumpId": "nu-09381c0c21bae4f2",
+  "source": "Equipment/Pumps/3D_ONIS_Normalized/MH/MH3-2-29963b706096.step",
+  "inlet": "inlet",
+  "originalPorts": {
+   "inlet": {
+    "id": "inlet",
+    "point": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "axis": [
+     -1.0,
+     0.0,
+     0.0
+    ],
+    "provisional": true
+   },
+   "outlet": {
+    "id": "outlet",
+    "point": [
+     72.0,
+     0.0,
+     90.0
+    ],
+    "axis": [
+     0.0,
+     0.0,
+     1.0
+    ],
+    "provisional": true
+   }
+  },
+  "mounts": {},
+  "bounds": [
+   -9.998506439169432e-08,
+   -79.0,
+   -75.0,
+   320.0,
+   79.0,
+   105.00000042907958
+  ],
+  "method": "axial_inlet_radial_outlet"
+ },
+ "f3fd1c6f6f818766bae41bcd6c8cb93c68d21151a74efd59d1306e8c460ad1e2": {
+  "pumpId": "nu-f9314dbe075a2d15",
+  "source": "Equipment/Pumps/3D_ONIS_Normalized/MH/MH3-3-48f163a8e394.step",
+  "inlet": "inlet",
+  "originalPorts": {
+   "inlet": {
+    "id": "inlet",
+    "point": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "axis": [
+     -1.0,
+     0.0,
+     0.0
+    ],
+    "provisional": true
+   },
+   "outlet": {
+    "id": "outlet",
+    "point": [
+     72.0,
+     0.0,
+     90.0
+    ],
+    "axis": [
+     0.0,
+     0.0,
+     1.0
+    ],
+    "provisional": true
+   }
+  },
+  "mounts": {},
+  "bounds": [
+   -9.998506439169432e-08,
+   -79.0,
+   -75.0,
+   320.0,
+   79.0,
+   105.00000042907958
+  ],
+  "method": "axial_inlet_radial_outlet"
+ },
+ "a8a58ff815e5ff88320303030bf5ef46253c5e522e4a05c510ad04c86d13b406": {
+  "pumpId": "nu-7bdfad8ae5c86685",
+  "source": "Equipment/Pumps/3D_ONIS_Normalized/MH/MH3-4-16c565cadde0.step",
+  "inlet": "inlet",
+  "originalPorts": {
+   "inlet": {
+    "id": "inlet",
+    "point": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "axis": [
+     -1.0,
+     0.0,
+     0.0
+    ],
+    "provisional": true
+   },
+   "outlet": {
+    "id": "outlet",
+    "point": [
+     90.0,
+     0.0,
+     90.0
+    ],
+    "axis": [
+     0.0,
+     0.0,
+     1.0
+    ],
+    "provisional": true
+   }
+  },
+  "mounts": {},
+  "bounds": [
+   -9.996006749825028e-08,
+   -79.0,
+   -77.0000001,
+   349.0,
+   79.0,
+   115.00000042907958
+  ],
+  "method": "axial_inlet_radial_outlet"
+ },
+ "f0d1740b46927ffb9143c8ca653be87efd1f7060cf3c77fcec55cf5008590202": {
+  "pumpId": "nu-ee28cedcc53d29b7",
+  "source": "Equipment/Pumps/3D_ONIS_Normalized/MH/MH3-5-c56860f1d5b7.step",
+  "inlet": "inlet",
+  "originalPorts": {
+   "inlet": {
+    "id": "inlet",
+    "point": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "axis": [
+     -1.0,
+     0.0,
+     0.0
+    ],
+    "provisional": true
+   },
+   "outlet": {
+    "id": "outlet",
+    "point": [
+     108.0,
+     0.0,
+     90.0
+    ],
+    "axis": [
+     0.0,
+     0.0,
+     1.0
+    ],
+    "provisional": true
+   }
+  },
+  "mounts": {},
+  "bounds": [
+   -9.996506971911003e-08,
+   -79.0,
+   -77.0000001,
+   367.0,
+   79.0,
+   115.00000042907958
+  ],
+  "method": "axial_inlet_radial_outlet"
+ },
+ "826526471d252ee3d400d3fe3506050e0b2fea27155f03e4fc994526c72b9598": {
+  "pumpId": "nu-05ba98b6a69d9b48",
+  "source": "Equipment/Pumps/3D_ONIS_Normalized/MH/MH3-6-4c0faf6e3258.step",
+  "inlet": "inlet",
+  "originalPorts": {
+   "inlet": {
+    "id": "inlet",
+    "point": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "axis": [
+     -1.0,
+     0.0,
+     0.0
+    ],
+    "provisional": true
+   },
+   "outlet": {
+    "id": "outlet",
+    "point": [
+     144.0,
+     0.0,
+     90.0
+    ],
+    "axis": [
+     0.0,
+     0.0,
+     1.0
+    ],
+    "provisional": true
+   }
+  },
+  "mounts": {},
+  "bounds": [
+   -9.996006749825028e-08,
+   -79.0,
+   -77.0000001,
+   403.0,
+   79.0,
+   115.00000042907958
+  ],
+  "method": "axial_inlet_radial_outlet"
+ },
+ "a9f8cacc266931a7f01cf6d6ecb977bb28b9ec729f1abc75da624dc3bfcfecb9": {
+  "pumpId": "nu-6aca62e3a3d51bf2",
+  "source": "Equipment/Pumps/3D_ONIS_Normalized/MH/MH4-2-1077c8f63c4f.step",
+  "inlet": "inlet",
+  "originalPorts": {
+   "inlet": {
+    "id": "inlet",
+    "point": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "axis": [
+     -1.0,
+     0.0,
+     0.0
+    ],
+    "provisional": true
+   },
+   "outlet": {
+    "id": "outlet",
+    "point": [
+     72.0,
+     0.0,
+     90.0
+    ],
+    "axis": [
+     0.0,
+     0.0,
+     1.0
+    ],
+    "provisional": true
+   }
+  },
+  "mounts": {},
+  "bounds": [
+   -9.996011013081442e-08,
+   -79.0,
+   -75.0,
+   320.0,
+   79.0,
+   105.00000042907958
+  ],
+  "method": "axial_inlet_radial_outlet"
+ },
+ "1ac797fb7d0be3ddcc1a6fb2311322ca352b9e876373c417c188ce16955e381d": {
+  "pumpId": "nu-ad453f5161a42ba0",
+  "source": "Equipment/Pumps/3D_ONIS_Normalized/MH/MH4-3-70353f8602b5.step",
+  "inlet": "inlet",
+  "originalPorts": {
+   "inlet": {
+    "id": "inlet",
+    "point": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "axis": [
+     -1.0,
+     0.0,
+     0.0
+    ],
+    "provisional": true
+   },
+   "outlet": {
+    "id": "outlet",
+    "point": [
+     72.0,
+     0.0,
+     90.0
+    ],
+    "axis": [
+     0.0,
+     0.0,
+     1.0
+    ],
+    "provisional": true
+   }
+  },
+  "mounts": {},
+  "bounds": [
+   -9.996011013081442e-08,
+   -79.0,
+   -77.0000001,
+   331.0,
+   79.0,
+   115.00000042907958
+  ],
+  "method": "axial_inlet_radial_outlet"
+ },
+ "ea4d2d617e279b0d64d3559acaab97333a2629018b0e1f68c6474124bf182a3a": {
+  "pumpId": "nu-8c685e2cc7053bfd",
+  "source": "Equipment/Pumps/3D_ONIS_Normalized/MH/MH4-4-3543c98f8f96.step",
+  "inlet": "inlet",
+  "originalPorts": {
+   "inlet": {
+    "id": "inlet",
+    "point": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "axis": [
+     -1.0,
+     0.0,
+     0.0
+    ],
+    "provisional": true
+   },
+   "outlet": {
+    "id": "outlet",
+    "point": [
+     90.0,
+     0.0,
+     90.0
+    ],
+    "axis": [
+     0.0,
+     0.0,
+     1.0
+    ],
+    "provisional": true
+   }
+  },
+  "mounts": {},
+  "bounds": [
+   -9.996011013081442e-08,
+   -79.0,
+   -77.0000001,
+   349.0,
+   79.0,
+   115.00000042907958
+  ],
+  "method": "axial_inlet_radial_outlet"
+ },
+ "0daff5872a74788e9dd37f1e974aff8df43f7e3062bc2a018dc191b52d68607b": {
+  "pumpId": "nu-63d7c0c3801a453f",
+  "source": "Equipment/Pumps/3D_ONIS_Normalized/MH/MH4-5-d8789d05057a.step",
+  "inlet": "inlet",
+  "originalPorts": {
+   "inlet": {
+    "id": "inlet",
+    "point": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "axis": [
+     -1.0,
+     0.0,
+     0.0
+    ],
+    "provisional": true
+   },
+   "outlet": {
+    "id": "outlet",
+    "point": [
+     108.0,
+     0.0,
+     90.0
+    ],
+    "axis": [
+     0.0,
+     0.0,
+     1.0
+    ],
+    "provisional": true
+   }
+  },
+  "mounts": {},
+  "bounds": [
+   -9.998212274476827e-08,
+   -89.0,
+   -90.0000001,
+   411.0,
+   89.0,
+   129.0000004290867
+  ],
+  "method": "axial_inlet_radial_outlet"
+ },
+ "04be9716a2c7f19116986f9b47285f9f0624d549e1576098cf487c45aa12bb3d": {
+  "pumpId": "nu-f4cf4f9e023e5db7",
+  "source": "Equipment/Pumps/3D_ONIS_Normalized/MH/MH4-6-669e02619f70.step",
+  "inlet": "inlet",
+  "originalPorts": {
+   "inlet": {
+    "id": "inlet",
+    "point": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "axis": [
+     -1.0,
+     0.0,
+     0.0
+    ],
+    "provisional": true
+   },
+   "outlet": {
+    "id": "outlet",
+    "point": [
+     144.0,
+     0.0,
+     90.0
+    ],
+    "axis": [
+     0.0,
+     0.0,
+     1.0
+    ],
+    "provisional": true
+   }
+  },
+  "mounts": {},
+  "bounds": [
+   -9.999712940734752e-08,
+   -89.0,
+   -90.0000001,
+   447.0,
+   89.0,
+   129.0000004290867
+  ],
+  "method": "axial_inlet_radial_outlet"
+ },
+ "39be370fed04658da2ec7234a6f21be7c0190f1dde506b03fc68b59466768ce0": {
+  "pumpId": "nu-02fbf2ab4be80c99",
+  "source": "Equipment/Pumps/3D_ONIS_Normalized/MH/MH5-2-038d0269ee8e.step",
+  "inlet": "inlet",
+  "originalPorts": {
+   "inlet": {
+    "id": "inlet",
+    "point": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "axis": [
+     -1.0,
+     0.0,
+     0.0
+    ],
+    "provisional": true
+   },
+   "outlet": {
+    "id": "outlet",
+    "point": [
+     72.0,
+     0.0,
+     90.0
+    ],
+    "axis": [
+     0.0,
+     0.0,
+     1.0
+    ],
+    "provisional": true
+   }
+  },
+  "mounts": {},
+  "bounds": [
+   -9.996011013081442e-08,
+   -79.0,
+   -75.0,
+   320.0,
+   79.0,
+   105.00000042907958
+  ],
+  "method": "axial_inlet_radial_outlet"
+ },
+ "b9149fe4645121fea6145d8bb215c754b366acc2dc1fcf8d48686aecee26774b": {
+  "pumpId": "nu-1bf16cdadad77c7c",
+  "source": "Equipment/Pumps/3D_ONIS_Normalized/MH/MH5-3-2fc1840f8d35.step",
+  "inlet": "inlet",
+  "originalPorts": {
+   "inlet": {
+    "id": "inlet",
+    "point": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "axis": [
+     -1.0,
+     0.0,
+     0.0
+    ],
+    "provisional": true
+   },
+   "outlet": {
+    "id": "outlet",
+    "point": [
+     72.0,
+     0.0,
+     90.0
+    ],
+    "axis": [
+     0.0,
+     0.0,
+     1.0
+    ],
+    "provisional": true
+   }
+  },
+  "mounts": {},
+  "bounds": [
+   -9.996011013081442e-08,
+   -79.0,
+   -77.0000001,
+   331.0,
+   79.0,
+   115.00000042907958
+  ],
+  "method": "axial_inlet_radial_outlet"
+ },
+ "791526ab5e88f667ac6deaa656a009b8c4be1ced03019ea1c66dcfef6ea22c51": {
+  "pumpId": "nu-16fe8b269bb41688",
+  "source": "Equipment/Pumps/3D_ONIS_Normalized/MH/MH5-4-e4ea0e4b3dff.step",
+  "inlet": "inlet",
+  "originalPorts": {
+   "inlet": {
+    "id": "inlet",
+    "point": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "axis": [
+     -1.0,
+     0.0,
+     0.0
+    ],
+    "provisional": true
+   },
+   "outlet": {
+    "id": "outlet",
+    "point": [
+     90.0,
+     0.0,
+     90.0
+    ],
+    "axis": [
+     0.0,
+     0.0,
+     1.0
+    ],
+    "provisional": true
+   }
+  },
+  "mounts": {},
+  "bounds": [
+   -9.996011013081442e-08,
+   -79.0,
+   -77.0000001,
+   349.0,
+   79.0,
+   115.00000042907958
+  ],
+  "method": "axial_inlet_radial_outlet"
+ },
+ "87d52f67505a840735836aa515c6b4fa4269f78eed0f27792b4aa4770ea2c640": {
+  "pumpId": "nu-edc716c7b80ca459",
+  "source": "Equipment/Pumps/3D_ONIS_Normalized/MH/MH5-5-292a87932ae9.step",
+  "inlet": "inlet",
+  "originalPorts": {
+   "inlet": {
+    "id": "inlet",
+    "point": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "axis": [
+     -1.0,
+     0.0,
+     0.0
+    ],
+    "provisional": true
+   },
+   "outlet": {
+    "id": "outlet",
+    "point": [
+     108.0,
+     0.0,
+     90.0
+    ],
+    "axis": [
+     0.0,
+     0.0,
+     1.0
+    ],
+    "provisional": true
+   }
+  },
+  "mounts": {},
+  "bounds": [
+   -9.998212274476827e-08,
+   -89.0,
+   -90.0000001,
+   411.0,
+   89.0,
+   129.0000004290867
+  ],
+  "method": "axial_inlet_radial_outlet"
+ },
+ "e0080209ecb6c25394f4357e03e3363a6b03988704a1d49af8053eedfdc8bc0e": {
+  "pumpId": "nu-46674b1f6c99db09",
+  "source": "Equipment/Pumps/3D_ONIS_Normalized/MH/MH5-6-e510052c74d7.step",
+  "inlet": "inlet",
+  "originalPorts": {
+   "inlet": {
+    "id": "inlet",
+    "point": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "axis": [
+     -1.0,
+     0.0,
+     0.0
+    ],
+    "provisional": true
+   },
+   "outlet": {
+    "id": "outlet",
+    "point": [
+     144.0,
+     0.0,
+     90.0
+    ],
+    "axis": [
+     0.0,
+     0.0,
+     1.0
+    ],
+    "provisional": true
+   }
+  },
+  "mounts": {},
+  "bounds": [
+   -9.999712940734752e-08,
+   -89.0,
+   -90.0000001,
+   447.0,
+   89.0,
+   129.0000004290867
+  ],
+  "method": "axial_inlet_radial_outlet"
+ },
+ "9faf634c09a5b09934cdb6c67f5f00972a801b387ecd4a97e612ae9870795ade": {
+  "pumpId": "nu-8cb869d819c90d0f",
+  "source": "Equipment/Pumps/3D_ONIS_Normalized/MV/MV20-10-744089460fbe.step",
+  "inlet": "port-a",
+  "originalPorts": {
+   "port-a": {
+    "id": "port-a",
+    "point": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "axis": [
+     -1.0,
+     0.0,
+     0.0
+    ],
+    "provisional": true
+   },
+   "port-b": {
+    "id": "port-b",
+    "point": [
+     300.0,
+     0.0,
+     0.0
+    ],
+    "axis": [
+     1.0,
+     0.0,
+     0.0
+    ],
+    "provisional": true
+   }
+  },
+  "arrows": [
+   {
+    "sign": 1,
+    "outline": [
+     [
+      135.0,
+      104.5,
+      -59.0
+     ],
+     [
+      135.0,
+      111.5,
+      -59.0
+     ],
+     [
+      156.0,
+      101.0,
+      -59.0
+     ],
+     [
+      156.0,
+      104.5,
+      -59.0
+     ],
+     [
+      156.0,
+      111.5,
+      -59.0
+     ],
+     [
+      156.0,
+      115.0,
+      -59.0
+     ],
+     [
+      165.0,
+      108.0,
+      -59.0
+     ]
+    ]
+   },
+   {
+    "sign": 1,
+    "outline": [
+     [
+      135.0,
+      -111.5,
+      -59.0
+     ],
+     [
+      135.0,
+      -104.5,
+      -59.0
+     ],
+     [
+      156.0,
+      -115.0,
+      -59.0
+     ],
+     [
+      156.0,
+      -111.5,
+      -59.0
+     ],
+     [
+      156.0,
+      -104.5,
+      -59.0
+     ],
+     [
+      156.0,
+      -101.0,
+      -59.0
+     ],
+     [
+      165.0,
+      -108.0,
+      -59.0
+     ]
+    ]
+   }
+  ],
+  "mounts": {
+   "inlet": {
+    "source": "STEP Equipment/Pumps/3D_ONIS_Normalized/MV/MV20-10-744089460fbe.step; SHA256 9faf634c09a5b09934cdb6c67f5f00972a801b387ecd4a97e612ae9870795ade; cylindrical through walls and planar back bearing lands around every hole",
+    "face": [
+     1.9999999,
+     0.0,
+     0.0
+    ],
+    "axis": [
+     -1.0,
+     0.0,
+     0.0
+    ],
+    "holes": [
+     [
+      1.9999999,
+      62.5,
+      0.0
+     ],
+     [
+      1.9999999,
+      0.0,
+      -62.5
+     ],
+     [
+      1.9999999,
+      -62.5,
+      0.0
+     ],
+     [
+      1.9999999,
+      -1.166835978386e-14,
+      62.5
+     ]
+    ],
+    "holeDiameter": 18.0,
+    "thickness": 18.0000001,
+    "holeKind": "through"
+   },
+   "outlet": {
+    "source": "STEP Equipment/Pumps/3D_ONIS_Normalized/MV/MV20-10-744089460fbe.step; SHA256 9faf634c09a5b09934cdb6c67f5f00972a801b387ecd4a97e612ae9870795ade; cylindrical through walls and planar back bearing lands around every hole",
+    "face": [
+     298.0000001,
+     0.0,
+     0.0
+    ],
+    "axis": [
+     1.0,
+     0.0,
+     0.0
+    ],
+    "holes": [
+     [
+      298.0000001,
+      62.5,
+      0.0
+     ],
+     [
+      298.0000001,
+      0.0,
+      62.5
+     ],
+     [
+      298.0000001,
+      -62.5,
+      0.0
+     ],
+     [
+      298.0000001,
+      -1.166835978386e-14,
+      -62.5
+     ]
+    ],
+    "holeDiameter": 18.0,
+    "thickness": 18.000000100000022,
+    "holeKind": "through"
+   }
+  },
+  "bounds": [
+   -120.00000009999899,
+   -175.00000010000068,
+   -90.00000010000001,
+   325.00000010000065,
+   175.0000001,
+   1248.00000010003
+  ],
+  "method": "casing_arrows"
+ },
+ "51404acfee1e3c5d66301574a801a0ac5f06d6567db1b71562ab6fea5357319c": {
+  "pumpId": "nu-30f6a23ee8ddbda3",
+  "source": "Equipment/Pumps/3D_ONIS_Normalized/MV/MV20-12-844b4ac98f84.step",
+  "inlet": "port-a",
+  "originalPorts": {
+   "port-a": {
+    "id": "port-a",
+    "point": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "axis": [
+     -1.0,
+     0.0,
+     0.0
+    ],
+    "provisional": true
+   },
+   "port-b": {
+    "id": "port-b",
+    "point": [
+     300.0,
+     0.0,
+     0.0
+    ],
+    "axis": [
+     1.0,
+     0.0,
+     0.0
+    ],
+    "provisional": true
+   }
+  },
+  "arrows": [
+   {
+    "sign": 1,
+    "outline": [
+     [
+      135.0,
+      104.5,
+      -59.0
+     ],
+     [
+      135.0,
+      111.5,
+      -59.0
+     ],
+     [
+      156.0,
+      101.0,
+      -59.0
+     ],
+     [
+      156.0,
+      104.5,
+      -59.0
+     ],
+     [
+      156.0,
+      111.5,
+      -59.0
+     ],
+     [
+      156.0,
+      115.0,
+      -59.0
+     ],
+     [
+      165.0,
+      108.0,
+      -59.0
+     ]
+    ]
+   },
+   {
+    "sign": 1,
+    "outline": [
+     [
+      135.0,
+      -111.5,
+      -59.0
+     ],
+     [
+      135.0,
+      -104.5,
+      -59.0
+     ],
+     [
+      156.0,
+      -115.0,
+      -59.0
+     ],
+     [
+      156.0,
+      -111.5,
+      -59.0
+     ],
+     [
+      156.0,
+      -104.5,
+      -59.0
+     ],
+     [
+      156.0,
+      -101.0,
+      -59.0
+     ],
+     [
+      165.0,
+      -108.0,
+      -59.0
+     ]
+    ]
+   }
+  ],
+  "mounts": {
+   "inlet": {
+    "source": "STEP Equipment/Pumps/3D_ONIS_Normalized/MV/MV20-12-844b4ac98f84.step; SHA256 51404acfee1e3c5d66301574a801a0ac5f06d6567db1b71562ab6fea5357319c; cylindrical through walls and planar back bearing lands around every hole",
+    "face": [
+     1.9999999,
+     0.0,
+     0.0
+    ],
+    "axis": [
+     -1.0,
+     0.0,
+     0.0
+    ],
+    "holes": [
+     [
+      1.9999999,
+      62.5,
+      0.0
+     ],
+     [
+      1.9999999,
+      0.0,
+      -62.5
+     ],
+     [
+      1.9999999,
+      -62.5,
+      0.0
+     ],
+     [
+      1.9999999,
+      -1.166835978386e-14,
+      62.5
+     ]
+    ],
+    "holeDiameter": 18.0,
+    "thickness": 18.0000001,
+    "holeKind": "through"
+   },
+   "outlet": {
+    "source": "STEP Equipment/Pumps/3D_ONIS_Normalized/MV/MV20-12-844b4ac98f84.step; SHA256 51404acfee1e3c5d66301574a801a0ac5f06d6567db1b71562ab6fea5357319c; cylindrical through walls and planar back bearing lands around every hole",
+    "face": [
+     298.0000001,
+     0.0,
+     0.0
+    ],
+    "axis": [
+     1.0,
+     0.0,
+     0.0
+    ],
+    "holes": [
+     [
+      298.0000001,
+      62.5,
+      0.0
+     ],
+     [
+      298.0000001,
+      0.0,
+      62.5
+     ],
+     [
+      298.0000001,
+      -62.5,
+      0.0
+     ],
+     [
+      298.0000001,
+      -1.166835978386e-14,
+      -62.5
+     ]
+    ],
+    "holeDiameter": 18.0,
+    "thickness": 18.000000100000022,
+    "holeKind": "through"
+   }
+  },
+  "bounds": [
+   -120.00000009999899,
+   -175.00000010000068,
+   -90.00000010000001,
+   325.00000010000065,
+   175.0000001,
+   1338.00000010003
+  ],
+  "method": "casing_arrows"
+ },
+ "c710404cdfa5a4d5ead5f18b9de6a310707ac23796f5dfa76dff15b59e3219a0": {
+  "pumpId": null,
+  "source": "Equipment/Pumps/3D_ONIS_Normalized/MV/MV20-14-81dbd94e598a.step",
+  "inlet": "port-a",
+  "originalPorts": {
+   "port-a": {
+    "id": "port-a",
+    "point": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "axis": [
+     -1.0,
+     0.0,
+     0.0
+    ],
+    "provisional": true
+   },
+   "port-b": {
+    "id": "port-b",
+    "point": [
+     300.0,
+     0.0,
+     0.0
+    ],
+    "axis": [
+     1.0,
+     0.0,
+     0.0
+    ],
+    "provisional": true
+   }
+  },
+  "arrows": [
+   {
+    "sign": 1,
+    "outline": [
+     [
+      135.0,
+      104.5,
+      -59.0
+     ],
+     [
+      135.0,
+      111.5,
+      -59.0
+     ],
+     [
+      156.0,
+      101.0,
+      -59.0
+     ],
+     [
+      156.0,
+      104.5,
+      -59.0
+     ],
+     [
+      156.0,
+      111.5,
+      -59.0
+     ],
+     [
+      156.0,
+      115.0,
+      -59.0
+     ],
+     [
+      165.0,
+      108.0,
+      -59.0
+     ]
+    ]
+   },
+   {
+    "sign": 1,
+    "outline": [
+     [
+      135.0,
+      -111.5,
+      -59.0
+     ],
+     [
+      135.0,
+      -104.5,
+      -59.0
+     ],
+     [
+      156.0,
+      -115.0,
+      -59.0
+     ],
+     [
+      156.0,
+      -111.5,
+      -59.0
+     ],
+     [
+      156.0,
+      -104.5,
+      -59.0
+     ],
+     [
+      156.0,
+      -101.0,
+      -59.0
+     ],
+     [
+      165.0,
+      -108.0,
+      -59.0
+     ]
+    ]
+   }
+  ],
+  "mounts": {
+   "inlet": {
+    "source": "STEP Equipment/Pumps/3D_ONIS_Normalized/MV/MV20-14-81dbd94e598a.step; SHA256 c710404cdfa5a4d5ead5f18b9de6a310707ac23796f5dfa76dff15b59e3219a0; cylindrical through walls and planar back bearing lands around every hole",
+    "face": [
+     1.9999999,
+     0.0,
+     0.0
+    ],
+    "axis": [
+     -1.0,
+     0.0,
+     0.0
+    ],
+    "holes": [
+     [
+      1.9999999,
+      62.5,
+      0.0
+     ],
+     [
+      1.9999999,
+      0.0,
+      -62.5
+     ],
+     [
+      1.9999999,
+      -62.5,
+      0.0
+     ],
+     [
+      1.9999999,
+      -1.166835978386e-14,
+      62.5
+     ]
+    ],
+    "holeDiameter": 18.0,
+    "thickness": 18.0000001,
+    "holeKind": "through"
+   },
+   "outlet": {
+    "source": "STEP Equipment/Pumps/3D_ONIS_Normalized/MV/MV20-14-81dbd94e598a.step; SHA256 c710404cdfa5a4d5ead5f18b9de6a310707ac23796f5dfa76dff15b59e3219a0; cylindrical through walls and planar back bearing lands around every hole",
+    "face": [
+     298.0000001,
+     0.0,
+     0.0
+    ],
+    "axis": [
+     1.0,
+     0.0,
+     0.0
+    ],
+    "holes": [
+     [
+      298.0000001,
+      62.5,
+      0.0
+     ],
+     [
+      298.0000001,
+      0.0,
+      62.5
+     ],
+     [
+      298.0000001,
+      -62.5,
+      0.0
+     ],
+     [
+      298.0000001,
+      -1.166835978386e-14,
+      -62.5
+     ]
+    ],
+    "holeDiameter": 18.0,
+    "thickness": 18.000000100000022,
+    "holeKind": "through"
+   }
+  },
+  "bounds": [
+   -120.00000009999899,
+   -175.00000010000068,
+   -90.00000010000001,
+   325.0000001000006,
+   175.0000001,
+   1428.00000010003
+  ],
+  "method": "casing_arrows"
+ },
+ "7aec162d806e765d3c5b077e6e98f097544bfe1bd51a1aa62055e09d67558915": {
+  "pumpId": "nu-76086419da9b19de",
+  "source": "Equipment/Pumps/3D_ONIS_Normalized/MV/MV20-17-89fcda855913.step",
+  "inlet": "port-a",
+  "originalPorts": {
+   "port-a": {
+    "id": "port-a",
+    "point": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "axis": [
+     -1.0,
+     0.0,
+     0.0
+    ],
+    "provisional": true
+   },
+   "port-b": {
+    "id": "port-b",
+    "point": [
+     300.0,
+     0.0,
+     0.0
+    ],
+    "axis": [
+     1.0,
+     0.0,
+     0.0
+    ],
+    "provisional": true
+   }
+  },
+  "arrows": [
+   {
+    "sign": 1,
+    "outline": [
+     [
+      135.0,
+      104.5,
+      -59.0
+     ],
+     [
+      135.0,
+      111.5,
+      -59.0
+     ],
+     [
+      156.0,
+      101.0,
+      -59.0
+     ],
+     [
+      156.0,
+      104.5,
+      -59.0
+     ],
+     [
+      156.0,
+      111.5,
+      -59.0
+     ],
+     [
+      156.0,
+      115.0,
+      -59.0
+     ],
+     [
+      165.0,
+      108.0,
+      -59.0
+     ]
+    ]
+   },
+   {
+    "sign": 1,
+    "outline": [
+     [
+      135.0,
+      -111.5,
+      -59.0
+     ],
+     [
+      135.0,
+      -104.5,
+      -59.0
+     ],
+     [
+      156.0,
+      -115.0,
+      -59.0
+     ],
+     [
+      156.0,
+      -111.5,
+      -59.0
+     ],
+     [
+      156.0,
+      -104.5,
+      -59.0
+     ],
+     [
+      156.0,
+      -101.0,
+      -59.0
+     ],
+     [
+      165.0,
+      -108.0,
+      -59.0
+     ]
+    ]
+   }
+  ],
+  "mounts": {
+   "inlet": {
+    "source": "STEP Equipment/Pumps/3D_ONIS_Normalized/MV/MV20-17-89fcda855913.step; SHA256 7aec162d806e765d3c5b077e6e98f097544bfe1bd51a1aa62055e09d67558915; cylindrical through walls and planar back bearing lands around every hole",
+    "face": [
+     1.9999999,
+     0.0,
+     0.0
+    ],
+    "axis": [
+     -1.0,
+     0.0,
+     0.0
+    ],
+    "holes": [
+     [
+      1.9999999,
+      62.5,
+      0.0
+     ],
+     [
+      1.9999999,
+      0.0,
+      -62.5
+     ],
+     [
+      1.9999999,
+      -62.5,
+      0.0
+     ],
+     [
+      1.9999999,
+      -1.166835978386e-14,
+      62.5
+     ]
+    ],
+    "holeDiameter": 18.0,
+    "thickness": 18.0000001,
+    "holeKind": "through"
+   },
+   "outlet": {
+    "source": "STEP Equipment/Pumps/3D_ONIS_Normalized/MV/MV20-17-89fcda855913.step; SHA256 7aec162d806e765d3c5b077e6e98f097544bfe1bd51a1aa62055e09d67558915; cylindrical through walls and planar back bearing lands around every hole",
+    "face": [
+     298.0000001,
+     0.0,
+     0.0
+    ],
+    "axis": [
+     1.0,
+     0.0,
+     0.0
+    ],
+    "holes": [
+     [
+      298.0000001,
+      62.5,
+      0.0
+     ],
+     [
+      298.0000001,
+      0.0,
+      62.5
+     ],
+     [
+      298.0000001,
+      -62.5,
+      0.0
+     ],
+     [
+      298.0000001,
+      -1.166835978386e-14,
+      -62.5
+     ]
+    ],
+    "holeDiameter": 18.0,
+    "thickness": 18.000000100000022,
+    "holeKind": "through"
+   }
+  },
+  "bounds": [
+   -120.00000009999899,
+   -175.00000010000076,
+   -90.00000010000001,
+   325.0000001000007,
+   175.0000001,
+   1607.0000001000294
+  ],
+  "method": "casing_arrows"
+ },
+ "0d29465e4ff55382c523a7509df9b8cb3a0903169cf544715b67a0d58eeaf95a": {
+  "pumpId": "nu-e54dc111d0241fcb",
+  "source": "Equipment/Pumps/3D_ONIS_Normalized/MV/MV20-3-cea7af8b25ce.step",
+  "inlet": "port-a",
+  "originalPorts": {
+   "port-a": {
+    "id": "port-a",
+    "point": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "axis": [
+     -1.0,
+     0.0,
+     0.0
+    ],
+    "provisional": true
+   },
+   "port-b": {
+    "id": "port-b",
+    "point": [
+     300.0,
+     0.0,
+     0.0
+    ],
+    "axis": [
+     1.0,
+     0.0,
+     0.0
+    ],
+    "provisional": true
+   }
+  },
+  "arrows": [
+   {
+    "sign": 1,
+    "outline": [
+     [
+      135.0,
+      104.5,
+      -59.0
+     ],
+     [
+      135.0,
+      111.5,
+      -59.0
+     ],
+     [
+      156.0,
+      101.0,
+      -59.0
+     ],
+     [
+      156.0,
+      104.5,
+      -59.0
+     ],
+     [
+      156.0,
+      111.5,
+      -59.0
+     ],
+     [
+      156.0,
+      115.0,
+      -59.0
+     ],
+     [
+      165.0,
+      108.0,
+      -59.0
+     ]
+    ]
+   },
+   {
+    "sign": 1,
+    "outline": [
+     [
+      135.0,
+      -111.5,
+      -59.0
+     ],
+     [
+      135.0,
+      -104.5,
+      -59.0
+     ],
+     [
+      156.0,
+      -115.0,
+      -59.0
+     ],
+     [
+      156.0,
+      -111.5,
+      -59.0
+     ],
+     [
+      156.0,
+      -104.5,
+      -59.0
+     ],
+     [
+      156.0,
+      -101.0,
+      -59.0
+     ],
+     [
+      165.0,
+      -108.0,
+      -59.0
+     ]
+    ]
+   }
+  ],
+  "mounts": {
+   "inlet": {
+    "source": "STEP Equipment/Pumps/3D_ONIS_Normalized/MV/MV20-3-cea7af8b25ce.step; SHA256 0d29465e4ff55382c523a7509df9b8cb3a0903169cf544715b67a0d58eeaf95a; cylindrical through walls and planar back bearing lands around every hole",
+    "face": [
+     1.9999999,
+     0.0,
+     0.0
+    ],
+    "axis": [
+     -1.0,
+     0.0,
+     0.0
+    ],
+    "holes": [
+     [
+      1.9999999,
+      62.5,
+      0.0
+     ],
+     [
+      1.9999999,
+      0.0,
+      -62.5
+     ],
+     [
+      1.9999999,
+      -62.5,
+      0.0
+     ],
+     [
+      1.9999999,
+      -1.166835978386e-14,
+      62.5
+     ]
+    ],
+    "holeDiameter": 18.0,
+    "thickness": 18.0000001,
+    "holeKind": "through"
+   },
+   "outlet": {
+    "source": "STEP Equipment/Pumps/3D_ONIS_Normalized/MV/MV20-3-cea7af8b25ce.step; SHA256 0d29465e4ff55382c523a7509df9b8cb3a0903169cf544715b67a0d58eeaf95a; cylindrical through walls and planar back bearing lands around every hole",
+    "face": [
+     298.0000001,
+     0.0,
+     0.0
+    ],
+    "axis": [
+     1.0,
+     0.0,
+     0.0
+    ],
+    "holes": [
+     [
+      298.0000001,
+      62.5,
+      0.0
+     ],
+     [
+      298.0000001,
+      0.0,
+      62.5
+     ],
+     [
+      298.0000001,
+      -62.5,
+      0.0
+     ],
+     [
+      298.0000001,
+      -1.166835978386e-14,
+      -62.5
+     ]
+    ],
+    "holeDiameter": 18.0,
+    "thickness": 18.000000100000022,
+    "holeKind": "through"
+   }
+  },
+  "bounds": [
+   -1e-07,
+   -127.5,
+   -90.00000010000001,
+   300.0000001,
+   127.5,
+   735.0000001
+  ],
+  "method": "casing_arrows"
+ },
+ "426a25e0759c0ac445c2858f9dc91488d58a028f438e3da6b0914dc01faf648c": {
+  "pumpId": "nu-7df3e508488afd36",
+  "source": "Equipment/Pumps/3D_ONIS_Normalized/MV/MV20-4-69ab1fcd6c17.step",
+  "inlet": "port-a",
+  "originalPorts": {
+   "port-a": {
+    "id": "port-a",
+    "point": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "axis": [
+     -1.0,
+     0.0,
+     0.0
+    ],
+    "provisional": true
+   },
+   "port-b": {
+    "id": "port-b",
+    "point": [
+     300.0,
+     0.0,
+     0.0
+    ],
+    "axis": [
+     1.0,
+     0.0,
+     0.0
+    ],
+    "provisional": true
+   }
+  },
+  "arrows": [
+   {
+    "sign": 1,
+    "outline": [
+     [
+      135.0,
+      104.5,
+      -59.0
+     ],
+     [
+      135.0,
+      111.5,
+      -59.0
+     ],
+     [
+      156.0,
+      101.0,
+      -59.0
+     ],
+     [
+      156.0,
+      104.5,
+      -59.0
+     ],
+     [
+      156.0,
+      111.5,
+      -59.0
+     ],
+     [
+      156.0,
+      115.0,
+      -59.0
+     ],
+     [
+      165.0,
+      108.0,
+      -59.0
+     ]
+    ]
+   },
+   {
+    "sign": 1,
+    "outline": [
+     [
+      135.0,
+      -111.5,
+      -59.0
+     ],
+     [
+      135.0,
+      -104.5,
+      -59.0
+     ],
+     [
+      156.0,
+      -115.0,
+      -59.0
+     ],
+     [
+      156.0,
+      -111.5,
+      -59.0
+     ],
+     [
+      156.0,
+      -104.5,
+      -59.0
+     ],
+     [
+      156.0,
+      -101.0,
+      -59.0
+     ],
+     [
+      165.0,
+      -108.0,
+      -59.0
+     ]
+    ]
+   }
+  ],
+  "mounts": {
+   "inlet": {
+    "source": "STEP Equipment/Pumps/3D_ONIS_Normalized/MV/MV20-4-69ab1fcd6c17.step; SHA256 426a25e0759c0ac445c2858f9dc91488d58a028f438e3da6b0914dc01faf648c; cylindrical through walls and planar back bearing lands around every hole",
+    "face": [
+     1.9999999,
+     0.0,
+     0.0
+    ],
+    "axis": [
+     -1.0,
+     0.0,
+     0.0
+    ],
+    "holes": [
+     [
+      1.9999999,
+      62.5,
+      0.0
+     ],
+     [
+      1.9999999,
+      0.0,
+      -62.5
+     ],
+     [
+      1.9999999,
+      -62.5,
+      0.0
+     ],
+     [
+      1.9999999,
+      -1.166835978386e-14,
+      62.5
+     ]
+    ],
+    "holeDiameter": 18.0,
+    "thickness": 18.0000001,
+    "holeKind": "through"
+   },
+   "outlet": {
+    "source": "STEP Equipment/Pumps/3D_ONIS_Normalized/MV/MV20-4-69ab1fcd6c17.step; SHA256 426a25e0759c0ac445c2858f9dc91488d58a028f438e3da6b0914dc01faf648c; cylindrical through walls and planar back bearing lands around every hole",
+    "face": [
+     298.0000001,
+     0.0,
+     0.0
+    ],
+    "axis": [
+     1.0,
+     0.0,
+     0.0
+    ],
+    "holes": [
+     [
+      298.0000001,
+      62.5,
+      0.0
+     ],
+     [
+      298.0000001,
+      0.0,
+      62.5
+     ],
+     [
+      298.0000001,
+      -62.5,
+      0.0
+     ],
+     [
+      298.0000001,
+      -1.166835978386e-14,
+      -62.5
+     ]
+    ],
+    "holeDiameter": 18.0,
+    "thickness": 18.000000100000022,
+    "holeKind": "through"
+   }
+  },
+  "bounds": [
+   -13.000000100000113,
+   -129.99999999999997,
+   -90.00000010000001,
+   300.0000001,
+   130.00000000000003,
+   879.0000001
+  ],
+  "method": "casing_arrows"
+ },
+ "4e8d0d47600cb9e36ceee48b374582cba357dccffa89f5593c1c7cdc9a1a6baa": {
+  "pumpId": "nu-d9505ead883e828c",
+  "source": "Equipment/Pumps/3D_ONIS_Normalized/MV/MV20-5-e4d27f266ca7.step",
+  "inlet": "port-a",
+  "originalPorts": {
+   "port-a": {
+    "id": "port-a",
+    "point": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "axis": [
+     -1.0,
+     0.0,
+     0.0
+    ],
+    "provisional": true
+   },
+   "port-b": {
+    "id": "port-b",
+    "point": [
+     300.0,
+     0.0,
+     0.0
+    ],
+    "axis": [
+     1.0,
+     0.0,
+     0.0
+    ],
+    "provisional": true
+   }
+  },
+  "arrows": [
+   {
+    "sign": 1,
+    "outline": [
+     [
+      135.0,
+      104.5,
+      -59.0
+     ],
+     [
+      135.0,
+      111.5,
+      -59.0
+     ],
+     [
+      156.0,
+      101.0,
+      -59.0
+     ],
+     [
+      156.0,
+      104.5,
+      -59.0
+     ],
+     [
+      156.0,
+      111.5,
+      -59.0
+     ],
+     [
+      156.0,
+      115.0,
+      -59.0
+     ],
+     [
+      165.0,
+      108.0,
+      -59.0
+     ]
+    ]
+   },
+   {
+    "sign": 1,
+    "outline": [
+     [
+      135.0,
+      -111.5,
+      -59.0
+     ],
+     [
+      135.0,
+      -104.5,
+      -59.0
+     ],
+     [
+      156.0,
+      -115.0,
+      -59.0
+     ],
+     [
+      156.0,
+      -111.5,
+      -59.0
+     ],
+     [
+      156.0,
+      -104.5,
+      -59.0
+     ],
+     [
+      156.0,
+      -101.0,
+      -59.0
+     ],
+     [
+      165.0,
+      -108.0,
+      -59.0
+     ]
+    ]
+   }
+  ],
+  "mounts": {
+   "inlet": {
+    "source": "STEP Equipment/Pumps/3D_ONIS_Normalized/MV/MV20-5-e4d27f266ca7.step; SHA256 4e8d0d47600cb9e36ceee48b374582cba357dccffa89f5593c1c7cdc9a1a6baa; cylindrical through walls and planar back bearing lands around every hole",
+    "face": [
+     1.9999999,
+     0.0,
+     0.0
+    ],
+    "axis": [
+     -1.0,
+     0.0,
+     0.0
+    ],
+    "holes": [
+     [
+      1.9999999,
+      62.5,
+      0.0
+     ],
+     [
+      1.9999999,
+      0.0,
+      -62.5
+     ],
+     [
+      1.9999999,
+      -62.5,
+      0.0
+     ],
+     [
+      1.9999999,
+      -1.166835978386e-14,
+      62.5
+     ]
+    ],
+    "holeDiameter": 18.0,
+    "thickness": 18.0000001,
+    "holeKind": "through"
+   },
+   "outlet": {
+    "source": "STEP Equipment/Pumps/3D_ONIS_Normalized/MV/MV20-5-e4d27f266ca7.step; SHA256 4e8d0d47600cb9e36ceee48b374582cba357dccffa89f5593c1c7cdc9a1a6baa; cylindrical through walls and planar back bearing lands around every hole",
+    "face": [
+     298.0000001,
+     0.0,
+     0.0
+    ],
+    "axis": [
+     1.0,
+     0.0,
+     0.0
+    ],
+    "holes": [
+     [
+      298.0000001,
+      62.5,
+      0.0
+     ],
+     [
+      298.0000001,
+      0.0,
+      62.5
+     ],
+     [
+      298.0000001,
+      -62.5,
+      0.0
+     ],
+     [
+      298.0000001,
+      -1.166835978386e-14,
+      -62.5
+     ]
+    ],
+    "holeDiameter": 18.0,
+    "thickness": 18.000000100000022,
+    "holeKind": "through"
+   }
+  },
+  "bounds": [
+   -13.000000100000113,
+   -129.99999999999997,
+   -90.00000010000001,
+   300.0000001,
+   130.00000000000003,
+   924.0000001
+  ],
+  "method": "casing_arrows"
+ },
+ "a33d79c9943667f6bf592e4a71151f919d42218cb7012a0bb503ab6d4f617f9a": {
+  "pumpId": "nu-012b179c44d7d327",
+  "source": "Equipment/Pumps/3D_ONIS_Normalized/MV/MV20-6-962ddb470a89.step",
+  "inlet": "port-a",
+  "originalPorts": {
+   "port-a": {
+    "id": "port-a",
+    "point": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "axis": [
+     -1.0,
+     0.0,
+     0.0
+    ],
+    "provisional": true
+   },
+   "port-b": {
+    "id": "port-b",
+    "point": [
+     300.0,
+     0.0,
+     0.0
+    ],
+    "axis": [
+     1.0,
+     0.0,
+     0.0
+    ],
+    "provisional": true
+   }
+  },
+  "arrows": [
+   {
+    "sign": 1,
+    "outline": [
+     [
+      135.0,
+      104.5,
+      -59.0
+     ],
+     [
+      135.0,
+      111.5,
+      -59.0
+     ],
+     [
+      156.0,
+      101.0,
+      -59.0
+     ],
+     [
+      156.0,
+      104.5,
+      -59.0
+     ],
+     [
+      156.0,
+      111.5,
+      -59.0
+     ],
+     [
+      156.0,
+      115.0,
+      -59.0
+     ],
+     [
+      165.0,
+      108.0,
+      -59.0
+     ]
+    ]
+   },
+   {
+    "sign": 1,
+    "outline": [
+     [
+      135.0,
+      -111.5,
+      -59.0
+     ],
+     [
+      135.0,
+      -104.5,
+      -59.0
+     ],
+     [
+      156.0,
+      -115.0,
+      -59.0
+     ],
+     [
+      156.0,
+      -111.5,
+      -59.0
+     ],
+     [
+      156.0,
+      -104.5,
+      -59.0
+     ],
+     [
+      156.0,
+      -101.0,
+      -59.0
+     ],
+     [
+      165.0,
+      -108.0,
+      -59.0
+     ]
+    ]
+   }
+  ],
+  "mounts": {
+   "inlet": {
+    "source": "STEP Equipment/Pumps/3D_ONIS_Normalized/MV/MV20-6-962ddb470a89.step; SHA256 a33d79c9943667f6bf592e4a71151f919d42218cb7012a0bb503ab6d4f617f9a; cylindrical through walls and planar back bearing lands around every hole",
+    "face": [
+     1.9999999,
+     0.0,
+     0.0
+    ],
+    "axis": [
+     -1.0,
+     0.0,
+     0.0
+    ],
+    "holes": [
+     [
+      1.9999999,
+      62.5,
+      0.0
+     ],
+     [
+      1.9999999,
+      0.0,
+      -62.5
+     ],
+     [
+      1.9999999,
+      -62.5,
+      0.0
+     ],
+     [
+      1.9999999,
+      -1.166835978386e-14,
+      62.5
+     ]
+    ],
+    "holeDiameter": 18.0,
+    "thickness": 18.0000001,
+    "holeKind": "through"
+   },
+   "outlet": {
+    "source": "STEP Equipment/Pumps/3D_ONIS_Normalized/MV/MV20-6-962ddb470a89.step; SHA256 a33d79c9943667f6bf592e4a71151f919d42218cb7012a0bb503ab6d4f617f9a; cylindrical through walls and planar back bearing lands around every hole",
+    "face": [
+     298.0000001,
+     0.0,
+     0.0
+    ],
+    "axis": [
+     1.0,
+     0.0,
+     0.0
+    ],
+    "holes": [
+     [
+      298.0000001,
+      62.5,
+      0.0
+     ],
+     [
+      298.0000001,
+      0.0,
+      62.5
+     ],
+     [
+      298.0000001,
+      -62.5,
+      0.0
+     ],
+     [
+      298.0000001,
+      -1.166835978386e-14,
+      -62.5
+     ]
+    ],
+    "holeDiameter": 18.0,
+    "thickness": 18.000000100000022,
+    "holeKind": "through"
+   }
+  },
+  "bounds": [
+   -13.000000100000113,
+   -129.99999999999997,
+   -90.00000010000001,
+   300.0000001,
+   130.00000000000003,
+   969.0000001
+  ],
+  "method": "casing_arrows"
+ },
+ "82bf92f9a822a5c32b3d396f130c2d063a70fc0c2adb3eee90453ab5bfe3a0ba": {
+  "pumpId": "nu-c51ba65c69ffa265",
+  "source": "Equipment/Pumps/3D_ONIS_Normalized/MV/MV20-7-1bb048f40eed.step",
+  "inlet": "port-a",
+  "originalPorts": {
+   "port-a": {
+    "id": "port-a",
+    "point": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "axis": [
+     -1.0,
+     0.0,
+     0.0
+    ],
+    "provisional": true
+   },
+   "port-b": {
+    "id": "port-b",
+    "point": [
+     300.0,
+     0.0,
+     0.0
+    ],
+    "axis": [
+     1.0,
+     0.0,
+     0.0
+    ],
+    "provisional": true
+   }
+  },
+  "arrows": [
+   {
+    "sign": 1,
+    "outline": [
+     [
+      135.0,
+      104.5,
+      -59.0
+     ],
+     [
+      135.0,
+      111.5,
+      -59.0
+     ],
+     [
+      156.0,
+      101.0,
+      -59.0
+     ],
+     [
+      156.0,
+      104.5,
+      -59.0
+     ],
+     [
+      156.0,
+      111.5,
+      -59.0
+     ],
+     [
+      156.0,
+      115.0,
+      -59.0
+     ],
+     [
+      165.0,
+      108.0,
+      -59.0
+     ]
+    ]
+   },
+   {
+    "sign": 1,
+    "outline": [
+     [
+      135.0,
+      -111.5,
+      -59.0
+     ],
+     [
+      135.0,
+      -104.5,
+      -59.0
+     ],
+     [
+      156.0,
+      -115.0,
+      -59.0
+     ],
+     [
+      156.0,
+      -111.5,
+      -59.0
+     ],
+     [
+      156.0,
+      -104.5,
+      -59.0
+     ],
+     [
+      156.0,
+      -101.0,
+      -59.0
+     ],
+     [
+      165.0,
+      -108.0,
+      -59.0
+     ]
+    ]
+   }
+  ],
+  "mounts": {
+   "inlet": {
+    "source": "STEP Equipment/Pumps/3D_ONIS_Normalized/MV/MV20-7-1bb048f40eed.step; SHA256 82bf92f9a822a5c32b3d396f130c2d063a70fc0c2adb3eee90453ab5bfe3a0ba; cylindrical through walls and planar back bearing lands around every hole",
+    "face": [
+     1.9999999,
+     0.0,
+     0.0
+    ],
+    "axis": [
+     -1.0,
+     0.0,
+     0.0
+    ],
+    "holes": [
+     [
+      1.9999999,
+      62.5,
+      0.0
+     ],
+     [
+      1.9999999,
+      0.0,
+      -62.5
+     ],
+     [
+      1.9999999,
+      -62.5,
+      0.0
+     ],
+     [
+      1.9999999,
+      -1.166835978386e-14,
+      62.5
+     ]
+    ],
+    "holeDiameter": 18.0,
+    "thickness": 18.0000001,
+    "holeKind": "through"
+   },
+   "outlet": {
+    "source": "STEP Equipment/Pumps/3D_ONIS_Normalized/MV/MV20-7-1bb048f40eed.step; SHA256 82bf92f9a822a5c32b3d396f130c2d063a70fc0c2adb3eee90453ab5bfe3a0ba; cylindrical through walls and planar back bearing lands around every hole",
+    "face": [
+     298.0000001,
+     0.0,
+     0.0
+    ],
+    "axis": [
+     1.0,
+     0.0,
+     0.0
+    ],
+    "holes": [
+     [
+      298.0000001,
+      62.5,
+      0.0
+     ],
+     [
+      298.0000001,
+      0.0,
+      62.5
+     ],
+     [
+      298.0000001,
+      -62.5,
+      0.0
+     ],
+     [
+      298.0000001,
+      -1.166835978386e-14,
+      -62.5
+     ]
+    ],
+    "holeDiameter": 18.0,
+    "thickness": 18.000000100000022,
+    "holeKind": "through"
+   }
+  },
+  "bounds": [
+   -13.000000100000113,
+   -129.99999999999997,
+   -90.00000010000001,
+   300.0000001,
+   130.00000000000003,
+   1014.0000001
+  ],
+  "method": "casing_arrows"
+ },
+ "3db62b0b91b74214cd52ea988781e1d51e6f75587d8a77cec3e16fcd7e610748": {
+  "pumpId": "nu-8e5175acaf92c551",
+  "source": "Equipment/Pumps/3D_ONIS_Normalized/MV/MV20-8-012731f6b5b6.step",
+  "inlet": "port-a",
+  "originalPorts": {
+   "port-a": {
+    "id": "port-a",
+    "point": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "axis": [
+     -1.0,
+     0.0,
+     0.0
+    ],
+    "provisional": true
+   },
+   "port-b": {
+    "id": "port-b",
+    "point": [
+     300.0,
+     0.0,
+     0.0
+    ],
+    "axis": [
+     1.0,
+     0.0,
+     0.0
+    ],
+    "provisional": true
+   }
+  },
+  "arrows": [
+   {
+    "sign": 1,
+    "outline": [
+     [
+      135.0,
+      104.5,
+      -59.0
+     ],
+     [
+      135.0,
+      111.5,
+      -59.0
+     ],
+     [
+      156.0,
+      101.0,
+      -59.0
+     ],
+     [
+      156.0,
+      104.5,
+      -59.0
+     ],
+     [
+      156.0,
+      111.5,
+      -59.0
+     ],
+     [
+      156.0,
+      115.0,
+      -59.0
+     ],
+     [
+      165.0,
+      108.0,
+      -59.0
+     ]
+    ]
+   },
+   {
+    "sign": 1,
+    "outline": [
+     [
+      135.0,
+      -111.5,
+      -59.0
+     ],
+     [
+      135.0,
+      -104.5,
+      -59.0
+     ],
+     [
+      156.0,
+      -115.0,
+      -59.0
+     ],
+     [
+      156.0,
+      -111.5,
+      -59.0
+     ],
+     [
+      156.0,
+      -104.5,
+      -59.0
+     ],
+     [
+      156.0,
+      -101.0,
+      -59.0
+     ],
+     [
+      165.0,
+      -108.0,
+      -59.0
+     ]
+    ]
+   }
+  ],
+  "mounts": {
+   "inlet": {
+    "source": "STEP Equipment/Pumps/3D_ONIS_Normalized/MV/MV20-8-012731f6b5b6.step; SHA256 3db62b0b91b74214cd52ea988781e1d51e6f75587d8a77cec3e16fcd7e610748; cylindrical through walls and planar back bearing lands around every hole",
+    "face": [
+     1.9999999,
+     0.0,
+     0.0
+    ],
+    "axis": [
+     -1.0,
+     0.0,
+     0.0
+    ],
+    "holes": [
+     [
+      1.9999999,
+      62.5,
+      0.0
+     ],
+     [
+      1.9999999,
+      0.0,
+      -62.5
+     ],
+     [
+      1.9999999,
+      -62.5,
+      0.0
+     ],
+     [
+      1.9999999,
+      -1.166835978386e-14,
+      62.5
+     ]
+    ],
+    "holeDiameter": 18.0,
+    "thickness": 18.0000001,
+    "holeKind": "through"
+   },
+   "outlet": {
+    "source": "STEP Equipment/Pumps/3D_ONIS_Normalized/MV/MV20-8-012731f6b5b6.step; SHA256 3db62b0b91b74214cd52ea988781e1d51e6f75587d8a77cec3e16fcd7e610748; cylindrical through walls and planar back bearing lands around every hole",
+    "face": [
+     298.0000001,
+     0.0,
+     0.0
+    ],
+    "axis": [
+     1.0,
+     0.0,
+     0.0
+    ],
+    "holes": [
+     [
+      298.0000001,
+      62.5,
+      0.0
+     ],
+     [
+      298.0000001,
+      0.0,
+      62.5
+     ],
+     [
+      298.0000001,
+      -62.5,
+      0.0
+     ],
+     [
+      298.0000001,
+      -1.166835978386e-14,
+      -62.5
+     ]
+    ],
+    "holeDiameter": 18.0,
+    "thickness": 18.000000100000022,
+    "holeKind": "through"
+   }
+  },
+  "bounds": [
+   -120.00000009999899,
+   -175.00000010000068,
+   -90.00000010000001,
+   325.00000010000065,
+   175.0000001,
+   1158.00000010003
+  ],
+  "method": "casing_arrows"
+ }
+}

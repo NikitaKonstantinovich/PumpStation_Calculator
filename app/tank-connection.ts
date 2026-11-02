@@ -1,6 +1,6 @@
 import type { AssemblyComponent } from "./suction-catalog";
 
-export const TANK_LAYOUT_REVISION = "tank-dn20-body-only-v2";
+export const TANK_LAYOUT_REVISION = "tank-dn20-valve-8l-v3";
 export const TANK_COLLECTOR_OFFSET_MM = 200;
 export const TANK_PUMP_GAP_MM = 200;
 export const tankConnectionDn = () => 20;

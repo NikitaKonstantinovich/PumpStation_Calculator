@@ -80,8 +80,10 @@ export function addInstrumentAssemblies(assembly: Assembly, project: ProjectConf
         continue;
       }
       const parts: Part[] = [{ role: "valve", row: valve, quantity: valve.quantity }];
-      if (gauge?.equipmentId && /^кипиа-001-r000[5-8]$/.test(gauge.equipmentId) && i < gauge.quantity) parts.push({ role: "gauge", row: gauge, quantity: gauge.quantity });
-      else warn(`комплект №${i + 1}: выбранный манометр не имеет CAD-профиля; требуется уточнение.`);
+      if (gauge && i < gauge.quantity && (gauge.equipmentId ? /^кипиа-001-r000[5-8]$/.test(gauge.equipmentId) : gauge.status === "clarify")) {
+        parts.push({ role: "gauge", row: gauge, quantity: gauge.quantity });
+        if (!gauge.equipmentId) warn(`комплект №${i + 1}: показана компоновочная модель манометра ТМ-510Р; диапазон и артикул не выбраны.`);
+      } else if (gauge && i < gauge.quantity) warn(`комплект №${i + 1}: выбранный манометр не имеет CAD-профиля; требуется уточнение.`);
       const adapter = fitting("adapter"), bush = fitting("bush");
       const quantity = (r: SpecItem | undefined) => (r?.quantity ?? 0) * (nested ? sensor?.quantity ?? 0 : 1);
       if (adapter?.equipmentId === INSTRUMENT_SIDE_FITTINGS.adapter && i < quantity(adapter)) {
@@ -100,11 +102,12 @@ export function addInstrumentAssemblies(assembly: Assembly, project: ProjectConf
         const asset = mounts.assets[part.role], bounds = asset.bounds as Bounds;
         const binding: InstrumentMount = { version: 1, parentId: parent.id, portId, role: part.role, revision: INSTRUMENT_MOUNT_REVISION, specPosition: part.row.position, position: asset.position as Vec3, rotation: asset.rotation as Vec3 };
         const componentId = `kip-${side}-${i + 1}-${part.role}`;
-        const note = part.role === "gauge" ? "Компоновочная CAD-геометрия ТМ-510Р Ø100 G1/2 по изображению пользователя; в расчёте сохранён выбранный манометр Экомера. Точное соответствие корпуса требует проверки."
+        const layoutGauge = part.role === "gauge" && !part.row.equipmentId;
+        const note = part.role === "gauge" ? (layoutGauge ? "Компоновочная модель ТМ-510Р Ø100 G1/2. Диапазон, артикул и цена манометра не определены в спецификации." : "Компоновочная CAD-геометрия ТМ-510Р Ø100 G1/2 по изображению пользователя; в расчёте сохранён выбранный манометр Экомера. Точное соответствие корпуса требует проверки.")
           : part.role === "connector" ? "Разъём DIN43650 — часть геометрии преобразователя; отдельная покупная позиция и стоимость не добавляются."
           : "Исходная CAD-геометрия КИП; номинальная посадка по резьбе. Глубины навинчивания и допуски требуют проверки при изготовлении.";
-        components.push({ id: componentId, name: `${part.role === "connector" ? "Разъём DIN43650" : part.row.name} · КИП ${i + 1}`, kind: "equipment", equipmentId: part.row.equipmentId,
-          sourceKey: `equipment:${part.row.equipmentId}`, sourceNote: note, position: [0, 0, 0], rotation: [0, 0, 0], hidden: false, locked: false, opacity: 1,
+        components.push({ id: componentId, name: `${part.role === "connector" ? "Разъём DIN43650" : part.row.name}${layoutGauge ? " (компоновочный ТМ-510Р)" : ""} · КИП ${i + 1}`, kind: "equipment", equipmentId: part.row.equipmentId,
+          sourceKey: part.row.equipmentId ? `equipment:${part.row.equipmentId}` : "layout:tm510r", sourceNote: note, position: [0, 0, 0], rotation: [0, 0, 0], hidden: false, locked: false, opacity: 1,
           bounds, meshUrl: asset.meshUrl, cadSource: { path: asset.source, hash: asset.sourceHash }, ports: structuredClone(asset.ports) as Port[], instrumentMount: binding,
           parameters: { length: bounds[3] - bounds[0], width: bounds[4] - bounds[1], height: bounds[5] - bounds[2], diameter: 1, routeOffset: 0 } });
         refs.set(part.role, componentId);

@@ -10,7 +10,7 @@ const [report, registry, manifest, pumps] = await Promise.all([
   'data/onis-model-import.json', 'data/onis-model-registry.json',
   'public/model-assets/manifest.json', 'public/pumps.json',
 ].map(json));
-const { parseModelLibrary, filterLibrary } = await loadTs(new URL('app/model-editor/library.ts', root));
+const { parseModelLibrary, filterLibrary, addLibraryModel } = await loadTs(new URL('app/model-editor/library.ts', root));
 const { resolvePumpLayout } = await loadTs(new URL('app/model-editor/pump-spatial.ts', root));
 const sha = bytes => createHash('sha256').update(bytes).digest('hex');
 const localCad = { skip: process.env.PSC_TEST_CAD_FILES !== '1' };
@@ -53,7 +53,8 @@ test('every ready mesh has a matching source, bounds and valid binary STL; libra
   }
 });
 
-test('exact catalogue profiles show CAD; MH points up, MV flow remains explicitly unassigned', () => {
+const mvFlow = await json('data/onis-flow-reviews.json');
+test('only independently reviewed MV solids acquire flow roles, including profiles in pinned manifests', () => {
   assert.equal(registry.models.length, 208);
   for (const profile of registry.models) {
     const pump = pumps.find(p=>p.id===profile.pumpId);
@@ -66,10 +67,38 @@ test('exact catalogue profiles show CAD; MH points up, MV flow remains explicitl
     assert.equal(spatial.info.schematic, undefined);
     assert.equal(profile.ports[0].point.every(n=>n===0), true);
     if (pump.series==='MH') assert.deepEqual(spatial.ports.find(p=>p.id==='outlet').axis,[0,0,1]);
-    else {
+    else if (mvFlow[profile.sourceHash]) {
+      const row=mvFlow[profile.sourceHash];
+      assert.equal(row.pumpId,pump.id);
+      assert.equal(row.arrows.length,2);
+      assert.deepEqual(spatial.ports.find(p=>p.id==='inlet').point,row.originalPorts[row.inlet].point);
+      assert.deepEqual(spatial.ports.find(p=>p.id==='outlet').point,row.originalPorts[row.inlet==='port-a'?'port-b':'port-a'].point);
+      assert.ok(!spatial.note.includes('Направление потока MV не подтверждено'));
+    } else {
       assert.deepEqual(spatial.ports.map(p=>p.id),['port-a','port-b']);
       assert.ok(spatial.info.issues.some(s=>s.includes('всасывающего')));
     }
   }
   assert.ok(registry.models.some(p=>p.warnings.some(w=>w.includes('Расхождение габарита'))));
+});
+
+test('ONIS MV20-3 uses the actual mounting holes and rejects altered or re-positioned CAD',()=>{
+  const pump=pumps.find(p=>p.id==='nu-e54dc111d0241fcb'), profile=manifest.profiles[pump.id], row=mvFlow[profile.sourceHash];
+  assert.equal(row.inlet,'port-a');
+  for(const mount of Object.values(row.mounts)){
+    assert.equal(mount.holes.length,4); assert.equal(mount.holeDiameter,18);
+    assert.ok(mount.holes.every(([,y,z])=>Math.abs(Math.hypot(y,z)-62.5)<.01));
+  }
+  for(const altered of [{...profile,sourceHash:'0'.repeat(64)}, {...profile,ports:profile.ports.map(p=>({...p,point:[p.point[0]+20,0,0]}))}])
+    assert.deepEqual(resolvePumpLayout(pump,altered).ports.map(p=>p.id),['port-a','port-b']);
+});
+
+test('a reviewed library-only pump keeps measured ports without borrowing a catalogue SKU',async()=>{
+  const source=report.files.find(f=>f.model==='MV20-14');
+  assert.ok(source && !source.pumpId);
+  const library=await json('public/model-assets/library.json');
+  const pump=parseModelLibrary({version:1,models:library.models.filter(m=>m.sourceHash===source.sourceHash)}).models[0];
+  const assembly=addLibraryModel({components:[]},pump,'manual-onsite');
+  assert.deepEqual(assembly.components[0].ports.map(p=>p.id),['inlet','outlet']);
+  assert.equal(assembly.components[0].equipmentId,undefined);
 });

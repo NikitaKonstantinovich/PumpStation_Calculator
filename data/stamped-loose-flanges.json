@@ -1,0 +1,638 @@
+{
+ "parts": {
+  "40": {
+   "source": "Equipment/Piping/3D/Элементы трубопроводов/Фланцы/Штампованные/Фланец_1_040х16_AISI_штампованный.SLDPRT",
+   "sourceHash": "3767d9ce17cdc9e98279c7206fed4b57c371634a6dc56a5cc98f5f80e330aafb",
+   "dimensions": {
+    "lengthMm": 15.0,
+    "outerMm": 150.0,
+    "innerMm": 51.0,
+    "boltCircleMm": 110.0,
+    "boltHoles": 4,
+    "boltHoleMm": 17.5
+   },
+   "placement": [
+    1,
+    0,
+    0,
+    0,
+    0.7071067811865476,
+    -0.7071067811865476,
+    0,
+    0.7071067811865476,
+    0.7071067811865476,
+    0,
+    0,
+    0,
+    1,
+    0,
+    0,
+    0
+   ],
+   "name": "Фланец свободный штампованный DN40 AISI (библиотека)"
+  },
+  "80": {
+   "source": "Equipment/Piping/3D/Элементы трубопроводов/Фланцы/Штампованные/Фланец_1_080х16_AISI_штампованный.SLDPRT",
+   "sourceHash": "3c950ca44528e0b9d03473ff477c833fc25266e78c9c54fc8976e74171c2fcd4",
+   "dimensions": {
+    "lengthMm": 16.0,
+    "outerMm": 200.0,
+    "innerMm": 94.0,
+    "boltCircleMm": 160.0,
+    "boltHoles": 8,
+    "boltHoleMm": 17.5
+   },
+   "placement": [
+    1,
+    0,
+    0,
+    0,
+    0.9238795325112867,
+    -0.3826834323650898,
+    0,
+    0.3826834323650898,
+    0.9238795325112867,
+    0,
+    0,
+    0,
+    1,
+    0,
+    0,
+    0
+   ],
+   "name": "Фланец свободный штампованный DN80 AISI (библиотека)"
+  },
+  "50": {
+   "source": "Equipment/Piping/3D/HECO/Pressed/heco_LF-060-GPR-1.step",
+   "sourceHash": "90452ede2043bd795a18de6fa80fd59f7151b912ccf364ccb8e72b6b9d6e6067",
+   "dimensions": {
+    "lengthMm": 19.5,
+    "outerMm": 165.0,
+    "innerMm": 65.0,
+    "boltCircleMm": 125.0,
+    "boltHoles": 4,
+    "boltHoleMm": 17.5
+   },
+   "placement": [
+    1,
+    0,
+    0,
+    0,
+    1.0,
+    0.0,
+    0,
+    -0.0,
+    1.0,
+    0,
+    0,
+    0,
+    1,
+    0,
+    0,
+    0
+   ],
+   "name": "Фланец свободный штампованный DN50 HECO LF-060-GPR-1"
+  },
+  "65": {
+   "source": "Equipment/Piping/3D/HECO/Pressed/heco_LF-076-GPR-1.step",
+   "sourceHash": "d6a22eea5f299ee52420d1b663d39376fe88551428fa2257ae029dcfdd4cc90c",
+   "dimensions": {
+    "lengthMm": 21.0,
+    "outerMm": 185.0,
+    "innerMm": 81.0,
+    "boltCircleMm": 145.0,
+    "boltHoles": 4,
+    "boltHoleMm": 17.5
+   },
+   "placement": [
+    1,
+    0,
+    0,
+    0,
+    1.0,
+    0.0,
+    0,
+    -0.0,
+    1.0,
+    0,
+    0,
+    0,
+    1,
+    0,
+    0,
+    0
+   ],
+   "name": "Фланец свободный штампованный DN65 HECO LF-076-GPR-1"
+  },
+  "100": {
+   "source": "Equipment/Piping/3D/HECO/Pressed/heco_LF-114-GPR-1.step",
+   "sourceHash": "ede619288cf4544a029daf1b92618274aca79901808aa27ee1f95ae93123ee22",
+   "dimensions": {
+    "lengthMm": 23.0,
+    "outerMm": 220.0,
+    "innerMm": 119.0,
+    "boltCircleMm": 180.0,
+    "boltHoles": 8,
+    "boltHoleMm": 17.5
+   },
+   "placement": [
+    1,
+    0,
+    0,
+    0,
+    0.9999999999999635,
+    -2.70393491597073e-07,
+    0,
+    2.70393491597073e-07,
+    0.9999999999999635,
+    0,
+    0,
+    0,
+    1,
+    0,
+    0,
+    0
+   ],
+   "name": "Фланец свободный штампованный DN100 HECO LF-114-GPR-1"
+  },
+  "125": {
+   "source": "Equipment/Piping/3D/HECO/Pressed/heco_LF-139-GPR-1.step",
+   "sourceHash": "cccaf350e46259d2c2227e7ad7e29442ea632425067dd0f012ab0c728ec7ca7a",
+   "dimensions": {
+    "lengthMm": 25.0,
+    "outerMm": 250.0,
+    "innerMm": 145.0,
+    "boltCircleMm": 210.0,
+    "boltHoles": 8,
+    "boltHoleMm": 17.5
+   },
+   "placement": [
+    1,
+    0,
+    0,
+    0,
+    0.9999999999999857,
+    1.6954893844456283e-07,
+    0,
+    -1.6954893844456283e-07,
+    0.9999999999999857,
+    0,
+    0,
+    0,
+    1,
+    0,
+    0,
+    0
+   ],
+   "name": "Фланец свободный штампованный DN125 HECO LF-139-GPR-1"
+  },
+  "150": {
+   "source": "Equipment/Piping/3D/Kohler/R358-PN16-DN150-ring.step",
+   "sourceHash": "ebb55515c06c7d1247245950f88db965302e2c65dd5ba9be3eb755808d87452f",
+   "dimensions": {
+    "lengthMm": 27.5,
+    "outerMm": 285.0,
+    "innerMm": 173.0,
+    "boltCircleMm": 240.0,
+    "boltHoles": 8,
+    "boltHoleMm": 21.5
+   },
+   "placement": [
+    1,
+    0,
+    0,
+    0,
+    0.9238795325112867,
+    -0.3826834323650898,
+    0,
+    0.3826834323650898,
+    0.9238795325112867,
+    0,
+    0,
+    0,
+    1,
+    0,
+    0,
+    0
+   ],
+   "name": "Фланец свободный штампованный DN150 Kohler R-358 AISI 304"
+  },
+  "200": {
+   "source": "Equipment/Piping/3D/Kohler/R358-PN16-DN200-ring.step",
+   "sourceHash": "f0b770cf1cba6710e8368c458cac09cdb389314a09fdcdb7f46064b3ac281d26",
+   "dimensions": {
+    "lengthMm": 31.5,
+    "outerMm": 340.0,
+    "innerMm": 225.0,
+    "boltCircleMm": 295.0,
+    "boltHoles": 12,
+    "boltHoleMm": 21.5
+   },
+   "placement": [
+    1,
+    0,
+    0,
+    0,
+    0.9659258262890683,
+    -0.25881904510252074,
+    0,
+    0.25881904510252074,
+    0.9659258262890683,
+    0,
+    0,
+    0,
+    1,
+    0,
+    0,
+    0
+   ],
+   "name": "Фланец свободный штампованный DN200 Kohler R-358 AISI 304"
+  }
+ },
+ "catalog": {
+  "фланцы-005-r0087": {
+   "previous": {
+    "lengthMm": 14,
+    "outerMm": 95,
+    "innerMm": 24,
+    "boltCircleMm": 65,
+    "boltHoles": 4,
+    "boltHoleMm": 14
+   },
+   "model": null
+  },
+  "фланцы-005-r0088": {
+   "previous": {
+    "lengthMm": 14,
+    "outerMm": 105,
+    "innerMm": 30,
+    "boltCircleMm": 75,
+    "boltHoles": 4,
+    "boltHoleMm": 14
+   },
+   "model": null
+  },
+  "фланцы-005-r0089": {
+   "previous": {
+    "lengthMm": 16,
+    "outerMm": 115,
+    "innerMm": 36,
+    "boltCircleMm": 85,
+    "boltHoles": 4,
+    "boltHoleMm": 14
+   },
+   "model": null
+  },
+  "фланцы-005-r0090": {
+   "previous": {
+    "lengthMm": 16,
+    "outerMm": 140,
+    "innerMm": 46,
+    "boltCircleMm": 100,
+    "boltHoles": 4,
+    "boltHoleMm": 18
+   },
+   "model": null
+  },
+  "фланцы-005-r0091": {
+   "previous": {
+    "lengthMm": 16,
+    "outerMm": 150,
+    "innerMm": 54,
+    "boltCircleMm": 110,
+    "boltHoles": 4,
+    "boltHoleMm": 18
+   },
+   "model": "40"
+  },
+  "фланцы-005-r0092": {
+   "previous": {
+    "lengthMm": 16,
+    "outerMm": 165,
+    "innerMm": 65,
+    "boltCircleMm": 125,
+    "boltHoles": 4,
+    "boltHoleMm": 18
+   },
+   "model": "50"
+  },
+  "фланцы-005-r0093": {
+   "previous": {
+    "lengthMm": 16,
+    "outerMm": 185,
+    "innerMm": 81,
+    "boltCircleMm": 145,
+    "boltHoles": 4,
+    "boltHoleMm": 18
+   },
+   "model": "65"
+  },
+  "фланцы-005-r0094": {
+   "previous": {
+    "lengthMm": 18,
+    "outerMm": 200,
+    "innerMm": 94,
+    "boltCircleMm": 160,
+    "boltHoles": 8,
+    "boltHoleMm": 18
+   },
+   "model": "80"
+  },
+  "фланцы-005-r0095": {
+   "previous": {
+    "lengthMm": 18,
+    "outerMm": 220,
+    "innerMm": 119,
+    "boltCircleMm": 180,
+    "boltHoles": 8,
+    "boltHoleMm": 18
+   },
+   "model": "100"
+  },
+  "фланцы-005-r0096": {
+   "previous": {
+    "lengthMm": 18,
+    "outerMm": 250,
+    "innerMm": 145,
+    "boltCircleMm": 210,
+    "boltHoles": 8,
+    "boltHoleMm": 18
+   },
+   "model": "125"
+  },
+  "фланцы-005-r0097": {
+   "previous": {
+    "lengthMm": 18,
+    "outerMm": 285,
+    "innerMm": 173,
+    "boltCircleMm": 240,
+    "boltHoles": 8,
+    "boltHoleMm": 22
+   },
+   "model": "150"
+  },
+  "фланцы-005-r0098": {
+   "previous": {
+    "lengthMm": 20,
+    "outerMm": 340,
+    "innerMm": 225,
+    "boltCircleMm": 295,
+    "boltHoles": 8,
+    "boltHoleMm": 22
+   },
+   "model": null
+  },
+  "фланцы-005-r0099": {
+   "previous": {
+    "lengthMm": 22,
+    "outerMm": 395,
+    "innerMm": 279,
+    "boltCircleMm": 350,
+    "boltHoles": 12,
+    "boltHoleMm": 22
+   },
+   "model": null
+  },
+  "фланцы-005-r0100": {
+   "previous": {
+    "lengthMm": 26,
+    "outerMm": 445,
+    "innerMm": 329,
+    "boltCircleMm": 400,
+    "boltHoles": 12,
+    "boltHoleMm": 22
+   },
+   "model": null
+  },
+  "фланцы-005-r0101": {
+   "previous": {
+    "lengthMm": 28,
+    "outerMm": 505,
+    "innerMm": 362,
+    "boltCircleMm": 460,
+    "boltHoles": 16,
+    "boltHoleMm": 22
+   },
+   "model": null
+  },
+  "фланцы-005-r0102": {
+   "previous": {
+    "lengthMm": 32,
+    "outerMm": 565,
+    "innerMm": 413,
+    "boltCircleMm": 515,
+    "boltHoles": 16,
+    "boltHoleMm": 26
+   },
+   "model": null
+  },
+  "фланцы-005-r0103": {
+   "previous": {
+    "lengthMm": 38,
+    "outerMm": 670,
+    "innerMm": 517,
+    "boltCircleMm": 620,
+    "boltHoles": 20,
+    "boltHoleMm": 26
+   },
+   "model": null
+  },
+  "фланцы-005-r0104": {
+   "previous": {
+    "lengthMm": 44,
+    "outerMm": 780,
+    "innerMm": 618,
+    "boltCircleMm": 725,
+    "boltHoles": 20,
+    "boltHoleMm": 30
+   },
+   "model": null
+  },
+  "фланцы-005-r0105": {
+   "previous": {
+    "lengthMm": 50,
+    "outerMm": 895,
+    "innerMm": 721,
+    "boltCircleMm": 840,
+    "boltHoles": 24,
+    "boltHoleMm": 30
+   },
+   "model": null
+  },
+  "фланцы-005-r0106": {
+   "previous": {
+    "lengthMm": 56,
+    "outerMm": 1015,
+    "innerMm": 824,
+    "boltCircleMm": 950,
+    "boltHoles": 24,
+    "boltHoleMm": 33
+   },
+   "model": null
+  },
+  "фланцы-006-r0110": {
+   "previous": {
+    "lengthMm": 14,
+    "outerMm": 95,
+    "innerMm": 25,
+    "boltCircleMm": 65,
+    "boltHoles": 4,
+    "boltHoleMm": 14
+   },
+   "model": null
+  },
+  "фланцы-006-r0111": {
+   "previous": {
+    "lengthMm": 16,
+    "outerMm": 105,
+    "innerMm": 31,
+    "boltCircleMm": 75,
+    "boltHoles": 4,
+    "boltHoleMm": 14
+   },
+   "model": null
+  },
+  "фланцы-006-r0112": {
+   "previous": {
+    "lengthMm": 16,
+    "outerMm": 115,
+    "innerMm": 38,
+    "boltCircleMm": 85,
+    "boltHoles": 4,
+    "boltHoleMm": 14
+   },
+   "model": null
+  },
+  "фланцы-006-r0113": {
+   "previous": {
+    "lengthMm": 18,
+    "outerMm": 140,
+    "innerMm": 47,
+    "boltCircleMm": 100,
+    "boltHoles": 4,
+    "boltHoleMm": 18
+   },
+   "model": null
+  },
+  "фланцы-006-r0114": {
+   "previous": {
+    "lengthMm": 18,
+    "outerMm": 150,
+    "innerMm": 53,
+    "boltCircleMm": 110,
+    "boltHoles": 4,
+    "boltHoleMm": 18
+   },
+   "model": "40"
+  },
+  "фланцы-006-r0115": {
+   "previous": {
+    "lengthMm": 20,
+    "outerMm": 165,
+    "innerMm": 65,
+    "boltCircleMm": 125,
+    "boltHoles": 4,
+    "boltHoleMm": 18
+   },
+   "model": "50"
+  },
+  "фланцы-006-r0116": {
+   "previous": {
+    "lengthMm": 20,
+    "outerMm": 185,
+    "innerMm": 81,
+    "boltCircleMm": 145,
+    "boltHoles": 8,
+    "boltHoleMm": 18
+   },
+   "model": null
+  },
+  "фланцы-006-r0117": {
+   "previous": {
+    "lengthMm": 20,
+    "outerMm": 200,
+    "innerMm": 94,
+    "boltCircleMm": 160,
+    "boltHoles": 8,
+    "boltHoleMm": 18
+   },
+   "model": "80"
+  },
+  "фланцы-006-r0118": {
+   "previous": {
+    "lengthMm": 22,
+    "outerMm": 220,
+    "innerMm": 120,
+    "boltCircleMm": 180,
+    "boltHoles": 8,
+    "boltHoleMm": 18
+   },
+   "model": "100"
+  },
+  "фланцы-006-r0119": {
+   "previous": {
+    "lengthMm": 22,
+    "outerMm": 250,
+    "innerMm": 145,
+    "boltCircleMm": 210,
+    "boltHoles": 8,
+    "boltHoleMm": 18
+   },
+   "model": "125"
+  },
+  "фланцы-006-r0120": {
+   "previous": {
+    "lengthMm": 24,
+    "outerMm": 285,
+    "innerMm": 174,
+    "boltCircleMm": 240,
+    "boltHoles": 8,
+    "boltHoleMm": 22
+   },
+   "model": "150"
+  },
+  "фланцы-006-r0121": {
+   "previous": {
+    "lengthMm": 26,
+    "outerMm": 340,
+    "innerMm": 226,
+    "boltCircleMm": 295,
+    "boltHoles": 12,
+    "boltHoleMm": 22
+   },
+   "model": "200"
+  },
+  "фланцы-006-r0122": {
+   "previous": {},
+   "model": null
+  },
+  "фланцы-006-r0123": {
+   "previous": {},
+   "model": null
+  },
+  "фланцы-006-r0124": {
+   "previous": {},
+   "model": null
+  },
+  "фланцы-006-r0125": {
+   "previous": {},
+   "model": null
+  },
+  "фланцы-006-r0126": {
+   "previous": {},
+   "model": null
+  },
+  "фланцы-006-r0127": {
+   "previous": {},
+   "model": null
+  },
+  "фланцы-006-r0128": {
+   "previous": {},
+   "model": null
+  },
+  "фланцы-006-r0129": {
+   "previous": {},
+   "model": null
+  }
+ }
+}

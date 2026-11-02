@@ -25,6 +25,12 @@ test("download streams private bytes; redirect cannot leak credentials",async()=
   const res=await cadRequest(r,"/v1/jobs/id/download",undefined,true);
   assert.deepEqual([...new Uint8Array(await res.arrayBuffer())],[9,8,7]);assert.match(res.headers.get("Cache-Control"),/private/);
   assert.match(res.headers.get("Content-Disposition"),/pumpstation.zip/);
+  s.response=()=>new Response(new Uint8Array([77,90]),{headers:{"Content-Type":"application/octet-stream"}});
+  for (const [format,ext] of [["edrawings","easm"],["edrawings-exe","exe"]]) {
+    const file=await cadRequest(r,"/v1/jobs/id/download?format="+format,undefined,true);
+    assert.equal(file.headers.get("Content-Disposition"),'attachment; filename="pumpstation.'+ext+'"');
+    assert.equal(file.headers.get("X-Content-Type-Options"),"nosniff");
+  }
   s.response=()=>new Response(null,{status:302,headers:{Location:"https://evil.test"}});
   assert.equal((await cadRequest(r,"/v1/jobs")).status,502);
 });

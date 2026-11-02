@@ -16,7 +16,7 @@ export const itemName = (item?:AssemblyComponent) => item ? String(field(item,/^
 
 // Thickness is the sum of all elements captured by this set of bolts.
 // null means dimensions are missing; no bolt length may be guessed.
-export type JointStack = { gaskets: number; thickness: number | null; flangeThickness?: number | null; fastener?: "bolt" | "stud"; source?: string };
+export type JointStack = { gaskets: number; thickness: number | null; flangeThickness?: number | null; fastener?: "bolt" | "stud"; source?: string; allowance?: string };
 /** Shared by station valve hardware and insert pipe sizing. Keeps the same catalogue selection. */
 export function selectJointFasteners(database: { items: AssemblyComponent[] }, material: CollectorConfiguration["material"], size: number, pn: number, wafer: boolean | JointStack = false, collarComponentId?: string, weldFlangeComponentId?: string) {
   const reference = fastenerReference.find(row => row.dn === size && row.pn === pn);
@@ -80,7 +80,7 @@ export function lineSpecParts(rows: SpecItem[], section: "suction" | "discharge"
     if(!selected){for(const [key,name] of [["bolts","Болты"],["nuts","Гайки"],["washers","Шайбы"]])add(`${role}-${key}`,`${name} для фланцев DN${size}`,joints,`DN${size} · PN${pn} · нет таблицы сверловки`,undefined,"компл.");return;}
     const { reference, diameter, nut, washer, stack, ends, length, bolt, source, warnings } = selected;
     const count=joints*reference.holes;
-    const details=`DN${size} · PN${pn} · ${reference.holes} шт. × ${joints} стыков${length?` · длина не менее ${length} мм`:" · длину болта уточнить по толщине фланцев и межфланцевых элементов"}`;
+    const details=`DN${size} · PN${pn} · ${reference.holes} шт. × ${joints} стыков${length?` · длина не менее ${length} мм`:" · длину болта уточнить по толщине фланцев и межфланцевых элементов"}${stack.allowance ? ` · ${stack.allowance}` : ""}`;
     add(`${role}-${stack.fastener === "stud" ? "studs" : "bolts"}`,bolt?itemName(bolt):`${stack.fastener === "stud" ? "Шпилька" : "Болт"} М${diameter} для фланцев DN${size}`,count,details,bolt,"шт.",undefined,[source,...warnings].join("; "),warnings.length?"clarify":undefined);
     add(`${role}-nuts`,nut?itemName(nut):`Гайка М${diameter}`,count * ends,details,nut,"шт.",undefined,source);
     add(`${role}-washers`,washer?itemName(washer):`Шайба М${diameter}`,count * ends,details,washer,"шт.",undefined,source);

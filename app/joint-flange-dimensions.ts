@@ -2,7 +2,8 @@ import type { BindingCatalog } from "./collector-catalog";
 import type { AssemblyComponent } from "./suction-catalog";
 import { flangeKinds } from "./collector-calculations";
 import { catalogPressures, readFlangeDimensions, acceptedFlangeMaterials } from "./flange-dimensions";
-import { collarLipThickness } from "./component-collar-dimensions";
+import { collarLipThickness, reviewCollarDimensions } from "./component-collar-dimensions";
+import { stampedShape } from "./model-editor/stamped-flanges";
 import flanges from "../data/flange-dimensions.json";
 import collars from "../data/collar-dimensions.json";
 import { supplierFlangeFor } from "./component-supplier-flanges";
@@ -12,11 +13,12 @@ const field = (item: Database["items"][number], label: string) => item.fields.fi
 const dn = (item: Database["items"][number]) => Number(String(field(item, "DN") ?? "").replace(/^DN\s*/i, ""));
 /** The physical bolt grip contains each backing flange AND each collar lip.
  * Excluding loose flanges from the insert BOM does not remove them from the joint. */
-export function jointFlangeThickness(database: Database, material: "st20" | "aisi304", size: number, pn: number, collarComponentId?: string, weldFlangeComponentId?: string, looseFlangeComponentId?: string) {
+export function jointFlangeThickness(database: Database, material: "st20" | "aisi304", size: number, pn: number, collarComponentId?: string, weldFlangeComponentId?: string, looseFlangeComponentId?: string, useStampedSeat = false) {
   const pressures = catalogPressures(database.items), kinds = weldFlangeComponentId ? ["weldFlange" as const] : flangeKinds(material, size, pn);
   const sources: string[] = [], warnings: string[] = [], dimensions: Array<{ name: string; value: number; unit: "мм"; source: string }> = [];
   const adoptedHoleCounts: number[] = [];
   let oneSide = 0, found = false;
+  const necks: Array<{ neck: number; lip: number }> = [];
   for (const kind of kinds) {
     const items = database.items.filter(item => dn(item) === size && (kind === "collar" && collarComponentId
       ? item.id === collarComponentId && (pressures.get(item.id) ?? 0) >= pn : weldFlangeComponentId
@@ -29,6 +31,10 @@ export function jointFlangeThickness(database: Database, material: "st20" | "ais
     if (!items.length) warnings.push(`Нет ${kind === "collar" ? "воротника" : "фланца"} ${material} DN${size} PN${pn} для крепёжного пакета`);
     for (const item of items) {
       if (kind === "collar") {
+        if (useStampedSeat) {
+          const check = reviewCollarDimensions(item, database.source?.sha256 ?? collars.sourceSha256, collars, pressures.get(item.id));
+          if (check?.approved && check.row.d) necks.push({ neck: check.row.d, lip: check.row.e });
+        }
         const policy = collarLipThickness(item, database.source?.sha256 ?? collars.sourceSha256, collars);
         const lip = Number(field(item, "Толщина борта, мм"));
         if (!policy || lip !== policy.valueMm) warnings.push(`Не подтверждена толщина борта воротника ${item.id} в крепёжном пакете`);
@@ -37,7 +43,15 @@ export function jointFlangeThickness(database: Database, material: "st20" | "ais
         const result = readFlangeDimensions(item, pressures.get(item.id) ?? pn, flanges, database.source?.sha256);
         warnings.push(...result.warnings);
         if (result.standard && result.dimensions.holes) adoptedHoleCounts.push(result.dimensions.holes);
-        if (result.dimensions.thicknessMm) { values.push(result.dimensions.thicknessMm); sources.push(`${item.id}: ${result.source}`); dimensions.push({ name: `Толщина фланца ${item.id} (одна сторона)`, value: result.dimensions.thicknessMm, unit: "мм", source: result.source }); }
+        const d = result.dimensions;
+        let thickness = d.thicknessMm, source = result.source;
+        if (useStampedSeat && kind === "looseFlange" && !result.warnings.length) {
+          const ring = stampedShape(item.id, { kind: "flange", lengthMm: thickness, innerMm: d.boreDiameterMm, outerMm: d.outerDiameterMm, boltCircleMm: d.boltCircleMm, boltHoleMm: d.boltHoleDiameterMm, boltHoles: d.holes, faceHeightMm: d.faceHeightMm, faceDiameterMm: d.faceDiameterMm }, true);
+          if (ring.stampedHash && ring.stampedHash !== "missing" && ring.innerMm && necks.length && necks.every(n => n.neck <= ring.innerMm! && n.lip > ring.innerMm!)) {
+            thickness = ring.lengthMm; source = `Опорная высота штампованного фланца по CAD: ${ring.stampedHash}`;
+          }
+        }
+        if (thickness) { values.push(thickness); sources.push(`${item.id}: ${source}`); dimensions.push({ name: `Толщина фланца ${item.id} (одна сторона)`, value: thickness, unit: "мм", source }); }
         if (/AISI\s*304/i.test(item.family) && /12Х18Н10Т/i.test(String(field(item, "Наименование")))) {
           const accepted = acceptedFlangeMaterials(item, pn, flanges, database.source?.sha256);
           if (accepted) sources.push(`${item.id}: ${accepted.materials}; ${accepted.source}`);

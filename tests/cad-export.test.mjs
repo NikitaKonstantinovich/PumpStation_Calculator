@@ -10,6 +10,17 @@ const component = (extra = {}) => ({ id:"a",name:"Pump",kind:"pump",...pose([210
 const project = components => ({project:{id:"p",name:"Station",updatedAt:"2026-11-01T12:00:00Z"},entities:{"station-model":{editor:{assembly:{version:1,sourceFingerprint:"fixture",components}}}}});
 const applySw = (p,t) => [0,1,2].map(j => p.reduce((sum,n,i)=>sum+n*t[3*i+j],0)+1000*t[9+j]);
 const close = (a,b) => a.forEach((v,i)=>assert.ok(Math.abs(v-b[i])<1e-8,`${a} != ${b}`));
+test("fabricated tube carries its physical dimensions, material finish and revision in the CAD snapshot", async()=>{
+  const pipe=component({kind:"pipe",name:"Труба",cadSource:undefined,ports:[],parameters:{length:250,width:60,height:60,diameter:60,wallThickness:3,routeOffset:0}});
+  const p=project([pipe]);p.entities["station-dn"]={collectorMaterial:"st20"};
+  const first=createCadManifest(p).instances;
+  assert.match(first[0].detailName,/Ø60×3 мм L=250 мм/);assert.equal(first[0].appearance,"red");
+  p.entities["station-dn"].collectorMaterial="aisi304";const second=createCadManifest(p).instances;
+  assert.equal(second[0].appearance,"metal");assert.notEqual(await snapshotKey(first),await snapshotKey(second));
+  const original=project([component({kind:"equipment",name:"Труба сталь 20",equipmentId:"library-pipe"})]);
+  original.entities["station-dn"]={collectorMaterial:"aisi304"};
+  assert.equal(createCadManifest(original).instances[0].appearance,"red");
+});
 test("SW row-axis matrices match Three.js XYZ, mm to metres, and nested local CAD bases", () => {
   for(let i=0;i<25;i++){
     const poses=[pose([i*50,-i*3,275],[i*11,-i*7,i*13]),pose([12,-7,33],[43,17,-61]),pose([-5,0,9],[0,90,0])];

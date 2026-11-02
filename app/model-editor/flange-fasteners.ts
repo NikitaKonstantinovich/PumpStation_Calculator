@@ -8,6 +8,8 @@ import reference from "../suction-fasteners.json";
 import shapes from "../../data/fastener-shapes.json";
 import cad from "../../data/flange-cad-mounts.json";
 import { flangeHoleCenters } from "./flange-hole-pattern";
+import { previousStampGrip, upgradeStampedFlanges } from "./stamped-flanges";
+import { reviewedMvMounts } from "./onis-flow";
 
 const add = (a: Vec3, b: Vec3): Vec3 => a.map((v,i)=>v+b[i]) as Vec3;
 const sub = (a: Vec3, b: Vec3): Vec3 => a.map((v,i)=>v-b[i]) as Vec3;
@@ -23,9 +25,10 @@ const positive = (v: number | undefined): v is number => typeof v === "number" &
 export const isHardwareRow = (c:Component) => /fasteners-(bolts|studs|nuts|washers)$/.test(c.line?.role??"");
 const isVibration = (c:Component) => /-vibration-compensator$/.test(c.line?.role??"");
 type Support = { node:string; owner:Component; port:Port; mount?:FlangeMount; pieceId?:string };
-function procedural(s: InsertionShape, source:string): FlangeMount | undefined {
+function procedural(s: InsertionShape, source:string, equipmentId?:string): FlangeMount | undefined {
+  if(s.stampedHash==="missing") return;
   const holes=flangeHoleCenters(s);
-  return s.kind==="flange" && holes.length && positive(s.lengthMm) ? {source,holes,holeDiameter:s.boltHoleMm!,thickness:s.lengthMm,face:zero,axis:[-1,0,0],holeKind:"through",bearingInner:s.innerMm,bearingOuter:s.outerMm} : undefined;
+  return s.kind==="flange" && holes.length && positive(s.lengthMm) ? {source,holes,holeDiameter:s.boltHoleMm!,thickness:s.lengthMm,previousStampGrip:previousStampGrip(equipmentId,s),face:zero,axis:[-1,0,0],holeKind:"through",bearingInner:s.innerMm,bearingOuter:s.outerMm} : undefined;
 }
 function transformed(m:FlangeMount, pose:{position:Vec3;rotation:Vec3}):FlangeMount {
   return {...m,face:world(pose,m.face),axis:rotate(m.axis,pose.rotation),holes:m.holes.map(p=>world(pose,p))};
@@ -36,17 +39,18 @@ function supports(c:Component):Support[] {
   const append=(p:Port,m?:FlangeMount,piece?:InsertionPiece)=>result.push({node:key({componentId:c.id,portId:p.id}),owner:c,port:p,
     mount:m?transformed(piece?transformed(m,piece):m,c):undefined,pieceId:piece?.id});
   if (c.shape?.kind==="flange") {
-    const p=c.ports.find(p=>p.id==="left"); if(p)append(p,procedural(c.shape,c.sourceNote));
+    const p=c.ports.find(p=>p.id==="left"); if(p)append(p,procedural(c.shape,c.sourceNote,c.equipmentId));
   } else if (c.insertion || c.collector) {
     const pieces=c.insertion?.template.geometry.pieces??c.collector!.template.pieces;
     for(const p of c.ports.filter(p=>p.purpose!=="sensor" && ["flanged","collar"].includes(p.connection??""))) {
       const root=c.insertion ? p.id : p.id.startsWith("network-") ? `end-${p.id.slice(8)}` : `branch-${p.id}`;
       const piece=pieces.find(s=>(c.insertion ? s.id===`${root}-loose` || s.id===root : s.id===`${root}-looseFlange` || s.id===`${root}-weldFlange`) && s.shape.kind==="flange");
-      append(p,piece?procedural(piece.shape,piece.source):undefined,piece);
+      append(p,piece?procedural(piece.shape,piece.source,piece.componentId):undefined,piece);
     }
   } else if (c.kind==="pump" || c.cadSource && !c.line || isVibration(c)) {
     const mesh=c.shape?.kind==="mesh"?c.shape:undefined;
-    const mounts=(cad.models as unknown as Record<string,Record<string,FlangeMount>>)[mesh?.modelHash??c.cadSource?.hash??""];
+    const hash=mesh?.modelHash??c.cadSource?.hash??"";
+    const mounts=(cad.models as unknown as Record<string,Record<string,FlangeMount>>)[hash] ?? reviewedMvMounts(hash);
     for(const p of c.ports.filter(p=>p.connection==="flanged")) {
       const mount=mounts?.[p.id];
       append(p,mount&&mesh?transformed(mount,{position:mesh.modelPosition??zero,rotation:mesh.modelRotation??zero}):mount);
@@ -59,6 +63,7 @@ const hash = (s:string) => { let a=2166136261,b=5381; for(let i=0;i<s.length;i++
 /** Connectivity, not spatial proximity, determines one clamped package. A wafer
  * and its gaskets connect two bearing flanges and receive ONE hardware set. */
 export function rebuildFasteners(assembly:Assembly):Assembly {
+  assembly=upgradeStampedFlanges(assembly);
   if (!assembly.fastenerCatalog) return assembly;
   const parts=assembly.components.filter(c=>!c.fastener).map(c=>isHardwareRow(c)?{...c,hidden:true}:c), byId=new Map(parts.map(c=>[c.id,c]));
   const parent=new Map<string,string>();
@@ -138,7 +143,15 @@ export function rebuildFasteners(assembly:Assembly):Assembly {
         }))issues.push("Головка, гайка или шайба не помещается на опорном кольце фланца; проверьте исполнение и посадочный диаметр.");
         binding.minimumLength=jointFastenerLength(binding.grip,nut.length,washer.length,endsCount);
         const selected=choose(kind);
-        const rod=selected??hardware.filter(h=>h.kind===kind&&h.diameter===ref.boltDiameter&&h.length+.01>=binding.minimumLength).sort((x,y)=>x.length-y.length)[0];
+        const suitable=hardware.filter(h=>h.kind===kind&&h.diameter===ref.boltDiameter&&h.length+.01>=binding.minimumLength).sort((x,y)=>x.length-y.length);
+        let rod=selected??suitable[0];
+        // Only a change of flange execution can justify replacing a formerly sufficient stock length.
+        const addedGrip=am.thickness-(am.previousStampGrip??am.thickness)+bm.thickness-(bm.previousStampGrip??bm.thickness);
+        if(selected && selected.length+.01<binding.minimumLength && selected.length+.01>=binding.minimumLength-addedGrip){
+          const series=(h:HardwareItem)=>h.name.replace(/([МM]\s*\d+)\s*[хx×]\s*\d+(?=\s|$)/i,"$1×#");
+          const replacement=suitable.find(h=>series(h)===series(selected));
+          if(replacement){rod=replacement;warnings.push(`Штампованный фланец: в 3D установлен крепёж «${rod.name}» вместо «${selected.name}». Сверьте длину в спецификации.`);}
+        }
         if(!rod)issues.push(`В каталоге нет ${kind==="stud"?"шпильки":"болта"} М${ref.boltDiameter} длиной не менее ${binding.minimumLength.toFixed(1)} мм.`);
         else if(rod.length+.01<binding.minimumLength)issues.push(`Крепёж спецификации ${rod.name} короче фактического пакета: нужно ≥${binding.minimumLength.toFixed(1)} мм. Исправьте подбор.`);
         else if(!/DIN\s*934/.test(nut.name)||!/DIN\s*125/.test(washer.name)||kind==="bolt"&&!/DIN\s*933/.test(rod.name))issues.push("Нет подтверждённого профиля выбранного стандарта крепежа.");

@@ -4,6 +4,7 @@ import { generateInsertCalculations } from "./component-insert-calculations";
 import type { InsertGeometryContext } from "./model-editor/insertion-template";
 import type { LineGeometry } from "./model-editor/line-types";
 import type { InsertionShape } from "./model-editor/insertion-types";
+import { stampedShape, stampMissing } from "./model-editor/stamped-flanges";
 import type { Port } from "./model-editor/model";
 import { field, number, itemDn } from "./line-spec-parts";
 import valveDimensions from "./suction-fasteners.json";
@@ -88,6 +89,11 @@ export function lineGeometry(item: AssemblyComponent, catalog: InsertCatalog, co
     if (positive(result.length) && positive(flange?.outerDiameterMm) && positive(flange?.boreDiameterMm) && positive(flange?.holes) && positive(flange?.boltCircleMm) && positive(flange?.boltHoleDiameterMm)) {
       shape = { kind: "flange", lengthMm: result.length, outerMm: flange.outerDiameterMm, innerMm: flange.boreDiameterMm, boltCircleMm: flange.boltCircleMm, boltHoles: flange.holes, boltHoleMm: flange.boltHoleDiameterMm,
         ...(flange.faceHeightMm !== undefined && flange.faceDiameterMm !== undefined ? { faceHeightMm: flange.faceHeightMm, faceDiameterMm: flange.faceDiameterMm } : {}) };
+      if(part.kind==="looseFlange"){
+        shape=stampedShape(item.id,shape,true);
+        if(shape.stampedHash==="missing") result.issues.push(stampMissing);
+        else result.length=shape.lengthMm!;
+      }
     } else result.issues.push("Не подтверждены полный профиль и сверловка фланца");
   } else if (part?.kind === "collar") {
     result.lipThickness = part.thicknessMm ?? undefined;

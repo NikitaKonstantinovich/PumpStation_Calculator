@@ -1,4 +1,5 @@
 import { assemblyBounds, type Assembly, type Bounds, type Component, type Port } from "./model";
+import { reviewedOnisLibraryPorts } from "./onis-flow";
 
 export type LibraryModel = {
   id: string; name: string; source: string; sources: string[]; categories: string[];
@@ -21,12 +22,12 @@ export function parseModelLibrary(raw: unknown): ModelLibrary {
       || typeof row.name !== "string" || typeof row.source !== "string" || !["ready", "pending", "error"].includes(String(row.status))) throw new Error("Некорректная запись библиотеки моделей");
     ids.add(row.id);
     if (row.status === "ready" && (!validBounds(row.bounds) || row.meshUrl !== `/model-assets/model-${row.id}-v1.stl`)) throw new Error(`Некорректная готовая модель: ${row.name}`);
+    const ports = row.status==="ready" && validBounds(row.bounds) ? reviewedOnisLibraryPorts(row.id,row.source,row.bounds) : [];
+    const warnings = strings(row.warnings).filter(w => !ports.length || !w.startsWith("Направление потока MV не подтверждено"));
     return { id: row.id, name: row.name, source: row.source, sources: strings(row.sources), categories: strings(row.categories), sourceHash: row.id, units: "mm" as const,
       status: row.status as LibraryModel["status"], bounds: validBounds(row.bounds) ? row.bounds : undefined, meshUrl: typeof row.meshUrl === "string" && row.status === "ready" ? row.meshUrl : undefined,
       bytes: typeof row.bytes === "number" && Number.isFinite(row.bytes) && row.bytes > 0 ? row.bytes : undefined,
-      // Generic library assets do not receive guessed mounting points. Reviewed
-      // catalogue profiles keep their ports through the separate manifest.
-      ports: [], warnings: strings(row.warnings), error: typeof row.error === "string" ? row.error : undefined };
+      ports, warnings, error: typeof row.error === "string" ? row.error : undefined };
   });
   return { version: 1, models };
 }
@@ -47,7 +48,7 @@ export function addLibraryModel(assembly: Assembly, model: LibraryModel, id: str
     sourceNote: `Геометрия CAD, мм. Исходная ориентация сохранена. ${model.warnings.join(". ")}. Ручная компоновка; спецификация не изменяется`,
     cadSource: { path: model.source, hash: model.sourceHash }, bounds, meshUrl: model.meshUrl,
     position: [(occupied ? occupied[3] + 100 : 0) - bounds[0], -bounds[1], -bounds[2]], rotation: [0, 0, 0],
-    hidden: false, opacity: 1, locked: false, ports: [],
+    hidden: false, opacity: 1, locked: false, ports: reviewedOnisLibraryPorts(model.sourceHash,model.source,bounds),
     parameters: { length: bounds[3] - bounds[0], width: bounds[4] - bounds[1], height: bounds[5] - bounds[2], diameter: 50, routeOffset: 0 },
   };
   return { ...assembly, components: [...assembly.components, component] };

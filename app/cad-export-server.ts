@@ -15,16 +15,19 @@ export async function cadRequest(request: Request, path: string, body?: string, 
   const config = env as unknown as CadEnv;
   if (!config.CAD_EXPORT_URL || !config.CAD_EXPORT_TOKEN) return json({ error: "Сервис сборки SOLIDWORKS ещё не подключён." }, 503);
   try {
+    // Limit the connection wait, not the time the user needs to download a large viewer.
+    const abort = new AbortController();
+    const timer = setTimeout(() => abort.abort(), 20_000);
     const response = await fetch(`${config.CAD_EXPORT_URL.replace(/\/$/, "")}${path}`, {
-      method: body === undefined ? "GET" : "POST", redirect: "manual", signal: AbortSignal.timeout(20_000),
+      method: body === undefined ? "GET" : "POST", redirect: "manual", signal: download ? abort.signal : AbortSignal.timeout(20_000),
       headers: { Authorization: `Bearer ${config.CAD_EXPORT_TOKEN}`, "X-Cad-Owner": user.id, "Content-Type": "application/json" },
       ...(body === undefined ? {} : { body }),
-    });
+    }).finally(() => clearTimeout(timer));
     if (response.status === 401 || response.status === 403) return json({ error: "Сервис сборки отклонил подключение. Проверьте настройки сервера." }, 502);
     if (response.status >= 300 && response.status < 400) return json({ error: "Сервис сборки возвращает перенаправление." }, 502);
     if (download && response.ok) {
       const type = response.headers.get("content-type");
-      const suffix = type === "application/zip" ? "zip" : type === "application/json" ? "json" : "easm";
+      const suffix = new URL(path, "http://cad.local").searchParams.get("format") === "edrawings-exe" ? "exe" : type === "application/zip" ? "zip" : type === "application/json" ? "json" : "easm";
       return new Response(response.body, { headers: { "Content-Type": type ?? "application/octet-stream",
         "Content-Disposition": `attachment; filename="pumpstation.${suffix}"`,
         "Cache-Control": "private, no-store", "X-Content-Type-Options": "nosniff" } });

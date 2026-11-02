@@ -7,7 +7,7 @@ export type FastenerCatalog = { version: 1; items: HardwareItem[] };
 export type FlangeMount = {
   source: string; holes: Vec3[]; holeDiameter: number; thickness: number;
   axis: Vec3; face: Vec3; holeKind: "through" | "threaded" | "unknown";
-  bearingInner?: number; bearingOuter?: number;
+  bearingInner?: number; bearingOuter?: number; previousStampGrip?: number;
 };
 export type FastenerBinding = {
   version: 1; members: string[]; jointIds: string[];

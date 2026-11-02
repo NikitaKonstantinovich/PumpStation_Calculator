@@ -14,6 +14,7 @@ import sqlite3
 import subprocess
 import sys
 import threading
+import time
 from urllib.parse import parse_qs, urlparse
 import uuid
 import zipfile
@@ -25,7 +26,8 @@ HERE = Path(__file__).resolve().parent
 
 
 READY = {"completed", "partial"}
-FORMATS = {"solidworks": "project.zip", "edrawings": "assembly.easm"}
+PHASES = ("import", "insert", "rebuild", "pack", "verify")
+FORMATS = {"solidworks": "project.zip", "edrawings": "assembly.easm", "edrawings-exe": "assembly.exe"}
 REMEDIES = {
     "source_missing": "Привяжите детализированную модель нужного исполнения в библиотеке.",
     "source_changed": "Обновите привязку к проверенной версии CAD и повторите сборку.",
@@ -37,6 +39,49 @@ REMEDIES = {
 
 def read_json(path):
     return json.loads(path.read_text(encoding="utf-8-sig"))
+
+
+def verify_viewer_exe(path):
+    with path.open("rb") as stream:
+        header = stream.read(64)
+        if len(header) == 64 and header[:2] == b"MZ":
+            stream.seek(int.from_bytes(header[60:64], "little"))
+            if stream.read(6) == b"PE\x00\x00\x64\x86":
+                return
+    raise ValueError("eDrawings не создал исполняемый файл Windows x64.")
+
+
+def progress_position(folder):
+    try:
+        p = read_json(folder / "progress.json")
+        phase, done, total = p["phase"], p["done"], p["total"]
+        if type(done) is int and type(total) is int and 0 <= done <= total:
+            return PHASES.index(phase), done
+    except (OSError, ValueError, KeyError, TypeError):
+        pass
+    return -1, -1
+
+
+def wait_stage(process, folder, name, idle_timeout, max_runtime, clock=time.monotonic):
+    start = clock()
+    last_advance, best = start, (-1, -1)
+    while True:
+        now = clock()
+        if name == "solidworks":
+            pos = progress_position(folder)
+            if pos > best:
+                last_advance, best = now, pos
+        remaining = min(start + max_runtime, last_advance + idle_timeout) - now
+        if remaining <= 0:
+            code = process.poll()
+            if code is not None:
+                return code
+            raise TimeoutError("Превышено предельное время этапа" if now >= start + max_runtime
+                               else "Нет прогресса в течение отведённого времени")
+        try:
+            return process.wait(timeout=min(5, remaining))
+        except subprocess.TimeoutExpired:
+            pass
 
 
 @lru_cache(maxsize=8192)
@@ -98,7 +143,10 @@ def validate(payload):
 
 
 class Jobs:
-    def __init__(self, state, root, runner, template, python=sys.executable, timeout=1800, part_template=None):
+    def __init__(self, state, root, runner, template, python=sys.executable, timeout=1800, part_template=None, max_runtime=14400):
+        if timeout <= 0 or max_runtime <= 0:
+            raise ValueError("Тайм-ауты должны быть положительными")
+        self.max_runtime = max_runtime
         self.state, self.root = Path(state).resolve(), Path(root).resolve()
         self.state.mkdir(parents=True, exist_ok=True)
         # OS lock is released on crash; do not run two COM queues on this state.
@@ -184,13 +232,21 @@ class Jobs:
         with (folder / f"{name}.log").open("wb") as log:
             process = subprocess.Popen(command, stdout=log, stderr=log, creationflags=subprocess.CREATE_NO_WINDOW if os.name == "nt" else 0)
             try:
-                code = process.wait(timeout=self.timeout)
-            except subprocess.TimeoutExpired:
+                code = wait_stage(process, folder, name, self.timeout, self.max_runtime)
+            except TimeoutError as error:
                 process.kill(); process.wait()
-                # COM can outlive its caller; never send the next job to that session.
+                if name in ("check-edrawings", "publish-exe"):
+                    raise RuntimeError("Не завершилась проверка файла в eDrawings.") from error
+                if name == "prepare":
+                    raise RuntimeError(f"{error}: подготовка моделей прервана.") from error
+                # A COM server can outlive its caller. Do not use an unknown session.
                 self.halted = True
-                raise RuntimeError("Превышено время сборки. Исполнитель остановлен до проверки SOLIDWORKS.")
+                raise RuntimeError(f"{error}. Исполнитель остановлен до проверки SOLIDWORKS.") from error
         if code:
+            if name == "publish-exe":
+                raise RuntimeError("eDrawings не подготовил автономный EXE. Выберите формат повторно; подробности в журнале исполнителя.")
+            if name == "check-edrawings":
+                raise RuntimeError("eDrawings не подтвердил состав файла. Выберите формат повторно; подробности в журнале исполнителя.")
             result = folder / "error.json"
             message = json.loads(result.read_text(encoding="utf-8-sig")).get("error") if result.exists() else None
             raise RuntimeError(message or f"Ошибка этапа {name}; подробности в журнале сервера.")
@@ -237,6 +293,18 @@ class Jobs:
                                      **omitted, "remedy": REMEDIES[omitted["code"]]})
 
     def checked(self, job):
+        if job and job["status"] == "building":
+            # The runner writes this atomically. Only surface progress for the active snapshot.
+            try:
+                progress = read_json(self.state / job["id"] / "progress.json")
+                phase, done, total = progress["phase"], progress["done"], progress["total"]
+                label = {"import": "Подготовка CAD-моделей", "insert": "Размещение элементов",
+                         "rebuild": "Проверка положений", "pack": "Упаковка зависимостей",
+                         "verify": "Проверка упакованной сборки"}[phase]
+                if type(done) is int and type(total) is int and 0 <= done <= total:
+                    return {**job, "stage": f"{label}: {done} из {total}" if total else label}
+            except (OSError, ValueError, KeyError, TypeError):
+                pass
         if job and job.get("snapshotKey") and job["status"] in READY:
             reason = stale_source(self.state / job["id"])
             if reason:
@@ -262,14 +330,59 @@ class Jobs:
             self.executor.submit(self.write_format, owner, job_id, fmt)
             return job
 
+    def viewer_command(self, folder):
+        verified = read_json(folder / "verification.json")["instances"]
+        checker = HERE / "acceptance" / "check-edrawings.ps1"
+        args = ["powershell.exe", "-NoProfile", "-NonInteractive", "-File", str(checker),
+                "-Drawing", str(folder / FORMATS["edrawings"]), "-MinimumComponents", str(len(verified))]
+        # Legacy verification records stored the snapshot ID as "component".
+        if all(v.get("file") and v.get("component") for v in verified):
+            names = folder / "verified-tree.txt"
+            names.write_text("\n".join(v["component"] for v in verified), encoding="utf-8-sig")
+            args.extend(["-ExpectedNames", str(names)])
+        return args
+
+    def artifact_state(self, owner, job_id, fmt, status, error=None):
+        with self.lock:
+            job = self.get(job_id, owner)
+            job["artifacts"][fmt] = status
+            if error:
+                job["exportError"] = error
+            self.save(job)
+
+    def ensure_easm(self, owner, job_id, folder):
+        # The executor is serial. An EXE request and a queued EASM request share this result.
+        path = folder / FORMATS["edrawings"]
+        if self.get(job_id, owner)["artifacts"].get("edrawings") == "ready" and path.is_file() and path.stat().st_size:
+            return
+        self.artifact_state(owner, job_id, "edrawings", "queued")
+        try:
+            if self.halted:
+                raise RuntimeError("Исполнитель SOLIDWORKS остановлен после тайм-аута.")
+            self.command([self.runner, "--edrawings", str(folder)], folder, "edrawings")
+            if not path.is_file() or not path.stat().st_size:
+                raise RuntimeError("Пустой файл EASM")
+            if os.name == "nt":
+                self.command(self.viewer_command(folder), folder, "check-edrawings")
+        except Exception:
+            self.artifact_state(owner, job_id, "edrawings", "failed")
+            raise
+        self.artifact_state(owner, job_id, "edrawings", "ready")
+
     def write_format(self, owner, job_id, fmt):
         folder = self.state / job_id
         error = None
         try:
-            if fmt == "edrawings":
-                if self.halted:
-                    raise RuntimeError("Исполнитель SOLIDWORKS остановлен после тайм-аута.")
-                self.command([self.runner, "--edrawings", str(folder)], folder, "edrawings")
+            if fmt in ("edrawings", "edrawings-exe"):
+                self.ensure_easm(owner, job_id, folder)
+                if fmt == "edrawings-exe":
+                    pending = folder / ("viewer-" + uuid.uuid4().hex + ".pending.exe")
+                    try:
+                        self.command(self.viewer_command(folder) + ["-PublishExe", str(pending)], folder, "publish-exe")
+                        verify_viewer_exe(pending)
+                        pending.replace(folder / FORMATS[fmt])
+                    finally:
+                        pending.unlink(missing_ok=True)
             else:
                 snapshot = folder / "snapshot"
                 if not any(snapshot.rglob("PumpStation.SLDASM")):
@@ -286,12 +399,7 @@ class Jobs:
                 raise ValueError("Пустой файл экспорта")
         except Exception as exc:
             error = str(exc)
-        with self.lock:
-            job = self.get(job_id, owner)
-            job["artifacts"][fmt] = "failed" if error else "ready"
-            if error:
-                job["exportError"] = error
-            self.save(job)
+        self.artifact_state(owner, job_id, fmt, "failed" if error else "ready", error)
 
 
 def handler(jobs, token):
@@ -312,7 +420,7 @@ def handler(jobs, token):
         def do_POST(self):
             owner = self.owner()
             if owner is None: return
-            export = re.fullmatch(r"/v1/jobs/([a-f0-9-]{36})/export/(solidworks|edrawings)", self.path)
+            export = re.fullmatch(r"/v1/jobs/([a-f0-9-]{36})/export/(solidworks|edrawings|edrawings-exe)", self.path)
             if self.path != "/v1/jobs" and not export: self.json({"error": "Not found"}, 404); return
             try:
                 length = int(self.headers.get("Content-Length", "0"))
@@ -357,7 +465,7 @@ def handler(jobs, token):
             path = jobs.state / job["id"] / filenames[fmt]
             if not path.is_file(): self.json({"error": "Файл результата отсутствует"}, 404); return
             self.send_response(200)
-            mime = {"solidworks": "application/zip", "edrawings": "application/octet-stream", "report": "application/json"}
+            mime = {"solidworks": "application/zip", "edrawings": "application/octet-stream", "edrawings-exe": "application/octet-stream", "report": "application/json"}
             self.send_header("Content-Type", mime[fmt])
             self.send_header("Content-Length", str(path.stat().st_size)); self.end_headers()
             try:
@@ -373,13 +481,14 @@ def main():
     parser.add_argument("--root", type=Path, required=True); parser.add_argument("--state", type=Path, required=True)
     parser.add_argument("--runner", type=Path, required=True); parser.add_argument("--template", type=Path, required=True)
     parser.add_argument("--part-template", type=Path)
-    parser.add_argument("--timeout", type=int, default=1800)
+    parser.add_argument("--timeout", type=int, default=1800, help="Seconds without forward progress")
+    parser.add_argument("--max-runtime", type=int, default=14400, help="Absolute safety limit per stage in seconds")
     args = parser.parse_args()
     token = os.environ.get("CAD_EXPORT_TOKEN", "")
     if len(token) < 24: parser.error("Задайте CAD_EXPORT_TOKEN длиной не менее 24 символов")
     if not args.runner.is_file() or not args.template.is_file(): parser.error("Не найден исполнитель или шаблон сборки")
     if args.part_template and not args.part_template.is_file(): parser.error("Не найден шаблон детали")
-    jobs = Jobs(args.state, args.root, args.runner, args.template, timeout=args.timeout, part_template=args.part_template)
+    jobs = Jobs(args.state, args.root, args.runner, args.template, timeout=args.timeout, part_template=args.part_template, max_runtime=args.max_runtime)
     server = ThreadingHTTPServer((args.host, args.port), handler(jobs, token))
     try: server.serve_forever()
     finally: server.server_close(); jobs.close()

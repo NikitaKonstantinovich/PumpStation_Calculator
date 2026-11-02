@@ -8,6 +8,6 @@ export async function GET(request: Request, context: { params: Promise<{ id: str
   const format = query.get("format");
   if (!format) return cadRequest(request, `/v1/jobs/${id}/download`, undefined, true); // Previously issued links.
   const key = query.get("snapshotKey") ?? "";
-  if (!["solidworks", "edrawings", "report"].includes(format) || !/^[a-f0-9]{64}$/.test(key)) return json({ error: "Некорректный запрос скачивания." }, 400);
+  if (!["solidworks", "edrawings", "edrawings-exe", "report"].includes(format) || !/^[a-f0-9]{64}$/.test(key)) return json({ error: "Некорректный запрос скачивания." }, 400);
   return cadRequest(request, `/v1/jobs/${id}/download?format=${format}&snapshotKey=${key}`, undefined, true);
 }

@@ -197,7 +197,7 @@ function seatLooseFlanges(branch: Component[], joints: LineJoint[]) {
   }
 }
 
-export function addLineAssemblies(base: Assembly, project: ProjectConfig, profiles: ProfileCatalog, data: LineCatalog): Assembly {
+export function addLineAssemblies(base: Assembly, project: ProjectConfig, profiles: ProfileCatalog, data: LineCatalog, verticalPumpIds: ReadonlySet<string> = new Set()): Assembly {
   const rows = (project.entities["station-spec"] as SpecEntity).items;
   const components = base.components.filter(c => !c.routing && !c.id.startsWith("spec-")).map(c => structuredClone(c));
   const joints: LineJoint[] = [], endpoints = new Map<string, Array<{ pumpId: string; point: Vec3; axis: Vec3; from: PortRef; provisional: boolean }>>();
@@ -228,7 +228,9 @@ export function addLineAssemblies(base: Assembly, project: ProjectConfig, profil
         let b = ports.find(p => p !== a && /^(right|outlet|small-end)$/.test(p.id)) ?? ports[1];
         // Reducers lead out from the pump's smaller end. Check valves follow actual flow.
         if (g.kind === "reducer" || /reducer$/.test(role) || ["collar", "weldFlange"].includes(g.kind ?? "") && reverseEnd(entry, prefix) || side === "suction" && /CheckValve/.test(role)) [a, b] = [b, a];
-        const rollDischargeValve = side === "discharge" && row.option === `${prefix}DischargeValve` && /затвор/i.test(row.name);
+        const butterfly = row.option === `${prefix}${side === "discharge" ? "Discharge" : "Suction"}Valve` && /затвор/i.test(row.name);
+        const upright = butterfly && verticalPumpIds.has(pump.equipmentId ?? "");
+        const rollDischargeValve = butterfly && side === "discharge" && !upright;
         const suctionPort = pump.ports.find(p => p.id === "inlet");
         const targetUp = rollDischargeValve ? dischargeValveUp(axis, sub(suctionPort ? world(pump, suctionPort.point) : pump.position, point)) : undefined;
         const rotation = mountingRotation(a.axis ? mul(a.axis, -1) : norm(sub(b.point, a.point)), axis, a.up, targetUp);
@@ -237,7 +239,7 @@ export function addLineAssemblies(base: Assembly, project: ProjectConfig, profil
         if (quantity !== 1) issues.push(`Количество на ветвь: ${quantity}. Группа требует размещения отдельных элементов по сверловке`);
         const start = auxiliary && !role.endsWith("-looseFlange") ? add(point, [0, 0, 100 + index * 20]) : point;
         const c: Component = { id, name: row.name, kind: g.kind === "pipe" && g.shape?.kind === "tube" && !g.template ? "pipe" : "equipment", equipmentId: row.equipmentId, sourceKey: `equipment:${row.equipmentId ?? role}`,
-          sourceNote: [g.source, ...(rollDischargeValve ? ["Напорный затвор повёрнут на 90° вокруг оси трубы в сторону всасывающего патрубка; монтажные плоскости сохранены"] : []), ...issues].join(". "), position: sub(start, rotate(a.point, rotation)), rotation, hidden: false, locked: false, opacity: 1,
+          sourceNote: [g.source, ...(upright ? ["Затвор вертикального насоса установлен приводом вверх"] : rollDischargeValve ? ["Напорный затвор повёрнут на 90° вокруг оси трубы в сторону всасывающего патрубка; монтажные плоскости сохранены"] : []), ...issues].join(". "), position: sub(start, rotate(a.point, rotation)), rotation, hidden: false, locked: false, opacity: 1,
           parameters: { length: g.length ?? 1, width: 1, height: 1, diameter: g.shape?.outerMm ?? 1, routeOffset: 0, ...(g.wall ? { wallThickness: g.wall } : {}) }, ports,
           bounds: g.bounds, shape: g.shape, meshUrl: g.meshUrl, cadSource: g.cadSource,
           ...(g.template ? { insertion: { template: g.template, hiddenPieceIds: [] } } : {}),

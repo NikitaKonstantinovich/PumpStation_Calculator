@@ -8,6 +8,8 @@ const { synchronizeCollectors } = await loadTs(new URL("../app/collector-project
 const { buildSuctionSpec, checkSuctionSpecPressure, suctionFingerprint } = await loadTs(new URL("../app/suction-spec.ts", import.meta.url));
 const { buildDischargeSpec, checkDischargeSpecPressure, dischargeFingerprint } = await loadTs(new URL("../app/discharge-spec.ts", import.meta.url));
 const { selectVibrationCompensator } = await loadTs(new URL("../app/line-vibration.ts", import.meta.url));
+const { vibrationBoltSeat } = await loadTs(new URL("../app/vibration-fasteners.ts", import.meta.url));
+const { vibrationExecution } = await loadTs(new URL("../app/vibration-dimensions.ts", import.meta.url));
 const { makeCollectorCatalog } = await loadTs(new URL("../app/collector-catalog.ts", import.meta.url));
 const binding = JSON.parse(await readFile(new URL("../public/binding-components.json", import.meta.url), "utf8"));
 const catalog = makeCollectorCatalog(binding);
@@ -46,7 +48,10 @@ test("both lines use nozzle-sized compensators followed by a separate rigid inse
     for (const joint of ["pump", "insertion"]) {
       assert.equal(role(rows, `primary-vibration-${joint}-gasket`), undefined);
       for (const hardware of ["bolts", "nuts", "washers"]) assert.equal(role(rows, `primary-vibration-${joint}-fasteners-${hardware}`).quantity, 24);
-      assert.equal(role(rows, `primary-vibration-${joint}-fasteners-bolts`).price, null, "missing compensator flange dimensions must not produce guessed bolts");
+      const bolt = role(rows, `primary-vibration-${joint}-fasteners-bolts`);
+      assert.ok(bolt.equipmentId && bolt.price > 0);
+      assert.match(bolt.name, /М16х\d+ DIN933/);
+      assert.match(bolt.description, /Толщина фланца виброкомпенсатора 16 мм \(STEP\).*Отступ от уплотнительной плоскости 7.5 мм/);
     }
     assert.equal(role(rows, "primary-pump-gasket"), undefined, "old pump joint must not be duplicated");
     const branchGaskets = rows.filter(row => row.assemblyRole.startsWith("primary-") && /gasket/.test(row.assemblyRole));
@@ -103,23 +108,39 @@ test("threaded and mixed branches keep compatible rigid inserts and count every 
   }
 });
 
-test("a bare compensator thickness without provenance or a confirmed insert never sizes its joints", () => {
+test("only a sourced item dimension overrides the CAD ring thickness; the recess remains in the grip", () => {
   const items = structuredClone(binding.items);
   const selected = selectVibrationCompensator(items, 80, 16, "flanged");
-  selected.item.fields.push(field("Толщина фланца, мм", 20));
+  selected.item.fields.push(field("Толщина фланца, мм", 32));
   for (const build of Object.values(builders)) {
     const rows = build(fixture(), { items }, catalog);
-    assert.equal(role(rows, "primary-vibration-insertion-fasteners-bolts").price, null);
-    assert.equal(role(rows, "primary-vibration-pump-fasteners-bolts").price, null);
+    for (const side of ["pump","insertion"]) assert.match(role(rows, `primary-vibration-${side}-fasteners-bolts`).description, /16 мм \(STEP\)/);
   }
   selected.item.fields.push(field("Источник толщины фланца", "test drawing"), field("Дата проверки толщины фланца", "2026-10-31"));
   for (const build of Object.values(builders)) {
     const rows = build(fixture(), { items }, catalog);
     const bolts = role(rows, "primary-vibration-pump-fasteners-bolts");
     assert.ok(bolts.price > 0);
-    assert.match(bolts.description, /Толщина фланца виброкомпенсатора 20 мм/);
+    assert.match(bolts.description, /Толщина фланца виброкомпенсатора 32 мм \(карточка изделия\).*Отступ от уплотнительной плоскости 7.5 мм/);
     assert.equal(role(rows, "primary-vibration-pump-gasket"), undefined);
   }
+});
+
+test("use standard flange thickness only for the selected size and pressure when no measured KMS end is available", () => {
+  const selected = selectVibrationCompensator(binding.items, 100, 16, "flanged").item;
+  const execution = vibrationExecution(selected, 16);
+  assert.equal(vibrationBoltSeat(selected, execution, 100, 16, "right").grip, 23.5);
+  const changed = { ...execution, cad: { ...execution.cad, sourceHash: "0".repeat(64) } };
+  const fallback = vibrationBoltSeat(selected, changed, 100, 16, "right");
+  assert.equal(fallback.grip, 26); assert.match(fallback.source, /стандартного фланца DN100 PN16/);
+  assert.equal(vibrationBoltSeat(undefined, execution, 100, 16, "left").grip, null);
+  assert.equal(vibrationBoltSeat(selected, execution, 100, 63, "left").grip, null);
+  const rows = buildSuctionSpec(fixture({pumpDn:100,pn:25}), binding, catalog);
+  const bolt = role(rows, "primary-vibration-pump-fasteners-bolts");
+  assert.match(bolt.description, /стандартного фланца DN100 PN25/);
+  assert.match(bolt.details, /расчёт по стандартному фланцу/);
+  assert.ok(bolt.price > 0);
+  assert.equal(role(rows, "primary-vibration-pump-gasket").quantity, 3);
 });
 
 test("second circuits use their own port sizes, quantities and PN; disabling option removes the assembly", () => {

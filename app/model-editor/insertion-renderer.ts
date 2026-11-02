@@ -30,7 +30,7 @@ export function disposeInsertionObject(object: THREE.Object3D) {
   object.traverse(o => { if (o instanceof THREE.InstancedMesh) o.dispose(); if (o instanceof THREE.Mesh || o instanceof THREE.LineSegments) { o.geometry.dispose(); for (const m of Array.isArray(o.material) ? o.material : [o.material]) m.dispose(); } });
 }
 export function pieceObject(p: InsertionPiece): THREE.Group {
-  const group = new THREE.Group(), s = p.shape;
+  const group = new THREE.Group(), s: InsertionShape = p.shape.stampedHash ? {kind:"marker"} : p.shape;
   group.userData.pieceId = p.id;
   const outline = p.fidelity === "outline" || p.fidelity === "missing";
   const pipeBody = (s.kind === "tube" || s.kind === "reducer-outline") && p.fidelity !== "missing";

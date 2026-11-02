@@ -18,6 +18,20 @@ function flange(id,x,rotation=0){
     ports:[{id:"left",point:[0,0,0],axis:[-1,0,0],connection:"flanged",dn:80,pn:16},{id:"right",point:[20,0,0],axis:[1,0,0],connection:"weld"}]};
 }
 
+test("CDM65-2 has upright butterfly actuators and eight measured holes on both pump nozzles",async()=>{
+  // Use real KMS counterflanges; an incomplete spec with no discharge
+  // counterflange must still block that joint even with a measured pump.
+  const {assembly:a}=await realStation("425",100,"aisi304",2,true);
+  const valves=a.components.filter(c=>/^(primary|secondary)(SuctionValve|DischargeValve)$/.test(c.line?.role));
+  assert.equal(valves.length,4);for(const c of valves)assert.ok(model.rotate([0,0,1],c.rotation)[2]>.999999);
+  const joints=a.components.filter(c=>c.fastener?.members.some(m=>m.startsWith("pump-1-425-")));
+  assert.equal(joints.length,4);
+  for(const c of joints){assert.equal(c.fastener.status,"ready",c.fastener.issues.join("; "));assert.equal(c.fastener.centers.length,8);}
+  const missing=await realStation("425",100,"aisi304",1,false);
+  const open=missing.assembly.components.find(c=>c.fastener?.members.includes("pump-1-425-0")&&c.fastener.members.some(id=>id.includes("-discharge-")));
+  assert.equal(open.fastener.status,"blocked");assert.match(open.fastener.issues.join(" "),/опорные поверхности/);
+});
+
 test("opening a project with geometry off preserves the scene and defers fastener generation until the editor opens", async()=>{
   const {createProject,parseProjectConfig}=await loadTs(new URL("../app/project-config.ts",import.meta.url));
   const project=createProject(), assembly=pair();
@@ -179,7 +193,8 @@ test("KMS has two independent eight-bolt joints; native STEP offsets do not brid
     const pair=groups.filter(g=>g.fastener.members.includes(c.id));
     assert.equal(pair.length,2);assert.ok(pair.every(g=>g.fastener.count===8&&g.fastener.dimensions.ends===1));
     assert.ok(pair.every(g=>g.fastener.grip>40&&g.fastener.grip<50),"use the recessed steel ring, not the 135 mm full body");
-    assert.ok(pair.every(g=>g.fastener.hardware.rod.length===70));
+    assert.equal(pair.find(g=>g.name.endsWith("к насосу")).fastener.hardware.rod.length,70);
+    assert.equal(pair.find(g=>g.name.endsWith("к вставке")).fastener.hardware.rod.length,65); // Original DN80 stamping: 16 mm from collar to bolt seat.
     assert.ok(pair.some(g=>g.name.endsWith("к насосу")));assert.ok(pair.some(g=>g.name.endsWith("к вставке")));
     const broken=model.editComponent(assembly,{id:c.id,patch:{position:model.add(c.position,[0,0,5])}});
     assert.ok(broken.components.filter(g=>g.fastener?.members.includes(c.id)).every(g=>g.fastener.status==="blocked"));

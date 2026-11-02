@@ -2,6 +2,7 @@
 
 import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from "react";
 import * as THREE from "three";
+import { stampedPart } from "./stamped-flanges";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { TransformControls } from "three/addons/controls/TransformControls.js";
 import { STLLoader } from "three/addons/loaders/STLLoader.js";
@@ -269,7 +270,7 @@ class Scene {
       for (const c of options.assembly.components) {
         const object = componentObject(options.assembly, c, this.insertionCache, this.collectorCache); this.objects.set(c.id, object); this.root.add(object);
         if (c.meshUrl) this.loadMesh(c, object, this.revision);
-        if (c.collector || c.insertion || c.shape?.kind === "mesh") this.loadInsertionMeshes(c, object, this.revision);
+        if (c.collector || c.insertion || c.shape?.kind === "mesh" || c.shape?.stampedHash) this.loadInsertionMeshes(c, object, this.revision);
       }
       if (!this.hasCamera) this.fit();
     }
@@ -306,15 +307,21 @@ class Scene {
   }
   loadInsertionMeshes(c: Component, object: THREE.Group, revision: number) {
     const pieces = c.collector?.template.pieces ?? c.insertion?.template.geometry.pieces ?? (c.shape ? [{ id: "line-body", name: c.name, shape: c.shape }] : []);
-    for (const piece of pieces.filter(p => p.shape.kind === "mesh")) {
-      void this.mesh(piece.shape.meshUrl!).then(geometry => {
+    for (const piece of pieces) {
+      const stamped=stampedPart(piece.shape);
+      const url=stamped ? `/model-assets/stamped-${stamped.sourceHash}.stl` : piece.shape.kind==="mesh" ? piece.shape.meshUrl : undefined;
+      if(!url) continue;
+      void this.mesh(url).then(geometry => {
         if (this.disposed || this.revision !== revision) return;
         let target: THREE.Object3D | undefined;
         object.traverse(o => { if (o.userData.pieceId === piece.id) target = o; });
         if (!target) return;
         for (const child of [...target.children]) { target.remove(child); disposeObject(child); }
-        const mesh = new THREE.Mesh(geometry.clone(), material({ ...c, opacity: c.opacity * (c.collector?.pieceOpacities?.[piece.id] ?? 1) }));
-        mesh.position.fromArray(piece.shape.modelPosition ?? [0, 0, 0]); mesh.rotation.set(...(piece.shape.modelRotation ?? [0, 0, 0]).map(a => a * Math.PI / 180) as Vec3);
+        const finish=material({ ...c, opacity: c.opacity * (c.collector?.pieceOpacities?.[piece.id] ?? 1) });
+        // The stainless backing ring is a separate part, including inside a coloured fitting.
+        if(stamped){ finish.color.setHex(0xb7c2c9); finish.metalness=.55; finish.roughness=.38; }
+        const mesh = new THREE.Mesh(geometry.clone(), finish);
+        if(!stamped){mesh.position.fromArray(piece.shape.modelPosition ?? [0, 0, 0]); mesh.rotation.set(...(piece.shape.modelRotation ?? [0, 0, 0]).map(a => a * Math.PI / 180) as Vec3);}
         target.add(mesh); this.highlight();
       }).catch(() => { if (!this.disposed && this.revision === revision) this.options?.onAssetError(`${piece.name}: CAD-копия недоступна; показан условный габарит, геометрия не полная.`); });
     }

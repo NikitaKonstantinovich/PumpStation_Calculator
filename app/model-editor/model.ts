@@ -18,6 +18,7 @@ import { VIBRATION_DIMENSIONS_REVISION } from "../vibration-dimensions";
 import { FRAME_RULE_REVISION, projectFrameSelection } from "../frame-selection";
 import { addValveControls, followValveControls, parseValveControl, VALVE_CONTROL_REVISION, type ValveControl } from "./valve-controls";
 import { isHardwareRow, rebuildFasteners } from "./flange-fasteners";
+import { upgradeStampedFlanges } from "./stamped-flanges";
 import { FASTENER_REVISION, parseFastenerBinding, parseFastenerCatalog, type FastenerBinding, type FastenerCatalog } from "./fastener-types";
 import { resolvePumpLayout, parsePumpGeometry, type PumpGeometryInfo } from "./pump-spatial";
 import { addInstrumentAssemblies, followInstrumentAssemblies, parseInstrumentMount, INSTRUMENT_MOUNT_REVISION, type InstrumentMount } from "./instrument-assemblies";
@@ -73,6 +74,7 @@ const vec = (v: unknown): v is Vec3 => Array.isArray(v) && v.length === 3 && v.e
 const safeId = (v: unknown): v is string => typeof v === "string" && v.length > 0 && v.length <= 240;
 const safeMesh = (v: unknown): v is string => typeof v === "string" && (/^\/model-assets\/[a-zA-Z0-9_-]+\.stl$/.test(v) || /^\/api\/model-preparation\/assets\/model-[a-f0-9]{64}-v1\.stl$/.test(v));
 
+const INVALID_INSERTION = "Повреждён или не поддерживается сохранённый шаблон вставки. Загрузите позицию из базы заново.";
 export function normalizeEditor(raw: unknown, rebuildGeometry = true): EditorState {
   const value = object(raw), result = emptyEditor();
   if (value.version !== 1) return result;
@@ -150,7 +152,7 @@ export function normalizeEditor(raw: unknown, rebuildGeometry = true): EditorSta
       component.meshUrl = undefined;
       component.equipmentId = template.source.recordId ? `calculated-insertion:${template.source.recordId}` : component.line?.equipmentId;
     } else if (c.insertion !== undefined) {
-      component.sourceNote = "Повреждён или не поддерживается сохранённый шаблон вставки. Загрузите позицию из базы заново.";
+      component.sourceNote = INVALID_INSERTION;
       component.ports = []; component.meshUrl = undefined; component.orphaned = true;
     }
     if (typeof cadSource.path === "string" && typeof cadSource.hash === "string" && /^[a-f0-9]{64}$/.test(cadSource.hash)) component.cadSource = { path: cadSource.path.slice(0, 1000), hash: cadSource.hash };
@@ -166,7 +168,9 @@ export function normalizeEditor(raw: unknown, rebuildGeometry = true): EditorSta
   if (Array.isArray(assembly.lineJoints)) result.assembly.lineJoints = parseLineJoints(assembly.lineJoints);
   if (typeof assembly.lineDataRevision === "string") result.assembly.lineDataRevision = assembly.lineDataRevision.slice(0, 1000);
   result.assembly.fastenerCatalog = parseFastenerCatalog(assembly.fastenerCatalog);
-  if (rebuildGeometry) result.assembly = rebuildFasteners(followTankConnections(followInstrumentAssemblies(result.assembly)));
+  const upgraded=upgradeStampedFlanges(result.assembly);
+  if (rebuildGeometry) result.assembly = rebuildFasteners(followTankConnections(followInstrumentAssemblies(upgraded)));
+  else if(upgraded!==result.assembly) result.assembly=rebuildFasteners(upgraded);
   if (!ids.has(result.selectedId ?? "")) result.selectedId = null;
   return result;
 }
@@ -435,7 +439,7 @@ export function buildAssembly(project: ProjectConfig, pumps: Pump[], profiles: P
   const assembly: Assembly = { version: 1, sourceFingerprint: sourceFingerprint(project), components };
   for (const c of components) if (c.routing) c.routing.points = pipePoints(assembly, c);
   const complete = withSpecificationModels(assembly, project, profiles, lines);
-  const withLines = lines ? addLineAssemblies(complete, project, profiles, lines) : complete;
+  const withLines = lines ? addLineAssemblies(complete, project, profiles, lines, new Set(pumps.filter(p => p.type === "vertical_multistage").map(p => p.id))) : complete;
   return rebuildFasteners({ ...addTankConnections(addInstrumentAssemblies(addValveControls(withLines, project), project), project), fastenerCatalog: lines?.fasteners });
 }
 
@@ -526,6 +530,25 @@ export function recoverEmptyCollectors(saved: Assembly, generated: Assembly): As
     return applyCollectorTemplate(component, template);
   });
   return repaired ? {...saved, components} : saved;
+}
+
+/** Old clients dropped valid server templates while decoding their SHA. Recover
+ * just the lost bodies of matching specification instances, in their saved poses. */
+export function recoverLostInsertions(saved: Assembly, generated: Assembly, rows: SpecEntity["items"]): Assembly {
+  let repaired=false;
+  const components=saved.components.map(c=>{
+    if(c.insertion || !c.orphaned || c.kind!=="equipment" || !c.line || c.line.manualGeometry ||
+       !c.equipmentId?.startsWith("calculated-insertion:") || c.sourceNote!==INVALID_INSERTION) return c;
+    const snap=rows.find(r=>r.position===c.line!.specPosition && r.equipmentId===c.equipmentId)?.insertionAssembly?.snapshot;
+    const fresh=generated.components.find(f=>f.id===c.id && f.equipmentId===c.equipmentId);
+    const t=fresh?.insertion?.template;
+    if(!snap || !fresh?.line || !t || t.source.recordId!==snap.id || t.source.revision!==snap.revision ||
+       t.source.identityKey!==snap.identityKey || t.geometry.totalLengthMm!==c.line.length || !parseInsertionTemplate(t)) return c;
+    repaired=true;
+    return {...c, orphaned:false, insertion:fresh.insertion, bounds:t.geometry.bounds, ports:fresh.ports,
+      sourceNote:fresh.sourceNote, line:{...c.line,issues:fresh.line.issues,fidelity:fresh.line.fidelity}};
+  });
+  return repaired ? rebuildFasteners({...saved,components}) : saved;
 }
 
 /** Synchronization retains manual geometry, removed components, and unsupported connections for review. */

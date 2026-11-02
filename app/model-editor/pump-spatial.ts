@@ -1,5 +1,6 @@
 import type { Pump, PumpSpatialData } from "../pump-catalog";
 import type { Bounds, Port, PumpProfile, Vec3 } from "./model";
+import { applyMvFlowReview } from "./onis-flow";
 
 export type PumpGeometryInfo = {
   version: 1;
@@ -41,6 +42,7 @@ export function parsePumpGeometry(raw: unknown): PumpGeometryInfo | undefined {
 /** A missing CAD mesh does not discard its measured envelope or port frame.
  * DN, packing dimensions and extra instrument connections are not coordinates. */
 export function resolvePumpSpatial(pump: Pump, profile?: PumpProfile): { bounds: Bounds; ports: Port[]; info: PumpGeometryInfo; note: string } {
+  profile = applyMvFlowReview(pump.id, profile);
   const dimensions = pump.dimensions ?? {}, issues: string[] = [];
   const sizes = ["length", "width", "height"].map(key => positive(dimensions[`overall_${key}`]) ? dimensions[`overall_${key}`] : null) as PumpGeometryInfo["dimensionsMm"];
   const measured = validBounds(profile?.bounds);

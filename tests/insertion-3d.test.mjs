@@ -1,11 +1,10 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { readFile } from "node:fs/promises";
-import { createHash } from "node:crypto";
 import { loadTs } from "./load-ts.mjs";
 const fixture = JSON.parse(await readFile(new URL("./fixtures/insertion-3d.json", import.meta.url), "utf8"));
-globalThis.__insertion3dHash = value => createHash("sha256").update(value).digest("hex");
-const replacements = { [new URL("../app/auth-server.ts", import.meta.url).href]: "export const sha256=async value=>globalThis.__insertion3dHash(value);" };
+const authUrl = new URL("../app/auth-server.ts", import.meta.url);
+const replacements = { [authUrl.href]: (await readFile(authUrl,"utf8")).replace('import { env } from "cloudflare:workers";','const env = {};') };
 const server = await loadTs(new URL("../app/component-insert-3d-server.ts", import.meta.url), replacements);
 const core = await loadTs(new URL("../app/model-editor/insertion-template.ts", import.meta.url));
 const model = await loadTs(new URL("../app/model-editor/model.ts", import.meta.url));
@@ -16,6 +15,27 @@ const build = (i, angle = 0, f = fixture) => server.insertion3d(f.rows[i], f.sou
 const close = (a, b) => assert.ok(Math.abs(a - b) < 1e-6, `${a} != ${b}`);
 const closeVec = (a, b) => a.forEach((n, i) => close(n, b[i]));
 const partPose = (piece, point) => model.add(piece.position, model.rotate(point, piece.rotation));
+
+test("restore a lost placed insert only for the saved revision, then reopen its production-format key",async()=>{
+  const template=await build(1);
+  assert.equal(template.geometryKey.length,43);
+  const fresh=core.insertionComponent(template,"branch-1");
+  const length=template.geometry.totalLengthMm;
+  fresh.line={specPosition:"03.04",length,issues:[],fidelity:"parametric"};
+  const old={...fresh,position:[12,16,875],rotation:[5,-32,90],locked:true,hidden:true,insertion:undefined,
+    orphaned:true,sourceNote:"Повреждён или не поддерживается сохранённый шаблон вставки. Загрузите позицию из базы заново."};
+  const saved={version:1,components:[old]},generated={version:1,components:[fresh]};
+  const row={position:"03.04",equipmentId:fresh.equipmentId,insertionAssembly:{snapshot:{id:template.source.recordId,revision:2,identityKey:template.source.identityKey}}};
+  assert.equal(model.recoverLostInsertions(saved,generated,[row]),saved);
+  row.insertionAssembly.snapshot.revision=3;
+  const result=model.recoverLostInsertions(saved,generated,[row]);
+  const restored=result.components[0];
+  assert.deepEqual([restored.position,restored.rotation,restored.hidden,restored.locked],[old.position,old.rotation,true,true]);
+  assert.equal(restored.insertion.template,template);
+  assert.equal(model.recoverLostInsertions(result,generated,[row]),result);
+  assert.ok(validation.parseInsertionTemplate({...template,geometryKey:"f".repeat(64)}));
+  assert.equal(validation.parseInsertionTemplate({...template,geometryKey:template.geometryKey+"!"}),null);
+});
 
 test("real DN125–65 PN25 uses 127 mm reducer, 137 mm finished length and 5 mm seats without pipe extensions", async () => {
   const t = await build(0), g = t.geometry;

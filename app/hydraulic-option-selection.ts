@@ -129,7 +129,6 @@ export function assessHydraulicProduct(item: AssemblyComponent, need: HydraulicP
     else if (!facts.pn.length) missing.push("Не подтверждено исполнение соединения по PN.");
     else if (!facts.pn.includes(need.pn)) incompatible.push(`Нет подтверждённого соединения PN${need.pn}; повышенный PN сам по себе не подтверждает совместимость.`);
     if (need.kind === "flange-plug") equal("материал", facts.material, need.material);
-    if (need.kind === "isolating-valve" && need.color && !(need.color === "red" ? /Красный/i : /Синий/i).test(item.family)) incompatible.push("Исполнение затвора не соответствует цвету принятой арматуры станции.");
     if (need.kind === "isolating-valve" && !need.actuator) missing.push("Не выбрано исполнение затвора: рукоятка, редуктор или шток.");
   }
   return { item, missing, incompatible, technicalStatus: incompatible.length ? "error" : missing.length ? "unverified" : "ready" };
@@ -137,7 +136,8 @@ export function assessHydraulicProduct(item: AssemblyComponent, need: HydraulicP
 /** Price never participates in compatibility or candidate ordering. Explicit choices survive catalogue changes. */
 export function selectHydraulicProduct(items: AssemblyComponent[], need: HydraulicProductRequirement, selectedId?: string) {
   const candidates = items.filter(item => hydraulicProductKind(item) === need.kind).map(item => assessHydraulicProduct(item, need));
-  const compatible = candidates.filter(candidate => !candidate.incompatible.length).sort((a, b) => a.missing.length - b.missing.length
+  const colorRank = (item: AssemblyComponent) => Number(need.kind === "isolating-valve" && !!need.color && !(need.color === "red" ? /красн/i : /син/i).test(item.family));
+  const compatible = candidates.filter(candidate => !candidate.incompatible.length).sort((a, b) => a.missing.length - b.missing.length || colorRank(a.item) - colorRank(b.item)
     || (need.kind === "transducer" ? (hydraulicProductFacts(a.item).range?.max ?? Infinity) - (hydraulicProductFacts(b.item).range?.max ?? Infinity) : 0)
     || a.item.id.localeCompare(b.item.id));
   const selected = selectedId ? candidates.find(candidate => candidate.item.id === selectedId) : compatible[0];

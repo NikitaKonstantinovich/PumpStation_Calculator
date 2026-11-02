@@ -75,7 +75,7 @@ export function validateCollarReference(reference: CollarDimensionReference) {
 }
 
 /** Product dimensions only: neither the drawing nor matching a tube certifies PN. */
-export function reviewCollarDimensions(item: Item, sourceSha256: string, reference: CollarDimensionReference, effectivePn?: number | null) {
+export function reviewCollarDimensions(item: Pick<Item, "id" | "catalogId" | "family" | "fields"> & Partial<Pick<Item, "tableId">>, sourceSha256: string, reference: CollarDimensionReference, effectivePn?: number | null) {
   if (sourceSha256 !== reference.sourceSha256 || item.catalogId !== "воротники" || !/AISI\s*304/i.test(item.family)) return null;
   const dn = number(value(item, /^DN$/i)), cad = reference.cadRows?.find(row => row.componentId === item.id);
   const adopted = reference.userRows?.find(row => row.componentId === item.id), exact = adopted ?? cad;

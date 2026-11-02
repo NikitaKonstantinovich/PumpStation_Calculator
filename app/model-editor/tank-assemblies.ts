@@ -1,5 +1,5 @@
 import models from "../../data/tank-models.json";
-import { TANK_LAYOUT_REVISION, TANK_PUMP_GAP_MM, tankConnectionDn } from "../tank-connection";
+import { TANK_LAYOUT_REVISION, TANK_PUMP_GAP_MM, TANK_VALVE_20_ID, tankConnectionDn } from "../tank-connection";
 import type { ProjectConfig, SettingsEntity, SpecEntity } from "../project-config";
 import type { Assembly, Bounds, Component, Port, Vec3 } from "./model";
 import { composeValvePose, relativePose } from "./valve-controls";
@@ -21,8 +21,9 @@ export function parseTankMount(value: unknown): TankMount | undefined {
     position:[...v.position],rotation:[...v.rotation],...(v.manual===true?{manual:true}:{})};
 }
 export function retainedTankMount(old: TankMount | undefined, next: TankMount): TankMount {
-  if(old?.manual&&old.revision==="tank-end200-pump-gap200-v1"&&old.volume===next.volume&&old.mode===next.mode){
-    if(old.volume===8){const pose=composeValvePose(next,{position:[old.position[0],old.position[1],old.position[2]+12],rotation:old.rotation});return {...next,...pose,manual:true};}
+  if(old?.manual&&old.role===next.role&&old.volume===next.volume&&old.mode===next.mode&&["tank-dn20-body-only-v2","tank-end200-pump-gap200-v1"].includes(old.revision)){
+    if(old.volume===8&&old.role==="tank"&&old.parentId!==next.parentId&&next.parentId==="tank-discharge-valve")
+      return {...next,...relativePose(valveOutletPose(),old),manual:true};
     return {...next,position:old.position,rotation:old.rotation,manual:true};
   }
   return old?.manual&&old.revision===next.revision&&old.volume===next.volume&&old.mode===next.mode
@@ -67,35 +68,37 @@ function fitAutomaticFrame(assembly:Assembly):Assembly{
       sourceNote:c.sourceNote.includes("Рама охватывает бак")?c.sourceNote:`${c.sourceNote} Рама охватывает бак с зазором 200 мм от последнего насоса; показан компоновочный контур. Несущая способность, отверстия и стоимость расширения требуют подтверждения.`};
   })};
 }
-/** Keep the 8 L body at its previous mounting height while omitting the valve
- * from the scene. This is a layout offset, not a direct rigid pipe joint. */
-function directTankPose(){
+function valveOutletPose(){
   const valve=models.assets.valve20,outlet=valve.ports.find(p=>p.id==="outlet")!;
-  const frame=composeValvePose({position:valve.position as Vec3,rotation:valve.rotation as Vec3},
+  return composeValvePose({position:valve.position as Vec3,rotation:valve.rotation as Vec3},
     {position:outlet.point as Vec3,rotation:mountingRotation([0,0,1],outlet.axis as Vec3,[1,0,0],[1,0,0])});
-  return composeValvePose(frame,{position:[0,0,-12],rotation:[0,0,0]});
 }
 
-/** Old valve/hose components are removed even when locked or retained by a
- * resource refresh. The tank body alone remains bound to its layout anchor. */
 export function followTankConnections(assembly:Assembly,editedId?:string):Assembly{
-  const components=assembly.components.filter(c=>!c.tankMount||c.tankMount.role==="tank");
-  const next=components.map(c=>{
+  const components=assembly.components.filter(c=>!c.tankMount||c.tankMount.role==="tank"||c.tankMount.role==="valve"&&c.tankMount.volume===8&&c.tankMount.revision===TANK_LAYOUT_REVISION&&assembly.components.some(t=>t.tankMount?.role==="tank"&&t.tankMount.volume===8));
+  const placed=new Map(components.map(c=>[c.id,c]));
+  function place(c:Component):Component {
     let binding=c.tankMount;if(!binding)return c;
-    if(binding.volume===8&&binding.parentId==="tank-discharge-valve"){
+    if(binding.volume===8&&binding.parentId==="tank-discharge-valve"&&!placed.has(binding.parentId)){
       const collector=components.find(p=>p.id==="collector-discharge"),port=collector?.ports.find(p=>p.id==="instrument-tank-0");
       if(!collector||!port)return {...c,orphaned:true};
-      const fresh={...binding,...directTankPose(),parentId:collector.id,portId:port.id,revision:TANK_LAYOUT_REVISION};
+      const fresh={...binding,...composeValvePose(valveOutletPose(),{position:[0,0,-12],rotation:[0,0,0]}),parentId:collector.id,portId:port.id,revision:"tank-dn20-body-only-v2"};
       binding=binding.manual?{...fresh,...relativePose(portFrame(collector,port),c),manual:true}:fresh;
     }
-    const parent=components.find(p=>p.id===binding.parentId);if(!parent)return {...c,orphaned:true};
+    const parent=placed.get(binding.parentId);if(!parent||parent.orphaned)return {...c,orphaned:true};
     const port=parent.ports.find(p=>p.id===binding.portId);
     if(binding.mode==="port"&&!port)return {...c,orphaned:true};
     const anchor=binding.mode==="floor"?floorTankAnchor({...assembly,components},parent,c):portFrame(parent,port!);
     const updated=editedId===c.id?{...binding,...relativePose(anchor,c),manual:true}:binding;
     return {...c,...composeValvePose(anchor,updated),tankMount:updated,orphaned:false};
-  });
-  return fitAutomaticFrame({...assembly,components:next,...(assembly.lineJoints?{lineJoints:assembly.lineJoints.filter(j=>!j.id.startsWith("tank-joint-"))}:{})});
+  }
+  for(const role of ["valve","tank"])for(const c of components)if(c.tankMount?.role===role)placed.set(c.id,place(c));
+  const next=[...placed.values()],lineJoints=assembly.lineJoints?.filter(j=>!j.id.startsWith("tank-joint-"));
+  for(const c of next)if(lineJoints&&c.tankMount?.volume===8&&c.tankMount.revision===TANK_LAYOUT_REVISION&&!c.orphaned&&
+      (c.tankMount.role==="valve"||c.tankMount.parentId==="tank-discharge-valve")){
+    lineJoints.push({id:`tank-joint-${c.tankMount.role}`,a:{componentId:c.tankMount.parentId,portId:c.tankMount.portId},b:{componentId:c.id,portId:"inlet"},kind:"thread",overlap:c.tankMount.role==="valve"?10:12,provisional:true});
+  }
+  return fitAutomaticFrame({...assembly,components:next,...(lineJoints?{lineJoints}:{})});
 }
 
 export function addTankConnections(assembly:Assembly,project:ProjectConfig):Assembly{
@@ -112,9 +115,17 @@ export function addTankConnections(assembly:Assembly,project:ProjectConfig):Asse
     parameters:{length:bounds[3]-bounds[0],width:bounds[4]-bounds[1],height:bounds[5]-bounds[2],diameter:1,routeOffset:0}});
   const omitted="Соединительная арматура и подводка учтены в спецификации и не отрисовываются в 3D по указанию пользователя; показаны сгон DN20 и бак.";
   if(volume===8){
-    const d=models.tank8.diameterMm/2,bounds:Bounds=[-d,-d,0,d,d,models.tank8.heightMm],pose=directTankPose();
-    base.components.push(make("Мембранный бак WAV 8 · на коллекторе",bounds,binding(collector.id,port.id,"port",pose.position,pose.rotation),
-      [{id:"inlet",point:[0,0,0],axis:[0,0,-1],dn:20,connection:"threaded",thread:"G3/4",gender:"male",provisional:true}],`${models.tank8.source}. ${models.tank8.note}. ${omitted}`));
+    const d=models.tank8.diameterMm/2,bounds:Bounds=[-d,-d,0,d,d,models.tank8.heightMm];
+    const selected=row.hydraulicAssembly?.parts.find(p=>p.assemblyRole==="tank-valve"&&p.equipmentId===TANK_VALVE_20_ID&&p.quantity===1);
+    const valve=models.assets.valve20;
+    if(selected){
+      const c=make(selected.name,valve.bounds as Bounds,{...binding(collector.id,port.id,"port",valve.position as Vec3,valve.rotation as Vec3),role:"valve",specPosition:selected.position||row.position},structuredClone(valve.ports) as Port[],"Кран LD Pride DN20 G3/4 ВР–ВР. Исходная CAD-модель; глубины навинчивания предварительные.");
+      base.components.push({...c,id:"tank-discharge-valve",equipmentId:selected.equipmentId,sourceKey:`equipment:${selected.equipmentId}`,meshUrl:valve.meshUrl,cadSource:{path:valve.source,hash:valve.sourceHash}});
+    }
+    const pose=composeValvePose(valveOutletPose(),{position:[0,0,-12],rotation:[0,0,0]});
+    const mount=selected?binding("tank-discharge-valve","outlet","port",[0,0,-12],[0,0,0]):binding(collector.id,port.id,"port",pose.position,pose.rotation);
+    base.components.push(make("Мембранный бак WAV 8 · на коллекторе",bounds,mount,
+      [{id:"inlet",point:[0,0,0],axis:[0,0,-1],dn:20,connection:"threaded",thread:"G3/4",gender:"male",provisional:true}],`${models.tank8.source}. ${models.tank8.note}. ${selected?"Установлен на кране DN20.":"Для выбранной позиции крана нет подтверждённой модели."}`));
   }else{
     const last=base.components.filter(c=>c.kind==="pump").at(-1);if(!last)return base;
     const asset=models.assets[`tank${volume}`],tank=make(`Мембранный бак WAV ${volume} · у последнего насоса`,asset.bounds as Bounds,

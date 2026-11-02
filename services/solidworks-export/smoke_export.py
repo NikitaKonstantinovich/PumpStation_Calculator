@@ -1,4 +1,4 @@
-"""Real mixed-source build and both downloads through the private service API."""
+"""Real mixed-source build and all three downloads through the private service API."""
 import argparse
 import hashlib
 from http.server import ThreadingHTTPServer
@@ -22,7 +22,9 @@ def main():
     native = json.loads((args.root / "frontend/data/instrument-mounts.json").read_text(encoding="utf-8"))["assets"]["valve"]
     instances = []
     def part(name, x, geometry):
-        instances.append(dict(id=name, componentId=name, name=name, specPosition=str(len(instances)+1), group="Тестовая ветвь",
+        labels={"tube":"Труба Ø60,3×3 мм L=200 мм", "flange":"Фланец DN65 PN16", "valve":"Кран LD Pride DN15"}
+        instances.append(dict(id=name, componentId=name, name=labels.get(name,name), detailName=labels.get(name,name),
+            appearance={"tube":"red","flange":"metal"}.get(name), specPosition=str(len(instances)+1), group="Тестовая ветвь",
             hidden=name == "flange", transform=[0,1,0,-1,0,0,0,0,1,x,.25,.5,1,0,0,0], geometry=geometry))
     part("tube", 1, dict(kind="tube", lengthMm=200, outerMm=60.3, innerMm=54.3))
     part("valve", 2, dict(kind="native", hash=native["sourceHash"]))
@@ -59,7 +61,10 @@ def main():
         stamp = check.stat().st_mtime_ns
         verified = json.loads(check.read_text(encoding="utf-8-sig"))["instances"]
         assert {p["id"] for p in verified} == {"tube", "valve", "flange"}
-        for fmt, filename in (("solidworks", "project.zip"), ("edrawings", "assembly.easm")):
+        tube=next(p for p in verified if p["id"]=="tube")
+        assert tube["component"].startswith("Труба Ø60.3×3 мм") and tube["file"].lower().endswith(".sldprt")
+        assert tube["solids"]>0 and tube["rgb"][0]>.7 and tube["rgb"][2]<.1
+        for fmt, filename in (("solidworks", "project.zip"), ("edrawings-exe", "assembly.exe"), ("edrawings", "assembly.easm")):
             prefix = "/" + job["id"]
             request(prefix + "/export/" + fmt, {"snapshotKey":key})
             wait(lambda j: j["artifacts"].get(fmt) == "ready")
@@ -70,7 +75,7 @@ def main():
             assert archive.testzip() is None and json.loads(archive.read("export/report.json")) == report
             assert any(p.lower().endswith("pumpstation.sldasm") for p in archive.namelist())
         assert check.stat().st_mtime_ns == stamp
-        print(f"PASS 3/4, ZIP + EASM, {folder}", flush=True)
+        print(f"PASS 3/4, ZIP + EASM + EXE, {folder}", flush=True)
     finally:
         http.shutdown()
         http.server_close()

@@ -4,7 +4,9 @@ import type { SpecItem, ValveConnection } from "./project-config";
 import { matingParts, suctionCatalogItems, type AssemblyComponent } from "./suction-catalog";
 import { componentPressureLimit } from "./suction-pressure";
 import { itemDn, price, lineSpecParts } from "./line-spec-parts";
-import { equipmentFlangeThickness, flangeStack, insertionEndThickness, pumpFlangeReference } from "./line-joint-stack";
+import { flangeStack, insertionEndThickness, pumpFlangeReference } from "./line-joint-stack";
+import { vibrationBoltSeat } from "./vibration-fasteners";
+import { jointFlangeThickness } from "./joint-flange-dimensions";
 import { selectLineInsertion, selectLineReducer } from "./line-insertion";
 import { vibrationExecution } from "./vibration-dimensions";
 
@@ -59,13 +61,19 @@ export function addPumpVibrationAssembly({ parts, database, catalog, collector, 
       gasket(`${prefix}-vibration-insertion-gasket`, p.dn, pn, count);
     } else row.description += ` ${mounting?.sealingSource}`;
     const pump = pumpFlangeReference(database, collector.material, p.dn, pn, insertion);
-    const compensator = equipmentFlangeThickness(selected?.item);
+    const pumpSide = vibrationBoltSeat(selected?.item, mounting, p.dn, pn, "left");
+    const insertionSide = vibrationBoltSeat(selected?.item, mounting, p.dn, pn, "right");
+    let end = insertionEndThickness(insertion, "from", database, true);
+    if (!insertion.insertionAssembly && !insertion.insertionRequirement?.design) {
+      const stock = jointFlangeThickness(database, collector.material, p.dn, pn, undefined, undefined, undefined, true);
+      if (!stock.warnings.length && stock.thicknessMm !== null) end = stock.thicknessMm / 2;
+    }
     fasteners(`${prefix}-vibration-pump-fasteners`, p.dn, pn, count,
-      { gaskets: gasketCount, thickness: 0, flangeThickness: flangeStack(pump.thickness, compensator),
-        source: `${pump.source} ${compensator === null ? "Не подтверждена толщина фланца виброкомпенсатора." : `Толщина фланца виброкомпенсатора ${compensator} мм.`}` });
+      { gaskets: gasketCount, thickness: 0, flangeThickness: flangeStack(pump.thickness, pumpSide.grip), allowance: pumpSide.allowance,
+        source: `Стык насос — виброкомпенсатор. ${pump.source} ${pumpSide.source}` });
     fasteners(`${prefix}-vibration-insertion-fasteners`, p.dn, pn, count,
-      { gaskets: gasketCount, thickness: 0, flangeThickness: flangeStack(compensator, insertionEndThickness(insertion,"from",database)),
-        source: "Стык виброкомпенсатор — вставка: нужны подтверждённая толщина собственного фланца компенсатора (источник и дата) и фланец выбранной вставки." });
+      { gaskets: gasketCount, thickness: 0, flangeThickness: flangeStack(insertionSide.grip, end), allowance: insertionSide.allowance,
+        source: `Стык виброкомпенсатор — вставка. ${insertionSide.source} ${end === null ? "Размер конца вставки не подтверждён." : `Со стороны вставки принято ${end} мм до опоры крепежа.`}` });
   } };
   const need={fromDn:p.dn,toDn:v,fromConnection:p.connection,toConnection:connection,pn,purpose:"after-vibration" as const};
 

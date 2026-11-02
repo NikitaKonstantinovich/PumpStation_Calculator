@@ -1,12 +1,12 @@
 "use client";
 
 import { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
-import type { ModelEntity, ProjectConfig } from "../project-config";
+import type { ModelEntity, ProjectConfig, SpecEntity } from "../project-config";
 import type { Pump } from "../pump-catalog";
 import { useRuntimeDiagnostic } from "../diagnostics-ui";
 import {
   addManualPipe, assemblyBounds, buildAssembly, componentBounds, connectionIssues, createHistory, dimensions,
-  distance, worldPoint, editComponent, emptyEditor, normalizeEditor, execute, mergeAssembly, recoverEmptyCollectors, pipePoints, redo, routeLength, setAutomaticRoute,
+  distance, worldPoint, editComponent, emptyEditor, execute, mergeAssembly, recoverEmptyCollectors, recoverLostInsertions, pipePoints, redo, routeLength, setAutomaticRoute,
   sourceFingerprint, undo, combineProfiles, refreshModelAssets, type Assembly, type Component, type Edit, type EditorState, type ProfileCatalog, type Vec3,
 } from "./model";
 import type { ViewportHandle, EditorMode } from "./viewport";
@@ -69,10 +69,18 @@ export function ModelTool({ project, catalogue, entity, onChange }: {
   const resetDialog = useRef<HTMLDialogElement>(null);
   const viewport = useRef<ViewportHandle>(null);
   const toolRoot = useRef<HTMLDivElement>(null);
-  const [initial] = useState(() => ({ saved: entity.editor, ready: entity.editor ? normalizeEditor(entity.editor) : emptyEditor() }));
-  const editor = entity.editor === initial.saved ? initial.ready : entity.editor ?? emptyEditor();
+  // Project loading already validates saved geometry. Rebuilding it here made
+  // the next selection/camera event persist a different set of physical fasteners.
+  const [initial] = useState(emptyEditor);
+  const editor = entity.editor ?? initial;
   const snaps = editor.objectSnaps ?? defaultSnaps();
   const generated = useMemo(() => buildAssembly(project, catalogue, profiles ?? EMPTY_PROFILES, lineData ?? EMPTY_LINES), [project, catalogue, profiles, lineData]);
+  const spec = project.entities["station-spec"] as SpecEntity | undefined;
+  useEffect(()=>{
+    if(!editor.assembly || !profiles || !catalogue.length || !lineData || !spec?.items) return;
+    const repaired=recoverLostInsertions(editor.assembly,generated,spec.items);
+    if(repaired!==editor.assembly) onChange({...entity,editor:{...editor,assembly:repaired}});
+  },[editor,profiles,catalogue.length,lineData,spec,generated,onChange,entity]);
   const assembly = useMemo(() => editor.assembly ? recoverEmptyCollectors(editor.assembly, generated) : generated, [editor.assembly, generated]);
   const missingPlane = useMemo(() => snaps.plane === "face" && !workingPlane(snaps, snapGeometry(assembly)), [snaps, assembly]);
   const displayAssembly = useMemo(() => {
@@ -106,6 +114,10 @@ export function ModelTool({ project, catalogue, entity, onChange }: {
   });
   const selected = assembly.components.find(c => c.id === editor.selectedId);
   const stale = Boolean(editor.assembly && (editor.assembly.sourceFingerprint !== sourceFingerprint(project) || lineData && editor.assembly.lineDataRevision !== lineData.revision));
+  const unassigned = assembly.components.filter(c => c.kind === "pump" && c.ports.some(p => p.id === "port-a"));
+  const recoveredPumps = unassigned.filter(c => c.cadSource && generated.components.some(fresh =>
+    fresh.id===c.id && fresh.cadSource?.hash===c.cadSource?.hash && fresh.ports.some(p=>p.id==="inlet") && fresh.ports.some(p=>p.id==="outlet")
+  ) && generated.components.some(part => part.line?.pumpId === c.id));
   const issues = useMemo(() => connectionIssues(assembly), [assembly]);
   const sourceWarnings = assembly.components.filter(c => !isHardwareRow(c) && (c.kind === "pump" || c.kind === "equipment")).map(c => c.sourceNote);
   const diagnostic = [...(stale ? ["Состав установки изменён. Обновите состав в 3D-редакторе; ручная компоновка сохранена."] : []), ...issues.map(i => i.message), catalogError, assetError, lineError, ...(lineData?.issues ?? [])].filter(Boolean).join("\n");
@@ -216,7 +228,9 @@ export function ModelTool({ project, catalogue, entity, onChange }: {
   return <div className="model-tool" ref={toolRoot}>{tabs}
     <div className="model-tool__mode"><label>Режим <select aria-label="Режим 3D модели" value={entity.mode ?? "preview"} disabled={!profiles || !lineData} onChange={event => changeMode(event.target.value)}><option value="preview">Эскиз установки</option><option value="editor">3D редактор</option></select></label><span>{profiles ? "мм · Z вверх" : "Загрузка библиотеки…"}</span></div>
     {entity.mode !== "editor" ? <div className="model-view"><div className="model-view__stage"><span className="model-view__pipe model-view__pipe--one"/><span className="model-view__pipe model-view__pipe--two"/><span className="model-view__pump model-view__pump--one"/><span className="model-view__pump model-view__pump--two"/><span className="model-view__pump model-view__pump--three"/><b>3D</b></div><p className="model-tool__preview-note">Условный эскиз. Для работы с составом проекта выберите «3D редактор».</p></div> : <div className="model-editor" aria-label="3D редактор установки">
-      {editor.assembly && !editor.assembly.lineJoints && <div className="model-editor__migration" role="status">Сохранена старая сборка без обвязки. Обновите состав, чтобы добавить арматуру из спецификации. Ручные положения сохранятся. <button disabled={!profiles || !lineData} onClick={() => commit(mergeAssembly(assembly, generated))}>Добавить обвязку</button></div>}
+      {editor.assembly && recoveredPumps.length > 0 ? <div className="model-editor__migration" role="status">Для {recoveredPumps.map(c=>c.name).join(", ")} подтверждено направление потока. Теперь можно подключить арматуру к патрубкам. <button disabled={!catalogue.length || !profiles || !lineData} onClick={() => commit(mergeAssembly(assembly, generated))}>Добавить обвязку</button></div>
+        : unassigned.length > 0 && profiles && lineData ? <div className="model-editor__notice" role="status">Для {unassigned.map(c=>c.name).join(", ")} в CAD-профиле не определены всасывающий и напорный патрубки. До проверки направления арматура показана отдельно.</div>
+        : editor.assembly && !editor.assembly.lineJoints && <div className="model-editor__migration" role="status">Сохранена старая сборка без обвязки. Обновите состав, чтобы добавить арматуру из спецификации. Ручные положения сохранятся. <button disabled={!profiles || !lineData} onClick={() => commit(mergeAssembly(assembly, generated))}>Добавить обвязку</button></div>}
       <div className="model-editor__toolbar" role="toolbar" aria-label="Инструменты 3D редактора">
         <button onClick={undoEdit} disabled={!currentHistory.past.length} title="Отменить последнее изменение модели">↶ Отмена</button><button onClick={redoEdit} disabled={!currentHistory.future.length}>↷ Повтор</button>
         <span className="model-editor__separator"/>

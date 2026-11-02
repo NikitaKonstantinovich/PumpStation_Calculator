@@ -93,7 +93,10 @@ export function buildHydraulicOptions(project: ProjectConfig, resources: { items
       const ordered = [...rules].sort((a,b) => Number(b.stationType !== "all")-Number(a.stationType !== "all")).flatMap(r => r.productIds);
       const eligible = selectHydraulicProduct(database.items,requirement).candidates.filter(c => c.technicalStatus === "ready");
       const preferred = ordered.find(id => eligible.some(c => c.item.id === id));
-      const selectedId = role==="transducer" ? automaticTransducerId(instrumentPressure.headM) : config.products[location] ?? prior ?? preferred;
+      const requestedColor = requirement.kind === "isolating-valve" && requirement.color ? (requirement.color==="red" ? /красн/i : /син/i) : undefined;
+      const sameColor = requestedColor && eligible.filter(c=>requestedColor.test(c.item.family));
+      const automatic = sameColor?.length ? [prior,preferred,...sameColor.map(c=>c.item.id)].find(id=>sameColor.some(c=>c.item.id===id)) : prior ?? preferred;
+      const selectedId = role==="transducer" ? automaticTransducerId(instrumentPressure.headM) : config.products[location] ?? automatic;
       const preferenceNote = role!=="transducer" && !config.products[location] && (!prior || prior === preferred || !preferred) && ordered.length && preferred !== ordered[0] ? "Предпочтительное изделие отсутствует или его совместимость не подтверждена. Использован другой совместимый вариант подбора." : "";
       const selection = role==="transducer"?selectAutomaticTransducer(database.items,instrumentPressure.headM):selectHydraulicProduct(database.items, requirement, selectedId);
       const product = selection.selected?.item, parts: SpecItem[] = [], findings = [...(selection.selected ? [...selection.selected.incompatible, ...selection.selected.missing] : [selection.explanation])];

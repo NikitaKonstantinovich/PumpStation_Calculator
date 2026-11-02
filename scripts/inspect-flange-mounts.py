@@ -75,6 +75,22 @@ def inspect(task):
         if key in merged: merged[key]['angle']+=c['angle']
         else: merged[key]=dict(c)
     cylinders=[c for c in merged.values() if abs(c['angle']-2*math.pi)<1e-4]
+    # CDM65: a relieved front face trims opposite halves of a through hole
+    # at different X values. Accept paired semicylinders only with a shared
+    # end and an independently verified open bore surrounded by solid metal.
+    halves=[c for c in merged.values() if abs(c['angle']-math.pi)<1e-4]
+    for i,a in enumerate(halves):
+        matches=[b for b in halves[i+1:] if all(abs(a[k]-b[k])<1e-4 for k in ('y','z','diameter'))
+                 and min(abs(a['lo']-b['lo']),abs(a['hi']-b['hi']))<1e-4
+                 and max(abs(a['lo']-b['lo']),abs(a['hi']-b['hi']))<=1.1]
+        if len(matches)!=1:continue
+        b=matches[0]; lo=max(a['lo'],b['lo']); hi=min(a['hi'],b['hi'])
+        if hi-lo<8:continue
+        x=(lo+hi)/2; r=a['diameter']/2
+        def ring_empty(radius,angle):
+            return empty_point(x,a['y']+radius*math.cos(angle),a['z']+radius*math.sin(angle))
+        if all(ring_empty(r-.1,k*math.pi/8) and not ring_empty(r+.1,k*math.pi/8) for k in range(16)):
+            cylinders.append({**a,'lo':min(a['lo'],b['lo']),'hi':max(a['hi'],b['hi']),'angle':2*math.pi})
     def bearing_plane(holes, end, direction):
         # A chamfer shortens a cylindrical wall. The head/washer must bear on
         # the actual annular plane beyond it, never on the wall's trimmed end.
@@ -125,6 +141,9 @@ def inspect(task):
 
 def main():
     parser=argparse.ArgumentParser(); parser.add_argument('--root',type=Path,default=Path(__file__).resolve().parents[2]); parser.add_argument('--pump-id'); parser.add_argument('--kms',action='store_true'); parser.add_argument('--registered-only',action='store_true'); parser.add_argument('--workers',type=int,default=2)
+    parser.add_argument('--report',type=Path)
+    parser.add_argument('--missing-cdm',action='store_true',help='Inspect CDM profiles without both measured flange mounts')
+    parser.add_argument('--cdm-series',type=int,help='Limit to one catalog family (e.g. 65 for CDM65)')
     args=parser.parse_args(); front=args.root/'frontend'
     profiles=json.loads((front/'public/model-assets/manifest.json').read_text(encoding='utf8'))['profiles']
     tasks=[(str(args.root),key,p) for key,p in profiles.items() if ('/CDM/' in p['source'] and (not args.pump_id or key==args.pump_id))]
@@ -140,6 +159,8 @@ def main():
                 tasks.append((str(args.root),f"KMS-DN{row['dn']}",profile))
     output=front/'data/flange-cad-mounts.json'
     data=json.loads(output.read_text(encoding='utf8'))
+    if args.missing_cdm:tasks=[t for t in tasks if set(data['models'].get(t[2]['sourceHash'],{}))!={'inlet','outlet'}]
+    if args.cdm_series:tasks=[t for t in tasks if f'/CDM/CDM{args.cdm_series}-' in t[2]['source']]
     if args.registered_only:tasks=[t for t in tasks if t[2]['sourceHash'] in data['models']]
     report=[]
     with ProcessPoolExecutor(max_workers=args.workers) as pool:
@@ -161,7 +182,7 @@ def main():
     temporary=output.with_suffix('.json.tmp')
     temporary.write_text(json.dumps(data,ensure_ascii=False,indent=2)+'\n',encoding='utf8')
     temporary.replace(output)
-    report_path=front/'work/flange-mount-audit.json';report_path.parent.mkdir(parents=True,exist_ok=True)
+    report_path=args.report or front/'work/flange-mount-audit.json';report_path.parent.mkdir(parents=True,exist_ok=True)
     report_path.write_text(json.dumps(sorted(report,key=lambda r:r['pumpId']),ensure_ascii=False,indent=2)+'\n',encoding='utf8')
     print(f"Checked {len(tasks)} profiles; supported {sum(bool(r['ports']) for r in report)}; report: {report_path}")
 

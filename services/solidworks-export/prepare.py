@@ -1,15 +1,24 @@
 """Resolve trusted native CAD and construct analytic B-rep parts, never export STL."""
 import argparse
 import hashlib
+import importlib.util
 import json
 import math
 import os
+from functools import lru_cache
 from pathlib import Path
-import sys
 
-HERE = Path(__file__).resolve().parent
-sys.path.insert(0, str(HERE.parents[1] / "scripts"))
-from model_assets import file_hash, load_library  # noqa: E402
+
+@lru_cache(maxsize=1)
+def model_assets(root):
+    """The service may be staged anywhere; --root is the configured installation."""
+    path = root / "frontend/scripts/model_assets.py"
+    if not path.is_file():
+        raise RuntimeError("На CAD-сервере отсутствует frontend/scripts/model_assets.py. Проверьте комплектность установки и CAD_EXPORT_ROOT.")
+    spec = importlib.util.spec_from_file_location("psc_cad_model_assets", path)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
 
 
 def records(value):
@@ -22,7 +31,7 @@ def records(value):
 
 
 def library(root):
-    entries = list(load_library(root).values())
+    entries = list(model_assets(root).load_library(root).values())
     paths = [root / "frontend/public/model-assets/library.json", root / "frontend/data/instrument-mounts.json",
              root / "frontend/data/tank-models.json", root / "frontend/data/valve-control-mounts.json",
              root / "frontend/data/line-valve-models.json", root / "frontend/data/line-gasket-models.json",
@@ -47,7 +56,7 @@ def source(root, entry):
         raise ValueError("CAD-модель должна находиться внутри библиотеки Equipment")
     if not path.is_file():
         raise SourceProblem("source_missing", "Исходный CAD-файл отсутствует в библиотеке.")
-    if file_hash(path) != entry["sourceHash"]:
+    if model_assets(root).file_hash(path) != entry["sourceHash"]:
         raise SourceProblem("source_changed", "SHA-256 исходного файла отличается от выбранной версии.")
     return path
 
@@ -150,6 +159,50 @@ def generate(g):
     return body
 
 
+def compose_transform(parent, child):
+    def rotated(v):
+        return [sum(v[i]*parent[3*i+j] for i in range(3)) for j in range(3)]
+    axes = [n for i in (0,3,6) for n in rotated(child[i:i+3])]
+    return axes + [v+w for v,w in zip(rotated(child[9:12]), parent[9:12])] + [1,0,0,0]
+
+
+def library_part(part, rows):
+    g = part["geometry"]
+    if g["kind"] == "native":
+        entry = next((r for r in rows if r.get("alias") == g.get("hash") and r.get("alias")), None)
+        return (entry, entry["placement"]) if entry else None
+    # A schematic preview can still have a known exact library part.
+    shape = g.get("shape") if g["kind"] == "unavailable" else g
+    if not isinstance(shape, dict): return None
+    for entry in rows:
+        dims = entry.get("dimensions")
+        if not dims: continue
+        if entry.get("kind")=="gasket":
+            if entry["equipmentId"]!=part.get("equipmentId") or not part.get("componentId","").startswith("line-"): continue
+            if g["kind"]=="catalogue" and abs(g.get("parameters",{}).get("length",0)-dims["lengthMm"])<.035:
+                return entry,entry["placement"]
+            if g["kind"]=="tube" and all(abs(g.get(k,0)-v)<.035 for k,v in dims.items()):
+                return entry,entry["placement"]
+            continue
+        hardware = entry.get("hardware")
+        if hardware:
+            if hardware != g.get("hardware") or entry["nominalMm"] != g.get("nominalMm"): continue
+            # These source files represent plated steel. Do not substitute for a stainless SKU.
+            if any(tag in part["name"].lower() for tag in ("нерж", "aisi", "а2", "а4", "a2", "a4")): continue
+        elif entry.get("kind") != shape["kind"] or entry.get("equipmentId",part.get("equipmentId")) != part.get("equipmentId"):
+            continue
+        if any(k in shape and abs(shape[k]-dims.get(k,0))>.035 for k in ("faceHeightMm","faceDiameterMm")): continue
+        mount = list(entry["placement"])
+        for key,value in dims.items():
+            if key in ("faceHeightMm","faceDiameterMm") and key not in shape: continue
+            if hardware=="nut" and key=="lengthMm":
+                if value > g.get("maxNutMm",g["lengthMm"])+.035: break
+                if g.get("seatAtEnd"): mount[9]+=(g["lengthMm"]-value)/1000
+            elif type(shape.get(key)) not in (float,int) or abs(shape[key]-value)>.035: break
+        else: return entry,mount
+    return None
+
+
 def prepare(root, folder):
     payload = json.loads((folder / "request.json").read_text(encoding="utf-8"))
     entries = library(root)
@@ -157,12 +210,58 @@ def prepare(root, folder):
     inputs = folder / "inputs"; inputs.mkdir(exist_ok=True)
     resolved, cache, failures, sources = [], {}, [], {}
     source_by_path = {e["source"]: e for e in entries}
+    index_path = root / "frontend/data/solidworks-parts.json"
+    parts_index = json.loads(index_path.read_text(encoding="utf-8")) if index_path.exists() else []
+    gasket_index = root / "frontend/data/solidworks-gaskets.json"
+    if gasket_index.exists(): parts_index.extend(json.loads(gasket_index.read_text(encoding="utf-8")))
+    checked = {}
+    stamped_path = root / "frontend/data/stamped-loose-flanges.json"
+    stamped = json.loads(stamped_path.read_text(encoding="utf-8")) if stamped_path.is_file() else {"parts":{}, "catalog":{}}
+    products = {}
+    flange_catalog = root / "frontend/data/flange-dimensions.json"
+    if flange_catalog.is_file():
+        products = {r["componentId"]: r["name"] for r in json.loads(flange_catalog.read_text(encoding="utf-8"))["rows"]}
 
     for part in payload["manifest"]["instances"]:
         g = part["geometry"]
+        label = part.get("detailName") or part["name"]
+        product = products.get(part.get("equipmentId"))
+        if product and (g["kind"]=="flange" or "фланец" in label.lower()): label=product
+        elif g.get("source","").startswith("Equipment/Pumps/") and not label.lower().startswith("насос"): label="Насос "+label
+        elif part.get("appearance")=="metal" and not any(mark in label.upper() for mark in ("AISI","НЕРЖ","Х18")): label+=" · нерж."
+        elif part.get("appearance")=="red" and part.get("material") and "ст20" not in label.lower(): label+=" · "+part["material"].replace("st20","Ст20")
+        part={**part,"detailName":label}
         try:
             kind = g.get("kind")
             key = hashlib.sha256(json.dumps(g, sort_keys=True).encode()).hexdigest()
+            stamp_row = stamped["catalog"].get(part.get("equipmentId"))
+            if stamp_row is not None and kind=="unavailable":
+                raise SourceProblem("unsupported_geometry",g.get("reason") or "Не подтверждена установка штампованного фланца.")
+            if stamp_row is not None or g.get("stampedHash"):
+                stock = stamped["parts"].get((stamp_row or {}).get("model"))
+                if not stock or stock["sourceHash"]!=g.get("stampedHash") or any(
+                    type(g.get(k)) not in (int,float) or abs(v-g[k])>.005 for k,v in stock["dimensions"].items()
+                ) or g.get("faceHeightMm") or g.get("faceDiameterMm"):
+                    raise SourceProblem("unsupported_geometry","Нет проверенного штампованного свободного фланца для этой посадки и сверловки. Обновите страницу и проверьте выбранное исполнение.")
+                match = stock,stock["placement"]
+                label = stock["name"]+" · PN"+str(10 if part["equipmentId"].startswith("фланцы-005-") else 16)+" · нерж."
+            else:
+                match = library_part(part, parts_index)
+            if match:
+                entry, native_pose = match
+                digest = entry["sourceHash"]
+                if digest not in checked: checked[digest] = source(root, entry)
+                path = checked[digest]
+                sources[str(path)] = digest
+                if (entry.get("alias") or entry.get("kind")=="collar") and "dn" not in label.lower():
+                    label=path.stem
+                if entry.get("kind")=="gasket": label=entry["name"]
+                # Preserve the browser datum alongside the CAD file's own datum.
+                resolved.append({**part, "detailName":label, "path":str(path), "browserTransform":part["transform"],
+                                 "transform":compose_transform(part["transform"], native_pose),
+                                 "configuration":entry.get("configuration"), "sourceFile":entry["source"],
+                                 "origin":"library", "sourceHash":digest})
+                continue
             if kind == "unavailable":
                 raise SourceProblem("unsupported_geometry", g.get("reason", "Нет точной геометрии."))
             if key not in cache:
@@ -187,7 +286,10 @@ def prepare(root, folder):
                     if writer.Transfer(body, STEPControl_AsIs) != IFSelect_RetDone or writer.Write(str(path)) != IFSelect_RetDone:
                         raise ValueError("Не удалось сохранить STEP детали.")
                 cache[key] = str(path)
-            resolved.append({**part, "path": cache[key]})
+            native = kind in ("native","catalogue")
+            resolved.append({**part, "path": cache[key], "origin":"library" if native else "generated",
+                             "sourceFile":Path(cache[key]).relative_to(root).as_posix() if native else None,
+                             "sourceHash":sources.get(cache[key])})
         except (ValueError, TypeError, KeyError, RuntimeError) as error:
             failures.append(dict(id=part["id"], code=getattr(error, "code", "part_creation"), reason=str(error)))
     (folder / "sources.json").write_text(json.dumps(sources), encoding="utf-8")

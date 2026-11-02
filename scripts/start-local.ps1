@@ -2,6 +2,7 @@ param([string]$ConfigPath=(Join-Path $env:LOCALAPPDATA 'PumpStationCalculator\fu
 $ErrorActionPreference = 'Stop'
 $profileData = Get-Content -Raw -LiteralPath $ConfigPath | ConvertFrom-Json
 $frontend = Split-Path -Parent $PSScriptRoot
+if ($profileData.CAD_EXPORT_SERVER) { & (Join-Path $PSScriptRoot 'start-cad-export.ps1') -ProfileData $profileData }
 foreach ($name in 'CAD_EXPORT_URL','CAD_EXPORT_TOKEN') {
     if ($profileData.$name) { [Environment]::SetEnvironmentVariable($name,[string]$profileData.$name,'Process') }
 }

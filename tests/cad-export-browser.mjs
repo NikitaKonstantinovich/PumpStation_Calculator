@@ -31,7 +31,7 @@ async function check(){
     if(!save().disabled)throw Error("save available before build");
     button("Собрать в SOLIDWORKS").click();
     await wait(()=>document.body.innerText.includes("Тестовая сборка выполняется"));
-    if(!save().disabled||!button("Собрать в SOLIDWORKS").disabled)throw Error("duplicate build allowed");
+    if(!save().disabled||!button("Идёт сборка в SOLIDWORKS").disabled)throw Error("duplicate build allowed");
     render(100);
     await wait(()=>document.body.innerText.includes("Собрано 1 из 2"));
     if(!save().disabled)throw Error("stale assembly available");
@@ -46,11 +46,13 @@ async function check(){
   if(picked!=="missing")throw Error("wrong selection");
   let downloaded="";
   HTMLAnchorElement.prototype.click=function(){downloaded=this.href;};
-  for(const [label,fmt] of [["Проект SOLIDWORKS","solidworks"],["Сборка eDrawings","edrawings"]]){
+  for(const [label,fmt] of [["Проект SOLIDWORKS","solidworks"],["Сборка eDrawings","edrawings"],["Автономный eDrawings","edrawings-exe"]]){
     save().click();await wait(()=>button(label));button(label).click();
-    await wait(()=>downloaded.includes("format="+fmt));
+    await wait(()=>downloaded && new URL(downloaded).searchParams.get("format")===fmt);
     if(!document.querySelector('a[href*="format=report"]'))throw Error("missing report");
   }
+  save().click();
+  await wait(()=>["solidworks","edrawings","edrawings-exe"].every(fmt=>document.querySelector('.cad-export__options a[download][href*="format='+fmt+'&"]')));
   await fetch("/result",{method:"POST",body:"ok"});
 }
 check().catch(e=>fetch("/result",{method:"POST",body:String(e)}));
@@ -85,7 +87,7 @@ const browser=spawn(process.env.CHROME_BIN||"C:/Program Files/Google/Chrome/Appl
 const closed=new Promise(resolve=>browser.once("close",resolve));
 browser.on("error",e=>finish(String(e)));
 const timer=setTimeout(()=>finish("Browser test timed out"),30000);
-try { assert.equal(await done,"ok");assert.equal(builds,1);assert.equal(exports,2);console.log("PASS browser: disabled, queued, stale, restored partial, selection, two saves from one build"); }
+try { assert.equal(await done,"ok");assert.equal(builds,1);assert.equal(exports,3);console.log("PASS browser: disabled, queued, stale, restored partial, selection, three saves from one build"); }
 finally {
   clearTimeout(timer);
   browser.kill();

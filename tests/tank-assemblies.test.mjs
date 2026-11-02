@@ -49,14 +49,14 @@ test("disabled option uses exactly one female cap in collector BOM and 3D; toggl
   }
 });
 
-test("8 L body stays over its DN20 collector takeoff while valve and hose are omitted from 3D",()=>{
+test("8 L tank sits on the actual DN20 valve with both threaded connections and no hose",()=>{
   const {p,assembly:a}=prepare(),tank=a.components.find(c=>c.id==="tank-discharge"),valve=a.components.find(c=>c.id==="tank-discharge-valve"),row=tankRow(p);
-  assert.equal(valve,undefined);assert.equal(active(a).length,1);assert.equal(tank.tankMount.mode,"port");assert.equal(tank.tankMount.parentId,"collector-discharge");assert.equal(tank.tankMount.volume,8);
+  assert.ok(valve.meshUrl&&valve.cadSource.hash);assert.equal(active(a).length,2);assert.equal(tank.tankMount.mode,"port");assert.equal(tank.tankMount.parentId,valve.id);assert.equal(valve.tankMount.parentId,"collector-discharge");assert.equal(tank.tankMount.volume,8);
   assert.deepEqual(tank.bounds,[-100,-100,0,100,100,311]);assert.match(tank.sourceNote,/Габаритная|Габарит|габарит|профиль|Профиль/);
   assert.equal(row.hydraulicAssembly.parts.find(p=>p.assemblyRole==="tank-valve").equipmentId,"tank-ld-pride-dn20-drain");
   assert.equal(row.hydraulicAssembly.parts.find(p=>p.assemblyRole==="tank-valve").price,null,"unknown LD20 price must not be borrowed");
   assert.ok(!row.hydraulicAssembly.parts.some(p=>p.assemblyRole==="tank-hose"));assert.ok(!a.components.some(c=>c.id.startsWith(`spec-${row.position}-equipment:${row.equipmentId}-`)));
-  assert.deepEqual(tankJoints(a),[]);assert.ok(!a.lineJoints?.some(j=>j.id.startsWith("tank-joint-")));assert.match(tank.sourceNote,/не отрисовываются/);
+  assert.deepEqual(tankJoints(a),[]);assert.deepEqual(a.lineJoints.filter(j=>j.id.startsWith("tank-joint-")).map(j=>[j.a.componentId,j.b.componentId,j.overlap]),[["collector-discharge",valve.id,10],[valve.id,tank.id,12]]);
   const collector=a.components.find(c=>c.id==="collector-discharge");close(tank.position[2]-model.portPoint(a,{componentId:collector.id,portId:"instrument-tank-0"})[2],33.5);
   const c=a.components.find(c=>c.id==="collector-discharge"),moved=model.editComponent(a,{id:c.id,patch:{position:[123,456,789],rotation:[29,-37,51]}});
   assert.deepEqual(tankJoints(moved),[]);assert.ok(!active(moved).some(c=>c.orphaned));
@@ -89,30 +89,43 @@ test("tank links, body/cap geometry, manual corrections, Undo/Redo and resource 
     const saved=model.normalizeEditor(JSON.parse(JSON.stringify({...model.emptyEditor(),assembly:moved}))).assembly;assert.ok(saved);vec(saved.components.find(c=>c.id===body.id).position,target);
     assert.ok(!active(saved).some(c=>c.orphaned));
     const fresh=model.buildAssembly(p,resources.pumps,profiles,lines),merged=model.mergeAssembly(saved,fresh),refreshed=model.refreshModelAssets(merged,p,resources.pumps,profiles,lines);
-    vec(refreshed.components.find(c=>c.id===body.id).position,target);assert.equal(active(refreshed).length,1);
-    assert.deepEqual(tankJoints(refreshed),[]);
+    vec(refreshed.components.find(c=>c.id===body.id).position,target);assert.equal(active(refreshed).length,volume===8?2:1);
+    if(volume===8)assert.ok(tankJoints(refreshed).length,"manually displaced tank must show its disconnected thread");else assert.deepEqual(tankJoints(refreshed),[]);
     assert.equal(parseProjectConfig(JSON.parse(JSON.stringify(p))).entities["station-settings"].membraneTankVolume,volume);
   }
   for(const volume of [8,50]){const off=prepare({on:false,volume}),saved=model.normalizeEditor(JSON.parse(JSON.stringify({...model.emptyEditor(),assembly:off.assembly}))).assembly;
     assert.equal(saved.components.find(c=>c.id==="collector-discharge").collector.template.pieces.find(p=>p.id==="instrument-tank-0-plug").shape.kind,"mesh");}
 });
 
-test("legacy valves, hoses and rigid joints disappear on saved-scene refresh while manual tank offsets survive",()=>{
+test("legacy fittings are replaced from specification and manual tank offsets survive",()=>{
   for(const volume of [8,50]){
     const {p,lines,assembly:a}=prepare({volume}),legacy=structuredClone(a),body=legacy.components.find(c=>c.id==="tank-discharge"),target=model.add(body.position,[7,0,0]);
     const collector=legacy.components.find(c=>c.id==="collector-discharge");
     const oldAnchor=volume===8?composeValvePose(body,{position:[0,0,12],rotation:[0,0,0]}):body;
     const local=relativePose(oldAnchor,{...body,position:target});
     body.position=target;body.tankMount={...body.tankMount,...local,revision:"tank-end200-pump-gap200-v1",manual:true,...(volume===8?{parentId:"tank-discharge-valve",portId:"outlet"}:{})};
-    for(const role of ["valve","hose"]){legacy.components.push({...structuredClone(body),id:`tank-discharge-${role}`,locked:true,hidden:false,tankMount:{...body.tankMount,parentId:collector.id,portId:"instrument-tank-0",role}});}
+    legacy.components=legacy.components.filter(c=>c.tankMount?.role!=="valve");
+    for(const role of ["valve","hose"]){const old=structuredClone(a.components.find(c=>c.tankMount?.role===role)??body);
+      legacy.components.push({...old,id:`tank-discharge-${role}`,locked:true,hidden:false,tankMount:{...old.tankMount,parentId:collector.id,portId:"instrument-tank-0",role,revision:"tank-end200-pump-gap200-v1",manual:false}});}
     legacy.lineJoints??=[];legacy.lineJoints.push({id:"tank-joint-legacy",a:{componentId:collector.id,portId:"instrument-tank-0"},b:{componentId:body.id,portId:"inlet"},kind:"thread",overlap:12,provisional:true});
     for(const next of [model.mergeAssembly(legacy,a),model.refreshModelAssets(legacy,p,resources.pumps,profiles,lines)]){
-      assert.equal(active(next).length,1);assert.equal(active(next)[0].tankMount.role,"tank");vec(active(next)[0].position,target);
-      assert.ok(!next.lineJoints.some(j=>j.id.startsWith("tank-joint-")));
+      assert.equal(active(next).length,volume===8?2:1);vec(next.components.find(c=>c.id===body.id).position,target);
+      assert.ok(!next.lineJoints.some(j=>j.id==="tank-joint-legacy"));assert.ok(!active(next).some(c=>c.tankMount.role==="hose"));
     }
     const saved=model.normalizeEditor(JSON.parse(JSON.stringify({...model.emptyEditor(),assembly:legacy}))).assembly;
     assert.equal(active(saved).length,1);vec(active(saved)[0].position,target);
   }
+});
+
+test("body-only 8 L scene gains one valve without losing a hand-positioned tank",()=>{
+  const {assembly:a}=prepare(),old=structuredClone(a);
+  old.components=old.components.filter(c=>c.id!=="tank-discharge-valve");
+  const tank=old.components.find(c=>c.id==="tank-discharge"),collector=old.components.find(c=>c.id==="collector-discharge"),p=collector.ports.find(p=>p.id==="instrument-tank-0");
+  const anchor=composeValvePose(collector,{position:p.point,rotation:[0,0,0]});
+  tank.position=model.add(tank.position,[8,-10,2]);tank.rotation=[4,5,6];
+  tank.tankMount={...tank.tankMount,...relativePose(anchor,tank),parentId:collector.id,portId:p.id,revision:"tank-dn20-body-only-v2",manual:true};
+  const updated=model.mergeAssembly(old,a),again=model.mergeAssembly(updated,a);
+  assert.equal(active(again).length,2);const actual=again.components.find(c=>c.id===tank.id);vec(actual.position,tank.position);vec(actual.rotation,tank.rotation);
 });
 
 test("updating a locked old DN25 tank takeoff changes only its section to DN20 and closes it with a DN20 cap",()=>{

@@ -3,7 +3,7 @@ import type { AssemblyComponent } from "./suction-catalog";
 import { jointFlangeThickness } from "./joint-flange-dimensions";
 import type { CollectorConfiguration } from "./collector-calculations";
 
-export function insertionEndThickness(row: SpecItem | undefined, end: "from" | "to", database: { items: AssemblyComponent[] }): number | null {
+export function insertionEndThickness(row: SpecItem | undefined, end: "from" | "to", database: { items: AssemblyComponent[] }, useStampedSeat = false): number | null {
   const assembly = row?.insertionAssembly;
   if (!assembly || !assembly.snapshot.currentCatalogVersion || assembly.snapshot.catalogVersion !== assembly.snapshot.currentCatalogVersion) return null;
   const side = (end === "from") !== assembly.reversed ? "left" : "right";
@@ -14,7 +14,7 @@ export function insertionEndThickness(row: SpecItem | undefined, end: "from" | "
   const component = (kind: string) => c.bom.find(part => part.role.startsWith(`${side}-`) && part.kind === kind)?.componentId ?? undefined;
   const collar = component("collar"), flange = component("weldFlange"), loose = component("looseFlange") ?? assembly.externalFlanges?.[end];
   if (connection === "flanged" && !flange || connection === "collar" && (!collar || !loose)) return null;
-  const result = jointFlangeThickness(database, c.material, dn, c.pn, collar, flange, loose);
+  const result = jointFlangeThickness(database, c.material, dn, c.pn, collar, flange, loose, useStampedSeat);
   return result.thicknessMm !== null && !result.warnings.length ? result.thicknessMm / 2 : null;
 }
 
