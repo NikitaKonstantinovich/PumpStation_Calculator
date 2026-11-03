@@ -1,3 +1,4 @@
+import { MAX_TOTAL_PUMPS } from "../pump-counts";
 import { FIRE_INSERTION_INSTRUMENTS_REVISION } from "../fire-insertion-instruments";
 import { TANK_LAYOUT_REVISION } from "../tank-connection";
 import { addTankConnections, followTankConnections, parseTankMount, retainedTankMount, type TankMount } from "./tank-assemblies";
@@ -358,7 +359,7 @@ export function buildAssembly(project: ProjectConfig, pumps: Pump[], profiles: P
     const pumpId = input.selectedPumpId ?? (circuit === 1 ? project.station.selectedPumpId : project.station.secondaryPumpId);
     const pump = pumps.find(p => p.id === pumpId);
     if (!pump) continue;
-    const count = Math.min(12, Math.max(1, Math.floor((input.workingPumpCount ?? 1) + (input.reservePumpCount ?? 0))));
+    const count = Math.min(MAX_TOTAL_PUMPS, Math.max(1, Math.floor((input.workingPumpCount ?? 1) + (input.reservePumpCount ?? 0))));
     const profile = profiles.profiles[pump.id], p = pump.dimensions;
     const spatial = resolvePumpLayout(pump, profile), bounds = spatial.bounds;
     const pitch = lines ? positive(collectors.suction.configuration?.[circuit === 1 ? "primary" : "secondary"]?.spacing, 500) : Math.max(positive(collectors.suction.configuration?.[circuit === 1 ? "primary" : "secondary"]?.spacing, 500), bounds[4] - bounds[1] + 150);

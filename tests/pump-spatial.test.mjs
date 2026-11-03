@@ -16,6 +16,12 @@ function assembly(id, catalog = profiles, lines) {
   Object.assign(project.entities["system-input"], { selectedPumpId: id, workingPumpCount: 1, reservePumpCount: 0 });
   return model.buildAssembly(project, pumps.map(p => p.id === mbl.id ? mbl : p), catalog, lines);
 }
+test("ten working plus three reserve pumps produce all thirteen scene instances", () => {
+  const project = createProject();
+  Object.assign(project.entities["system-input"], { selectedPumpId: mbl.id, workingPumpCount: 10, reservePumpCount: 3 });
+  const result = model.buildAssembly(project, [mbl], none);
+  assert.equal(result.components.filter(component => component.kind === "pump").length, 13);
+});
 const close = (a, b) => assert.ok(Math.abs(a - b) < 1e-6, `${a} != ${b}`);
 
 test("complete catalog dimensions form an exact box without inventing nozzle positions", () => {

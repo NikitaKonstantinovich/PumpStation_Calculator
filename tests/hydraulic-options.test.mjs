@@ -118,7 +118,7 @@ test("two optional blind flanges replace one network joint each; unknown blind t
 });
 
 test("separators add N-1 valves per collector and exactly two welded ends per gap", () => {
-  for (const pumps of [1, 2, 4, 6]) {
+  for (const pumps of [1, 2, 4, 6, 10]) {
     const p = choose(fixture(), "318", pumps, 0);
     Object.assign(p.entities["station-settings"], { stationType: "fire", isolatingValves: true });
     Object.assign(p.entities["station-dn"], { collectorMaterial: "st20", suctionCollectorDn: 100, dischargeCollectorDn: 100, pn: 16 });

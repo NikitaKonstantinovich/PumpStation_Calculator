@@ -5,6 +5,7 @@ import { fileURLToPath } from "node:url";
 import { Miniflare } from "miniflare";
 import { fork } from "node:child_process";
 import { localModelAssets } from "./local-model-assets.mjs";
+import { pumpFileService } from "../services/local-storage/pump-files.mjs";
 import { syncRuntimeModelAssets } from "./local-runtime-models.mjs";
 import { loadLocalAIEnv } from "./local-ai-env.mjs";
 import { localAIProvider } from "./local-ai-provider.mjs";
@@ -37,7 +38,7 @@ const worker = new Miniflare({
   modules: paths.map(path => ({ type: "ESModule", path: resolve(server, path) })), modulesRoot: server,
   compatibilityDate: config.compatibility_date, compatibilityFlags: config.compatibility_flags, bindings,
   d1Databases: Object.fromEntries(config.d1_databases.map(d => [d.binding, d.database_id])), d1Persist: resolve(state, "v3/d1"),
-  serviceBindings: { PROJECT_STORE: projectService(projects), AI_PROVIDER: localAIProvider, ASSETS: localModelAssets(resolve(library), async request => (await worker.getBindings()).BUNDLED_ASSETS.fetch(request)) },
+  serviceBindings: { PROJECT_STORE: projectService(projects), PUMP_FILES: pumpFileService(process.env.PUMP_FILES_DIR || resolve(dirname(state), "pump-files")), AI_PROVIDER: localAIProvider, ASSETS: localModelAssets(resolve(library), async request => (await worker.getBindings()).BUNDLED_ASSETS.fetch(request)) },
   assets: { directory: resolve(built, "client"), binding: "BUNDLED_ASSETS", routerConfig: { has_user_worker: true, invoke_user_worker_ahead_of_assets: true } },
 });
 console.log(`Full editor ready: ${await worker.ready}; build: ${built}; migrations unchanged`);

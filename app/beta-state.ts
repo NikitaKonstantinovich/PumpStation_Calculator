@@ -1,3 +1,4 @@
+import { MAX_WORKING_PUMPS } from "./pump-counts";
 import type { InputEntity, PanelState, ProjectConfig } from "./project-config";
 import { isBetaTool } from "./release-policy";
 import { ENTITY_BY_TOOL } from "./tool-registry";
@@ -16,7 +17,7 @@ export function parseBetaInput(raw: unknown): InputEntity {
   }
   result.medium = value.medium === "wastewater" ? "wastewater" : "water";
   if (typeof value.selectedPumpId === "string" && value.selectedPumpId.length <= 256) result.selectedPumpId = value.selectedPumpId;
-  result.calculated = value.calculated === true && result.flowRate !== null && result.flowRate > 0 && result.head !== null && result.head > 0 && result.staticHead !== null && result.staticHead <= result.head && Number.isInteger(result.workingPumpCount) && result.workingPumpCount! >= 1 && result.workingPumpCount! <= 6 && Number.isInteger(result.reservePumpCount) && result.reservePumpCount! >= 0 && result.reservePumpCount! <= 3;
+  result.calculated = value.calculated === true && result.flowRate !== null && result.flowRate > 0 && result.head !== null && result.head > 0 && result.staticHead !== null && result.staticHead <= result.head && Number.isInteger(result.workingPumpCount) && result.workingPumpCount! >= 1 && result.workingPumpCount! <= MAX_WORKING_PUMPS && Number.isInteger(result.reservePumpCount) && result.reservePumpCount! >= 0 && result.reservePumpCount! <= 3;
   return result;
 }
 

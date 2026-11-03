@@ -4,6 +4,8 @@ import { db } from "./auth-server";
 import { BASE_SECTIONS, BASE_LABELS, baseSnapshot, spacingForPump, type AppliedBaseValues, type BaseSection } from "./base-values";
 import { currentBasePublication, resolveBaseVersions } from "./base-values-server";
 import { cataloguePurchasePriceRub, type Pump } from "./pump-catalog";
+import { readManualPumps } from "./manual-pump-server";
+import { mergePumpCatalog } from "./pump-catalog-client";
 import { pumpCardPhysicalData } from "./pump-card-data";
 import { currentInsertSource } from "./component-insert-catalog-server";
 import type { AssistantContext, AssistantSource } from "./assistant-types";
@@ -52,7 +54,7 @@ export function createAssistantDataTools(access: AssistantDataAccess) {
     if (!response.ok) throw new DataError("Каталог насосов недоступен.");
     const result = await response.json();
     if (!Array.isArray(result)) throw new DataError("Каталог насосов имеет неверный формат.");
-    return result as Pump[];
+    return mergePumpCatalog(result as Pump[], (await readManualPumps()).map(record => record.pump));
   })();
   const project = () => projectPromise ??= (async () => {
     const context = access.context;

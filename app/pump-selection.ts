@@ -1,4 +1,6 @@
-import { cataloguePurchasePriceRub, operatingPoint, selectionHeadAtFlow, usablePump, type Pump, type PumpType } from "./pump-catalog";
+import { cataloguePurchasePriceRub, operatingPoint, selectionHeadAtFlow, usablePump, type Pump } from "./pump-catalog";
+import { matchesPumpFilters, type PumpFilters } from "./pump-filters";
+import { MAX_WORKING_PUMPS } from "./pump-counts";
 
 export type PumpSortMode = "distance" | "price";
 export type PumpSelectionInput = {
@@ -8,7 +10,7 @@ export type PumpSelectionInput = {
   workingPumpCount: number;
   medium: "water" | "wastewater";
 };
-export type PumpSelectionFilters = { type?: PumpType; manufacturer?: string; series?: string };
+export type PumpSelectionFilters = PumpFilters;
 type PriceSettings = Parameters<typeof cataloguePurchasePriceRub>[1];
 
 export const OPERATING_POINT_PERCENT_EPSILON = 1e-7;
@@ -46,12 +48,11 @@ export function preferredOperatingPoint(deltaQPercent: number, deltaHPercent: nu
 export function evaluatePumpCandidates(catalogue: readonly Pump[], input: PumpSelectionInput, settings: PriceSettings, filters: PumpSelectionFilters = {}): PumpSelectionCandidate[] {
   if (![input.flowRate, input.head, input.staticHead, input.workingPumpCount].every(Number.isFinite) ||
     input.flowRate <= 0 || input.head <= 0 || input.staticHead < 0 || input.staticHead > input.head ||
-    !Number.isInteger(input.workingPumpCount) || input.workingPumpCount < 1 || input.workingPumpCount > 6) return [];
+    !Number.isInteger(input.workingPumpCount) || input.workingPumpCount < 1 || input.workingPumpCount > MAX_WORKING_PUMPS) return [];
 
   const candidates: PumpSelectionCandidate[] = [];
   for (const pump of catalogue) {
-    if (!usablePump(pump, input.medium) || (filters.type && pump.type !== filters.type) ||
-      (filters.manufacturer && pump.manufacturer !== filters.manufacturer) || (filters.series && pump.series !== filters.series)) continue;
+    if (!usablePump(pump, input.medium) || !matchesPumpFilters(pump, filters)) continue;
     const headAtRequestedFlow = selectionHeadAtFlow(pump, input.flowRate / input.workingPumpCount);
     if (headAtRequestedFlow === null) continue;
     const headReservePercent = (headAtRequestedFlow - input.head) / input.head * 100;

@@ -1,3 +1,4 @@
+import { MAX_WORKING_PUMPS } from "./pump-counts";
 import type { ProjectConfig, InputEntity, SettingsEntity, DnEntity, SpecEntity, PanelKind } from "./project-config";
 import type { Pump } from "./pump-catalog";
 import type { CollectorCatalog } from "./collector-calculations";
@@ -27,7 +28,7 @@ export function inputIssues(input: InputEntity, tool: "input" | "input2"): ToolI
     ["flowRate", "Расход станции", (v: number) => v > 0, "должен быть больше нуля"],
     ["head", "Напор", (v: number) => v > 0, "должен быть больше нуля"],
     ["staticHead", "Статический напор", (v: number) => v >= 0 && (input.head === null || v <= input.head), "должен быть от 0 до общего напора"],
-    ["workingPumpCount", "Количество рабочих насосов", (v: number) => Number.isInteger(v) && v >= 1 && v <= 6, "должно быть целым числом от 1 до 6"],
+    ["workingPumpCount", "Количество рабочих насосов", (v: number) => Number.isInteger(v) && v >= 1 && v <= MAX_WORKING_PUMPS, `должно быть целым числом от 1 до ${MAX_WORKING_PUMPS}`],
     ["reservePumpCount", "Количество резервных насосов", (v: number) => Number.isInteger(v) && v >= 0 && v <= 3, "должно быть целым числом от 0 до 3"],
   ] as const;
   return fields.flatMap<ToolIssue>(([field, label, valid, requirement]) => {

@@ -1,6 +1,23 @@
 import { relations, sql } from "drizzle-orm";
 import { check, index, integer, real, sqliteTable, text, uniqueIndex } from "drizzle-orm/sqlite-core";
 
+export const manualPumpFiles = sqliteTable("manual_pump_files", {
+  id: text("id").primaryKey(), kind: text("kind").notNull(), storageKey: text("storage_key").notNull().unique(),
+  name: text("name").notNull(), size: integer("size").notNull(), contentType: text("content_type").notNull(),
+  createdBy: text("created_by").notNull(), createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+});
+
+export const manualPumps = sqliteTable("manual_pumps", {
+  id: text("id").primaryKey(),
+  identityKey: text("identity_key").notNull(),
+  pumpJson: text("pump_json").notNull(),
+  revision: integer("revision").notNull().default(1),
+  createdBy: text("created_by").notNull(),
+  updatedBy: text("updated_by").notNull(),
+  createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+  updatedAt: text("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+}, table => [uniqueIndex("uq_manual_pumps_identity").on(table.identityKey)]);
+
 export const baseValueVersions = sqliteTable("base_value_versions", {
   id: text("id").primaryKey(),
   valuesJson: text("values_json").notNull(),

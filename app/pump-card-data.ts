@@ -122,6 +122,10 @@ export function pumpCardSections(pump: Pump): PumpCardSection[] {
       ...optional("Технические характеристики", pump.source), ...optional("Чертёж", pump.drawingSource),
       ...propertyRows(pump.physicalDataSources),
     ] },
+    { title: "Файлы насоса", rows: [
+      ...optional("Изображение", pump.assets?.files?.image?.name ?? pump.assets?.imagePath), ...optional("Чертёж", pump.assets?.files?.drawing?.name ?? pump.assets?.drawingPath),
+      ...optional("3D-модель", pump.assets?.files?.model?.name ?? pump.assets?.modelPath),
+    ] },
   ].filter(section => section.rows.length > 0);
 }
 

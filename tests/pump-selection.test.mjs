@@ -176,11 +176,30 @@ test("candidate set matches the old eligibility rule on the real catalogue for b
   }
 });
 
+test("checkbox filters combine values within each group and intersect groups before ranking", () => {
+  const catalogue = [
+    pump("a", { manufacturer: "CNP", series: "CDM", type: "vertical_multistage" }),
+    pump("b", { manufacturer: "LEO", series: "LVR", type: "vertical_multistage" }),
+    pump("c", { manufacturer: "CNP", series: "TD", type: "inline" }),
+    pump("d", { manufacturer: "Other", series: "TD", type: "inline" }),
+    pump("e", { manufacturer: "LEO", series: "XST", type: "end_suction" }),
+    pump("inactive", { manufacturer: "CNP", series: "TD", type: "inline", active: false }),
+  ];
+  for (const mode of ["distance", "price"]) {
+    assert.deepEqual(ids(select(catalogue, mode, {}, {
+      type: ["vertical_multistage", "inline"], manufacturer: ["CNP", "LEO"], series: ["CDM", "LVR", "TD"],
+    })).sort(), ["a", "b", "c"]);
+    assert.deepEqual(ids(select(catalogue, mode, {}, { manufacturer: ["LEO", "CNP"], series: ["TD", "XST"] })).sort(), ["c", "e"]);
+    assert.deepEqual(ids(select(catalogue, mode, {}, { type: [], manufacturer: [], series: [] })).sort(), ["a", "b", "c", "d", "e"]);
+    assert.deepEqual(ids(select(catalogue, mode, {}, { manufacturer: ["Missing"], series: [] })), []);
+  }
+});
+
 test("parallel pumps use station flow and reserve pump count does not change hydraulic ranking", () => {
   const catalogue = [pump("A", { curve: [[0, 61], [100, 51], [200, 41]] }),
     pump("B", { curve: [[0, 251.5], [100, 51.5], [125, 1.5]] })];
   const reference = select(catalogue);
-  for (const count of [1, 2, 4, 6]) for (const reservePumpCount of [0, 1, 3]) {
+  for (const count of [1, 2, 4, 6, 7, 10]) for (const reservePumpCount of [0, 1, 3]) {
     const result = select(catalogue, "distance", { workingPumpCount: count, reservePumpCount, flowRate: 100 * count });
     assert.deepEqual(ids(result), ["B", "A"]);
     for (let i = 0; i < result.candidates.length; i++) {
@@ -209,7 +228,7 @@ test("zero static head and a horizontal system curve retain valid point metrics"
 
 test("invalid input produces no candidates and leaves auto-selection empty", () => {
   for (const overrides of [{ flowRate: 0 }, { flowRate: Infinity }, { head: 0 }, { head: NaN }, { staticHead: -1 },
-    { staticHead: 51 }, { workingPumpCount: 0 }, { workingPumpCount: 1.5 }, { workingPumpCount: 7 }]) {
+    { staticHead: 51 }, { workingPumpCount: 0 }, { workingPumpCount: 1.5 }, { workingPumpCount: 11 }]) {
     assert.deepEqual(select([pump("valid")], "price", overrides), { candidates: [], selectedPumpId: undefined });
   }
 });
@@ -245,6 +264,24 @@ test("both project circuits select independently for combined and fire/jockey st
       }
     }
     assert.deepEqual(loaded, snapshot);
+  }
+});
+
+test("ten working pumps remain valid in both saved circuits and beta, including three reserves", async () => {
+  const { parseBetaInput } = await loadTs(new URL("../app/beta-state.ts", import.meta.url));
+  const { validStationInput } = await loadTs(new URL("../app/station-specification.ts", import.meta.url));
+  const project = createProject(); project.entities["station-settings"].stationType = "combined";
+  const model = pump("ten-working");
+  for (const id of ["system-input", "system-input-2"]) Object.assign(project.entities[id], input, { flowRate: 1000, workingPumpCount: 10, reservePumpCount: 3, selectedPumpId: model.id, calculated: true });
+  const saved = parseProjectConfig(JSON.parse(JSON.stringify(project)));
+  for (const [id, tool] of [["system-input", "input"], ["system-input-2", "input2"]]) {
+    const request = saved.entities[id]; assert.equal(validStationInput(request), true);
+    assert.equal(parseBetaInput(request).calculated, true);
+    const result = buildPumpSelection([model], request, settings);
+    assert.equal(result.selectedPumpId, model.id); close(result.candidates[0].point.flow, 1000);
+    assert.equal(collectProjectIssues(saved, [model], null, []).some(issue => issue.id === `${tool}/workingPumpCount`), false);
+    assert.equal(validStationInput({ ...request, workingPumpCount: 11 }), false);
+    assert.equal(parseBetaInput({ ...request, workingPumpCount: 11 }).calculated, false);
   }
 });
 

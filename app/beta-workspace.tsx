@@ -7,6 +7,8 @@ import { AllowedPumpPanel } from "./allowed-pump-tools";
 import { FloatingPanel, GridWorkspace, Icon } from "./workspace-panels";
 import { AppSettings } from "./app-settings";
 import { BaseValuesPanel } from "./base-values-panel";
+import { ItemEntryPanel } from "./item-entry-panel";
+import { loadPumpCatalog, mergePumpCatalog } from "./pump-catalog-client";
 import { HelpCenter } from "./help-center";
 import { AIAssistant } from "./ai-assistant";
 import { BaseValuesUpdateNotice, usePublishedBaseValues } from "./base-values-update";
@@ -32,9 +34,9 @@ export default function BetaWorkspace({ account, onAccountChange }: { account: A
   const settings=useMemo(()=>defaultProjectSettings(applied??undefined),[applied]);
   const [config,setConfig]=useState<BetaState>(()=>{try{return parseBetaState(JSON.parse(localStorage.getItem(key)??"null"));}catch{return defaultBetaState();}});
   const [sidebar,setSidebar]=useState(false);
-  const [view,setView]=useState<"workspace"|"users"|"base-values"|"help">("workspace");
-  const navigateView=(next:"workspace"|"users"|"base-values"|"help")=>{
-    if((next==="users"||next==="base-values")&&account.role!=="admin")return;
+  const [view,setView]=useState<"workspace"|"users"|"base-values"|"item-entry"|"help">("workspace");
+  const navigateView=(next:"workspace"|"users"|"base-values"|"item-entry"|"help")=>{
+    if((next==="users"||next==="base-values"||next==="item-entry")&&account.role!=="admin")return;
     window.history.pushState({},"",next!=="workspace"?`/?view=${next}`:"/");
     setView(next);setDetached(null);setSidebar(false);setAccessNotice("");
   };
@@ -68,8 +70,8 @@ export default function BetaWorkspace({ account, onAccountChange }: { account: A
     const navigate=()=>{
       const params=new URLSearchParams(window.location.search),requested=params.get("panel");
       if(params.get("view")==="help"){setView("help");setDetached(null);setSidebar(false);return;}
-      if(["users","base-values"].includes(params.get("view")??"")&&account.role==="admin"&&!requested){
-        setView(params.get("view") as "users"|"base-values");setDetached(null);
+      if(["users","base-values","item-entry"].includes(params.get("view")??"")&&account.role==="admin"&&!requested){
+        setView(params.get("view") as "users"|"base-values"|"item-entry");setDetached(null);
         return;
       }
       setView("workspace");
@@ -94,7 +96,7 @@ export default function BetaWorkspace({ account, onAccountChange }: { account: A
   },[config,key]);
   useEffect(()=>{
     const controller=new AbortController();
-    fetch("/pumps.json",{cache:"no-store",signal:controller.signal}).then(async response=>{if(!response.ok)throw new Error("Не удалось загрузить каталог насосов");const data=await response.json() as Pump[];if(!Array.isArray(data))throw new Error("Некорректный каталог насосов");setCatalogue(data);}).catch(reason=>{if(!controller.signal.aborted)setCatalogueError(reason instanceof Error?reason.message:"Каталог недоступен");});
+    loadPumpCatalog(controller.signal).then(data=>{if(!Array.isArray(data))throw new Error("Некорректный каталог насосов");setCatalogue(data);}).catch(reason=>{if(!controller.signal.aborted)setCatalogueError(reason instanceof Error?reason.message:"Каталог недоступен");});
     return()=>controller.abort();
   },[]);
   const setPanels = (change: (panels: PanelState[]) => PanelState[]) => updateConfig(current => ({ ...current, workspace: { ...current.workspace, windows: change(current.workspace.windows) } }));
@@ -120,6 +122,7 @@ export default function BetaWorkspace({ account, onAccountChange }: { account: A
   const diagnostics=useDiagnosticRegistry(diagnosticProject,derivedIssues);
   const diagnosticsValue={...diagnostics,onNavigate:()=>{}};
   if(view==="help")return <HelpCenter onBack={()=>navigateView("workspace")}/>;
+  if(view==="item-entry")return <ItemEntryPanel actor={account} onSaved={pump=>setCatalogue(current=>mergePumpCatalog(current.filter(item=>item.id!==pump.id),[pump]))} onBack={()=>navigateView("workspace")}/>;
   if(view==="base-values")return <BaseValuesPanel actor={account} onBack={()=>navigateView("workspace")}/>;
   if(!applied)return <main className="base-page"><h1>Базовые значения</h1><p role="status">{pinnedError||baseValuesError||"Загрузка версии расчёта…"}</p><button className="button" onClick={()=>window.location.reload()}>Повторить</button></main>;
   if(view==="users"&&account.role==="admin")return <UsersPanel actor={account} onBack={()=>navigateView("workspace")} onAccountChange={onAccountChange}/>;
@@ -138,7 +141,7 @@ export default function BetaWorkspace({ account, onAccountChange }: { account: A
 
     <BaseValuesUpdateNotice project={diagnosticProject} latest={latest} error={pinnedError||baseValuesError} onApply={next=>accept((next.entities["station-settings"] as SettingsEntity).baseValues!)}/>
     {accessNotice && <p className="access-note" role="status">{accessNotice}<button className="button" onClick={()=>setAccessNotice("")}>Понятно</button></p>}
-    <div className={`sidebar ${sidebar ? "sidebar--open" : ""}`} inert={!sidebar}><button className="sidebar__backdrop" onClick={() => setSidebar(false)} aria-label="Закрыть меню"/><aside className="sidebar__panel"><div className="sidebar__top"><div className="brand"><span className="brand__mark">PS</span><span><b>Pump Station</b><small>Calculator</small></span></div><button className="icon-button" onClick={() => setSidebar(false)}><Icon name="close" /></button></div><div className="user-card"><span className="avatar avatar--large">{initials(account.name)}</span><div><div className="user-card__name"><b>{account.name}</b><span className="user-role">{account.role}</span></div><small>{account.email}</small></div></div><nav className="sidebar__nav"><button className="sidebar__link sidebar__link--active" onClick={()=>setSidebar(false)}>▦ <span>Рабочее пространство</span></button><button className="sidebar__link" disabled title={BETA_LOCK}>▤ <span>Мои проекты</span></button><button className="sidebar__link" disabled title={BETA_LOCK}>⌁ <span>База оборудования</span></button>{account.role==="admin"&&<button className="sidebar__link" disabled title={BETA_LOCK}>⌗ <span>Расчёт комплектующих</span></button>}{account.role==="admin"&&<button className="sidebar__link" onClick={()=>navigateView("base-values")}>⚙ <span>Базовые значения</span></button>}{account.role==="admin"&&<button className="sidebar__link" onClick={()=>navigateView("users")}>♙ <span>Список пользователей</span></button>}<button className="sidebar__link" onClick={() => { setSidebar(false); setSettingsOpen(true); }}>⚙ <span>Настройки</span></button><Link className="sidebar__link" href="/?auth=forgot">⌘ <span>Сменить пароль</span></Link><button className="sidebar__link" onClick={logout}>↪ <span>Выйти</span></button></nav><button className="sidebar__footer help-center-entry" onClick={()=>navigateView("help")}><span className="help-center-entry__icon" aria-hidden="true">?</span><span><b>Центр помощи</b><small>Документация и поддержка</small></span></button></aside></div>
+    <div className={`sidebar ${sidebar ? "sidebar--open" : ""}`} inert={!sidebar}><button className="sidebar__backdrop" onClick={() => setSidebar(false)} aria-label="Закрыть меню"/><aside className="sidebar__panel"><div className="sidebar__top"><div className="brand"><span className="brand__mark">PS</span><span><b>Pump Station</b><small>Calculator</small></span></div><button className="icon-button" onClick={() => setSidebar(false)}><Icon name="close" /></button></div><div className="user-card"><span className="avatar avatar--large">{initials(account.name)}</span><div><div className="user-card__name"><b>{account.name}</b><span className="user-role">{account.role}</span></div><small>{account.email}</small></div></div><nav className="sidebar__nav"><button className="sidebar__link sidebar__link--active" onClick={()=>setSidebar(false)}>▦ <span>Рабочее пространство</span></button><button className="sidebar__link" disabled title={BETA_LOCK}>▤ <span>Мои проекты</span></button><button className="sidebar__link" disabled title={BETA_LOCK}>⌁ <span>База оборудования</span></button>{account.role==="admin"&&<button className="sidebar__link" disabled title={BETA_LOCK}>⌗ <span>Расчёт комплектующих</span></button>}{account.role==="admin"&&<button className="sidebar__link" onClick={()=>navigateView("item-entry")}>＋ <span>Заведение позиций</span></button>}{account.role==="admin"&&<button className="sidebar__link" onClick={()=>navigateView("base-values")}>⚙ <span>Базовые значения</span></button>}{account.role==="admin"&&<button className="sidebar__link" onClick={()=>navigateView("users")}>♙ <span>Список пользователей</span></button>}<button className="sidebar__link" onClick={() => { setSidebar(false); setSettingsOpen(true); }}>⚙ <span>Настройки</span></button><Link className="sidebar__link" href="/?auth=forgot">⌘ <span>Сменить пароль</span></Link><button className="sidebar__link" onClick={logout}>↪ <span>Выйти</span></button></nav><button className="sidebar__footer help-center-entry" onClick={()=>navigateView("help")}><span className="help-center-entry__icon" aria-hidden="true">?</span><span><b>Центр помощи</b><small>Документация и поддержка</small></span></button></aside></div>
 
     <nav className="ribbon">
       <div className="ribbon__tabs">

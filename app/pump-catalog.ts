@@ -1,5 +1,6 @@
 import { pchipValue, cubicTurningPoints } from "./pchip";
 import { curveSegments, type CurveMethod } from "./curve-methods";
+import type { PumpFileKind, PumpFileReference } from "./pump-files";
 
 export type PumpType = "vertical_multistage" | "horizontal_multistage" | "end_suction" | "inline" | "submersible" | "unknown";
 export type PumpPropertyValue = string | number | boolean | null | PumpPropertyValue[] | { [key: string]: PumpPropertyValue };
@@ -30,6 +31,8 @@ export type Pump = {
   inlet?: PumpProperties; outlet?: PumpProperties; connectionSourceValue?: PumpProperties;
   physicalDataSources?: PumpProperties; physicalNote?: string;
   spatialData?: PumpSpatialData;
+  assets?: { imagePath?: string; drawingPath?: string; modelPath?: string; files?: Partial<Record<PumpFileKind, PumpFileReference>> };
+  manualEntry?: boolean;
 };
 
 export function usablePump(pump: Pump, medium: "water" | "wastewater" = "water") {
@@ -59,11 +62,11 @@ export function interpolateCurve(points: Array<[number, number]>, flow: number, 
   return null;
 }
 
-export function pumpCurvePath(pump: Pump, count: number, maxQ: number, maxH: number, method: CurveMethod = "pchip") {
-  if (![count, maxQ, maxH].every(value => Number.isFinite(value) && value > 0)) return "";
+export function pumpCurvePath(pump: Pump, count: number, maxQ: number, maxH: number, method: CurveMethod = "pchip", minimum: { flow: number; head: number } = { flow: 0, head: 0 }) {
+  if (![count, maxQ, maxH].every(value => Number.isFinite(value) && value > 0) || ![minimum.flow,minimum.head].every(Number.isFinite) || maxQ <= minimum.flow || maxH <= minimum.head) return "";
   const segments = curveSegments(pump.curve, method);
   if (!segments.length) return "";
-  const xy = (q: number, h: number) => `${45 + q * count / maxQ * 435} ${210 - h / maxH * 190}`;
+  const xy = (q: number, h: number) => `${45 + (q * count - minimum.flow) / (maxQ - minimum.flow) * 435} ${210 - (h - minimum.head) / (maxH - minimum.head) * 190}`;
   // Exact cubic Bézier representation of each Hermite segment, not sampled lines.
   return `M${xy(segments[0].start, segments[0].d)}` + segments.map(s => {
     const end = s.start + s.width, head = pchipValue(s, 1);

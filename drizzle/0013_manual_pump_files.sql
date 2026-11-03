@@ -1,0 +1,10 @@
+CREATE TABLE IF NOT EXISTS manual_pump_files (
+  id TEXT PRIMARY KEY NOT NULL,
+  kind TEXT NOT NULL,
+  storage_key TEXT NOT NULL UNIQUE,
+  name TEXT NOT NULL,
+  size INTEGER NOT NULL,
+  content_type TEXT NOT NULL,
+  created_by TEXT NOT NULL,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);

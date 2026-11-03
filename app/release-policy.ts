@@ -18,6 +18,9 @@ export function betaApiAllowed(path: string, method: string): boolean {
     (path === "/api/users" && ["GET", "POST", "PATCH"].includes(method)) ||
     (path === "/api/base-values" && ["GET", "PATCH"].includes(method)) ||
     (path === "/api/base-values/effective" && method === "GET") ||
+    (path === "/api/pumps" && ["GET", "POST", "PATCH"].includes(method)) ||
+    (path === "/api/pumps/files" && method === "POST") ||
+    (/^\/api\/pumps\/files\/[0-9a-f-]+$/i.test(path) && ["GET", "HEAD"].includes(method)) ||
     (path === "/api/components" && method === "GET") ||
     (path === "/api/help" && method === "GET") ||
     (path === "/api/assistant" && ["GET", "POST"].includes(method)) ||

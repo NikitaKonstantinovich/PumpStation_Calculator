@@ -1,3 +1,4 @@
+import { MAX_WORKING_PUMPS } from "./pump-counts";
 import { synchronizeHydraulicOptions } from "./hydraulic-option-assembly";
 import { normalizeHydraulicOptions } from "./hydraulic-option-config";
 import { baseSettingsIdentity } from "./base-values";
@@ -16,7 +17,7 @@ export const secondaryStationEnabled = (settings: SettingsEntity) => settings.st
 export function validStationInput(input: InputEntity) {
   return input.calculated && [input.flowRate, input.head, input.staticHead, input.workingPumpCount, input.reservePumpCount].every(value => typeof value === "number" && Number.isFinite(value)) &&
     input.flowRate! > 0 && input.head! > 0 && input.staticHead! >= 0 && input.staticHead! <= input.head! &&
-    Number.isInteger(input.workingPumpCount) && input.workingPumpCount! >= 1 && input.workingPumpCount! <= 6 &&
+    Number.isInteger(input.workingPumpCount) && input.workingPumpCount! >= 1 && input.workingPumpCount! <= MAX_WORKING_PUMPS &&
     Number.isInteger(input.reservePumpCount) && input.reservePumpCount! >= 0 && input.reservePumpCount! <= 3;
 }
 
