@@ -92,6 +92,11 @@ def main():
         dn=str(r['dn']); model=parts.get(dn)
         compatible=model and len(old)==6 and all(old[k]==model['dimensions'][k] for k in ('boltHoles','boltCircleMm','outerMm'))
         catalog[r['componentId']]=dict(previous=old,model=dn if compatible else None)
+    project=json.loads((DATA/'dn65-project-fittings.json').read_text(encoding='utf8'))['flange']
+    assert hashlib.sha256((ROOT/project['source']).read_bytes()).hexdigest()==project['sourceHash']
+    assert measure(ROOT/project['step'])[1]==catalog[project['componentId']]['previous']==project['dimensions']
+    parts[project['modelKey']]={k:project[k] for k in ('source','sourceHash','dimensions','placement','name')}
+    catalog[project['componentId']]['model']=project['modelKey']
     (DATA/'stamped-loose-flanges.json').write_text(json.dumps(dict(parts=parts,catalog=catalog),ensure_ascii=False,indent=1)+'\n',encoding='utf8')
     print('Verified',len(parts),'solids;',sum(bool(v['model']) for v in catalog.values()),'catalogue bindings.')
 if __name__=='__main__':main()

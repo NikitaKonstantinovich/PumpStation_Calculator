@@ -25,6 +25,7 @@ export const flangeManagedColumns: string[] = [...Object.values(FLANGE_FIELDS).m
 const value = (item: Item, label: string) => item.fields.find(field => field.headerPath.at(-1) === label)?.value;
 const number = (value: unknown) => Number(String(value ?? "").replace(/^(?:DN|PN)\s*/i, "").replace(",", "."));
 const positive = (value: unknown): value is number => typeof value === "number" && Number.isFinite(value) && value > 0;
+const validDimension = (key: string, value: unknown): value is number => positive(value) || ((key === "faceHeightMm" || key === "faceDiameterMm") && value === 0);
 
 export function catalogPressures(items: Item[]) {
   const result = new Map<string, number>(), tables = new Map<string, number>();
@@ -70,7 +71,7 @@ export function readFlangeDimensions(item: Item, pn: number | null, reference: F
     const field = item.fields.find(field => field.headerPath.at(-1) === label);
     if (!field) continue;
     const numeric = number(field.value);
-    if (!positive(numeric) || !source || (field.column === column && (!row || row.dimensions[key] !== numeric))) {
+    if (!validDimension(key, numeric) || !source || (field.column === column && (!row || row.dimensions[key] !== numeric))) {
       warnings.push(`Размер фланца «${label}» не подтверждён для текущего DN/PN/исполнения: ${item.id}`); continue;
     }
     dimensions[key] = numeric;
@@ -85,7 +86,7 @@ export function mergeFlangeDimensions(input: BindingCatalog, reference: FlangeDi
     if (!row.componentId || ids.has(row.componentId) || !row.name || !row.family || !row.source || !row.reason || !positive(row.dn) || !positive(row.pn)
       || (row.standard !== undefined && (typeof row.standard !== "string" || !row.standard.trim()))
       || (row.materialAcceptance !== undefined && (!row.materialAcceptance.materials.trim() || !row.materialAcceptance.source.trim()))
-      || Object.values(row.dimensions).some(value => !positive(value)) || Object.keys(row.dimensions).some(key => !(key in FLANGE_FIELDS))) throw new Error(`Invalid flange reference: ${row.componentId}`);
+      || Object.entries(row.dimensions).some(([key, value]) => !validDimension(key, value)) || Object.keys(row.dimensions).some(key => !(key in FLANGE_FIELDS))) throw new Error(`Invalid flange reference: ${row.componentId}`);
     ids.add(row.componentId);
   }
   const data = structuredClone(input), pressures = catalogPressures(data.items);

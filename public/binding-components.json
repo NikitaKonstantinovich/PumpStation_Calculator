@@ -22,10 +22,10 @@
   },
   "statistics": {
     "catalogs": 25,
-    "tables": 85,
-    "componentRows": 2027,
-    "pricedComponentRows": 1997,
-    "priceEntries": 4458,
+    "tables": 86,
+    "componentRows": 2029,
+    "pricedComponentRows": 1999,
+    "priceEntries": 4460,
     "formulaRules": 4785,
     "formulaErrorsInSavedValues": 0,
     "dataValidations": 23,
@@ -3042,6 +3042,223 @@
             "nhi-gost-pn16:dn700",
             "nhi-gost-pn16:dn800",
             "nhi-gost-pn16:dn900"
+          ]
+        },
+        {
+          "id": "fginox-iso-pn16-20261105",
+          "title": "Фланцы плоские AISI304L FGinox PN16 EN1092-1 тип 01/A ISO",
+          "sourceRange": "Проверенный прайс 2026-11-05",
+          "sourceUrls": [
+            "https://www.dkmtools.nl/specs/723140912",
+            "https://e-supplier.lv/1c/Files/82/82163.pdf",
+            "https://www.dkmtools.nl/datasheets/99410600010.pdf",
+            "https://www.cbr.ru/scripts/XML_daily.asp?date_req=05/11/2026",
+            "https://www.dkmtools.nl/specs/723140913"
+          ],
+          "headerRows": [],
+          "columns": [
+            {
+              "column": "name",
+              "headerPath": [
+                "Наименование"
+              ]
+            },
+            {
+              "column": "dn",
+              "headerPath": [
+                "DN"
+              ]
+            },
+            {
+              "column": "pn",
+              "headerPath": [
+                "PN"
+              ]
+            },
+            {
+              "column": "supplier",
+              "headerPath": [
+                "Поставщик"
+              ]
+            },
+            {
+              "column": "supplierId",
+              "headerPath": [
+                "ID товара поставщика"
+              ]
+            },
+            {
+              "column": "material",
+              "headerPath": [
+                "Материал"
+              ]
+            },
+            {
+              "column": "compatiblePns",
+              "headerPath": [
+                "Подтверждённые PN исполнения"
+              ]
+            },
+            {
+              "column": "priceDate",
+              "headerPath": [
+                "Дата цены"
+              ]
+            },
+            {
+              "column": "vat",
+              "headerPath": [
+                "Условия цены"
+              ]
+            },
+            {
+              "column": "sourceUrl",
+              "headerPath": [
+                "Источник URL"
+              ]
+            },
+            {
+              "column": "geometryBasis",
+              "headerPath": [
+                "Основание геометрии"
+              ]
+            },
+            {
+              "column": "pressureSource",
+              "headerPath": [
+                "Основание применения PN"
+              ]
+            },
+            {
+              "column": "article",
+              "headerPath": [
+                "Артикул"
+              ]
+            },
+            {
+              "column": "manufacturer",
+              "headerPath": [
+                "Производитель"
+              ]
+            },
+            {
+              "column": "unit",
+              "headerPath": [
+                "Единица измерения"
+              ]
+            },
+            {
+              "column": "weight",
+              "headerPath": [
+                "Масса по каталогу, кг"
+              ]
+            },
+            {
+              "column": "standard",
+              "headerPath": [
+                "Стандарт по карточке"
+              ]
+            },
+            {
+              "column": "facing",
+              "headerPath": [
+                "Уплотнительная поверхность"
+              ]
+            },
+            {
+              "column": "fitPipeOuter",
+              "headerPath": [
+                "Наружный диаметр трубы для проверки посадки, мм"
+              ]
+            },
+            {
+              "column": "originalPrice",
+              "headerPath": [
+                "Исходная цена, EUR/шт. без НДС"
+              ]
+            },
+            {
+              "column": "fxRate",
+              "headerPath": [
+                "Курс EUR/RUB"
+              ]
+            },
+            {
+              "column": "fxDate",
+              "headerPath": [
+                "Дата курса"
+              ]
+            },
+            {
+              "column": "fxSource",
+              "headerPath": [
+                "Источник курса"
+              ]
+            },
+            {
+              "column": "priceSource",
+              "headerPath": [
+                "Источник цены"
+              ]
+            },
+            {
+              "column": "priceNote",
+              "headerPath": [
+                "Примечание к цене"
+              ]
+            },
+            {
+              "column": "checkedAt",
+              "headerPath": [
+                "Дата проверки источника"
+              ]
+            },
+            {
+              "column": "documentUrl",
+              "headerPath": [
+                "Паспорт URL"
+              ]
+            },
+            {
+              "column": "materialGrade",
+              "headerPath": [
+                "Марка стали EN"
+              ]
+            },
+            {
+              "column": "manufacturing",
+              "headerPath": [
+                "Изготовление"
+              ]
+            },
+            {
+              "column": "medium",
+              "headerPath": [
+                "Рабочая среда"
+              ]
+            },
+            {
+              "column": "maxTemperature",
+              "headerPath": [
+                "Максимальная температура, °C"
+              ]
+            },
+            {
+              "column": "pressureTemperature",
+              "headerPath": [
+                "Давление / температура по серии 2PAS"
+              ]
+            },
+            {
+              "column": "modelStatus",
+              "headerPath": [
+                "Статус 3D"
+              ]
+            }
+          ],
+          "recordIds": [
+            "fginox-iso-pn16:2PAS16400",
+            "fginox-iso-pn16:2PAS16500"
           ]
         }
       ]
@@ -224850,6 +225067,684 @@
       ]
     },
     {
+      "id": "fginox-iso-pn16:2PAS16400",
+      "catalogId": "фланцы",
+      "tableId": "fginox-iso-pn16-20261105",
+      "family": "Фланцы плоские AISI304L FGinox PN16 EN1092-1 тип 01/A ISO",
+      "sourceSheet": "DKMTools",
+      "sourceRow": 1,
+      "fields": [
+        {
+          "column": "name",
+          "headerPath": [
+            "Наименование"
+          ],
+          "value": "Фланец плоский FGinox 2PAS16400 DN400 PN16 AISI304L EN1092-1 тип 01/A под трубу Ø406,4 мм"
+        },
+        {
+          "column": "dn",
+          "headerPath": [
+            "DN"
+          ],
+          "value": 400
+        },
+        {
+          "column": "pn",
+          "headerPath": [
+            "PN"
+          ],
+          "value": 16
+        },
+        {
+          "column": "supplier",
+          "headerPath": [
+            "Поставщик"
+          ],
+          "value": "DKMTools"
+        },
+        {
+          "column": "supplierId",
+          "headerPath": [
+            "ID товара поставщика"
+          ],
+          "value": "99410600410"
+        },
+        {
+          "column": "material",
+          "headerPath": [
+            "Материал"
+          ],
+          "value": "AISI304L / F304L (1.4306)"
+        },
+        {
+          "column": "compatiblePns",
+          "headerPath": [
+            "Подтверждённые PN исполнения"
+          ],
+          "value": "16"
+        },
+        {
+          "column": "priceDate",
+          "headerPath": [
+            "Дата цены"
+          ],
+          "value": "проверено 2026-11-05; дата изменения цены на сайте не указана"
+        },
+        {
+          "column": "vat",
+          "headerPath": [
+            "Условия цены"
+          ],
+          "value": "609,94 EUR/шт. без НДС; НДС поставщика 21% показан отдельно. В расчёте рублёвый эквивалент без НДС, доставки и таможенных платежей."
+        },
+        {
+          "column": "sourceUrl",
+          "headerPath": [
+            "Источник URL"
+          ],
+          "value": "https://www.dkmtools.nl/specs/723140912"
+        },
+        {
+          "column": "geometryBasis",
+          "headerPath": [
+            "Основание геометрии"
+          ],
+          "value": "Каталог FGinox 2026, печатная стр. 176 (PDF стр. 134), I.2PAS16, точный артикул 2PAS16400: D580, b38, K525, 16×Ø30, труба Ø406,4. Отверстие Ø411 по техническому листу серии 2PAS, стр. 3; совпадает с EN1092-1 тип 01/A. Плоская поверхность A/FF без выступа."
+        },
+        {
+          "column": "pressureSource",
+          "headerPath": [
+            "Основание применения PN"
+          ],
+          "value": "Карточка DKMTools 99410600410 и каталог изготовителя FGinox 2026 I.2PAS16: конкретное исполнение 2PAS16400 PN16. Марка F304L (1.4306), группа 10E0; зависимость давления от температуры приведена в техническом листе серии, стр. 2."
+        },
+        {
+          "column": "article",
+          "headerPath": [
+            "Артикул"
+          ],
+          "value": "2PAS16400"
+        },
+        {
+          "column": "manufacturer",
+          "headerPath": [
+            "Производитель"
+          ],
+          "value": "FGinox"
+        },
+        {
+          "column": "unit",
+          "headerPath": [
+            "Единица измерения"
+          ],
+          "value": "шт."
+        },
+        {
+          "column": "weight",
+          "headerPath": [
+            "Масса по каталогу, кг"
+          ],
+          "value": 35.9
+        },
+        {
+          "column": "standard",
+          "headerPath": [
+            "Стандарт по карточке"
+          ],
+          "value": "EN1092-1:01:A:PN16"
+        },
+        {
+          "column": "facing",
+          "headerPath": [
+            "Уплотнительная поверхность"
+          ],
+          "value": "A / FF, плоская, без выступа"
+        },
+        {
+          "column": "fitPipeOuter",
+          "headerPath": [
+            "Наружный диаметр трубы для проверки посадки, мм"
+          ],
+          "value": 406.4
+        },
+        {
+          "column": "originalPrice",
+          "headerPath": [
+            "Исходная цена, EUR/шт. без НДС"
+          ],
+          "value": 609.94
+        },
+        {
+          "column": "fxRate",
+          "headerPath": [
+            "Курс EUR/RUB"
+          ],
+          "value": 91.601
+        },
+        {
+          "column": "fxDate",
+          "headerPath": [
+            "Дата курса"
+          ],
+          "value": "2026-11-04"
+        },
+        {
+          "column": "fxSource",
+          "headerPath": [
+            "Источник курса"
+          ],
+          "value": "https://www.cbr.ru/scripts/XML_daily.asp?date_req=05/11/2026"
+        },
+        {
+          "column": "priceSource",
+          "headerPath": [
+            "Источник цены"
+          ],
+          "value": "https://www.dkmtools.nl/specs/723140912"
+        },
+        {
+          "column": "priceNote",
+          "headerPath": [
+            "Примечание к цене"
+          ],
+          "value": "609,94 × 91,6010 = 55 871,11 ₽/шт.; курс ЦБ от 04.11.2026, получен на 05.11.2026. Справочная стоимость закупки у указанного поставщика."
+        },
+        {
+          "column": "checkedAt",
+          "headerPath": [
+            "Дата проверки источника"
+          ],
+          "value": "2026-11-05"
+        },
+        {
+          "column": "documentUrl",
+          "headerPath": [
+            "Паспорт URL"
+          ],
+          "value": "https://e-supplier.lv/1c/Files/82/82163.pdf"
+        },
+        {
+          "column": "materialGrade",
+          "headerPath": [
+            "Марка стали EN"
+          ],
+          "value": "1.4306 / F304L, EN10222-5"
+        },
+        {
+          "column": "manufacturing",
+          "headerPath": [
+            "Изготовление"
+          ],
+          "value": "Кованая нержавеющая сталь"
+        },
+        {
+          "column": "medium",
+          "headerPath": [
+            "Рабочая среда"
+          ],
+          "value": "Жидкости и газы"
+        },
+        {
+          "column": "maxTemperature",
+          "headerPath": [
+            "Максимальная температура, °C"
+          ],
+          "value": 450
+        },
+        {
+          "column": "pressureTemperature",
+          "headerPath": [
+            "Давление / температура по серии 2PAS"
+          ],
+          "value": "PN16: 20°C — 16 бар; 100°C — 13,7; 150°C — 12,3; 200°C — 11,2; 250°C — 10,4; 300°C — 9,6; 350°C — 9,2; 400°C — 8,8; 450°C — 8,5. Технический лист, стр. 2, группа 10E0."
+        },
+        {
+          "column": "modelStatus",
+          "headerPath": [
+            "Статус 3D"
+          ],
+          "value": "Параметрическая модель EN1092-1 тип 01/A по проверенным размерам; не STEP изготовителя"
+        },
+        {
+          "column": "CALC_FLANGE_B",
+          "headerPath": [
+            "Толщина фланца, мм"
+          ],
+          "value": 38
+        },
+        {
+          "column": "CALC_FLANGE_BORE",
+          "headerPath": [
+            "Посадочный диаметр фланца, мм"
+          ],
+          "value": 411
+        },
+        {
+          "column": "CALC_FLANGE_PIPE_OD",
+          "headerPath": [
+            "Диаметр трубы под фланец, мм"
+          ],
+          "value": 406.4
+        },
+        {
+          "column": "CALC_FLANGE_OD",
+          "headerPath": [
+            "Наружный диаметр фланца, мм"
+          ],
+          "value": 580
+        },
+        {
+          "column": "CALC_FLANGE_PCD",
+          "headerPath": [
+            "Диаметр окружности отверстий фланца, мм"
+          ],
+          "value": 525
+        },
+        {
+          "column": "CALC_FLANGE_HOLES",
+          "headerPath": [
+            "Количество отверстий фланца"
+          ],
+          "value": 16
+        },
+        {
+          "column": "CALC_FLANGE_HOLE",
+          "headerPath": [
+            "Диаметр отверстия фланца, мм"
+          ],
+          "value": 30
+        },
+        {
+          "column": "CALC_FLANGE_FACE_HEIGHT",
+          "headerPath": [
+            "Высота соединительного выступа фланца, мм"
+          ],
+          "value": 0
+        },
+        {
+          "column": "CALC_FLANGE_FACE_OD",
+          "headerPath": [
+            "Диаметр соединительного выступа фланца, мм"
+          ],
+          "value": 0
+        },
+        {
+          "column": "CALC_FLANGE_SOURCE",
+          "headerPath": [
+            "Источник размеров фланца"
+          ],
+          "value": "Каталог FGinox 2026, печатная стр. 176 (PDF стр. 134), I.2PAS16, точный артикул 2PAS16400: D580, b38, K525, 16×Ø30, труба Ø406,4. Отверстие Ø411 по техническому листу серии 2PAS, стр. 3; совпадает с EN1092-1 тип 01/A. Плоская поверхность A/FF без выступа. https://e-supplier.lv/1c/Files/82/82163.pdf; https://www.dkmtools.nl/datasheets/99410600010.pdf"
+        },
+        {
+          "column": "CALC_FLANGE_STANDARD",
+          "headerPath": [
+            "Принятое исполнение фланца"
+          ],
+          "value": "EN1092-1:01:A:PN16"
+        },
+        {
+          "column": "CALC_FLANGE_REVIEW",
+          "headerPath": [
+            "Проверка размеров фланца"
+          ],
+          "value": "Проверено 05.11.2026: ISO-посадка, PN16, тип 01/A. Геометрия по точному артикулу изготовителя; плоская поверхность, без выступа. Материал и цена сохранены отдельно."
+        }
+      ],
+      "prices": [
+        {
+          "amount": 55871.11,
+          "currency": "RUB",
+          "sourceColumn": "price",
+          "label": "Цена, ₽/шт. (DKMTools EUR без НДС × курс ЦБ)"
+        }
+      ],
+      "sourceUrls": [
+        "https://www.dkmtools.nl/specs/723140912",
+        "https://e-supplier.lv/1c/Files/82/82163.pdf",
+        "https://www.dkmtools.nl/datasheets/99410600010.pdf",
+        "https://www.cbr.ru/scripts/XML_daily.asp?date_req=05/11/2026"
+      ]
+    },
+    {
+      "id": "fginox-iso-pn16:2PAS16500",
+      "catalogId": "фланцы",
+      "tableId": "fginox-iso-pn16-20261105",
+      "family": "Фланцы плоские AISI304L FGinox PN16 EN1092-1 тип 01/A ISO",
+      "sourceSheet": "DKMTools",
+      "sourceRow": 2,
+      "fields": [
+        {
+          "column": "name",
+          "headerPath": [
+            "Наименование"
+          ],
+          "value": "Фланец плоский FGinox 2PAS16500 DN500 PN16 AISI304L EN1092-1 тип 01/A под трубу Ø508 мм"
+        },
+        {
+          "column": "dn",
+          "headerPath": [
+            "DN"
+          ],
+          "value": 500
+        },
+        {
+          "column": "pn",
+          "headerPath": [
+            "PN"
+          ],
+          "value": 16
+        },
+        {
+          "column": "supplier",
+          "headerPath": [
+            "Поставщик"
+          ],
+          "value": "DKMTools"
+        },
+        {
+          "column": "supplierId",
+          "headerPath": [
+            "ID товара поставщика"
+          ],
+          "value": "99410600510"
+        },
+        {
+          "column": "material",
+          "headerPath": [
+            "Материал"
+          ],
+          "value": "AISI304L / F304L (1.4306)"
+        },
+        {
+          "column": "compatiblePns",
+          "headerPath": [
+            "Подтверждённые PN исполнения"
+          ],
+          "value": "16"
+        },
+        {
+          "column": "priceDate",
+          "headerPath": [
+            "Дата цены"
+          ],
+          "value": "проверено 2026-11-05; дата изменения цены на сайте не указана"
+        },
+        {
+          "column": "vat",
+          "headerPath": [
+            "Условия цены"
+          ],
+          "value": "1 205,21 EUR/шт. без НДС; НДС поставщика 21% показан отдельно. В расчёте рублёвый эквивалент без НДС, доставки и таможенных платежей."
+        },
+        {
+          "column": "sourceUrl",
+          "headerPath": [
+            "Источник URL"
+          ],
+          "value": "https://www.dkmtools.nl/specs/723140913"
+        },
+        {
+          "column": "geometryBasis",
+          "headerPath": [
+            "Основание геометрии"
+          ],
+          "value": "Каталог FGinox 2026, печатная стр. 176 (PDF стр. 134), I.2PAS16, точный артикул 2PAS16500: D715, b46, K650, 20×Ø33, труба Ø508. Отверстие Ø513,5 по техническому листу серии 2PAS, стр. 3; совпадает с EN1092-1 тип 01/A. Плоская поверхность A/FF без выступа."
+        },
+        {
+          "column": "pressureSource",
+          "headerPath": [
+            "Основание применения PN"
+          ],
+          "value": "Карточка DKMTools 99410600510 и каталог изготовителя FGinox 2026 I.2PAS16: конкретное исполнение 2PAS16500 PN16. Марка F304L (1.4306), группа 10E0; зависимость давления от температуры приведена в техническом листе серии, стр. 2."
+        },
+        {
+          "column": "article",
+          "headerPath": [
+            "Артикул"
+          ],
+          "value": "2PAS16500"
+        },
+        {
+          "column": "manufacturer",
+          "headerPath": [
+            "Производитель"
+          ],
+          "value": "FGinox"
+        },
+        {
+          "column": "unit",
+          "headerPath": [
+            "Единица измерения"
+          ],
+          "value": "шт."
+        },
+        {
+          "column": "weight",
+          "headerPath": [
+            "Масса по каталогу, кг"
+          ],
+          "value": 64
+        },
+        {
+          "column": "standard",
+          "headerPath": [
+            "Стандарт по карточке"
+          ],
+          "value": "EN1092-1:01:A:PN16"
+        },
+        {
+          "column": "facing",
+          "headerPath": [
+            "Уплотнительная поверхность"
+          ],
+          "value": "A / FF, плоская, без выступа"
+        },
+        {
+          "column": "fitPipeOuter",
+          "headerPath": [
+            "Наружный диаметр трубы для проверки посадки, мм"
+          ],
+          "value": 508
+        },
+        {
+          "column": "originalPrice",
+          "headerPath": [
+            "Исходная цена, EUR/шт. без НДС"
+          ],
+          "value": 1205.21
+        },
+        {
+          "column": "fxRate",
+          "headerPath": [
+            "Курс EUR/RUB"
+          ],
+          "value": 91.601
+        },
+        {
+          "column": "fxDate",
+          "headerPath": [
+            "Дата курса"
+          ],
+          "value": "2026-11-04"
+        },
+        {
+          "column": "fxSource",
+          "headerPath": [
+            "Источник курса"
+          ],
+          "value": "https://www.cbr.ru/scripts/XML_daily.asp?date_req=05/11/2026"
+        },
+        {
+          "column": "priceSource",
+          "headerPath": [
+            "Источник цены"
+          ],
+          "value": "https://www.dkmtools.nl/specs/723140913"
+        },
+        {
+          "column": "priceNote",
+          "headerPath": [
+            "Примечание к цене"
+          ],
+          "value": "1 205,21 × 91,6010 = 110 398,44 ₽/шт.; курс ЦБ от 04.11.2026, получен на 05.11.2026. Справочная стоимость закупки у указанного поставщика."
+        },
+        {
+          "column": "checkedAt",
+          "headerPath": [
+            "Дата проверки источника"
+          ],
+          "value": "2026-11-05"
+        },
+        {
+          "column": "documentUrl",
+          "headerPath": [
+            "Паспорт URL"
+          ],
+          "value": "https://e-supplier.lv/1c/Files/82/82163.pdf"
+        },
+        {
+          "column": "materialGrade",
+          "headerPath": [
+            "Марка стали EN"
+          ],
+          "value": "1.4306 / F304L, EN10222-5"
+        },
+        {
+          "column": "manufacturing",
+          "headerPath": [
+            "Изготовление"
+          ],
+          "value": "Кованая нержавеющая сталь"
+        },
+        {
+          "column": "medium",
+          "headerPath": [
+            "Рабочая среда"
+          ],
+          "value": "Жидкости и газы"
+        },
+        {
+          "column": "maxTemperature",
+          "headerPath": [
+            "Максимальная температура, °C"
+          ],
+          "value": 450
+        },
+        {
+          "column": "pressureTemperature",
+          "headerPath": [
+            "Давление / температура по серии 2PAS"
+          ],
+          "value": "PN16: 20°C — 16 бар; 100°C — 13,7; 150°C — 12,3; 200°C — 11,2; 250°C — 10,4; 300°C — 9,6; 350°C — 9,2; 400°C — 8,8; 450°C — 8,5. Технический лист, стр. 2, группа 10E0."
+        },
+        {
+          "column": "modelStatus",
+          "headerPath": [
+            "Статус 3D"
+          ],
+          "value": "Параметрическая модель EN1092-1 тип 01/A по проверенным размерам; не STEP изготовителя"
+        },
+        {
+          "column": "CALC_FLANGE_B",
+          "headerPath": [
+            "Толщина фланца, мм"
+          ],
+          "value": 46
+        },
+        {
+          "column": "CALC_FLANGE_BORE",
+          "headerPath": [
+            "Посадочный диаметр фланца, мм"
+          ],
+          "value": 513.5
+        },
+        {
+          "column": "CALC_FLANGE_PIPE_OD",
+          "headerPath": [
+            "Диаметр трубы под фланец, мм"
+          ],
+          "value": 508
+        },
+        {
+          "column": "CALC_FLANGE_OD",
+          "headerPath": [
+            "Наружный диаметр фланца, мм"
+          ],
+          "value": 715
+        },
+        {
+          "column": "CALC_FLANGE_PCD",
+          "headerPath": [
+            "Диаметр окружности отверстий фланца, мм"
+          ],
+          "value": 650
+        },
+        {
+          "column": "CALC_FLANGE_HOLES",
+          "headerPath": [
+            "Количество отверстий фланца"
+          ],
+          "value": 20
+        },
+        {
+          "column": "CALC_FLANGE_HOLE",
+          "headerPath": [
+            "Диаметр отверстия фланца, мм"
+          ],
+          "value": 33
+        },
+        {
+          "column": "CALC_FLANGE_FACE_HEIGHT",
+          "headerPath": [
+            "Высота соединительного выступа фланца, мм"
+          ],
+          "value": 0
+        },
+        {
+          "column": "CALC_FLANGE_FACE_OD",
+          "headerPath": [
+            "Диаметр соединительного выступа фланца, мм"
+          ],
+          "value": 0
+        },
+        {
+          "column": "CALC_FLANGE_SOURCE",
+          "headerPath": [
+            "Источник размеров фланца"
+          ],
+          "value": "Каталог FGinox 2026, печатная стр. 176 (PDF стр. 134), I.2PAS16, точный артикул 2PAS16500: D715, b46, K650, 20×Ø33, труба Ø508. Отверстие Ø513,5 по техническому листу серии 2PAS, стр. 3; совпадает с EN1092-1 тип 01/A. Плоская поверхность A/FF без выступа. https://e-supplier.lv/1c/Files/82/82163.pdf; https://www.dkmtools.nl/datasheets/99410600010.pdf"
+        },
+        {
+          "column": "CALC_FLANGE_STANDARD",
+          "headerPath": [
+            "Принятое исполнение фланца"
+          ],
+          "value": "EN1092-1:01:A:PN16"
+        },
+        {
+          "column": "CALC_FLANGE_REVIEW",
+          "headerPath": [
+            "Проверка размеров фланца"
+          ],
+          "value": "Проверено 05.11.2026: ISO-посадка, PN16, тип 01/A. Геометрия по точному артикулу изготовителя; плоская поверхность, без выступа. Материал и цена сохранены отдельно."
+        }
+      ],
+      "prices": [
+        {
+          "amount": 110398.44,
+          "currency": "RUB",
+          "sourceColumn": "price",
+          "label": "Цена, ₽/шт. (DKMTools EUR без НДС × курс ЦБ)"
+        }
+      ],
+      "sourceUrls": [
+        "https://www.dkmtools.nl/specs/723140913",
+        "https://e-supplier.lv/1c/Files/82/82163.pdf",
+        "https://www.dkmtools.nl/datasheets/99410600010.pdf",
+        "https://www.cbr.ru/scripts/XML_daily.asp?date_req=05/11/2026"
+      ]
+    },
+    {
       "id": "st20-concentric:r0005",
       "catalogId": "переходы",
       "tableId": "st20-concentric-reducers-20261028",
@@ -386579,7 +387474,7 @@
       "сгоны-резьба": 29,
       "трубы": 120,
       "металл": 29,
-      "фланцы": 156,
+      "фланцы": 158,
       "воротники": 40,
       "отводы": 120,
       "переходы": 653,
@@ -387018,6 +387913,14 @@
         "https://onyxspb.ru/catalog/flantsy/flantsy-ploskie/flantsy-ploskie-stal-12kh18n10t/flanets-ploskiy-500-16-01-1-b-st-12kh18n10t-iv-gost-33259-2015/",
         "https://onyxspb.ru/catalog/flantsy/flantsy-ploskie/flantsy-ploskie-stal-12kh18n10t/flanets-ploskiy-600-16-01-1-b-st-12kh18n10t-iv-gost-33259-2015/",
         "https://www.nhi-group.ru/catalog/detali_truboprovoda/flantsy/?page=7"
+      ]
+    },
+    {
+      "id": "fginox-iso-pn16-20261105",
+      "checkedAt": "2026-11-05",
+      "urls": [
+        "https://www.dkmtools.nl/specs/723140912",
+        "https://www.dkmtools.nl/specs/723140913"
       ]
     },
     {

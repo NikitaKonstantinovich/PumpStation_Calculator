@@ -4,6 +4,7 @@ import test from "node:test";
 import { loadTs } from "./load-ts.mjs";
 
 const calc = await loadTs(new URL("../app/component-insert-calculations.ts", import.meta.url));
+const { insertionPrice } = await loadTs(new URL("../app/calculated-insertion.ts", import.meta.url));
 const adapter = await loadTs(new URL("../app/component-insert-catalog.ts", import.meta.url));
 const source = JSON.parse(await readFile(new URL("../public/binding-components.json", import.meta.url), "utf8"));
 const provenance = "TEST FIXTURE ONLY — explicitly verified hypothetical dimensions";
@@ -64,6 +65,9 @@ test("compact ready ends: one weld, actual purchased pieces, no pipe or bolt len
       assert.ok(row.bom.every(b => b.kind !== "pipe" && b.kind !== "machining"));
       if (material === "st20") near(row.bom.find(b => b.kind === "painting").quantity, threaded ? .076 : .038);
       near(row.price, row.bom.reduce((n,b) => n+b.cost,0));
+      assert.equal(insertionPrice({calculation:row, currentCatalogVersion:null}), row.price);
+      const missingBase = {...row, bom:row.bom.filter(part => part.role !== "base")};
+      assert.equal(insertionPrice({calculation:missingBase}), null);
     }
   }
 });

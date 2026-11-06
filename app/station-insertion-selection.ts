@@ -13,7 +13,7 @@ export type InsertionRequirement = {
   withSensorNipple?: boolean;
   design?: InsertionDesign;
 };
-export type InsertionFinding = { code: "missing-product" | "missing-price" | "missing-dimensions" | "incompatible" | "stale" | "engineering-decision" | "incomplete-bom"; message: string };
+export type InsertionFinding = { code: "missing-product" | "missing-price" | "missing-dimensions" | "incompatible" | "engineering-decision" | "incomplete-bom"; message: string };
 export type InsertionSelection = { item?: AssemblyComponent; reversed: boolean; exact: boolean; technicalStatus: SpecTechnicalStatus; findings: InsertionFinding[]; explanation: string; candidates: string[] };
 const threadGender = (physical: string | null | undefined) => {
   try { const value: unknown = JSON.parse(physical ?? "null"); return Array.isArray(value) ? value[16] : null; } catch { return null; }
@@ -41,6 +41,12 @@ export function insertionDesign(c: InsertCalculation): InsertionDesign | undefin
   return finitePositive(c.totalLengthMm) ? { configuration: c.configuration, totalLengthMm: c.totalLengthMm, threadLeft: c.threadLeft, threadRight: c.threadRight } : undefined;
 }
 
+// Revision numbers belong to one product. Compare publication dates across products.
+export function latestInsertionFirst(a: AssemblyComponent, b: AssemblyComponent): number {
+  const left = a.calculatedInsertion!, right = b.calculatedInsertion!;
+  return right.pricedAt.localeCompare(left.pricedAt) || right.revision - left.revision || a.id.localeCompare(b.id);
+}
+
 export function selectStationInsertion(items: AssemblyComponent[], r: InsertionRequirement): InsertionSelection {
   const finding = (code: InsertionFinding["code"], message: string): InsertionFinding => ({ code, message });
   const candidates = items.filter(item => item.calculatedInsertion).flatMap(item => insertionOrientations(item, r).map(reversed => ({ item, reversed })));
@@ -59,21 +65,19 @@ export function selectStationInsertion(items: AssemblyComponent[], r: InsertionR
       (!expected.sensor.requested || Boolean(expected.sensor.part && finitePositive(expected.sensor.dn) && expected.sensor.gender));
   });
   // Price is deliberately absent from the ordering. A missing price never authorizes substitution.
-  const fresh = (item: AssemblyComponent) => Boolean(item.calculatedInsertion!.currentCatalogVersion && item.calculatedInsertion!.catalogVersion === item.calculatedInsertion!.currentCatalogVersion);
-  exact.sort((a, b) => Number(fresh(b.item)) - Number(fresh(a.item)) || Number(b.item.calculatedInsertion!.calculation.complete) - Number(a.item.calculatedInsertion!.calculation.complete) || b.item.calculatedInsertion!.revision - a.item.calculatedInsertion!.revision || a.item.id.localeCompare(b.item.id) || Number(a.reversed) - Number(b.reversed));
+  exact.sort((a, b) => latestInsertionFirst(a.item, b.item) || Number(a.reversed) - Number(b.reversed));
   const selected = exact[0];
   if (!selected) return { reversed: false, exact: false, technicalStatus: "unverified", candidates: [...new Set(candidates.map(c => c.item.id))],
     findings: [...(missing ? [finding("missing-dimensions", "Не подтверждены монтажная длина, геометрия концов и состав вставки для этого места. Выберите исполнение в спецификации.")] : []),
       ...(!candidates.length ? [finding("missing-product", `Нет расчётного изделия с требуемыми материалом, PN, обоими DN, соединениями и геометрией${r.withSensorNipple === undefined ? "" : r.withSensorNipple ? ", со сгоном DN15 под реле давления" : ", без сгона"}.`)] : missing ? [] : [finding("incompatible", "Расчётные вставки не соответствуют подтверждённой длине, соединениям, сгону или конфигурации.")])],
     explanation: "Точное рассчитанное исполнение не выбрано." };
   const s = selected.item.calculatedInsertion!, c = s.calculation, findings: InsertionFinding[] = [];
-  if (!fresh(selected.item)) findings.push(finding("stale", s.currentCatalogVersion ? "Расчёт вставки устарел относительно текущего каталога." : "Актуальность расчёта вставки не проверена: текущая версия каталога недоступна."));
   for (const message of insertionBomIssues(c)) findings.push(finding("incomplete-bom", message));
   if (!c.complete) findings.push(finding("engineering-decision", `Расчёт вставки не завершён. ${(c.warnings ?? []).join("; ")}`));
   if (c.assumptions?.length) findings.push(finding("engineering-decision", c.assumptions.map(a => `${a.message} Основание: ${a.source}`).join("; ")));
-  if (insertionPrice(s) === null) findings.push(finding("missing-price", "Полная актуальная стоимость вставки не подтверждена; частичный итог BOM не учитывается."));
+  if (insertionPrice(s) === null) findings.push(finding("missing-price", "В сохранённой ревизии нет подтверждённой цены готовой вставки."));
   const technical = findings.filter(f => f.code !== "missing-price");
-  return { ...selected, exact: fresh(selected.item) && !technical.length, candidates: [...new Set(exact.map(c => c.item.id))], findings,
-    technicalStatus: !fresh(selected.item) ? "stale" : technical.length ? "incomplete" : "ready",
-    explanation: `Выбрана расчётная вставка ${s.id}, ревизия ${s.revision}. Совпадений: ${new Set(exact.map(c => c.item.id)).size}. Приоритет: актуальность, завершённость, ревизия, стабильный ID; цена не влияет. ${selected.reversed ? "Концы развёрнуты: правый к насосу." : "Левый конец — начало участка."}` };
+  return { ...selected, exact: !technical.length, candidates: [...new Set(exact.map(c => c.item.id))], findings,
+    technicalStatus: technical.length ? "incomplete" : "ready",
+    explanation: `Выбрана последняя выгруженная вставка для этого исполнения, ревизия ${s.revision}. ${selected.reversed ? "Правый конец обращён к насосу." : "Левый конец обращён к насосу."}` };
 }

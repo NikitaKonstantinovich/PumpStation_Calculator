@@ -2651,6 +2651,50 @@
       },
       "source": "https://bkarm.ru/product/flanecz-stalnoj-nerzhaveyushhij-ploskij-pn-10-dn-400/; карточка товара, проверено 31.10.2026: отверстие, D, b, n, d, D1, уплотнительная поверхность. Высота выступа B f1=3 мм: ГОСТ 33259-2015, таблица 1 DN250–500; https://www.htpipe.com/d/files/flanges-standard/gost-33259-2015.pdf. Полная толщина b включает выступ.",
       "reason": "Подтверждены размеры и цена отдельного исполнения PN10; замена PN16 по одному DN запрещена. Исполнение ряда 1 под трубу Ø426 мм; на ISO-переход Ø406.4 мм без отдельного решения не устанавливать."
+    },
+    {
+      "componentId": "fginox-iso-pn16:2PAS16400",
+      "tableId": "fginox-iso-pn16-20261105",
+      "family": "Фланцы плоские AISI304L FGinox PN16 EN1092-1 тип 01/A ISO",
+      "name": "Фланец плоский FGinox 2PAS16400 DN400 PN16 AISI304L EN1092-1 тип 01/A под трубу Ø406,4 мм",
+      "dn": 400,
+      "pn": 16,
+      "standard": "EN1092-1:01:A:PN16",
+      "dimensions": {
+        "thicknessMm": 38,
+        "boreDiameterMm": 411,
+        "pipeOuterDiameterMm": 406.4,
+        "outerDiameterMm": 580,
+        "boltCircleMm": 525,
+        "holes": 16,
+        "boltHoleDiameterMm": 30,
+        "faceHeightMm": 0,
+        "faceDiameterMm": 0
+      },
+      "source": "Каталог FGinox 2026, печатная стр. 176 (PDF стр. 134), I.2PAS16, точный артикул 2PAS16400: D580, b38, K525, 16×Ø30, труба Ø406,4. Отверстие Ø411 по техническому листу серии 2PAS, стр. 3; совпадает с EN1092-1 тип 01/A. Плоская поверхность A/FF без выступа. https://e-supplier.lv/1c/Files/82/82163.pdf; https://www.dkmtools.nl/datasheets/99410600010.pdf",
+      "reason": "Проверено 05.11.2026: ISO-посадка, PN16, тип 01/A. Геометрия по точному артикулу изготовителя; плоская поверхность, без выступа. Материал и цена сохранены отдельно."
+    },
+    {
+      "componentId": "fginox-iso-pn16:2PAS16500",
+      "tableId": "fginox-iso-pn16-20261105",
+      "family": "Фланцы плоские AISI304L FGinox PN16 EN1092-1 тип 01/A ISO",
+      "name": "Фланец плоский FGinox 2PAS16500 DN500 PN16 AISI304L EN1092-1 тип 01/A под трубу Ø508 мм",
+      "dn": 500,
+      "pn": 16,
+      "standard": "EN1092-1:01:A:PN16",
+      "dimensions": {
+        "thicknessMm": 46,
+        "boreDiameterMm": 513.5,
+        "pipeOuterDiameterMm": 508,
+        "outerDiameterMm": 715,
+        "boltCircleMm": 650,
+        "holes": 20,
+        "boltHoleDiameterMm": 33,
+        "faceHeightMm": 0,
+        "faceDiameterMm": 0
+      },
+      "source": "Каталог FGinox 2026, печатная стр. 176 (PDF стр. 134), I.2PAS16, точный артикул 2PAS16500: D715, b46, K650, 20×Ø33, труба Ø508. Отверстие Ø513,5 по техническому листу серии 2PAS, стр. 3; совпадает с EN1092-1 тип 01/A. Плоская поверхность A/FF без выступа. https://e-supplier.lv/1c/Files/82/82163.pdf; https://www.dkmtools.nl/datasheets/99410600010.pdf",
+      "reason": "Проверено 05.11.2026: ISO-посадка, PN16, тип 01/A. Геометрия по точному артикулу изготовителя; плоская поверхность, без выступа. Материал и цена сохранены отдельно."
     }
   ]
 }

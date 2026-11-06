@@ -105,14 +105,10 @@ test("published labour tariffs are used once in collector and insert BOM, missin
   const projected=base.paintingItemForBase(work,applied);assert.equal(projected.id,work.id);assert.equal(projected.prices.length,1);assert.equal(projected.prices[0].amount,777);assert.equal(work.prices[0].amount,10);
   const result=collectors.calculateCollector(configuration,base.applyBaseTariffs(catalog,applied));
   assert.equal(result.complete,true,result.warnings.join("\n"));near(result.weldCost,result.weldLengthMm/1000*3456);near(result.price,result.bom.reduce((sum,r)=>sum+r.cost,0));
-  const inserts=await load("component-insert-calculations"),binding=await load("base-values-components");
+  const inserts=await load("component-insert-calculations");
   const rows=inserts.generateInsertCalculations({...extensionInput,materials:["st20"]},base.applyBaseTariffs(extensionCatalog("st20"),applied));
   const row=rows.find(r=>r.complete);assert.ok(row);near(row.weldCost,row.weldLengthMm/1000*3456);near(row.price,row.bom.reduce((sum,r)=>sum+r.cost,0));
   assert.equal(row.bom.find(r=>r.kind==="painting").unitPrice,777);
-  const old=initial(),snapshot={version:1,id:"fixture",catalogVersion:row.catalogVersion,currentCatalogVersion:row.catalogVersion,calculation:row};
-  const bound=binding.bindInsertionTariffs(snapshot,old);near(bound.calculation.weldCost,row.weldLengthMm/1000*2400);assert.notEqual(bound.calculation.price,row.price);
-  const again=binding.bindInsertionTariffs(bound,old);assert.deepEqual(again,bound);
-  old.values.painting.forEach(p=>p.pricePerMeter=null);const unpriced=binding.bindInsertionTariffs(snapshot,old);assert.equal(unpriced.calculation.price,null);assert.equal(unpriced.calculation.complete,false);
 });
 test("net pump prices bypass manufacturer discount",async()=>{
   const pricing=await load("pump-catalog"),source=await readFile(new URL("../app/pump-catalog.ts",import.meta.url),"utf8");
@@ -195,7 +191,7 @@ test("admin API authorization, immutable history, optimistic conflicts and trust
 });
 
 
-test("catalogue refresh replaces a stale project insertion snapshot and retains project labour tariffs", async () => {
+test("catalogue refresh uses the published insertion revision, including its labour tariffs", async () => {
   const { calculations, component, requirement, insertionDesign, selectStationInsertion } = await import("./fixtures/station-insertions.mjs");
   const { bindProjectComponents } = await load("base-values-components");
   const { insertionPrice } = await load("calculated-insertion");
@@ -218,8 +214,8 @@ test("catalogue refresh replaces a stale project insertion snapshot and retains 
   assert.equal(actual.revision, 1);
   assert.equal(actual.pricedAt, "2026-10-31");
   assert.equal(actual.calculation.bom.find(r => r.role === "base").unitPrice, part.unitPrice);
-  near(actual.calculation.weldCost, c.weldLengthMm / 1000 * 1234);
-  assert.ok(insertionPrice(actual) > 0);
+  assert.deepEqual(actual, fresh.calculatedInsertion);
+  assert.equal(insertionPrice(actual), fresh.calculatedInsertion.calculation.price);
   assert.equal(selectStationInsertion(bound.items, req).technicalStatus, "ready");
   assert.deepEqual(bindProjectComponents(project, bound), bound, "repeated tariff binding is idempotent");
   assert.deepEqual(project, beforeProject); assert.deepEqual(database, beforeDatabase);
@@ -227,9 +223,9 @@ test("catalogue refresh replaces a stale project insertion snapshot and retains 
   assert.equal(bindProjectComponents(reloaded, database).items[0].calculatedInsertion.revision, 1);
 
   const stale = structuredClone(database); stale.items[0].calculatedInsertion.currentCatalogVersion = "even-newer-source";
-  assert.equal(insertionPrice(bindProjectComponents(project, stale).items[0].calculatedInsertion), null, "tariffs never freshen a stale product");
-  const invalid = structuredClone(database); invalid.items[0].calculatedInsertion.currentCatalogVersion = null;
-  assert.equal(insertionPrice(bindProjectComponents(project, invalid).items[0].calculatedInsertion), null);
+  assert.equal(insertionPrice(bindProjectComponents(project, stale).items[0].calculatedInsertion), insertionPrice(actual));
+  stale.items[0].calculatedInsertion.currentCatalogVersion = null;
+  assert.equal(insertionPrice(bindProjectComponents(project, stale).items[0].calculatedInsertion), insertionPrice(actual));
   const incomplete = structuredClone(database); incomplete.items[0].calculatedInsertion.calculation.bom = incomplete.items[0].calculatedInsertion.calculation.bom.filter(r => r.role !== "base");
   assert.equal(insertionPrice(bindProjectComponents(project, incomplete).items[0].calculatedInsertion), null);
   const changed = structuredClone(database); changed.items[0].calculatedInsertion.calculation.totalLengthMm += 10;

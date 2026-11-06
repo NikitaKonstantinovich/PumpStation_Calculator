@@ -72,7 +72,11 @@ test("installed insertion excludes reserve cap once, retains immutable source an
   const saved=rows(restored).find(r=>r.insertionAssembly?.sensorConnection);
   assert.equal(saved.price,row.price);assert.equal(saved.insertionAssembly.sensorConnection,a.sensorConnection);
   assert.deepEqual(saved.insertionAssembly.snapshot.calculation.configuration,a.snapshot.calculation.configuration);
-  const missing=structuredClone(a);missing.snapshot.currentCatalogVersion="changed";assert.equal(installedInsertionPrice(missing),null);
+  const updatedCatalog=structuredClone(a);
+  updatedCatalog.snapshot.currentCatalogVersion="changed";
+  assert.equal(installedInsertionPrice(updatedCatalog),row.price);
+  updatedCatalog.snapshot.calculation.bom.find(part=>part.role==="sensor-plug").cost=null;
+  assert.equal(installedInsertionPrice(updatedCatalog),null);
   assert.equal(sets(restored).length,4);for(const node of requiredSpecificationNodes(restored).filter(n=>/^primary-sensor-/.test(n.id)))assert.equal(rows(restored).filter(node.matches).reduce((s,r)=>s+r.quantity,0),node.quantity);
 });
 

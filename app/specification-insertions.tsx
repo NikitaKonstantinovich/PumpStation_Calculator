@@ -1,6 +1,6 @@
 import type { DnEntity, SpecItem } from "./project-config";
 import type { AssemblyComponent } from "./suction-catalog";
-import { insertionDesign, insertionOrientations } from "./station-insertion-selection";
+import { insertionDesign, insertionOrientations, latestInsertionFirst } from "./station-insertion-selection";
 import { insertionPhysicalKey, installedInsertionBom } from "./calculated-insertion";
 import "./specification-insertions.css";
 
@@ -11,14 +11,13 @@ export function SpecificationInsertion({ item, database, designs, onChange }: {
   const requirement = item.insertionRequirement;
   if (!requirement) return null;
   const candidates = (database?.items ?? []).filter(candidate => insertionOrientations(candidate, requirement).length && insertionDesign(candidate.calculatedInsertion!.calculation))
-    .sort((a, b) => a.id.localeCompare(b.id));
+    .sort(latestInsertionFirst);
   const design = designs?.[requirement.location];
   const current = candidates.find(candidate => design && candidate.calculatedInsertion!.calculation.totalLengthMm === design.totalLengthMm && insertionPhysicalKey(candidate.calculatedInsertion!.calculation.configuration) === insertionPhysicalKey(design.configuration));
   const assembly = item.insertionAssembly;
   const location = `${requirement.location.startsWith("suction:") ? "Всас" : "Напор"} · ${requirement.location.includes(":secondary-") ? "Контур 2" : "Контур 1"} · ${{"between-valves":"между арматурой","pump-transition":"у насоса","after-vibration":"после компенсатора"}[requirement.purpose]}`;
   return <details className="spec-insertion" data-insertion-location={requirement.location}>
     <summary>Исполнение и состав вставки</summary>
-    {item.technicalStatus === "stale" && <p role="status">Расчёт вставки устарел. Пересчитайте и выгрузите изделие в «Расчёте комплектующих», затем обновите спецификацию. До обновления итоговая цена не учитывается.</p>}
     <p>Подтвердите монтажную длину и исполнение для этого участка. Направление концов — от насоса к коллектору. Совместимость проверяется при каждом пересчёте.</p>
     <p>Требуется: {{straight:"прямая вставка",concentric:"концентрический переход",eccentric:"эксцентрический переход"}[requirement.geometry]}{requirement.withSensorNipple === undefined ? "" : requirement.withSensorNipple ? ", со сгоном DN15 под реле давления" : ", без сгона"}.</p>
     <label>{location}

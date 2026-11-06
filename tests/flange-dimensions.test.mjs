@@ -84,11 +84,11 @@ test("accepted PN25 material does not widen bores or waive direct reducer profil
   assert.match(row.bom.find(item => item.role === "left-flanged").source, /Проектная взаимозаменяемость/);
 });
 
-test("137 flange executions get sourced thickness; unapproved large loose PN16/pressed variants remain pending", () => {
+test("139 flange executions get sourced thickness; unapproved large loose PN16/pressed variants remain pending", () => {
   const enriched = merge(original, reference), pressures = catalogPressures(enriched.items);
-  assert.equal(reference.rows.length, 156);
-  assert.equal(reference.rows.filter(row => row.dimensions.thicknessMm).length, 137);
-  assert.equal(enriched.items.filter(item => field(item, "Толщина фланца, мм")).length, 137);
+  assert.equal(reference.rows.length, 158);
+  assert.equal(reference.rows.filter(row => row.dimensions.thicknessMm).length, 139);
+  assert.equal(enriched.items.filter(item => field(item, "Толщина фланца, мм")).length, 139);
   assert.deepEqual(merge(enriched, reference), enriched);
   for (let i = 0; i < enriched.items.length; i++) assert.deepEqual(native(enriched.items[i]), original.items[i]);
   for (const row of reference.rows) {

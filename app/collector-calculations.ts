@@ -140,15 +140,24 @@ export function calculateCollector(c: CollectorConfiguration, catalog: Collector
   const rate = (catalog.weldRates ?? WELD_RATES)[c.material], flow = collectorFlow(c);
   if (flow.flow === null) warnings.push("Укажите расход каждого активного контура больше нуля");
   const label = (kind: ComponentKind, dn: number | null, pn: number) => `${({ pipe: "Труба", weldFlange: "Фланец приварной", looseFlange: "Фланец воротниковый", collar: "Воротник", nipple: "Сгон", plug: "Заглушка резьбовая ВР" })[kind]} DN${dn ?? "?"} PN${pn}${kind === "plug" ? " или выше" : ` ${c.material === "aisi304" ? "AISI304" : "СТ20"}`}`;
-  const find = (kind: ComponentKind, dn: number | null, pn: number) => catalog.components.find(v => {
-    if (v.kind !== kind || v.dn !== dn) return false;
-    // Caps screw onto the sgon: their material need not match welded parts.
-    // Unknown pressure or a male thread cannot establish a compatible cap.
-    if (kind === "plug") return v.threadGender === "female" && positive(v.pn) && v.pn >= pn && (v.material === c.material || v.material === "brass");
-    return v.material === c.material && (v.pn === pn || (kind === "nipple" && v.pn === null));
-  });
-  const add = (role: string, kind: ComponentKind, dn: number | null, pn: number, quantity: number) => {
-    const item = find(kind, dn, pn), name = item?.name ?? label(kind, dn, pn);
+  const find = (kind: ComponentKind, dn: number | null, pn: number, pipeOuter?: number | null) => {
+    const candidates = catalog.components.filter(v => {
+      if (v.kind !== kind || v.dn !== dn) return false;
+      // Caps screw onto the sgon: their material need not match welded parts.
+      // Unknown pressure or a male thread cannot establish a compatible cap.
+      if (kind === "plug") return v.threadGender === "female" && positive(v.pn) && v.pn >= pn && (v.material === c.material || v.material === "brass");
+      return v.material === c.material && (v.pn === pn || (kind === "nipple" && v.pn === null));
+    });
+    // DN/PN alone cannot distinguish ISO tubing from the larger GOST pipe series.
+    // Prefer an explicitly matching seat; retain a mismatch for the diagnostic below
+    // when the catalogue has no suitable execution.
+    return (["weldFlange", "looseFlange", "collar"].includes(kind) && positive(pipeOuter)
+      ? candidates.find(v => positive(v.requiredPipeOuterDiameterMm) && Math.abs(v.requiredPipeOuterDiameterMm - pipeOuter) <= .001)
+        ?? candidates.find(v => !positive(v.requiredPipeOuterDiameterMm))
+      : undefined) ?? candidates[0];
+  };
+  const add = (role: string, kind: ComponentKind, dn: number | null, pn: number, quantity: number, pipeOuter?: number | null) => {
+    const item = find(kind, dn, pn, pipeOuter), name = item?.name ?? label(kind, dn, pn);
     if (!item) warnings.push(`Нет компонента: ${label(kind, dn, pn)}`);
     const price = item?.price;
     if (!positive(price)) warnings.push(`Нет цены: ${name}`);
@@ -184,7 +193,7 @@ export function calculateCollector(c: CollectorConfiguration, catalog: Collector
   paint("painting-collector", "труба коллектора", c.dn, lengthMm);
   const flanges = (role: string, dn: number | null, pn: number, count: number, outer: number | null | undefined) => {
     for (const kind of flangeKinds(c.material, dn ?? 0, pn)) {
-      const item = add(`${role}-${kind}`, kind, dn, pn, count);
+      const item = add(`${role}-${kind}`, kind, dn, pn, count, outer);
       if (item?.requiredPipeOuterDiameterMm && positive(outer) && Math.abs(item.requiredPipeOuterDiameterMm - outer) > .001)
         warnings.push(`${item.name}: посадка на трубу Ø${outer} мм не подтверждена; размерный ряд фланца рассчитан под Ø${item.requiredPipeOuterDiameterMm} мм. Требуется подходящее отверстие или согласованное исполнение соединения.`);
     }

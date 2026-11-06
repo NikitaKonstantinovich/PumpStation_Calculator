@@ -110,6 +110,7 @@ def main():
     parser.add_argument("--database", type=Path, required=True, help="Exact existing local D1 .sqlite file")
     parser.add_argument("--catalog", type=Path, default=Path(__file__).resolve().parents[1] / "public/binding-components.json")
     parser.add_argument("--supplier", default="lunda-ld-67-504")
+    parser.add_argument("--add-only", action="store_true", help="Require the matching active workbook; preserve edited existing supplier records")
     args = parser.parse_args()
     path = args.database.resolve(strict=True)
     with sqlite3.connect(path.as_uri() + "?mode=rw", uri=True, timeout=30) as db:
@@ -121,7 +122,7 @@ def main():
         with sqlite3.connect(backup) as destination:
             db.backup(destination)
         data = json.loads(args.catalog.read_text(encoding="utf-8"))
-        result = import_supplement(db, data, args.supplier)
+        result = import_supplement(db, data, args.supplier, add_only=args.add_only)
         result.update(backup=str(backup), integrity=db.execute("PRAGMA quick_check").fetchone()[0])
         print(json.dumps(result, ensure_ascii=True))
 

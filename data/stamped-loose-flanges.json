@@ -247,6 +247,37 @@
     0
    ],
    "name": "Фланец свободный штампованный DN200 Kohler R-358 AISI 304"
+  },
+  "65-PN16-8": {
+   "source": "Equipment/Piping/3D/Project-DN65/DN65-PN16-8x18-pressed-layout.SLDPRT",
+   "sourceHash": "eb36fde810d068779f0894a979aef1a386ab0fac8983e18af22c6c5bf2760ccf",
+   "dimensions": {
+    "lengthMm": 20,
+    "outerMm": 185,
+    "innerMm": 81,
+    "boltCircleMm": 145,
+    "boltHoles": 8,
+    "boltHoleMm": 18
+   },
+   "placement": [
+    1,
+    0,
+    0,
+    0,
+    1,
+    0,
+    0,
+    0,
+    1,
+    0,
+    0,
+    0,
+    1,
+    0,
+    0,
+    0
+   ],
+   "name": "Свободный штампованный фланец DN65 PN16 AISI304 · проектная модель 8×Ø18"
   }
  },
  "catalog": {
@@ -545,7 +576,7 @@
     "boltHoles": 8,
     "boltHoleMm": 18
    },
-   "model": null
+   "model": "65-PN16-8"
   },
   "фланцы-006-r0117": {
    "previous": {

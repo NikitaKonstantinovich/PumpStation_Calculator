@@ -7,7 +7,9 @@ const { insertionPrice } = await load("calculated-insertion");
 const { insertionEndThickness, pumpFlangeReference } = await load("line-joint-stack");
 const { specificationLineTotal, assessSpecification } = await load("specification-readiness");
 const { specificationExportRows, specificationCsv } = await load("specification-export");
-const { addPumpConnectionAssembly } = await load("line-vibration");
+const { addPumpConnectionAssembly, selectVibrationCompensator } = await load("line-vibration");
+const { vibrationBoltSeat } = await load("vibration-fasteners");
+const { vibrationExecution } = await load("vibration-dimensions");
 const valid = (material = "st20", pn = 16, geometry = "straight") => {
   const c = calculations.find(c => c.material === material && c.pn === pn && c.geometry === geometry && c.complete && c.dnLarge === 80);
   assert.ok(c, `${material} PN${pn} ${geometry}`); return c;
@@ -34,10 +36,12 @@ test("orientation, revision, stale source, and deterministic ties are independen
   assert.equal(selectStationInsertion([a], requirement(c, true)).reversed, true);
   for (const items of [[a, b], [b, a]]) assert.equal(selectStationInsertion(items, requirement(c)).item.id, b.id);
   b.calculatedInsertion.currentCatalogVersion = "new-version";
-  assert.equal(selectStationInsertion([b, a], requirement(c)).item.id, a.id);
-  const stale = selectStationInsertion([b], requirement(c));
-  assert.equal(stale.technicalStatus, "stale"); assert.equal(stale.exact, false); assert.equal(insertionPrice(b.calculatedInsertion), null);
-  assert.match(stale.explanation, /ревизия/);
+  assert.equal(selectStationInsertion([b, a], requirement(c)).item.id, b.id);
+  const published = selectStationInsertion([b], requirement(c));
+  assert.equal(published.technicalStatus, "ready"); assert.equal(published.exact, true); assert.equal(insertionPrice(b.calculatedInsertion), c.price);
+  assert.match(published.explanation, /ревизия 2/);
+  a.calculatedInsertion.pricedAt = "2026-11-02";
+  assert.equal(selectStationInsertion([b, a], requirement(c)).item.id, a.id, "revision numbers are local to each product");
 });
 test("missing BOM roles, partial costs and engineering assumptions remain incomplete", () => {
   const c = valid(), req = requirement(c);
@@ -47,6 +51,30 @@ test("missing BOM roles, partial costs and engineering assumptions remain incomp
   }
   const item = component(c); item.calculatedInsertion.calculation.assumptions = [{ code: "sensor-pn25-pressure", message: "TEST pressure decision", source: "TEST" }];
   assert.equal(selectStationInsertion([item], req).technicalStatus, "incomplete");
+});
+test("reopening a saved project restores the latest published unit price and counts three inserts once", async () => {
+  const { refreshSavedSpecificationInsertions } = await load("saved-insertion-specification");
+  const c = valid("aisi304"), req = requirement(c), old = component(c), project = fixture();
+  const newerCalculation = structuredClone(c);
+  const part = newerCalculation.bom.find(row => row.role === "base");
+  part.unitPrice += 100;
+  part.cost = part.quantity * part.unitPrice;
+  newerCalculation.price = newerCalculation.bom.reduce((sum, row) => sum + row.cost, 0);
+  const latest = component(newerCalculation, old.calculatedInsertion.id, { revision: 2, currentCatalogVersion: null });
+  const oldRow = { position:"04.04", name:c.name, details:"", quantity:3, section:"discharge", generatedBy:"discharge-line",
+    insertionRequirement:req, insertionAssembly:{snapshot:old.calculatedInsertion,accounting:"assembly",reversed:false},
+    price:null, status:"clarify", technicalStatus:"stale", technicalNotes:["Расчёт вставки устарел относительно текущего каталога."] };
+  const unrelated = {...oldRow, technicalNotes:["Исходные данные или насосы активных контуров не подтверждены"]};
+  project.entities["station-spec"].items = [oldRow, unrelated];
+  const restored = refreshSavedSpecificationInsertions(project,[latest]);
+  const row = restored.entities["station-spec"].items[0];
+  assert.equal(row.insertionAssembly.snapshot.revision, 2);
+  assert.equal(row.price, newerCalculation.price);
+  assert.equal(row.technicalStatus, "ready");
+  assert.equal(specificationLineTotal(row), 3 * newerCalculation.price);
+  assert.equal(restored.entities["station-spec"].items[1], unrelated);
+  assert.equal(project.entities["station-spec"].items[0].price, null);
+  assert.equal(refreshSavedSpecificationInsertions(restored,[latest]), restored);
 });
 test("both lines, circuits and vibration modes count the supplied BOM once and preserve external joints", () => {
   for (const material of ["st20", "aisi304"]) for (const pn of [16, 25]) for (const section of ["suction", "discharge"]) for (const prefix of ["primary", "secondary"]) for (const vibration of [false, true]) {
@@ -70,8 +98,17 @@ test("both lines, circuits and vibration modes count the supplied BOM once and p
     assert.ok(result.some(row => /fasteners-bolts/.test(row.assemblyRole)));
     assert.ok(result.some(row => /gasket/.test(row.assemblyRole)));
     const pumpBolt = result.find(row => /pump-fasteners-bolts/.test(row.assemblyRole));
-    if (vibration) assert.equal(pumpBolt.price, null, "compensator flange thickness is missing");
-    else {
+    if (vibration) {
+      const compensator = selectVibrationCompensator(db.items, c.dnSmall, pn, "flanged");
+      const mounting = compensator && vibrationExecution(compensator.item, compensator.pn);
+      const { grip } = vibrationBoltSeat(compensator?.item, mounting, c.dnSmall, pn, "left");
+      const { thickness } = pumpFlangeReference(db, material, c.dnSmall, pn, assembly);
+      const stack = grip === null || thickness === null ? null : grip + thickness;
+      const selected = selectJointFasteners(db, material, c.dnSmall, pn, {
+        gaskets:mounting?.separateGasket === false ? 0 : 1, thickness:0, flangeThickness:stack,
+      });
+      assert.equal(pumpBolt.equipmentId, selected.bolt?.id);
+    } else {
       const end = insertionEndThickness(assembly, "from", db);
       assert.ok(end > 0);
       const selected = selectJointFasteners(db, material, c.dnSmall, pn, {gaskets:1, thickness:0, flangeThickness:2*end});
@@ -124,7 +161,7 @@ test("draft and explanatory BOM survive CSV export without a second cost row", (
   parts.insertion("primary-between-valves-insertion","Insert",3,"",requirement);
   const exported = specificationExportRows(result,[{title:"Line",sections:[{id:"discharge"}]}]);
   assert.equal(exported.filter(r=>r.kind==="item").length,1);
-  const csv=specificationCsv(exported); assert.match(csv,/Полная актуальная стоимость вставки не подтверждена/); assert.match(csv,/не суммируется повторно/); assert.match(csv,/welding/);
+  const csv=specificationCsv(exported); assert.match(csv,/нет подтверждённой цены готовой вставки/); assert.match(csv,/не суммируется повторно/); assert.match(csv,/welding/);
   assert.equal(exported.find(r=>r.kind==="item").cells[5],null);
 });
 test("thread standard, gender and end orientation are mandatory, not inferred from DN", () => {

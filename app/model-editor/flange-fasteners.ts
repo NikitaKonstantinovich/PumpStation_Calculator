@@ -23,6 +23,9 @@ const key = (p: PortRef) => JSON.stringify([p.componentId,p.portId]);
 const positive = (v: number | undefined): v is number => typeof v === "number" && Number.isFinite(v) && v>0;
 
 export const isHardwareRow = (c:Component) => /fasteners-(bolts|studs|nuts|washers)$/.test(c.line?.role??"");
+// Older snapshots rejected adopted flange patterns even when the spec and both faces agreed.
+export const hasLegacyDrillingBlock = (c:Component) => c.fastener?.status==="blocked" &&
+  c.fastener.issues.includes("Фактическая сверловка не согласуется с принятой таблицей DN/PN и диаметром крепежа.");
 const isVibration = (c:Component) => /-vibration-compensator$/.test(c.line?.role??"");
 type Support = { node:string; owner:Component; port:Port; mount?:FlangeMount; pieceId?:string };
 function procedural(s: InsertionShape, source:string, equipmentId?:string): FlangeMount | undefined {
@@ -118,7 +121,7 @@ export function rebuildFasteners(assembly:Assembly):Assembly {
       const ref=reference.find(r=>r.dn===dn&&r.pn===pn);
       if(!ref)issues.push(`Нет принятого правила крепежа DN${dn??"?"} PN${pn??"?"}.`);
       if(am.holes.length!==bm.holes.length || am.holes.some(h=>!bm.holes.some(k=>Math.hypot(...sub(sub(k,h),mul(axis,dot(sub(k,h),axis))))<.2)))issues.push("Сверловка или угловое положение отверстий не совпадают. Фланцы автоматически не поворачиваются.");
-      if(ref && (am.holes.length!==ref.holes || bm.holes.length!==ref.holes || am.holeDiameter<=ref.boltDiameter || bm.holeDiameter<=ref.boltDiameter))issues.push("Фактическая сверловка не согласуется с принятой таблицей DN/PN и диаметром крепежа.");
+      if(ref && (am.holeDiameter<=ref.boltDiameter || bm.holeDiameter<=ref.boltDiameter))issues.push("Диаметр отверстий фланцев недостаточен для выбранного крепежа.");
       const wafer=objects.find(c=>/CheckValve|SuctionValve|DischargeValve/.test(c.line?.role??""));
       const vibration=objects.find(isVibration);
       const check=/CheckValve/.test(wafer?.line?.role??"");
@@ -130,6 +133,15 @@ export function rebuildFasteners(assembly:Assembly):Assembly {
       const specParts=parts.filter(c=>c.line?.pumpId===branch?.pumpId&&c.line?.side===branch?.side&&c.line?.role.startsWith(`${prefix}-${role}-`));
       const hardware=assembly.fastenerCatalog.items;
       const choose=(k:HardwareItem["kind"])=>hardware.find(h=>h.kind===k && h.diameter===ref?.boltDiameter && specParts.some(c=>c.equipmentId===h.id));
+      const selected=choose(kind);
+      // The spec adopts the drilling of the selected flange execution. Its rod
+      // quantity is per joint (nuts/washers can be doubled on a stud). Keep the
+      // DN/PN reference as the fallback for joints without a matching spec row.
+      const rodRows=selected ? specParts.filter(c=>c.equipmentId===selected.id) : [];
+      const specifiedCount=rodRows.length===1 ? rodRows[0].line?.quantity : undefined;
+      const matchesCount=(count:number|undefined)=>am.holes.length===count && bm.holes.length===count;
+      if(ref && !matchesCount(ref.holes) && !matchesCount(specifiedCount))
+        issues.push(`Число отверстий на опорных фланцах не согласуется с крепежом стыка: по справочнику ${ref.holes}, по спецификации ${specifiedCount ?? "—"}, на фланцах ${am.holes.length} и ${bm.holes.length}.`);
       const nut=choose("nut")??hardware.find(h=>h.kind==="nut"&&h.diameter===ref?.boltDiameter),washer=choose("washer")??hardware.find(h=>h.kind==="washer"&&h.diameter===ref?.boltDiameter);
       const shape=shapes.rows.find(s=>s.d===ref?.boltDiameter);
       binding.grip=Math.max(0,span+am.thickness+bm.thickness);
@@ -142,7 +154,6 @@ export function rebuildFasteners(assembly:Assembly):Assembly {
           return positive(m.bearingInner)&&radius-bearingRadius<m.bearingInner/2-.01 || positive(m.bearingOuter)&&radius+bearingRadius>m.bearingOuter/2+.01;
         }))issues.push("Головка, гайка или шайба не помещается на опорном кольце фланца; проверьте исполнение и посадочный диаметр.");
         binding.minimumLength=jointFastenerLength(binding.grip,nut.length,washer.length,endsCount);
-        const selected=choose(kind);
         const suitable=hardware.filter(h=>h.kind===kind&&h.diameter===ref.boltDiameter&&h.length+.01>=binding.minimumLength).sort((x,y)=>x.length-y.length);
         let rod=selected??suitable[0];
         // Only a change of flange execution can justify replacing a formerly sufficient stock length.

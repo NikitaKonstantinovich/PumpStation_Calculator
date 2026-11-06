@@ -36,7 +36,7 @@ export function buildSuctionSpec(project:ProjectConfig, database:{items:Assembly
   for(const secondary of circuits) {
     const input=e[secondary?"system-input-2":"system-input"] as InputEntity;
     if(!input.calculated) continue;
-    const h=suctionHydraulics(dn,input,settings,secondary), prefix=secondary?"secondary":"primary", title=secondary?"Контур 2":"Контур 1", count=(input.workingPumpCount??0)+(input.reservePumpCount??0), branch=secondary?collector.secondary:collector.primary;
+    const h=suctionHydraulics(dn,input,settings,secondary,pumps?.find(p=>p.id===input.selectedPumpId)), prefix=secondary?"secondary":"primary", title=secondary?"Контур 2":"Контур 1", count=(input.workingPumpCount??0)+(input.reservePumpCount??0), branch=secondary?collector.secondary:collector.primary;
     const errors=[...h.errors];
     if(branch && (branch.dn!==h.dn || branch.connection!==h.connection || branch.pn!==h.pn)) errors.push("Параметры отвода коллектора не совпадают с арматурой. Исправьте переопределения в конструкторе коллекторов.");
     if(errors.length || !h.port) {add(`${prefix}-error`,`${title}: ошибка комплектации всасывающей линии`,1,errors.join(" "),undefined,"компл.");continue;}
@@ -84,7 +84,7 @@ export function replaceSuctionSpec(items:SpecItem[],generated:SpecItem[]):SpecIt
   return [...items.filter(item=>item.generatedBy!=="suction-line"&&item.assemblyRole!=="template-suction-instrument"),...generated];
 }
 
-export function checkSuctionSpecPressure(project: ProjectConfig, items: SpecItem[], database?: { items: AssemblyComponent[] }, catalog?: CollectorCatalog): SpecItem[] {
+export function checkSuctionSpecPressure(project: ProjectConfig, items: SpecItem[], database?: { items: AssemblyComponent[] }, catalog?: CollectorCatalog, pumps?: readonly Pump[] | null): SpecItem[] {
   const settings = project.entities["station-settings"] as SettingsEntity;
   if (!pressureChecksEnabled(settings)) return items.map(item=>acceptInstrumentFitting(withoutPressureChecks(item)));
   const dn = project.entities["station-dn"] as DnEntity;
@@ -97,7 +97,7 @@ export function checkSuctionSpecPressure(project: ProjectConfig, items: SpecItem
       const secondary = item.option === "secondaryPump";
       if (secondary && (!collector || !secondaryAllowed(collector))) return item;
       const input = project.entities[secondary ? "system-input-2" : "system-input"] as InputEntity;
-      const port = resolvePumpPortData(dn, { ...input, selectedPumpId: item.equipmentId ?? input.selectedPumpId }, secondary);
+      const port = resolvePumpPortData(dn, { ...input, selectedPumpId: item.equipmentId ?? input.selectedPumpId }, secondary, "inlet", pumps?.find(p=>p.id===(item.equipmentId??input.selectedPumpId)));
       return withInletPressureChecks(item, [checkInletPressure(settings.inletHead, `${item.name}: допустимое давление на входе`, port?.maxInletPressure)]);
     }
     // Fasteners and limit switches have no independent hydraulic pressure rating.

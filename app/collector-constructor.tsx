@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useId, useState, type Dispatch, type SetStateAction } from "react";
 import type { ProjectConfig } from "./project-config";
+import type { Pump } from "./pump-catalog";
 import { calculateCollector, collectorFlow, collectorLength, collectorVelocityWarning, collectorPressureChecks, configurationFingerprint, matchesCollectorConfiguration, configurationWarnings, collectorBranchDiameterErrors, pumpCount, type CollectorCatalog, type CollectorConfiguration, type CollectorType } from "./collector-calculations";
 import { pressureCheckWarning } from "./dn-defaults";
 import { synchronizeCollectors, type CollectorCardState, type CollectorOverrides, type CollectorsEntity, type SavedCollector } from "./collector-project";
@@ -16,7 +17,7 @@ async function api(url: string, body?: unknown) {
   if (!response.ok) throw new Error(data.error ?? "Ошибка запроса");
   return data;
 }
-export function useCollectorDatabase(project: ProjectConfig, setProject: Dispatch<SetStateAction<ProjectConfig>>, enabled: boolean) {
+export function useCollectorDatabase(project: ProjectConfig, setProject: Dispatch<SetStateAction<ProjectConfig>>, enabled: boolean, pumps?: readonly Pump[]) {
   const settings=project.entities["station-settings"] as import("./project-config").SettingsEntity;
   const versionsKey=JSON.stringify(settings.baseValues?.versions??null);
   const [catalog, setCatalog] = useState<CollectorCatalog | null>(null), [catalogError, setCatalogError] = useState("");
@@ -24,9 +25,9 @@ export function useCollectorDatabase(project: ProjectConfig, setProject: Dispatc
     setCatalog(catalog); setCatalogError("");
     setProject(current => {
       const entity = current.entities["station-collectors"] as CollectorsEntity;
-      return synchronizeCollectors({ ...current, entities: { ...current.entities, "station-collectors": { ...entity, suction: { ...entity.suction, currentCatalogVersion: catalog.version }, discharge: { ...entity.discharge, currentCatalogVersion: catalog.version } } } }, catalog);
+      return synchronizeCollectors({ ...current, entities: { ...current.entities, "station-collectors": { ...entity, suction: { ...entity.suction, currentCatalogVersion: catalog.version }, discharge: { ...entity.discharge, currentCatalogVersion: catalog.version } } } }, catalog, pumps);
     });
-  }, [setProject]);
+  }, [setProject, pumps]);
   useEffect(() => {
     if (!enabled) return;
     let active = true;
@@ -44,12 +45,12 @@ export function useCollectorDatabase(project: ProjectConfig, setProject: Dispatc
       const apply = (patch: Partial<CollectorCardState>) => { if (active) setProject(current => {
         const collectors = current.entities["station-collectors"] as CollectorsEntity, state = collectors[type];
         if (current.project.id !== JSON.parse(key)[0] || state.code !== code || !state.configuration || configurationFingerprint(state.configuration) !== fingerprint) return current;
-        return synchronizeCollectors({ ...current, entities: { ...current.entities, "station-collectors": { ...collectors, [type]: { ...state, ...(catalog ? { currentCatalogVersion: catalog.version } : {}), ...patch } } } }, catalog ?? undefined);
+        return synchronizeCollectors({ ...current, entities: { ...current.entities, "station-collectors": { ...collectors, [type]: { ...state, ...(catalog ? { currentCatalogVersion: catalog.version } : {}), ...patch } } } }, catalog ?? undefined, pumps);
       }); };
       api(`/api/collectors?code=${encodeURIComponent(code)}&configuration=${encodeURIComponent(JSON.stringify(configuration))}`).then(data => apply({ database: data.collector, databaseStatus: data.collector ? "found" : "missing", databaseError: undefined })).catch(error => apply({ database: null, databaseStatus: "error", databaseError: error.message }));
     }
     return () => { active = false; };
-  }, [key, enabled, setProject, catalog]);
+  }, [key, enabled, setProject, catalog, pumps]);
   return { catalog, catalogError, setCatalog: acceptCatalog };
 }
 

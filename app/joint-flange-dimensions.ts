@@ -20,12 +20,25 @@ export function jointFlangeThickness(database: Database, material: "st20" | "ais
   let oneSide = 0, found = false;
   const necks: Array<{ neck: number; lip: number }> = [];
   for (const kind of kinds) {
-    const items = database.items.filter(item => dn(item) === size && (kind === "collar" && collarComponentId
+    let items = database.items.filter(item => dn(item) === size && (kind === "collar" && collarComponentId
       ? item.id === collarComponentId && (pressures.get(item.id) ?? 0) >= pn : weldFlangeComponentId
         ? item.id === weldFlangeComponentId && (pressures.get(item.id) === pn || supplierFlangeFor(item, database.source?.sha256)?.compatiblePns.includes(pn))
         : pressures.get(item.id) === pn && (kind !== "looseFlange" || !looseFlangeComponentId || item.id === looseFlangeComponentId))
       && (material === "aisi304" ? /AISI\s*304/i : /(?:сталь|ст[.\s]*)\s*20/i).test(item.family)
       && (kind === "collar" ? item.catalogId === "воротники" : item.catalogId === "фланцы" && (kind === "looseFlange" ? /свободн/i : /плоск/i).test(item.family)));
+    if (kind === "weldFlange" && !weldFlangeComponentId) {
+      const pipeDiameters = new Set(database.items.filter(item => item.catalogId === "трубы" && dn(item) === size && pressures.get(item.id) === pn
+        && (material === "aisi304" ? /AISI\s*304/i : /(?:сталь|ст[.\s]*)\s*20/i).test(item.family))
+        .map(item => Number(String(field(item, "Диаметр, мм") ?? field(item, "Наружный диаметр, мм") ?? "").replace(",", "."))).filter(d => Number.isFinite(d) && d > 0));
+      if (pipeDiameters.size === 1) {
+        const [pipeOuter] = pipeDiameters;
+        const matching = items.filter(item => {
+          const seat = readFlangeDimensions(item, pn, flanges, database.source?.sha256).dimensions.pipeOuterDiameterMm;
+          return seat !== undefined && Math.abs(seat - pipeOuter) <= .001;
+        });
+        if (matching.length) items = matching;
+      }
+    }
     found ||= items.length > 0;
     const values: number[] = [];
     if (!items.length) warnings.push(`Нет ${kind === "collar" ? "воротника" : "фланца"} ${material} DN${size} PN${pn} для крепёжного пакета`);

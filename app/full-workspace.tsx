@@ -1,6 +1,7 @@
 "use client";
 import {calculationMethod} from "./project-config";
-import {ProjectSession,latestDraft,projectApi,type ProjectCard,type ProjectFile} from "./project-session";
+import {ProjectSession,projectApi,type ProjectCard,type ProjectFile} from "./project-session";
+import {mergeProjectChanges} from "./project-merge";
 import {ProjectHistory} from "./project-history";
 import { SpecificationHydraulicOption } from "./specification-hydraulic-options";
 import { SpecificationInsertion } from "./specification-insertions";
@@ -15,7 +16,6 @@ import Link from "next/link";
 import { AppSettings } from "./app-settings";
 import { useTheme } from "./use-theme";
 import { GridHeightControl } from "./grid-height-control";
-import { useCircuitSync } from "./use-circuit-sync";
 import { CircuitInputFields } from "./circuit-input-fields";
 import { createProject, DEFAULT_PANELS, projectFilename, withUpdatedTimestamp, type CollectorMaterial, type DnEntity, type InputEntity, type PanelKind, type PanelState, type ProjectConfig, type ProjectEntity, type SettingsEntity, type ShutoffValveType, type SpecEntity, type SpecItem, type SpecOption, type SpecSection, type ValveConnection, type ValvePn, type WorkspaceGrid, type WorkspaceMode } from "./project-config";
 import { CalculationToggle, PressureCheckToggle } from "./pressure-check-toggle";
@@ -34,6 +34,7 @@ import { STANDARD_DN, dnVelocityLimit, flowVelocity, recommendedDn, defaultColle
 import { AccountScreen } from "./account-ui";
 import { BaseValuesPanel } from "./base-values-panel";
 import { ItemEntryPanel } from "./item-entry-panel";
+import { EquipmentAdminPanel } from "./equipment-admin-panel";
 import { loadPumpCatalog, mergePumpCatalog } from "./pump-catalog-client";
 import { HelpCenter } from "./help-center";
 import { AIAssistant } from "./ai-assistant";
@@ -53,6 +54,7 @@ import type { Pump } from "./pump-catalog";
 import { smartCabinetSpecificationPrice, type ControlCabinet } from "./control-cabinet-selection";
 import { synchronizeStationSpecification, cabinetSourceFingerprint } from "./station-specification";
 import { repairSavedInstrumentSpecification } from "./saved-instrument-specification";
+import { refreshSavedSpecificationInsertions } from "./saved-insertion-specification";
 import { assessSpecification, specificationHasPrice, specificationLineTotal } from "./specification-readiness";
 
 const isSecondaryEnabled = (settings: SettingsEntity) => settings.stationType === "combined" || (settings.stationType === "fire" && settings.jockeyPump);
@@ -219,15 +221,15 @@ type CircuitDnConfig={
 };
 const isJockeyCircuit=(settings:SettingsEntity,secondary:boolean)=>secondary&&settings.stationType==="fire"&&settings.jockeyPump;
 
-const getCircuitDnConfig=(entity:DnEntity,input:InputEntity,settings:SettingsEntity,secondary=false):CircuitDnConfig|null=>{
+const getCircuitDnConfig=(entity:DnEntity,input:InputEntity,settings:SettingsEntity,secondary=false,pump?:Pump):CircuitDnConfig|null=>{
   if(!isCalculated(input))return null;
   const stationFlow=input.flowRate,pumpFlow=stationFlow/Math.max(1,input.workingPumpCount),collectorDn=recommendedDn(stationFlow,settings.baseValues?.values.velocity),pumpDn=recommendedDn(pumpFlow,settings.baseValues?.values.velocity);
   const values:Record<DnField,number>={
     suctionCollectorDn:entity.suctionCollectorDn??collectorDn,dischargeCollectorDn:entity.dischargeCollectorDn??collectorDn,suctionValveDn:entity.suctionValveDn??pumpDn,dischargeValveDn:entity.dischargeValveDn??pumpDn,
     secondarySuctionCollectorDn:entity.secondarySuctionCollectorDn??collectorDn,secondaryDischargeCollectorDn:entity.secondaryDischargeCollectorDn??collectorDn,secondarySuctionValveDn:entity.secondarySuctionValveDn??pumpDn,secondaryDischargeValveDn:entity.secondaryDischargeValveDn??pumpDn,
   };
-  const suction=suctionHydraulics(entity,input,settings,secondary);
-  const discharge=dischargeHydraulics(entity,input,settings,secondary);
+  const suction=suctionHydraulics(entity,input,settings,secondary,pump);
+  const discharge=dischargeHydraulics(entity,input,settings,secondary,pump);
   values[secondary?"secondarySuctionValveDn":"suctionValveDn"]=suction.dn;
   values[secondary?"secondaryDischargeValveDn":"dischargeValveDn"]=discharge.dn;
   const valveDns=secondary?[values.secondarySuctionValveDn,values.secondaryDischargeValveDn]:[values.suctionValveDn,values.dischargeValveDn],maxValveDn=Math.max(...valveDns);
@@ -279,8 +281,8 @@ const selectValveComponent=(items:ComponentItem[],kind:ValveSelectionKind,dn:num
   return {item:best.item,price:best.price,execution:kind==="butterfly"?(dn<=150?"с рукояткой":"с редуктором"):connection==="threaded"?"резьбовое":"фланцевое",material};
 };
 
-function DnCalculator({role,entity,input,secondaryInput,settings,onChange,onAddValves}:{role:UserRole;entity:DnEntity;input:InputEntity;secondaryInput:InputEntity;settings:SettingsEntity;onChange?:(patch:Partial<DnEntity>)=>void;onAddValves?:()=>void}){
-  const primary=getCircuitDnConfig(entity,input,settings),secondary=isSecondaryEnabled(settings)?getCircuitDnConfig(entity,secondaryInput,settings,true):null;
+function DnCalculator({role,entity,input,secondaryInput,settings,onChange,onAddValves,catalogue}:{catalogue:Pump[];role:UserRole;entity:DnEntity;input:InputEntity;secondaryInput:InputEntity;settings:SettingsEntity;onChange?:(patch:Partial<DnEntity>)=>void;onAddValves?:()=>void}){
+  const primary=getCircuitDnConfig(entity,input,settings,false,catalogue.find(p=>p.id===input.selectedPumpId)),secondary=isSecondaryEnabled(settings)?getCircuitDnConfig(entity,secondaryInput,settings,true,catalogue.find(p=>p.id===secondaryInput.selectedPumpId)):null;
   if(!primary)return <div data-issue-id="dn/empty" className="dn-calculator__empty"><span aria-hidden="true">Ø</span><b>Сначала задайте рабочую точку</b><p>Укажите расход станции и количество рабочих насосов в инструменте «Подбор насосов».</p></div>;
   const circuits=[primary,...(secondary?[secondary]:[])];
   const reset=()=>{
@@ -301,7 +303,7 @@ function DnCalculator({role,entity,input,secondaryInput,settings,onChange,onAddV
     {circuits.map(circuit=><section className="dn-circuit" key={circuit.id}><header className="dn-circuit__header"><div><small>{circuit.id==="secondary"?"ВТОРОЙ КОНТУР":"КОНТУР 1"}</small><b>{circuit.title}</b><span>Q = {circuit.stationFlow.toLocaleString("ru-RU",{maximumFractionDigits:2})} м³/ч · {circuit.workingPumpCount} раб. + {circuit.totalPumpCount-circuit.workingPumpCount} рез.</span></div><i className={circuit.color==="red"?"dn-circuit__color dn-circuit__color--red":"dn-circuit__color dn-circuit__color--blue"}>{circuit.color==="red"?"Красная арматура":"Синяя в приоритете"}</i></header>
       <div className="dn-calculator__controls"><label><span>Соединение арматуры</span><select value={circuit.connection} onChange={event=>{const connection=event.target.value as ValveConnection;onChange?.({[circuit.connectionField]:connection,[circuit.suctionTypeField]:connection==="threaded"?"ball":"butterfly",[circuit.dischargeTypeField]:connection==="threaded"?"ball":"butterfly"} as Partial<DnEntity>);}}><option value="threaded" disabled={!circuit.threadedAllowed}>Резьбовое · до 2″</option><option value="flanged">Фланцевое</option></select><small>{circuit.forcedFlanged?"Для этого типа НС разрешено только фланцевое соединение":circuit.threadedAllowed?"Резьба — стандарт до DN50":"Для выбранного DN требуется фланец"}</small></label><label><span>Рабочее давление</span><select value={circuit.pn} onChange={event=>patchField(circuit.pnField,Number(event.target.value) as ValvePn)}><option value={10}>PN10</option><option value={16}>PN16</option><option value={25}>PN25</option></select></label><label><span>Запорная арматура на всасе</span><select value={circuit.suctionValveType} onChange={event=>patchField(circuit.suctionTypeField,event.target.value as ShutoffValveType)}><option value="butterfly" disabled={circuit.connection==="threaded"}>Затвор дисковый</option><option value="ball">Шаровой кран</option></select></label><label><span>Запорная арматура на напоре</span><select value={circuit.dischargeValveType} onChange={event=>patchField(circuit.dischargeTypeField,event.target.value as ShutoffValveType)}><option value="butterfly" disabled={circuit.connection==="threaded"}>Затвор дисковый</option><option value="ball">Шаровой кран</option></select></label></div>
 
-      <PumpNozzleFields entity={entity} input={circuit.id==="secondary"?secondaryInput:input} secondary={circuit.id==="secondary"} title={circuit.title} onChange={onChange}/>
+      <PumpNozzleFields pump={catalogue.find(p=>p.id===(circuit.id==="secondary"?secondaryInput:input).selectedPumpId)} entity={entity} input={circuit.id==="secondary"?secondaryInput:input} secondary={circuit.id==="secondary"} title={circuit.title} onChange={onChange}/>
       <p>Всас: {circuit.suction.connection==="threaded"?"резьбовая арматура":"фланцевая арматура"}. {circuit.suction.locked?"DN крана равен DN патрубка и изменяется вместе с ним.":circuit.suction.nozzleDefault?"Для многоступенчатого насоса DN арматуры по умолчанию равен DN впускного патрубка; доступно ручное изменение.":"DN арматуры и коллекторов рассчитываются отдельно от патрубков насоса."}</p>
       <p>Напор: {circuit.discharge.connection==="threaded"?"резьбовая арматура":"фланцевая арматура"}. {circuit.discharge.locked?"DN крана и обратного клапана равен DN напорного патрубка.":circuit.discharge.nozzleDefault?"Для многоступенчатого насоса DN арматуры по умолчанию равен DN выпускного патрубка; доступно ручное изменение.":"Между обратным клапаном и затвором устанавливается отдельная вставка ФФ."}</p>
       {settings.vibrationCompensators
@@ -331,8 +333,8 @@ const valveSpecItem=(selection:ValveSelection|null,kind:ValveSelectionKind,circu
   const material=kind==="check"?(selection?.material??checkValveMaterial(collectorMaterial,circuit.connection)):null,materialDetails=material?` · Материал: ${material}`:"";
   return {position,name:selection?.item.family??typeLabel,details:`DN${dn} · PN${circuit.pn} · ${connectionLabel} · ${colorLabel} · ${execution}${materialDetails}`,quantity:circuit.totalPumpCount,unit:"шт.",price:selection?.price?.amount??null,equipmentId:selection?.item.id,description:selection?`${circuit.title} · подобрано из базы комплектующих по DN, PN и материалу коллектора`:`${circuit.title} · точное исполнение по DN, PN, соединению, цвету и материалу коллектора не найдено в базе`,section,option,technicalStatus:selection?"ready":"unverified",status:selection?.price?"selected":"clarify"};
 };
-const buildValveSpecItems=(database:ComponentsDatabase,entity:DnEntity,input:InputEntity,secondaryInput:InputEntity,settings:SettingsEntity,dischargeMaterial?:CollectorMaterial)=>{
-  const primary=getCircuitDnConfig(entity,input,settings),secondary=isSecondaryEnabled(settings)?getCircuitDnConfig(entity,secondaryInput,settings,true):null,circuits=[primary,...(secondary?[secondary]:[])].filter((item):item is CircuitDnConfig=>Boolean(item)),collectorMaterial=entity.collectorMaterial??defaultCollectorMaterial(settings);
+const buildValveSpecItems=(database:ComponentsDatabase,entity:DnEntity,input:InputEntity,secondaryInput:InputEntity,settings:SettingsEntity,dischargeMaterial?:CollectorMaterial,pumps?:readonly Pump[]|null)=>{
+  const primary=getCircuitDnConfig(entity,input,settings,false,pumps?.find(p=>p.id===input.selectedPumpId)),secondary=isSecondaryEnabled(settings)?getCircuitDnConfig(entity,secondaryInput,settings,true,pumps?.find(p=>p.id===secondaryInput.selectedPumpId)):null,circuits=[primary,...(secondary?[secondary]:[])].filter((item):item is CircuitDnConfig=>Boolean(item)),collectorMaterial=entity.collectorMaterial??defaultCollectorMaterial(settings);
   return circuits.flatMap(circuit=>{const secondaryCircuit=circuit.id==="secondary",suctionDn=circuit.values[secondaryCircuit?"secondarySuctionValveDn":"suctionValveDn"],dischargeDn=circuit.values[secondaryCircuit?"secondaryDischargeValveDn":"dischargeValveDn"],prefix=secondaryCircuit?"secondary":"primary";
     const suctionKind:ValveSelectionKind=circuit.suctionValveType,dischargeKind:ValveSelectionKind=circuit.dischargeValveType;
     return [
@@ -353,15 +355,15 @@ function refreshSuctionSpecification(project:ProjectConfig,database=loadedCompon
   // Leave an uncalculated draft intact, but clear stale generated lines if its
   // working point is later invalidated.
   if(!database || (!force&&!isCalculated(primary)&&!managed.length)) {
-    const items=checkDischargeSpecPressure(project,checkSuctionSpecPressure(project,spec.items,database,database?.collectorCatalog),database,database?.collectorCatalog);
+    const items=checkDischargeSpecPressure(project,checkSuctionSpecPressure(project,spec.items,database,database?.collectorCatalog,pumps),database,database?.collectorCatalog,pumps);
     return JSON.stringify(items)===JSON.stringify(spec.items)?project:{...project,entities:{...project.entities,"station-spec":{...spec,items}}};
   }
   const dn=project.entities["station-dn"] as DnEntity,settings=project.entities["station-settings"] as SettingsEntity,secondary=project.entities["system-input-2"] as InputEntity;
-  const valves=buildValveSpecItems(database,dn,primary,secondary,settings,(project.entities["station-collectors"] as CollectorsEntity).discharge.configuration?.material);
+  const valves=buildValveSpecItems(database,dn,primary,secondary,settings,(project.entities["station-collectors"] as CollectorsEntity).discharge.configuration?.material,pumps);
   const base=spec.items.filter(item=>!HYDRAULIC_SPEC_OPTIONS.includes(specificationOption(item) as SpecOption));
   const suction=replaceSuctionSpec(base,buildSuctionSpec(project,database,database.collectorCatalog,valves,pumps));
   const discharge=replaceDischargeSpec(suction,buildDischargeSpec(project,database,database.collectorCatalog,valves,pumps));
-  const items=checkDischargeSpecPressure(project,checkSuctionSpecPressure(project,normalizeSpecificationItems([...discharge,...valves]),database,database.collectorCatalog),database,database.collectorCatalog);
+  const items=checkDischargeSpecPressure(project,checkSuctionSpecPressure(project,normalizeSpecificationItems([...discharge,...valves]),database,database.collectorCatalog,pumps),database,database.collectorCatalog,pumps);
   // A current selection fingerprint does not guarantee current catalogue prices.
   if(spec.autoHydraulics&&JSON.stringify(items)===JSON.stringify(spec.items))return project;
   return {...project,entities:{...project.entities,"station-spec":{...spec,items,autoHydraulics:true}}};
@@ -374,7 +376,7 @@ function PanelContent({ project, issues, role, assistantPanel, collectorPanel, m
   if (locked) return <div className="tool-lock"><b>Второй контур заблокирован</b></div>;
   if (id === "input" || id === "input2" || id === "chart" || id === "chart2" || id === "sketch" || id === "sketch2" || id === "components") return <AllowedPumpPanel automaticSpecification id={id} input={input} settings={settings} catalogue={catalogue} onInputChange={onInputChange} onAddToSpec={onAddToSpec}/>;
   if (id === "settings") return <InstallationSettings role={role} settings={settings} input={input} secondaryInput={secondaryInput} onInputChange={patch=>onInputChange?.(patch)} onSecondaryInputChange={onSecondaryInputChange} onChange={patch=>onSettingsChange?.(patch)}/>;
-  if (id === "dn") return <DnCalculator role={role} entity={entity as DnEntity} input={input} secondaryInput={secondaryInput} settings={settings} onChange={onDnChange} onAddValves={onAddValves}/>;
+  if (id === "dn") return <DnCalculator catalogue={catalogue} role={role} entity={entity as DnEntity} input={input} secondaryInput={secondaryInput} settings={settings} onChange={onDnChange} onAddValves={onAddValves}/>;
   if (id === "collectors") return collectorPanel;
   if (id === "model") return modelPanel;
   if (id === "spec") return <Specification project={project} issues={issues} entity={entity as SpecEntity} settings={settings} onDnChange={onDnChange} onSettingsChange={onSettingsChange}/>;
@@ -429,18 +431,33 @@ export default function Home() {
   const [activeSession,setActiveSession]=useState<ProjectSession|null>(null);
   const [conflicted,setConflicted]=useState(false);
   const activate=useCallback((user:AccountUser,project:ProjectConfig,revision:number,freeze:boolean)=>{
+    session.current?.dispose();
+    if (freeze && (project.entities["station-spec"] as SpecEntity).items.some(item => item.insertionAssembly)) resetComponentsDatabase();
     if(libraryVersion.current && !project.project.modelLibraryVersion){
       project={...project,project:{...project.project,modelLibraryVersion:libraryVersion.current}};
     }
     const active=new ProjectSession(user.id,project,revision,
       message=>{if(session.current===active){setSaveMessage(message);setConflicted(active.blocked);}},
-      card=>setProjects(cards=>[card,...cards.filter(other=>other.id!==card.id)]));
+      card=>setProjects(cards=>[card,...cards.filter(other=>other.id!==card.id)]),
+      (next,previous)=>{
+        if(session.current!==active)return;
+        setConfig(current=>{
+          if(current.project.id!==next.project.id)return current;
+          const merged=mergeProjectChanges(previous,current,next);
+          if(merged.conflicts.length)active.retainConflict(current);
+          return merged.conflicts.length?current:merged.config;
+        });
+        setSnapshot(true);
+        // Undo must not roll back changes received from another window.
+        history.current=[next];historyIndex.current=0;setHistoryState({canUndo:false,canRedo:false});
+      },next=>parseAccessibleProject(next,user.role));
     session.current=active;setActiveSession(active);setConflicted(false); setSnapshot(freeze); setConfig(project);
     history.current=[project];historyIndex.current=0;setHistoryState({canUndo:false,canRedo:false});
     setSaveMessage(revision?"Сохранено на сервере":"Есть изменения");
     return active;
   },[]);
-  const [view,setView]=useState<"workspace"|"projects"|"users"|"component-calculator"|"base-values"|"item-entry"|"help">(()=>{const requested=typeof window!=="undefined"?new URLSearchParams(window.location.search).get("view"):null;return requested==="projects"||requested==="users"||requested==="component-calculator"||requested==="base-values"||requested==="item-entry"||requested==="help"?requested:"workspace";});
+  useEffect(()=>activeSession?.connect(),[activeSession]);
+  const [view,setView]=useState<"workspace"|"projects"|"users"|"component-calculator"|"base-values"|"item-entry"|"equipment-admin"|"help">(()=>{const requested=typeof window!=="undefined"?new URLSearchParams(window.location.search).get("view"):null;return requested==="projects"||requested==="users"||requested==="component-calculator"||requested==="base-values"||requested==="item-entry"||requested==="equipment-admin"||requested==="help"?requested:"workspace";});
   const [catalogue,setCatalogue] = useState<Pump[]>([]);
   const [controlCabinets,setControlCabinets] = useState<ControlCabinet[]>([]);
   const [smartCabinets,setSmartCabinets] = useState<SmartCabinet[]>([]);
@@ -466,8 +483,7 @@ export default function Home() {
   const inputEntity2 = config.entities["system-input-2"] as InputEntity;
   const settingsEntity = config.entities["station-settings"] as SettingsEntity;
   const secondaryEnabled = isSecondaryEnabled(settingsEntity);
-  useCircuitSync(config, Boolean(account) && !accountLoading && !snapshot, setAccessibleConfig, synchronizeFullProject);
-  const { catalog: collectorCatalog, catalogError: collectorCatalogError, setCatalog: setCollectorCatalog } = useCollectorDatabase(config, setConfig, Boolean(account) && !snapshot);
+  const { catalog: collectorCatalog, catalogError: collectorCatalogError, setCatalog: setCollectorCatalog } = useCollectorDatabase(config, setConfig, Boolean(account) && !snapshot, catalogue);
   const derivedIssues = useMemo(()=>collectProjectIssues(config,catalogue,collectorCatalog,smartCabinets,{...assetErrors,"collectors/catalog":collectorCatalogError}),[config,catalogue,collectorCatalog,smartCabinets,assetErrors,collectorCatalogError]);
   const diagnostics = useDiagnosticRegistry(config,derivedIssues);
   const suctionItems=(config.entities["station-spec"] as SpecEntity).items;
@@ -477,9 +493,9 @@ export default function Home() {
     let active=true;
     const projectId=config.project.id;
     void loadComponentsDatabase().then(database=>{if(active)setConfig(current=>current.project.id!==projectId?current:snapshot?
-      repairSavedInstrumentSpecification(current,{...database,pumps:catalogue}):synchronizeFullProject(current,database));}).catch(()=>{setSaveMessage("Не удалось обновить комплектацию гидравлических линий");setAssetErrors(current=>({...current,"components/database":"Не удалось обновить комплектацию гидравлических линий"}));});
+      repairSavedInstrumentSpecification(refreshSavedSpecificationInsertions(current,database.items),{...database,pumps:catalogue}):synchronizeFullProject(current,database));}).catch(()=>{setSaveMessage("Не удалось обновить комплектацию гидравлических линий");setAssetErrors(current=>({...current,"components/database":"Не удалось обновить комплектацию гидравлических линий"}));});
     return()=>{active=false;};
-  },[snapshot,suctionEnabled,suctionSource,synchronizeFullProject,catalogue,config.project.id]);
+  },[snapshot,suctionEnabled,suctionSource,synchronizeFullProject,catalogue,config.project.id,activeSession]);
 
   useEffect(() => {
     const params=new URLSearchParams(window.location.search),panel=params.get("panel"),requestedProject=params.get("project");
@@ -491,14 +507,12 @@ export default function Home() {
       if(!active)return;
       setAccount(user);
       const page=await projectApi<{projects:StoredProject[];next:number|null;modelLibraryVersion?:string}>();
-      const anyDraft=await latestDraft(user.id,requestedProject??undefined).catch(()=>undefined);
-      const recover=anyDraft && window.confirm("Восстановить локальный черновик проекта «"+anyDraft.config.project.name+"»?");
-      const id=requestedProject??(recover?anyDraft.project:page.projects[0]?.id);
+      const id=requestedProject??page.projects[0]?.id;
       let file:ProjectFile|undefined;
-      if(id && !(recover && anyDraft.baseRevision===0)) file=await projectApi<ProjectFile>("?id="+encodeURIComponent(id));
+      if(id) file=await projectApi<ProjectFile>("?id="+encodeURIComponent(id));
       let loaded:ProjectConfig;
       try {
-        loaded=recover?parseAccessibleProject(anyDraft.config,user.role):file?parseAccessibleProject(file.config,user.role):createProject("Новая насосная станция",{baseValues:await fetchPublishedBaseValues()});
+        loaded=file?parseAccessibleProject(file.config,user.role):createProject("Новая насосная станция",{baseValues:await fetchPublishedBaseValues()});
       } catch(error) {
         if(!active)return;
         setAccessNotice("Сохранённый проект оставлен в базе. "+(error instanceof Error?error.message:"Не удалось открыть проект."));
@@ -508,8 +522,8 @@ export default function Home() {
       if(!active)return;
       setProjects(page.projects);setNextPage(page.next);setAccount(user);
       libraryVersion.current=page.modelLibraryVersion;
-      const current=activate(user,loaded,file?.revision??0,Boolean(file||recover));
-      if(recover && loaded.project.id===anyDraft.project)current.recover({...anyDraft,config:loaded});
+      activate(user,loaded,file?.revision??0,Boolean(file));
+      if(!params.has("view") && file){params.set("project",loaded.project.id);window.history.replaceState({},"","/?"+params.toString());}
       if(panel&&loaded.workspace.windows.some(item=>item.id===panel))setDetached(panel);
       hydrated.current=true;
     })().catch(error=>{if(active)setBootError(error instanceof Error?error.message:"Не удалось загрузить проект");}).finally(()=>{if(active)setAccountLoading(false);});
@@ -535,11 +549,11 @@ export default function Home() {
     return () => { controller.abort(); window.clearInterval(timer); document.removeEventListener("visibilitychange", visible); };
   }, [account?.id]);
   useEffect(() => {
-    const navigate = () => { const requested = new URLSearchParams(window.location.search).get("view"); setView(requested === "projects" || requested === "users" || requested === "component-calculator" || requested === "base-values" || requested === "item-entry" || requested === "help" ? requested : "workspace"); setSidebar(false); };
+    const navigate = () => { const requested = new URLSearchParams(window.location.search).get("view"); setView(requested === "projects" || requested === "users" || requested === "component-calculator" || requested === "base-values" || requested === "item-entry" || requested === "equipment-admin" || requested === "help" ? requested : "workspace"); setSidebar(false); };
     window.addEventListener("popstate", navigate);
     return () => window.removeEventListener("popstate", navigate);
   }, []);
-  useEffect(()=>{loadPumpCatalog().then((data:Pump[])=>{setCatalogue(data);setConfig(current=>{if(session.current?.revision)return current;const entities={...current.entities};for(const id of ["system-input","system-input-2"]){const input=entities[id] as InputEntity,pump=data.find(p=>p.id===input.selectedPumpId);if(pump)entities[id]={...input,selectedPumpModel:`${pump.manufacturer} ${pump.model}`};}return synchronizeCollectors({...current,entities});});}).catch(()=>{setSaveMessage("Не удалось загрузить каталог насосов");setAssetErrors(current=>({...current,"input/database":"Не удалось загрузить каталог насосов","input2/database":"Не удалось загрузить каталог насосов","spec/database/pumps":"Не удалось загрузить каталог насосов"}));});},[]);
+  useEffect(()=>{loadPumpCatalog().then((data:Pump[])=>{setCatalogue(data);setConfig(current=>{if(session.current?.revision)return current;const entities={...current.entities};for(const id of ["system-input","system-input-2"]){const input=entities[id] as InputEntity,pump=data.find(p=>p.id===input.selectedPumpId);if(pump)entities[id]={...input,selectedPumpModel:`${pump.manufacturer} ${pump.model}`};}return synchronizeCollectors({...current,entities},undefined,data);});}).catch(()=>{setSaveMessage("Не удалось загрузить каталог насосов");setAssetErrors(current=>({...current,"input/database":"Не удалось загрузить каталог насосов","input2/database":"Не удалось загрузить каталог насосов","spec/database/pumps":"Не удалось загрузить каталог насосов"}));});},[]);
   useEffect(()=>{fetch("/control-cabinets.json",{cache:"no-store"}).then(response=>response.ok?response.json():Promise.reject()).then((data:ControlCabinet[])=>setControlCabinets(data)).catch(()=>{setSaveMessage("Не удалось загрузить каталог шкафов управления");setAssetErrors(current=>({...current,"spec/database/cabinets":"Не удалось загрузить каталог шкафов управления"}));});},[]);
   useEffect(()=>{fetch("/control-cabinet-database.json",{cache:"no-store"}).then(response=>response.ok?response.json():Promise.reject()).then((data:{cabinets:SmartCabinet[]})=>setSmartCabinets(data.cabinets)).catch(()=>{setSaveMessage("Не удалось загрузить базу NS Smart");setAssetErrors(current=>({...current,"cabinet/database":"Не удалось загрузить базу NS Smart","spec/database/smart":"Не удалось загрузить базу NS Smart"}));});},[]);
   // A render-time transaction also covers imports, undo and asynchronous catalog/collector updates.
@@ -574,7 +588,20 @@ export default function Home() {
   const addGridRow=()=>updateConfig(current=>{const grid=current.workspace.grid;if(grid.rows>=6)return current;return {...current,workspace:{...current.workspace,grid:{...grid,rows:grid.rows+1,rowSizes:[...grid.rowSizes,1],cells:[...grid.cells,...Array.from({length:grid.columns},()=>null)]}}};});
   const focus = (id: string) => setPanels(p => p.map(item => item.id === id ? { ...item, z: Math.max(0,...p.map(v => v.z)) + 1 } : item));
   const change = (next: PanelState) => { if(diagnostics.navigation?.panelId===next.id&&next.activeTool!==diagnostics.navigation.issue.tool)diagnostics.setNavigation(null);setPanels(p => p.map(item => item.id === next.id ? next : item)); };
-  const openPanel = (id: string) => window.open(`${window.location.pathname}?project=${encodeURIComponent(config.project.id)}&panel=${encodeURIComponent(id)}`, "_blank", "noopener,noreferrer");
+  const openPanel = (id: string) => {
+    const current=session.current;
+    if(!current)return;
+    // Open synchronously with the click so popup blocking does not interfere
+    // while the project (including a newly added panel) is saved first.
+    const child=window.open("about:blank","_blank");
+    if(!child){setAccessNotice("Браузер заблокировал отдельное окно. Разрешите всплывающие окна для этого сайта.");return;}
+    child.opener=null;
+    current.update(config);
+    void current.flush().then(saved=>{
+      if(!saved || session.current!==current){child.close();setAccessNotice("Не удалось сохранить проект перед открытием окна. Проверьте сообщение о сохранении.");return;}
+      child.location.replace(`${window.location.pathname}?project=${encodeURIComponent(current.latest.project.id)}&panel=${encodeURIComponent(id)}`);
+    }).catch(()=>{child.close();setAccessNotice("Не удалось открыть отдельное окно: проект не сохранён.");});
+  };
   const addPanel = () => updateConfig(current=>{const windows=current.workspace.windows,index=windows.length,maxZ=Math.max(0,...windows.map(panel=>panel.z)),panel:PanelState={id:`tool-${Date.now()}`,entityId:"station-model",x:24+(index%5)*34,y:24+(index%5)*34,w:430,h:320,z:maxZ+1};if(current.workspace.mode!=="grid")return {...current,workspace:{...current.workspace,windows:[...windows,panel]}};let grid=current.workspace.grid,cell=grid.cells.findIndex(id=>!id||!windows.some(candidate=>candidate.id===id));if(cell<0&&grid.rows<6){cell=grid.cells.length;grid={...grid,rows:grid.rows+1,rowSizes:[...grid.rowSizes,1],cells:[...grid.cells,...Array.from({length:grid.columns},()=>null)]};}if(cell>=0){const cells=[...grid.cells];cells[cell]=panel.id;grid={...grid,cells};}return {...current,workspace:{...current.workspace,grid,windows:[...windows,panel]}};});
   const createGridTool=(cell:number,activeTool:PanelKind)=>updateConfig(current=>{const windows=current.workspace.windows,maxZ=Math.max(0,...windows.map(panel=>panel.z)),panel:PanelState={id:`grid-tool-${Date.now()}-${cell}`,activeTool,entityId:ENTITY_BY_TOOL[activeTool],x:0,y:0,w:430,h:320,z:maxZ+1},cells=[...current.workspace.grid.cells];cells[cell]=panel.id;return {...current,workspace:{...current.workspace,windows:[...windows,panel],grid:{...current.workspace.grid,cells}}};});
   const minimizePanel = (id:string) => setPanels(current=>current.map(panel=>panel.id===id?{...panel,minimized:true}:panel));
@@ -588,7 +615,7 @@ export default function Home() {
   const updateInput = (patch: Partial<InputEntity>) => updateEngineering(current => ({ ...current, entities: { ...current.entities, "system-input": { ...(current.entities["system-input"] as InputEntity), ...patch, ...(patch.selectedPumpId ? {selectedPumpModel: (()=>{const pump=catalogue.find(p=>p.id===patch.selectedPumpId);return pump?`${pump.manufacturer} ${pump.model}`:undefined;})()} : {}) } } }));
   const updateInput2 = (patch: Partial<InputEntity>) => updateEngineering(current => ({ ...current, entities: { ...current.entities, "system-input-2": { ...(current.entities["system-input-2"] as InputEntity), ...patch, ...(patch.selectedPumpId ? {selectedPumpModel: (()=>{const pump=catalogue.find(p=>p.id===patch.selectedPumpId);return pump?`${pump.manufacturer} ${pump.model}`:undefined;})()} : {}) } } }));
   const updateDn = (patch:Partial<DnEntity>) => updateEngineering(current=>({...current,entities:{...current.entities,"station-dn":{...(current.entities["station-dn"] as DnEntity),...patch}}}));
-  const addValvesToSpec=()=>{setSaveMessage("Подбор арматуры и комплектация всасывающей и напорной линий…");void loadComponentsDatabase(true).then(database=>{updateConfig(current=>refreshSuctionSpecification(current,database,true));setSaveMessage("Всасывающая и напорная линии заполнены. Позиции без точного исполнения или цены отмечены «Уточнить».");}).catch(()=>setSaveMessage("Не удалось загрузить комплектующие для спецификации"));};
+  const addValvesToSpec=()=>{setSaveMessage("Подбор арматуры и комплектация всасывающей и напорной линий…");void loadComponentsDatabase(true).then(database=>{updateConfig(current=>refreshSuctionSpecification(current,database,true,catalogue));setSaveMessage("Всасывающая и напорная линии заполнены. Позиции без точного исполнения или цены отмечены «Уточнить».");}).catch(()=>setSaveMessage("Не удалось загрузить комплектующие для спецификации"));};
   const updateSettings = (patch: Partial<SettingsEntity>) => updateEngineering(current => {
     if ((Object.keys(patch) as Array<keyof SettingsEntity>).some(key => !canEditSetting(role, key))) return current;
     return { ...current, entities: { ...current.entities, "station-settings": { ...(current.entities["station-settings"] as SettingsEntity), ...patch } } };
@@ -624,6 +651,7 @@ export default function Home() {
     try {
       if(!account)return;
       const loaded=parseAccessibleProject(JSON.parse(await file.text()),role);
+      if(session.current && !await session.current.flush())throw new Error("Сначала сохраните текущий проект или сохраните конфликт как копию.");
       if(importMode.current==="replace") {
         if(!window.confirm("Заменить содержимое открытого проекта импортированным JSON?"))return;
         loaded.project={...loaded.project,id:config.project.id,createdAt:config.project.createdAt};
@@ -638,18 +666,29 @@ export default function Home() {
   const rename = () => { const name=window.prompt("Название проекта",config.project.name)?.trim();if(name)updateConfig(current=>({...current,project:{...current.project,name}})); };
   const openById=async(id:string)=>{
     if(!account)return;
+    if(session.current?.latest.project.id!==id && session.current && !await session.current.flush())throw new Error("Сначала сохраните текущий проект или сохраните конфликт как копию.");
     const file=await projectApi<ProjectFile>("?id="+encodeURIComponent(id));
-    const draft=await latestDraft(account.id,id).catch(()=>undefined);
-    const recover=draft && window.confirm("Восстановить локальные изменения вместо серверной версии?");
-    const loaded=parseAccessibleProject(recover?draft.config:file.config,role);
-    const current=activate(account,loaded,file.revision,true);
-    if(recover)current.recover({...draft,config:loaded});
-    setAccessNotice("");setView("workspace");window.history.replaceState({},"","/?project="+encodeURIComponent(id));
+    const loaded=parseAccessibleProject(file.config,role);
+    activate(account,loaded,file.revision,true);
+    const params=new URLSearchParams({project:id});
+    if(detached && loaded.workspace.windows.some(panel=>panel.id===detached))params.set("panel",detached);
+    else setDetached(null);
+    setAccessNotice("");setView("workspace");window.history.replaceState({},"","/?"+params.toString());
   };
   const openStoredProject=(card:StoredProject)=>{void openById(card.id).catch(error=>window.alert(error.message));};
-  const newProject=async()=>{try{if(!account)return;const project=createProject("Новая насосная станция",{baseValues:await fetchPublishedBaseValues()});activate(account,project,0,false);setView("workspace");window.history.replaceState({},"","/");}catch(error){window.alert(String(error));}};
+  const reloadFromDatabase=()=>{void openById(config.project.id).catch(error=>setAccessNotice(error.message));};
+  const saveConflictCopy=()=>{
+    const original=session.current;
+    if(!account || !original)return;
+    const copy={...config,project:{...config.project,id:crypto.randomUUID(),name:config.project.name+" (копия)"}};
+    activate(account,copy,0,true).retireAfterCopy(original);
+    const params=new URLSearchParams({project:copy.project.id});
+    if(detached)params.set("panel",detached);
+    window.history.replaceState({},"","/?"+params.toString());
+  };
+  const newProject=async()=>{try{if(!account)return;if(session.current && !await session.current.flush())throw new Error("Сначала сохраните текущий проект или сохраните конфликт как копию.");const project=createProject("Новая насосная станция",{baseValues:await fetchPublishedBaseValues()});activate(account,project,0,false);setView("workspace");window.history.replaceState({},"","/");}catch(error){window.alert(String(error));}};
   const deleteProject=async(card:StoredProject)=>{if(!window.confirm("Удалить проект «"+card.name+"»?"))return;
-    try{await projectApi("?id="+encodeURIComponent(card.id)+"&base="+card.revision,undefined,"DELETE");setProjects(current=>current.filter(p=>p.id!==card.id));if(config.project.id===card.id)await newProject();}catch(error){window.alert(String(error));}
+    try{await projectApi("?id="+encodeURIComponent(card.id)+"&base="+card.revision,undefined,"DELETE");setProjects(current=>current.filter(p=>p.id!==card.id));if(config.project.id===card.id){session.current?.dispose();session.current=null;await newProject();}}catch(error){window.alert(String(error));}
   };
   const logout=async()=>{await fetch("/api/auth",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"logout"})});window.location.replace("/");};
 
@@ -667,6 +706,7 @@ export default function Home() {
   if(accountLoading)return <main className="auth-page"><section className="auth-intro"><Link className="brand auth-brand" href="/"><span className="brand__mark">PS</span><span><b>Pump Station</b><small>Calculator</small></span></Link></section><section className="auth-panel"><div className="auth-card"><span className="auth-icon">PS</span><h2>Загрузка</h2><p>Подготавливаем рабочее пространство…</p></div></section></main>;
   if(!account){const auth=new URLSearchParams(window.location.search).get("auth"),mode=auth==="verify"?"verify":auth==="reset"?"reset":"login";return <AccountScreen initialMode={mode}/>;}
   if(view==="help")return <HelpCenter onBack={()=>{setView("workspace");window.history.pushState({},"",`/?project=${encodeURIComponent(config.project.id)}`);}}/>;
+  if(view==="equipment-admin")return <EquipmentAdminPanel actor={account} onBack={()=>{setView("workspace");window.history.pushState({},"","/");}}/>;
   if(view==="item-entry")return <ItemEntryPanel actor={account} onSaved={pump=>setCatalogue(current=>mergePumpCatalog(current.filter(item=>item.id!==pump.id),[pump]))} onBack={()=>{setView("workspace");window.history.pushState({},"","/");}}/>;
   if(view==="base-values")return <BaseValuesPanel actor={account} onBack={()=>{setView("workspace");window.history.pushState({},"","/");}}/>;
   if(bootError)return <main className="base-page"><h1>Не удалось загрузить проект</h1><p role="alert">{bootError}</p><button className="button" onClick={()=>window.location.reload()}>Повторить загрузку</button></main>;
@@ -688,7 +728,7 @@ export default function Home() {
     return { ...current, entities: { ...current.entities, "station-collectors": { ...entity, [type]: { ...state, ...patch } } } };
   })}/>;
   const assistantPanel = <AIAssistant userId={account.id} context={{projectId:config.project.id}}/>;
-  if (detached) { const windowState = panels.find(panel => panel.id === detached),tool=windowState?.activeTool; if(!windowState)return null; const secondary=tool==="input2"||tool==="chart2"||tool==="sketch2",entity=tool?config.entities[ENTITY_BY_TOOL[tool]]:undefined,activeInput=secondary?inputEntity2:inputEntity; return <CadProvider key={`${account.id}/${config.project.id}`} enabled={geometryEnabled} project={config}><DiagnosticsProvider value={diagnosticsValue}><main className="detached"><header className="detached__header"><div className="brand"><span className="brand__mark">PS</span><span><b>Pump Station</b><small>Calculator</small></span></div><span>{tool?PANEL_INFO[tool].title:"Пустой инструмент"}</span></header><section className="detached__content"><DiagnosticSurface panelId={windowState.id}>{tool&&entity?<PanelContent project={config} issues={derivedIssues} role={account.role} key={tool} assistantPanel={assistantPanel} collectorPanel={collectorPanel} modelPanel={modelPanel} id={tool} entity={entity} input={activeInput} secondaryInput={inputEntity2} settings={settingsEntity} catalogue={catalogue} onInputChange={secondary?updateInput2:updateInput} onSecondaryInputChange={updateInput2} onSettingsChange={updateSettings} onDnChange={updateDn} onAddValves={addValvesToSpec} onAddToSpec={()=>addSelectedPumpToSpec()} onCabinetConfigured={useConfiguredCabinet} locked={secondary&&!secondaryEnabled}/>:<div className="empty-tool"><span>＋</span><b>Пустой инструмент</b></div>}</DiagnosticSurface></section></main></DiagnosticsProvider></CadProvider>; }
+  if (detached) { const windowState = panels.find(panel => panel.id === detached),tool=windowState?.activeTool; if(!windowState)return null; const secondary=tool==="input2"||tool==="chart2"||tool==="sketch2",entity=tool?config.entities[ENTITY_BY_TOOL[tool]]:undefined,activeInput=secondary?inputEntity2:inputEntity; return <CadProvider key={`${account.id}/${config.project.id}`} enabled={geometryEnabled} project={config}><DiagnosticsProvider value={diagnosticsValue}><main className="detached"><header className="detached__header"><div className="brand"><span className="brand__mark">PS</span><span><b>Pump Station</b><small>Calculator</small></span></div><span>{tool?PANEL_INFO[tool].title:"Пустой инструмент"}</span><div className="detached__saving"><span role="status">{saveMessage}</span><button className="button" onClick={()=>void session.current?.flush()} disabled={conflicted}>Сохранить</button>{conflicted&&<><button className="button" onClick={reloadFromDatabase}>Открыть из базы</button><button className="button" onClick={saveConflictCopy}>Сохранить копию</button></>}</div></header>{accessNotice&&<p className="access-note" role="alert">{accessNotice}</p>}<section className="detached__content"><DiagnosticSurface panelId={windowState.id}>{tool&&entity?<PanelContent project={config} issues={derivedIssues} role={account.role} key={tool} assistantPanel={assistantPanel} collectorPanel={collectorPanel} modelPanel={modelPanel} id={tool} entity={entity} input={activeInput} secondaryInput={inputEntity2} settings={settingsEntity} catalogue={catalogue} onInputChange={secondary?updateInput2:updateInput} onSecondaryInputChange={updateInput2} onSettingsChange={updateSettings} onDnChange={updateDn} onAddValves={addValvesToSpec} onAddToSpec={()=>addSelectedPumpToSpec()} onCabinetConfigured={useConfiguredCabinet} locked={secondary&&!secondaryEnabled}/>:<div className="empty-tool"><span>＋</span><b>Пустой инструмент</b></div>}</DiagnosticSurface></section></main></DiagnosticsProvider></CadProvider>; }
 
   const minimizedPanels=panels.filter(panel=>panel.minimized);
   const renderWorkspacePanel=(panel:PanelState,mode:WorkspaceMode="free")=>{const tool=panel.activeTool,secondary=tool==="input2"||tool==="chart2"||tool==="sketch2";return <FloatingPanel key={panel.id} panel={panel} zoom={zoom} layoutMode={mode} content={tool?<PanelContent project={config} issues={derivedIssues} role={role} assistantPanel={assistantPanel} collectorPanel={collectorPanel} modelPanel={modelPanel} key={tool} id={tool} entity={config.entities[ENTITY_BY_TOOL[tool]]} input={secondary?inputEntity2:inputEntity} secondaryInput={inputEntity2} settings={settingsEntity} catalogue={catalogue} onInputChange={secondary?updateInput2:updateInput} onSecondaryInputChange={updateInput2} onSettingsChange={updateSettings} onDnChange={updateDn} onAddValves={addValvesToSpec} onAddToSpec={()=>addSelectedPumpToSpec()} onCabinetConfigured={useConfiguredCabinet} locked={secondary&&!secondaryEnabled}/>:<div className="empty-tool"><span>＋</span><b>Пустой инструмент</b><p>Выберите нужный инструмент в списке заголовка.</p></div>} secondaryEnabled={secondaryEnabled} onFocus={()=>focus(panel.id)} onChange={change} onDetach={()=>openPanel(panel.id)} onMinimize={()=>minimizePanel(panel.id)} onClose={()=>closePanel(panel.id)}/>;};
@@ -703,7 +743,7 @@ export default function Home() {
 
     {accessNotice && <p className="access-note" role="status">{accessNotice}<button className="button" onClick={()=>setAccessNotice("")}>Понятно</button></p>}
     <BaseValuesUpdateNotice key={config.project.id} project={config} latest={latestBaseValues} error={baseValuesError} onApply={next=>updateEngineering(()=>next)}/>
-    <div className={`sidebar ${sidebar ? "sidebar--open" : ""}`} inert={!sidebar}><button className="sidebar__backdrop" onClick={() => setSidebar(false)} aria-label="Закрыть меню"/><aside className="sidebar__panel"><div className="sidebar__top"><div className="brand"><span className="brand__mark">PS</span><span><b>Pump Station</b><small>Calculator</small></span></div><button className="icon-button" onClick={() => setSidebar(false)}><Icon name="close" /></button></div><div className="user-card"><span className="avatar avatar--large">{initials(account.name)}</span><div><div className="user-card__name"><b>{account.name}</b><span className="user-role">{account.role}</span></div><small>{account.email}</small></div></div><nav className="sidebar__nav"><button className="sidebar__link sidebar__link--active" onClick={()=>setSidebar(false)}>▦ <span>Рабочее пространство</span></button><button className="sidebar__link" onClick={()=>{setView("projects");setSidebar(false);window.history.pushState({},"","/?view=projects");}}>▤ <span>Мои проекты</span><em>{projects.length}</em></button><Link className="sidebar__link" href="/?view=equipment">⌁ <span>База оборудования</span></Link>{account.role==="admin"&&<button className="sidebar__link" onClick={()=>{setView("component-calculator");setSidebar(false);window.history.pushState({},"","/?view=component-calculator");}}>⌗ <span>Расчёт комплектующих</span></button>}{account.role==="admin"&&<button className="sidebar__link" onClick={()=>{setView("item-entry");setSidebar(false);window.history.pushState({},"","/?view=item-entry");}}>＋ <span>Заведение позиций</span></button>}{account.role==="admin"&&<button className="sidebar__link" onClick={()=>{setView("base-values");setSidebar(false);window.history.pushState({},"","/?view=base-values");}}>⚙ <span>Базовые значения</span></button>}{account.role==="admin"&&<button className="sidebar__link" onClick={()=>{setView("users");setSidebar(false);window.history.pushState({},"","/?view=users");}}>♙ <span>Список пользователей</span></button>}<button className="sidebar__link" onClick={() => { setSidebar(false); setSettingsOpen(true); }}>⚙ <span>Настройки</span></button><button className="sidebar__link" onClick={logout}>↪ <span>Выйти</span></button></nav><button className="sidebar__footer help-center-entry" onClick={()=>{setView("help");setSidebar(false);window.history.pushState({},"","/?view=help");}}><span className="help-center-entry__icon" aria-hidden="true">?</span><span><b>Центр помощи</b><small>Документация и поддержка</small></span></button></aside></div>
+    <div className={`sidebar ${sidebar ? "sidebar--open" : ""}`} inert={!sidebar}><button className="sidebar__backdrop" onClick={() => setSidebar(false)} aria-label="Закрыть меню"/><aside className="sidebar__panel"><div className="sidebar__top"><div className="brand"><span className="brand__mark">PS</span><span><b>Pump Station</b><small>Calculator</small></span></div><button className="icon-button" onClick={() => setSidebar(false)}><Icon name="close" /></button></div><div className="user-card"><span className="avatar avatar--large">{initials(account.name)}</span><div><div className="user-card__name"><b>{account.name}</b><span className="user-role">{account.role}</span></div><small>{account.email}</small></div></div><nav className="sidebar__nav"><button className="sidebar__link sidebar__link--active" onClick={()=>setSidebar(false)}>▦ <span>Рабочее пространство</span></button><button className="sidebar__link" onClick={()=>{setView("projects");setSidebar(false);window.history.pushState({},"","/?view=projects");}}>▤ <span>Мои проекты</span><em>{projects.length}</em></button>{account.role==="admin"&&<button className="sidebar__link" onClick={()=>{setView("equipment-admin");setSidebar(false);window.history.pushState({},"","/?view=equipment-admin");}}>⌁ <span>База комплектующих</span></button>}{account.role==="admin"&&<button className="sidebar__link" onClick={()=>{setView("component-calculator");setSidebar(false);window.history.pushState({},"","/?view=component-calculator");}}>⌗ <span>Расчёт комплектующих</span></button>}{account.role==="admin"&&<button className="sidebar__link" onClick={()=>{setView("item-entry");setSidebar(false);window.history.pushState({},"","/?view=item-entry");}}>＋ <span>Заведение позиций</span></button>}{account.role==="admin"&&<button className="sidebar__link" onClick={()=>{setView("base-values");setSidebar(false);window.history.pushState({},"","/?view=base-values");}}>⚙ <span>Базовые значения</span></button>}{account.role==="admin"&&<button className="sidebar__link" onClick={()=>{setView("users");setSidebar(false);window.history.pushState({},"","/?view=users");}}>♙ <span>Список пользователей</span></button>}<button className="sidebar__link" onClick={() => { setSidebar(false); setSettingsOpen(true); }}>⚙ <span>Настройки</span></button><button className="sidebar__link" onClick={logout}>↪ <span>Выйти</span></button></nav><button className="sidebar__footer help-center-entry" onClick={()=>{setView("help");setSidebar(false);window.history.pushState({},"","/?view=help");}}><span className="help-center-entry__icon" aria-hidden="true">?</span><span><b>Центр помощи</b><small>Документация и поддержка</small></span></button></aside></div>
 
     <nav className="ribbon">
       <div className="ribbon__tabs">
@@ -729,14 +769,7 @@ export default function Home() {
             <button onClick={()=>setHistoryVisible(true)}><small>История версий</small></button>
             <button onClick={()=>{addSelectedPumpToSpec();}}><small>Пересчитать по каталогу</small></button>
             <button onClick={()=>{importMode.current="replace";fileInput.current?.click();}}><small>Заменить из JSON</small></button>
-            {conflicted&&<button onClick={()=>{
-              const original=session.current;
-              if(account && original){
-                const copy={...config,project:{...config.project,id:crypto.randomUUID(),name:config.project.name+" (копия)"}};
-                activate(account,copy,0,true).retireAfterCopy(original);
-                window.history.replaceState({},"","/?project="+encodeURIComponent(copy.project.id));
-              }
-            }}><small>Сохранить конфликт как копию</small></button>}
+            {conflicted&&<><button onClick={reloadFromDatabase}><small>Открыть версию из базы</small></button><button onClick={saveConflictCopy}><small>Сохранить конфликт как копию</small></button></>}
             <button onClick={download}><b>↓</b><small>Экспорт JSON</small></button>
           </div>
         </>}

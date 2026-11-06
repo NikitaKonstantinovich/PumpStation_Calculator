@@ -1,5 +1,6 @@
 import index from "../../data/stamped-loose-flanges.json";
-import type { Assembly, Component } from "./model";
+import projectFittings from "../../data/dn65-project-fittings.json";
+import type { Assembly, Bounds, Component } from "./model";
 import type { InsertionPiece, InsertionShape } from "./insertion-types";
 
 type Dims = Partial<Pick<InsertionShape,"lengthMm"|"outerMm"|"innerMm"|"boltCircleMm"|"boltHoles"|"boltHoleMm">>;
@@ -24,18 +25,27 @@ export const previousStampGrip = (id:string|undefined,s:InsertionShape) => stamp
 const isLoose=(role?:string)=>!!role && /(?:^|-)(loose|looseFlange)$/.test(role);
 function adaptPiece(p:InsertionPiece, pieces:InsertionPiece[]) {
   let input=p.shape;
+  const {collar: stockCollar} = projectFittings;
+  if(p.componentId===stockCollar.componentId && input.kind==="collar" && p.fidelity==="outline" &&
+    Object.entries(stockCollar.dimensions).every(([k,v])=>input[k as keyof InsertionShape]===v)) {
+    return {...p,fidelity:"cad" as const,source:stockCollar.basis,
+      shape:{kind:"mesh" as const,modelHash:stockCollar.sourceHash,meshUrl:stockCollar.meshUrl,meshBounds:stockCollar.bounds as Bounds}};
+  }
   if(input.stampedHash==="missing" && isLoose(p.id)) {
     // A previous "missing" may also mean that the collar would not fit.
     // Recheck its real neck and lip before reviving a formerly unbound size.
     const collarId=p.id.endsWith("-looseFlange") ? p.id.replace(/-looseFlange$/,"-collar") : p.id.replace(/-loose$/,"");
     const collar=pieces.find(other=>other.id===collarId)?.shape;
     const row=catalog[p.componentId],stock=row?.model && parts[row.model];
-    if(stock && matches(input,row.previous) && collar?.kind==="collar" &&
-       (collar.outerMm??Infinity)<=stock.dimensions.innerMm && (collar.lipOuterMm??0)>stock.dimensions.innerMm) {
+    const seat=collar?.kind==="collar" ? collar : collar?.modelHash===stockCollar.sourceHash ? stockCollar.dimensions : undefined;
+    if(stock && matches(input,row.previous) && seat &&
+       (seat.outerMm??Infinity)<=stock.dimensions.innerMm && (seat.lipOuterMm??0)>stock.dimensions.innerMm) {
       input={...input,stampedHash:undefined};
     }
   }
   const shape=stampedShape(p.componentId,input,isLoose(p.id));
+  if (shape.stampedHash===projectFittings.flange.sourceHash && p.source!==projectFittings.flange.basis)
+    return {...p,shape,source:projectFittings.flange.basis};
   return shape===p.shape?p:{...p,shape};
 }
 /** Upgrade stock shapes without moving the assembly; callers refresh dependent fasteners. */
@@ -50,8 +60,30 @@ export function upgradeStampedFlanges(a:Assembly):Assembly {
     if(c.insertion || c.collector) {
       const original=c.insertion?.template.geometry.pieces??c.collector!.template.pieces;
       const pieces=original.map(p=>adaptPiece(p,original));
-      if(pieces.some((p,i)=>p!==original[i])){
-        if(c.insertion) {const t=c.insertion.template;next={...next,insertion:{...c.insertion,template:{...t,geometry:{...t.geometry,pieces}}}};}
+      const geometryChanged=pieces.some((p,i)=>p!==original[i]);
+      const oldSourceNote=c.line && !c.line.manualGeometry && c.insertion?.template.source.recordId &&
+        c.sourceNote?.includes(projectFittings.flange.componentId+": "+stampMissing) &&
+        pieces.some(p=>p.componentId===projectFittings.flange.componentId) &&
+        pieces.every(p=>p.componentId!==projectFittings.flange.componentId || p.shape.stampedHash===projectFittings.flange.sourceHash);
+      if(geometryChanged || oldSourceNote){
+        if(c.insertion) {
+          const t=c.insertion.template, {collar,flange}=projectFittings;
+          const collars=pieces.filter(p=>p.componentId===collar.componentId), flanges=pieces.filter(p=>p.componentId===flange.componentId);
+          const collarReady=collars.length>0 && collars.every(p=>p.shape.modelHash===collar.sourceHash);
+          const flangeReady=flanges.length>0 && flanges.every(p=>p.shape.stampedHash===flange.sourceHash);
+          const relevant=(s:string)=>!(collarReady && s.startsWith(collar.componentId+": контур воротника") ||
+            flangeReady && s===flange.componentId+": "+stampMissing);
+          const issues=t.issues.filter(relevant), warnings=t.warnings.filter(relevant);
+          if(flangeReady && !warnings.includes(flange.basis)) warnings.push(flange.basis);
+          next={...next,insertion:{...c.insertion,template:{...t,issues,warnings,status:issues.length?t.status:"layout",geometry:{...t.geometry,pieces}}}};
+          if(c.line) {
+            const lineIssues=c.line.issues.filter(relevant);
+            if(flangeReady && !lineIssues.includes(flange.basis)) lineIssues.push(flange.basis);
+            next.line={...c.line,issues:lineIssues};
+            if(t.source.recordId && !c.line.manualGeometry && (collarReady || flangeReady))
+              next.sourceNote=[`Сохранённый расчёт ${t.source.recordId}, ревизия ${t.source.revision}`,...lineIssues].join(". ");
+          }
+        }
         else {const b=c.collector!;next={...next,collector:{...b,template:{...b.template,pieces}}};}
       }
     }

@@ -1,0 +1,174 @@
+{
+  "checkedAt": "2026-11-06",
+  "policy": "Exact manufacturer/model for pumps; full standard designation for flanges. No cross-brand or approximate name matches.",
+  "bindings": [
+    {
+      "key": "pump:729",
+      "name": "ECH15-40",
+      "manufacturer": "Aquastrong",
+      "models": [
+        {
+          "path": "Equipment/Pumps/3D/horizontal_multistage/Aquastrong/ECH/ECH15-40__729/ECH15-40.stp",
+          "hash": "38cee4543f84ff23770d39bb96dc3a1bf17aa5171e918d794d91cebd056000fb",
+          "note": "Исходник библиотеки: точно совпадают производитель и полное обозначение модели."
+        }
+      ]
+    },
+    {
+      "key": "pump:400",
+      "name": "EVR45-3-2",
+      "manufacturer": "Aquastrong",
+      "models": [
+        {
+          "path": "Equipment/Pumps/3D/_source_library/Aquastrong/EVR45-3-2.SLDPRT",
+          "hash": "c6988583687d08c2ce1a94aae88d5729518a6fe8ed238fe71292a3aa905db7ab",
+          "note": "Исходник библиотеки: точно совпадают производитель и полное обозначение модели."
+        }
+      ]
+    },
+    {
+      "key": "pump:179",
+      "name": "EVR5-9",
+      "manufacturer": "Aquastrong",
+      "models": [
+        {
+          "path": "Equipment/Pumps/3D/_source_library/Aquastrong/EVR5-9.SLDPRT",
+          "hash": "630d54154f17418fddccffc325728d1ad661bc13bdf36311d3d7807af83253d1",
+          "note": "Исходник библиотеки: точно совпадают производитель и полное обозначение модели."
+        }
+      ]
+    },
+    {
+      "key": "pump:448",
+      "name": "EVR64-3-2",
+      "manufacturer": "Aquastrong",
+      "models": [
+        {
+          "path": "Equipment/Pumps/3D/_source_library/Aquastrong/EVR64-3-2.SLDPRT",
+          "hash": "95e28e6cdf35bf2ef31fb050e4577e5f27ac81c899e2862b73ea9010bbf039fe",
+          "note": "Исходник библиотеки: точно совпадают производитель и полное обозначение модели."
+        }
+      ]
+    },
+    {
+      "key": "pump:590",
+      "name": "CDM185-2-2B",
+      "manufacturer": "CNP",
+      "models": [
+        {
+          "path": "Equipment/Pumps/3D/_source_library/CNP/CDM/CDM 185-2-2B.SLDPRT",
+          "hash": "d91104b4f6851c4b8273eca0d27f233252c80957998920d0fc613f9d4af0737f",
+          "note": "Исходник библиотеки: точно совпадают производитель и полное обозначение модели."
+        }
+      ]
+    },
+    {
+      "key": "pump:nu-1d09d4634d9f22c2",
+      "name": "MV 3-27",
+      "manufacturer": "ONIS",
+      "models": [
+        {
+          "path": "Equipment/Pumps/3D/vertical_multistage/ONIS/MV/MV32/MV32-7.stp",
+          "hash": "34bc99a66e1cf66af63aa1687615c1f0d46145f15e24f08bbb54785bbc878b2a",
+          "note": "Исходник библиотеки: точно совпадают производитель и полное обозначение модели."
+        }
+      ]
+    },
+    {
+      "key": "pump:nu-9a1f5c71b574da56",
+      "name": "MV 32-2",
+      "manufacturer": "ONIS",
+      "models": [
+        {
+          "path": "Equipment/Pumps/3D/vertical_multistage/ONIS/MV/MV3/MV3-22.stp",
+          "hash": "adb79ac19969c3b2f1fc2abdf7f39292584a9b0e308e44d8ef0b9af43e1873c8",
+          "note": "Исходник библиотеки: точно совпадают производитель и полное обозначение модели."
+        }
+      ]
+    },
+    {
+      "key": "equipment:фланцы-001-r0009",
+      "name": "Фланец плоский 50-10-01-1-B-Ст.20-IV",
+      "manufacturer": null,
+      "models": [
+        {
+          "path": "Equipment/Piping/3D/Элементы трубопроводов/Фланцы/Стальные приварные ГОСТ33259-2015/DN50/Фланец 50-10-01-1-В-IV-Ст20.SLDPRT",
+          "hash": "23c903f13649cd867b4eff4da15847b1ae2641fc060086bbb0f086ab002381d7",
+          "note": "Исходник библиотеки: совпадают DN, PN, тип 01, ряд, поверхность B, группа IV и материал Ст20. Геометрия файла не изменена."
+        }
+      ]
+    },
+    {
+      "key": "equipment:фланцы-001-r0011",
+      "name": "Фланец плоский 80-10-01-1-B-Ст.20-IV",
+      "manufacturer": null,
+      "models": [
+        {
+          "path": "Equipment/Piping/3D/Элементы трубопроводов/Фланцы/Стальные приварные ГОСТ33259-2015/DN80/Фланец 80-10-01-1-В-IV-Ст20.SLDPRT",
+          "hash": "51437cdf73cb46b9eec329dcbc5176d187fa248f997b3c923098a44dadd0662b",
+          "note": "Исходник библиотеки: совпадают DN, PN, тип 01, ряд, поверхность B, группа IV и материал Ст20. Геометрия файла не изменена."
+        }
+      ]
+    },
+    {
+      "key": "equipment:фланцы-001-r0016",
+      "name": "Фланец плоский 250-10-01-1-B-Ст.20-IV",
+      "manufacturer": null,
+      "models": [
+        {
+          "path": "Equipment/Piping/3D/Элементы трубопроводов/Фланцы/Стальные приварные ГОСТ33259-2015/DN250/Фланец 250-10-01-1-B-Ст 20-IV-dв 273.SLDPRT",
+          "hash": "f6c98384a65aaa976f4ea125c48db189135ed1b1886a76e272fc6ea08ee2e774",
+          "note": "Исходник библиотеки: совпадают DN, PN, тип 01, ряд, поверхность B, группа IV и материал Ст20. Геометрия файла не изменена."
+        }
+      ]
+    },
+    {
+      "key": "equipment:фланцы-001-r0017",
+      "name": "Фланец плоский 300-10-01-1-B-Ст.20-IV",
+      "manufacturer": null,
+      "models": [
+        {
+          "path": "Equipment/Piping/3D/Элементы трубопроводов/Фланцы/Стальные приварные ГОСТ33259-2015/DN300/Фланец 300-10-01-1-B-Ст 20-IV-dв 325.SLDPRT",
+          "hash": "bfae1b6070280f189511434ea112a972585b637b3a30cbde19dcc0afeec0585c",
+          "note": "Исходник библиотеки: совпадают DN, PN, тип 01, ряд, поверхность B, группа IV и материал Ст20. Геометрия файла не изменена."
+        }
+      ]
+    },
+    {
+      "key": "equipment:фланцы-001-r0018",
+      "name": "Фланец плоский 350-10-01-1-B-Ст.20-IV",
+      "manufacturer": null,
+      "models": [
+        {
+          "path": "Equipment/Piping/3D/Элементы трубопроводов/Фланцы/Стальные приварные ГОСТ33259-2015/DN350/Фланец 350-10-01-1-B-Ст 20-IV-dв 377.SLDPRT",
+          "hash": "ee7becdb841b4fd80e5e63f2b1c785486b7523b5a7ccc2255715e76ab0db0f08",
+          "note": "Исходник библиотеки: совпадают DN, PN, тип 01, ряд, поверхность B, группа IV и материал Ст20. Геометрия файла не изменена."
+        }
+      ]
+    },
+    {
+      "key": "equipment:фланцы-002-r0032",
+      "name": "Фланец плоский 50-16-01-1-B-Ст.20-IV",
+      "manufacturer": null,
+      "models": [
+        {
+          "path": "Equipment/Piping/3D/Элементы трубопроводов/Фланцы/Стальные приварные ГОСТ33259-2015/DN50/Фланец 50-16-01-1-В-IV-Ст20.SLDPRT",
+          "hash": "4794d4b149392501b17ec0008dd2001b5cde694fc59d0596cc7b412df9268888",
+          "note": "Исходник библиотеки: совпадают DN, PN, тип 01, ряд, поверхность B, группа IV и материал Ст20. Геометрия файла не изменена."
+        }
+      ]
+    },
+    {
+      "key": "equipment:фланцы-002-r0034",
+      "name": "Фланец плоский 80-16-01-1-B-Ст.20-IV",
+      "manufacturer": null,
+      "models": [
+        {
+          "path": "Equipment/Piping/3D/Элементы трубопроводов/Фланцы/Стальные приварные ГОСТ33259-2015/DN80/Фланец 80-16-01-1-В-IV-Ст20.SLDPRT",
+          "hash": "782fe752724c58bbc09a9ba0717019cb7aaa36c29bf81abe653412a05d809363",
+          "note": "Исходник библиотеки: совпадают DN, PN, тип 01, ряд, поверхность B, группа IV и материал Ст20. Геометрия файла не изменена."
+        }
+      ]
+    }
+  ]
+}

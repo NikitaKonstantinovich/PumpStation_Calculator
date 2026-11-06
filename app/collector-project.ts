@@ -1,3 +1,4 @@
+import type { Pump } from "./pump-catalog";
 import { baseConfigurationIdentity, spacingForPump } from "./base-values";
 import { stationCollectorInstrumentPorts, resolveStationCollectorInstrumentPorts } from "./station-hydraulic-ports";
 import { separationEnabled } from "./hydraulic-option-config";
@@ -34,7 +35,7 @@ export function normalizeCollectors(raw: unknown): CollectorsEntity {
   };
   return { kind: "collectors", suction: card(value.suction, "suction"), discharge: card(value.discharge, "discharge") };
 }
-export function collectorRecommendation(project: ProjectConfig, type: CollectorType): CollectorConfiguration {
+export function collectorRecommendation(project: ProjectConfig, type: CollectorType, pumps?: readonly Pump[] | null): CollectorConfiguration {
   const dn = project.entities["station-dn"] as DnEntity, settings = project.entities["station-settings"] as SettingsEntity;
   const first = project.entities["system-input"] as InputEntity, second = project.entities["system-input-2"] as InputEntity;
   const circuit = (input: InputEntity, secondary: boolean) => {
@@ -42,7 +43,7 @@ export function collectorRecommendation(project: ProjectConfig, type: CollectorT
     const spacingRule = spacingForPump(settings.baseValues?.values, selectedPumpId, secondary);
     const prefix = secondary ? "secondary" : "", branch = type === "suction" ? (secondary ? "secondarySuctionValveDn" : "suctionValveDn") : (secondary ? "secondaryDischargeValveDn" : "dischargeValveDn");
     const pumpDn = positive(input.flowRate) && positive(input.workingPumpCount) ? recommendedDn(input.flowRate / input.workingPumpCount, settings.baseValues?.values.velocity) : null;
-    const suction = (type === "suction" ? suctionHydraulics : dischargeHydraulics)(dn,input,settings,secondary);
+    const suction = (type === "suction" ? suctionHydraulics : dischargeHydraulics)(dn,input,settings,secondary,pumps?.find(pump=>pump.id===selectedPumpId));
     const branchDn = suction && positive(input.flowRate) ? suction.dn : dn[branch] ?? pumpDn;
     const pair = secondary ? [dn.secondarySuctionValveDn, dn.secondaryDischargeValveDn] : [dn.suctionValveDn, dn.dischargeValveDn];
     const connection = suction?.connection ?? resolveDnConnection(settings, Math.max(...pair.map(v => v ?? pumpDn ?? 0)), secondary, secondary ? dn.secondaryConnectionType : dn.connectionType).connection;
@@ -104,11 +105,11 @@ function collectorSourceFingerprint(value: string | undefined): string | undefin
     return JSON.stringify(canonical(parts));
   } catch { return value; }
 }
-export function synchronizeCollectors(project: ProjectConfig, catalog?: CollectorCatalog): ProjectConfig {
+export function synchronizeCollectors(project: ProjectConfig, catalog?: CollectorCatalog, pumps?: readonly Pump[] | null): ProjectConfig {
   const previous = (project.entities["station-collectors"] as CollectorsEntity | undefined) ?? createCollectors();
   const collectors = { ...previous };
   for (const type of ["suction", "discharge"] as const) {
-    const state = previous[type], recommended = collectorRecommendation(project, type), configuration = resolveCollector(recommended, state, project.entities["station-settings"] as SettingsEntity), code = collectorCode(configuration);
+    const state = previous[type], recommended = collectorRecommendation(project, type, pumps), configuration = resolveCollector(recommended, state, project.entities["station-settings"] as SettingsEntity), code = collectorCode(configuration);
     const calculation=state.calculation&&state.calculation.code!==code&&state.calculation.code===collectorStorageCode(configuration)&&matchesCollectorConfiguration(state.calculation.fingerprint,configuration)?{...state.calculation,code}:state.calculation;
     const sourceFingerprint = collectorSourceFingerprint(JSON.stringify([recommended, project.entities["station-dn"], project.entities["system-input"], configuration.secondary ? project.entities["system-input-2"] : null]));
     const calculationSourceFingerprint = collectorSourceFingerprint(state.calculationSourceFingerprint);

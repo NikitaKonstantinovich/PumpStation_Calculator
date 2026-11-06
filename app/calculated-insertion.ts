@@ -16,7 +16,9 @@ const nonnegative = (value: unknown): value is number => typeof value === "numbe
 
 export function insertionBomIssues(c: InsertCalculation): string[] {
   if (!c?.configuration || !Array.isArray(c.bom)) return ["Нет конфигурации или вложенного состава вставки"];
-  const required = ["base", `left-${c.leftConnection}`, `right-${c.rightConnection}`, "welding",
+  const baseIsLeftEnd = c.configuration.construction === "compact-threaded" && c.leftConnection === "threaded" &&
+    c.configuration.left?.part === c.configuration.base && c.bom.some(row => row.role === "base" && row.kind === "threadEnd");
+  const required = ["base", ...(baseIsLeftEnd ? [] : [`left-${c.leftConnection}`]), `right-${c.rightConnection}`, "welding",
     ...(c.material === "st20" ? ["painting"] : []), ...(c.withSensorNipple ? ["sensor-nipple"] : []),
     ...(["left", "right"] as const).flatMap(side => c.configuration[side]?.looseFlange ? [`${side}-looseFlange`] : []),
     ...(c.configuration.sensor?.plug ? ["sensor-plug"] : []), ...(c.configuration.extension ? ["extension-pipe"] : [])];
@@ -32,7 +34,7 @@ export function insertionBomIssues(c: InsertCalculation): string[] {
 
 export function insertionPrice(snapshot: CalculatedInsertion): number | null {
   const c = snapshot.calculation;
-  if (!snapshot.currentCatalogVersion || snapshot.catalogVersion !== snapshot.currentCatalogVersion || insertionBomIssues(c).length || !c.complete || !finitePositive(c.price)) return null;
+  if (insertionBomIssues(c).length || !c.complete || !finitePositive(c.price)) return null;
   if (c.bom.some(row => !nonnegative(row.unitPrice) || !nonnegative(row.quantity) || !nonnegative(row.cost) || Math.abs(row.unitPrice * row.quantity - row.cost) > .01)) return null;
   return Math.abs(c.bom.reduce((sum, row) => sum + row.cost!, 0) - c.price) <= .01 ? c.price : null;
 }

@@ -3,6 +3,7 @@ import { insertPartIdentity, insertMaterialLabel } from "../component-insert-cal
 import type { FlangeDimensions } from "../flange-dimensions";
 import type { Bounds, Component, Vec3 } from "./model";
 import { stampedShape, stampMissing } from "./stamped-flanges";
+import projectFittings from "../../data/dn65-project-fittings.json";
 import type { ConnectionPoint, InsertionGeometry, InsertionPiece, InsertionShape, InsertionTemplate } from "./insertion-types";
 import { eccentricOffset } from "./eccentric-offset";
 
@@ -104,7 +105,11 @@ export function prepareInsertionTemplate(row: InsertCalculation, context: Insert
         if (!fits) issues.push(`${loose.id}: свободный фланец не согласован с шейкой и бортом воротника.`);
         warnings.push(`${loose.id}: положение свободного фланца принято за бортом воротника; контакт со скруглением и необходимость фаски требуют проверки перед изготовлением.`);
         const sign = e.side === "left" ? 1 : -1;
-        add(`${e.side}-loose`, loose, [e.origin[0] + sign * p.thicknessMm, e.origin[1], e.origin[2]], e.rotation, stock, "parametric", true);
+        const ring=add(`${e.side}-loose`, loose, [e.origin[0] + sign * p.thicknessMm, e.origin[1], e.origin[2]], e.rotation, stock, "parametric", true);
+        if(stock.stampedHash===projectFittings.flange.sourceHash) {
+          ring.source=projectFittings.flange.basis;
+          warnings.push(ring.source);
+        }
         Object.assign(external, { boltCircleMm: stock.boltCircleMm, boltHoles: stock.boltHoles, boltHoleMm: stock.boltHoleMm });
       } else issues.push(`${e.side}: нет размеров вспомогательного свободного фланца.`);
     }

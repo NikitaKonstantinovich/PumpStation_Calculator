@@ -2,10 +2,10 @@ import evidence from "./pump-connections.json";
 import importedPorts from "./imported-pump-ports.json";
 import catalogNozzles from "./pump-nozzles.json";
 import type { DnEntity, InputEntity, ValveConnection } from "./project-config";
-import type { PumpType } from "./pump-catalog";
+import type { Pump, PumpType } from "./pump-catalog";
 
-export function isMultistagePump(pumpId?: string) {
-  const type = (catalogNozzles as Record<string, { type?: PumpType }>)[pumpId ?? ""]?.type;
+export function isMultistagePump(pumpId?: string, pump?: Pump) {
+  const type = pump && pump.id === pumpId ? pump.type : (catalogNozzles as Record<string, { type?: PumpType }>)[pumpId ?? ""]?.type;
   return type === "vertical_multistage" || type === "horizontal_multistage";
 }
 
@@ -15,6 +15,19 @@ export type PumpPortOverride = { pumpId: string; dn: number | null; connection: 
 export type PumpPortData = Omit<PumpPortOverride, "pumpId">;
 export type PumpPortSide = "inlet" | "outlet";
 const complete = (port: PumpPortData | null | undefined): port is PumpPort => Boolean(port && typeof port.dn === "number" && Number.isFinite(port.dn) && port.dn > 0 && (port.connection === "threaded" || port.connection === "flanged"));
+const positive = (value: unknown): value is number => typeof value === "number" && Number.isFinite(value) && value > 0;
+
+// Manual records are stored in D1 after the build-time nozzle index is generated.
+// Read their current data explicitly; a DN alone does not specify a connection.
+function manualPumpPort(pump: Pump, side: PumpPortSide): PumpPortData | null {
+  const nested = pump[side];
+  const dn = [nested?.dn, pump[side === "inlet" ? "inletDn" : "outletDn"]].find(positive) ?? null;
+  const type = String(nested?.type ?? "").toLowerCase();
+  const connection = ["flange", "flanged"].includes(type) ? "flanged" : ["thread", "threaded"].includes(type) ? "threaded" : null;
+  if (dn === null && connection === null) return null;
+  const pressure = Number(String(nested?.pressure_class ?? "").replace(/^PN\s*/i, ""));
+  return { dn, connection, maxPressure: positive(pressure) ? pressure : null, source: pump.source || "Ручное заполнение" };
+}
 
 export function pumpPortField(secondary = false, side: PumpPortSide = "inlet") {
   return side === "inlet" ? (secondary ? "secondaryPumpSuctionPort" : "pumpSuctionPort")
@@ -36,22 +49,23 @@ export function pumpPortChoices(pumpId?: string, side: PumpPortSide = "inlet"): 
     return [{ dn, connection: "flanged" as const, maxPressure: row.maxPressure, source: `${row.source}: ${row.value}`, shape: "round" as const }];
   });
 }
-export function catalogPumpPort(pumpId?: string, side: PumpPortSide = "inlet"): PumpPortData | null {
+export function catalogPumpPort(pumpId?: string, side: PumpPortSide = "inlet", pump?: Pump): PumpPortData | null {
+  if (pump && pump.id === pumpId && pump.manualEntry) return manualPumpPort(pump, side);
   const catalog = (catalogNozzles as Record<string, Partial<Record<PumpPortSide, PumpPortData | null>>>)[pumpId ?? ""]?.[side];
   if (catalog) return catalog;
   const choices = pumpPortChoices(pumpId, side);
   return choices.length === 1 ? choices[0] : null;
 }
 
-export function resolvePumpPortData(entity: DnEntity, input: InputEntity, secondary = false, side: PumpPortSide = "inlet"): PumpPortData | null {
+export function resolvePumpPortData(entity: DnEntity, input: InputEntity, secondary = false, side: PumpPortSide = "inlet", pump?: Pump): PumpPortData | null {
   const override = entity[pumpPortField(secondary, side)];
   if (input.selectedPumpId && override?.pumpId === input.selectedPumpId) {
     return override;
   }
-  return catalogPumpPort(input.selectedPumpId, side);
+  return catalogPumpPort(input.selectedPumpId, side, pump);
 }
 
-export function resolvePumpPort(entity: DnEntity, input: InputEntity, secondary = false, side: PumpPortSide = "inlet"): PumpPort | null {
-  const port = resolvePumpPortData(entity, input, secondary, side);
+export function resolvePumpPort(entity: DnEntity, input: InputEntity, secondary = false, side: PumpPortSide = "inlet", pump?: Pump): PumpPort | null {
+  const port = resolvePumpPortData(entity, input, secondary, side, pump);
   return complete(port) ? port : null;
 }

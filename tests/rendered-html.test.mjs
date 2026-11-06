@@ -4,7 +4,7 @@ import test from "node:test";
 import { loadTs } from "./load-ts.mjs";
 
 const templateRoot = new URL("../", import.meta.url);
-const readPage = async () => (await Promise.all(["full-workspace.tsx", "control-cabinet-selection.ts", "station-specification.ts", "workspace-panels.tsx", "allowed-pump-tools.tsx", "pump-sketches.ts", "tool-registry.ts"].map(name => readFile(new URL(`../app/${name}`, import.meta.url), "utf8")))).join("\n");
+const readPage = async () => (await Promise.all(["full-workspace.tsx", "control-cabinet-selection.ts", "station-specification.ts", "workspace-panels.tsx", "allowed-pump-tools.tsx", "pump-chart-plot.tsx", "pump-catalog-client.ts", "pump-sketches.ts", "tool-registry.ts"].map(name => readFile(new URL(`../app/${name}`, import.meta.url), "utf8")))).join("\n");
 
 async function loadProjectConfig() {
   return loadTs(new URL("../app/project-config.ts", import.meta.url));
@@ -89,7 +89,7 @@ test("keeps the production surface free of the starter preview", async () => {
   assert.equal(settings.usdRate, 85);
   assert.equal(settings.cnyRate, 13);
   assert.deepEqual(settings.manufacturerDiscounts, { cnp: 45, aquastrong: 55, onis: 0, vandjord: 25, wellmix: 35 });
-  assert.match(page, /const curvePath\s*=\s*pumpCurvePath/);
+  assert.match(page, /d=\{pumpCurvePath\(pump,i\+1,maxQ,maxH,method/);
   assert.doesNotMatch(page, /polynomialFit|solveLinearSystem/);
   assert.doesNotMatch(page, /pchipTangents/);
   assert.match(layout, /title: "Pump Station Calculator"/);
@@ -161,7 +161,8 @@ test("provides a persisted DN calculator with SP velocity defaults", async () =>
   assert.match(page, /PN25/);
   assert.match(page, /resolveDnConnection\(settings,maxValveDn,secondary,savedConnection\)/);
   assert.match(page, /dn<=150\?\/рукоятк\/i:\/редуктор\/i/);
-  assert.match(page, /if\(color==="red"\)candidates=candidates\.filter\(item=>componentColor\(item\)==="red"\)/);
+  assert.match(page, /colorRank=color==="red"\?\(componentColor\(item\)==="red"\?0:1\)/);
+  assert.match(page, /sort\(\(a,b\)=>a\.colorRank-b\.colorRank/);
   assert.match(page, /componentColor\(item\)==="blue"\?0/);
   assert.match(page, /Добавить арматуру в спецификацию/);
   assert.match(page, /const buildValveSpecItems=/);
@@ -230,7 +231,9 @@ test("ships the discounted control-cabinet catalogue and selection rules", async
   const chlft1530 = pumps.find(pump => pump.model === "CHLF15-30");
   assert.equal(chlft1530?.power, 3);
   assert.equal(nearestAbove(chlft1530.power)?.id, "BP-2-3,7");
-  assert.match(page, /fetch\("\/pumps\.json",\{cache:"no-store"\}\)/);
+  assert.match(page, /loadPumpCatalog\(\)\.then\(/);
+  assert.match(page, /fetch\("\/pumps\.json",\s*\{\s*cache:\s*"no-store",\s*signal\s*\}\)/);
+  assert.match(page, /fetch\("\/api\/pumps",\s*\{\s*cache:\s*"no-store",\s*signal\s*\}\)/);
   assert.match(page, /fetch\("\/control-cabinets\.json",\{cache:"no-store"\}\)/);
   assert.match(page, /const stationInputs = \[config\.entities, config\.station, synchronizeFullProject\]/);
   assert.match(page, /stationInputs\.some\(\(value, index\) => value !== previousStationInputs\[index\]\)/);
@@ -465,7 +468,7 @@ test("provides a component-database tool with category-specific characteristics 
   ]);
   const database = JSON.parse(rawDatabase);
   assert.equal(database.catalogs.length, 25);
-  assert.equal(database.items.length, 2027);
+  assert.equal(database.items.length, 2029);
   assert.ok(!database.catalogs.some(catalog => catalog.id === "обвязка"));
   assert.ok(database.catalogs.some(catalog => catalog.id === "обратные-клапаны"));
   assert.ok(database.catalogs.some(catalog => catalog.id === "пожарная-арматура"));
@@ -523,10 +526,10 @@ test("ships the complete binding-component catalogue with prices and relations",
   assert.equal(catalogue.source.externalLinks.length, 2);
   assert.deepEqual(catalogue.statistics, {
     catalogs: 25,
-    tables: 85,
-    componentRows: 2027,
-    pricedComponentRows: 1997,
-    priceEntries: 4458,
+    tables: 86,
+    componentRows: 2029,
+    pricedComponentRows: 1999,
+    priceEntries: 4460,
     formulaRules: 4785,
     formulaErrorsInSavedValues: 0,
     dataValidations: 23,
@@ -563,7 +566,15 @@ test("defines the normalized D1 schema for binding components", async () => {
     readFile(new URL("../.openai/hosting.json", import.meta.url), "utf8"),
   ]);
 
-  assert.equal([...schema.matchAll(/sqliteTable\("/g)].length, 31);
+  for (const [table, migrationFile] of [
+    ["manual_pumps", "0012_manual_pumps"],
+    ["manual_pump_files", "0013_manual_pump_files"],
+    ["equipment_files", "0014_equipment_files"],
+  ]) {
+    assert.ok(schema.includes(`sqliteTable("${table}"`));
+    const sql = await readFile(new URL(`../drizzle/${migrationFile}.sql`, import.meta.url), "utf8");
+    assert.ok(sql.includes(`CREATE TABLE IF NOT EXISTS ${table} (`));
+  }
   for (const table of ["base_value_versions", "base_value_state", "component_insertions", "component_insertion_items", "component_calculator_source_revision"]) {
     assert.ok(schema.includes(`sqliteTable("${table}"`));
   }

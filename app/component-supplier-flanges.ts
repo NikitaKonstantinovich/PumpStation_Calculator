@@ -1,12 +1,13 @@
 import reference from "../data/supplier-flanges.json";
 import newkeyReference from "../data/newkey-flanges.json";
 import standardStainlessReference from "../data/standard-stainless-flanges.json";
+import isoStainlessReference from "../data/iso-stainless-flanges.json";
 import type { BindingCatalog } from "./collector-catalog";
 
 /** A dual PN label is permission for this exact SKU, not a general PN downgrade. */
 type Item = Pick<BindingCatalog["items"][number], "id" | "catalogId" | "family" | "fields"> & { tableId?: string };
 export function supplierFlangeFor(item: Item, sourceSha256?: string) {
-  const source = [reference, newkeyReference, standardStainlessReference].find(source => sourceSha256 === source.sourceSha256 && item.catalogId === "фланцы" && item.tableId === source.id && item.family === source.family);
+  const source = [reference, newkeyReference, standardStainlessReference, isoStainlessReference].find(source => sourceSha256 === source.sourceSha256 && item.catalogId === "фланцы" && item.tableId === source.id && item.family === source.family);
   if (!source) return null;
   const row = source.rows.find(row => row.id === item.id);
   if (!row) return null;

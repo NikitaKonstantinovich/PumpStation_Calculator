@@ -14,16 +14,16 @@ export async function readPumpFile(id: string): Promise<StoredFile> {
   if (!row) throw new PumpFileError("Файл не найден.", 404);
   return { ...row, url: pumpFileUrl(id) };
 }
-export async function uploadPumpFile(request: Request, owner: string, storage: PumpFileStore): Promise<PumpFileReference> {
+export async function uploadPumpFile(request: Pick<Request,"headers"|"body">, owner: string, storage: PumpFileStore, validate = checkPumpFile, checkedStream = checkedPumpFileStream): Promise<PumpFileReference> {
   const kind = request.headers.get("X-Pump-File-Kind");
   if (!PUMP_FILE_KINDS.includes(kind as PumpFileKind)) throw new PumpFileError("Выберите назначение файла.");
   let name: string;
   try { name = decodeURIComponent(request.headers.get("X-File-Name") ?? "").split(/[\\/]/).at(-1) ?? ""; } catch { throw new PumpFileError("Некорректное имя файла."); }
-  const size = Number(request.headers.get("X-File-Size")), { extension, contentType } = checkPumpFile(kind as PumpFileKind, name, size);
+  const size = Number(request.headers.get("X-File-Size")), { extension, contentType } = validate(kind as PumpFileKind, name, size);
   if (!request.body) throw new PumpFileError("Выберите файл для загрузки.");
   const id = crypto.randomUUID(), key = `${kind}/${id}.${extension}`;
   await ensurePumpFiles();
-  const response = await storage(key, "PUT", checkedPumpFileStream(request.body, size, extension), size);
+  const response = await storage(key, "PUT", checkedStream(request.body, size, extension), size);
   if (!response.ok) {
     let message = "Не удалось загрузить файл. Повторите попытку.";
     try { const body = await response.json() as { error?: string }; if (body.error) message = body.error; } catch { /* Storage can return an empty error response. */ }

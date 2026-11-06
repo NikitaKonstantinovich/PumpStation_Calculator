@@ -17,6 +17,7 @@ import { mergeSt20ConcentricReducers } from "./st20-concentric-reducers.mjs";
 import { mergeVibrationDimensions } from "../app/vibration-dimensions.ts";
 import { mergeThreadEnds } from "./thread-ends.mjs";
 import { mergeStandardStainlessFlanges } from "./standard-stainless-flanges.mjs";
+import { mergeIsoStainlessFlanges } from "./iso-stainless-flanges.mjs";
 
 const sourceUrl = new URL("../public/binding-components.json", import.meta.url);
 const original = await readFile(sourceUrl, "utf8");
@@ -35,7 +36,8 @@ const insertAnalogs = JSON.parse(await readFile(new URL("../data/insert-analog-d
 const st20Reducers = JSON.parse(await readFile(new URL("../data/st20-concentric-reducers.json", import.meta.url), "utf8"));
 const vibrations = JSON.parse(await readFile(new URL("../data/vibration-dimensions.json", import.meta.url), "utf8"));
 const standardStainlessFlanges = JSON.parse(await readFile(new URL("../data/standard-stainless-flanges.json", import.meta.url), "utf8"));
-const withSupplierFlanges = mergeSt20ConcentricReducers(mergeStandardStainlessFlanges(mergeSupplierFlanges(mergeSupplierFlanges(JSON.parse(original), supplierFlanges), newkeyFlanges), standardStainlessFlanges), st20Reducers, standards);
+const isoStainlessFlanges = JSON.parse(await readFile(new URL("../data/iso-stainless-flanges.json", import.meta.url), "utf8"));
+const withSupplierFlanges = mergeSt20ConcentricReducers(mergeIsoStainlessFlanges(mergeStandardStainlessFlanges(mergeSupplierFlanges(mergeSupplierFlanges(JSON.parse(original), supplierFlanges), newkeyFlanges), standardStainlessFlanges), isoStainlessFlanges), st20Reducers, standards);
 const data = mergeCadDimensions(mergePipePainting(mergeSensorNipples(mergeFlangeDimensions(mergeCollarDimensions(mergeReducerDimensions(mergeInstrumentValve(mergeSealingSupplement(mergeBindingSupplement(withSupplierFlanges, supplier), seals), valve), standards), collars), flanges), sensorNipples), painting), cad);
 Object.assign(data, mergeInsertAnalogs(data, insertAnalogs));
 Object.assign(data, mergeVibrationDimensions(data, vibrations));

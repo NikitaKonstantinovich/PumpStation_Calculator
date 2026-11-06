@@ -1,4 +1,4 @@
-import { BASE_SECTIONS, BASE_LABELS, baseEqual, collectorNippleRules, legacyBaseSnapshot, spacingForPump, type AppliedBaseValues, type BaseSection } from "./base-values";
+import { BASE_SECTIONS, baseEqual, collectorNippleRules, legacyBaseSnapshot, spacingForPump, type AppliedBaseValues, type BaseSection } from "./base-values";
 import { collectorRuleSet, describeNippleRules } from "./collector-nipple-rules";
 import type { ProjectConfig, SettingsEntity, SpecEntity } from "./project-config";
 import type { CollectorsEntity } from "./collector-project";
@@ -19,11 +19,11 @@ export function projectBaseChanges(project:ProjectConfig, latest:AppliedBaseValu
       for(const side of ["suction","discharge"] as const){const card=collectors[side];add("spacing",`${side==="suction"?"Всас":"Напор"}, контур ${index+1}: шаг / R / статус`,[index?card.spacing2:card.spacing1,before.radius,before.status],[after.spacing,after.radius,after.status],"мм","Геометрия, длина, стоимость коллектора и компоновка",Boolean(index?card.spacing2Manual:card.spacing1Manual));}
     }
   }
-  for(const key of ["aisi304","st20"] as const)add("welding",`Сварка ${key}`,old.values.welding[key],latest.values.welding[key],"₽/м","Стоимость коллекторов и вставок");
+  for(const key of ["aisi304","st20"] as const)add("welding",`Сварка ${key}`,old.values.welding[key],latest.values.welding[key],"₽/м","Стоимость сварки коллекторов");
   const oldThreads=old.values.welding.threadCutting??[],newThreads=latest.values.welding.threadCutting??[];
   for(const id of new Set([...oldThreads,...newThreads].map(row=>row.id))){const before=oldThreads.find(r=>r.id===id),after=newThreads.find(r=>r.id===id),row=after??before!;add("welding",`Нарезка резьбы ${row.material==="aisi304"?"AISI304":"Ст20"} DN${row.dn} ${row.thread}`,before?.pricePerEnd,after?.pricePerEnd,"₽/конец","Стоимость нарезки; готовая резьбовая деталь не тарифицируется повторно");add("welding",`Условия нарезки DN${row.dn} ${row.material}`,before&&{priceKind:before.priceKind,source:before.source,note:before.note,date:before.date},after&&{priceKind:after.priceKind,source:after.source,note:after.note,date:after.date},"","Применимость и достоверность тарифа");}
   if(!baseEqual(old.values.velocity,latest.values.velocity))add("velocity","Диапазоны DN и пределы скорости",old.values.velocity,latest.values.velocity,"м/с","Автоподбор DN и проверка скорости");
-  for(const row of latest.values.painting){const prior=old.values.painting.find(p=>p.id===row.id);add("painting",`Окраска Ст20 DN${row.dn}`,prior?.pricePerMeter,row.pricePerMeter,"₽/м","Стоимость окраски коллекторов и вставок");}
+  for(const row of latest.values.painting){const prior=old.values.painting.find(p=>p.id===row.id);add("painting",`Окраска Ст20 DN${row.dn}`,prior?.pricePerMeter,row.pricePerMeter,"₽/м","Стоимость окраски коллекторов");}
   const oldProducts={hoseLengthMm:old.values.preferences.hoseLengthMm,rules:old.values.preferences.rules},newProducts={hoseLengthMm:latest.values.preferences.hoseLengthMm,rules:latest.values.preferences.rules};
   if(!baseEqual(oldProducts,newProducts))add("preferences","Предпочтительные изделия и подводка",oldProducts,newProducts,"","Подбор совместимых комплектующих",Boolean(Object.keys(settings.hydraulicOptions?.products??{}).length||settings.hydraulicOptions?.hoseLengthMm));
   const beforeNipples=collectorNippleRules(old.values),afterNipples=collectorNippleRules(latest.values);
@@ -53,7 +53,6 @@ export function applyProjectBaseUpdate(project:ProjectConfig, latest:AppliedBase
   settings.baseValues=applied;
   if(sections.some(s=>["spacing","welding","velocity","painting"].includes(s)))for(const card of [collectors.suction,collectors.discharge]){card.status=card.calculation?"stale":"uncalculated";card.database=null;card.databaseStatus="unchecked";card.currentCatalogVersion=undefined;card.calculationSourceFingerprint=undefined;}
   const spec=next.entities["station-spec"] as SpecEntity;
-  if(sections.some(s=>["welding","painting"].includes(s)))for(const item of spec.items)if(item.insertionAssembly){item.technicalStatus="stale";item.technicalNotes=[`Обновлены ${sections.map(s=>BASE_LABELS[s]).join(", ")}. Требуется расчёт вставки по выбранным тарифам.`];item.price=null;}
   spec.synchronization=undefined;
   return next;
 }

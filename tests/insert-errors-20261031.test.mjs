@@ -42,7 +42,10 @@ test("DN250-125 and DN300-150 calculate both reducer geometries for each PN; pre
   }
   const large=rows.filter(r=>r.dnLarge===400 && r.dnSmall===300);
   assert.ok(large.length); assert.ok(large.every(r=>r.baseLengthMm===356));
-  assert.ok(large.filter(r=>r.pn===10 || r.pn===16).every(r=>!r.complete && r.warnings.some(w=>/426/.test(w))),"a flange for OD426 cannot be silently applied to OD406.4");
+  assert.ok(large.filter(r=>r.pn===10).every(r=>!r.complete && r.warnings.some(w=>/426/.test(w))),"a flange for OD426 cannot be silently applied to OD406.4");
+  const iso = large.filter(r=>r.pn===16);
+  assert.ok(iso.length);
+  assert.ok(iso.every(r=>r.complete && r.bom.some(b=>b.componentId==="fginox-iso-pn16:2PAS16400")), "PN16 uses the sourced ISO execution for OD406.4");
 });
 
 test("adopted analogue lengths are limited to the approved physical records and do not change prices", () => {

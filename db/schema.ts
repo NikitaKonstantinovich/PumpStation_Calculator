@@ -1,11 +1,17 @@
 import { relations, sql } from "drizzle-orm";
-import { check, index, integer, real, sqliteTable, text, uniqueIndex } from "drizzle-orm/sqlite-core";
+import { check, index, integer, primaryKey, real, sqliteTable, text, uniqueIndex } from "drizzle-orm/sqlite-core";
 
 export const manualPumpFiles = sqliteTable("manual_pump_files", {
   id: text("id").primaryKey(), kind: text("kind").notNull(), storageKey: text("storage_key").notNull().unique(),
   name: text("name").notNull(), size: integer("size").notNull(), contentType: text("content_type").notNull(),
   createdBy: text("created_by").notNull(), createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
 });
+
+export const equipmentFiles = sqliteTable("equipment_files", {
+  equipmentKey: text("equipment_key").notNull(), kind: text("kind").notNull(),
+  fileId: text("file_id").notNull().references(() => manualPumpFiles.id),
+  updatedBy: text("updated_by").notNull(), updatedAt: text("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+}, table => [primaryKey({columns:[table.equipmentKey,table.kind]}), check("equipment_file_kind",sql`${table.kind} IN ('drawing','model')`)]);
 
 export const manualPumps = sqliteTable("manual_pumps", {
   id: text("id").primaryKey(),

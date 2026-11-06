@@ -6,6 +6,7 @@ import "./diagnostics.css";
 import "./users.css";
 import "./project-access.css";
 import "./beta.css";
+import "./equipment-admin.css";
 import { THEME_INIT_SCRIPT } from "./theme";
 
 export const metadata: Metadata = {

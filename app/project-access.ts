@@ -45,7 +45,7 @@ export function parseAccessibleProject(raw: unknown, role: UserRole): ProjectCon
 
 // Collector requests can arrive directly, without saving a project. Recompute
 // the standard assembly from duty inputs and the trusted pump nozzle catalogue.
-export function collectorAccessError(configuration: CollectorConfiguration, role: UserRole, applied?: import("./base-values").AppliedBaseValues): string | null {
+export function collectorAccessError(configuration: CollectorConfiguration, role: UserRole, applied?: import("./base-values").AppliedBaseValues, pumps?: readonly import("./pump-catalog").Pump[]): string | null {
   if (canEditAllSettings(role)) return null;
   const project = createProject("Проверка исполнения", { id: "access-check", timestamp: "2000-01-01T00:00:00.000Z", ...(applied ? {baseValues:applied} : {}) });
   if (canEditProjectOptions(role)) {
@@ -57,7 +57,7 @@ export function collectorAccessError(configuration: CollectorConfiguration, role
   }
   const input = project.entities["system-input"] as InputEntity;
   project.entities["system-input"] = { ...input, flowRate: configuration.primary.flow, workingPumpCount: configuration.primary.working, reservePumpCount: configuration.primary.reserve, selectedPumpId: configuration.primary.pumpId, selectedPumpModel: configuration.primary.pumpModel };
-  const expected = collectorRecommendation(project, configuration.type);
+  const expected = collectorRecommendation(project, configuration.type, pumps);
   if (configuration.instrumentPorts === undefined) delete expected.instrumentPorts; // Legacy standalone collector requests.
   return same(configuration, expected) ? null : "Для вашего уровня доступен только автоматический подбор стандартного коллектора. Ручное исполнение доступно с pro.";
 }

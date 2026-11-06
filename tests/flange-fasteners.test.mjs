@@ -59,6 +59,37 @@ test("one actual-size set spans two flanges and actual gasket; renderer instance
   disposeObject(object);assert.equal(disposed,4,"instance GPU buffers must be released on scene rebuild");
   assert.deepEqual(rebuildFasteners(a),a);
 });
+
+test("saved DN65 PN16 joint adopts the eight rods in its specification and still verifies both flanges",()=>{
+  const a=pair(), faces=a.components.filter(c=>c.shape?.kind==="flange");
+  for(const c of faces){
+    Object.assign(c.shape,{outerMm:185,innerMm:81,boltCircleMm:145});
+    c.ports[0].dn=65;
+  }
+  const row=structuredClone(a.components.find(c=>c.id==="gasket"));
+  row.id="spec-bolts";row.equipmentId=a.components.find(c=>c.fastener).fastener.hardware.rod.id;
+  Object.assign(row.line,{role:"primary-pump-fasteners-bolts",quantity:8});row.ports=[];
+  a.components.push(row);
+  const old=a.components.find(c=>c.fastener);
+  old.fastener.status="blocked";old.fastener.issues=["Фактическая сверловка не согласуется с принятой таблицей DN/PN и диаметром крепежа."];
+  const load=()=>model.normalizeEditor({...model.emptyEditor(),assembly:a},false).assembly.components.find(c=>c.fastener);
+  const ready=load();
+  assert.equal(ready.fastener.status,"ready",ready.fastener.issues.join("; "));
+  assert.equal(ready.fastener.centers.length,8);
+  assert.ok(fastenerObject(ready).children.every(mesh=>mesh.count===8));
+  faces[0].shape.boltHoles=4;
+  assert.equal(load().fastener.status,"blocked");
+  faces[0].shape.boltHoles=8;faces[0].shape.boltHoleMm=16;
+  assert.equal(load().fastener.status,"blocked");
+  faces[0].shape.boltHoleMm=18;row.line.quantity=4;
+  assert.equal(load().fastener.status,"blocked");
+  for(const c of faces)c.shape.boltHoles=4;
+  row.line.quantity=8;
+  const standard=load().fastener;
+  assert.equal(standard.status,"ready");
+  assert.equal(standard.count,4);
+  assert.match(standard.issues.join(" "),/Количество крепежа в спецификации отличается/);
+});
 test("movement diagnoses gap, arbitrary common transform follows, undo/reopen preserve visibility and no duplicates",()=>{
   const a=pair(),group=a.components.find(c=>c.fastener),h=model.createHistory(a);
   const changed=model.editComponent(a,{id:"b",patch:{position:[2,2,0]}});

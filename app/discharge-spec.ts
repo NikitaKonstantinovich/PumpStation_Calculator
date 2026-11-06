@@ -85,7 +85,7 @@ export function buildDischargeSpec(project: ProjectConfig, database: { items: As
   for (const secondary of [false, ...(secondaryAllowed(collector) ? [true] : [])]) {
     const input = e[secondary ? "system-input-2" : "system-input"] as InputEntity;
     if (!input.calculated) continue;
-    const h = dischargeHydraulics(dn, input, settings, secondary), prefix = secondary ? "secondary" : "primary", title = secondary ? "Контур 2" : "Контур 1";
+    const h = dischargeHydraulics(dn,input,settings,secondary,pumps?.find(p=>p.id===input.selectedPumpId)), prefix = secondary ? "secondary" : "primary", title = secondary ? "Контур 2" : "Контур 1";
     const count = (input.workingPumpCount ?? 0) + (input.reservePumpCount ?? 0), branch = secondary ? collector.secondary : collector.primary;
     const errors = [...h.errors];
     if (!branch || branch.dn !== h.dn || branch.connection !== h.connection || branch.pn !== h.pn) errors.push("Параметры отвода напорного коллектора не совпадают с арматурой. Исправьте переопределения в конструкторе коллекторов.");
@@ -148,7 +148,7 @@ const checkDischargePressure = (head: number | null, name: string, limit?: numbe
   const check = checkInletPressure(head, name, limit, label);
   return { ...check, message: check.message.replaceAll("на входе", "на выходе (напор на входе + напор насоса)") };
 };
-export function checkDischargeSpecPressure(project: ProjectConfig, items: SpecItem[], database?: { items: AssemblyComponent[] }, catalog?: CollectorCatalog): SpecItem[] {
+export function checkDischargeSpecPressure(project: ProjectConfig, items: SpecItem[], database?: { items: AssemblyComponent[] }, catalog?: CollectorCatalog, pumps?: readonly Pump[] | null): SpecItem[] {
   if (!pressureChecksEnabled(project.entities["station-settings"] as SettingsEntity)) return items.map(item=>acceptInstrumentFitting(withoutPressureChecks(item)));
   const e = project.entities, dn = e["station-dn"] as DnEntity, collector = baseConfigurationIdentity((e["station-collectors"] as CollectorsEntity).discharge.configuration!);
   const components = new Map([...suctionCatalogItems, ...(database?.items ?? [])].map(item => [item.id, item]));
@@ -168,7 +168,7 @@ export function checkDischargeSpecPressure(project: ProjectConfig, items: SpecIt
       const secondary = item.option === "secondaryPump";
       if (secondary && (!collector || !secondaryAllowed(collector))) return item;
       const input = e[secondary ? "system-input-2" : "system-input"] as InputEntity;
-      const port = resolvePumpPortData(dn, { ...input, selectedPumpId: item.equipmentId ?? input.selectedPumpId }, secondary, "outlet");
+      const port = resolvePumpPortData(dn, { ...input, selectedPumpId: item.equipmentId ?? input.selectedPumpId }, secondary, "outlet", pumps?.find(p=>p.id===(item.equipmentId??input.selectedPumpId)));
       checks = [checkDischargePressure(dischargeHead(project, secondary), `${item.name}: допустимое давление на выходе`, port?.maxPressure)];
     } else {
       if (item.section !== "discharge" || /(?:fasteners|limit-switches|error)/.test(item.assemblyRole ?? "") || (!item.generatedBy && !/^(?:primary|secondary)(?:Check|Discharge)Valve$/.test(item.option ?? ""))) return item;

@@ -18,7 +18,7 @@ function sectionFor(name) {
   if (["ai-assistant", "hydraulic-curves"].includes(name)) return "start";
   if (/audit|current-state|development-plan|solidworks-assembly-algorithm/.test(name)) return "archive";
   if (/^3d-|^collector-3d|^collector-instrument-mounting|^fire-insertion-instruments|^tank-connection-3d|^insertion-3d|^valve-control-mounting/.test(name)) return "models";
-  if (["base-values", "user-administration", "item-entry"].includes(name)) return "management";
+  if (["base-values", "user-administration", "item-entry", "equipment-admin"].includes(name)) return "management";
   if (["README", "beta-0.1", "beta-0.1-windows-hosting", "model-converter", "help-center"].includes(name)) return "operations";
   if (/^(collector-constructor|component-calculator|diagnostics|discharge-spec|frame-selection|pipe-painting|pressure-checks|sealing-selection|specification-consistency|specification-hydraulics-instruments|specification-insertions|suction-instruments|suction-pressure|threaded-inserts|valve-fasteners)$/.test(name)) return "calculation";
   return "engineering";

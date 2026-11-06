@@ -6,6 +6,7 @@ import { Miniflare } from "miniflare";
 import { loadLocalAIEnv } from "./local-ai-env.mjs";
 import { localAIProvider } from "./local-ai-provider.mjs";
 import { pumpFileService } from "../services/local-storage/pump-files.mjs";
+import { equipmentAssetService } from "../services/local-storage/equipment-assets.mjs";
 const release = JSON.parse(await readFile("dist/release.json", "utf8"));
 if (release.profile !== "beta") throw new Error("Run npm run build:beta first");
 const args = process.argv.slice(2);
@@ -52,7 +53,7 @@ const worker = new Miniflare({
   compatibilityDate: config.compatibility_date,
   compatibilityFlags: config.compatibility_flags,
   bindings,
-  serviceBindings: { AI_PROVIDER: localAIProvider, PUMP_FILES: pumpFileService(process.env.PUMP_FILES_DIR || resolve(state, "pump-files")) },
+  serviceBindings: { AI_PROVIDER: localAIProvider, PUMP_FILES: pumpFileService(process.env.PUMP_FILES_DIR || resolve(state, "pump-files"), {allowReveal:!publicOrigin}), EQUIPMENT_ASSETS: equipmentAssetService({equipmentRoot:process.env.EQUIPMENT_ROOT || resolve("../Equipment"),publicRoot:resolve("dist/client"),manifestPath:resolve(process.env.PROJECT_MODEL_LIBRARY || "public/model-assets","manifest.json"),allowReveal:!publicOrigin}) },
   d1Databases: Object.fromEntries(config.d1_databases.map(database => [database.binding, database.database_id])),
   d1Persist: resolve(state, "v3/d1"),
   assets: { directory: config.assets.directory, binding: "ASSETS", routerConfig: { has_user_worker: true, invoke_user_worker_ahead_of_assets: true } },

@@ -89,7 +89,7 @@ export function collectProjectIssues(project: ProjectConfig, catalogue: Pump[], 
     const valid=inputIssues(input,secondary?"input2":"input").length===0&&input.calculated;
     if (!valid) { if (!secondary) add("dn", "empty", "warning", "Сначала задайте корректную рабочую точку в инструменте «Подбор насосов»."); continue; }
     const circuit = secondary ? "secondary" : "primary", subject = secondary ? "Контур 2" : "Контур 1";
-    const suction = suctionHydraulics(dn, input, settings, secondary), discharge = dischargeHydraulics(dn, input, settings, secondary);
+    const suction = suctionHydraulics(dn, input, settings, secondary, catalogue.find(p=>p.id===input.selectedPumpId)), discharge = dischargeHydraulics(dn, input, settings, secondary, catalogue.find(p=>p.id===input.selectedPumpId));
     suction.errors.forEach((message, index) => add("dn", `${circuit}/suction/${index}`, "error", message, subject));
     discharge.errors.forEach((message, index) => add("dn", `${circuit}/discharge/${index}`, "error", message, subject));
     if (suction.inletPressureCheck && pressureCheckWarning(suction.inletPressureCheck)) add("dn", `${circuit}/pressure`, suction.inletPressureCheck.status === "exceeded" ? "error" : "warning", suction.inletPressureCheck.message, subject);

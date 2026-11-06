@@ -1,5 +1,6 @@
 import flangeReference from "../data/flange-dimensions.json";
 import bindings from "../data/insertion-model-bindings.json";
+import projectFittings from "../data/dn65-project-fittings.json";
 import { sha256 } from "./auth-server";
 import type { InsertCalculation, InsertCatalog, InsertPart } from "./component-insert-calculations";
 import type { InsertSource } from "./component-insert-catalog-server";
@@ -18,6 +19,10 @@ export function insertionGeometryContext(source: InsertSource, catalog: InsertCa
     const candidate = bindings.rows.find(r => r.kind === part.kind && (!r.componentId || r.componentId === part.id) && (!r.sourceSha256 || r.sourceSha256 === source.source.sha256)
       && Object.entries(r.match).every(([key, expected]) => part[key as keyof InsertPart] === expected));
     if (candidate) models[part.id] = { hash: candidate.hash, bounds: candidate.bounds as Bounds, position: candidate.position as Vec3, rotation: candidate.rotation as Vec3, source: candidate.source };
+    const collar = projectFittings.collar;
+    if (part.id === collar.componentId && part.kind === "collar" && Object.entries(collar.match).every(([k,v]) => part[k as keyof InsertPart] === v)) {
+      models[part.id] = { hash: collar.sourceHash, bounds: collar.bounds as Bounds, position: [0,0,0], rotation: [0,0,0], source: collar.name };
+    }
   }
   return { catalog, flanges, models };
 }

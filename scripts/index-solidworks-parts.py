@@ -157,6 +157,10 @@ def main():
             if ('aisi' in grade.lower())!=('aisi304' in (r['family']+r['name']).lower()):continue
             if 'aisi' not in grade.lower() and not re.search(r'Ст(?:аль)?\.?\s*20',r['family']+r['name'],re.I):continue
             rows.append(record(path,kind='flange',equipmentId=r['componentId'],dimensions=dims,placement=t))
+    project=load(DATA/'dn65-project-fittings.json')['collar']
+    assert sha(ROOT/project['source'])==project['sourceHash']
+    rows.append(record(ROOT/project['source'],kind='collar',equipmentId=project['componentId'],
+                       alias=project['sourceHash'],dimensions=project['dimensions'],placement=pose()))
     (DATA/'solidworks-parts.json').write_text(json.dumps(rows,ensure_ascii=False,indent=1)+'\n',encoding='utf8')
     from collections import Counter
     print(dict(Counter(r.get('hardware') or r.get('kind') or 'nativeAlias' for r in rows)))

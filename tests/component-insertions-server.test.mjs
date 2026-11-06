@@ -195,10 +195,16 @@ test("saved insertions reappear in shared catalogue from SQL, and repeated migra
     assert.ok(item.fields.find(value => value.column === "Идентичность изделия").value);
     const snapshot=item.calculatedInsertion;
     assert.ok(snapshot.calculation.bom.length); assert.ok(snapshot.revision>0);
-    if(snapshot.catalogVersion===result.catalogVersion) assert.ok(item.prices[0].amount > 1);
-    else assert.deepEqual(item.prices,[],"stale saved products retain their BOM but cannot expose a current price");
+    assert.equal(item.prices[0].amount, snapshot.calculation.price);
   }
   const saved = await store.readSavedInsertions();
+  const record = saved[0];
+  assert.ok(store.savedInsertionComponent(record, null).prices[0].amount > 0);
+  for (const patch of [{identity_key:"wrong"}, {catalog_version:"wrong"}, {configuration_json:"{}"}, {cached_price_microunits:0}]) {
+    const invalid = store.savedInsertionComponent({...record,...patch}, null);
+    assert.deepEqual(invalid.prices, []);
+    assert.equal(invalid.calculatedInsertion.calculation.price, null);
+  }
   const planned = sqlite.prepare("EXPLAIN QUERY PLAN SELECT id FROM component_insertions WHERE identity_key=?").all(saved[0].identity_key);
   assert.ok(planned.some(row => row.detail.includes("uq_component_insertions_identity")));
   assert.deepEqual(sqlite.prepare("PRAGMA foreign_key_check").all(), []);

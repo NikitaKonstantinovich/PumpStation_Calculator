@@ -10,6 +10,7 @@ import { catalogNozzle, parseNozzleSize } from "../scripts/build-pump-nozzles.mj
 const portsUrl = new URL("../app/pump-ports.ts", import.meta.url);
 const { resolvePumpPort, resolvePumpPortData, catalogPumpPort } = await loadTs(portsUrl);
 const { createProject, parseProjectConfig } = await loadTs(new URL("../app/project-config.ts", import.meta.url));
+const { parseManualPump } = await loadTs(new URL("../app/manual-pump.ts", import.meta.url));
 const pumps = JSON.parse(await readFile(new URL("../public/pumps.json", import.meta.url), "utf8"));
 const index = JSON.parse(await readFile(new URL("../app/pump-nozzles.json", import.meta.url), "utf8"));
 
@@ -82,6 +83,24 @@ test("manual values persist independently for both nozzles and circuits, and do 
 });
 
 const nodes = element => !element || typeof element !== "object" ? [] : [element, ...[element.props?.children].flat(Infinity).flatMap(nodes)];
+test("DN fields show saved manual pump nozzles and reset project overrides to their current values", () => {
+  const pump=parseManualPump({model:"Manual",inletDn:"80",outletDn:"65",inletType:"flange",outletType:"flange"},"manual-nozzles");
+  for(const secondary of [false,true]) {
+    const entity=createProject().entities["station-dn"];
+    const props={entity,input:{selectedPumpId:pump.id},pump,secondary,title:secondary?"Контур 2":"Контур 1",onChange:patch=>Object.assign(entity,patch)};
+    const selects=nodes(PumpNozzleFields(props)).filter(n=>n.type==="select");
+    assert.deepEqual(selects.map(n=>n.props.value),[80,"flanged",65,"flanged"]);
+    assert.doesNotMatch(renderToStaticMarkup(createElement(PumpNozzleFields,props)),/role="alert"/);
+    selects[0].props.onChange({target:{value:"100"}});
+    const reset=nodes(PumpNozzleFields(props)).find(n=>n.type==="button");
+    assert.equal(reset.props.disabled,false);reset.props.onClick();
+    assert.equal(nodes(PumpNozzleFields(props)).find(n=>n.type==="select").props.value,80);
+    const partial={...pump,inlet:undefined};
+    const html=renderToStaticMarkup(createElement(PumpNozzleFields,{...props,pump:partial}));
+    assert.match(html,/<option value="80" selected="">DN80<\/option>/);
+    assert.match(html,/выберите тип соединения вручную/);
+  }
+});
 test("UI auto-fills both sides, prompts only for missing fields, and dropdown edits/reset work", () => {
   let entity = createProject().entities["station-dn"];
   let props = { entity, input: { selectedPumpId: "979" }, title: "Контур 1", onChange: patch => Object.assign(entity, patch) };

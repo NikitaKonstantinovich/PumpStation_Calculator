@@ -5,7 +5,7 @@ import {dirname,resolve} from 'node:path';
 import {fileURLToPath,pathToFileURL} from 'node:url';
 
 const root=fileURLToPath(new URL('../',import.meta.url));
-const metadata=['instrument-mounts.json','tank-models.json','valve-control-mounts.json'];
+const metadata=['instrument-mounts.json','tank-models.json','valve-control-mounts.json','dn65-project-fittings.json'];
 const hash=bytes=>createHash('sha256').update(bytes).digest('hex');
 
 /** These meshes are referenced directly by assembly code, independently of a
@@ -17,7 +17,7 @@ export function runtimeModelAssets(documents){
     if(!value||typeof value!=='object')return;
     if(Object.hasOwn(value,'meshUrl')){
       if(!/^[a-f0-9]{64}$/.test(value.sourceHash??'')||!/^[a-f0-9]{64}$/.test(value.meshHash??'')
-        ||value.meshUrl!==`/model-assets/model-${value.sourceHash}-v1.stl`)throw new Error('Invalid runtime CAD metadata');
+        ||![`/model-assets/model-${value.sourceHash}-v1.stl`,`/model-assets/stamped-${value.sourceHash}.stl`].includes(value.meshUrl))throw new Error('Invalid runtime CAD metadata');
       const name=value.meshUrl.slice('/model-assets/'.length),prior=assets.get(name);
       if(prior&&prior.meshHash!==value.meshHash)throw new Error(`Conflicting runtime CAD metadata: ${name}`);
       assets.set(name,{name,meshHash:value.meshHash});

@@ -3,15 +3,17 @@ import { createReadStream, createWriteStream } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { Readable, Transform } from 'node:stream';
 import { pipeline } from 'node:stream/promises';
+import { fileLocation } from './file-location.mjs';
 
 // Internal service binding; no public HTTP listener or user-supplied filesystem path.
-export function pumpFileService(directory) {
+export function pumpFileService(directory, locationOptions = {}) {
   const root = resolve(directory);
   const ready = mkdir(root, { recursive: true }).then(() => realpath(root));
   return async request => {
     const key = new URL(request.url).pathname.slice(1);
     if (!/^(image|drawing|model)\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\.[a-z0-9_]{1,8}$/i.test(key)) return new Response(null, { status: 404 });
-    if (!['PUT', 'GET', 'HEAD', 'DELETE'].includes(request.method)) return new Response(null, { status: 405 });
+    const location = new URL(request.url).searchParams.get('location') === '1';
+    if (!['PUT', 'GET', 'HEAD', 'DELETE', ...(location ? ['POST'] : [])].includes(request.method)) return new Response(null, { status: 405 });
     let temporary;
     try {
       const base = await ready, folder = resolve(base, key.split('/')[0]);
@@ -36,6 +38,7 @@ export function pumpFileService(directory) {
       if (request.method === 'DELETE') { await unlink(actual); return new Response(null, { status: 204 }); }
       const info = await stat(actual);
       if (!info.isFile()) return new Response(null, { status: 404 });
+      if (location && ['GET','POST'].includes(request.method)) return fileLocation(request,actual,locationOptions);
       return new Response(request.method === 'HEAD' ? null : Readable.toWeb(createReadStream(actual)), { headers: { 'Content-Length': String(info.size) } });
     } catch (error) {
       if (temporary) await unlink(temporary).catch(() => {});

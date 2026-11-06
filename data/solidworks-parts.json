@@ -4538,5 +4538,37 @@
    0,
    0
   ]
+ },
+ {
+  "kind": "collar",
+  "equipmentId": "воротники-002-r0035",
+  "alias": "95a302c76529e52107d8771ace3d27a38fae4c6bb1aecf86708cf5105838afd7",
+  "source": "Equipment/Piping/3D/Project-DN65/DN65-76.1x3-collar.SLDPRT",
+  "sourceHash": "95a302c76529e52107d8771ace3d27a38fae4c6bb1aecf86708cf5105838afd7",
+  "dimensions": {
+   "lengthMm": 25,
+   "outerMm": 76.1,
+   "innerMm": 70.1,
+   "lipOuterMm": 122,
+   "lipThicknessMm": 3
+  },
+  "placement": [
+   1,
+   0,
+   0,
+   0,
+   1,
+   0,
+   0,
+   0,
+   1,
+   0,
+   0,
+   0,
+   1,
+   0,
+   0,
+   0
+  ]
  }
 ]

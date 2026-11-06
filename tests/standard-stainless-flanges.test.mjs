@@ -41,7 +41,11 @@ test("actual alloy, source prices and PN survive all adapters; dimensions are gu
     const cfg = { type: "discharge", dn: r.dn, pn: 16, material: "aisi304", connection: "flanged", eccentric: false, stationType: "utility", simultaneous: false, jockey: false,
       primary: { flow: 60, working: 2, reserve: 1, dn: 80, connection: "flanged", spacing: 500, pn: 16 }, secondary: null };
     if (r.dn > 200) {
-      const calc = calculateCollector(cfg, collectors), flange = calc.bom.find(b => b.role === "end-weldFlange");
+      const metric = structuredClone(collectors);
+      for (const pipe of metric.components.filter(p => p.kind === "pipe" && p.dn === r.dn && p.material === "aisi304" && p.pn === 16)) {
+        if (r.requiredPipeOuterDiameterMm) pipe.outerDiameter = r.requiredPipeOuterDiameterMm;
+      }
+      const calc = calculateCollector(cfg, metric), flange = calc.bom.find(b => b.role === "end-weldFlange");
       assert.equal(flange.componentId, r.id); assert.equal(flange.cost, 2*r.price);
       assert.ok(!calc.warnings.some(w => /Нет (компонента|цены): Фланец/.test(w) && w.includes(`DN${r.dn}`)));
     }
@@ -75,6 +79,7 @@ test("new flanges use the ST20 parametric renderer with actual drilling and mati
 
 test("large row-1 bores do not silently approve smaller ISO pipes in collectors or inserts", () => {
   const catalog = makeCollectorCatalog(source);
+  catalog.components = catalog.components.filter(p => !p.id.startsWith("fginox-iso-pn16:"));
   const config = { type: "discharge", dn: 400, pn: 16, material: "aisi304", connection: "flanged", eccentric: false, stationType: "utility", simultaneous: false, jockey: false,
     primary: { flow: 60, working: 2, reserve: 1, dn: 80, connection: "flanged", spacing: 500, pn: 16 }, secondary: null };
   const result = calculateCollector(config, catalog);
@@ -82,7 +87,8 @@ test("large row-1 bores do not silently approve smaller ISO pipes in collectors 
   assert.ok(result.warnings.some(w => w.includes("Ø406.4") && w.includes("Ø426")));
   const matching = calculateCollector({...config, dn:350}, catalog);
   assert.ok(!matching.warnings.some(w => /посадка на трубу/.test(w)));
-  const inserts = generateInsertCalculations({dnFrom:400,dnTo:400,materials:["aisi304"],withSensorNipple:false,includeEccentric:false}, makeInsertCatalog(source));
+  const withoutIso = {...source, items: source.items.filter(i => !i.id.startsWith("fginox-iso-pn16:"))};
+  const inserts = generateInsertCalculations({dnFrom:400,dnTo:400,materials:["aisi304"],withSensorNipple:false,includeEccentric:false}, makeInsertCatalog(withoutIso));
   const usesFlange = inserts.filter(r => r.pn === 16 && r.bom.some(p => p.componentId === "onyx-gost-pn16:00000051406"));
   assert.ok(usesFlange.length > 0);
   for (const r of usesFlange) {

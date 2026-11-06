@@ -65,11 +65,15 @@ export function savedInsertionComponent(saved: SavedInsertion, currentCatalogVer
   const snapshot: CalculatedInsertion = { version: 1, id: saved.id, identityKey: saved.identity_key, revision: saved.revision,
     // Array.map's numeric index is never a catalogue revision.
     catalogVersion: saved.catalog_version, currentCatalogVersion: typeof currentCatalogVersion === "string" ? currentCatalogVersion : null, pricedAt: saved.price_updated_at, calculation };
-  // Header/cache inconsistencies are not a current complete product price.
+  // Check the published record against its own header and cache, independently of today's source catalogue.
   if (calculation.identityKey !== saved.identity_key || calculation.catalogVersion !== saved.catalog_version ||
-    JSON.stringify(calculation.configuration) !== JSON.stringify(JSON.parse(saved.configuration_json))) snapshot.currentCatalogVersion = null;
+    JSON.stringify(calculation.configuration) !== JSON.stringify(JSON.parse(saved.configuration_json))) {
+    snapshot.currentCatalogVersion = null;
+    snapshot.calculation = { ...calculation, price: null };
+  }
+  if (!Number.isSafeInteger(saved.cached_price_microunits) || calculation.price === null ||
+    Math.abs(calculation.price - saved.cached_price_microunits / 1_000_000) > .01) snapshot.calculation = { ...calculation, price: null };
   const amount = insertionPrice(snapshot);
-  if (amount !== null && Math.abs(amount - saved.cached_price_microunits / 1_000_000) > .01) snapshot.calculation = { ...calculation, price: null };
   const values: Record<string, unknown> = {
     Наименование: saved.name, DN: calculation.dnLarge, "Меньший DN": calculation.dnSmall,
     "Резьба слева": calculation.threadLeft, "Резьба справа": calculation.threadRight,
@@ -90,7 +94,7 @@ export function savedInsertionComponent(saved: SavedInsertion, currentCatalogVer
     id: `calculated-insertion:${saved.id}`, catalogId: "ответные-части", family: saved.name,
     calculatedInsertion: snapshot,
     fields: Object.entries(values).map(([column, value]) => ({ column, headerPath: [column], value })),
-    prices: amount !== null && Math.abs(amount - saved.cached_price_microunits / 1_000_000) <= .01 ? [{ label: "Цена, ₽/шт", amount, currency: "RUB" }] : [],
+    prices: amount === null ? [] : [{ label: "Цена, ₽/шт", amount, currency: "RUB" }],
   };
 }
 

@@ -125,7 +125,7 @@ export function synchronizeStationSpecification(project: ProjectConfig, resource
   for (const [key, input] of [["system-input", primary], ["system-input-2", second]] as const) {
     if (!validStationInput(input)) entities[key] = { ...input, calculated: false };
   }
-  let next = synchronizeCollectors({ ...project, station, entities: { ...entities, "station-spec": { ...spec, items } } }, resources.components?.collectorCatalog);
+  let next = synchronizeCollectors({ ...project, station, entities: { ...entities, "station-spec": { ...spec, items } } }, resources.components?.collectorCatalog, resources.pumps);
   if (resources.components) {
     next = refreshHydraulics(next, resources.components, true, resources.pumps);
     next = synchronizeHydraulicOptions(next, {...resources.components,pumps:resources.pumps});

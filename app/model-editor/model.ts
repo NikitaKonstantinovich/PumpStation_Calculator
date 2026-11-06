@@ -18,7 +18,7 @@ import { PUMP_LINE_RULES_REVISION } from "../line-insertion";
 import { VIBRATION_DIMENSIONS_REVISION } from "../vibration-dimensions";
 import { FRAME_RULE_REVISION, projectFrameSelection } from "../frame-selection";
 import { addValveControls, followValveControls, parseValveControl, VALVE_CONTROL_REVISION, type ValveControl } from "./valve-controls";
-import { isHardwareRow, rebuildFasteners } from "./flange-fasteners";
+import { hasLegacyDrillingBlock, isHardwareRow, rebuildFasteners } from "./flange-fasteners";
 import { upgradeStampedFlanges } from "./stamped-flanges";
 import { FASTENER_REVISION, parseFastenerBinding, parseFastenerCatalog, type FastenerBinding, type FastenerCatalog } from "./fastener-types";
 import { resolvePumpLayout, parsePumpGeometry, type PumpGeometryInfo } from "./pump-spatial";
@@ -171,7 +171,7 @@ export function normalizeEditor(raw: unknown, rebuildGeometry = true): EditorSta
   result.assembly.fastenerCatalog = parseFastenerCatalog(assembly.fastenerCatalog);
   const upgraded=upgradeStampedFlanges(result.assembly);
   if (rebuildGeometry) result.assembly = rebuildFasteners(followTankConnections(followInstrumentAssemblies(upgraded)));
-  else if(upgraded!==result.assembly) result.assembly=rebuildFasteners(upgraded);
+  else if(upgraded!==result.assembly || upgraded.components.some(hasLegacyDrillingBlock)) result.assembly=rebuildFasteners(upgraded);
   if (!ids.has(result.selectedId ?? "")) result.selectedId = null;
   return result;
 }
@@ -374,7 +374,7 @@ export function buildAssembly(project: ProjectConfig, pumps: Pump[], profiles: P
       c.ports = structuredClone(spatial.ports);
       if (lines) c.ports = c.ports.map(port => {
         if (port.id !== "inlet" && port.id !== "outlet") return port;
-        const metadata = resolvePumpPortData(dn, { ...input, selectedPumpId: pump.id }, circuit === 2, port.id);
+        const metadata = resolvePumpPortData(dn, { ...input, selectedPumpId: pump.id }, circuit === 2, port.id, pump);
         return metadata ? { ...port, dn: metadata.dn ?? undefined, connection: metadata.connection ?? undefined, source: [metadata.source, port.source].filter(Boolean).join("; ") } : port;
       });
       c.sourceNote = spatial.note;
@@ -430,7 +430,7 @@ export function buildAssembly(project: ProjectConfig, pumps: Pump[], profiles: P
       const pipe = base(`pipe-${type}-${c.id}`, `${discharge ? "Напорная" : "Всасывающая"} труба · ${c.name}`, "pipe");
       const secondary = c.id.startsWith("pump-2-");
       const branch = state.configuration?.[secondary ? "secondary" : "primary"];
-      const branchDn = (discharge ? (secondary ? dn.secondaryDischargeValveDn : dn.dischargeValveDn) : (secondary ? dn.secondarySuctionValveDn : dn.suctionValveDn)) ?? branch?.dn ?? catalogPumpPort(c.equipmentId, portId)?.dn;
+      const branchDn = (discharge ? (secondary ? dn.secondaryDischargeValveDn : dn.dischargeValveDn) : (secondary ? dn.secondarySuctionValveDn : dn.suctionValveDn)) ?? branch?.dn ?? catalogPumpPort(c.equipmentId, portId, pumps.find(p=>p.id===c.equipmentId))?.dn;
       pipe.parameters.diameter = outsideDiameter(branchDn ?? 50);
       if (!branchDn) pipe.sourceNote += ". DN не задан; для компоновки предварительно принят DN50";
       pipe.routing = { from: { componentId: c.id, portId }, to: { componentId: collector.id, portId: c.id }, automatic: true, points: [] };

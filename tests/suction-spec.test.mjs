@@ -142,6 +142,7 @@ test("secondary branches scale independently while common instruments do not dou
 const pageUrl=new URL("../app/full-workspace.tsx",import.meta.url),page=await readFile(pageUrl,"utf8");
 const shared = await readFile(new URL("../app/allowed-pump-tools.tsx", import.meta.url), "utf8");
 const actualSelection=[
+  'import {MAX_WORKING_PUMPS} from "./pump-counts";',
   'import {recommendedDn,defaultCollectorMaterial,resolveDnConnection,suctionHydraulics,dischargeHydraulics} from "./dn-defaults";',
   'import {buildSuctionSpec,replaceSuctionSpec,suctionFingerprint,checkSuctionSpecPressure} from "./suction-spec";',
   'import {buildDischargeSpec,replaceDischargeSpec,checkDischargeSpecPressure} from "./discharge-spec";',

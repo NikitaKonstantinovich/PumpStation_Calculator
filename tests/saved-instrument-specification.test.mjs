@@ -84,8 +84,9 @@ test("actual workspace hydration effect repairs a frozen saved project after res
   const start=page.indexOf('  useEffect(()=>{\n    if(!suctionEnabled)');assert.ok(start>0);
   const effect=page.slice(start,page.indexOf('\n\n  useEffect(() => {',start));
   const code=`import {repairSavedInstrumentSpecification} from './saved-instrument-specification';
+  import {refreshSavedSpecificationInsertions} from './saved-insertion-specification';
   export async function hydrate(project,resources){
-    const config=project,snapshot=true,suctionEnabled=true,catalogue=resources.pumps,suctionSource='snapshot';
+    const config=project,snapshot=true,suctionEnabled=true,catalogue=resources.pumps,suctionSource='snapshot',activeSession=null;
     let current=project;const setConfig=change=>{current=change(current)};
     const loadComponentsDatabase=async()=>resources;
     const synchronizeFullProject=()=>{throw new Error('Snapshot must not trigger full recalculation')};

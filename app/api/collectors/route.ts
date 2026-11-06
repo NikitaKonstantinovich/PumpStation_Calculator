@@ -7,6 +7,7 @@ import { BaseValuesError, resolveBaseVersions } from "../../base-values-server";
 import { applyBaseTariffs } from "../../base-values";
 import { applyCollectorSpacingRules, collectorSpacingIsManual } from "../../collector-spacing";
 import { canEditAllSettings } from "../../user-types";
+import { readManualPumps } from "../../manual-pump-server";
 import { collectorAccessError } from "../../project-access";
 import { collectorInstrumentPortIdentity } from "../../hydraulic-port-ledger";
 
@@ -74,7 +75,8 @@ export async function POST(request: Request) {
       const errors = raw && raw.primary && typeof raw.primary === "object" && (raw.secondary === null || typeof raw.secondary === "object") ? configurationWarnings(raw as CollectorConfiguration) : [];
       return json({ error: errors.length ? errors.join("\n") : "Некорректная конфигурация: проверьте DN, соединения, PN и количество насосов." }, 400);
     }
-    const accessError = collectorAccessError(configuration, user.role, applied);
+    const manualPumps = !canEditAllSettings(user.role) && [configuration.primary,configuration.secondary].some(circuit=>circuit?.pumpId?.startsWith("manual-")) ? (await readManualPumps()).map(record=>record.pump) : undefined;
+    const accessError = collectorAccessError(configuration, user.role, applied, manualPumps);
     if (accessError) return json({ error: accessError }, 403);
     const catalog = applyBaseTariffs(await currentCollectorCatalog(),applied), calculation = calculateCollector(configuration, catalog), code = collectorCode(configuration)!;
     if (body.action === "calculate") return json({ calculation, catalog });
