@@ -1,3 +1,4 @@
+import { engineeringOperation, registerOperation } from "../engineering/runtime";
 import type { InsertCalculation, InsertCatalog, InsertPart } from "../component-insert-calculations";
 import { insertPartIdentity, insertMaterialLabel } from "../component-insert-calculations";
 import type { FlangeDimensions } from "../flange-dimensions";
@@ -16,7 +17,7 @@ const positive = (n: number | null | undefined): n is number => typeof n === "nu
 const same = (a: number, b: number) => Math.abs(a - b) < .001;
 
 /** Uses the server calculation's finished/base lengths and seating; never calculates fasteners or prices. */
-export function prepareInsertionTemplate(row: InsertCalculation, context: InsertGeometryContext, record: { id: string; revision: number } | null = null, angle = 0): Omit<InsertionTemplate, "geometryKey"> {
+export function corePrepareInsertionTemplate(row: InsertCalculation, context: InsertGeometryContext, record: { id: string; revision: number } | null = null, angle = 0): Omit<InsertionTemplate, "geometryKey"> {
   if (!Number.isFinite(angle) || Math.abs(angle) > 360) throw new Error("Угол эксцентриситета должен быть от −360 до 360°.");
   const cfg = row.configuration, L = row.totalLengthMm, B = row.baseLengthMm, al = cfg.axialLeftMm, ar = cfg.axialRightMm;
   if (!positive(L) || !positive(B) || al === null || ar === null || !Number.isFinite(al + ar) || !same(L, B + al + ar)) throw new Error("Для 3D нужны согласованные длины основы, изделия и осевые добавки обоих концов. Выполните полный расчёт.");
@@ -179,3 +180,9 @@ export function connectionCompatibility(a: ConnectionPoint, b: ConnectionPoint):
   else for (const k of ["boltCircleMm", "boltHoles", "boltHoleMm"] as const) if (!a[k] || !b[k] || !same(a[k]!, b[k]!)) issues.push(`Не согласована схема крепежа: ${k}`);
   return issues;
 }
+
+export function prepareInsertionTemplate(...args: Parameters<typeof corePrepareInsertionTemplate>): ReturnType<typeof corePrepareInsertionTemplate> {
+  return engineeringOperation("prepareInsertionTemplate", corePrepareInsertionTemplate, args);
+}
+
+registerOperation("prepareInsertionTemplate", ["row","context","record","angle"], corePrepareInsertionTemplate);

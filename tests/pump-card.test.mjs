@@ -1,7 +1,6 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
-import ts from "typescript";
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { loadTs } from "./load-ts.mjs";
@@ -9,18 +8,7 @@ import { pumpCardSupplement } from "../scripts/build-pump-card-supplement.mjs";
 
 const { pumpCardSections, pumpCardCurves, pumpCardPhysicalData } = await loadTs(new URL("../app/pump-card-data.ts", import.meta.url));
 const pumps = JSON.parse(await readFile(new URL("../public/pumps.json", import.meta.url), "utf8"));
-const toModule = source => `data:text/javascript;base64,${Buffer.from(ts.transpileModule(source, {
-  compilerOptions: { module: ts.ModuleKind.ESNext, target: ts.ScriptTarget.ES2022, jsx: ts.JsxEmit.ReactJSX },
-}).outputText).toString("base64")}`;
-const supplementJson = await readFile(new URL("../app/pump-card-supplement.json", import.meta.url), "utf8");
-const helperUrl = toModule((await readFile(new URL("../app/pump-card-data.ts", import.meta.url), "utf8"))
-  .replace('import supplement from "./pump-card-supplement.json";', `const supplement = ${supplementJson};`));
-const componentSource = (await readFile(new URL("../app/pump-card.tsx", import.meta.url), "utf8"))
-  .replace('from "./pump-card-data"', `from "${helperUrl}"`);
-const componentUrl = toModule(componentSource);
-const componentJs = Buffer.from(componentUrl.split(",")[1], "base64").toString()
-  .replaceAll('from "react/jsx-runtime"', `from "${import.meta.resolve("react/jsx-runtime")}"`);
-const { PumpCard } = await import(`data:text/javascript;base64,${Buffer.from(componentJs).toString("base64")}`);
+const { PumpCard } = await loadTs(new URL("../app/pump-card.tsx", import.meta.url));
 
 test("CNP cards show verified nozzle sizes, net mass and traceable sources", () => {
   const model = name => pumps.find(p => p.manufacturer === "CNP" && p.model === name);

@@ -1,3 +1,4 @@
+import { engineeringOperation, registerOperation } from "./engineering/runtime";
 export type PumpFilterRow = { type: string; manufacturer: string; series: string };
 export type PumpFilterKey = keyof PumpFilterRow;
 export type PumpFilters = Partial<Record<PumpFilterKey, string | readonly string[]>>;
@@ -14,7 +15,7 @@ export const PUMP_TYPE_LABELS: Record<string, string> = {
 };
 export const pumpTypeLabel = (type: string) => PUMP_TYPE_LABELS[type] ?? type;
 
-export function matchesPumpFilters(row: PumpFilterRow, filters: PumpFilters = {}) {
+export function coreMatchesPumpFilters(row: PumpFilterRow, filters: PumpFilters = {}) {
   return (["type", "manufacturer", "series"] as const).every(key => {
     const selected = filters[key];
     return !selected?.length || (typeof selected === "string" ? row[key] === selected : selected.includes(row[key]));
@@ -42,3 +43,9 @@ export function changePumpFilter(rows: readonly PumpFilterRow[], filters: PumpFi
   }
   return next;
 }
+
+export function matchesPumpFilters(...args: Parameters<typeof coreMatchesPumpFilters>): ReturnType<typeof coreMatchesPumpFilters> {
+  return engineeringOperation("matchesPumpFilters", coreMatchesPumpFilters, args);
+}
+
+registerOperation("matchesPumpFilters", ["row","filters"], coreMatchesPumpFilters);

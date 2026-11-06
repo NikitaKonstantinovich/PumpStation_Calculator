@@ -12,23 +12,8 @@ const { suctionCatalogItems } = await loadTs(new URL("../app/suction-catalog.ts"
 const { makeCollectorCatalog } = await loadTs(new URL("../app/collector-catalog.ts", import.meta.url));
 const binding = JSON.parse(await readFile(new URL("../public/binding-components.json", import.meta.url), "utf8"));
 const catalog = makeCollectorCatalog(binding), database = { ...binding, collectorCatalog: catalog };
-const pageUrl = new URL("../app/full-workspace.tsx", import.meta.url), page = await readFile(pageUrl, "utf8");
-const shared = await readFile(new URL("../app/allowed-pump-tools.tsx", import.meta.url), "utf8");
-const source = [
-  'import {MAX_WORKING_PUMPS} from "./pump-counts";',
-  'import {recommendedDn,defaultCollectorMaterial,resolveDnConnection,suctionHydraulics,dischargeHydraulics} from "./dn-defaults";',
-  'import {buildSuctionSpec,replaceSuctionSpec,checkSuctionSpecPressure} from "./suction-spec";',
-  'import {buildDischargeSpec,replaceDischargeSpec,checkDischargeSpecPressure} from "./discharge-spec";',
-  'import {normalizeSpecificationItems,specificationOption} from "./specification-items";',
-  'import {synchronizeCollectors} from "./collector-project";',
-  'import {bindProjectComponents} from "./base-values-components";',
-  shared.match(/^export const isCalculated =.*$/m)[0], page.match(/^const isSecondaryEnabled =.*$/m)[0],
-  shared.match(/^export const componentFieldLabel=.*$/m)[0],
-  page.slice(page.indexOf("const isJockeyCircuit="), page.indexOf("function DnCalculator(")),
-  page.slice(page.indexOf("const HYDRAULIC_SPEC_OPTIONS:"), page.indexOf("function PanelContent(")),
-  "let loadedComponentsDatabase; export {refreshSuctionSpecification as refresh, buildValveSpecItems};",
-].join("\n");
-const { refresh, buildValveSpecItems } = await loadTs(pageUrl, { [pageUrl.href]: source });
+const {refreshSuctionSpecification:refresh,buildValveSpecItems}=await loadTs(new URL("../app/station-hydraulic-calculation.ts",import.meta.url));
+
 function fixture({ pumpDn = 80, valveDn = 80, pumpConnection = "flanged", connection = "flanged", pn = 16, material = "st20", type = "utility", count = 3 } = {}) {
   const p = createProject();
   Object.assign(p.entities["station-settings"], { stationType: type, inletHead: 10 });

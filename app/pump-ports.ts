@@ -1,3 +1,4 @@
+import { engineeringOperation, registerOperation } from "./engineering/runtime";
 import evidence from "./pump-connections.json";
 import importedPorts from "./imported-pump-ports.json";
 import catalogNozzles from "./pump-nozzles.json";
@@ -59,13 +60,21 @@ export function catalogPumpPort(pumpId?: string, side: PumpPortSide = "inlet", p
 
 export function resolvePumpPortData(entity: DnEntity, input: InputEntity, secondary = false, side: PumpPortSide = "inlet", pump?: Pump): PumpPortData | null {
   const override = entity[pumpPortField(secondary, side)];
-  if (input.selectedPumpId && override?.pumpId === input.selectedPumpId) {
-    return override;
-  }
-  return catalogPumpPort(input.selectedPumpId, side, pump);
+  const selected = input.selectedPumpId && override?.pumpId === input.selectedPumpId ? override : null;
+  return resolvePort(catalogPumpPort(input.selectedPumpId, side, pump), selected);
 }
 
 export function resolvePumpPort(entity: DnEntity, input: InputEntity, secondary = false, side: PumpPortSide = "inlet", pump?: Pump): PumpPort | null {
   const port = resolvePumpPortData(entity, input, secondary, side, pump);
   return complete(port) ? port : null;
 }
+
+export function coreResolvePort(catalog: PumpPortData | null, override: PumpPortData | null): PumpPortData | null {
+  return override ?? catalog;
+}
+
+export function resolvePort(...args: Parameters<typeof coreResolvePort>): ReturnType<typeof coreResolvePort> {
+  return engineeringOperation("resolvePort", coreResolvePort, args);
+}
+
+registerOperation("resolvePort", ["catalog","override"], coreResolvePort);

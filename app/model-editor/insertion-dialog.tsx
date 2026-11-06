@@ -8,7 +8,7 @@ import type { ViewportHandle } from "./viewport";
 import "./editor.css";
 const Viewport = lazy(() => import("./viewport"));
 const noop = () => {};
-export type InsertPreviewRequest = { input: InsertRequest; catalogVersion: string; identityKey: string };
+export type InsertPreviewRequest = { input: InsertRequest; catalogVersion: string; graphVersion?: string; identityKey: string };
 type SavedItem = { id: string; name: string; dnLarge: number; dnSmall: number; pn: number; connections: string; geometry: string; sensor: boolean };
 const connectionLabel = (value: string) => ({ flanged: "фланец", collar: "воротник", threaded: "резьба", butt: "стык" })[value] ?? value;
 const connectionsLabel = (value: string) => value.split("/").map(connectionLabel).join(" / ");
@@ -45,7 +45,7 @@ export function InsertionDialog({ onClose, onAdd, preview, recordId, initialAngl
     const load = async () => {
       setBusy(true); setError(""); setAssetError(""); setTemplate(null);
       try {
-        const r = await fetch(preview ? "/api/component-insertions-3d" : `/api/component-insertions-3d?id=${encodeURIComponent(id)}&angle=${angle}`, { signal: controller.signal, cache: "no-store", ...(preview ? { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ...preview, angle }) } : {}) });
+        const r = await fetch(preview ? "/api/component-insertions-3d" : `/api/component-insertions-3d?id=${encodeURIComponent(id)}&angle=${angle}`, { signal: controller.signal, cache: "no-store", ...(preview ? { method: "POST", headers: { "Content-Type": "application/json", ...(preview.graphVersion?{"X-Engineering-Version":preview.graphVersion}:{}) }, body: JSON.stringify({ ...preview, angle }) } : {}) });
         const data = await r.json(); if (!r.ok) throw new Error(data.error ?? "Не удалось подготовить шаблон.");
         const parsed = parseInsertionTemplate(data.template); if (!parsed) throw new Error("Сервер вернул некорректную геометрию шаблона.");
         if (!controller.signal.aborted) setTemplate(parsed);

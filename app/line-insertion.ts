@@ -1,3 +1,4 @@
+import { engineeringOperation, registerOperation } from "./engineering/runtime";
 import { suctionCatalogItems, type AssemblyComponent } from "./suction-catalog";
 import { componentPressureLimit } from "./suction-pressure";
 import { field, itemDn, number } from "./line-spec-parts";
@@ -6,7 +7,7 @@ import type { CollectorCatalog, CollectorConfiguration } from "./collector-calcu
 export const PUMP_LINE_RULES_REVISION = "pump-connections-v6-kms-bolt-grip";
 
 /** The same exact reducer selection serves both sides and both vibration modes. */
-export function selectLineReducer(items: AssemblyComponent[], catalog: CollectorCatalog, material: CollectorConfiguration["material"], pumpDn: number, valveDn: number, pn: number, geometry: "concentric" | "eccentric" = "eccentric") {
+export function coreSelectLineReducer(items: AssemblyComponent[], catalog: CollectorCatalog, material: CollectorConfiguration["material"], pumpDn: number, valveDn: number, pn: number, geometry: "concentric" | "eccentric" = "eccentric") {
   const outer = (dn: number) => catalog.components.find(item => item.kind === "pipe" && item.dn === dn && item.material === material)?.outerDiameter;
   const largeDn = Math.max(valveDn, pumpDn), smallDn = Math.min(valveDn, pumpDn);
   const large = outer(largeDn), small = outer(smallDn);
@@ -17,7 +18,7 @@ export function selectLineReducer(items: AssemblyComponent[], catalog: Collector
 }
 
 // The table prices only the insertion body. Material and length need explicit evidence.
-export function selectLineInsertion(items: AssemblyComponent[], dn: number, pn: number, material: "st20" | "aisi304") {
+export function coreSelectLineInsertion(items: AssemblyComponent[], dn: number, pn: number, material: "st20" | "aisi304") {
   const part = [...items, ...suctionCatalogItems].find(item => item.id === `suction-table:ff-${dn}`);
   const rating = componentPressureLimit(part)?.bar;
   const requested = material === "aisi304" ? "AISI 304" : "Ст20";
@@ -27,3 +28,15 @@ export function selectLineInsertion(items: AssemblyComponent[], dn: number, pn: 
   if (text && actual !== material) return { description: `Материал вставки в таблице (${text}) не соответствует ${requested}. Исполнение и цену уточнить.` };
   return { item: part, description: actual ? `Предварительная цена тела: ${part.id}; длина и комплектность не подтверждены; фланцы отдельно.` : `Материал вставки в таблице не указан: применимость к ${requested} и длину уточнить. Цена тела вставки из таблицы; фланцы отдельно.`, status: "clarify" as const };
 }
+
+export function selectLineReducer(...args: Parameters<typeof coreSelectLineReducer>): ReturnType<typeof coreSelectLineReducer> {
+  return engineeringOperation("selectLineReducer", coreSelectLineReducer, args);
+}
+
+export function selectLineInsertion(...args: Parameters<typeof coreSelectLineInsertion>): ReturnType<typeof coreSelectLineInsertion> {
+  return engineeringOperation("selectLineInsertion", coreSelectLineInsertion, args);
+}
+
+registerOperation("selectLineReducer", ["items","catalog","material","pumpDn","valveDn","pn","geometry"], coreSelectLineReducer);
+
+registerOperation("selectLineInsertion", ["items","dn","pn","material"], coreSelectLineInsertion);

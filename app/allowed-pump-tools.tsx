@@ -23,9 +23,8 @@ import { PumpCard } from "./pump-card";
 import { suctionCatalogItems } from "./suction-catalog";
 import { isLegacyNomenclature, LEGACY_NOMENCLATURE_CATALOG_ID, LEGACY_NOMENCLATURE_LABEL, routeNomenclature } from "./component-nomenclature";
 import { makeCollectorCatalog, type BindingCatalog } from "./collector-catalog";
-import type { CollectorCatalog } from "./collector-calculations";
-export type CalculatedInput = InputEntity & { flowRate:number; head:number; staticHead:number; workingPumpCount:number; reservePumpCount:number; calculated:true };
-export const isCalculated = (input:InputEntity): input is CalculatedInput => input.calculated && input.flowRate !== null && input.head !== null && input.staticHead !== null && input.workingPumpCount !== null && input.reservePumpCount !== null && input.flowRate > 0 && input.head > 0 && input.staticHead >= 0 && input.staticHead <= input.head && Number.isInteger(input.workingPumpCount) && input.workingPumpCount >= 1 && input.workingPumpCount <= MAX_WORKING_PUMPS && Number.isInteger(input.reservePumpCount) && input.reservePumpCount >= 0 && input.reservePumpCount <= 3;
+import {isCalculated,type CalculatedInput} from "./calculated-input";
+export {isCalculated,type CalculatedInput} from "./calculated-input";
 const pumpListPriceRub = cataloguePriceRub;
 const pumpDiscountPercent = catalogueDiscount;
 export const pumpPriceRub = cataloguePurchasePriceRub;
@@ -130,12 +129,8 @@ function PumpSketchView({ pump, sketch, tool }: { pump:Pump; sketch:PumpSketchIn
   return <figure className="pump-sketch"><div className="pump-sketch__meta"><span><small>ВЫБРАННЫЙ АГРЕГАТ</small><b>{pump.manufacturer} {pump.model}</b></span><div className="pump-sketch__actions"><span>Ctrl + колесо · {zoom}%</span><a href={sketch.src} download={`${pump.manufacturer}-${pump.model.replace(/[^a-zа-я0-9]+/gi,"-")}.${sketch.src.match(/\.(png|jpe?g|webp)(?:\?|$)/i)?.[1]??"png"}`}>Скачать изображение</a></div></div><div ref={canvasRef} className="pump-sketch__canvas" aria-label="Габаритный чертёж. Для изменения масштаба удерживайте Ctrl и вращайте колесо мыши">{imageError&&<p data-issue-id={`${tool}/drawing-load`} role="alert" className="pump-sketch__error">Не удалось загрузить чертёж. Попробуйте открыть изображение по ссылке выше.</p>}<div className="pump-sketch__zoom-surface" style={{width:`${extent}%`,height:`${extent}%`,display:imageError?"none":undefined}}><img src={sketch.src} onError={()=>setImageError(true)} hidden={imageError} style={{width:`${imageSize}%`,height:`${imageSize}%`}} alt={`Габаритный чертёж насосного агрегата ${pump.manufacturer} ${pump.model}`}/></div></div><figcaption><span>{sketch.caption}</span><span>Источник: {sketch.source}</span></figcaption></figure>;
 }
 
-type ComponentField={column:string;headerPath:string[];value:unknown};
-export type ComponentPrice={label:string;amount:number;currency:string};
-export type ComponentItem={id:string;catalogId:string;family:string;fields:ComponentField[];prices:ComponentPrice[]};
-type ComponentGroupId="hydraulic"|"control"|"metal"|"services";
-type ComponentCatalog={id:string;name:string;groupId:ComponentGroupId};
-export type ComponentsDatabase={catalogs:ComponentCatalog[];items:ComponentItem[];collectorCatalog:CollectorCatalog;statistics:{componentRows:number;pricedComponentRows:number}};
+import type { ComponentItem, ComponentGroupId, ComponentCatalog, ComponentsDatabase } from "./component-database-types";
+export type { ComponentPrice, ComponentItem, ComponentsDatabase } from "./component-database-types";
 type RawBindingDatabase=BindingCatalog & {catalogs:Array<{id:string;name:string}>;items:ComponentItem[];statistics:{componentRows:number;pricedComponentRows:number}};
 type RawControlDatabase={components:Array<{id:string;category:string;manufacturer:string|null;article:string|null;name:string;componentType:string|null;attributes:Record<string,unknown>;currentPrice:number|null;currency:string}>;statistics:{components:number;pricedComponents:number}};
 const COMPONENT_GROUPS:Array<{id:ComponentGroupId;name:string}>=[{id:"hydraulic",name:"Сборочный комплект гидравлики"},{id:"control",name:"Комплектующие ШУ"},{id:"metal",name:"Металлоконструкция и рама"},{id:"services",name:"Работы и услуги"}];
@@ -157,7 +152,8 @@ export const loadComponentsDatabase=(reload=false)=>{
   return loadedComponentsDatabase={collectorCatalog:makeCollectorCatalog(binding),catalogs:[...binding.catalogs.map(catalog=>({...catalog,groupId:bindingGroupFor(catalog.id)})),{id:"ответные-части",name:"Ответные части и американки",groupId:"hydraulic"},{id:LEGACY_NOMENCLATURE_CATALOG_ID,name:LEGACY_NOMENCLATURE_LABEL,groupId:"hydraulic"},...controlCatalogs],items,statistics:{componentRows:items.length,pricedComponentRows:items.filter(item=>item.prices.length).length}};
 }).catch(error=>{componentsDatabasePromise=undefined;throw error;});
 };
-export const componentFieldLabel=(field:ComponentField)=>field.headerPath.filter(Boolean).at(-1)?.trim()??"";
+import {componentFieldLabel} from "./component-database-types";
+export {componentFieldLabel} from "./component-database-types";
 export const componentValue=(value:unknown)=>typeof value==="number"?value.toLocaleString("ru-RU",{maximumFractionDigits:3}):typeof value==="string"&&value.trim()?value:"—";
 
 function ComponentsDatabaseView({settings}:{settings:SettingsEntity}){

@@ -5,16 +5,8 @@ import { loadTs } from "./load-ts.mjs";
 
 // Exercise the actual selection and specification functions without mounting
 // the workspace or triggering its project persistence effects.
-const url = new URL("../app/full-workspace.tsx", import.meta.url);
-const page = await readFile(url, "utf8");
-const shared = await readFile(new URL("../app/allowed-pump-tools.tsx", import.meta.url), "utf8");
-const source = [
-  shared.match(/^export const componentFieldLabel=.*$/m)[0],
-  page.slice(page.indexOf("const componentDn="), page.indexOf("function DnCalculator(")),
-  page.slice(page.indexOf("const valveSpecItem="), page.indexOf("const buildValveSpecItems=")),
-  "export { selectValveComponent, valveSpecItem };",
-].join("\n");
-const { selectValveComponent: select, valveSpecItem: specItem } = await loadTs(url, { [url.href]: source });
+const {selectValveComponent:select,valveSpecItem:specItem}=await loadTs(new URL("../app/station-hydraulic-calculation.ts",import.meta.url));
+
 const { items } = JSON.parse(await readFile(new URL("../public/binding-components.json", import.meta.url), "utf8"));
 
 test("valve colour falls back only within compatible sizes and actuator executions",()=>{

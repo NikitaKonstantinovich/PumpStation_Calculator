@@ -1,3 +1,4 @@
+import { engineeringOperation, registerOperation } from "./engineering/runtime";
 import { tankMounting } from "./tank-mounting";
 import { baseConfigurationIdentity, baseSettingsIdentity } from "./base-values";
 import { hydraulicPortLabel, stationHydraulicPortLedger } from "./station-hydraulic-ports";
@@ -72,7 +73,7 @@ export function hydraulicOptionCatalog(items: AssemblyComponent[]): AssemblyComp
 }
 
 const optionRoles = new Set<SpecOption>(["membraneTank", "pressureTransducer", "collectorPlugs", "isolatingValves"]);
-export function buildHydraulicOptions(project: ProjectConfig, resources: { items: AssemblyComponent[]; collectorCatalog: CollectorCatalog; pumps?: readonly Pump[] | null }): SpecItem[] {
+export function coreBuildHydraulicOptions(project: ProjectConfig, resources: { items: AssemblyComponent[]; collectorCatalog: CollectorCatalog; pumps?: readonly Pump[] | null }): SpecItem[] {
   const settings = project.entities["station-settings"] as SettingsEntity;
   const config = normalizeHydraulicOptions({ ...settings.hydraulicOptions, hoseLengthMm: settings.hydraulicOptions?.hoseLengthMm ?? settings.baseValues?.values.preferences.hoseLengthMm }), database = { items: hydraulicOptionCatalog(resources.items) };
   const collectors = project.entities["station-collectors"] as CollectorsEntity;
@@ -186,3 +187,9 @@ export function synchronizeHydraulicOptions(project: ProjectConfig, resources: {
   const items = [...spec.items.filter(item => item.generatedBy !== "hydraulic-options" && !(item.option && optionRoles.has(item.option) && (item.generatedBy === "station" || !item.equipmentId && item.quantity === 0))), ...buildHydraulicOptions(project, resources)];
   return { ...project, entities: { ...project.entities, "station-spec": { ...spec, items, hydraulicPorts: stationHydraulicPortLedger(project) } } };
 }
+
+export function buildHydraulicOptions(...args: Parameters<typeof coreBuildHydraulicOptions>): ReturnType<typeof coreBuildHydraulicOptions> {
+  return engineeringOperation("buildHydraulicOptions", coreBuildHydraulicOptions, args);
+}
+
+registerOperation("buildHydraulicOptions", ["project","resources"], coreBuildHydraulicOptions);

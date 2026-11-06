@@ -1,11 +1,13 @@
+import { engineeringOperation, registerOperation } from "./engineering/runtime";
+import {refreshSuctionSpecification} from "./station-hydraulic-calculation";
 import { MAX_WORKING_PUMPS } from "./pump-counts";
 import { synchronizeHydraulicOptions } from "./hydraulic-option-assembly";
 import { normalizeHydraulicOptions } from "./hydraulic-option-config";
 import { baseSettingsIdentity } from "./base-values";
 import { bindProjectComponents } from "./base-values-components";
 import type { InputEntity, ProjectConfig, SettingsEntity, SpecEntity, SpecItem, SpecOption } from "./project-config";
-import type { ComponentsDatabase } from "./allowed-pump-tools";
-import type { SmartCabinet } from "./cabinet-configurator";
+import type { ComponentsDatabase } from "./component-database-types";
+import type { SmartCabinet } from "./smart-cabinet-types";
 import { cataloguePurchasePriceRub, type Pump } from "./pump-catalog";
 import { projectControlCabinetItem, type ControlCabinet } from "./control-cabinet-selection";
 import { synchronizeCollectors, type CollectorsEntity } from "./collector-project";
@@ -44,7 +46,7 @@ const valveRoles = new Set<SpecOption>(["primarySuctionValve", "primaryDischarge
 const stale = (item: SpecItem, reason: string): SpecItem => ({ ...item, technicalStatus: "stale", technicalNotes: [reason], price: null });
 
 /** One transaction for a confirmed selection, resource refresh, import or undo. No I/O. */
-export function synchronizeStationSpecification(project: ProjectConfig, resources: StationSpecificationResources, refreshHydraulics: HydraulicRefresh): ProjectConfig {
+export function corePrepareStation(project: ProjectConfig, resources: StationSpecificationResources) {
   const priorSettings=project.entities["station-settings"] as SettingsEntity;
   if(priorSettings.hydraulicOptions){
     const hydraulicOptions=normalizeHydraulicOptions(priorSettings.hydraulicOptions);
@@ -125,14 +127,29 @@ export function synchronizeStationSpecification(project: ProjectConfig, resource
   for (const [key, input] of [["system-input", primary], ["system-input-2", second]] as const) {
     if (!validStationInput(input)) entities[key] = { ...input, calculated: false };
   }
-  let next = synchronizeCollectors({ ...project, station, entities: { ...entities, "station-spec": { ...spec, items } } }, resources.components?.collectorCatalog, resources.pumps);
-  if (resources.components) {
-    next = refreshHydraulics(next, resources.components, true, resources.pumps);
-    next = synchronizeHydraulicOptions(next, {...resources.components,pumps:resources.pumps});
-  }
-  else reasons.push("Каталог комплектующих недоступен; гидравлические узлы требуют пересчёта.");
+  const next:ProjectConfig = { ...project, station, entities: { ...entities, "station-spec": { ...spec, items } } };
+  return { original:project, next, resources, cabinetReady:Boolean(cabinetReady), reasons };
+}
+export type StationWork=ReturnType<typeof prepareStation>;
+export function coreStationCollectors(work:StationWork):StationWork {
+  return {...work,next:synchronizeCollectors(work.next,work.resources.components?.collectorCatalog,work.resources.pumps)};
+}
+let refreshImplementation:HydraulicRefresh=refreshSuctionSpecification;
+export function coreStationLines(work:StationWork):StationWork {
+  const {components,pumps}=work.resources;
+  if(!components)return {...work,reasons:[...work.reasons,"Каталог комплектующих недоступен; гидравлические узлы требуют пересчёта."]};
+  return {...work,next:refreshImplementation(work.next,components,true,pumps)};
+}
+export function coreStationOptions(work:StationWork):StationWork {
+  const {components,pumps}=work.resources;
+  return components?{...work,next:synchronizeHydraulicOptions(work.next,{...components,pumps})}:work;
+}
+export function coreFinalizeStation(work:StationWork):ProjectConfig {
+  const {original:project,cabinetReady,resources,reasons}=work;
+  const primary=project.entities["system-input"] as InputEntity,second=project.entities["system-input-2"] as InputEntity;
+  let next=work.next;
   const nextSpec = next.entities["station-spec"] as SpecEntity;
-  items = nextSpec.items.map(item => {
+  const items = nextSpec.items.map(item => {
     const hydraulic = item.generatedBy === "hydraulic-options" || ["membraneTank", "pressureTransducer", "collectorPlugs", "isolatingValves"].includes(item.option ?? "") || item.generatedBy === "suction-line" || item.generatedBy === "discharge-line" || valveRoles.has(item.option as SpecOption);
     const dependent = hydraulic || item.option === "suctionCollector" || item.option === "dischargeCollector";
     if (dependent && !resources.components) return stale(item, "Каталог комплектующих недоступен; состав и цены не проверены.");
@@ -143,3 +160,51 @@ export function synchronizeStationSpecification(project: ProjectConfig, resource
     "station-spec": { ...nextSpec, identityVersion: 1, items: normalizeSpecificationItems(items), synchronization: { fingerprint: specificationSourceFingerprint(project), reasons: [...new Set(reasons)] } } } };
   return JSON.stringify(next) === JSON.stringify(project) ? project : next;
 }
+
+export function coreStationComposition(project:ProjectConfig,resources:StationSpecificationResources):ProjectConfig {
+  const prepared=prepareStation(project,resources);
+  const collectors=stationCollectors(prepared);
+  const lines=stationLines(collectors);
+  return finalizeStation(stationOptions(lines));
+}
+/** Keep the original synchronous caller contract, including injected hydraulic refresh. */
+export function synchronizeStationSpecification(project:ProjectConfig,resources:StationSpecificationResources,refresh:HydraulicRefresh=refreshSuctionSpecification):ProjectConfig {
+  const previous=refreshImplementation;refreshImplementation=refresh;
+  try{return stationComposition(project,resources);}finally{refreshImplementation=previous;}
+}
+
+export function stationComposition(...args: Parameters<typeof coreStationComposition>): ReturnType<typeof coreStationComposition> {
+  return engineeringOperation("stationComposition", coreStationComposition, args);
+}
+
+registerOperation("stationComposition", ["project","resources"], coreStationComposition);
+
+export function prepareStation(...args: Parameters<typeof corePrepareStation>): ReturnType<typeof corePrepareStation> {
+  return engineeringOperation("prepareStation", corePrepareStation, args);
+}
+
+registerOperation("prepareStation", ["project","resources"], corePrepareStation);
+
+export function stationCollectors(...args: Parameters<typeof coreStationCollectors>): ReturnType<typeof coreStationCollectors> {
+  return engineeringOperation("stationCollectors", coreStationCollectors, args);
+}
+
+registerOperation("stationCollectors", ["work"], coreStationCollectors);
+
+export function stationLines(...args: Parameters<typeof coreStationLines>): ReturnType<typeof coreStationLines> {
+  return engineeringOperation("stationLines", coreStationLines, args);
+}
+
+registerOperation("stationLines", ["work"], coreStationLines);
+
+export function stationOptions(...args: Parameters<typeof coreStationOptions>): ReturnType<typeof coreStationOptions> {
+  return engineeringOperation("stationOptions", coreStationOptions, args);
+}
+
+registerOperation("stationOptions", ["work"], coreStationOptions);
+
+export function finalizeStation(...args: Parameters<typeof coreFinalizeStation>): ReturnType<typeof coreFinalizeStation> {
+  return engineeringOperation("finalizeStation", coreFinalizeStation, args);
+}
+
+registerOperation("finalizeStation", ["work"], coreFinalizeStation);

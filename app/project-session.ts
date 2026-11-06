@@ -1,3 +1,4 @@
+import {currentPublication} from "./engineering/runtime";
 import type {ProjectConfig} from "./project-config";
 import {mergeProjectChanges,sameProject} from "./project-merge";
 
@@ -10,7 +11,7 @@ export class ProjectRequestError extends Error {
   constructor(message:string, readonly status:number) { super(message); }
 }
 export async function projectApi<T>(params="",body?:unknown,method=body?"PUT":"GET"):Promise<T> {
-  const response=await fetch("/api/projects"+params,{method,cache:"no-store",headers:body?{"Content-Type":"application/json"}:undefined,body:body?JSON.stringify(body):undefined});
+  const response=await fetch("/api/projects"+params,{method,cache:"no-store",headers:{"X-Engineering-Version":currentPublication().version,...(body?{"Content-Type":"application/json"}:{})},body:body?JSON.stringify(body):undefined});
   const data=await response.json();
   if(!response.ok) throw new ProjectRequestError(data.error??"Ошибка хранилища проектов",response.status);
   return data;

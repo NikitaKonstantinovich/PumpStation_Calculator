@@ -1,3 +1,4 @@
+import { engineeringOperation, registerOperation } from "./engineering/runtime";
 import imported from "../data/hydraulic-v11-source.json";
 import type { AssemblyComponent } from "./suction-catalog";
 import type { HydraulicProductAssessment } from "./hydraulic-option-selection";
@@ -18,7 +19,7 @@ export function pressureTransducerCatalog(items: AssemblyComponent[]): AssemblyC
 
 /** The owner-approved two-variant rule is complete: generic passport/PN
  * confirmation must not unset a priced product selected by that rule. */
-export function selectAutomaticTransducer(items: AssemblyComponent[], headM: number | null) {
+export function coreSelectAutomaticTransducer(items: AssemblyComponent[], headM: number | null) {
   const selectedId=automaticTransducerId(headM);
   const candidates:HydraulicProductAssessment[]=pressureTransducerCatalog(items).filter(isPressureTransducer).map(item=>({item,missing:[],incompatible:[],technicalStatus:"ready"}));
   return {selected:candidates.find(c=>c.item.id===selectedId)!,candidates,missingSelection:false,
@@ -30,3 +31,9 @@ export function automaticTransducerSummary(item:AssemblyComponent){
   const article=bar===25?"PPT-G-ST-025-4-20-1-1":"PPT-G-ST-016-4-20-1-1";
   return `ONI PPT10 · ${article} · 0–${bar} бар · G1/4 НР · 4–20 мА · питание от ШУ`;
 }
+
+export function selectAutomaticTransducer(...args: Parameters<typeof coreSelectAutomaticTransducer>): ReturnType<typeof coreSelectAutomaticTransducer> {
+  return engineeringOperation("selectAutomaticTransducer", coreSelectAutomaticTransducer, args);
+}
+
+registerOperation("selectAutomaticTransducer", ["items","headM"], coreSelectAutomaticTransducer);

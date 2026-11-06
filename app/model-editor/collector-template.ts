@@ -1,3 +1,4 @@
+import { engineeringOperation, registerOperation } from "../engineering/runtime";
 import type { CollectorCardState } from "../collector-project";
 import { activeCircuits, matchesCollectorConfiguration, flangeKinds, pumpCount } from "../collector-calculations";
 import type { Component, Vec3, Bounds } from "./model";
@@ -55,7 +56,7 @@ export function finishCollectorTemplate(t:CollectorTemplate):CollectorTemplate {
 }
 
 /** Generates descriptors only. Prices, weld work and pipe quantities are never changed. */
-export function buildCollectorTemplate(card:CollectorCardState, data:LineCatalog, pumps:Array<{id:string;circuit:number;x:number}>, side:"suction"|"discharge", savedMount=defaultCollectorMount(), pumpBranchOrientation:CollectorTemplate["pumpBranchOrientation"]="side"):CollectorTemplate {
+export function coreBuildCollectorTemplate(card:CollectorCardState, data:LineCatalog, pumps:Array<{id:string;circuit:number;x:number}>, side:"suction"|"discharge", savedMount=defaultCollectorMount(), pumpBranchOrientation:CollectorTemplate["pumpBranchOrientation"]="side"):CollectorTemplate {
   const mount=resolveCollectorMount(savedMount);
   const bottom=side==="discharge"&&pumpBranchOrientation==="bottom";
   const t:CollectorTemplate={version:1,ruleVersion:3,side,pumpBranchOrientation:bottom?"bottom":"side",mount:structuredClone(mount),main:null,branches:[],pieces:[],ports:[],issues:[],assumptions:[
@@ -173,3 +174,9 @@ export function applyCollectorTemplate(c:Component,t:CollectorTemplate):Componen
   return {...c,collector:{template:t,hiddenPieceIds:c.collector?.hiddenPieceIds.filter(id=>id==="main"||t.branches.some(b=>b.id===id)||t.pieces.some(p=>p.id===id))??[],selectedPieceId:c.collector?.selectedPieceId,manualGeometry:c.collector?.manualGeometry,pieceOpacities:c.collector?.pieceOpacities},
     ports:t.ports,bounds:t.bounds,sourceNote:[...t.assumptions,...t.issues].join("\n"),parameters:{...c.parameters,...(t.main?{length:t.main.lengthMm,diameter:t.main.outerMm,wallThickness:(t.main.outerMm-t.main.innerMm)/2}:{})}};
 }
+
+export function buildCollectorTemplate(...args: Parameters<typeof coreBuildCollectorTemplate>): ReturnType<typeof coreBuildCollectorTemplate> {
+  return engineeringOperation("buildCollectorTemplate", coreBuildCollectorTemplate, args);
+}
+
+registerOperation("buildCollectorTemplate", ["card","data","pumps","side","savedMount","pumpBranchOrientation"], coreBuildCollectorTemplate);

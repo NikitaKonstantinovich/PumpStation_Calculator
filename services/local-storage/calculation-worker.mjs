@@ -1,3 +1,5 @@
+import "../../app/engineering/native-server.ts";
+import {withEvaluationProgram} from "../../app/engineering/runtime.ts";
 import {connectStore} from './store.mjs';
 import {generateInsertCalculations} from '../../app/component-insert-calculations.ts';
 import {setTimeout as delay} from 'node:timers/promises';
@@ -16,11 +18,12 @@ try {
     // The STEP service and batch calculations share one CPU-intensive slot.
     await lock.query('SELECT pg_advisory_lock(70124321)');
     try{
-      const {input,catalog}=job.payload;
+      const {input,catalog,engineering}=job.payload;
       const dns=catalog.nominalDns.filter(n=>n>=input.dnFrom && n<=input.dnTo).sort((a,b)=>a-b);
       const rows=[];
       for (const [i,dn] of dns.entries()) {
-        rows.push(...generateInsertCalculations({...input,dnFrom:dn,dnTo:dn},catalog));
+        const calculate=()=>generateInsertCalculations({...input,dnFrom:dn,dnTo:dn},catalog);
+        rows.push(...(engineering?withEvaluationProgram(engineering,calculate):calculate()));
         await lock.query('UPDATE calculation_jobs SET progress=$2 WHERE id=$1',[job.id,Math.floor((i+1)*100/dns.length)]);
       }
       await lock.query("UPDATE calculation_jobs SET state='done',result=$2,payload=NULL,error=NULL,progress=100 WHERE id=$1",[job.id,JSON.stringify(rows)]);

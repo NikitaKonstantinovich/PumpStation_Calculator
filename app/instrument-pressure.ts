@@ -1,3 +1,4 @@
+import { engineeringOperation, registerOperation } from "./engineering/runtime";
 import type { InputEntity, ProjectConfig, SettingsEntity } from "./project-config";
 import { interpolateCurve, type Pump } from "./pump-catalog";
 
@@ -7,7 +8,7 @@ const format = (n: number) => n.toLocaleString("ru-RU", { maximumFractionDigits:
 
 /** Shutoff pressure is based on source Q=0 data, never on the duty head,
  * selection-flow limits, pump count or an extrapolated curve endpoint. */
-export function stationInstrumentPressure(project: ProjectConfig, pumps?: readonly Pump[] | null, circuit?: "primary" | "secondary"): InstrumentPressure {
+export function coreStationInstrumentPressure(project: ProjectConfig, pumps?: readonly Pump[] | null, circuit?: "primary" | "secondary"): InstrumentPressure {
   return shutoffPressure(project,pumps,circuit,true);
 }
 
@@ -43,7 +44,7 @@ export function instrumentMaximumHead(pump: Pump | undefined): number | null {
 }
 
 /** Shared policy for collector transducers and each fire-pump branch relay. */
-export function dischargeInstrumentPressure(project: ProjectConfig,pumps?:readonly Pump[]|null,circuit?:"primary"|"secondary"):InstrumentPressure {
+export function coreDischargeInstrumentPressure(project: ProjectConfig,pumps?:readonly Pump[]|null,circuit?:"primary"|"secondary"):InstrumentPressure {
   const settings=project.entities["station-settings"] as SettingsEntity;
   const activeSecondary=settings.stationType==="combined"||settings.stationType==="fire"&&settings.jockeyPump;
   const inputs=(circuit?[circuit==="primary"?"system-input":"system-input-2"]:["system-input",...(activeSecondary?["system-input-2"]:[])]).map(key=>project.entities[key] as InputEntity);
@@ -62,3 +63,15 @@ export function dischargeInstrumentPressure(project: ProjectConfig,pumps?:readon
 }
 
 export const transducerSelectionPressure=dischargeInstrumentPressure;
+
+export function stationInstrumentPressure(...args: Parameters<typeof coreStationInstrumentPressure>): ReturnType<typeof coreStationInstrumentPressure> {
+  return engineeringOperation("stationInstrumentPressure", coreStationInstrumentPressure, args);
+}
+
+registerOperation("stationInstrumentPressure", ["project","pumps","circuit"], coreStationInstrumentPressure);
+
+export function dischargeInstrumentPressure(...args: Parameters<typeof coreDischargeInstrumentPressure>): ReturnType<typeof coreDischargeInstrumentPressure> {
+  return engineeringOperation("dischargeInstrumentPressure", coreDischargeInstrumentPressure, args);
+}
+
+registerOperation("dischargeInstrumentPressure", ["project","pumps","circuit"], coreDischargeInstrumentPressure);

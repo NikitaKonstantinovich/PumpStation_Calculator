@@ -17,6 +17,7 @@ export function betaApiAllowed(path: string, method: string): boolean {
     // The users route independently authenticates and requires the admin role.
     (path === "/api/users" && ["GET", "POST", "PATCH"].includes(method)) ||
     (path === "/api/base-values" && ["GET", "PATCH"].includes(method)) ||
+    (path === "/api/engineering/runtime" && method === "GET") ||
     (path === "/api/base-values/effective" && method === "GET") ||
     (path === "/api/pumps" && ["GET", "POST", "PATCH"].includes(method)) ||
     (path === "/api/pumps/files" && method === "POST") ||

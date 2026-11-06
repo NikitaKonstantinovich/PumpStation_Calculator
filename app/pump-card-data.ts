@@ -1,3 +1,4 @@
+import { engineeringOperation, registerOperation } from "./engineering/runtime";
 import type { Pump, PumpProperties, PumpPropertyValue, PumpType } from "./pump-catalog";
 import supplement from "./pump-card-supplement.json";
 
@@ -79,7 +80,7 @@ export function pumpCardPhysicalData(pump: Pump) {
   };
 }
 
-export function pumpCardSections(pump: Pump): PumpCardSection[] {
+export function corePumpCardSections(pump: Pump): PumpCardSection[] {
   const physical = pumpCardPhysicalData(pump);
   const row = (label: string, value: PumpPropertyValue | undefined): PumpCardRow => ({ label, value: pumpCardValue(value) });
   const optional = (label: string, value: PumpPropertyValue | undefined): PumpCardRow[] => {
@@ -129,7 +130,7 @@ export function pumpCardSections(pump: Pump): PumpCardSection[] {
   ].filter(section => section.rows.length > 0);
 }
 
-export function pumpCardCurves(pump: Pump) {
+export function corePumpCardCurves(pump: Pump) {
   return [
     { title: "Расход — напор (Q–H)", unit: "H, м", points: pump.curve },
     { title: "КПД", unit: "η, %", points: pump.efficiencyCurve },
@@ -137,3 +138,15 @@ export function pumpCardCurves(pump: Pump) {
     { title: "Кавитационный запас (NPSH)", unit: "NPSH, м", points: pump.npshCurve },
   ].filter((curve): curve is { title: string; unit: string; points: Array<[number, number]> } => Boolean(curve.points?.length));
 }
+
+export function pumpCardSections(...args: Parameters<typeof corePumpCardSections>): ReturnType<typeof corePumpCardSections> {
+  return engineeringOperation("pumpCardSections", corePumpCardSections, args);
+}
+
+registerOperation("pumpCardSections", ["pump"], corePumpCardSections);
+
+export function pumpCardCurves(...args: Parameters<typeof corePumpCardCurves>): ReturnType<typeof corePumpCardCurves> {
+  return engineeringOperation("pumpCardCurves", corePumpCardCurves, args);
+}
+
+registerOperation("pumpCardCurves", ["pump"], corePumpCardCurves);

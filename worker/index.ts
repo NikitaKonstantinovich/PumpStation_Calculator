@@ -1,3 +1,6 @@
+import { AsyncLocalStorage } from "node:async_hooks";
+import { provideRequestPublication, type Publication } from "../app/engineering/runtime";
+import {readProgram} from "../app/engineering/publication-server";
 /** Cloudflare Worker entry point for the vinext-starter template. */
 import { handleImageOptimization, DEFAULT_DEVICE_SIZES, DEFAULT_IMAGE_SIZES } from "vinext/server/image-optimization";
 import handler from "vinext/server/app-router-entry";
@@ -29,6 +32,8 @@ interface ExecutionContext {
 // dangerouslyAllowSVG: true in next.config.js and uncomment below:
 // const imageConfig: ImageConfig = { dangerouslyAllowSVG: true };
 
+const engineeringScope=new AsyncLocalStorage<Publication>();
+provideRequestPublication(()=>engineeringScope.getStore());
 const worker = {
   async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
     try {
@@ -69,6 +74,12 @@ const worker = {
       }, allowedWidths);
     }
 
+    if(/^\/api\/(?:projects|collectors|component-calculator|component-insertions-3d|model-preparation|control-cabinets)(?:\/|$)/.test(url.pathname)){
+      try{const program=await readProgram(request.headers.get("x-engineering-version"));
+        if(Object.keys(program.plans).length)await import("../app/engineering/native-server");
+        return engineeringScope.run(program,()=>handler.fetch(request,env,ctx));
+      }catch{return Response.json({error:"Не удалось загрузить опубликованный инженерный граф."},{status:503});}
+    }
     return handler.fetch(request, env, ctx);
   },
 };

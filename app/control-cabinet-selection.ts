@@ -1,6 +1,7 @@
+import { engineeringOperation, registerOperation } from "./engineering/runtime";
 import type { SettingsEntity, SpecItem } from "./project-config";
 import type { Pump } from "./pump-catalog";
-import type { SmartCabinet } from "./cabinet-configurator";
+import type { SmartCabinet } from "./smart-cabinet-types";
 
 // currentTotal can be a partial sum; do not present it as the cabinet's complete price.
 export const smartCabinetSpecificationPrice = (cabinet: SmartCabinet) =>
@@ -8,7 +9,12 @@ export const smartCabinetSpecificationPrice = (cabinet: SmartCabinet) =>
   cabinet.items.every(item => typeof item.currentCost === "number" && Number.isFinite(item.currentCost) && item.currentCost >= 0 && Number.isFinite(item.quantity) && item.quantity > 0)
     ? cabinet.currentTotal : null;
 
-export const smartCabinetSupportsPower=(cabinet:SmartCabinet,power:number)=>{const match=cabinet.name.match(/\((\d+(?:,\d+)?)-(\d+(?:,\d+)?)\)/);const min=cabinet.powerMinKw??(match?Number(match[1].replace(",",".")):cabinet.pumpPowerKw),max=cabinet.powerMaxKw??(match?Number(match[2].replace(",",".")):cabinet.pumpPowerKw);return power+1e-7>=min&&power<=max+1e-7;};
+export function coreSmartCabinetSupportsPower(cabinet:SmartCabinet,power:number){const match=cabinet.name.match(/\((\d+(?:,\d+)?)-(\d+(?:,\d+)?)\)/);const min=cabinet.powerMinKw??(match?Number(match[1].replace(",",".")):cabinet.pumpPowerKw),max=cabinet.powerMaxKw??(match?Number(match[2].replace(",",".")):cabinet.pumpPowerKw);return power+1e-7>=min&&power<=max+1e-7;};
+export function smartCabinetSupportsPower(cabinet: SmartCabinet, power: number) {
+  return engineeringOperation("smartCabinetSupportsPower", coreSmartCabinetSupportsPower, [cabinet, power]);
+}
+registerOperation("smartCabinetSupportsPower", ["cabinet", "power"], coreSmartCabinetSupportsPower);
+
 export type ControlCabinet = { id:string; type:"bp"|"fp"|"fpj"; application:"utility"|"fire"; brand:string; name:string; pumpCount:number; powerKw:number; startType:string; code:string; weightKg:number; price:number };
 const SMART_MAX_PUMP_POWER_KW=7.5;
 export const isAutomaticCabinetSelectionEnabled = (settings:SettingsEntity) => settings.stationType === "utility" || settings.stationType === "fire" || settings.stationType === "smart";
@@ -36,4 +42,10 @@ const smartControlCabinetItem=(cabinets:SmartCabinet[],pump:Pump,totalPumpCount:
   const cabinet=power===null?undefined:cabinets.find(item=>item.pumpCount===totalPumpCount&&smartCabinetSupportsPower(item,power));
   return cabinet?{position:"03",name:cabinet.name,details:`NS Smart · ${cabinet.pumpCount} нас. × ${cabinet.pumpPowerKw.toLocaleString("ru-RU")} кВт · ${cabinet.enclosureDimensions}`,quantity:1,unit:"шт.",price:smartCabinetSpecificationPrice(cabinet),equipmentId:cabinet.id,description:`${cabinet.items.length} позиций · автоматически подобран из базы ШУ`,section:"control",status:"selected"}:{position:"03",name:"Шкаф управления NS Smart",details:`${totalPumpCount} нас. × ${power===null?"мощность не указана":`${power.toLocaleString("ru-RU")} кВт`}`,quantity:1,unit:"шт.",price:null,description:"Шкаф управления не найден в базе",section:"control",status:"clarify"};
 };
-export const projectControlCabinetItem=(controlCabinets:ControlCabinet[],smartCabinets:SmartCabinet[],settings:SettingsEntity,pump:Pump,totalPumpCount:number):SpecItem=>settings.stationType==="smart"?smartControlCabinetItem(smartCabinets,pump,totalPumpCount):settings.stationType==="utility"||settings.stationType==="fire"?controlCabinetItem(selectControlCabinet(controlCabinets,settings,pump,totalPumpCount),settings,pump,totalPumpCount):manualControlCabinetItem(settings.stationType);
+export const coreProjectControlCabinetItem=(controlCabinets:ControlCabinet[],smartCabinets:SmartCabinet[],settings:SettingsEntity,pump:Pump,totalPumpCount:number):SpecItem=>settings.stationType==="smart"?smartControlCabinetItem(smartCabinets,pump,totalPumpCount):settings.stationType==="utility"||settings.stationType==="fire"?controlCabinetItem(selectControlCabinet(controlCabinets,settings,pump,totalPumpCount),settings,pump,totalPumpCount):manualControlCabinetItem(settings.stationType);
+
+export function projectControlCabinetItem(...args: Parameters<typeof coreProjectControlCabinetItem>): ReturnType<typeof coreProjectControlCabinetItem> {
+  return engineeringOperation("projectControlCabinetItem", coreProjectControlCabinetItem, args);
+}
+
+registerOperation("projectControlCabinetItem", ["controlCabinets","smartCabinets","settings","pump","totalPumpCount"], coreProjectControlCabinetItem);

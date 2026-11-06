@@ -1,3 +1,4 @@
+import { engineeringOperation, registerOperation } from "./engineering/runtime";
 import type { InsertCalculation, InsertCatalog } from "./component-insert-calculations";
 
 /** A catalogue slot is not the physical identity used to update a saved product. */
@@ -15,7 +16,7 @@ export function insertVariantSlot(row: InsertCalculation): string {
 
 const recipe = (row: InsertCalculation) => JSON.stringify({ ...row.configuration, sensor: null });
 
-export function selectInsertVariants(rows: InsertCalculation[], coreRows: InsertCalculation[], catalog: InsertCatalog): InsertCalculation[] {
+export function coreSelectInsertVariants(rows: InsertCalculation[], coreRows: InsertCalculation[], catalog: InsertCatalog): InsertCalculation[] {
   const policy = catalog.engineering.variantSelection;
   if (!policy?.source.trim()) return rows;
   const parts = new Map(catalog.parts.map(part => [part.id, part]));
@@ -43,3 +44,9 @@ export function selectInsertVariants(rows: InsertCalculation[], coreRows: Insert
       alternatives: ranked.slice(1).map(row => ({ identityKey: row.identityKey, componentIds: row.bom.filter(item => parts.has(item.componentId ?? "")).map(item => item.componentId!), complete: (cores.get(recipe(row)) ?? row).complete })) } };
   });
 }
+
+export function selectInsertVariants(...args: Parameters<typeof coreSelectInsertVariants>): ReturnType<typeof coreSelectInsertVariants> {
+  return engineeringOperation("selectInsertVariants", coreSelectInsertVariants, args);
+}
+
+registerOperation("selectInsertVariants", ["rows","coreRows","catalog"], coreSelectInsertVariants);

@@ -1,3 +1,4 @@
+import { engineeringOperation, registerOperation } from "./engineering/runtime";
 import type { AssemblyComponent } from "./suction-catalog";
 
 const field = (item: AssemblyComponent, label: string) => item.fields.find(f => f.headerPath.at(-1) === label)?.value;
@@ -12,7 +13,7 @@ export const gasketPressures = (item: AssemblyComponent): number[] => {
   return (typeof compatible === "string" ? compatible.split("/").map(Number) : [number(field(item,"PN"))]).filter(pn => Number.isFinite(pn) && pn > 0);
 };
 
-export function selectGasket(items: AssemblyComponent[], dn: number, pn: number): AssemblyComponent | undefined {
+export function coreSelectGasket(items: AssemblyComponent[], dn: number, pn: number): AssemblyComponent | undefined {
   if (!(Number.isFinite(dn) && dn > 0 && Number.isFinite(pn) && pn > 0)) return undefined;
   const candidates = items.filter(item => item.catalogId === "прокладки" && /паронит/i.test(sealingName(item)) &&
     number(field(item,"DN")) === dn && gasketPressures(item).length > 0);
@@ -32,3 +33,9 @@ export function selectFlax(items: AssemblyComponent[]): AssemblyComponent | unde
   return items.filter(item => /^л[её]н для уплотнения труб$/i.test(sealingName(item)) && field(item,"Единица цены") === "м")
     .sort((a,b) => (sealingPrice(b) ?? -1)-(sealingPrice(a) ?? -1) || a.id.localeCompare(b.id))[0];
 }
+
+export function selectGasket(...args: Parameters<typeof coreSelectGasket>): ReturnType<typeof coreSelectGasket> {
+  return engineeringOperation("selectGasket", coreSelectGasket, args);
+}
+
+registerOperation("selectGasket", ["items","dn","pn"], coreSelectGasket);

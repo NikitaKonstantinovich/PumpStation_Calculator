@@ -1,3 +1,4 @@
+import { engineeringOperation, registerOperation } from "./engineering/runtime";
 import { cataloguePurchasePriceRub, operatingPoint, selectionHeadAtFlow, usablePump, type Pump } from "./pump-catalog";
 import { matchesPumpFilters, type PumpFilters } from "./pump-filters";
 import { MAX_WORKING_PUMPS } from "./pump-counts";
@@ -39,13 +40,13 @@ export type PumpSelectionCandidate = {
   preferredByOperatingPoint: boolean;
 };
 
-export function preferredOperatingPoint(deltaQPercent: number, deltaHPercent: number) {
+export function corePreferredOperatingPoint(deltaQPercent: number, deltaHPercent: number) {
   // Tolerance is in percentage points and is only used for these inclusive bounds.
   return [deltaQPercent, deltaHPercent].every(value => Number.isFinite(value) &&
     value >= -2 - OPERATING_POINT_PERCENT_EPSILON && value <= 15 + OPERATING_POINT_PERCENT_EPSILON);
 }
 
-export function evaluatePumpCandidates(catalogue: readonly Pump[], input: PumpSelectionInput, settings: PriceSettings, filters: PumpSelectionFilters = {}): PumpSelectionCandidate[] {
+export function coreEvaluatePumpCandidates(catalogue: readonly Pump[], input: PumpSelectionInput, settings: PriceSettings, filters: PumpSelectionFilters = {}): PumpSelectionCandidate[] {
   if (![input.flowRate, input.head, input.staticHead, input.workingPumpCount].every(Number.isFinite) ||
     input.flowRate <= 0 || input.head <= 0 || input.staticHead < 0 || input.staticHead > input.head ||
     !Number.isInteger(input.workingPumpCount) || input.workingPumpCount < 1 || input.workingPumpCount > MAX_WORKING_PUMPS) return [];
@@ -108,3 +109,15 @@ export function buildPumpSelection(catalogue: readonly Pump[], input: PumpSelect
     selectedPumpId: ranked.find(candidate => candidate.point !== null)?.pump.id,
   };
 }
+
+export function evaluatePumpCandidates(...args: Parameters<typeof coreEvaluatePumpCandidates>): ReturnType<typeof coreEvaluatePumpCandidates> {
+  return engineeringOperation("evaluatePumpCandidates", coreEvaluatePumpCandidates, args);
+}
+
+registerOperation("evaluatePumpCandidates", ["catalogue","input","settings","filters"], coreEvaluatePumpCandidates);
+
+export function preferredOperatingPoint(...args: Parameters<typeof corePreferredOperatingPoint>): ReturnType<typeof corePreferredOperatingPoint> {
+  return engineeringOperation("preferredOperatingPoint", corePreferredOperatingPoint, args);
+}
+
+registerOperation("preferredOperatingPoint", ["deltaQPercent","deltaHPercent"], corePreferredOperatingPoint);

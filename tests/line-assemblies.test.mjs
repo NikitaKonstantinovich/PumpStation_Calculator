@@ -14,21 +14,8 @@ const { makeInsertCatalog } = await loadTs(new URL("../app/component-insert-cata
 const { lineGeometry } = await loadTs(new URL("../app/line-geometry-catalog.ts", import.meta.url));
 const pumps = await json("../public/pumps.json"), profiles = await json("../public/model-assets/manifest.json"), binding = await json("../public/binding-components.json");
 const db = { ...binding, collectorCatalog: makeCollectorCatalog(binding) };
-const pageUrl = new URL("../app/full-workspace.tsx", import.meta.url), page = await readFile(pageUrl, "utf8"), shared = await readFile(new URL("../app/allowed-pump-tools.tsx", import.meta.url), "utf8");
-const source = [
-  'import {MAX_WORKING_PUMPS} from "./pump-counts";',
-  'import {recommendedDn,defaultCollectorMaterial,resolveDnConnection,suctionHydraulics,dischargeHydraulics} from "./dn-defaults";',
-  'import {buildSuctionSpec,replaceSuctionSpec,checkSuctionSpecPressure} from "./suction-spec";',
-  'import {buildDischargeSpec,replaceDischargeSpec,checkDischargeSpecPressure} from "./discharge-spec";',
-  'import {normalizeSpecificationItems,specificationOption} from "./specification-items";',
-  'import {synchronizeCollectors} from "./collector-project";',
-  'import {bindProjectComponents} from "./base-values-components";',
-  shared.match(/^export const isCalculated =.*$/m)[0], page.match(/^const isSecondaryEnabled =.*$/m)[0], shared.match(/^export const componentFieldLabel=.*$/m)[0],
-  page.slice(page.indexOf("const isJockeyCircuit="), page.indexOf("function DnCalculator(")),
-  page.slice(page.indexOf("const HYDRAULIC_SPEC_OPTIONS:"), page.indexOf("function PanelContent(")),
-  "let loadedComponentsDatabase; export {refreshSuctionSpecification as refresh};",
-].join("\n");
-const { refresh } = await loadTs(pageUrl, { [pageUrl.href]: source });
+const {refreshSuctionSpecification:refresh}=await loadTs(new URL("../app/station-hydraulic-calculation.ts",import.meta.url));
+
 const empty = { version: 1, revision: "test", items: {}, issues: [] };
 function station(id = "nu-b1879e1e3807d907", dn = 40, discharge = 32, connection = "threaded") {
   const p = createProject("Обвязка", { id: "line-test", timestamp: "2026-10-26T00:00:00Z" });

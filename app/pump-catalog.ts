@@ -1,3 +1,4 @@
+import { engineeringOperation, registerOperation } from "./engineering/runtime";
 import { pchipValue, cubicTurningPoints } from "./pchip";
 import { curveSegments, type CurveMethod } from "./curve-methods";
 import type { PumpFileKind, PumpFileReference } from "./pump-files";
@@ -35,13 +36,13 @@ export type Pump = {
   manualEntry?: boolean;
 };
 
-export function usablePump(pump: Pump, medium: "water" | "wastewater" = "water") {
+export function coreUsablePump(pump: Pump, medium: "water" | "wastewater" = "water") {
   return pump.selectable !== false && pump.active !== false && (pump.medium ?? "water") === medium &&
     pump.curve.length >= 2 && pump.curve.every(([q, h], i, points) =>
       Number.isFinite(q) && Number.isFinite(h) && q >= 0 && h >= 0 && (i === 0 || q > points[i - 1][0]));
 }
 
-export function selectionHeadAtFlow(pump: Pump, flow: number): number | null {
+export function coreSelectionHeadAtFlow(pump: Pump, flow: number): number | null {
   const range = pump.selectionFlowRange;
   if (range && (flow < range[0] || flow > range[1])) return null;
   return interpolateCurve(pump.curve, flow);
@@ -49,7 +50,7 @@ export function selectionHeadAtFlow(pump: Pump, flow: number): number | null {
 
 // Selection uses PCHIP by default; chart methods share rendering and intersection math.
 // Interpolation is limited to the source range; no synthetic endpoints are added.
-export function interpolateCurve(points: Array<[number, number]>, flow: number, method: CurveMethod = "pchip"): number | null {
+export function coreInterpolateCurve(points: Array<[number, number]>, flow: number, method: CurveMethod = "pchip"): number | null {
   if (!Number.isFinite(flow) || points.length < 2 || flow < points[0][0] || flow > points[points.length - 1][0]) return null;
   const segments = curveSegments(points, method);
   if (segments.length && method !== "polynomial") {
@@ -75,7 +76,7 @@ export function pumpCurvePath(pump: Pump, count: number, maxQ: number, maxH: num
   }).join("");
 }
 
-export function operatingPoint(pump: Pump, count: number, input: {flowRate: number; head: number; staticHead: number}, method: CurveMethod = "pchip") {
+export function coreOperatingPoint(pump: Pump, count: number, input: {flowRate: number; head: number; staticHead: number}, method: CurveMethod = "pchip") {
   if (![count, input.flowRate, input.head, input.staticHead].every(Number.isFinite) ||
     !(count > 0 && input.flowRate > 0 && input.head >= input.staticHead && input.staticHead >= 0)) return null;
   const k = (input.head - input.staticHead) / input.flowRate ** 2;
@@ -105,18 +106,60 @@ export function operatingPoint(pump: Pump, count: number, input: {flowRate: numb
 }
 
 type PriceSettings = {usdRate: number; cnyRate: number; manufacturerDiscounts: {cnp: number; aquastrong: number; onis?: number; vandjord?: number; wellmix?: number}};
-export function cataloguePriceRub(pump: Pump, settings: PriceSettings) {
+export function coreCataloguePriceRub(pump: Pump, settings: PriceSettings) {
   if (pump.price === null || !Number.isFinite(pump.price) || pump.priceCurrency === null) return null;
   const rate = pump.priceCurrency === "USD" ? settings.usdRate : pump.priceCurrency === "CNY" ? settings.cnyRate : 1;
   return Math.round(pump.price * rate * 100) / 100;
 }
-export function catalogueDiscount(pump: Pump, settings: PriceSettings) {
+export function coreCatalogueDiscount(pump: Pump, settings: PriceSettings) {
   // A net snapshot must never be discounted a second time.
   if (pump.priceKind === "net") return 0;
   const key = pump.manufacturer.toLowerCase() as keyof PriceSettings["manufacturerDiscounts"];
   return settings.manufacturerDiscounts[key] ?? pump.discountPercent ?? 0;
 }
-export function cataloguePurchasePriceRub(pump: Pump, settings: PriceSettings) {
+export function coreCataloguePurchasePriceRub(pump: Pump, settings: PriceSettings) {
   const price = cataloguePriceRub(pump, settings);
   return price === null ? null : Math.round(price * (1 - catalogueDiscount(pump, settings) / 100) * 100) / 100;
 }
+
+export function selectionHeadAtFlow(...args: Parameters<typeof coreSelectionHeadAtFlow>): ReturnType<typeof coreSelectionHeadAtFlow> {
+  return engineeringOperation("selectionHeadAtFlow", coreSelectionHeadAtFlow, args);
+}
+
+export function operatingPoint(...args: Parameters<typeof coreOperatingPoint>): ReturnType<typeof coreOperatingPoint> {
+  return engineeringOperation("operatingPoint", coreOperatingPoint, args);
+}
+
+export function cataloguePurchasePriceRub(...args: Parameters<typeof coreCataloguePurchasePriceRub>): ReturnType<typeof coreCataloguePurchasePriceRub> {
+  return engineeringOperation("cataloguePurchasePriceRub", coreCataloguePurchasePriceRub, args);
+}
+
+registerOperation("selectionHeadAtFlow", ["pump","flow"], coreSelectionHeadAtFlow);
+
+registerOperation("operatingPoint", ["pump","count","input","method"], coreOperatingPoint);
+
+registerOperation("cataloguePurchasePriceRub", ["pump","settings"], coreCataloguePurchasePriceRub);
+
+export function interpolateCurve(...args: Parameters<typeof coreInterpolateCurve>): ReturnType<typeof coreInterpolateCurve> {
+  return engineeringOperation("interpolateCurve", coreInterpolateCurve, args);
+}
+
+registerOperation("interpolateCurve", ["points","flow","method"], coreInterpolateCurve);
+
+export function usablePump(...args: Parameters<typeof coreUsablePump>): ReturnType<typeof coreUsablePump> {
+  return engineeringOperation("usablePump", coreUsablePump, args);
+}
+
+registerOperation("usablePump", ["pump","medium"], coreUsablePump);
+
+export function cataloguePriceRub(...args: Parameters<typeof coreCataloguePriceRub>): ReturnType<typeof coreCataloguePriceRub> {
+  return engineeringOperation("cataloguePriceRub", coreCataloguePriceRub, args);
+}
+
+registerOperation("cataloguePriceRub", ["pump","settings"], coreCataloguePriceRub);
+
+export function catalogueDiscount(...args: Parameters<typeof coreCatalogueDiscount>): ReturnType<typeof coreCatalogueDiscount> {
+  return engineeringOperation("catalogueDiscount", coreCatalogueDiscount, args);
+}
+
+registerOperation("catalogueDiscount", ["pump","settings"], coreCatalogueDiscount);

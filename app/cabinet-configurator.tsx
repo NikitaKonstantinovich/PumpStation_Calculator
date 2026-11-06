@@ -6,9 +6,8 @@ import type { InputEntity, SettingsEntity } from "./project-config";
 import { useIssueNavigation, useRuntimeDiagnostic } from "./diagnostics-ui";
 
 type PumpLite={id:string;manufacturer:string;model:string;power:number|null};
-type ControlComponent={id:string;category:string;manufacturer:string|null;article:string|null;name:string;componentType:string|null;attributes:Record<string,unknown>;currentPrice:number|null;currency:string};
-export type SmartCabinetItem={role:string;componentGroup?:"dynamic"|"static";componentId:string;quantity:number;sortOrder:number;currentCost:number|null;component:ControlComponent};
-export type SmartCabinet={id:string;configurationKey:string;stationType:"smart";name:string;pumpCount:number;pumpPowerKw:number;powerMinKw?:number;powerMaxKw?:number;breakerCurrentA:number;incomingSwitchCurrentA:number;contactorCount:number;vfdCount:number;vfdPowerKw:number;enclosureDimensions:string;assemblyKitType:string;laborHours:number;laborRate:number;cachedTotal:number;currentTotal:number;source:string;priceUpdatedAt?:string;items:SmartCabinetItem[]};
+import type { ControlComponent, SmartCabinet, SmartCabinetItem } from "./smart-cabinet-types";
+export type { SmartCabinet, SmartCabinetItem } from "./smart-cabinet-types";
 type ControlCabinetDatabase={schemaVersion:number;statistics:{components:number;pricedComponents:number;readyCabinets:number};components:ControlComponent[];cabinets:SmartCabinet[]};
 
 let databasePromise:Promise<ControlCabinetDatabase>|undefined;

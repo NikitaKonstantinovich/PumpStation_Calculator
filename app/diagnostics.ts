@@ -1,9 +1,10 @@
+import { engineeringOperation, registerOperation } from "./engineering/runtime";
 import { MAX_WORKING_PUMPS } from "./pump-counts";
 import type { ProjectConfig, InputEntity, SettingsEntity, DnEntity, SpecEntity, PanelKind } from "./project-config";
 import type { Pump } from "./pump-catalog";
 import type { CollectorCatalog } from "./collector-calculations";
 import type { CollectorsEntity } from "./collector-project";
-import type { SmartCabinet } from "./cabinet-configurator";
+import type { SmartCabinet } from "./smart-cabinet-types";
 import { selectionHeadAtFlow, operatingPoint, usablePump } from "./pump-catalog";
 import { HEAD_RESERVE_WARNING_PERCENT, headReserveClass } from "./pump-selection";
 import { suctionHydraulics, dischargeHydraulics, recommendedDn, flowVelocity, dnVelocityLimit, pressureCheckWarning } from "./dn-defaults";
@@ -45,7 +46,7 @@ export function diagnosticScope(project: ProjectConfig, tool: PanelKind) {
   return JSON.stringify(project.entities[secondary ? "system-input-2" : "system-input"]);
 }
 
-export function pumpIssues(input:InputEntity, tool:"input"|"input2", catalogue:Pump[]):ToolIssue[] {
+export function corePumpIssues(input:InputEntity, tool:"input"|"input2", catalogue:Pump[]):ToolIssue[] {
   const result:ToolIssue[]=[];
   const add=(tool:PanelKind,suffix:string,severity:IssueSeverity,message:string,subject?:string)=>result.push({id:`${tool}/${suffix}`,tool,severity,message,subject});
   const secondary=tool==="input2",chart=secondary?"chart2":"chart",card=secondary?"sketch2":"sketch";
@@ -77,7 +78,7 @@ export function pumpIssues(input:InputEntity, tool:"input"|"input2", catalogue:P
   return result;
 }
 
-export function collectProjectIssues(project: ProjectConfig, catalogue: Pump[], catalog: CollectorCatalog | null, cabinets: SmartCabinet[], assetErrors: Record<string, string> = {}): ToolIssue[] {
+export function coreCollectProjectIssues(project: ProjectConfig, catalogue: Pump[], catalog: CollectorCatalog | null, cabinets: SmartCabinet[], assetErrors: Record<string, string> = {}): ToolIssue[] {
   const result: ToolIssue[] = [];
   const settings = project.entities["station-settings"] as SettingsEntity;
   const dn = project.entities["station-dn"] as DnEntity;
@@ -183,3 +184,15 @@ export function openIssueInFirstPanel(project: ProjectConfig, issue: ToolIssue, 
   Object.assign(first, { activeTool: issue.tool, entityId: ENTITY_BY_TOOL[issue.tool], minimized: false, z: maxZ + 3 });
   return { project: { ...project, workspace: { ...workspace, windows, grid } }, panelId: first.id };
 }
+
+export function collectProjectIssues(...args: Parameters<typeof coreCollectProjectIssues>): ReturnType<typeof coreCollectProjectIssues> {
+  return engineeringOperation("collectProjectIssues", coreCollectProjectIssues, args);
+}
+
+registerOperation("collectProjectIssues", ["project","catalogue","catalog","cabinets","assetErrors"], coreCollectProjectIssues);
+
+export function pumpIssues(...args: Parameters<typeof corePumpIssues>): ReturnType<typeof corePumpIssues> {
+  return engineeringOperation("pumpIssues", corePumpIssues, args);
+}
+
+registerOperation("pumpIssues", ["input","tool","catalogue"], corePumpIssues);

@@ -1,11 +1,16 @@
 "use client";
+import "./engineering/native-server";
+import {getCircuitDnConfig,refreshSuctionSpecification} from "./station-hydraulic-calculation";
+import {EngineeringEditor} from "./engineering/editor";
+import {loadProgram} from "./engineering/client";
+import {currentPublication,INITIAL_VERSION,setBrowserPublication} from "./engineering/runtime";
 import {calculationMethod} from "./project-config";
 import {ProjectSession,projectApi,type ProjectCard,type ProjectFile} from "./project-session";
 import {mergeProjectChanges} from "./project-merge";
 import {ProjectHistory} from "./project-history";
 import { SpecificationHydraulicOption } from "./specification-hydraulic-options";
 import { SpecificationInsertion } from "./specification-insertions";
-import { AllowedPumpPanel, isCalculated, downloadBlob, loadComponentsDatabase, loadedComponentsDatabase, resetComponentsDatabase, componentFieldLabel, type ComponentItem, type ComponentPrice, type ComponentsDatabase } from "./allowed-pump-tools";
+import { AllowedPumpPanel, downloadBlob, loadComponentsDatabase, loadedComponentsDatabase, resetComponentsDatabase } from "./allowed-pump-tools";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { FloatingPanel, GridWorkspace, Icon } from "./workspace-panels";
@@ -17,20 +22,20 @@ import { AppSettings } from "./app-settings";
 import { useTheme } from "./use-theme";
 import { GridHeightControl } from "./grid-height-control";
 import { CircuitInputFields } from "./circuit-input-fields";
-import { createProject, DEFAULT_PANELS, projectFilename, withUpdatedTimestamp, type CollectorMaterial, type DnEntity, type InputEntity, type PanelKind, type PanelState, type ProjectConfig, type ProjectEntity, type SettingsEntity, type ShutoffValveType, type SpecEntity, type SpecItem, type SpecOption, type SpecSection, type ValveConnection, type ValvePn, type WorkspaceGrid, type WorkspaceMode } from "./project-config";
+import { createProject, DEFAULT_PANELS, projectFilename, withUpdatedTimestamp, type CollectorMaterial, type DnEntity, type InputEntity, type PanelKind, type PanelState, type ProjectConfig, type ProjectEntity, type SettingsEntity, type ShutoffValveType, type SpecEntity, type SpecItem, type SpecSection, type ValveConnection, type ValvePn, type WorkspaceGrid, type WorkspaceMode } from "./project-config";
 import { CalculationToggle, PressureCheckToggle } from "./pressure-check-toggle";
 import { canUseGeometry } from "./user-types";
 import { pressureChecksEnabled } from "./pressure-check-policy";
 import { CollectorConstructor, useCollectorDatabase } from "./collector-constructor";
 import { synchronizeCollectors, type CollectorsEntity } from "./collector-project";
-import { normalizeSpecificationItems, specificationOption, replaceSpecificationRole } from "./specification-items";
+import { replaceSpecificationRole } from "./specification-items";
 import { specificationItemPresentation, specificationIssueId, specificationSection, visibleSpecificationItems } from "./specification-presentation";
 import { specificationExportRows, specificationExportBlob, type SpecificationExportFormat } from "./specification-export";
 import { PANEL_INFO, ENTITY_BY_TOOL } from "./tool-registry";
 import { collectProjectIssues, openIssueInFirstPanel, type ToolIssue } from "./diagnostics";
 import { DiagnosticSurface, DiagnosticsProvider, IssuesTool, IssueNotice, IssueMessages, IssueNavigationMessage, useDiagnosticRegistry } from "./diagnostics-ui";
 import { configurationFingerprint } from "./collector-calculations";
-import { STANDARD_DN, dnVelocityLimit, flowVelocity, recommendedDn, defaultCollectorMaterial, resolveDnConnection } from "./dn-defaults";
+import { STANDARD_DN, dnVelocityLimit, flowVelocity, recommendedDn, defaultCollectorMaterial } from "./dn-defaults";
 import { AccountScreen } from "./account-ui";
 import { BaseValuesPanel } from "./base-values-panel";
 import { ItemEntryPanel } from "./item-entry-panel";
@@ -39,17 +44,14 @@ import { loadPumpCatalog, mergePumpCatalog } from "./pump-catalog-client";
 import { HelpCenter } from "./help-center";
 import { AIAssistant } from "./ai-assistant";
 import { BaseValuesUpdateNotice, fetchPublishedBaseValues, usePublishedBaseValues } from "./base-values-update";
-import { bindProjectComponents } from "./base-values-components";
 import { UsersPanel } from "./users-panel";
 import { ComponentCalculator } from "./component-calculator";
 import { canEditAllSettings, canEditProjectOptions, type AccountUser, type UserRole } from "./user-types";
 import { canEditSetting, parseAccessibleProject, projectAccessError } from "./project-access";
 import { CabinetConfigurator, type SmartCabinet } from "./cabinet-configurator";
-import { suctionHydraulics } from "./dn-defaults";
 import { PumpNozzleFields } from "./pump-nozzle-fields";
-import { buildSuctionSpec, replaceSuctionSpec, suctionFingerprint, checkSuctionSpecPressure } from "./suction-spec";
-import { buildDischargeSpec, replaceDischargeSpec, dischargeFingerprint, checkDischargeSpecPressure } from "./discharge-spec";
-import { dischargeHydraulics } from "./dn-defaults";
+import { suctionFingerprint } from "./suction-spec";
+import { dischargeFingerprint } from "./discharge-spec";
 import type { Pump } from "./pump-catalog";
 import { smartCabinetSpecificationPrice, type ControlCabinet } from "./control-cabinet-selection";
 import { synchronizeStationSpecification, cabinetSourceFingerprint } from "./station-specification";
@@ -208,79 +210,6 @@ function Specification({ project, issues, entity, settings, onDnChange, onSettin
   </div>;
 }
 
-type DnField="suctionCollectorDn"|"dischargeCollectorDn"|"suctionValveDn"|"dischargeValveDn"|"secondarySuctionCollectorDn"|"secondaryDischargeCollectorDn"|"secondarySuctionValveDn"|"secondaryDischargeValveDn";
-type CircuitId="primary"|"secondary";
-type CircuitDnConfig={
-  suction:ReturnType<typeof suctionHydraulics>;
-  discharge:ReturnType<typeof dischargeHydraulics>;
-  id:CircuitId;title:string;stationFlow:number;pumpFlow:number;workingPumpCount:number;totalPumpCount:number;
-  values:Record<DnField,number>;connection:ValveConnection;pn:ValvePn;suctionValveType:ShutoffValveType;dischargeValveType:ShutoffValveType;
-  connectionField:"connectionType"|"secondaryConnectionType";pnField:"pn"|"secondaryPn";suctionTypeField:"suctionValveType"|"secondarySuctionValveType";dischargeTypeField:"dischargeValveType"|"secondaryDischargeValveType";
-  rows:Array<{field:DnField;title:string;subtitle:string;flow:number}>;
-  threadedAllowed:boolean;forcedFlanged:boolean;color:"red"|"blue";
-};
-const isJockeyCircuit=(settings:SettingsEntity,secondary:boolean)=>secondary&&settings.stationType==="fire"&&settings.jockeyPump;
-
-const getCircuitDnConfig=(entity:DnEntity,input:InputEntity,settings:SettingsEntity,secondary=false,pump?:Pump):CircuitDnConfig|null=>{
-  if(!isCalculated(input))return null;
-  const stationFlow=input.flowRate,pumpFlow=stationFlow/Math.max(1,input.workingPumpCount),collectorDn=recommendedDn(stationFlow,settings.baseValues?.values.velocity),pumpDn=recommendedDn(pumpFlow,settings.baseValues?.values.velocity);
-  const values:Record<DnField,number>={
-    suctionCollectorDn:entity.suctionCollectorDn??collectorDn,dischargeCollectorDn:entity.dischargeCollectorDn??collectorDn,suctionValveDn:entity.suctionValveDn??pumpDn,dischargeValveDn:entity.dischargeValveDn??pumpDn,
-    secondarySuctionCollectorDn:entity.secondarySuctionCollectorDn??collectorDn,secondaryDischargeCollectorDn:entity.secondaryDischargeCollectorDn??collectorDn,secondarySuctionValveDn:entity.secondarySuctionValveDn??pumpDn,secondaryDischargeValveDn:entity.secondaryDischargeValveDn??pumpDn,
-  };
-  const suction=suctionHydraulics(entity,input,settings,secondary,pump);
-  const discharge=dischargeHydraulics(entity,input,settings,secondary,pump);
-  values[secondary?"secondarySuctionValveDn":"suctionValveDn"]=suction.dn;
-  values[secondary?"secondaryDischargeValveDn":"dischargeValveDn"]=discharge.dn;
-  const valveDns=secondary?[values.secondarySuctionValveDn,values.secondaryDischargeValveDn]:[values.suctionValveDn,values.dischargeValveDn],maxValveDn=Math.max(...valveDns);
-  const jockey=isJockeyCircuit(settings,secondary);
-  const savedConnection=secondary?entity.secondaryConnectionType:entity.connectionType;
-  const {connection,forcedFlanged,threadedAllowed}=resolveDnConnection(settings,maxValveDn,secondary,savedConnection);
-  const suctionValveType:ShutoffValveType=suction.valveType,dischargeValveType:ShutoffValveType=discharge.valveType;
-  const fields=secondary?{suctionCollector:"secondarySuctionCollectorDn" as const,dischargeCollector:"secondaryDischargeCollectorDn" as const,suctionValve:"secondarySuctionValveDn" as const,dischargeValve:"secondaryDischargeValveDn" as const}:{suctionCollector:"suctionCollectorDn" as const,dischargeCollector:"dischargeCollectorDn" as const,suctionValve:"suctionValveDn" as const,dischargeValve:"dischargeValveDn" as const};
-  return {suction,discharge,id:secondary?"secondary":"primary",title:secondary?(jockey?"Контур 2 · жокей-насос":"Контур 2 · совмещённая НС"):"Основной контур",stationFlow,pumpFlow,workingPumpCount:input.workingPumpCount,totalPumpCount:input.workingPumpCount+input.reservePumpCount,values,connection,pn:(secondary?entity.secondaryPn:entity.pn)??16,suctionValveType,dischargeValveType,connectionField:secondary?"secondaryConnectionType":"connectionType",pnField:secondary?"secondaryPn":"pn",suctionTypeField:secondary?"secondarySuctionValveType":"suctionValveType",dischargeTypeField:secondary?"secondaryDischargeValveType":"dischargeValveType",threadedAllowed,forcedFlanged,color:settings.stationType==="fire"||settings.stationType==="combined"&&!secondary?"red":"blue",rows:[
-    {field:fields.suctionCollector,title:"Всасывающий коллектор",subtitle:"Расход контура",flow:stationFlow},{field:fields.dischargeCollector,title:"Напорный коллектор",subtitle:"Расход контура",flow:stationFlow},{field:fields.suctionValve,title:"Арматура на всасе насоса",subtitle:"Расход одного рабочего насоса",flow:pumpFlow},{field:fields.dischargeValve,title:"Арматура на напоре насоса",subtitle:"Расход одного рабочего насоса",flow:pumpFlow},
-  ]};
-};
-
-const componentDn=(item:ComponentItem)=>{for(const field of item.fields){const label=componentFieldLabel(field),match=String(field.value??"").match(/(?:DN|Ду)\s*(\d+)/i);if(/^DN$|условн|диаметр/i.test(label)&&match)return Number(match[1]);}return null;};
-const componentText=(item:ComponentItem)=>`${item.family} ${item.fields.flatMap(field=>[...field.headerPath,String(field.value??"")]).join(" ")}`;
-const componentPns=(item:ComponentItem)=>[...componentText(item).matchAll(/PN\s*(10|16|25)(?:\s*\/\s*(10|16|25))?/gi)].flatMap(match=>[Number(match[1]),match[2]?Number(match[2]):null]).filter((value):value is number=>value!==null);
-const checkValvePns=(item:ComponentItem):ValvePn[]=>{
-  const explicit=componentPns(item) as ValvePn[];if(explicit.length)return explicit;
-  const text=componentText(item);
-  if(/латунн.*сердечник/i.test(text)||/010C\.Y.*красн/i.test(text))return [16];
-  if(/\b(?:010C(?:\.Y)?|012F(?:\.[ZM])?)\b/i.test(text))return [10,16];
-  return [];
-};
-const checkValveMaterial=(material:CollectorMaterial,connection:ValveConnection)=>connection==="threaded"?"Латунь":material==="aisi304"?"Нержавеющая сталь":"Чугун";
-const componentColor=(item:ComponentItem):"red"|"blue"|"neutral"=>/красн/i.test(componentText(item))?"red":/син/i.test(componentText(item))?"blue":"neutral";
-type ValveSelectionKind="butterfly"|"ball"|"check";
-type ValveSelection={item:ComponentItem;price:ComponentPrice|null;execution:string;material:string|null};
-const selectValveComponent=(items:ComponentItem[],kind:ValveSelectionKind,dn:number,connection:ValveConnection,pn:ValvePn,color:"red"|"blue",collectorMaterial:CollectorMaterial):ValveSelection|null=>{
-  const catalogId=kind==="butterfly"?"затворы":kind==="ball"?"шаровые-краны":"обратные-клапаны";
-  let candidates=items.filter(item=>item.catalogId===catalogId&&componentDn(item)===dn);
-  if(kind==="ball"){
-    // Ball valves are always the brass lever-handle catalogue series. Colour
-    // and collector material do not apply; DN, PN and connection still do.
-    if(connection!=="threaded")return null;
-    const ranked=candidates.filter(item=>/латун/i.test(item.family)&&/ручка[\s—–-]*рычаг/i.test(item.family))
-      .filter(item=>{const pns=componentPns(item);return !pns.length||pns.includes(pn);})
-      .map(item=>({item,price:item.prices.find(price=>Number.isFinite(price.amount)&&price.amount>0)??null}))
-      .filter(candidate=>candidate.price)
-      .sort((a,b)=>a.price!.amount-b.price!.amount||a.item.id.localeCompare(b.item.id));
-    const best=ranked[0];
-    return best?{...best,execution:"резьбовое · ручка-рычаг",material:"Латунь"}:null;
-  }
-  candidates=candidates.filter(item=>connection==="threaded"?(kind==="check"&&/латун/i.test(componentText(item))):(kind==="butterfly"||kind==="check"&&/фланц/i.test(componentText(item))));
-  candidates=candidates.filter(item=>{const pns=kind==="check"?checkValvePns(item):componentPns(item);return !pns.length||pns.includes(pn);});
-  const actuation=kind==="butterfly"?(dn<=150?/рукоятк/i:/редуктор/i):null;
-  const material=kind==="check"?checkValveMaterial(collectorMaterial,connection):null;
-  const ranked=candidates.map(item=>{const price=actuation?item.prices.find(entry=>actuation.test(entry.label))??null:material?item.prices.find(entry=>entry.label.toLocaleLowerCase("ru-RU").includes(material.toLocaleLowerCase("ru-RU")))??null:item.prices[0]??null,colorRank=color==="red"?(componentColor(item)==="red"?0:1):(componentColor(item)==="blue"?0:componentColor(item)==="neutral"?1:2),pnRank=(kind==="check"?checkValvePns(item):componentPns(item)).includes(pn)?0:1;return {item,price,colorRank,pnRank};}).filter(candidate=>(kind!=="butterfly"&&kind!=="check")||candidate.price).sort((a,b)=>a.colorRank-b.colorRank||a.pnRank-b.pnRank||(a.price?.amount??Number.MAX_VALUE)-(b.price?.amount??Number.MAX_VALUE));
-  const best=ranked[0];if(!best)return null;
-  return {item:best.item,price:best.price,execution:kind==="butterfly"?(dn<=150?"с рукояткой":"с редуктором"):connection==="threaded"?"резьбовое":"фланцевое",material};
-};
-
 function DnCalculator({role,entity,input,secondaryInput,settings,onChange,onAddValves,catalogue}:{catalogue:Pump[];role:UserRole;entity:DnEntity;input:InputEntity;secondaryInput:InputEntity;settings:SettingsEntity;onChange?:(patch:Partial<DnEntity>)=>void;onAddValves?:()=>void}){
   const primary=getCircuitDnConfig(entity,input,settings,false,catalogue.find(p=>p.id===input.selectedPumpId)),secondary=isSecondaryEnabled(settings)?getCircuitDnConfig(entity,secondaryInput,settings,true,catalogue.find(p=>p.id===secondaryInput.selectedPumpId)):null;
   if(!primary)return <div data-issue-id="dn/empty" className="dn-calculator__empty"><span aria-hidden="true">Ø</span><b>Сначала задайте рабочую точку</b><p>Укажите расход станции и количество рабочих насосов в инструменте «Подбор насосов».</p></div>;
@@ -319,56 +248,6 @@ function DnCalculator({role,entity,input,secondaryInput,settings,onChange,onAddV
     <footer className="dn-calculator__note"><span>i</span><p><b>Правила автоподбора</b>{settings.baseValues?.values.velocity.map(r=>`DN${r.fromDn}–${r.toDn??"∞"}: до ${r.limit} м/с`).join("; ")??"До DN250 — 2 м/с, выше — 3 м/с"}. Резьба до DN50 (2″) включительно — по умолчанию для первого контура хоз-пит и SMART и для второго контура. При необходимости можно выбрать фланцевое соединение. Затворы до DN125 подбираются с рукояткой, от DN150 — с редуктором. Обратный клапан подбирается по DN напорной арматуры, PN и материалу коллектора. Шаровой кран — всегда латунный с ручкой-рычагом, независимо от цвета и материала коллектора.</p></footer>
   </div>;
 }
-
-const HYDRAULIC_SPEC_OPTIONS:SpecOption[]=["primarySuctionValve","primaryDischargeValve","primaryCheckValve","secondarySuctionValve","secondaryDischargeValve","secondaryCheckValve"];
-const valveSpecItem=(selection:ValveSelection|null,kind:ValveSelectionKind,circuit:CircuitDnConfig,dn:number,section:SpecSection,position:string,option:SpecOption,collectorMaterial:CollectorMaterial):SpecItem=>{
-  if(kind==="ball")return {
-    position,name:selection?.item.family??"Кран шаровой латунный · ручка-рычаг",
-    details:`DN${dn} · PN${circuit.pn} · ${circuit.connection==="threaded"?"Резьбовое до 2″":"Требуется фланцевое соединение"} · Материал: Латунь · Ручка-рычаг`,
-    quantity:circuit.totalPumpCount,unit:"шт.",price:selection?.price?.amount??null,equipmentId:selection?.item.id,
-    description:selection?`${circuit.title} · латунный кран с ручкой-рычагом; цвет и материал коллектора не учитываются`:`${circuit.title} · латунный кран с ручкой-рычагом по DN, PN и соединению не найден в базе`,
-    section,option,technicalStatus:selection?"ready":"unverified",status:selection?.price?"selected":"clarify",
-  };
-  const connectionLabel=circuit.connection==="threaded"?"Резьбовое до 2″":"Фланцевое",colorLabel=selection&&componentColor(selection.item)!==circuit.color?`Подобрано совместимое исполнение другого цвета`:(circuit.color==="red"?"Красное исполнение":"Синее исполнение в приоритете"),typeLabel=kind==="butterfly"?"Затвор дисковый":"Клапан обратный",execution=kind==="butterfly"?(dn<=150?"рукоятка":"редуктор"):circuit.connection==="threaded"?"резьбовой":"фланцевый";
-  const material=kind==="check"?(selection?.material??checkValveMaterial(collectorMaterial,circuit.connection)):null,materialDetails=material?` · Материал: ${material}`:"";
-  return {position,name:selection?.item.family??typeLabel,details:`DN${dn} · PN${circuit.pn} · ${connectionLabel} · ${colorLabel} · ${execution}${materialDetails}`,quantity:circuit.totalPumpCount,unit:"шт.",price:selection?.price?.amount??null,equipmentId:selection?.item.id,description:selection?`${circuit.title} · подобрано из базы комплектующих по DN, PN и материалу коллектора`:`${circuit.title} · точное исполнение по DN, PN, соединению, цвету и материалу коллектора не найдено в базе`,section,option,technicalStatus:selection?"ready":"unverified",status:selection?.price?"selected":"clarify"};
-};
-const buildValveSpecItems=(database:ComponentsDatabase,entity:DnEntity,input:InputEntity,secondaryInput:InputEntity,settings:SettingsEntity,dischargeMaterial?:CollectorMaterial,pumps?:readonly Pump[]|null)=>{
-  const primary=getCircuitDnConfig(entity,input,settings,false,pumps?.find(p=>p.id===input.selectedPumpId)),secondary=isSecondaryEnabled(settings)?getCircuitDnConfig(entity,secondaryInput,settings,true,pumps?.find(p=>p.id===secondaryInput.selectedPumpId)):null,circuits=[primary,...(secondary?[secondary]:[])].filter((item):item is CircuitDnConfig=>Boolean(item)),collectorMaterial=entity.collectorMaterial??defaultCollectorMaterial(settings);
-  return circuits.flatMap(circuit=>{const secondaryCircuit=circuit.id==="secondary",suctionDn=circuit.values[secondaryCircuit?"secondarySuctionValveDn":"suctionValveDn"],dischargeDn=circuit.values[secondaryCircuit?"secondaryDischargeValveDn":"dischargeValveDn"],prefix=secondaryCircuit?"secondary":"primary";
-    const suctionKind:ValveSelectionKind=circuit.suctionValveType,dischargeKind:ValveSelectionKind=circuit.dischargeValveType;
-    return [
-      valveSpecItem(selectValveComponent(database.items,suctionKind,suctionDn,circuit.suction.connection,circuit.pn,circuit.color,collectorMaterial),suctionKind,{...circuit,connection:circuit.suction.connection},suctionDn,"suction",secondaryCircuit?"03.20":"03.10",`${prefix}SuctionValve` as SpecOption,collectorMaterial),
-      valveSpecItem(selectValveComponent(database.items,dischargeKind,dischargeDn,circuit.discharge.connection,circuit.pn,circuit.color,dischargeMaterial??collectorMaterial),dischargeKind,{...circuit,connection:circuit.discharge.connection},dischargeDn,"discharge",secondaryCircuit?"04.20":"04.10",`${prefix}DischargeValve` as SpecOption,dischargeMaterial??collectorMaterial),
-      valveSpecItem(selectValveComponent(database.items,"check",dischargeDn,circuit.discharge.connection,circuit.pn,circuit.color,dischargeMaterial??collectorMaterial),"check",{...circuit,connection:circuit.discharge.connection},dischargeDn,"discharge",secondaryCircuit?"04.21":"04.11",`${prefix}CheckValve` as SpecOption,dischargeMaterial??collectorMaterial),
-    ];
-  });
-};
-
-function refreshSuctionSpecification(project:ProjectConfig,database=loadedComponentsDatabase,force=false,pumps?:readonly Pump[]|null):ProjectConfig {
-  if(database)database=bindProjectComponents(project,database);
-  const spec=project.entities["station-spec"] as SpecEntity;
-  const primary=project.entities["system-input"] as InputEntity;
-  const managed=spec.items.filter(item=>(item.generatedBy==="suction-line"||item.generatedBy==="discharge-line"));
-  // This module belongs to the full workspace. Legacy/test autoHydraulics=false
-  // must not disable filling a calculated project; beta has its own workspace.
-  // Leave an uncalculated draft intact, but clear stale generated lines if its
-  // working point is later invalidated.
-  if(!database || (!force&&!isCalculated(primary)&&!managed.length)) {
-    const items=checkDischargeSpecPressure(project,checkSuctionSpecPressure(project,spec.items,database,database?.collectorCatalog,pumps),database,database?.collectorCatalog,pumps);
-    return JSON.stringify(items)===JSON.stringify(spec.items)?project:{...project,entities:{...project.entities,"station-spec":{...spec,items}}};
-  }
-  const dn=project.entities["station-dn"] as DnEntity,settings=project.entities["station-settings"] as SettingsEntity,secondary=project.entities["system-input-2"] as InputEntity;
-  const valves=buildValveSpecItems(database,dn,primary,secondary,settings,(project.entities["station-collectors"] as CollectorsEntity).discharge.configuration?.material,pumps);
-  const base=spec.items.filter(item=>!HYDRAULIC_SPEC_OPTIONS.includes(specificationOption(item) as SpecOption));
-  const suction=replaceSuctionSpec(base,buildSuctionSpec(project,database,database.collectorCatalog,valves,pumps));
-  const discharge=replaceDischargeSpec(suction,buildDischargeSpec(project,database,database.collectorCatalog,valves,pumps));
-  const items=checkDischargeSpecPressure(project,checkSuctionSpecPressure(project,normalizeSpecificationItems([...discharge,...valves]),database,database.collectorCatalog,pumps),database,database.collectorCatalog,pumps);
-  // A current selection fingerprint does not guarantee current catalogue prices.
-  if(spec.autoHydraulics&&JSON.stringify(items)===JSON.stringify(spec.items))return project;
-  return {...project,entities:{...project.entities,"station-spec":{...spec,items,autoHydraulics:true}}};
-}
-
 
 function PanelContent({ project, issues, role, assistantPanel, collectorPanel, modelPanel, id, entity, input, secondaryInput, settings, catalogue, onInputChange, onSecondaryInputChange, onSettingsChange, onDnChange, onAddValves, onAddToSpec, onCabinetConfigured, locked }: { project: ProjectConfig; issues: ToolIssue[]; role: UserRole; assistantPanel?: React.ReactNode; collectorPanel?: React.ReactNode; modelPanel?: React.ReactNode; id: PanelKind; entity: ProjectEntity; input: InputEntity; secondaryInput:InputEntity; settings: SettingsEntity; catalogue:Pump[]; onInputChange?: (patch: Partial<InputEntity>) => void; onSecondaryInputChange: (patch: Partial<InputEntity>) => void; onSettingsChange?: (patch: Partial<SettingsEntity>) => void; onDnChange?:(patch:Partial<DnEntity>)=>void; onAddValves?:()=>void; onAddToSpec?:()=>void; onCabinetConfigured?:(cabinet:SmartCabinet)=>void; locked?:boolean }) {
   if (id === "assistant") return assistantPanel;
@@ -457,7 +336,7 @@ export default function Home() {
     return active;
   },[]);
   useEffect(()=>activeSession?.connect(),[activeSession]);
-  const [view,setView]=useState<"workspace"|"projects"|"users"|"component-calculator"|"base-values"|"item-entry"|"equipment-admin"|"help">(()=>{const requested=typeof window!=="undefined"?new URLSearchParams(window.location.search).get("view"):null;return requested==="projects"||requested==="users"||requested==="component-calculator"||requested==="base-values"||requested==="item-entry"||requested==="equipment-admin"||requested==="help"?requested:"workspace";});
+  const [view,setView]=useState<"workspace"|"projects"|"users"|"component-calculator"|"base-values"|"item-entry"|"equipment-admin"|"geometry-nodes"|"help">(()=>{const requested=typeof window!=="undefined"?new URLSearchParams(window.location.search).get("view"):null;return requested==="projects"||requested==="users"||requested==="component-calculator"||requested==="base-values"||requested==="item-entry"||requested==="equipment-admin"||requested==="geometry-nodes"||requested==="help"?requested:"workspace";});
   const [catalogue,setCatalogue] = useState<Pump[]>([]);
   const [controlCabinets,setControlCabinets] = useState<ControlCabinet[]>([]);
   const [smartCabinets,setSmartCabinets] = useState<SmartCabinet[]>([]);
@@ -522,6 +401,9 @@ export default function Home() {
       if(!active)return;
       setProjects(page.projects);setNextPage(page.next);setAccount(user);
       libraryVersion.current=page.modelLibraryVersion;
+      const program=await loadProgram(file?(loaded.project.graphVersion??INITIAL_VERSION):undefined);
+      if(!active)return;
+      setBrowserPublication(program);loaded.project.graphVersion=program.version;
       activate(user,loaded,file?.revision??0,Boolean(file));
       if(!params.has("view") && file){params.set("project",loaded.project.id);window.history.replaceState({},"","/?"+params.toString());}
       if(panel&&loaded.workspace.windows.some(item=>item.id===panel))setDetached(panel);
@@ -549,7 +431,7 @@ export default function Home() {
     return () => { controller.abort(); window.clearInterval(timer); document.removeEventListener("visibilitychange", visible); };
   }, [account?.id]);
   useEffect(() => {
-    const navigate = () => { const requested = new URLSearchParams(window.location.search).get("view"); setView(requested === "projects" || requested === "users" || requested === "component-calculator" || requested === "base-values" || requested === "item-entry" || requested === "equipment-admin" || requested === "help" ? requested : "workspace"); setSidebar(false); };
+    const navigate = () => { const requested = new URLSearchParams(window.location.search).get("view"); setView(requested === "projects" || requested === "users" || requested === "component-calculator" || requested === "base-values" || requested === "item-entry" || requested === "equipment-admin" || requested === "geometry-nodes" || requested === "help" ? requested : "workspace"); setSidebar(false); };
     window.addEventListener("popstate", navigate);
     return () => window.removeEventListener("popstate", navigate);
   }, []);
@@ -610,7 +492,7 @@ export default function Home() {
   const updateEngineering=(change:(current:ProjectConfig)=>ProjectConfig)=>{
     if(snapshot && !window.confirm("Изменить расчётные параметры сохранённой станции и пересчитать её по доступному каталогу?"))return;
     setSnapshot(false);
-    updateConfig(current=>{const next=change(current);return synchronizeFullProject({...next,project:{...next.project,calculationMethod,recalculatedAt:new Date().toISOString()}});});
+    updateConfig(current=>{const next=change(current);return synchronizeFullProject({...next,project:{...next.project,calculationMethod,graphVersion:currentPublication().version,recalculatedAt:new Date().toISOString()}});});
   };
   const updateInput = (patch: Partial<InputEntity>) => updateEngineering(current => ({ ...current, entities: { ...current.entities, "system-input": { ...(current.entities["system-input"] as InputEntity), ...patch, ...(patch.selectedPumpId ? {selectedPumpModel: (()=>{const pump=catalogue.find(p=>p.id===patch.selectedPumpId);return pump?`${pump.manufacturer} ${pump.model}`:undefined;})()} : {}) } } }));
   const updateInput2 = (patch: Partial<InputEntity>) => updateEngineering(current => ({ ...current, entities: { ...current.entities, "system-input-2": { ...(current.entities["system-input-2"] as InputEntity), ...patch, ...(patch.selectedPumpId ? {selectedPumpModel: (()=>{const pump=catalogue.find(p=>p.id===patch.selectedPumpId);return pump?`${pump.manufacturer} ${pump.model}`:undefined;})()} : {}) } } }));
@@ -622,9 +504,11 @@ export default function Home() {
   });
   const addSelectedPumpToSpec = () => {
     setSaveMessage("Проверяем актуальность каталога и обновляем спецификацию…");
-    void loadComponentsDatabase(true).then(database=>{
-      setSnapshot(false);
-      updateConfig(current=>synchronizeFullProject({...current,project:{...current.project,calculationMethod,recalculatedAt:new Date().toISOString()}},database));
+    const projectId=config.project.id;
+    void Promise.all([loadComponentsDatabase(true),loadProgram()]).then(([database,program])=>{
+      if(session.current?.latest.project.id!==projectId)return;
+      setBrowserPublication(program);setSnapshot(false);
+      updateConfig(current=>synchronizeFullProject({...current,project:{...current.project,calculationMethod,graphVersion:currentPublication().version,recalculatedAt:new Date().toISOString()}},database));
       setAssetErrors(current=>{const next={...current};delete next["components/database"];return next;});
       setSaveMessage("Спецификация обновлена по актуальному каталогу. Выбранные насосы и количество синхронизируются автоматически.");
     }).catch(()=>{
@@ -655,9 +539,11 @@ export default function Home() {
       if(importMode.current==="replace") {
         if(!window.confirm("Заменить содержимое открытого проекта импортированным JSON?"))return;
         loaded.project={...loaded.project,id:config.project.id,createdAt:config.project.createdAt};
+        const program=await loadProgram(loaded.project.graphVersion??INITIAL_VERSION);setBrowserPublication(program);loaded.project.graphVersion=program.version;
         setSnapshot(true);setConfig(loaded);history.current=[loaded];historyIndex.current=0;refreshHistoryState();
       } else {
         loaded.project={...loaded.project,id:crypto.randomUUID()};
+        const program=await loadProgram(loaded.project.graphVersion??INITIAL_VERSION);setBrowserPublication(program);loaded.project.graphVersion=program.version;
         activate(account,loaded,0,true);
       }
       setAccessNotice("");window.history.replaceState({},"","/?project="+encodeURIComponent(loaded.project.id));
@@ -669,6 +555,8 @@ export default function Home() {
     if(session.current?.latest.project.id!==id && session.current && !await session.current.flush())throw new Error("Сначала сохраните текущий проект или сохраните конфликт как копию.");
     const file=await projectApi<ProjectFile>("?id="+encodeURIComponent(id));
     const loaded=parseAccessibleProject(file.config,role);
+    const program=await loadProgram(loaded.project.graphVersion??INITIAL_VERSION);
+    setBrowserPublication(program);loaded.project.graphVersion=program.version;
     activate(account,loaded,file.revision,true);
     const params=new URLSearchParams({project:id});
     if(detached && loaded.workspace.windows.some(panel=>panel.id===detached))params.set("panel",detached);
@@ -686,7 +574,7 @@ export default function Home() {
     if(detached)params.set("panel",detached);
     window.history.replaceState({},"","/?"+params.toString());
   };
-  const newProject=async()=>{try{if(!account)return;if(session.current && !await session.current.flush())throw new Error("Сначала сохраните текущий проект или сохраните конфликт как копию.");const project=createProject("Новая насосная станция",{baseValues:await fetchPublishedBaseValues()});activate(account,project,0,false);setView("workspace");window.history.replaceState({},"","/");}catch(error){window.alert(String(error));}};
+  const newProject=async()=>{try{if(!account)return;if(session.current && !await session.current.flush())throw new Error("Сначала сохраните текущий проект или сохраните конфликт как копию.");const project=createProject("Новая насосная станция",{baseValues:await fetchPublishedBaseValues()});const program=await loadProgram();setBrowserPublication(program);project.project.graphVersion=program.version;activate(account,project,0,false);setView("workspace");window.history.replaceState({},"","/");}catch(error){window.alert(String(error));}};
   const deleteProject=async(card:StoredProject)=>{if(!window.confirm("Удалить проект «"+card.name+"»?"))return;
     try{await projectApi("?id="+encodeURIComponent(card.id)+"&base="+card.revision,undefined,"DELETE");setProjects(current=>current.filter(p=>p.id!==card.id));if(config.project.id===card.id){session.current?.dispose();session.current=null;await newProject();}}catch(error){window.alert(String(error));}
   };
@@ -705,7 +593,9 @@ export default function Home() {
   const diagnosticsValue={...diagnostics,onNavigate:navigateToIssue};
   if(accountLoading)return <main className="auth-page"><section className="auth-intro"><Link className="brand auth-brand" href="/"><span className="brand__mark">PS</span><span><b>Pump Station</b><small>Calculator</small></span></Link></section><section className="auth-panel"><div className="auth-card"><span className="auth-icon">PS</span><h2>Загрузка</h2><p>Подготавливаем рабочее пространство…</p></div></section></main>;
   if(!account){const auth=new URLSearchParams(window.location.search).get("auth"),mode=auth==="verify"?"verify":auth==="reset"?"reset":"login";return <AccountScreen initialMode={mode}/>;}
+  const mainMenu = <div className={`sidebar ${sidebar ? "sidebar--open" : ""}`} inert={!sidebar}><button className="sidebar__backdrop" onClick={() => setSidebar(false)} aria-label="Закрыть меню"/><aside className="sidebar__panel"><div className="sidebar__top"><div className="brand"><span className="brand__mark">PS</span><span><b>Pump Station</b><small>Calculator</small></span></div><button className="icon-button" onClick={() => setSidebar(false)}><Icon name="close" /></button></div><div className="user-card"><span className="avatar avatar--large">{initials(account.name)}</span><div><div className="user-card__name"><b>{account.name}</b><span className="user-role">{account.role}</span></div><small>{account.email}</small></div></div><nav className="sidebar__nav"><button className="sidebar__link sidebar__link--active" onClick={()=>setSidebar(false)}>▦ <span>Рабочее пространство</span></button><button className="sidebar__link" onClick={()=>{setView("projects");setSidebar(false);window.history.pushState({},"","/?view=projects");}}>▤ <span>Мои проекты</span><em>{projects.length}</em></button>{account.role==="admin"&&<button className="sidebar__link" onClick={()=>{setView("geometry-nodes");setSidebar(false);window.history.pushState({},"","/?view=geometry-nodes&project="+encodeURIComponent(config.project.id));}}>⌘ <span>Geometry Nodes</span></button>}{account.role==="admin"&&<button className="sidebar__link" onClick={()=>{setView("equipment-admin");setSidebar(false);window.history.pushState({},"","/?view=equipment-admin");}}>⌁ <span>База комплектующих</span></button>}{account.role==="admin"&&<button className="sidebar__link" onClick={()=>{setView("component-calculator");setSidebar(false);window.history.pushState({},"","/?view=component-calculator");}}>⌗ <span>Расчёт комплектующих</span></button>}{account.role==="admin"&&<button className="sidebar__link" onClick={()=>{setView("item-entry");setSidebar(false);window.history.pushState({},"","/?view=item-entry");}}>＋ <span>Заведение позиций</span></button>}{account.role==="admin"&&<button className="sidebar__link" onClick={()=>{setView("base-values");setSidebar(false);window.history.pushState({},"","/?view=base-values");}}>⚙ <span>Базовые значения</span></button>}{account.role==="admin"&&<button className="sidebar__link" onClick={()=>{setView("users");setSidebar(false);window.history.pushState({},"","/?view=users");}}>♙ <span>Список пользователей</span></button>}<button className="sidebar__link" onClick={() => { setSidebar(false); setSettingsOpen(true); }}>⚙ <span>Настройки</span></button><button className="sidebar__link" onClick={logout}>↪ <span>Выйти</span></button></nav><button className="sidebar__footer help-center-entry" onClick={()=>{setView("help");setSidebar(false);window.history.pushState({},"","/?view=help");}}><span className="help-center-entry__icon" aria-hidden="true">?</span><span><b>Центр помощи</b><small>Документация и поддержка</small></span></button></aside></div>;
   if(view==="help")return <HelpCenter onBack={()=>{setView("workspace");window.history.pushState({},"",`/?project=${encodeURIComponent(config.project.id)}`);}}/>;
+  if(view==="geometry-nodes")return account.role==="admin"?<><EngineeringEditor openMain={()=>setSidebar(true)} navigation={mainMenu} project={config} pumps={catalogue} back={()=>{setView("workspace");window.history.pushState({},"","/?project="+encodeURIComponent(config.project.id));}}/>{settingsOpen&&<AppSettings theme={theme} onThemeChange={setTheme} profile={colorProfile} onProfileChange={setColorProfile} onClose={closeSettings}/>}</>:<main className="users-page"><h1>Доступ только для администратора</h1><button onClick={()=>{setView("workspace");window.history.replaceState({},"","/");}}>В рабочее пространство</button></main>;
   if(view==="equipment-admin")return <EquipmentAdminPanel actor={account} onBack={()=>{setView("workspace");window.history.pushState({},"","/");}}/>;
   if(view==="item-entry")return <ItemEntryPanel actor={account} onSaved={pump=>setCatalogue(current=>mergePumpCatalog(current.filter(item=>item.id!==pump.id),[pump]))} onBack={()=>{setView("workspace");window.history.pushState({},"","/");}}/>;
   if(view==="base-values")return <BaseValuesPanel actor={account} onBack={()=>{setView("workspace");window.history.pushState({},"","/");}}/>;
@@ -743,7 +633,7 @@ export default function Home() {
 
     {accessNotice && <p className="access-note" role="status">{accessNotice}<button className="button" onClick={()=>setAccessNotice("")}>Понятно</button></p>}
     <BaseValuesUpdateNotice key={config.project.id} project={config} latest={latestBaseValues} error={baseValuesError} onApply={next=>updateEngineering(()=>next)}/>
-    <div className={`sidebar ${sidebar ? "sidebar--open" : ""}`} inert={!sidebar}><button className="sidebar__backdrop" onClick={() => setSidebar(false)} aria-label="Закрыть меню"/><aside className="sidebar__panel"><div className="sidebar__top"><div className="brand"><span className="brand__mark">PS</span><span><b>Pump Station</b><small>Calculator</small></span></div><button className="icon-button" onClick={() => setSidebar(false)}><Icon name="close" /></button></div><div className="user-card"><span className="avatar avatar--large">{initials(account.name)}</span><div><div className="user-card__name"><b>{account.name}</b><span className="user-role">{account.role}</span></div><small>{account.email}</small></div></div><nav className="sidebar__nav"><button className="sidebar__link sidebar__link--active" onClick={()=>setSidebar(false)}>▦ <span>Рабочее пространство</span></button><button className="sidebar__link" onClick={()=>{setView("projects");setSidebar(false);window.history.pushState({},"","/?view=projects");}}>▤ <span>Мои проекты</span><em>{projects.length}</em></button>{account.role==="admin"&&<button className="sidebar__link" onClick={()=>{setView("equipment-admin");setSidebar(false);window.history.pushState({},"","/?view=equipment-admin");}}>⌁ <span>База комплектующих</span></button>}{account.role==="admin"&&<button className="sidebar__link" onClick={()=>{setView("component-calculator");setSidebar(false);window.history.pushState({},"","/?view=component-calculator");}}>⌗ <span>Расчёт комплектующих</span></button>}{account.role==="admin"&&<button className="sidebar__link" onClick={()=>{setView("item-entry");setSidebar(false);window.history.pushState({},"","/?view=item-entry");}}>＋ <span>Заведение позиций</span></button>}{account.role==="admin"&&<button className="sidebar__link" onClick={()=>{setView("base-values");setSidebar(false);window.history.pushState({},"","/?view=base-values");}}>⚙ <span>Базовые значения</span></button>}{account.role==="admin"&&<button className="sidebar__link" onClick={()=>{setView("users");setSidebar(false);window.history.pushState({},"","/?view=users");}}>♙ <span>Список пользователей</span></button>}<button className="sidebar__link" onClick={() => { setSidebar(false); setSettingsOpen(true); }}>⚙ <span>Настройки</span></button><button className="sidebar__link" onClick={logout}>↪ <span>Выйти</span></button></nav><button className="sidebar__footer help-center-entry" onClick={()=>{setView("help");setSidebar(false);window.history.pushState({},"","/?view=help");}}><span className="help-center-entry__icon" aria-hidden="true">?</span><span><b>Центр помощи</b><small>Документация и поддержка</small></span></button></aside></div>
+    {mainMenu}
 
     <nav className="ribbon">
       <div className="ribbon__tabs">

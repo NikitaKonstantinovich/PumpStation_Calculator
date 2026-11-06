@@ -140,22 +140,11 @@ test("secondary branches scale independently while common instruments do not dou
 });
 
 const pageUrl=new URL("../app/full-workspace.tsx",import.meta.url),page=await readFile(pageUrl,"utf8");
-const shared = await readFile(new URL("../app/allowed-pump-tools.tsx", import.meta.url), "utf8");
 const actualSelection=[
-  'import {MAX_WORKING_PUMPS} from "./pump-counts";',
-  'import {recommendedDn,defaultCollectorMaterial,resolveDnConnection,suctionHydraulics,dischargeHydraulics} from "./dn-defaults";',
-  'import {buildSuctionSpec,replaceSuctionSpec,suctionFingerprint,checkSuctionSpecPressure} from "./suction-spec";',
-  'import {buildDischargeSpec,replaceDischargeSpec,checkDischargeSpecPressure} from "./discharge-spec";',
-  'import {normalizeSpecificationItems,specificationOption} from "./specification-items";',
+  'import {refreshSuctionSpecification} from "./station-hydraulic-calculation"; export {refreshSuctionSpecification};',
   'import {synchronizeCollectors} from "./collector-project";',
-  'import {bindProjectComponents} from "./base-values-components";',
-  shared.match(/^export const isCalculated =.*$/m)[0],page.match(/^const isSecondaryEnabled =.*$/m)[0],
-  shared.match(/^export const componentFieldLabel=.*$/m)[0],
-  page.slice(page.indexOf("const isJockeyCircuit="),page.indexOf("function DnCalculator(")),
-  page.slice(page.indexOf("const HYDRAULIC_SPEC_OPTIONS:"),page.indexOf("function PanelContent(")),
-  "let loadedComponentsDatabase; export {refreshSuctionSpecification};",
   'import { canEditSetting } from "./project-access";',
-  'export function changeCollectorMode(project, simultaneous, database) { const role="pro"; let updated=project; loadedComponentsDatabase=database; const updateEngineering=change=>{updated=refreshSuctionSpecification(synchronizeCollectors(change(updated)),database);};',
+  'export function changeCollectorMode(project, simultaneous, database) { const role="pro"; let updated=project;  const updateEngineering=change=>{updated=refreshSuctionSpecification(synchronizeCollectors(change(updated)),database);};',
   page.slice(page.indexOf("  const updateSettings ="),page.indexOf("  const addSelectedPumpToSpec =")),
   'updateSettings({combinedCircuitsSimultaneous:simultaneous}); return updated; }',
 ].join("\n");

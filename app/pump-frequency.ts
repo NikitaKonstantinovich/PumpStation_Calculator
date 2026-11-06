@@ -1,3 +1,4 @@
+import { engineeringOperation, registerOperation } from "./engineering/runtime";
 import type { Pump } from "./pump-catalog";
 
 export type PumpFrequencySettings = { enabled: boolean; nominalHz: number | null; frequencyHz: number | null; showNominal: boolean };
@@ -14,7 +15,7 @@ export function pumpFrequencyState(pump: Pump, settings: PumpFrequencySettings) 
 }
 
 /** Plot-only affinity-law estimate; never writes back to the catalogue or selection. */
-export function frequencyAdjustedPump(pump: Pump, frequencyHz: number, nominalHz = nominalPumpFrequency(pump)): Pump {
+export function coreFrequencyAdjustedPump(pump: Pump, frequencyHz: number, nominalHz = nominalPumpFrequency(pump)): Pump {
   if (!positive(nominalHz) || !positive(frequencyHz) || frequencyHz > nominalHz) throw new RangeError("Частота должна быть положительной и не превышать номинальную.");
   const ratio = frequencyHz / nominalHz;
   if (ratio === 1) return pump.frequencyHz === frequencyHz ? pump : { ...pump, frequencyHz };
@@ -28,3 +29,9 @@ export function frequencyAdjustedPump(pump: Pump, frequencyHz: number, nominalHz
     npshCurve: undefined,
   };
 }
+
+export function frequencyAdjustedPump(...args: Parameters<typeof coreFrequencyAdjustedPump>): ReturnType<typeof coreFrequencyAdjustedPump> {
+  return engineeringOperation("frequencyAdjustedPump", coreFrequencyAdjustedPump, args);
+}
+
+registerOperation("frequencyAdjustedPump", ["pump","frequencyHz","nominalHz"], coreFrequencyAdjustedPump);

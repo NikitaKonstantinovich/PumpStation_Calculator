@@ -1,3 +1,4 @@
+import { engineeringOperation, registerOperation } from "./engineering/runtime";
 import type { InputEntity, ProjectConfig, SettingsEntity, SpecItem } from "./project-config";
 import type { Pump } from "./pump-catalog";
 
@@ -10,7 +11,7 @@ export type FrameConstruction = {
   sheetThicknessMm?: 4 | 5;
 };
 
-export function frameConstructionForPumpMass(massKg: unknown): FrameConstruction | null {
+export function coreFrameConstructionForPumpMass(massKg: unknown): FrameConstruction | null {
   if (typeof massKg !== "number" || !Number.isFinite(massKg) || massKg <= 0) return null;
   if (massKg < 50) return { code: "bent-4", label: "Рама гнутая, лист 4 мм", sheetThicknessMm: 4, heightMm: 50 };
   if (massKg < 100) return { code: "bent-5", label: "Рама гнутая, лист 5 мм", sheetThicknessMm: 5, heightMm: 50 };
@@ -20,7 +21,7 @@ export function frameConstructionForPumpMass(massKg: unknown): FrameConstruction
   return { code: "channel-14p", label: "Рама из швеллера 14П", heightMm: 140 };
 }
 
-export function projectFrameSelection(project: ProjectConfig, pumps: Pump[] | null) {
+export function coreProjectFrameSelection(project: ProjectConfig, pumps: Pump[] | null) {
   const settings = project.entities["station-settings"] as SettingsEntity;
   const secondary = settings.stationType === "combined" || settings.stationType === "fire" && settings.jockeyPump;
   const inputs = [project.entities["system-input"] as InputEntity, ...(secondary ? [project.entities["system-input-2"] as InputEntity] : [])];
@@ -55,3 +56,15 @@ export function frameSpecificationItem(selection: ReturnType<typeof projectFrame
 /** Only an untouched empty legacy placeholder may be replaced like an automatic row. */
 export const automaticFrameItem = (item: SpecItem) => item.generatedBy === "station" ||
   item.name === "Рама насосной установки" && item.quantity === 0 && item.price == null && !item.equipmentId && item.technicalStatus === "incomplete";
+
+export function frameConstructionForPumpMass(...args: Parameters<typeof coreFrameConstructionForPumpMass>): ReturnType<typeof coreFrameConstructionForPumpMass> {
+  return engineeringOperation("frameConstructionForPumpMass", coreFrameConstructionForPumpMass, args);
+}
+
+export function projectFrameSelection(...args: Parameters<typeof coreProjectFrameSelection>): ReturnType<typeof coreProjectFrameSelection> {
+  return engineeringOperation("projectFrameSelection", coreProjectFrameSelection, args);
+}
+
+registerOperation("frameConstructionForPumpMass", ["massKg"], coreFrameConstructionForPumpMass);
+
+registerOperation("projectFrameSelection", ["project","pumps"], coreProjectFrameSelection);

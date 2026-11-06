@@ -1,3 +1,4 @@
+import { engineeringOperation, registerOperation } from "./engineering/runtime";
 import defaults from "../data/collector-nipple-rules.json";
 import type { BaseValues } from "./base-values";
 
@@ -63,7 +64,7 @@ export function matchesNippleRule(when:NippleConditions,c:NippleContext):boolean
     &&(when.pn==="all"||Number(when.pn)===c.pn)&&(when.tank==="all"||(when.tank==="on")===c.tank)
     &&(when.dnFrom===null||c.dn!==null&&c.dn>=when.dnFrom)&&(when.dnTo===null||c.dn!==null&&c.dn<=when.dnTo);
 }
-export function resolveNippleRule(value:CollectorNippleConfiguration|undefined,context:NippleContext) {
+export function coreResolveNippleRule(value:CollectorNippleConfiguration|undefined,context:NippleContext) {
   const errors=validateCollectorNippleRules(value);
   if(errors.length)return {rule:null,outputs:[],error:errors.join(" ")};
   const rules=collectorRuleSet(value),rule=rules.rules.find(r=>r.enabled&&matchesNippleRule(r.when,context));
@@ -117,3 +118,9 @@ export function describeNippleOutputs(outputs:NippleOutput[]):string {
   const labels={instrument:"КИП",tank:"бак",reserve:"резерв",auto:"по оборудованию",occupied:"занят",capped:"заглушка",open:"открыт"};
   return outputs.filter(o=>o.quantity).map(o=>`${o.quantity} × DN${o.dn}, ${o.lengthMm} мм, ${o.threaded?`резьба${o.threadPitchMm?` шаг ${o.threadPitchMm} мм`:""}${o.threadLengthMm?` участок ${o.threadLengthMm} мм`:""}`:"без резьбы"}, ${labels[o.purpose]}, ${labels[o.state]}`).join("; ")||"без сгонов";
 }
+
+export function resolveNippleRule(...args: Parameters<typeof coreResolveNippleRule>): ReturnType<typeof coreResolveNippleRule> {
+  return engineeringOperation("resolveNippleRule", coreResolveNippleRule, args);
+}
+
+registerOperation("resolveNippleRule", ["rules","context"], coreResolveNippleRule);

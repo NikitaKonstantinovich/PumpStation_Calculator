@@ -1,3 +1,4 @@
+import { engineeringOperation, registerOperation } from "./engineering/runtime";
 import { INSTRUMENT_CONNECTION_REVISION, isAcceptedInstrumentFitting, acceptInstrumentFitting } from "./instrument-connection";
 import { addFireInsertionInstruments, FIRE_INSERTION_INSTRUMENTS_REVISION } from "./fire-insertion-instruments";
 import { installedInsertionPrice } from "./calculated-insertion";
@@ -41,7 +42,7 @@ export function commonDischargeHead(project: ProjectConfig): number | null {
   return heads.some(head => head === null) ? null : Math.max(...heads as number[]);
 }
 
-export function buildDischargeSpec(project: ProjectConfig, database: { items: AssemblyComponent[] }, catalog: CollectorCatalog, valves: SpecItem[] = (project.entities["station-spec"] as { items: SpecItem[] }).items, pumps?:readonly Pump[]|null): SpecItem[] {
+export function coreBuildDischargeSpec(project: ProjectConfig, database: { items: AssemblyComponent[] }, catalog: CollectorCatalog, valves: SpecItem[] = (project.entities["station-spec"] as { items: SpecItem[] }).items, pumps?:readonly Pump[]|null): SpecItem[] {
   const e = project.entities, settings = e["station-settings"] as SettingsEntity, dn = e["station-dn"] as DnEntity;
   const collector = baseConfigurationIdentity((e["station-collectors"] as CollectorsEntity).discharge.configuration!);
   if (!collector || !(e["system-input"] as InputEntity).calculated) return [];
@@ -185,3 +186,9 @@ export function checkDischargeSpecPressure(project: ProjectConfig, items: SpecIt
     return { ...item, status: warning && baseStatus !== "clarify" ? "confirmation" : baseStatus, dischargePressureCheck: { baseStatus, checks } };
   });
 }
+
+export function buildDischargeSpec(...args: Parameters<typeof coreBuildDischargeSpec>): ReturnType<typeof coreBuildDischargeSpec> {
+  return engineeringOperation("buildDischargeSpec", coreBuildDischargeSpec, args);
+}
+
+registerOperation("buildDischargeSpec", ["project","database","catalog","valves","pumps"], coreBuildDischargeSpec);

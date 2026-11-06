@@ -5,23 +5,8 @@ const root = new URL("../../", import.meta.url);
 export const load = name => loadTs(new URL(`app/${name}.ts`, root));
 export const read = name => readFile(new URL(name, root), "utf8");
 export const json = async name => JSON.parse(await read(name));
-const pageUrl = new URL("app/full-workspace.tsx", root), page = await read("app/full-workspace.tsx"), shared = await read("app/allowed-pump-tools.tsx");
-// Exercise the actual hydraulic transaction retained in the UI, not a substitute implementation.
-const source = [
-  'import {MAX_WORKING_PUMPS} from "./pump-counts";',
-  'import {bindProjectComponents} from "./base-values-components";',
-  'import {recommendedDn,defaultCollectorMaterial,resolveDnConnection,suctionHydraulics,dischargeHydraulics} from "./dn-defaults";',
-  'import {buildSuctionSpec,replaceSuctionSpec,checkSuctionSpecPressure} from "./suction-spec";',
-  'import {buildDischargeSpec,replaceDischargeSpec,checkDischargeSpecPressure} from "./discharge-spec";',
-  'import {normalizeSpecificationItems,specificationOption} from "./specification-items";',
-  'import {synchronizeCollectors} from "./collector-project";',
-  shared.match(/^export const isCalculated =.*$/m)[0], page.match(/^const isSecondaryEnabled =.*$/m)[0],
-  shared.match(/^export const componentFieldLabel=.*$/m)[0],
-  page.slice(page.indexOf("const isJockeyCircuit="), page.indexOf("function DnCalculator(")),
-  page.slice(page.indexOf("const HYDRAULIC_SPEC_OPTIONS:"), page.indexOf("function PanelContent(")),
-  "let loadedComponentsDatabase; export {refreshSuctionSpecification};",
-].join("\n");
-export const { refreshSuctionSpecification } = await loadTs(pageUrl, { [pageUrl.href]: source });
+export const {refreshSuctionSpecification}=await loadTs(new URL("app/station-hydraulic-calculation.ts",root));
+
 export const { createProject, parseProjectConfig } = await load("project-config");
 export const { synchronizeStationSpecification, specificationSourceFingerprint, cabinetSourceFingerprint } = await load("station-specification");
 export const { assessSpecification, specificationTechnicalStatus } = await load("specification-readiness");

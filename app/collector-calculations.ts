@@ -1,3 +1,4 @@
+import { engineeringOperation, registerOperation } from "./engineering/runtime";
 import { baseConfigurationIdentity, collectorNippleCounts } from "./base-values";
 import type { CollectorMaterial, StationType, ValveConnection } from "./project-config";
 import { checkInletPressure, dnVelocityLimit, type InletPressureCheck } from "./dn-defaults";
@@ -83,7 +84,7 @@ export function collectorStorageCode(c: CollectorConfiguration): string | null {
   if(c.baseVersions && [c.baseVersions.spacing,c.baseVersions.welding,c.baseVersions.painting,c.baseVersions.velocity].some(v=>v!=="legacy-v1")){let hash=2166136261;for(const ch of JSON.stringify([c.baseVersions.spacing,c.baseVersions.welding,c.baseVersions.painting,c.baseVersions.velocity])){hash=Math.imul(hash^ch.charCodeAt(0),16777619);}baseSuffix=`_Б-${(hash>>>0).toString(16)}`;}
   return `${code}${portsSuffix}${c.sectionBreaks ? `_СЕК-${c.sectionBreaks + 1}` : ""}${baseSuffix}`;
 }
-export function collectorFlow(c: CollectorConfiguration): { flow: number | null; mode: string } {
+export function coreCollectorFlow(c: CollectorConfiguration): { flow: number | null; mode: string } {
   // Circuit flows already include all working pumps; reserves only add branches.
   // On suction, the first circuit is always the fire circuit for these stations.
   if (c.type === "suction" && (c.stationType === "fire" || c.stationType === "combined")) {
@@ -104,8 +105,8 @@ export function collectorVelocityWarning(dn: number | null, velocity: number | n
   if (!positive(dn) || !positive(velocity) || velocity <= dnVelocityLimit(dn,rules) + 1e-9) return null;
   return `Скорость в коллекторе DN${dn} (${velocity.toLocaleString("ru-RU", { maximumFractionDigits: 3 })} м/с) превышает допустимую ${dnVelocityLimit(dn,rules)} м/с. Увеличьте DN коллектора.`;
 }
-export const branchLength = (outer: number | null, bolt: number | null) => positive(outer) && positive(bolt) ? 0.5 * outer + 1.1 * bolt : null;
-export const flangeKinds = (material: CollectorMaterial, dn: number, pn: number): ComponentKind[] => material === "aisi304" && dn <= 200 && pn < 25 ? ["collar", "looseFlange"] : ["weldFlange"];
+export const coreBranchLength = (outer: number | null, bolt: number | null) => positive(outer) && positive(bolt) ? 0.5 * outer + 1.1 * bolt : null;
+export const coreFlangeKinds = (material: CollectorMaterial, dn: number, pn: number): ComponentKind[] => material === "aisi304" && dn <= 200 && pn < 25 ? ["collar", "looseFlange"] : ["weldFlange"];
 // JSONB preserves values and array order, but not object key order.
 export const configurationFingerprint = (c: CollectorConfiguration) => JSON.stringify(
   baseConfigurationIdentity(c),
@@ -122,7 +123,7 @@ export function matchesCollectorConfiguration(saved: string | undefined, config:
     return configurationFingerprint(JSON.parse(saved)) === expected;
   } catch { return false; }
 }
-export function collectorPressureChecks(c: CollectorConfiguration, inletHead: number | null | undefined, catalog?: CollectorCatalog | null, enabled = true): InletPressureCheck[] {
+export function coreCollectorPressureChecks(c: CollectorConfiguration, inletHead: number | null | undefined, catalog?: CollectorCatalog | null, enabled = true): InletPressureCheck[] {
   if (!enabled || c.type !== "suction") return [];
   const checks = [checkInletPressure(inletHead, "Всасывающий коллектор", c.pn, `PN${c.pn}`)];
   if (catalog) {
@@ -135,7 +136,7 @@ export function collectorPressureChecks(c: CollectorConfiguration, inletHead: nu
   }
   return checks;
 }
-export function calculateCollector(c: CollectorConfiguration, catalog: CollectorCatalog): CollectorCalculation {
+export function coreCalculateCollector(c: CollectorConfiguration, catalog: CollectorCatalog): CollectorCalculation {
   const warnings = [...new Set([...configurationWarnings(c), ...collectorBranchDiameterErrors(c, catalog)])], bom: CollectorBomItem[] = [], welds: WeldOperation[] = [];
   const rate = (catalog.weldRates ?? WELD_RATES)[c.material], flow = collectorFlow(c);
   if (flow.flow === null) warnings.push("Укажите расход каждого активного контура больше нуля");
@@ -232,3 +233,33 @@ export function calculateCollector(c: CollectorConfiguration, catalog: Collector
   const subtotal = bom.reduce((sum, v) => sum + (v.cost ?? 0), 0), uniqueWarnings = [...new Set(warnings)];
   return { branchLengthRule: COLLECTOR_BRANCH_LENGTH_RULE, branchBoltReferences, fingerprint: configurationFingerprint(c), catalogVersion: catalog.version, code: collectorCode(c), complete: !uniqueWarnings.length, warnings: uniqueWarnings, ...flow, lengthMm, branchLengthsMm, velocities: { collector: flowSpeed(flow.flow, main?.innerDiameter ?? null), primary: velocities[0], secondary: velocities[1] ?? null }, bom, welds, weldLengthMm, weldCost, subtotal, price: uniqueWarnings.length ? null : subtotal };
 }
+
+export function collectorFlow(...args: Parameters<typeof coreCollectorFlow>): ReturnType<typeof coreCollectorFlow> {
+  return engineeringOperation("collectorFlow", coreCollectorFlow, args);
+}
+
+export function calculateCollector(...args: Parameters<typeof coreCalculateCollector>): ReturnType<typeof coreCalculateCollector> {
+  return engineeringOperation("calculateCollector", coreCalculateCollector, args);
+}
+
+registerOperation("collectorFlow", ["c"], coreCollectorFlow);
+
+registerOperation("calculateCollector", ["c","catalog"], coreCalculateCollector);
+
+export function branchLength(...args: Parameters<typeof coreBranchLength>): ReturnType<typeof coreBranchLength> {
+  return engineeringOperation("branchLength", coreBranchLength, args);
+}
+
+registerOperation("branchLength", ["outer","bolt"], coreBranchLength);
+
+export function flangeKinds(...args: Parameters<typeof coreFlangeKinds>): ReturnType<typeof coreFlangeKinds> {
+  return engineeringOperation("flangeKinds", coreFlangeKinds, args);
+}
+
+registerOperation("flangeKinds", ["material","dn","pn"], coreFlangeKinds);
+
+export function collectorPressureChecks(...args: Parameters<typeof coreCollectorPressureChecks>): ReturnType<typeof coreCollectorPressureChecks> {
+  return engineeringOperation("collectorPressureChecks", coreCollectorPressureChecks, args);
+}
+
+registerOperation("collectorPressureChecks", ["c","inletHead","catalog","enabled"], coreCollectorPressureChecks);

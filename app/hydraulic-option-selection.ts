@@ -1,3 +1,4 @@
+import { engineeringOperation, registerOperation } from "./engineering/runtime";
 import type { AssemblyComponent } from "./suction-catalog";
 import type { CollectorMaterial, SpecTechnicalStatus } from "./project-config";
 import { componentPressureLimit } from "./suction-pressure";
@@ -134,7 +135,7 @@ export function assessHydraulicProduct(item: AssemblyComponent, need: HydraulicP
   return { item, missing, incompatible, technicalStatus: incompatible.length ? "error" : missing.length ? "unverified" : "ready" };
 }
 /** Price never participates in compatibility or candidate ordering. Explicit choices survive catalogue changes. */
-export function selectHydraulicProduct(items: AssemblyComponent[], need: HydraulicProductRequirement, selectedId?: string) {
+export function coreSelectHydraulicProduct(items: AssemblyComponent[], need: HydraulicProductRequirement, selectedId?: string) {
   const candidates = items.filter(item => hydraulicProductKind(item) === need.kind).map(item => assessHydraulicProduct(item, need));
   const colorRank = (item: AssemblyComponent) => Number(need.kind === "isolating-valve" && !!need.color && !(need.color === "red" ? /красн/i : /син/i).test(item.family));
   const compatible = candidates.filter(candidate => !candidate.incompatible.length).sort((a, b) => a.missing.length - b.missing.length || colorRank(a.item) - colorRank(b.item)
@@ -152,3 +153,9 @@ export function hydraulicProductPrice(item: AssemblyComponent, need: Pick<Hydrau
   const prices = item.prices.filter(p => p.currency === "RUB" && /цен[аы]/i.test(p.label) && !/\/кг|\/м\b/i.test(p.label) && (!variant || variant.test(p.label)) && Number.isFinite(p.amount) && p.amount > 0);
   return prices.length === 1 ? prices[0].amount : null;
 }
+
+export function selectHydraulicProduct(...args: Parameters<typeof coreSelectHydraulicProduct>): ReturnType<typeof coreSelectHydraulicProduct> {
+  return engineeringOperation("selectHydraulicProduct", coreSelectHydraulicProduct, args);
+}
+
+registerOperation("selectHydraulicProduct", ["items","need","selectedId"], coreSelectHydraulicProduct);

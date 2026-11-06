@@ -1,0 +1,4 @@
+import {MAX_WORKING_PUMPS} from "./pump-counts";
+import type {InputEntity} from "./project-config";
+export type CalculatedInput = InputEntity & { flowRate:number; head:number; staticHead:number; workingPumpCount:number; reservePumpCount:number; calculated:true };
+export const isCalculated = (input:InputEntity): input is CalculatedInput => input.calculated && input.flowRate !== null && input.head !== null && input.staticHead !== null && input.workingPumpCount !== null && input.reservePumpCount !== null && input.flowRate > 0 && input.head > 0 && input.staticHead >= 0 && input.staticHead <= input.head && Number.isInteger(input.workingPumpCount) && input.workingPumpCount >= 1 && input.workingPumpCount <= MAX_WORKING_PUMPS && Number.isInteger(input.reservePumpCount) && input.reservePumpCount >= 0 && input.reservePumpCount <= 3;

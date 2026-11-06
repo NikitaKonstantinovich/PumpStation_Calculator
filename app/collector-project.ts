@@ -1,3 +1,4 @@
+import { engineeringOperation, registerOperation } from "./engineering/runtime";
 import type { Pump } from "./pump-catalog";
 import { baseConfigurationIdentity, spacingForPump } from "./base-values";
 import { stationCollectorInstrumentPorts, resolveStationCollectorInstrumentPorts } from "./station-hydraulic-ports";
@@ -35,7 +36,7 @@ export function normalizeCollectors(raw: unknown): CollectorsEntity {
   };
   return { kind: "collectors", suction: card(value.suction, "suction"), discharge: card(value.discharge, "discharge") };
 }
-export function collectorRecommendation(project: ProjectConfig, type: CollectorType, pumps?: readonly Pump[] | null): CollectorConfiguration {
+export function coreCollectorRecommendation(project: ProjectConfig, type: CollectorType, pumps?: readonly Pump[] | null): CollectorConfiguration {
   const dn = project.entities["station-dn"] as DnEntity, settings = project.entities["station-settings"] as SettingsEntity;
   const first = project.entities["system-input"] as InputEntity, second = project.entities["system-input-2"] as InputEntity;
   const circuit = (input: InputEntity, secondary: boolean) => {
@@ -67,7 +68,7 @@ export function collectorRecommendation(project: ProjectConfig, type: CollectorT
   if (separationEnabled(settings)) configuration.sectionBreaks = Math.max(0, [primary, secondary].reduce((sum, circuit) => sum + (circuit?.working ?? 0) + (circuit?.reserve ?? 0), 0) - 1);
   return { ...configuration, dn: networkDn, connection: resolveDnConnection(settings, networkDn, false, dn.connectionType).connection };
 }
-export function resolveCollector(recommended: CollectorConfiguration, state: CollectorCardState, settings?: SettingsEntity): CollectorConfiguration {
+export function coreResolveCollector(recommended: CollectorConfiguration, state: CollectorCardState, settings?: SettingsEntity): CollectorConfiguration {
   const o = state.overrides;
   const result: CollectorConfiguration = { ...recommended, dn: o.dn ?? recommended.dn, pn: o.pn ?? recommended.pn, material: o.material ?? recommended.material, connection: o.connection ?? recommended.connection, eccentric: recommended.type === "suction" && state.eccentric,
     primary: { ...recommended.primary, dn: o.primaryDn ?? recommended.primary.dn, pn: o.pn ?? recommended.primary.pn, connection: o.primaryConnection ?? recommended.primary.connection, spacing: state.spacing1Manual ? state.spacing1 : recommended.primary.spacing, ...(state.spacing1Manual ? { spacingManual:true, spacingConfirmation:state.spacing1Confirmation } : {}) },
@@ -124,3 +125,15 @@ export function synchronizeCollectors(project: ProjectConfig, catalog?: Collecto
   const spec = project.entities["station-spec"];
   return { ...project, entities: { ...project.entities, "station-collectors": collectors, ...(spec?.kind === "spec" ? { "station-spec": { ...spec, items: syncCollectorSpec(spec.items, collectors, (project.entities["station-settings"] as SettingsEntity).inletHead, catalog, pressureChecksEnabled(project.entities["station-settings"] as SettingsEntity)) } } : {}) } };
 }
+
+export function collectorRecommendation(...args: Parameters<typeof coreCollectorRecommendation>): ReturnType<typeof coreCollectorRecommendation> {
+  return engineeringOperation("collectorRecommendation", coreCollectorRecommendation, args);
+}
+
+registerOperation("collectorRecommendation", ["project","type","pumps"], coreCollectorRecommendation);
+
+export function resolveCollector(...args: Parameters<typeof coreResolveCollector>): ReturnType<typeof coreResolveCollector> {
+  return engineeringOperation("resolveCollector", coreResolveCollector, args);
+}
+
+registerOperation("resolveCollector", ["recommended","state","settings"], coreResolveCollector);

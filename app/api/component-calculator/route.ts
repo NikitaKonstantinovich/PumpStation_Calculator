@@ -1,3 +1,4 @@
+import {currentPublication} from "../../engineering/runtime";
 import { guardDisabledBetaFeature } from "../../release-server";
 import { currentUser, json } from "../../auth-server";
 import { storageOperation } from "../../project-storage-server";
@@ -58,7 +59,7 @@ export async function POST(request: Request) {
     if (body.action === "export" && (typeof body.catalogVersion !== "string" || !Array.isArray(body.keys) || !body.keys.length || body.keys.length > 5000 || body.keys.some(key => typeof key !== "string" || !key || key.length > 10000))) return reply({ error: "Выберите от 1 до 5000 рассчитанных позиций и укажите версию каталога." }, 400);
     const source = await currentInsertSource(), catalog = await currentInsertCatalog(source);
     if(body.action==="calculate" && body.background===true && input.dnFrom!==input.dnTo) {
-      return storageOperation(actor.id,{action:"enqueue",id:crypto.randomUUID(),input,catalog});
+      return storageOperation(actor.id,{action:"enqueue",id:crypto.randomUUID(),input,catalog,engineering:currentPublication()});
     }
     if (body.action === "export" && body.catalogVersion !== catalog.version) return reply({ error: "Исходные цены, размеры или правила изменились. Выполните расчёт заново перед выгрузкой.", stale: true, catalogVersion: catalog.version }, 409);
     const calculated = generateInsertCalculations(input, catalog);

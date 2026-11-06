@@ -4,7 +4,7 @@ import test from "node:test";
 import { loadTs } from "./load-ts.mjs";
 
 const templateRoot = new URL("../", import.meta.url);
-const readPage = async () => (await Promise.all(["full-workspace.tsx", "control-cabinet-selection.ts", "station-specification.ts", "workspace-panels.tsx", "allowed-pump-tools.tsx", "pump-chart-plot.tsx", "pump-catalog-client.ts", "pump-sketches.ts", "tool-registry.ts"].map(name => readFile(new URL(`../app/${name}`, import.meta.url), "utf8")))).join("\n");
+const readPage = async () => (await Promise.all(["full-workspace.tsx", "station-hydraulic-calculation.ts", "calculated-input.ts", "control-cabinet-selection.ts", "station-specification.ts", "workspace-panels.tsx", "allowed-pump-tools.tsx", "pump-chart-plot.tsx", "pump-catalog-client.ts", "pump-sketches.ts", "tool-registry.ts"].map(name => readFile(new URL(`../app/${name}`, import.meta.url), "utf8")))).join("\n");
 
 async function loadProjectConfig() {
   return loadTs(new URL("../app/project-config.ts", import.meta.url));
@@ -165,7 +165,7 @@ test("provides a persisted DN calculator with SP velocity defaults", async () =>
   assert.match(page, /sort\(\(a,b\)=>a\.colorRank-b\.colorRank/);
   assert.match(page, /componentColor\(item\)==="blue"\?0/);
   assert.match(page, /Добавить арматуру в спецификацию/);
-  assert.match(page, /const buildValveSpecItems=/);
+  assert.match(page, /function buildValveSpecItems\(/);
   assert.match(page, /const checkValvePns=/);
   assert.match(page, /if\(\/латунн\.\*сердечник\/i\.test\(text\)\|\|\/010C\\\.Y\.\*красн\/i\.test\(text\)\)return \[16\]/);
   assert.match(page, /if\(\/\\b\(\?:010C/);

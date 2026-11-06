@@ -1,3 +1,4 @@
+import { engineeringOperation, registerOperation } from "./engineering/runtime";
 import { flangeKinds, positive, THREAD_SIZES, WELD_RATES } from "./collector-calculations";
 import type { InsertPaintingRate } from "./component-painting";
 import type { SensorPressureAcceptance } from "./component-sensor-nipples";
@@ -586,7 +587,7 @@ function calculateVariant(base: InsertPart, left: End, right: End, input: Insert
   return { identityKey: `insert:v1:${JSON.stringify(physicalConfiguration)}`, configuration, catalogVersion: catalog.version, name, dnLarge, dnSmall, pn, material, geometry: base.geometry, leftConnection: left.connection, rightConnection: right.connection, threadLeft: left.connection === "threaded" ? left.part?.thread ?? null : null, threadRight: right.connection === "threaded" ? right.part?.thread ?? null : null, withSensorNipple: input.withSensorNipple, baseLengthMm, totalLengthMm, complete, warnings: uniqueWarnings, ...(assumptions.length ? { assumptions } : {}), ...(assemblyDecisions.length ? { assemblyDecisions } : {}), bom, welds, dimensions, ...(machining.length ? { machining } : {}), weldLengthMm, weldCost, price: complete ? bom.reduce((sum, row) => sum + row.cost!, 0) : null, description: `${insertGeometryLabel(base.geometry)} исполнение; ${insertConnectionLabel(left.connection)} / ${insertConnectionLabel(right.connection)}; PN${pn ?? "?"}; основа: ${base.name}${machining.length ? `; предусмотрена расточка фланцев: ${machining.length} шт.` : ""}; ${input.withSensorNipple ? "со сгоном" : "без сгона"}${assemblyDecisions.length ? `; ${assemblyDecisions.map(item => item.message).join(" ")}` : ""}${sensor?.pressureAcceptance ? `; давление сгона принято ${sensor.pressureAcceptance.pressureBar} бар при температуре среды до +${sensor.pressureAcceptance.maxTemperatureC} °C` : ""}${assumptions.length ? `; ${assumptions.map(item => item.message).join(" ")}` : ""}` };
 }
 
-export function generateInsertCandidates(request: InsertRequest, originalCatalog: InsertCatalog): InsertCalculation[] {
+export function coreGenerateInsertCandidates(request: InsertRequest, originalCatalog: InsertCatalog): InsertCalculation[] {
   const input = parseInsertRequest(request);
   const catalog = { ...originalCatalog, parts: deduplicateInsertParts(originalCatalog.parts) };
   const dns = new Set(catalog.nominalDns.filter(dn => dn >= input.dnFrom && dn <= input.dnTo));
@@ -623,9 +624,21 @@ export function generateInsertCandidates(request: InsertRequest, originalCatalog
   return [...rows.values()].sort((a, b) => a.dnLarge - b.dnLarge || (a.dnSmall ?? 0) - (b.dnSmall ?? 0) || a.material.localeCompare(b.material) || (a.pn ?? 0) - (b.pn ?? 0) || a.identityKey.localeCompare(b.identityKey));
 }
 
-export function generateInsertCalculations(request: InsertRequest, catalog: InsertCatalog): InsertCalculation[] {
+export function coreGenerateInsertCalculations(request: InsertRequest, catalog: InsertCatalog): InsertCalculation[] {
   const rows = generateInsertCandidates(request, catalog);
   if (!catalog.engineering.variantSelection) return rows;
   const core = request.withSensorNipple ? generateInsertCandidates({ ...request, withSensorNipple: false }, catalog) : rows;
   return selectInsertVariants(rows, core, catalog);
 }
+
+export function generateInsertCalculations(...args: Parameters<typeof coreGenerateInsertCalculations>): ReturnType<typeof coreGenerateInsertCalculations> {
+  return engineeringOperation("generateInsertCalculations", coreGenerateInsertCalculations, args);
+}
+
+registerOperation("generateInsertCalculations", ["request","catalog"], coreGenerateInsertCalculations);
+
+export function generateInsertCandidates(...args: Parameters<typeof coreGenerateInsertCandidates>): ReturnType<typeof coreGenerateInsertCandidates> {
+  return engineeringOperation("generateInsertCandidates", coreGenerateInsertCandidates, args);
+}
+
+registerOperation("generateInsertCandidates", ["request","originalCatalog"], coreGenerateInsertCandidates);

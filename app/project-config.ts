@@ -129,7 +129,7 @@ declare const __PSC_CALC_METHOD__:string;
 export const calculationMethod=typeof __PSC_CALC_METHOD__==="string"?__PSC_CALC_METHOD__:"development";
 export type ProjectConfig = {
   schemaVersion: 1;
-  project: { id: string; name: string; createdAt: string; updatedAt: string; modelLibraryVersion?: string; recalculatedAt?: string; calculationMethod?: string };
+  project: { id: string; name: string; createdAt: string; updatedAt: string; modelLibraryVersion?: string; recalculatedAt?: string; calculationMethod?: string; graphVersion?: string };
   station: { selectedPumpId?: string; selectedPumpModel?: string; workingPumpCount?: number; reservePumpCount?: number; totalPumpCount?: number; secondaryPumpId?: string; secondaryPumpModel?: string; secondaryWorkingPumpCount?: number; secondaryReservePumpCount?: number; secondaryTotalPumpCount?: number };
   workspace: { zoom: number; mode:WorkspaceMode; gridHeightScreens:number; grid:WorkspaceGrid; windows: PanelState[] };
   entities: Record<string, ProjectEntity>;

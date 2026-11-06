@@ -1,3 +1,4 @@
+import { engineeringOperation, registerOperation } from "../engineering/runtime";
 import { MAX_TOTAL_PUMPS } from "../pump-counts";
 import { FIRE_INSERTION_INSTRUMENTS_REVISION } from "../fire-insertion-instruments";
 import { TANK_LAYOUT_REVISION } from "../tank-connection";
@@ -346,7 +347,7 @@ export function sourceFingerprint(project: ProjectConfig): string {
   const entities = project.entities;
   return JSON.stringify([TANK_LAYOUT_REVISION, FIRE_INSERTION_INSTRUMENTS_REVISION, FASTENER_REVISION, INSTRUMENT_MOUNT_REVISION, "collector-assembly-v12-flange-seating-5mm-insert-sgon60-v4", "pump-spatial-onis-v3-mbl2026-workbook", VALVE_CONTROL_REVISION, COLLECTOR_INSTRUMENT_RULES_REVISION, "check-valve-flow-v1", "discharge-butterfly-roll90-v1", PUMP_LINE_RULES_REVISION, VIBRATION_DIMENSIONS_REVISION, FRAME_RULE_REVISION, project.station, entities["system-input"], entities["system-input-2"], entities["station-dn"], entities["station-settings"], ...["suction", "discharge"].map(side => { const c = (entities["station-collectors"] as CollectorsEntity)?.[side as "suction" | "discharge"]; return [c?.configuration, c?.calculation && [c.calculation.fingerprint, c.calculation.lengthMm, c.calculation.branchLengthsMm, c.calculation.bom.map(r => [r.role, r.componentId, r.quantity])], c?.status]; }), (entities["station-spec"] as SpecEntity)?.items.map(i => [i.equipmentId, i.option, i.quantity, i.name, i.position, i.assemblyRole, i.details, i.description, i.status, i.hydraulicAssembly?.parts.map(p => [p.assemblyRole, p.equipmentId, p.quantity])])]);
 }
-export function buildAssembly(project: ProjectConfig, pumps: Pump[], profiles: ProfileCatalog, lines?: LineCatalog): Assembly {
+export function coreBuildAssembly(project: ProjectConfig, pumps: Pump[], profiles: ProfileCatalog, lines?: LineCatalog): Assembly {
   const settings = project.entities["station-settings"] as SettingsEntity, dn = project.entities["station-dn"] as DnEntity, collectors = project.entities["station-collectors"] as CollectorsEntity;
   const components: Component[] = [], pumpComponents: Component[] = [];
   const frameSelection = projectFrameSelection(project, pumps);
@@ -641,3 +642,9 @@ export function undo(history: AssemblyHistory): AssemblyHistory {
 export function redo(history: AssemblyHistory): AssemblyHistory {
   return history.future.length ? { past: [...history.past, history.present], present: history.future[0], future: history.future.slice(1) } : history;
 }
+
+export function buildAssembly(...args: Parameters<typeof coreBuildAssembly>): ReturnType<typeof coreBuildAssembly> {
+  return engineeringOperation("buildAssembly", coreBuildAssembly, args);
+}
+
+registerOperation("buildAssembly", ["project","pumps","profiles","lines"], coreBuildAssembly);

@@ -1,3 +1,4 @@
+import { engineeringOperation, registerOperation } from "./engineering/runtime";
 import { hydraulicProductRowPrice } from "./hydraulic-option-assembly";
 import { instrumentCount, separationEnabled } from "./hydraulic-option-config";
 import type { InputEntity, ProjectConfig, SettingsEntity, SpecEntity, SpecItem, SpecOption, SpecTechnicalStatus } from "./project-config";
@@ -12,7 +13,7 @@ export type RequiredSpecificationNode = { id: string; label: string; matches: (i
 export const specificationHasPrice = (item: SpecItem) => item.technicalStatus !== "stale" && typeof item.price === "number" && Number.isFinite(item.price) && item.price >= 0 &&
   (!item.insertionAssembly || installedInsertionPrice(item.insertionAssembly) === item.price) &&
   (!item.hydraulicAssembly || hydraulicProductRowPrice(item.hydraulicAssembly) === item.price);
-export const specificationLineTotal = (item: SpecItem) => specificationHasPrice(item) && Number.isFinite(item.quantity) && item.quantity > 0 ? item.price! * item.quantity : 0;
+export const coreSpecificationLineTotal = (item: SpecItem) => specificationHasPrice(item) && Number.isFinite(item.quantity) && item.quantity > 0 ? item.price! * item.quantity : 0;
 type ExistingIssue = { id: string; tool: string; severity: "error" | "warning"; message: string; subject?: string };
 
 export function specificationTechnicalStatus(item: SpecItem): SpecTechnicalStatus {
@@ -70,7 +71,7 @@ export function requiredSpecificationNodes(project: ProjectConfig): RequiredSpec
   return nodes;
 }
 
-export function assessSpecification(project: ProjectConfig, displayedItems?: SpecItem[], existingIssues: ExistingIssue[] = []) {
+export function coreAssessSpecification(project: ProjectConfig, displayedItems?: SpecItem[], existingIssues: ExistingIssue[] = []) {
   const spec = project.entities["station-spec"] as SpecEntity, settings = project.entities["station-settings"] as SettingsEntity;
   const items = displayedItems ?? visibleSpecificationItems(spec, settings);
   const findings: SpecificationFinding[] = [];
@@ -129,3 +130,15 @@ export function assessSpecification(project: ProjectConfig, displayedItems?: Spe
     pricedRows: items.filter(specificationHasPrice).length, totalRows: items.length, findings };
 }
 export type SpecificationReadiness = ReturnType<typeof assessSpecification>;
+
+export function specificationLineTotal(...args: Parameters<typeof coreSpecificationLineTotal>): ReturnType<typeof coreSpecificationLineTotal> {
+  return engineeringOperation("specificationLineTotal", coreSpecificationLineTotal, args);
+}
+
+registerOperation("specificationLineTotal", ["item"], coreSpecificationLineTotal);
+
+export function assessSpecification(...args: Parameters<typeof coreAssessSpecification>): ReturnType<typeof coreAssessSpecification> {
+  return engineeringOperation("assessSpecification", coreAssessSpecification, args);
+}
+
+registerOperation("assessSpecification", ["project","displayedItems","existingIssues"], coreAssessSpecification);

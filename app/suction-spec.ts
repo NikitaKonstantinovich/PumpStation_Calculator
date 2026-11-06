@@ -1,3 +1,4 @@
+import { engineeringOperation, registerOperation } from "./engineering/runtime";
 import { baseConfigurationIdentity } from "./base-values";
 import type { DnEntity, InputEntity, ProjectConfig, SettingsEntity, SpecItem } from "./project-config";
 import type { CollectorsEntity } from "./collector-project";
@@ -24,7 +25,7 @@ export function suctionFingerprint(project:ProjectConfig) {
   return JSON.stringify([INSTRUMENT_CONNECTION_REVISION,PUMP_LINE_RULES_REVISION,VALVE_LIMIT_SWITCHES_REVISION,"instruments-v2","seals-v2","instrument-valve-v1",settings.vibrationCompensators,settings.inletHead??null,e["station-dn"],e["system-input"],secondaryAllowed({stationType:settings.stationType,jockey:settings.jockeyPump})?e["system-input-2"]:null,settings.stationType,settings.jockeyPump,baseConfigurationIdentity((e["station-collectors"] as CollectorsEntity).suction.configuration!)]);
 }
 
-export function buildSuctionSpec(project:ProjectConfig, database:{items:AssemblyComponent[]}, catalog:CollectorCatalog, valves:SpecItem[]=(project.entities["station-spec"] as {items:SpecItem[]}).items, pumps?:readonly Pump[]|null):SpecItem[] {
+export function coreBuildSuctionSpec(project:ProjectConfig, database:{items:AssemblyComponent[]}, catalog:CollectorCatalog, valves:SpecItem[]=(project.entities["station-spec"] as {items:SpecItem[]}).items, pumps?:readonly Pump[]|null):SpecItem[] {
   const e=project.entities, settings=e["station-settings"] as SettingsEntity, dn=e["station-dn"] as DnEntity;
   const collector=baseConfigurationIdentity((e["station-collectors"] as CollectorsEntity).suction.configuration!);
   if (!collector || !(e["system-input"] as InputEntity).calculated) return [];
@@ -111,3 +112,9 @@ export function checkSuctionSpecPressure(project: ProjectConfig, items: SpecItem
     return withInletPressureChecks(item, [checkInletPressure(settings.inletHead, item.name, limit?.bar, limit?.label)]);
   });
 }
+
+export function buildSuctionSpec(...args: Parameters<typeof coreBuildSuctionSpec>): ReturnType<typeof coreBuildSuctionSpec> {
+  return engineeringOperation("buildSuctionSpec", coreBuildSuctionSpec, args);
+}
+
+registerOperation("buildSuctionSpec", ["project","database","catalog","valves","pumps"], coreBuildSuctionSpec);
