@@ -28,7 +28,7 @@ createRoot(document.getElementById("root")).render(<EngineeringEditor project={c
 const ticks=()=>new Promise(r=>setTimeout(r,25));
 const until=async(fn)=>{for(let i=0;i<260;i++){const hit=fn();if(hit)return hit;await ticks();}throw Error("Ожидание: "+document.body.innerText.slice(-850));};
 const button=(text,root=document)=>Array.from(root.querySelectorAll("button")).find(b=>b.textContent.trim()===text);
-const click=async(text,root=document)=>{(await until(()=>button(text,root))).click();await ticks();};
+const click=async(text,root=document)=>{let el;try{el=await until(()=>button(text,root));}catch(err){throw Error("Кнопка «"+text+"» · "+(document.querySelector("[role=alert]")?.textContent??err.message));}el.click();await ticks();};
 const field=(label,scope)=>Array.from(scope.querySelectorAll("label")).find(l=>l.childNodes[0].textContent.trim()===label)?.querySelector("input,select,textarea");
 async function fill(el,value){
   if(!el)throw Error("Не найдено поле для "+value);
@@ -38,7 +38,9 @@ async function fill(el,value){
   el.dispatchEvent(new FocusEvent("focusout",{bubbles:true}));await ticks();
 }
 const byName=name=>[...document.querySelectorAll(".gn-node")].find(n=>n.getAttribute("aria-label")===name);
-const opts=async()=>{await fill(document.querySelector('[aria-label="Схема инструмента"]'),"lab");};
+const zoom=async path=>{const n=await until(()=>document.querySelector('[data-address="'+path+'"]'));for(let i=0;i<22&&!n.classList.contains("expanded");i++){const b=n.getBoundingClientRect();n.dispatchEvent(new WheelEvent("wheel",{bubbles:true,cancelable:true,deltaY:-200,clientX:b.x+b.width/2,clientY:b.y+b.height/2}));await ticks();}if(!n.classList.contains("expanded"))throw Error("Не раскрылся "+path);};
+const select=async name=>{(await until(()=>byName(name))).dispatchEvent(new KeyboardEvent("keydown",{key:"Enter",bubbles:true}));await ticks();};
+const opts=async()=>{await click("Показать всю станцию");await zoom("primary");await until(()=>byName("Условия подбора"));await click("Показать всю станцию");await zoom("lab");await select("Расчёт массы");};
 const context=async name=>{const n=await until(()=>byName(name));n.dispatchEvent(new MouseEvent("contextmenu",{bubbles:true,clientX:80,clientY:100}));await click("Передать атрибут…",await until(()=>document.querySelector(".gn-menu")));};
 async function send(source,field,target,input){
   await context(source);
@@ -66,8 +68,9 @@ async function run(){
     if(!byName("Тестовая деталь")||!byName("Тестовый инструмент"))throw Error("Узлы потеряны после обновления");
     window.confirm=()=>true;
     await showDn(65);
-    await fill(document.querySelector('[aria-label="Схема инструмента"]'),"resolvePort");
+    await click("Показать всю станцию");await zoom("dn");await zoom("dn/live");await zoom("dn/live/choose");
     byName("DN патрубка").dispatchEvent(new KeyboardEvent("keydown",{key:"Enter",bubbles:true}));await ticks();
+    if(!document.querySelector(".gn-props"))await click("☰ Свойства");
     await click("Изменить определение типа");
     const form=document.querySelector(".gn-dialog");
     await fill(form.querySelector("textarea[placeholder]"),"200");await click("Применить определение",form);
@@ -119,7 +122,7 @@ const server=createServer(async(req,res)=>{
       const response=await store.effective.GET(new Request("http://fixture"+req.url,{headers:{"x-test-role":"base"}}));
       res.writeHead(response.status,{"Content-Type":"application/json"});res.end(await response.text());return;
     }
-    if(req.url.startsWith("/api/admin/geometry-nodes")){let text="";for await(const chunk of req)text+=chunk;
+    if(req.url.startsWith("/api/admin/geometry-nodes")){req.setEncoding("utf8");let text="";for await(const chunk of req)text+=chunk;
       const r=await store.call(text?JSON.parse(text):null);res.writeHead(r.status,{"Content-Type":"application/json"});res.end(JSON.stringify(r.body));return;}
     const file=built.outputFiles.find(f=>req.url==="/"+basename(f.path));
     if(file){res.setHeader("Content-Type",file.path.endsWith(".js")?"application/javascript":"text/css");res.end(file.contents);return;}

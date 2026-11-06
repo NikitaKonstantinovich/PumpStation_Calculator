@@ -9,6 +9,7 @@ export type Step = {
   links: Edge[];
   expressions: Record<string, Expr>;
   native?: string;
+  direct?: boolean;
 };
 export type Plan = {
   id: string;
@@ -37,7 +38,7 @@ export function connectionProblem(graph: Diagram, types: NodeType[], edge: Edge)
   }
   return "";
 }
-export function compileDiagram(graph: Diagram, types: NodeType[]): Plan {
+export function compileDiagram(graph: Diagram, types: NodeType[], multi = false): Plan {
   const nodes = new Map(graph.nodes.map(n => [n.id, n]));
   if (nodes.size !== graph.nodes.length || !nodes.has("result")) throw Error(graph.name + " · отсутствует результат или повторяется ID узла");
   const incoming = new Map<string, Edge[]>();
@@ -73,7 +74,7 @@ export function compileDiagram(graph: Diagram, types: NodeType[]): Plan {
         throw Error(node.name + "." + key + " · " + (error as Error).message);
       }
     }
-    if (id === "result" && !links.some(e => e.input === "value")) throw Error(node.name + " · подключите результат");
+    if (!multi && id === "result" && !links.some(e => e.input === "value")) throw Error(node.name + " · подключите результат");
     steps.push({
       id,
       catalog: node.catalog,
@@ -96,7 +97,7 @@ export type StepCache = Map<string, {
   inputs: unknown[];
   outputs: Record<string, unknown>;
 }>;
-export function runPlan(plan: Plan, args: Record<string, unknown>, native: (name: string, values: Record<string, unknown>) => unknown, traceAll = false, cache?: StepCache) {
+export function runPlan(plan: Plan, args: Record<string, unknown>, native: (name: string, values: Record<string, unknown>, direct?: boolean) => unknown, traceAll = false, cache?: StepCache) {
   const trace: Trace = Object.create(null);
   const needed = new Set(["result"]);
   if (!traceAll) for (let i = plan.steps.length - 1; i >= 0; i--) {
@@ -135,7 +136,7 @@ export function runPlan(plan: Plan, args: Record<string, unknown>, native: (name
     try {
       for (const f of step.fields) if (f.required && f.direction !== "output" && values[f.key] == null) throw Error(f.name + " · обязательный вход пуст");
       if (step.native) {
-        outputs.value = native(step.native, values);
+        outputs.value = native(step.native, values, step.direct);
         sources.value = "Встроенная операция · " + step.native;
       }
       for (const f of step.fields) {
@@ -170,7 +171,7 @@ export class DiagramError extends Error {
   }
 }
 export function validateDocument(doc: Document, sigs: Signature[], builtin: NodeType[], forPublish: boolean) {
-  if (doc?.schema !== 1 || !Array.isArray(doc.types) || doc.types.length > 400 || !Array.isArray(doc.diagrams) || doc.diagrams.length > 150) throw Error("Некорректный формат или превышен размер графа");
+  if (doc?.schema !== 1 || !Array.isArray(doc.types) || doc.types.length > 800 || !Array.isArray(doc.diagrams) || doc.diagrams.length > 300) throw Error("Некорректный формат или превышен размер графа");
   const unique = (ids: string[]) => ids.every(validKey) && new Set(ids).size === ids.length;
   if (!unique(doc.types.map(t => t.id)) || !unique(doc.diagrams.map(g => g.id))) throw Error("Некорректные или повторяющиеся ключи типов или графов");
   for (const t of doc.types) {
@@ -195,7 +196,7 @@ export function validateDocument(doc: Document, sigs: Signature[], builtin: Node
         const t = doc.types.find(t => t.id === n.type)!;
         if (sig && betaOperations.has(sig.id) && t.native && !betaOperations.has(t.native)) throw Error(n.name + " · операция полной версии недоступна в схеме beta");
       }
-      const program = compileDiagram(graph, doc.types);
+      const program = compileDiagram(graph, doc.types, !sig && graph.id!=="lab");
       for (const step of program.steps) for (const f of step.fields) {
         if (f.direction === "output") continue;
         const connected = step.links.some(e => e.input === f.key);
@@ -217,8 +218,9 @@ export function validateDocument(doc: Document, sigs: Signature[], builtin: Node
       if (stack.has(id)) throw Error("Цикл между инструментами: " + [...stack, id].join(" → "));
       stack.add(id);
       for (const node of byId.get(id)?.nodes ?? []) {
-        const target = doc.types.find(t => t.id === node.type)?.native;
-        if (target && target !== id) checkCalls(target);
+        const type = doc.types.find(t => t.id === node.type);
+        if(type?.instrument){if(!byId.has(type.instrument))throw new DiagramError("Нет определения Instrument",id,node.id);checkCalls(type.instrument);}
+        if(type?.native && type.native!==id)checkCalls(type.native);
       }
       stack.delete(id);
       done.add(id);
@@ -228,8 +230,8 @@ export function validateDocument(doc: Document, sigs: Signature[], builtin: Node
 }
 
 /** Lower only the fields consumed by the host result. Editor-only data stays in the draft. */
-export function executableSlice(plan: Plan): Plan {
-  const needs = new Map<string, Set<string>>([["result", new Set(["value"])]]),
+export function executableSlice(plan: Plan, outputs = ["value"]): Plan {
+  const needs = new Map<string, Set<string>>([["result", new Set(outputs)]]),
     steps: Step[] = [];
   function references(expr: Expr, fields: Set<string>) {
     if ("input" in expr) fields.add(expr.input);else if ("args" in expr) expr.args.forEach(e => references(e, fields));
@@ -255,6 +257,7 @@ export function executableSlice(plan: Plan): Plan {
     steps.push({
       id: step.id,
       native: step.native,
+      ...(step.direct ? {direct:true} : {}),
       fields: step.fields.filter(f => fields.has(f.key)),
       values,
       links,

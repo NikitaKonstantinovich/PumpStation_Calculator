@@ -32,6 +32,10 @@ const functions: Record<string, [number, number]> = {
   if: [3, 3],
   get: [2, 2],
   set: [3, 3],
+  finite: [1, 1],
+  object: [0, 0],
+  at: [2, 2],
+  lookup: [2, 2],
   len: [1, 1]
 };
 export function compileExpression(source: string, names: Set<string>): Expr {
@@ -115,6 +119,7 @@ export function evaluate(root: Expr, values: Record<string, unknown>): unknown {
       const args = expr.args.map(arg => numeric(visit(arg)));
       return expr.op === "min" ? Math.min(...args) : Math.max(...args);
     }
+    if(expr.op==="object")return {};
     const [a, b, c] = expr.args;
     const left = visit(a);
     if (expr.op === "if") return visit(left ? b : c);
@@ -122,15 +127,20 @@ export function evaluate(root: Expr, values: Record<string, unknown>): unknown {
     if (expr.op === "&&") return left && visit(b);
     if (expr.op === "||") return left || visit(b);
     if (expr.op === "not") return !left;
+    if (expr.op === "finite") return typeof left==="number" && Number.isFinite(left);
     if (expr.op === "len") return Array.isArray(left) || typeof left === "string" ? left.length : null;
     const right = b ? visit(b) : undefined;
+    if(expr.op==="at")return Array.isArray(left)&&Number.isInteger(right)?left[right as number]??null:null;
+    if (expr.op === "lookup") return Array.isArray(left) ? left.find(item => item && typeof item === "object" && item.id === right) ?? null : null;
     if (expr.op === "get" || expr.op === "set") {
       if (left == null) return null;
       if (typeof left !== "object" || !safeKey(right)) throw Error("Некорректное поле объекта");
       if (expr.op === "get") return Object.hasOwn(left, right) ? (left as Record<string, unknown>)[right] : null;
+      const replacement=visit(c);
+      if (Object.hasOwn(left,right) && (left as Record<string,unknown>)[right] === replacement) return left;
       return {
         ...left,
-        [right]: visit(c)
+        [right]: replacement
       };
     }
     if (expr.op === "==") return left === right;

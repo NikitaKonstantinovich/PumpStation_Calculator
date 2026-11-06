@@ -13,7 +13,7 @@ export async function GET(request: Request) {
     }, 401);
     const p = await readProgram(new URL(request.url).searchParams.get("version"));
     if (!IS_BETA) return reply(p);
-    const allowed = (record: Record<string, unknown>) => Object.fromEntries(Object.entries(record).filter(([key]) => beta.has(key)));
+    const allowed = (record: Record<string, unknown>) => Object.fromEntries(Object.entries(record).filter(([key]) => beta.has(key.split("@")[0])));
     return reply({
       version: p.version,
       plans: allowed(p.plans),

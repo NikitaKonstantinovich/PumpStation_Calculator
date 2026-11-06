@@ -348,9 +348,16 @@ export function sourceFingerprint(project: ProjectConfig): string {
   return JSON.stringify([TANK_LAYOUT_REVISION, FIRE_INSERTION_INSTRUMENTS_REVISION, FASTENER_REVISION, INSTRUMENT_MOUNT_REVISION, "collector-assembly-v12-flange-seating-5mm-insert-sgon60-v4", "pump-spatial-onis-v3-mbl2026-workbook", VALVE_CONTROL_REVISION, COLLECTOR_INSTRUMENT_RULES_REVISION, "check-valve-flow-v1", "discharge-butterfly-roll90-v1", PUMP_LINE_RULES_REVISION, VIBRATION_DIMENSIONS_REVISION, FRAME_RULE_REVISION, project.station, entities["system-input"], entities["system-input-2"], entities["station-dn"], entities["station-settings"], ...["suction", "discharge"].map(side => { const c = (entities["station-collectors"] as CollectorsEntity)?.[side as "suction" | "discharge"]; return [c?.configuration, c?.calculation && [c.calculation.fingerprint, c.calculation.lengthMm, c.calculation.branchLengthsMm, c.calculation.bom.map(r => [r.role, r.componentId, r.quantity])], c?.status]; }), (entities["station-spec"] as SpecEntity)?.items.map(i => [i.equipmentId, i.option, i.quantity, i.name, i.position, i.assemblyRole, i.details, i.description, i.status, i.hydraulicAssembly?.parts.map(p => [p.assemblyRole, p.equipmentId, p.quantity])])]);
 }
 export function coreBuildAssembly(project: ProjectConfig, pumps: Pump[], profiles: ProfileCatalog, lines?: LineCatalog): Assembly {
+  return assembleWithInputs(project,pumps,profiles,lines,projectFrameSelection(project,pumps));
+}
+type PortValue = ReturnType<typeof resolvePumpPortData>;
+type PortInputs = { primaryId?:string; secondaryId?:string; primaryIn:PortValue; primaryOut:PortValue; secondaryIn:PortValue; secondaryOut:PortValue };
+export function coreAssembleWithInputs(project:ProjectConfig,pumps:Pump[],profiles:ProfileCatalog,lines:LineCatalog|undefined,frameSelection:ReturnType<typeof projectFrameSelection>,ports?:PortInputs):Assembly {
+  return buildStationLayout(placeStationPumps(project,pumps,profiles,lines,frameSelection,ports));
+}
+export function corePlaceStationPumps(project:ProjectConfig,pumps:Pump[],profiles:ProfileCatalog,lines:LineCatalog|undefined,frameSelection:ReturnType<typeof projectFrameSelection>,ports?:PortInputs){
   const settings = project.entities["station-settings"] as SettingsEntity, dn = project.entities["station-dn"] as DnEntity, collectors = project.entities["station-collectors"] as CollectorsEntity;
-  const components: Component[] = [], pumpComponents: Component[] = [];
-  const frameSelection = projectFrameSelection(project, pumps);
+  const pumpComponents: Component[] = [];
   // Unknown mass retains only the explicitly labelled legacy layout placeholder.
   const frameHeight = frameSelection.construction?.heightMm ?? 80;
   let y = 0;
@@ -375,7 +382,8 @@ export function coreBuildAssembly(project: ProjectConfig, pumps: Pump[], profile
       c.ports = structuredClone(spatial.ports);
       if (lines) c.ports = c.ports.map(port => {
         if (port.id !== "inlet" && port.id !== "outlet") return port;
-        const metadata = resolvePumpPortData(dn, { ...input, selectedPumpId: pump.id }, circuit === 2, port.id, pump);
+        const channel=circuit===2?"secondary":"primary";
+        const metadata = ports && ports[channel==="primary"?"primaryId":"secondaryId"]===pump.id ? ports[(channel+(port.id==="inlet"?"In":"Out")) as "primaryIn"|"primaryOut"|"secondaryIn"|"secondaryOut"] : resolvePumpPortData(dn, { ...input, selectedPumpId: pump.id }, circuit === 2, port.id, pump);
         return metadata ? { ...port, dn: metadata.dn ?? undefined, connection: metadata.connection ?? undefined, source: [metadata.source, port.source].filter(Boolean).join("; ") } : port;
       });
       c.sourceNote = spatial.note;
@@ -386,9 +394,15 @@ export function coreBuildAssembly(project: ProjectConfig, pumps: Pump[], profile
         });
         if (mismatches.length) c.sourceNote += `. Расхождение габаритов требует проверки: ${mismatches.join("; ")}`;
       }
-      components.push(c); pumpComponents.push(c); y += pitch;
+      pumpComponents.push(c); y += pitch;
     }
   }
+  return {project,pumps,profiles,lines,frameSelection,frameHeight,pumpComponents,y};
+}
+export function coreBuildStationLayout(batch:ReturnType<typeof corePlaceStationPumps>):Assembly {
+  const {project,pumps,profiles,lines,frameSelection,frameHeight,pumpComponents,y}=batch;
+  const dn=project.entities["station-dn"] as DnEntity,collectors=project.entities["station-collectors"] as CollectorsEntity;
+  const components=[...pumpComponents];
   if (!pumpComponents.length) return addValveControls(withSpecificationModels({ version: 1, sourceFingerprint: sourceFingerprint(project), components: [] }, project, profiles, lines), project);
   const midY = (pumpComponents[0].position[1] + pumpComponents[pumpComponents.length - 1].position[1]) / 2, spanY = y;
   const maxX = Math.max(...pumpComponents.map(c => c.position[0] + c.bounds![3]));
@@ -648,3 +662,12 @@ export function buildAssembly(...args: Parameters<typeof coreBuildAssembly>): Re
 }
 
 registerOperation("buildAssembly", ["project","pumps","profiles","lines"], coreBuildAssembly);
+
+export function assembleWithInputs(...args:Parameters<typeof coreAssembleWithInputs>):ReturnType<typeof coreAssembleWithInputs>{return engineeringOperation("assembleWithInputs",coreAssembleWithInputs,args);}
+registerOperation("assembleWithInputs",["project","pumps","profiles","lines","frame","ports"],coreAssembleWithInputs);
+
+export function placeStationPumps(...args:Parameters<typeof corePlaceStationPumps>):ReturnType<typeof corePlaceStationPumps>{return engineeringOperation("placeStationPumps",corePlaceStationPumps,args);}
+registerOperation("placeStationPumps",["project","pumps","profiles","lines","frame","ports"],corePlaceStationPumps);
+
+export function buildStationLayout(...args:Parameters<typeof coreBuildStationLayout>):ReturnType<typeof coreBuildStationLayout>{return engineeringOperation("buildStationLayout",coreBuildStationLayout,args);}
+registerOperation("buildStationLayout",["batch"],coreBuildStationLayout);

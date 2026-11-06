@@ -2,7 +2,11 @@
 
 import { useEffect, useState, type ReactNode } from "react";
 import { betaOperations } from "./profile";
-import { Canvas } from "./canvas";
+import { Canvas, type Focus } from "./canvas";
+import { rowIdentity, type RowHistory } from "./trial-trace";
+import { GroupDialog } from "./group-dialog";
+import { ROOT, childDiagram } from "./hierarchy";
+import { layout, classification, type Address } from "./canvas-layout";
 import { Properties } from "./properties";
 import { TypeEditor } from "./type-editor";
 import { connectionProblem, type Trace } from "./engine";
@@ -10,7 +14,7 @@ import { compatible, display, type Diagram, type Document, type Edge, type Edito
 import { graphNode, signatures } from "./templates";
 import { catalogPumpPort, pumpPortField } from "../pump-ports";
 import type { Pump } from "../pump-catalog";
-import type { DnEntity, InputEntity, ProjectConfig } from "../project-config";
+import type { DnEntity, InputEntity, ProjectConfig, SpecEntity, SpecItem } from "../project-config";
 import "./editor.css";
 const api = "/api/admin/geometry-nodes";
 interface NodeLocation {
@@ -44,7 +48,7 @@ async function request(path: string, body?: unknown) {
   if (!response.ok) throw new RequestError(value.error ?? "Ошибка доступа к редактору", value.location);
   return value;
 }
-function inputsFor(key: string, project: ProjectConfig, pumps: Pump[], secondary: boolean, side: "inlet" | "outlet") {
+function inputsFor(key: string, project: ProjectConfig, pumps: Pump[], secondary: boolean, side: "inlet" | "outlet", document?:Document) {
   const input = project.entities[secondary ? "system-input-2" : "system-input"] as InputEntity,
     entity = project.entities["station-dn"] as DnEntity;
   const pump = pumps.find(p => p.id === input.selectedPumpId);
@@ -55,8 +59,27 @@ function inputsFor(key: string, project: ProjectConfig, pumps: Pump[], secondary
       override: input.selectedPumpId && override?.pumpId === input.selectedPumpId ? override : null
     };
   }
+  const selectedIds = ["system-input", "system-input-2"].map(k => (project.entities[k] as InputEntity).selectedPumpId);
+  const catalogue = pumps.filter(p => selectedIds.includes(p.id));
   const known: Record<string, unknown> = {
     project,
+    resources: {
+      pumps: catalogue,
+      cabinets: null,
+      smartCabinets: null
+    },
+    catalogue,specEntity:project.entities["station-spec"],input2:project.entities["system-input-2"],primary:project.entities["system-input"],second:project.entities["system-input-2"],pump1:pumps.find(p=>p.id===selectedIds[0]),pump2:pumps.find(p=>p.id===selectedIds[1]),
+    side,
+    profiles: {
+      version: 1,
+      profiles: {}
+    },
+    lines: {
+      version: 1,
+      items: {},
+      issues: []
+    },
+    item: (project.entities["station-spec"] as SpecEntity).items[0],
     entity,
     input,
     settings: project.entities["station-settings"],
@@ -78,7 +101,9 @@ function inputsFor(key: string, project: ProjectConfig, pumps: Pump[], secondary
     dn: entity.dischargeValveDn,
     volume: 50
   };
-  const args = signatures.find(s => s.id === key)?.args ?? [];
+  if (key === ROOT) return known;
+  const source=document?.diagrams.find(g=>g.id===key)?.nodes.find(n=>n.id==="source");
+  const args = signatures.find(s => s.id === key)?.args ?? document?.types.find(t=>t.id===source?.type)?.fields ?? [];
   return Object.fromEntries(args.map(f => [f.key, known[f.key] ?? null]));
 }
 type Transfer = {
@@ -102,9 +127,9 @@ export function EngineeringEditor({
 }: Props) {
   const [remote, setRemote] = useState<EditorState | null>(null),
     [doc, setDoc] = useState<Document | null>(null),
-    [id, setId] = useState("resolvePort");
-  const [selected, setSelected] = useState("select"),
-    [props, setProps] = useState(true),
+    [id, setId] = useState(ROOT);
+  const [selected, setSelected] = useState("spec"),
+    [props, setProps] = useState(false),
     [library, setLibrary] = useState(false),
     [query, setQuery] = useState("");
   const [menu, setMenu] = useState<{
@@ -134,6 +159,14 @@ export function EngineeringEditor({
     [sampleQuery, setSampleQuery] = useState("");
   const [impact, setImpact] = useState<AffectedNode[] | null>(null);
   const [errorLocation, setErrorLocation] = useState<NodeLocation | null>(null);
+  const [path, setPath] = useState<string[]>([]),
+    [focus, setFocus] = useState<Focus | null>(null),
+    [pack, setPack] = useState(false),
+    [useCatalog, setUseCatalog] = useState(true),
+    [trialOut, setTrialOut] = useState("stationComposition"),
+    [rowEvents, setRowEvents] = useState<RowHistory[]>([]),
+    [trialSpec, setTrialSpec] = useState<SpecEntity | null>(null),
+    [tracePrefix, setTracePrefix] = useState("");
   const [versions, setVersions] = useState(false);
   const graph = doc?.diagrams.find(g => g.id === id),
     node = graph?.nodes.find(n => n.id === selected),
@@ -202,6 +235,8 @@ export function EngineeringEditor({
     state = remote;
   function change(next: Document) {
     if (busy) return;
+    setRowEvents([]);
+    setTrialSpec(null);
     setHistory(old => [...old.slice(-39), current]);
     setDoc(next);
     setTrace({});
@@ -211,7 +246,7 @@ export function EngineeringEditor({
   function updateGraph(next: Diagram) {
     change({
       ...current,
-      diagrams: current.diagrams.map(d => d.id === id ? next : d)
+      diagrams: current.diagrams.map(d => d.id === next.id ? next : d)
     });
   }
   function updateNode(nid: string, patch: Partial<GraphNode>) {
@@ -293,13 +328,13 @@ export function EngineeringEditor({
       formulas: {}
     });
   }
-  function add(t: NodeType, types = current.types) {
+  function add(t: NodeType, types = current.types, diagrams = current.diagrams) {
     const key = "n_" + crypto.randomUUID().slice(0, 8),
       n = graphNode(key, t.id, t.name, (node?.x ?? 30) + 65, (node?.y ?? 40) + 140);
     change({
       ...current,
       types,
-      diagrams: current.diagrams.map(d => d.id === id ? {
+      diagrams: diagrams.map(d => d.id === id ? {
         ...d,
         nodes: [...d.nodes, {
           ...n,
@@ -314,16 +349,101 @@ export function EngineeringEditor({
   function saveType(t: NodeType) {
     const exists = current.types.some(x => x.id === t.id),
       types = exists ? current.types.map(x => x.id === t.id ? t : x) : [...current.types, t];
+    if (!exists && t.category === "Инструменты") {
+      if (t.fields.some(f => f.direction === "both")) throw Error("Укажите направление каждого внешнего порта Instrument.");
+      const wrap: NodeType = {
+        ...t,
+        instrument: t.id,
+        formulas: {},
+        section: "edit"
+      };
+      const leaf: NodeType = {
+        ...t,
+        id: t.id + ".rule",
+        category: "Функции"
+      };
+      const bounds = (input: boolean): NodeType => ({
+        ...t,
+        id: t.id + (input ? ".in" : ".out"),
+        category: "Границы",
+        formulas: {},
+        fields: t.fields.filter(f => f.direction === (input ? "input" : "output")).map(f => ({
+          ...f,
+          direction: input ? "output" : "input"
+        }))
+      });
+      const child: Diagram = {
+        id: t.id,
+        name: t.name,
+        groups: {},
+        nodes: [graphNode("source", t.id + ".in", "Входы", 0, 60), graphNode("rule", leaf.id, t.name, 365, 60), graphNode("result", t.id + ".out", "Выходы", 730, 60)],
+        edges: t.fields.map(f => f.direction === "input" ? {
+          from: "source",
+          out: f.key,
+          to: "rule",
+          input: f.key
+        } : {
+          from: "rule",
+          out: f.key,
+          to: "result",
+          input: f.key
+        })
+      };
+      add(wrap, [...current.types, wrap, leaf, bounds(true), bounds(false)], [...current.diagrams, child]);
+      setEditing(null);
+      return;
+    }
+    if (exists && t.instrument) {
+      const child = current.diagrams.find(d => d.id === t.instrument);
+      if (child) {
+        for (const [id, dir] of [["source", "input"], ["result", "output"]] as const) {
+          const boundary = child.nodes.find(n => n.id === id),
+            index = types.findIndex(type => type.id === boundary?.type);
+          if (index < 0) continue;
+          const fields = t.fields.filter(f => f.direction === dir).map(f => ({
+            ...f,
+            direction: dir === "input" ? "output" as const : "input" as const
+          }));
+          if (child.edges.some(e => e.from === id && !fields.some(f => f.key === e.out) || e.to === id && !fields.some(f => f.key === e.input))) throw Error("Сначала отключите внутренние связи удаляемого порта.");
+          types[index] = {
+            ...types[index],
+            fields
+          };
+        }
+      }
+    }
     if (exists) change({
       ...current,
       types
     });else add(t, types);
     setEditing(null);
   }
+  function navigate(at: Address, base = focus?.base ?? ROOT) {
+    setId(at.graph);
+    setSelected(at.node);
+    setPath(at.path);
+    setFocus({
+      ...at,
+      base,
+      serial: Date.now()
+    });
+    setMenu(null);
+    setTransfer(null);
+  }
+  function activate(at: Address) {
+    if (transfer && at.graph !== id) return;
+    setId(at.graph);
+    setPath(at.path);
+    pickNode(at.node);
+  }
   function locate(at: NodeLocation) {
     setImpact(null);
-    setId(at.diagram);
-    setSelected(at.node ?? "result");
+    const route = layout(current).locate(at.diagram);
+    navigate({
+      graph: at.diagram,
+      path: route ?? [],
+      node: at.node ?? "result"
+    }, route ? ROOT : at.diagram);
     setProps(true);
     setGroup("");
   }
@@ -368,7 +488,7 @@ export function EngineeringEditor({
   }
   function startTest() {
     setTrialPump("");
-    setJson(JSON.stringify(inputsFor(id, project, pumps, secondary, side), null, 2));
+    setJson(JSON.stringify(inputsFor(id, project, pumps, path[0]==="secondary"||secondary, side,current), null, 2));
     setTestOpen(true);
     setError("");
   }
@@ -383,17 +503,46 @@ export function EngineeringEditor({
         revision: state.revision,
         document: current,
         diagram: id,
+        output: id === ROOT ? trialOut : undefined,
+        useCatalog: id === ROOT && useCatalog,
         inputs
       });
       setTrace(result.trace);
+      setTracePrefix(path.join("/"));
+      if (result.value?.entities?.["station-spec"]) {
+        setTrialSpec(result.value.entities["station-spec"]);
+        setRowEvents(result.rows ?? []);
+      }
       setTestOpen(false);
-      setMessage("Результат · " + display(result.value));
+      setMessage(result.value?.entities ? "Готово · строк спецификации: " + result.value.entities["station-spec"].items.length : "Результат · " + display(result.value));
     } catch (e) {
       setTrace({});
       setError((e as Error).message);
     } finally {
       setBusy(false);
     }
+  }
+  const localTrace: Trace = {};
+  const prefix = path.join("/");
+  if (!tracePrefix || prefix === tracePrefix || prefix.startsWith(tracePrefix + "/")) {
+    const rel = prefix.slice(tracePrefix.length).replace(/^\//, "");
+    for (const n of g.nodes) {
+      const key = [rel, n.id].filter(Boolean).join("/");
+      if (trace[key]) localTrace[n.id] = trace[key];else if (trace[key + "/result"]) localTrace[n.id] = {
+        inputs: trace[key + "/source"]?.outputs ?? {},
+        outputs: trace[key + "/result"].inputs,
+        sources: trace[key + "/result"].sources
+      };
+    }
+  }
+  function rowRule(item: SpecItem) {
+    if (item.generatedBy === "suction-line" || item.generatedBy === "discharge-line") return "stationLines";
+    if (item.generatedBy === "hydraulic-options") return "stationOptions";
+    if (item.option === "controlCabinet") return "stationCabinetRows";
+    if (item.section === "pump") return "preparePumpRows";
+    if (item.option?.toLowerCase().includes("frame")) return "stationFrameRows";
+    if (item.option?.toLowerCase().includes("collector")) return "stationCollectors";
+    return "finalizeStation";
   }
   const shellBack = () => {
     if (!dirty || window.confirm("Выйти и отбросить несохранённые изменения?")) back();
@@ -408,16 +557,7 @@ export function EngineeringEditor({
         e.stopPropagation();
       }
     }}>{navigation}</div>}
-    <div className="gn-toolbar"><select aria-label="Схема инструмента" value={id} onChange={e => {
-        setId(e.target.value);
-        setGroup("");
-        const target = current.diagrams.find(d => d.id === e.target.value);
-        setSelected((target?.nodes.find(n => n.id === "operation") ?? target?.nodes.find(n => n.id === "select") ?? target?.nodes[0])?.id ?? "");
-        setTransfer(null);
-        setTrace({});
-        setMessage("");
-        setMenu(null);
-      }}>{current.diagrams.map(d => <option value={d.id} key={d.id}>{d.name}</option>)}</select>
+    <div className="gn-toolbar"><strong>Расчёт насосной установки</strong><span className="gn-location">{id === ROOT ? "Станция" : g.name}</span><button onClick={() => setPack(true)}>Собрать Instrument</button>
     <button onClick={() => setLibrary(!library)}>＋ Библиотека</button><button disabled={!history.length || busy} onClick={() => {
         setDoc(history.at(-1)!);
         setHistory(history.slice(0, -1));
@@ -426,20 +566,70 @@ export function EngineeringEditor({
     {(message || error) && <div className={error ? "gn-error" : "gn-status"} role={error ? "alert" : "status"}>{error || message} {error && errorLocation && <button onClick={() => locate(errorLocation)}>Перейти к ошибке</button>} {error.includes("другом окне") && <button onClick={() => {
         if (window.confirm("Заменить локальный черновик сохранённым?")) void request(api).then(accept).catch(e => setError(e.message));
       }}>Загрузить актуальный</button>}</div>}
-    <div className="gn-body"><Canvas key={id} doc={current} graph={g} selected={selected} trace={trace} eligible={transfer?.out ? targets : null} group={group} setGroup={setGroup} select={pickNode} context={(nid, x, y) => {
-        setSelected(nid);
+    <div className="gn-body"><Canvas doc={current} storageKey={project.project.id} active={{
+        graph: id,
+        node: selected,
+        path
+      }} focus={focus} eligible={transfer?.out ? targets : null} select={activate} context={(at, x, y) => {
+        setId(at.graph);
+        setPath(at.path);
+        setSelected(at.node);
         setMenu({
-          id: nid,
+          id: at.node,
           x,
           y
         });
-      }} move={(nid, x, y) => updateNode(nid, {
-        x,
-        y
-      })} unlink={unlink} />
-    {props && node && type && <Properties key={node.id} graph={g} node={node} type={type} trace={trace} source={type.native ? state.sources[type.native] : undefined} update={patch => updateNode(node.id, patch)} edit={() => setEditing(type)} send={key => start(node.id, key)} go={nid => {
+      }} move={(graph, nid, x, y) => updateGraph({
+        ...graph,
+        nodes: graph.nodes.map(n => n.id === nid ? {
+          ...n,
+          x,
+          y
+        } : n)
+      })} unlink={(graph, e) => {
+        if (window.confirm("Удалить связь " + e.from + "." + e.out + " → " + e.to + "." + e.input + "?")) updateGraph({
+          ...graph,
+          edges: graph.edges.filter(w => w !== e)
+        });
+      }} overview={() => navigate({
+        graph: ROOT,
+        node: "",
+        path: []
+      }, ROOT)} />
+    {props && node && type && <Properties key={node.id} graph={g} node={node} type={type} trace={localTrace} extra={<>{childDiagram(type, id) && <button onClick={() => navigate({
+          graph: childDiagram(type, id)!,
+          path: [...path, node.id],
+          node: ""
+        })}>Раскрыть Instrument</button>}{path.length > 0 && <button onClick={() => {
+          const base = focus?.base ?? ROOT;
+          const parent = path.slice(0, -1);
+          navigate({
+            graph: layout(current).at(base, parent).graph.id,
+            path: parent,
+            node: path.at(-1)!
+          }, base);
+        }}>К внешним портам</button>}{node.id === "spec" && id === ROOT && <details open><summary>Строки спецификации</summary>{(trialSpec ?? project.entities["station-spec"] as SpecEntity).items.map((item, i) => <details key={i}><summary>{item.position} · {item.name}</summary><p>{item.equipmentId ?? "Позиция проекта"} · {item.quantity} {item.unit ?? "шт"} · цена {item.price ?? "не указана"}</p><p>{[item.generatedBy, item.option, item.assemblyRole, item.details, ...(item.technicalNotes ?? [])].filter(Boolean).join(" · ")}</p>{item.listPrice != null && <p>Прайс · {item.listPrice} {item.priceCurrency}</p>}{(rowEvents.find(row => row.row === rowIdentity(item))?.changes ?? []).map(c => <button key={c.node} onClick={() => {
+              const p = c.node.split("/");
+              const n = p.pop()!;
+              const target = layout(current).at(ROOT, p);
+              navigate({
+                graph: target.graph.id,
+                path: p,
+                node: n
+              }, ROOT);
+            }}>{c.fields.join(", ")} · {c.node === "source" ? "из сохранённого проекта" : c.node}</button>)}<button onClick={() => locate({
+              diagram: rowRule(item),
+              node: "operation"
+            })}>К правилу состава</button><button onClick={() => locate({
+              diagram: "specificationLineTotal",
+              node: "row"
+            })}>К количеству и цене</button></details>)}</details>}</>} source={type.native ? state.sources[type.native] : undefined} update={patch => updateNode(node.id, patch)} edit={() => setEditing(type)} send={key => start(node.id, key)} go={nid => {
         setGroup("");
-        setSelected(nid);
+        navigate({
+          graph: id,
+          path,
+          node: nid
+        });
       }} unlink={unlink} test={startTest} pick={() => {
         setSamples(true);
         setSampleQuery("");
@@ -481,18 +671,40 @@ export function EngineeringEditor({
           out: f.key
         });
         setSearch("");
-      }}>{f.name}<small>{f.kind} · {f.meaning} {f.unit} · {display(trace[src!.id]?.outputs[f.key] ?? src?.values[f.key] ?? f.initial)}</small></button>) : !transfer.to ? <>{g.nodes.filter(n => targets.has(n.id) && filtered(n.name)).map(n => <button key={n.id} onClick={() => pickNode(n.id)}>{n.name}</button>)}{!targets.size && <p>Совместимых входов нет. Проверьте тип, инженерный смысл, единицу и направление связи.</p>}</> : fieldsFor(g.nodes.find(n => n.id === transfer.to)!).filter(f => filtered(f.name)).map(f => <button key={f.key} onClick={() => connect(f.key)}>{f.name} · {f.meaning} {f.unit}</button>)}</section>}
-    {library && <section className="gn-library"><header><h2>Библиотека</h2><button onClick={() => setLibrary(false)}>×</button></header><input aria-label="Поиск типов" value={query} onChange={e => setQuery(e.target.value)} placeholder="Тип или инструмент…" /><button onClick={() => makeType("Комплектующие")}>Создать тип комплектующего</button><button onClick={() => makeType("Инструменты")}>Создать тип инструмента</button>{current.types.filter(t => !t.id.startsWith("args.") && !t.id.startsWith("return.") && (!betaOperations.has(id) || !t.native || betaOperations.has(t.native)) && t.name.toLowerCase().includes(query.toLowerCase())).map(t => <button key={t.id} onClick={() => add(t)}>{t.name}<small>{t.category}</small></button>)}</section>}
-    {editing && <TypeEditor original={editing} doc={current} close={() => setEditing(null)} save={saveType} navigate={(g, n) => {
+      }}>{f.name}<small>{f.kind} · {f.meaning} {f.unit} · {display(localTrace[src!.id]?.outputs[f.key] ?? src?.values[f.key] ?? f.initial)}</small></button>) : !transfer.to ? <>{g.nodes.filter(n => targets.has(n.id) && filtered(n.name)).map(n => <button key={n.id} onClick={() => pickNode(n.id)}>{n.name}</button>)}{!targets.size && <p>Совместимых входов нет. Проверьте тип, инженерный смысл, единицу и направление связи.</p>}</> : fieldsFor(g.nodes.find(n => n.id === transfer.to)!).filter(f => filtered(f.name)).map(f => <button key={f.key} onClick={() => connect(f.key)}>{f.name} · {f.meaning} {f.unit}</button>)}</section>}
+    {library && <section className="gn-library"><header><h2>Библиотека</h2><button onClick={() => setLibrary(false)}>×</button></header><input aria-label="Поиск типов" value={query} onChange={e => setQuery(e.target.value)} placeholder="Тип или инструмент…" />{query.trim() && current.diagrams.filter(d => d.name.toLowerCase().includes(query.toLowerCase())).map(d => <button key={d.id} onClick={() => {
+        locate({
+          diagram: d.id,
+          node: ""
+        });
+        setLibrary(false);
+      }}>Открыть · {d.name}</button>)}<button onClick={() => makeType("Комплектующие")}>Создать тип комплектующего</button><button onClick={() => makeType("Инструменты")}>Создать тип инструмента</button>{current.types.filter(t => t.category !== "Границы" && !t.id.startsWith("args.") && !t.id.startsWith("return.") && (!betaOperations.has(id) || !t.native || betaOperations.has(t.native)) && t.name.toLowerCase().includes(query.toLowerCase())).map(t => <button key={t.id} onClick={() => add(t)}>{t.name}<small>{classification(t)}</small></button>)}</section>}
+    {pack && <GroupDialog graph={g} doc={current} initial={selected} close={() => setPack(false)} save={(d, n) => {
+      change(d);
+      setPack(false);
+      navigate({
+        graph: id,
+        path,
+        node: n
+      });
+    }} />}
+    {editing && <TypeEditor original={editing} doc={current} close={() => setEditing(null)} save={saveType} navigate={(g, n, route) => {
       setEditing(null);
       setLibrary(false);
-      setId(g);
-      setSelected(n);
+      if (route) navigate({
+        graph: g,
+        node: n,
+        path: route
+      }, ROOT);else locate({
+        diagram: g,
+        node: n
+      });
       setGroup("");
       setProps(true);
       setTrace({});
     }} />}
     {testOpen && <div className="gn-shade"><section className="gn-dialog" role="dialog" aria-label="Тестовый запуск"><header><h2>Тестовый запуск</h2><button onClick={() => setTestOpen(false)}>Закрыть</button></header><p>{g.name} · копия входных данных проекта</p>
+      {id === ROOT && <label>Выход станции<select value={trialOut} onChange={e => setTrialOut(e.target.value)}>{current.types.find(t => t.id === "station.out")?.fields.map(f => <option key={f.key} value={f.key}>{f.name}</option>)}</select><span><input type="checkbox" checked={useCatalog} onChange={e => setUseCatalog(e.target.checked)} /> Использовать рабочие каталоги сервера</span></label>}
       {id === "resolvePort" && <div className="gn-toolbar"><select aria-label="Контур" value={Number(secondary)} onChange={e => {
             const s = !!Number(e.target.value);
             setSecondary(s);

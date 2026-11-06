@@ -1,7 +1,10 @@
+import { betaOperations } from "./profile";
+import {compileTree, endpointPlan, ROOT} from "./hierarchy";
+import {installStation,endpointInputs,secondaryEndpoints} from "./station-graph";
 import { requiredInputs } from "./required";
 import { operations } from "./contracts";
 import { makeField, type DataKind, type Diagram, type Document, type NodeType, type Signature } from "./schema";
-import { compileDiagram, executableSlice } from "./engine";
+import { executableSlice } from "./engine";
 import { type Publication } from "./runtime";
 const labels: Record<string, string> = {
   catalog: "Каталог",
@@ -71,7 +74,7 @@ const edge = (from: string, out: string, to: string, input: string) => ({
   to,
   input
 });
-export function initialDocument(equipment: NodeType[] = []): Document {
+export function legacyDocument(equipment: NodeType[] = []): Document {
   const types: NodeType[] = [...equipment],
     diagrams: Diagram[] = [];
   for (const sig of signatures) {
@@ -246,20 +249,30 @@ export function initialDocument(equipment: NodeType[] = []): Document {
     diagrams
   };
 }
+export function upgradeDocument(stored:Document) {return installStation(stored,signatures,legacyDocument());}
+export function initialDocument(equipment:NodeType[]=[]):Document {return upgradeDocument(legacyDocument(equipment));}
 export function compilePublication(doc: Document, version: string): Publication {
   const plans: Publication["plans"] = {},
     args: Publication["args"] = {};
-  const baseline = initialDocument();
+  const baseline = legacyDocument();
   for (const sig of signatures) {
     const graph = doc.diagrams.find(g => g.id === sig.id)!;
-    const plan = compileDiagram(graph, doc.types);
-    const original = compileDiagram(baseline.diagrams.find(g => g.id === sig.id)!, baseline.types);
+    const plan = compileTree(doc,graph);
+    const original = compileTree(baseline,baseline.diagrams.find(g => g.id === sig.id)!);
     const compiled = executableSlice(plan);
     if (JSON.stringify(compiled) !== JSON.stringify(executableSlice(original))) {
       plans[sig.id] = compiled;
       args[sig.id] = sig.args.map(f => f.key);
     }
   }
+  const root=doc.diagrams.find(g=>g.id===ROOT);
+  if(!root)throw Error("Отсутствует граф станции");
+  if(root){
+    const compiled=compileTree(doc,root);
+    for(const [host,inputs] of Object.entries(endpointInputs)) {plans[host]=endpointPlan(compiled,host,host);args[host]=inputs;}
+    for(const [id,entry] of Object.entries(secondaryEndpoints)){const host=id+"@second";plans[host]=endpointPlan(compiled,entry.output,host);args[host]=entry.args;}
+  }
+  for(const [id,plan] of Object.entries(plans))if(betaOperations.has(id.split("@")[0]))for(const s of plan.steps)if(s.native&&!betaOperations.has(s.native))throw Error(id+" → "+s.id+" · операция полной версии недоступна в beta");
   return {
     version,
     plans,

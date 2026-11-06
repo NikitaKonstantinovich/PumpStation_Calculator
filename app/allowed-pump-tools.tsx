@@ -2,13 +2,13 @@
 import { MAX_WORKING_PUMPS } from "./pump-counts";
 
 import { paintingItemForBase } from "./base-values";
-import { pressureTransducerCatalog } from "./pressure-transducers";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { InputEntity, SettingsEntity } from "./project-config";
 import { CircuitInputFields } from "./circuit-input-fields";
 import { jpegToPdf } from "./pdf-export";
 import { IssueNotice, IssueMessages, useRuntimeDiagnostic, useStoredDiagnostic } from "./diagnostics-ui";
 import { type Pump, usablePump, interpolateCurve, operatingPoint, cataloguePriceRub, catalogueDiscount, cataloguePurchasePriceRub } from "./pump-catalog";
+import {withCircuit} from "./engineering/runtime";
 import { buildPumpSelection, headReserveClass, type PumpSortMode } from "./pump-selection";
 import { EMPTY_PUMP_FILTERS, pumpTypeLabel as typeLabel, type PumpFilterValues } from "./pump-filters";
 import { PumpFilterFields } from "./pump-filter-fields";
@@ -20,9 +20,7 @@ import { defaultPumpFrequencySettings, frequencyAdjustedPump, frequencyLabel, pu
 import { CURVE_METHODS, curveSegments, curveMaxHead, type CurveMethod } from "./curve-methods";
 import { pumpSketchFor, type PumpSketchInfo } from "./pump-sketches";
 import { PumpCard } from "./pump-card";
-import { suctionCatalogItems } from "./suction-catalog";
-import { isLegacyNomenclature, LEGACY_NOMENCLATURE_CATALOG_ID, LEGACY_NOMENCLATURE_LABEL, routeNomenclature } from "./component-nomenclature";
-import { makeCollectorCatalog, type BindingCatalog } from "./collector-catalog";
+import { isLegacyNomenclature, LEGACY_NOMENCLATURE_LABEL } from "./component-nomenclature";
 import {isCalculated,type CalculatedInput} from "./calculated-input";
 export {isCalculated,type CalculatedInput} from "./calculated-input";
 const pumpListPriceRub = cataloguePriceRub;
@@ -44,7 +42,7 @@ function PumpSelector({ tool, input, settings, catalogue, onInputChange, onAddTo
   const [filters,setFilters]=useState<PumpFilterValues>(EMPTY_PUMP_FILTERS),[sort,setSort]=useState<PumpSortMode>("distance");
   const calculated=isCalculated(input)?input:null;
   const filterRows=useMemo(()=>catalogue.filter(p=>usablePump(p,input.medium)),[catalogue,input.medium]);
-  const pumps=useMemo(()=>calculated?buildPumpSelection(catalogue,calculated,settings,filters,sort).candidates:[],[catalogue,calculated,settings,filters,sort]);
+  const pumps=useMemo(()=>calculated?withCircuit(tool==="input2",()=>buildPumpSelection(catalogue,calculated,settings,filters,sort)).candidates:[],[catalogue,calculated,settings,filters,sort,tool]);
   const resultsRef=useRef<HTMLDivElement>(null);
   useEffect(()=>{
     const results=resultsRef.current;
@@ -72,7 +70,7 @@ function PumpSelector({ tool, input, settings, catalogue, onInputChange, onAddTo
       window.alert("Заполните поля корректно. Статический напор должен быть от 0 до общего напора.");return;
     }
     const next:CalculatedInput={...input,flowRate:flow,head,staticHead,workingPumpCount:working,reservePumpCount:reserve,calculated:true};
-    const {selectedPumpId}=buildPumpSelection(catalogue,next,settings,filters,sort);
+    const {selectedPumpId}=withCircuit(tool==="input2",()=>buildPumpSelection(catalogue,next,settings,filters,sort));
     onInputChange?.({...next,selectedPumpId,selectedPumpModel:undefined});
   };
   return <div className="pump-selector"><CircuitInputFields issueTool={tool} input={input} onChange={patch=>{if(patch.medium)setFilters(EMPTY_PUMP_FILTERS);onInputChange?.(patch);}}/>
@@ -129,13 +127,10 @@ function PumpSketchView({ pump, sketch, tool }: { pump:Pump; sketch:PumpSketchIn
   return <figure className="pump-sketch"><div className="pump-sketch__meta"><span><small>ВЫБРАННЫЙ АГРЕГАТ</small><b>{pump.manufacturer} {pump.model}</b></span><div className="pump-sketch__actions"><span>Ctrl + колесо · {zoom}%</span><a href={sketch.src} download={`${pump.manufacturer}-${pump.model.replace(/[^a-zа-я0-9]+/gi,"-")}.${sketch.src.match(/\.(png|jpe?g|webp)(?:\?|$)/i)?.[1]??"png"}`}>Скачать изображение</a></div></div><div ref={canvasRef} className="pump-sketch__canvas" aria-label="Габаритный чертёж. Для изменения масштаба удерживайте Ctrl и вращайте колесо мыши">{imageError&&<p data-issue-id={`${tool}/drawing-load`} role="alert" className="pump-sketch__error">Не удалось загрузить чертёж. Попробуйте открыть изображение по ссылке выше.</p>}<div className="pump-sketch__zoom-surface" style={{width:`${extent}%`,height:`${extent}%`,display:imageError?"none":undefined}}><img src={sketch.src} onError={()=>setImageError(true)} hidden={imageError} style={{width:`${imageSize}%`,height:`${imageSize}%`}} alt={`Габаритный чертёж насосного агрегата ${pump.manufacturer} ${pump.model}`}/></div></div><figcaption><span>{sketch.caption}</span><span>Источник: {sketch.source}</span></figcaption></figure>;
 }
 
-import type { ComponentItem, ComponentGroupId, ComponentCatalog, ComponentsDatabase } from "./component-database-types";
+import type { ComponentItem, ComponentGroupId, ComponentsDatabase } from "./component-database-types";
 export type { ComponentPrice, ComponentItem, ComponentsDatabase } from "./component-database-types";
-type RawBindingDatabase=BindingCatalog & {catalogs:Array<{id:string;name:string}>;items:ComponentItem[];statistics:{componentRows:number;pricedComponentRows:number}};
-type RawControlDatabase={components:Array<{id:string;category:string;manufacturer:string|null;article:string|null;name:string;componentType:string|null;attributes:Record<string,unknown>;currentPrice:number|null;currency:string}>;statistics:{components:number;pricedComponents:number}};
+import {assembleComponentDatabase,type RawBindingDatabase,type RawControlDatabase} from "./component-database";
 const COMPONENT_GROUPS:Array<{id:ComponentGroupId;name:string}>=[{id:"hydraulic",name:"Сборочный комплект гидравлики"},{id:"control",name:"Комплектующие ШУ"},{id:"metal",name:"Металлоконструкция и рама"},{id:"services",name:"Работы и услуги"}];
-const METAL_CATALOGS=new Set(["металл","метизы","опоры","кронштейны","рама"]);
-const bindingGroupFor=(catalogId:string):ComponentGroupId=>catalogId==="работы"?"services":METAL_CATALOGS.has(catalogId)?"metal":"hydraulic";
 let componentsDatabasePromise:Promise<ComponentsDatabase>|undefined;
 export let loadedComponentsDatabase:ComponentsDatabase|undefined;
 export const loadComponentsDatabase=(reload=false)=>{
@@ -145,11 +140,7 @@ export const loadComponentsDatabase=(reload=false)=>{
   fetch("/control-cabinet-database.json",{cache:"no-store"}).then(response=>response.ok?response.json():Promise.reject(new Error("Не удалось загрузить комплектующие ШУ"))) as Promise<RawControlDatabase>,
   fetch("/api/components",{cache:"no-store"}).then(async response=>{const result=await response.json() as {items?:ComponentItem[];error?:string};if(!response.ok)throw new Error(result.error??"Не удалось загрузить сохранённые вставки");return result.items??[];}),
 ]).then(([binding,control,savedInsertions])=>{
-  const categories=[...new Set(control.components.map(item=>item.category))].sort((a,b)=>a.localeCompare(b,"ru"));
-  const controlCatalogs:ComponentCatalog[]=categories.map(category=>({id:`control:${category}`,name:category.replaceAll("_"," "),groupId:category==="Работы"?"services":"control"}));
-  const controlItems:ComponentItem[]=control.components.map(item=>({id:item.id,catalogId:`control:${item.category}`,family:item.name,fields:[{column:"manufacturer",headerPath:["Производитель"],value:item.manufacturer},{column:"article",headerPath:["Артикул"],value:item.article},{column:"componentType",headerPath:["Тип"],value:item.componentType},...Object.entries(item.attributes).map(([key,value])=>({column:key,headerPath:[key],value}))],prices:typeof item.currentPrice==="number"&&item.currentPrice>0?[{label:"Актуальная цена",amount:item.currentPrice,currency:item.currency}]:[]}));
-  const items=pressureTransducerCatalog([...binding.items,...suctionCatalogItems,...savedInsertions,...controlItems]).map(routeNomenclature);
-  return loadedComponentsDatabase={collectorCatalog:makeCollectorCatalog(binding),catalogs:[...binding.catalogs.map(catalog=>({...catalog,groupId:bindingGroupFor(catalog.id)})),{id:"ответные-части",name:"Ответные части и американки",groupId:"hydraulic"},{id:LEGACY_NOMENCLATURE_CATALOG_ID,name:LEGACY_NOMENCLATURE_LABEL,groupId:"hydraulic"},...controlCatalogs],items,statistics:{componentRows:items.length,pricedComponentRows:items.filter(item=>item.prices.length).length}};
+  return loadedComponentsDatabase=assembleComponentDatabase(binding,control,savedInsertions);
 }).catch(error=>{componentsDatabasePromise=undefined;throw error;});
 };
 import {componentFieldLabel} from "./component-database-types";
@@ -187,7 +178,7 @@ export function AllowedPumpPanel({ id, input, settings, catalogue, onInputChange
   const chartPump=(id==="chart"||id==="chart2")&&isCalculated(input)?catalogue.find(p=>p.id===input.selectedPumpId):undefined;
   useRuntimeDiagnostic(id,"method",chartPump&&chartMethod==="polynomial"&&!curveSegments(chartPump.curve,"polynomial").length?"Сглаживание недоступно для этой модели; показан PCHIP.":"", "warning");
   if (id === "input" || id === "input2") return <PumpSelector automaticSpecification={automaticSpecification} tool={id} key={input.medium} input={input} settings={settings} catalogue={catalogue} onInputChange={onInputChange} onAddToSpec={onAddToSpec}/>;
-  if (id === "chart" || id === "chart2") { if(!isCalculated(input))return <div data-issue-id={`${id}/empty`} className="pump-chart__empty">Введите параметры и нажмите «Подобрать оборудование»</div>; const selected=catalogue.find(p=>p.id===input.selectedPumpId); if(!selected)return <div data-issue-id={`${id}/empty`} className="pump-chart__empty">Для заданной рабочей точки насос не выбран</div>; if(!usablePump(selected,input.medium))return <div data-issue-id={`${id}/empty`} className="pump-chart__empty">Для этой модели нет подтверждённой рабочей кривой. Выберите другой насос.</div>; const polynomialAvailable=curveSegments(selected.curve,"polynomial").length>0,method:CurveMethod=chartMethod==="polynomial"&&!polynomialAvailable?"pchip":chartMethod,methodInfo=CURVE_METHODS.find(item=>item.value===method)!; const frequencySettings=frequencyControl.pumpId===selected.id?frequencyControl.settings:defaultPumpFrequencySettings(),frequency=pumpFrequencyState(selected,frequencySettings),effectivePump=frequencySettings.enabled?frequencyAdjustedPump(selected,frequency.frequencyHz,frequency.nominalHz):selected,referencePump=frequencySettings.enabled&&frequencySettings.showNominal&&frequency.ratio!==1?selected:undefined,frequencyCaption=frequencySettings.enabled?` · f=${frequencyLabel(frequency.frequencyHz)} Гц (ном. ${frequencyLabel(frequency.nominalHz)} Гц)`:"",count=input.workingPumpCount,xScale=chartAxisScale(Math.max(input.flowRate*1.2,...effectivePump.curve.map(p=>p[0]*count),...(referencePump?.curve.map(p=>p[0]*count)??[])),chartGrid.flow,"Q"),maxPumpHead=Math.max(curveMaxHead(effectivePump.curve,method),referencePump?curveMaxHead(referencePump.curve,method):0),yScale=chartAxisScale(Math.max(maxPumpHead,input.head,1)*1.1,chartGrid.head,"H"),maxQ=xScale.max,maxH=yScale.max,minQ=xScale.min,minH=yScale.min,gridIssues=[xScale.issue,yScale.issue].filter((issue):issue is string=>Boolean(issue)),systemSegments=systemCurveSegments(effectivePump,count,input,maxQ,maxH,method,minQ,minH),actualPoint=actualOperatingPoint(effectivePump,count,input,method),clipId=`plot-${id}-${selected.id}-${count}`; return (
+  if (id === "chart" || id === "chart2") { if(!isCalculated(input))return <div data-issue-id={`${id}/empty`} className="pump-chart__empty">Введите параметры и нажмите «Подобрать оборудование»</div>; const selected=catalogue.find(p=>p.id===input.selectedPumpId); if(!selected)return <div data-issue-id={`${id}/empty`} className="pump-chart__empty">Для заданной рабочей точки насос не выбран</div>; if(!usablePump(selected,input.medium))return <div data-issue-id={`${id}/empty`} className="pump-chart__empty">Для этой модели нет подтверждённой рабочей кривой. Выберите другой насос.</div>; const polynomialAvailable=curveSegments(selected.curve,"polynomial").length>0,method:CurveMethod=chartMethod==="polynomial"&&!polynomialAvailable?"pchip":chartMethod,methodInfo=CURVE_METHODS.find(item=>item.value===method)!; const frequencySettings=frequencyControl.pumpId===selected.id?frequencyControl.settings:defaultPumpFrequencySettings(),frequency=pumpFrequencyState(selected,frequencySettings),effectivePump=frequencySettings.enabled?frequencyAdjustedPump(selected,frequency.frequencyHz,frequency.nominalHz):selected,referencePump=frequencySettings.enabled&&frequencySettings.showNominal&&frequency.ratio!==1?selected:undefined,frequencyCaption=frequencySettings.enabled?` · f=${frequencyLabel(frequency.frequencyHz)} Гц (ном. ${frequencyLabel(frequency.nominalHz)} Гц)`:"",count=input.workingPumpCount,xScale=chartAxisScale(Math.max(input.flowRate*1.2,...effectivePump.curve.map(p=>p[0]*count),...(referencePump?.curve.map(p=>p[0]*count)??[])),chartGrid.flow,"Q"),maxPumpHead=Math.max(curveMaxHead(effectivePump.curve,method),referencePump?curveMaxHead(referencePump.curve,method):0),yScale=chartAxisScale(Math.max(maxPumpHead,input.head,1)*1.1,chartGrid.head,"H"),maxQ=xScale.max,maxH=yScale.max,minQ=xScale.min,minH=yScale.min,gridIssues=[xScale.issue,yScale.issue].filter((issue):issue is string=>Boolean(issue)),systemSegments=systemCurveSegments(effectivePump,count,input,maxQ,maxH,method,minQ,minH),actualPoint=withCircuit(id==="chart2",()=>actualOperatingPoint(effectivePump,count,input,method)),clipId=`plot-${id}-${selected.id}-${count}`; return (
     <div className="pump-chart pump-chart--with-settings" data-curve-method={method} data-curve-label={methodInfo.label+frequencyCaption}>
       <div className="pump-chart__top"><label className="pump-chart__method"><span>Кривая</span><select aria-label="Способ отображения кривой" value={method} title={methodInfo.description} onChange={event=>{setChartMethod(event.target.value as CurveMethod);setChartExportError("");}}>{CURVE_METHODS.map(item=><option key={item.value} value={item.value} disabled={item.value==="polynomial"&&!polynomialAvailable}>{item.label}</option>)}</select></label><div className="pump-chart__legend"><span><i className="pump-chart__dot pump-chart__dot--blue" />{selected.manufacturer} {selected.model}</span><span><i className="pump-chart__dot pump-chart__dot--orange" />Система</span>{referencePump&&<span><i className="pump-chart__dot pump-chart__dot--nominal"/>Номинальная: {frequencyLabel(frequency.nominalHz)} Гц</span>}<span><i className="pump-chart__point-symbol pump-chart__point-symbol--requested" />Запрашиваемая</span><span><i className="pump-chart__point-symbol pump-chart__point-symbol--actual" />Фактическая</span></div><details className="chart-export"><summary>Export <span>⌄</span></summary><div className="chart-export__menu">{(["png","pdf","jpeg"] as ChartExportFormat[]).map(format=><button key={format} disabled={gridIssues.length>0} onClick={event=>{const button=event.currentTarget;setChartExportError("");void exportChart(button,format,`hydraulic-curve-${selected.model.replace(/[^a-zа-я0-9]+/gi,"-")}-${method}${frequencySettings.enabled?`-${frequency.frequencyHz.toFixed(2)}Hz`:""}`).catch(()=>setChartExportError("Не удалось экспортировать график. Попробуйте ещё раз.")).finally(()=>button.closest("details")?.removeAttribute("open"));}}>{format.toUpperCase()}</button>)}</div></details><p data-issue-id={`${id}/method`} className="pump-chart__method-note">{methodInfo.description}{chartMethod==="polynomial"&&!polynomialAvailable&&" Сглаживание недоступно для этой модели; показан PCHIP."}</p>{chartExportError&&<p data-issue-id={`${id}/export`} className="pump-chart__export-error" role="alert">{chartExportError}</p>}</div>
       <div className="pump-chart__canvas" aria-label="График насосной кривой">

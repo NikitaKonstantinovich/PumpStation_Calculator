@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { accepts, makeField, validKey, type DataKind, type Document, type Field, type NodeType } from "./schema";
+import {usesInStation} from "./uses";
 import { compileExpression } from "./expression";
 const kinds: DataKind[] = ["number", "string", "boolean", "enum", "reference", "object", "array"];
 const kindLabels = ["Число", "Строка", "Логическое", "Перечисление", "Ссылка", "Объект", "Массив"];
@@ -16,7 +17,7 @@ export function TypeEditor({
   doc: Document;
   close: () => void;
   save: (t: NodeType) => void;
-  navigate: (g: string, n: string) => void;
+  navigate: (g: string, n: string,path?:string[]) => void;
 }) {
   const [type, setType] = useState<NodeType>(() => structuredClone(original)),
     [error, setError] = useState("");
@@ -24,6 +25,7 @@ export function TypeEditor({
     g,
     n
   })));
+  const paths=usesInStation(doc,original.id);
   function patch(index: number, change: Partial<Field>) {
     setType(t => ({
       ...t,
@@ -78,10 +80,12 @@ export function TypeEditor({
             ...type,
             description: e.target.value
           })} /></label></div>
-    {instances.length > 0 && <details><summary>Затронутые узлы · {instances.length}</summary>{instances.map(({
+    {paths.length>0&&<details open><summary>Экземпляры на полотне · {paths.length}</summary>{paths.map(p=><button key={[...p.path,p.node].join("/")} onClick={()=>navigate(p.diagram,p.node,p.path)}>{p.name} · связей {p.links}</button>)}</details>}
+    {!paths.length&&instances.length > 0 && <details open><summary>Затронутые узлы · {instances.length}</summary>{instances.map(({
           g,
           n
-        }) => <button key={g.id + n.id} onClick={() => navigate(g.id, n.id)}>{g.name} → {n.name}</button>)}</details>}
+        }) => <button key={g.id + n.id} onClick={() => navigate(g.id, n.id)}>{g.name} → {n.name} · связей {g.edges.filter(e=>e.from===n.id||e.to===n.id).length}</button>)}</details>}
+    {type.instrument&&<small>Функции редактируются внутри Instrument. Укажите входы и выходы границы.</small>}
     {type.fields.map((f, i) => <fieldset key={i}><legend>{f.name || "Новый атрибут"}</legend><div className="gn-form">
       <label>Стабильный ключ<input value={f.key} disabled={original.fields.some(old => old.key === f.key)} onChange={e => patch(i, {
               key: e.target.value
@@ -121,7 +125,7 @@ export function TypeEditor({
       {f.kind === "enum" && <label>Варианты через запятую<input value={f.options?.join(",") ?? ""} onChange={e => patch(i, {
               options: e.target.value.split(",").map(s => s.trim())
             })} /></label>}
-    </div>{f.direction !== "input" && <label>Функция выхода {f.key}<textarea placeholder="Например, mass * count" value={type.formulas[f.key] ?? ""} onChange={e => {
+    </div>{!type.instrument && f.direction !== "input" && <label>Функция выхода {f.key}<textarea placeholder="Например, mass * count" value={type.formulas[f.key] ?? ""} onChange={e => {
             const formulas = {
               ...type.formulas
             };

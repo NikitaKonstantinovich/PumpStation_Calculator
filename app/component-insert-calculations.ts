@@ -627,9 +627,11 @@ export function coreGenerateInsertCandidates(request: InsertRequest, originalCat
 export function coreGenerateInsertCalculations(request: InsertRequest, catalog: InsertCatalog): InsertCalculation[] {
   const rows = generateInsertCandidates(request, catalog);
   if (!catalog.engineering.variantSelection) return rows;
-  const core = request.withSensorNipple ? generateInsertCandidates({ ...request, withSensorNipple: false }, catalog) : rows;
+  const core = insertBaseline(rows,{...request,withSensorNipple:false},catalog,!!request.withSensorNipple);
   return selectInsertVariants(rows, core, catalog);
 }
+
+export function coreInsertBaseline(rows:InsertCalculation[],request:InsertRequest,catalog:InsertCatalog,rebuild:boolean){return rebuild?generateInsertCandidates(request,catalog):rows;}
 
 export function generateInsertCalculations(...args: Parameters<typeof coreGenerateInsertCalculations>): ReturnType<typeof coreGenerateInsertCalculations> {
   return engineeringOperation("generateInsertCalculations", coreGenerateInsertCalculations, args);
@@ -642,3 +644,6 @@ export function generateInsertCandidates(...args: Parameters<typeof coreGenerate
 }
 
 registerOperation("generateInsertCandidates", ["request","originalCatalog"], coreGenerateInsertCandidates);
+
+export function insertBaseline(...args:Parameters<typeof coreInsertBaseline>):ReturnType<typeof coreInsertBaseline>{return engineeringOperation("insertBaseline",coreInsertBaseline,args);}
+registerOperation("insertBaseline",["rows","request","catalog","rebuild"],coreInsertBaseline);

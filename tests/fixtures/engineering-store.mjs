@@ -5,6 +5,7 @@ import {loadTs} from "../load-ts.mjs";
 export async function engineeringStore(){
   const sql=new DatabaseSync(":memory:");
   sql.exec(await readFile(new URL("../../drizzle/0015_engineering_graphs.sql",import.meta.url),"utf8"));
+  sql.exec(await readFile(new URL("../../drizzle/0016_station_instruments.sql",import.meta.url),"utf8"));
   class Statement {
     constructor(query,params=[]){this.query=query;this.params=params;}
     bind(...args){return new Statement(this.query,args);}
@@ -19,7 +20,7 @@ export async function engineeringStore(){
   const replacements={
     [new URL("auth-server.ts",base).href]:'export const db=()=>globalThis.'+unique+';export const currentUser=async r=>r.headers.has("x-test-role")?{id:"fixture",name:"Тест",role:r.headers.get("x-test-role")}:null;export const json=(v,status=200,headers={})=>Response.json(v,{status,headers});',
     [new URL("release-policy.ts",base).href]:'export const IS_BETA=false;export const publicShellAsset=()=>false;export const betaApiAllowed=()=>true;export const betaDataAsset=()=>false;',
-    [new URL("engineering/equipment-server.ts",base).href]:'export const equipmentTypes=async()=>[];export const equipmentSamples=async()=>[];',
+    [new URL("engineering/equipment-server.ts",base).href]:'export const trialResources=async()=>({pumps:[],cabinets:null,smartCabinets:null});export const equipmentTypes=async()=>[];export const equipmentSamples=async()=>[];',
   };
   const load=path=>loadTs(new URL(path+".ts",base),replacements);
   const route=await load("api/admin/geometry-nodes/route"), effective=await load("api/engineering/runtime/route");

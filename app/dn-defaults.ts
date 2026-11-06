@@ -1,6 +1,6 @@
 import { engineeringOperation, registerOperation } from "./engineering/runtime";
 import type { CollectorMaterial, DnEntity, InputEntity, SettingsEntity, ValveConnection } from "./project-config";
-import { isMultistagePump, resolvePumpPort, resolvePumpPortData } from "./pump-ports";
+import { isMultistagePump, completePumpPort, resolvePumpPortData, type PumpPortData } from "./pump-ports";
 import { pressureChecksEnabled } from "./pressure-check-policy";
 import { baseVelocityLimit, type VelocityRule } from "./base-values";
 import type { Pump } from "./pump-catalog";
@@ -41,8 +41,10 @@ export function coreResolveDnConnection(settings: Pick<SettingsEntity, "stationT
 }
 
 function lineHydraulics(entity: DnEntity, input: InputEntity, settings: SettingsEntity, secondary: boolean, side: "inlet" | "outlet", pump?: Pump) {
-  const port = resolvePumpPort(entity, input, secondary, side, pump);
-  const portData = resolvePumpPortData(entity, input, secondary, side, pump);
+  return lineFromPort(entity,input,settings,secondary,side,pump,resolvePumpPortData(entity,input,secondary,side,pump));
+}
+export function coreLineFromPort(entity:DnEntity,input:InputEntity,settings:SettingsEntity,secondary:boolean,side:"inlet"|"outlet",pump:Pump|undefined,portData:PumpPortData|null) {
+  const port=completePumpPort(portData)?portData:null;
   const saved = secondary ? entity.secondaryConnectionType : entity.connectionType;
   const suction = side === "inlet";
   const savedType = suction ? (secondary ? entity.secondarySuctionValveType : entity.suctionValveType) : (secondary ? entity.secondaryDischargeValveType : entity.dischargeValveType);
@@ -64,6 +66,9 @@ function lineHydraulics(entity: DnEntity, input: InputEntity, settings: Settings
   if (port?.connection === "flanged" && connection === "flanged" && port.dn > dn) errors.push(`DN патрубка насоса (${port.dn}) больше DN арматуры (${dn}). Увеличьте DN арматуры.`);
   return { port, dn, connection, valveType, locked, errors, pn, nozzleDefault };
 }
+
+export function lineFromPort(...args:Parameters<typeof coreLineFromPort>){return engineeringOperation("lineFromPort",coreLineFromPort,args);}
+registerOperation("lineFromPort",["entity","input","settings","secondary","side","pump","port"],coreLineFromPort);
 
 export function coreSuctionHydraulics(entity: DnEntity, input: InputEntity, settings: SettingsEntity, secondary = false, pump?: Pump) {
   const inletPressureCheck = pressureChecksEnabled(settings) ? checkInletPressure(settings.inletHead, `Насос контура ${secondary ? 2 : 1}: допустимое давление на входе`, resolvePumpPortData(entity, input, secondary, "inlet", pump)?.maxInletPressure) : null;

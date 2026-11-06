@@ -46,7 +46,7 @@ const valveRoles = new Set<SpecOption>(["primarySuctionValve", "primaryDischarge
 const stale = (item: SpecItem, reason: string): SpecItem => ({ ...item, technicalStatus: "stale", technicalNotes: [reason], price: null });
 
 /** One transaction for a confirmed selection, resource refresh, import or undo. No I/O. */
-export function corePrepareStation(project: ProjectConfig, resources: StationSpecificationResources) {
+export function corePreparePumpRows(project: ProjectConfig, resources: StationSpecificationResources) {
   const priorSettings=project.entities["station-settings"] as SettingsEntity;
   if(priorSettings.hydraulicOptions){
     const hydraulicOptions=normalizeHydraulicOptions(priorSettings.hydraulicOptions);
@@ -90,17 +90,28 @@ export function corePrepareStation(project: ProjectConfig, resources: StationSpe
     items = replaceSpecificationRole(items, option, row);
   }
 
+  return {project,resources,primary,second,secondary,settings,spec,station,entities,reasons,items};
+}
+type PumpRows = ReturnType<typeof corePreparePumpRows>;
+export function coreStationCabinetRows(batch:PumpRows) {
+  return applyCabinetSelection(batch,cabinetSelectionReady(batch),batch.settings.stationType==="smart"?batch.resources.smartCabinets!==null:batch.resources.cabinets!==null);
+}
+export function coreCabinetSelectionReady(batch:PumpRows){
+  const {primary,second,secondary,resources}=batch;
+  return !!(validStationInput(primary)&&resources.pumps?.some(p=>p.id===primary.selectedPumpId)&&(!secondary||validStationInput(second)&&resources.pumps?.some(p=>p.id===second.selectedPumpId)));
+}
+export function coreApplyCabinetSelection(batch:PumpRows,cabinetReady:boolean,catalogAvailable:boolean) {
+  const {project,resources,primary,settings}=batch;
+  const reasons=[...batch.reasons]; let items=batch.items;
   const pump = resources.pumps?.find(pump => pump.id === primary.selectedPumpId);
   const previousCabinet = items.find(item => item.option === "controlCabinet");
   const cabinetFingerprint = cabinetSourceFingerprint(project);
-  const cabinetReady = validStationInput(primary) && pump && (!secondary || validStationInput(second) && resources.pumps?.some(item => item.id === second.selectedPumpId));
-  const catalogAvailable = settings.stationType === "smart" ? resources.smartCabinets !== null : resources.cabinets !== null;
   // Explicit manual selections survive. Their applicability must be rechecked after a motor/type change.
   if (previousCabinet && previousCabinet.generatedBy !== "station") {
     if (!cabinetReady || previousCabinet.sourceFingerprint !== cabinetFingerprint) {
       items = replaceSpecificationRole(items, "controlCabinet", { ...stale(previousCabinet, "Ручной шкаф: конфигурация насосов изменилась или не проверена. Требуется повторное подтверждение применимости."), price: previousCabinet.price });
     }
-  } else if (cabinetReady && catalogAvailable) {
+  } else if (cabinetReady && catalogAvailable && pump) {
     const row = projectControlCabinetItem(resources.cabinets ?? [], resources.smartCabinets ?? [], settings, pump, primary.workingPumpCount! + primary.reservePumpCount!);
     const jockeyUnchecked = settings.stationType === "fire" && settings.jockeyPump;
     items = replaceSpecificationRole(items, "controlCabinet", { ...row, option: "controlCabinet", generatedBy: "station", sourceFingerprint: cabinetFingerprint,
@@ -113,7 +124,15 @@ export function corePrepareStation(project: ProjectConfig, resources: StationSpe
       details: "Не подобран", quantity: 0, unit: "шт.", price: null, status: "clarify", technicalStatus: "stale", technicalNotes: [reason] });
   }
 
-  const frameSelection = projectFrameSelection(project, resources.pumps);
+  return {...batch,cabinetReady:Boolean(cabinetReady),items,reasons};
+}
+export function coreStationFrameRows(batch:ReturnType<typeof coreStationCabinetRows>) {
+  return applyFrameSelection(batch,projectFrameSelection(batch.project,batch.resources.pumps));
+}
+export function coreApplyFrameSelection(batch:ReturnType<typeof coreStationCabinetRows>,frameSelection:ReturnType<typeof projectFrameSelection>){
+  const {project,resources,spec,station,primary,second,cabinetReady,reasons}=batch;
+  const entities={...batch.entities}; let items=batch.items;
+
   const frameRows = items.filter(item => item.option === "frame");
   if (frameRows.every(automaticFrameItem)) {
     items = replaceSpecificationRole(items, "frame", frameSpecificationItem(frameSelection, Boolean(cabinetReady)));
@@ -129,6 +148,9 @@ export function corePrepareStation(project: ProjectConfig, resources: StationSpe
   }
   const next:ProjectConfig = { ...project, station, entities: { ...entities, "station-spec": { ...spec, items } } };
   return { original:project, next, resources, cabinetReady:Boolean(cabinetReady), reasons };
+}
+export function corePrepareStation(project:ProjectConfig, resources:StationSpecificationResources) {
+  return stationFrameRows(stationCabinetRows(preparePumpRows(project,resources)));
 }
 export type StationWork=ReturnType<typeof prepareStation>;
 export function coreStationCollectors(work:StationWork):StationWork {
@@ -208,3 +230,27 @@ export function finalizeStation(...args: Parameters<typeof coreFinalizeStation>)
 }
 
 registerOperation("finalizeStation", ["work"], coreFinalizeStation);
+
+export function preparePumpRows(...args: Parameters<typeof corePreparePumpRows>): ReturnType<typeof corePreparePumpRows> {
+  return engineeringOperation("preparePumpRows", corePreparePumpRows, args);
+}
+registerOperation("preparePumpRows", ["project","resources"], corePreparePumpRows);
+
+export function stationCabinetRows(...args: Parameters<typeof coreStationCabinetRows>): ReturnType<typeof coreStationCabinetRows> {
+  return engineeringOperation("stationCabinetRows", coreStationCabinetRows, args);
+}
+registerOperation("stationCabinetRows", ["batch"], coreStationCabinetRows);
+
+export function stationFrameRows(...args: Parameters<typeof coreStationFrameRows>): ReturnType<typeof coreStationFrameRows> {
+  return engineeringOperation("stationFrameRows", coreStationFrameRows, args);
+}
+registerOperation("stationFrameRows", ["batch"], coreStationFrameRows);
+
+export function cabinetSelectionReady(...args:Parameters<typeof coreCabinetSelectionReady>):ReturnType<typeof coreCabinetSelectionReady>{return engineeringOperation("cabinetSelectionReady",coreCabinetSelectionReady,args);}
+registerOperation("cabinetSelectionReady",["batch"],coreCabinetSelectionReady);
+
+export function applyCabinetSelection(...args:Parameters<typeof coreApplyCabinetSelection>):ReturnType<typeof coreApplyCabinetSelection>{return engineeringOperation("applyCabinetSelection",coreApplyCabinetSelection,args);}
+registerOperation("applyCabinetSelection",["batch","cabinetReady","catalogAvailable"],coreApplyCabinetSelection);
+
+export function applyFrameSelection(...args:Parameters<typeof coreApplyFrameSelection>):ReturnType<typeof coreApplyFrameSelection>{return engineeringOperation("applyFrameSelection",coreApplyFrameSelection,args);}
+registerOperation("applyFrameSelection",["batch","frame"],coreApplyFrameSelection);

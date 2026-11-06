@@ -10,7 +10,7 @@ import { installedInsertionPrice } from "./calculated-insertion";
 export type SpecificationFinding = { id: string; category: "composition" | "technical" | "price"; severity: "error" | "warning"; message: string };
 export type RequiredSpecificationNode = { id: string; label: string; matches: (item: SpecItem) => boolean; quantity?: number; equipmentId?: string };
 // Preserve a manually entered historical price in project data, but never total a stale selection.
-export const specificationHasPrice = (item: SpecItem) => item.technicalStatus !== "stale" && typeof item.price === "number" && Number.isFinite(item.price) && item.price >= 0 &&
+export const coreSpecificationHasPrice = (item: SpecItem) => item.technicalStatus !== "stale" && typeof item.price === "number" && Number.isFinite(item.price) && item.price >= 0 &&
   (!item.insertionAssembly || installedInsertionPrice(item.insertionAssembly) === item.price) &&
   (!item.hydraulicAssembly || hydraulicProductRowPrice(item.hydraulicAssembly) === item.price);
 export const coreSpecificationLineTotal = (item: SpecItem) => specificationHasPrice(item) && Number.isFinite(item.quantity) && item.quantity > 0 ? item.price! * item.quantity : 0;
@@ -142,3 +142,8 @@ export function assessSpecification(...args: Parameters<typeof coreAssessSpecifi
 }
 
 registerOperation("assessSpecification", ["project","displayedItems","existingIssues"], coreAssessSpecification);
+
+export function specificationHasPrice(...args: Parameters<typeof coreSpecificationHasPrice>): ReturnType<typeof coreSpecificationHasPrice> {
+  return engineeringOperation("specificationHasPrice", coreSpecificationHasPrice, args);
+}
+registerOperation("specificationHasPrice", ["item"], coreSpecificationHasPrice);

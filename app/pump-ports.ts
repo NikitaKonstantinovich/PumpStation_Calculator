@@ -15,7 +15,7 @@ export type PumpPort = { dn: number; connection: ValveConnection; maxPressure?: 
 export type PumpPortOverride = { pumpId: string; dn: number | null; connection: ValveConnection | null; maxPressure?: number | null; maxInletPressure?: number | null; source: string };
 export type PumpPortData = Omit<PumpPortOverride, "pumpId">;
 export type PumpPortSide = "inlet" | "outlet";
-const complete = (port: PumpPortData | null | undefined): port is PumpPort => Boolean(port && typeof port.dn === "number" && Number.isFinite(port.dn) && port.dn > 0 && (port.connection === "threaded" || port.connection === "flanged"));
+export const completePumpPort = (port: PumpPortData | null | undefined): port is PumpPort => Boolean(port && typeof port.dn === "number" && Number.isFinite(port.dn) && port.dn > 0 && (port.connection === "threaded" || port.connection === "flanged"));
 const positive = (value: unknown): value is number => typeof value === "number" && Number.isFinite(value) && value > 0;
 
 // Manual records are stored in D1 after the build-time nozzle index is generated.
@@ -37,7 +37,7 @@ export function pumpPortField(secondary = false, side: PumpPortSide = "inlet") {
 
 export function pumpPortChoices(pumpId?: string, side: PumpPortSide = "inlet"): PumpPort[] {
   const catalog = (catalogNozzles as Record<string, Partial<Record<PumpPortSide, PumpPortData | null>>>)[pumpId ?? ""]?.[side];
-  if (complete(catalog)) return [catalog];
+  if (completePumpPort(catalog)) return [catalog];
   // Legacy imported evidence describes the inlet only.
   if (side === "outlet") return [];
   const imported = (importedPorts as Record<string, PumpPort[]>)[pumpId ?? ""];
@@ -50,7 +50,7 @@ export function pumpPortChoices(pumpId?: string, side: PumpPortSide = "inlet"): 
     return [{ dn, connection: "flanged" as const, maxPressure: row.maxPressure, source: `${row.source}: ${row.value}`, shape: "round" as const }];
   });
 }
-export function catalogPumpPort(pumpId?: string, side: PumpPortSide = "inlet", pump?: Pump): PumpPortData | null {
+export function coreCatalogPumpPort(pumpId?: string, side: PumpPortSide = "inlet", pump?: Pump): PumpPortData | null {
   if (pump && pump.id === pumpId && pump.manualEntry) return manualPumpPort(pump, side);
   const catalog = (catalogNozzles as Record<string, Partial<Record<PumpPortSide, PumpPortData | null>>>)[pumpId ?? ""]?.[side];
   if (catalog) return catalog;
@@ -58,7 +58,7 @@ export function catalogPumpPort(pumpId?: string, side: PumpPortSide = "inlet", p
   return choices.length === 1 ? choices[0] : null;
 }
 
-export function resolvePumpPortData(entity: DnEntity, input: InputEntity, secondary = false, side: PumpPortSide = "inlet", pump?: Pump): PumpPortData | null {
+export function coreResolvePumpPortData(entity: DnEntity, input: InputEntity, secondary = false, side: PumpPortSide = "inlet", pump?: Pump): PumpPortData | null {
   const override = entity[pumpPortField(secondary, side)];
   const selected = input.selectedPumpId && override?.pumpId === input.selectedPumpId ? override : null;
   return resolvePort(catalogPumpPort(input.selectedPumpId, side, pump), selected);
@@ -66,7 +66,7 @@ export function resolvePumpPortData(entity: DnEntity, input: InputEntity, second
 
 export function resolvePumpPort(entity: DnEntity, input: InputEntity, secondary = false, side: PumpPortSide = "inlet", pump?: Pump): PumpPort | null {
   const port = resolvePumpPortData(entity, input, secondary, side, pump);
-  return complete(port) ? port : null;
+  return completePumpPort(port) ? port : null;
 }
 
 export function coreResolvePort(catalog: PumpPortData | null, override: PumpPortData | null): PumpPortData | null {
@@ -78,3 +78,13 @@ export function resolvePort(...args: Parameters<typeof coreResolvePort>): Return
 }
 
 registerOperation("resolvePort", ["catalog","override"], coreResolvePort);
+
+export function resolvePumpPortData(...args: Parameters<typeof coreResolvePumpPortData>): ReturnType<typeof coreResolvePumpPortData> {
+  return engineeringOperation("resolvePumpPortData", coreResolvePumpPortData, args);
+}
+registerOperation("resolvePumpPortData", ["entity","input","secondary","side","pump"], coreResolvePumpPortData);
+
+export function catalogPumpPort(...args: Parameters<typeof coreCatalogPumpPort>): ReturnType<typeof coreCatalogPumpPort> {
+  return engineeringOperation("catalogPumpPort", coreCatalogPumpPort, args);
+}
+registerOperation("catalogPumpPort", ["pumpId","side","pump"], coreCatalogPumpPort);

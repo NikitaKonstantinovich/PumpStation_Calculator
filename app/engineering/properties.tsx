@@ -4,7 +4,7 @@ import { useState } from "react";
 import { accepts, display, type Diagram, type Edge, type GraphNode, type NodeType } from "./schema";
 import type { Trace } from "./engine";
 export function Properties({
-  graph,
+  extra,graph,
   node,
   type,
   trace,
@@ -18,6 +18,7 @@ export function Properties({
   pick,
   group
 }: {
+  extra: import("react").ReactNode;
   graph: Diagram;
   node: GraphNode;
   type: NodeType;
@@ -37,7 +38,7 @@ export function Properties({
   const locked = !!type.native || type.id.startsWith("args.") || type.id.startsWith("return.");
   const links = graph.edges.filter(e => e.from === node.id || e.to === node.id),
     record = trace[node.id];
-  return <aside className="gn-props"><h2>Свойства</h2><strong>{node.name}</strong><nav>{["Объект", "Атрибуты", "Функции и скрипты", "Связи и результат"].map(k => <button key={k} aria-pressed={tab === k} onClick={() => setTab(k)}>{k}</button>)}</nav>
+  return <aside className="gn-props"><h2>Свойства</h2><strong>{node.name}</strong>{extra}<nav>{["Объект", "Атрибуты", "Функции и скрипты", "Связи и результат"].map(k => <button key={k} aria-pressed={tab === k} onClick={() => setTab(k)}>{k}</button>)}</nav>
     {tab === "Объект" && <><label>Имя экземпляра<input key={node.id + node.name} defaultValue={node.name} onBlur={e => {
           if (e.target.value.trim() && e.target.value !== node.name) update({
             name: e.target.value.trim()

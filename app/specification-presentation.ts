@@ -1,3 +1,4 @@
+import {engineeringOperation, registerOperation} from "./engineering/runtime";
 import type { SpecEntity, SpecItem, SpecSection, SettingsEntity } from "./project-config";
 import { normalizeSpecificationItems } from "./specification-items";
 import { pressureCheckWarning } from "./dn-defaults";
@@ -40,7 +41,7 @@ export const specificationSection = (item: SpecItem): SpecSection => item.sectio
   (item.option === "primaryPump" || item.option === "secondaryPump" ? "pump" : item.option === "controlCabinet" ? "control" :
     item.generatedBy === "suction-line" ? "suction" : "discharge");
 
-export function visibleSpecificationItems(entity: SpecEntity, settings: SettingsEntity) {
+export function coreVisibleSpecificationItems(entity: SpecEntity, settings: SettingsEntity) {
   const items = normalizeSpecificationItems(pressureChecksEnabled(settings) ? entity.items : entity.items.map(withoutPressureChecks));
   const secondary = settings.stationType === "combined" || settings.stationType === "fire" && settings.jockeyPump;
   return items.filter(item => {
@@ -54,3 +55,6 @@ export function visibleSpecificationItems(entity: SpecEntity, settings: Settings
     }
   });
 }
+
+export function visibleSpecificationItems(...args:Parameters<typeof coreVisibleSpecificationItems>):ReturnType<typeof coreVisibleSpecificationItems>{return engineeringOperation("visibleSpecificationItems",coreVisibleSpecificationItems,args);}
+registerOperation("visibleSpecificationItems",["spec","settings"],coreVisibleSpecificationItems);

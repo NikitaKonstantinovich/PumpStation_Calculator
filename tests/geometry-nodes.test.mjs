@@ -12,7 +12,10 @@ const native=()=>{throw Error("No native operation expected");};
 
 test("all installed tools have complete, compilable port contracts; identity lowering",()=>{
   assert.doesNotThrow(()=>validateDocument(base,signatures,base.types,true));
-  assert.deepEqual(compilePublication(base,"test").plans,{});
+  const program=compilePublication(base,"test");
+  assert.ok(program.plans.buildAssembly.steps.some(s=>s.id.startsWith("model/")));
+  assert.ok(program.plans.stationComposition.steps.length>10);
+  assert.ok(!program.plans.specificationLineTotal.steps.some(s=>s.id.startsWith("model/")));
 });
 test("port selection preserves partial project overrides; connections support fan-out, semantic types, occupied inputs, cycles and missing values",()=>{
   const p=compileDiagram(port,base.types);
@@ -46,7 +49,7 @@ test("admin lifecycle persists types, enforces revisions, publishes atomically, 
   assert.equal((await store.call()).body.draft.types.find(t=>t.id==="lab.total").name,"Расчёт партии");
   assert.equal((await store.call({action:"save",document:doc,revision:0})).status,409);
   const runtime=async id=>{const r=await store.effective.GET(new Request("http://fixture/api/engineering/runtime"+(id?"?version="+id:""),{headers:{"x-test-role":"base"}}));return r.json();};
-  const prior=await runtime();assert.deepEqual(prior.plans,{});
+  const prior=await runtime();assert.equal(prior.version,"engineering-station-v2");assert.ok(JSON.stringify(prior)===JSON.stringify(compilePublication(initialDocument(),prior.version)),"The installed factory version must match the editor");assert.deepEqual((await runtime("engineering-v1")).plans,{});
   result=await store.call({action:"test",diagram:"resolvePort",document:doc,revision:1,inputs:{catalog:{dn:65,source:"fixture",connection:"flanged"},override:null}});
   assert.equal(result.body.value.dn,70);
   const pub=await store.call({action:"publish",document:doc,revision:1});assert.equal(pub.status,200);const used=await runtime();
@@ -86,6 +89,11 @@ test("all public calculation entry points use the edited result of their publish
     doc.types.push(type);
     graph.nodes.push({id: "probe", type: type.id, name: "Проба", x: 0, y: 0, values: {value}});
     graph.edges = [...graph.edges.filter(e => e.to !== "result"), {from: "probe", out: "value", to: "result", input: "value"}];
+    const root=doc.diagrams.find(g=>g.id==="station");
+    if(root.edges.some(e=>e.to==="result"&&e.input===sig.id)){
+      root.nodes.push({id:"probe_"+sig.id,type:type.id,name:"Проверка входа "+sig.id,x:0,y:0,values:{value}});
+      root.edges=root.edges.map(e=>e.to==="result"&&e.input===sig.id?{...e,from:"probe_"+sig.id,out:"value"}:e);
+    }
     if (!modules.has(sig.file)) modules.set(sig.file, await store.load(sig.file));
   }
   validateDocument(doc, signatures, initialDocument().types, true);
@@ -115,4 +123,96 @@ test("pressure cannot feed DN, missing required mass is reported and catalogue o
   Object.assign(field, {meaning: "pressure", unit: "бар"});
   Object.assign(receiver, {meaning: "dn", unit: ""});
   assert.match(connectionProblem(graph, doc.types, graph.edges[0]), /pressure.*dn/);
+});
+
+test("station factory preserves engineering results for two circuits, manual overrides and incomplete resources",async()=>{
+  const {createProject}=await store.load("project-config"),{stationComposition}=await store.load("station-specification");
+  const {buildAssembly}=await store.load("model-editor/model"),{dischargeHydraulics}=await store.load("dn-defaults");
+  const {specificationLineTotal}=await store.load("specification-readiness"),{collectProjectIssues}=await store.load("diagnostics");
+  const {evaluatePumpCandidates}=await store.load("pump-selection"),{operatingPoint}=await store.load("pump-catalog");
+  const before={version:"engineering-v1",plans:{},args:{}},after=compilePublication(initialDocument(),"station");
+  const pump=(id,dn,price)=>({id,model:id,type:"vertical_multistage",manufacturer:"CNP",manualEntry:true,outlet:{dn,type:"flanged"},inlet:{dn,type:"flanged"},price,priceCurrency:"RUB",discountPercent:0,curve:[[0,32],[10,20],[20,5]],weightKg:80});
+  const pumps=[pump("A",65,100),pump("B",50,120)],settingsPrice={usdRate:95,cnyRate:13,manufacturerDiscounts:{cnp:0}};
+  for(const available of [pumps,pumps.slice(0,1),null]){
+    const project=createProject("Сравнение");const e=project.entities;
+    Object.assign(e["station-settings"],{stationType:"combined",...settingsPrice});
+    for(const [i,key] of ["system-input","system-input-2"].entries())Object.assign(e[key],{selectedPumpId:pumps[i].id,calculated:true,workingPumpCount:1,reservePumpCount:0,flowRate:10,head:20,staticHead:0});
+    Object.assign(e["station-dn"],{secondaryPumpDischargePort:{pumpId:"B",dn:40,source:"Проект",connection:"flanged"}});
+    const res={pumps:available,cabinets:null,smartCabinets:null};
+    const calculate=()=>{
+      const next=stationComposition(structuredClone(project),res),rows=next.entities["station-spec"].items;
+      return {composition:next,totals:rows.map(specificationLineTotal),issues:collectProjectIssues(next,available??[],undefined,[],{}),
+        model:buildAssembly(next,available??[],{version:1,profiles:{}},{version:1,revision:"test",items:{},issues:[]}),
+        selection:evaluatePumpCandidates(available??[],e["system-input"],settingsPrice,{}),
+        point:operatingPoint(pumps[0],1,e["system-input"]),
+        ports:pumps.map((p,i)=>dischargeHydraulics(e["station-dn"],e[i?"system-input-2":"system-input"],e["station-settings"],!!i,p))};
+    };
+    assert.deepEqual(withEvaluationProgram(after,calculate),withEvaluationProgram(before,calculate));
+  }
+});
+
+test("encapsulation preserves crossing wires, project persistence and nested trace for a two-input 10 kg instrument",async()=>{
+  const {encapsulate,compileTree}=await store.load("engineering/hierarchy");
+  const state=(await store.call()).body,doc=state.draft,g=doc.diagrams.find(d=>d.id==="lab");
+  const made=encapsulate(doc,g,["operation"],"Масса партии",[
+    {key:"mass",node:"operation",field:"mass",direction:"input"},{key:"count",node:"operation",field:"count",direction:"input"},
+    {key:"total",node:"operation",field:"value",direction:"output"}]);
+  const saved=await store.call({action:"save",document:made.document,revision:state.revision});
+  assert.equal(saved.status,200);
+  const reload=(await store.call()).body.draft;
+  const project=reload.diagrams.find(g=>g.id==="station");
+  const plan=compileTree(reload,project);
+  assert.ok(plan.steps.some(s=>s.id==="lab/"+made.id+"/operation"));
+  const trial=await store.call({action:"test",diagram:"lab",document:reload,inputs:{},revision:saved.body.revision});
+  assert.equal(trial.status,200);
+  assert.equal(trial.body.value,10);
+  assert.equal(trial.body.trace[made.id+"/operation"].outputs.value,10);
+});
+
+test("changing the source priority in the draft crosses the DN boundary into the published discharge line and 3D",async()=>{
+  const {createProject}=await store.load("project-config");
+  const {buildAssembly}=await store.load("model-editor/model"),{dischargeHydraulics}=await store.load("dn-defaults");
+  const s=(await store.call()).body,doc=s.draft,p=createProject("Источники DN"),e=p.entities,input=e["system-input"],dn=e["station-dn"];
+  const pump={id:"manual-65",model:"A",manufacturer:"Test",manualEntry:true,type:"vertical_multistage",outlet:{dn:65,type:"flanged"},inlet:{dn:50,type:"flanged"},curve:[[0,25],[10,20]],spatialData:{version:1,units:"mm",coordinateSystem:"inlet",boundsMm:[-40,-40,-40,200,40,140],ports:[{id:"inlet",point:[0,0,0],axis:[-1,0,0],source:"test"},{id:"outlet",point:[160,0,90],axis:[1,0,0],source:"test"}],source:"test",rule:"test",issues:[]}};
+  Object.assign(input,{selectedPumpId:pump.id,workingPumpCount:1,reservePumpCount:0,head:20,flowRate:10,staticHead:0,calculated:true});
+  dn.pumpDischargePort={pumpId:pump.id,dn:80,source:"Проект",connection:"flanged"};
+  const read=async(version="")=>(await store.effective.GET(new Request("http://fixture/api/engineering/runtime"+(version?"?version="+version:""),{headers:{"x-test-role":"base"}}))).json();
+  const compute=()=>{const model=buildAssembly(p,[pump],{version:1,profiles:{}},{version:1,items:{},issues:[]});return [dischargeHydraulics(dn,input,e["station-settings"],false,pump).dn,model.components.find(c=>c.equipmentId===pump.id).ports.find(port=>port.id==="outlet").dn];};
+  const previous=await read();assert.deepEqual(withEvaluationProgram(previous,compute),[80,80]);
+  doc.types.find(t=>t.id==="resolve.port").formulas.port="catalog ?? override";
+  const trial=await store.call({action:"test",revision:s.revision,diagram:"station",output:"dischargeHydraulics",document:doc,inputs:{project:p,catalogue:[pump],side:"outlet",secondary:false}});
+  assert.equal(trial.status,200,trial.body.error);assert.equal(trial.body.value.dn,65);
+  assert.deepEqual(withEvaluationProgram(await read(),compute),[80,80]);
+  const pub=await store.call({action:"publish",revision:s.revision,document:doc});assert.equal(pub.status,200,pub.body.error);
+  assert.deepEqual(withEvaluationProgram(await read(),compute),[65,65]);
+  await store.call({action:"rollback",revision:pub.body.revision,version:previous.version});assert.deepEqual(withEvaluationProgram(await read(),compute),[80,80]);
+  assert.deepEqual(withEvaluationProgram(await read(pub.body.active),compute),[65,65]);
+});
+
+test("a second-circuit instance can be rewired without changing primary selection",async()=>{
+  const d=initialDocument(),root=d.diagrams.find(g=>g.id==="station"),sig=signatures.find(s=>s.id==="evaluatePumpCandidates");
+  const type={id:"fixedCandidates",name:"Второй контур",category:"Тест",description:"",fields:[sig.result],formulas:{}};
+  d.types.push(type);root.nodes.push({id:"fixed",type:type.id,name:type.name,x:0,y:0,values:{value:[{tag:"second"}]}});
+  const edge=root.edges.find(e=>e.input==="secondCandidates"&&e.to==="result");edge.from="fixed";edge.out="value";
+  const program=compilePublication(d,"two");
+  const {withCircuit}=await store.load("engineering/runtime"),{evaluatePumpCandidates}=await store.load("pump-selection");
+  const calc=()=>evaluatePumpCandidates([],{flowRate:10,head:15,staticHead:0,workingPumpCount:1},{manufacturerDiscounts:{}},{});
+  assert.deepEqual(withEvaluationProgram(program,()=>withCircuit(false,calc)),[]);
+  assert.deepEqual(withEvaluationProgram(program,()=>withCircuit(true,calc)),[{tag:"second"}]);
+});
+
+test("hierarchical migration preserves existing custom rules and rejects incompatible or recursive container boundaries",async()=>{
+  const {legacyDocument,upgradeDocument}=await store.load("engineering/templates"),{compileTree}=await store.load("engineering/hierarchy");
+  const old=legacyDocument();old.types.find(t=>t.id==="resolve.port").formulas.port="catalog ?? override";
+  const legacy=old.diagrams.find(g=>g.id==="stationComposition");legacy.nodes.find(n=>n.id==="stationLines").name="Обвязка проекта";
+  const migrated=upgradeDocument(structuredClone(old)),root=migrated.diagrams.find(g=>g.id==="station");
+  assert.equal(root.nodes.find(n=>n.id==="spec").type,"tool.stationComposition");
+  assert.equal(migrated.diagrams.find(d=>d.id===legacy.id).nodes.find(n=>n.id==="stationLines").name,"Обвязка проекта");
+  assert.equal(migrated.types.find(t=>t.id==="resolve.port").formulas.port,"catalog ?? override");
+  assert.equal(upgradeDocument(migrated),migrated);
+  const bad=structuredClone(migrated);bad.types.find(t=>t.id==="stationSelection").fields[0].unit="бар";
+  assert.throws(()=>compileTree(bad,bad.diagrams[0]),/порт.*границы/);
+  const cyc=structuredClone(migrated);const diagram=cyc.diagrams.find(g=>g.id==="stationSelection");
+  diagram.nodes.push({id:"again",name:"Снова",type:"stationSelection",values:{},x:0,y:0});
+  assert.throws(()=>compileTree(cyc,cyc.diagrams[0]),/Цикл/);
 });

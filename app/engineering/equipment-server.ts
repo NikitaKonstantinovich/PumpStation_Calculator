@@ -1,8 +1,19 @@
 import { catalogPumpPort } from "../pump-ports";
 import type { Pump } from "../pump-catalog";
-import { readEquipmentCatalog } from "../equipment-catalog-server";
+import {readSavedInsertions,savedInsertionComponent} from "../component-insert-store-server";
+import {currentInsertCatalog} from "../component-insert-catalog-server";
+import {readManualPumps} from "../manual-pump-server";
+import {mergePumpCatalog} from "../pump-catalog-client";
+import {assembleComponentDatabase,type RawBindingDatabase,type RawControlDatabase} from "../component-database";
+import type {StationSpecificationResources} from "../station-specification";
+import { equipmentAsset, readEquipmentCatalog } from "../equipment-catalog-server";
 import { equipmentLabel, type EquipmentRow } from "../equipment-admin";
 import { makeField, type DataKind, type NodeType } from "./schema";
+export async function trialResources():Promise<StationSpecificationResources>{
+  async function data<T>(url:string){const response=await equipmentAsset(url);if(!response.ok)throw Error("Каталог недоступен · "+url);return response.json() as Promise<T>;}
+  const [base,manual,binding,control,cabinets,saved,catalog]=await Promise.all([data<Pump[]>("/pumps.json"),readManualPumps(),data<RawBindingDatabase>("/binding-components.json"),data<RawControlDatabase&{cabinets:StationSpecificationResources["smartCabinets"]}>("/control-cabinet-database.json"),data<StationSpecificationResources["cabinets"]>("/control-cabinets.json"),readSavedInsertions(),currentInsertCatalog().catch(()=>null)]);
+  return {pumps:mergePumpCatalog(base,manual.map(r=>r.pump)),cabinets,smartCabinets:control.cabinets,components:assembleComponentDatabase(binding,control,saved.map(r=>savedInsertionComponent(r,catalog?.version??null)))};
+}
 const stable = (value: string) => {
   let hash = 2166136261;
   for (const c of value) hash = Math.imul(hash ^ c.charCodeAt(0), 16777619);

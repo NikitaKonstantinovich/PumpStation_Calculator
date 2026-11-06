@@ -46,19 +46,27 @@ export function corePreferredOperatingPoint(deltaQPercent: number, deltaHPercent
     value >= -2 - OPERATING_POINT_PERCENT_EPSILON && value <= 15 + OPERATING_POINT_PERCENT_EPSILON);
 }
 
-export function coreEvaluatePumpCandidates(catalogue: readonly Pump[], input: PumpSelectionInput, settings: PriceSettings, filters: PumpSelectionFilters = {}): PumpSelectionCandidate[] {
+export function coreFilterSelectionCatalog(catalogue: readonly Pump[], input: PumpSelectionInput, filters: PumpSelectionFilters = {}) {
   if (![input.flowRate, input.head, input.staticHead, input.workingPumpCount].every(Number.isFinite) ||
     input.flowRate <= 0 || input.head <= 0 || input.staticHead < 0 || input.staticHead > input.head ||
     !Number.isInteger(input.workingPumpCount) || input.workingPumpCount < 1 || input.workingPumpCount > MAX_WORKING_PUMPS) return [];
 
-  const candidates: PumpSelectionCandidate[] = [];
-  for (const pump of catalogue) {
-    if (!usablePump(pump, input.medium) || !matchesPumpFilters(pump, filters)) continue;
+  return catalogue.filter(pump=>usablePump(pump,input.medium)&&matchesPumpFilters(pump,filters));
+}
+export function coreReserveCandidates(catalogue:readonly Pump[],input:PumpSelectionInput,minimum:number) {
+  const candidates: Array<Pick<PumpSelectionCandidate,"pump"|"headAtRequestedFlow"|"headReservePercent">>=[];
+  for(const pump of catalogue){
     const headAtRequestedFlow = selectionHeadAtFlow(pump, input.flowRate / input.workingPumpCount);
     if (headAtRequestedFlow === null) continue;
     const headReservePercent = (headAtRequestedFlow - input.head) / input.head * 100;
-    if (!Number.isFinite(headReservePercent) || headReservePercent < MINIMUM_HEAD_RESERVE_PERCENT) continue;
-
+    if (!Number.isFinite(headReservePercent) || headReservePercent < minimum) continue;
+    candidates.push({pump,headAtRequestedFlow,headReservePercent});
+  }
+  return candidates;
+}
+export function coreMeasureCandidates(rows:ReturnType<typeof coreReserveCandidates>,input:PumpSelectionInput,settings:PriceSettings) {
+  const candidates:PumpSelectionCandidate[]=[];
+  for(const {pump,headAtRequestedFlow,headReservePercent} of rows){
     const actual = operatingPoint(pump, input.workingPumpCount, input, "pchip");
     let point: OperatingPointMetrics | null = null;
     let pointIssue: string | null = null;
@@ -84,6 +92,9 @@ export function coreEvaluatePumpCandidates(catalogue: readonly Pump[], input: Pu
   return candidates;
 }
 
+export function coreEvaluatePumpCandidates(catalogue:readonly Pump[],input:PumpSelectionInput,settings:PriceSettings,filters:PumpSelectionFilters={}) {
+  return measureCandidates(reserveCandidates(filterSelectionCatalog(catalogue,input,filters),input,MINIMUM_HEAD_RESERVE_PERCENT),input,settings);
+}
 function compareOptionalNumber(a: number | null, b: number | null) {
   if (a === null) return b === null ? 0 : 1;
   if (b === null) return -1;
@@ -121,3 +132,18 @@ export function preferredOperatingPoint(...args: Parameters<typeof corePreferred
 }
 
 registerOperation("preferredOperatingPoint", ["deltaQPercent","deltaHPercent"], corePreferredOperatingPoint);
+
+export function filterSelectionCatalog(...args: Parameters<typeof coreFilterSelectionCatalog>): ReturnType<typeof coreFilterSelectionCatalog> {
+  return engineeringOperation("filterSelectionCatalog", coreFilterSelectionCatalog, args);
+}
+registerOperation("filterSelectionCatalog", ["catalogue","input","filters"], coreFilterSelectionCatalog);
+
+export function reserveCandidates(...args: Parameters<typeof coreReserveCandidates>): ReturnType<typeof coreReserveCandidates> {
+  return engineeringOperation("reserveCandidates", coreReserveCandidates, args);
+}
+registerOperation("reserveCandidates", ["catalogue","input","minimum"], coreReserveCandidates);
+
+export function measureCandidates(...args: Parameters<typeof coreMeasureCandidates>): ReturnType<typeof coreMeasureCandidates> {
+  return engineeringOperation("measureCandidates", coreMeasureCandidates, args);
+}
+registerOperation("measureCandidates", ["rows","input","settings"], coreMeasureCandidates);

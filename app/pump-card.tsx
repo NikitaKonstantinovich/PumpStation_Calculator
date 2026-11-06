@@ -1,9 +1,10 @@
+import {withCircuit} from "./engineering/runtime";
 import type { ReactNode } from "react";
 import type { Pump } from "./pump-catalog";
 import { pumpCardCurves, pumpCardPhysicalData, pumpCardSections, pumpCardValue, PUMP_TYPE_LABELS } from "./pump-card-data";
 
 export function PumpCard({ pump, children, issueTool = "sketch" }: { pump: Pump; children?: ReactNode; issueTool?: "sketch"|"sketch2" }) {
-  const curves = pumpCardCurves(pump);
+  const curves = withCircuit(issueTool==="sketch2",()=>pumpCardCurves(pump));
   const physical = pumpCardPhysicalData(pump);
   return <article className="pump-card" aria-label={`Карточка насоса ${pump.manufacturer} ${pump.model}`}>
     <header className="pump-card__header">
@@ -29,7 +30,7 @@ export function PumpCard({ pump, children, issueTool = "sketch" }: { pump: Pump;
     </aside>}
     <div className="pump-card__characteristics">
       <p className="pump-card__hint">Характеристики одного насоса по данным каталога. «—» — значение не указано.</p>
-      {pumpCardSections(pump).map(section => <section className="pump-card__section" key={section.title}>
+      {withCircuit(issueTool==="sketch2",()=>pumpCardSections(pump)).map(section => <section className="pump-card__section" key={section.title}>
         <h3>{section.title}</h3>
         <dl>{section.rows.map((row, index) => <div className="pump-card__row" key={`${row.label}-${index}`}>
           <dt>{row.label}</dt><dd>{row.value}</dd>

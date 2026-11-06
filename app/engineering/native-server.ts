@@ -1,3 +1,12 @@
+import { coreSpecificationHasPrice } from "../specification-readiness";
+import { coreCatalogPumpPort } from "../pump-ports";
+import { coreResolvePumpPortData } from "../pump-ports";
+import { coreMeasureCandidates } from "../pump-selection";
+import { coreReserveCandidates } from "../pump-selection";
+import { coreFilterSelectionCatalog } from "../pump-selection";
+import { coreStationFrameRows } from "../station-specification";
+import { coreStationCabinetRows } from "../station-specification";
+import { corePreparePumpRows } from "../station-specification";
 import { corePrepareInsertionTemplate } from "../model-editor/insertion-template";
 import { coreBuildCollectorTemplate } from "../model-editor/collector-template";
 import { coreSelectInsertVariants } from "../component-insert-variants";
@@ -65,7 +74,42 @@ import { coreGenerateInsertCalculations } from "../component-insert-calculations
 import { coreBuildAssembly } from "../model-editor/model";
 
 // Importing this module registers the complete library of pure engineering operations.
+import {coreAssembleWithInputs} from "../model-editor/model";
+import {coreCreateCadManifest} from "../cad-export";
+import {coreVisibleSpecificationItems} from "../specification-presentation";
+import {coreIntersectPumpCurve} from "../pump-catalog";
+import {coreLineFromPort} from "../dn-defaults";
+import {corePlaceStationPumps} from "../model-editor/model";
+import {coreBuildStationLayout} from "../model-editor/model";
+import {coreValvesByDn} from "../station-hydraulic-calculation";
+import {coreRankValve} from "../station-hydraulic-calculation";
+import {coreInsertBaseline} from "../component-insert-calculations";
+import {coreCabinetSelectionReady} from "../station-specification";
+import {coreApplyCabinetSelection} from "../station-specification";
+import {coreApplyFrameSelection} from "../station-specification";
 export const nativeOperations = {
+  applyFrameSelection:coreApplyFrameSelection,
+  applyCabinetSelection:coreApplyCabinetSelection,
+  cabinetSelectionReady:coreCabinetSelectionReady,
+  insertBaseline:coreInsertBaseline,
+  rankValve:coreRankValve,
+  valvesByDn:coreValvesByDn,
+  buildStationLayout:coreBuildStationLayout,
+  placeStationPumps:corePlaceStationPumps,
+  lineFromPort:coreLineFromPort,
+  intersectPumpCurve:coreIntersectPumpCurve,
+  visibleSpecificationItems:coreVisibleSpecificationItems,
+  createCadManifest:coreCreateCadManifest,
+  assembleWithInputs:coreAssembleWithInputs,
+  specificationHasPrice: coreSpecificationHasPrice,
+  catalogPumpPort: coreCatalogPumpPort,
+  resolvePumpPortData: coreResolvePumpPortData,
+  measureCandidates: coreMeasureCandidates,
+  reserveCandidates: coreReserveCandidates,
+  filterSelectionCatalog: coreFilterSelectionCatalog,
+  stationFrameRows: coreStationFrameRows,
+  stationCabinetRows: coreStationCabinetRows,
+  preparePumpRows: corePreparePumpRows,
   prepareInsertionTemplate: corePrepareInsertionTemplate,
   buildCollectorTemplate: coreBuildCollectorTemplate,
   selectInsertVariants: coreSelectInsertVariants,

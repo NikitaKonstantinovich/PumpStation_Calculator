@@ -1,124 +1,145 @@
 # Geometry Nodes в PumpStation Calculator
 
-Администратор полной версии может изменить, какие значения получит штатный инженерный инструмент, проверить результат на копии проекта и опубликовать его. Ветка `codex/geometry-nodes` создана от `codex/3d-flange-fasteners`, коммит `8df2af7bce73e006162adae2b1d78e53ba4122d4`.
+В полной версии администратор открывает главное меню → **Geometry Nodes**. Начальный вид показывает расчёт насосной установки. Зелёные карточки принимают данные, синие рассчитывают или отображают их, охристые готовят выходы. Проекты штатного рабочего пространства используют опубликованную версию. База этой переработки — `b48e2233` в ветке `codex/geometry-nodes`.
 
-## Запуск в Windows
+## Локальный запуск
 
-Команды выполняются из `E:\PumpStation_Calculator\frontend`. Требуется настроенный локальный профиль полной версии с PostgreSQL и D1. Для новой установки порядок подготовки базы и постоянных каталогов описан в [README](../README.md) и [инструкции локального хранилища](local-project-storage.md).
-
-```powershell
-npm ci
-npm run build:full
-```
-
-Для существующей **тестовой** D1 со схемой по 0014 включительно примените одну новую миграцию. Укажите путь к каталогу состояния именно того профиля, который будет открывать стенд. Для пустой D1 выполните все миграции в порядке имён по инструкции README.
+В каталоге `E:\PumpStation_Calculator\frontend` выполните `npm ci` и `npm run build:full`. Нужен настроенный локальный профиль с PostgreSQL и D1. Для новой установки примените миграции по порядку согласно [инструкции локального хранилища](local-project-storage.md). Для изолированного стенда с уже установленной 0015 примените 0016 в его каталоге состояния.
 
 ```powershell
-$profilePath = Join-Path $env:LOCALAPPDATA 'PumpStationCalculator\full.json'
-$settings = Get-Content -Raw -LiteralPath $profilePath | ConvertFrom-Json
-node node_modules/wrangler/bin/wrangler.js d1 execute DB --local --config dist/server/wrangler.json --persist-to $settings.PROJECT_STATE_DIR --file drizzle/0015_engineering_graphs.sql
+node node_modules/wrangler/bin/wrangler.js d1 execute DB --local --config dist/server/wrangler.json --persist-to "<каталог состояния стенда>" --file drizzle/0016_station_instruments.sql
+powershell -NoProfile -File scripts/start-local.ps1 -ConfigPath "<конфигурация стенда>"
 ```
 
-Укажите в тестовом профиле `buildDir`, указывающий на свежий `dist` этой ветки. Запустите настроенный профиль командой `npm run start:local` или отдельный тестовый профиль командой `powershell -NoProfile -File scripts/start-local.ps1 -ConfigPath <путь-к-профилю>`. Войдите как admin, откройте главное меню → **Geometry Nodes**. Прямой адрес на том же хосте — `/?view=geometry-nodes`. Обычные роли получают опубликованные расчёты через штатные экраны. В beta сохранены ограничения на редактирование, для расчётов выдаются операции разрешённых инструментов.
+Откройте `/?view=geometry-nodes` на адресе этого профиля и войдите как admin. В beta редактор закрыт. API обычных расчётов выдаёт только разрешённые для профиля программы.
 
-## Проверка через интерфейс
+## Проверка колёсиком и изменением правила
 
-1. **Каталог и два контура.** Откройте проект с выбранным насосом, затем схему «Данные патрубка насоса» и «▷ Запуск». Выберите контур и выходной патрубок, нажмите «Выполнить». У узла «Выбор источника» посмотрите входы `catalog` и `override`. В свойствах узла «DN патрубка» откройте «Связи и результат». Повторите для другой модели и другого контура. Для совпадающего ID насоса проектное переопределение имеет приоритет целиком, в том числе при неполных характеристиках.
-2. **Масса.** Откройте «Песочница · масса партии». Начальный пример даёт 10 кг. В библиотеке создайте тип комплектующего с числовым выходом `mass`, смыслом `mass`, единицей `кг` и начальным значением `2.5`. Создайте тип инструмента с числовым входом `mass` с тем же смыслом и единицей, входом `count` со значением 4 и выходом `total` со смыслом `mass` и единицей `кг`. Для выхода введите `mass * count`. По ПКМ передайте массу от детали инструменту, а выход инструмента — на вход конечной ноды. Подтвердите замену связи и запустите граф. Измените количество на 5 в свойствах экземпляра и повторите запуск. Ожидаемые результаты — 10 и 12,5 кг.
-3. **Скрытые поля.** Тем же выходом подключите второго получателя. На карточке источника виден один выход. Удалите линии по очереди через ПКМ по линии или «Свойства → Связи и результат». После удаления последней линии поле остаётся в «Атрибутах». При повторном подключении нажмите Esc до выбора принимающего поля и проверьте исходную схему.
-4. **Публикация.** На отдельном тестовом проекте с каталожным DN 65 измените функцию узла «DN патрубка» на `get(port, "dn") + 5`. В пробном запуске появится 70. Сохраните черновик и проверьте исходный DN в уже открытом проекте. Опубликуйте и подтвердите список затронутых экземпляров. Создайте новый проект с тем же насосом либо выполните явный пересчёт состава на актуальных правилах. Сверьте DN патрубка в напорной линии и данных 3D. Через «Версии» восстановите прежнюю публикацию и повторите пересчёт. Параметры входного и выходного патрубков проверяйте раздельно.
-5. **Доступ и конкуренция.** Откройте редактор двумя администраторами. Сохраните разные изменения по очереди. Второй получит сообщение о конфликте и сможет решить, когда загрузить актуальный черновик. Проверьте прямую ссылку и административный API в отдельной сессии обычного пользователя.
+1. Откройте проект, нажмите **Показать всю станцию**. Наведите курсор на «Подбор насосов · основной» и приблизьте колёсиком. Внутри появятся выбор инженера, условия и оценка кандидатов. Приблизьте оценку, чтобы добраться до фильтра каталога, запаса напора и рабочей точки. Отдаление сворачивает контейнеры. Перемещение за фон или средней кнопкой двигает камеру. Заголовок узла позволяет перемещать экземпляр.
+2. В проекте задайте разные DN для каталожного и проектного напорного патрубка одного насоса. На полотне приблизьте **Расчёт DN → Патрубок выбранного контура → Данные патрубка насоса → Источник параметров**. Тот же узел доступен кнопкой **Раскрыть Instrument** в свойствах. В определении типа замените `override ?? catalog` на `catalog ?? override`. Раздел типов показывает пути затронутых экземпляров.
+3. Для проверки самой функции выберите внутренний узел и нажмите **▷ Запуск**. На уровне «Данные патрубка насоса» проба принимает `catalog` и `override`. Для проверки всего тракта нажмите **Показать всю станцию → ▷ Запуск**, выберите напорную линию, состав либо 3D. Для 3D можно указать каталоги профилей и линий в JSON. Флажок рабочих каталогов загружает насосы, шкафы, гидравлику и сохранённые вставки из источников локальной установки. Большие промежуточные коллекции показаны выборкой.
+4. Сохраните черновик и проверьте старый результат в рабочем пространстве. Затем нажмите **Опубликовать → Подтвердить публикацию**, вернитесь в проект и запустите его штатный пересчёт на актуальных данных. Проверьте линию и порт в 3D. Для возврата откройте **Версии**, восстановите нужную публикацию и повторите пересчёт.
+5. Выберите **Спецификация → ☰ Свойства → Строки спецификации**. После пробного расчёта состава у каждой позиции доступны фактические шаги появления и изменения количества, цены и статуса. Переход приближает внутренний узел. Для строки сохранённого проекта доступны записанные идентификатор, количество, цена, пометки и переходы к правилам.
+6. Найдите на полотне **Песочница · масса партии**. Внутри есть деталь массой 2,5 кг и расчёт на 4 шт. Выберите расчёт, нажмите **Собрать Instrument**, укажите название, выберите входы массы и количества и выход результата. Подключённые внешние провода переносятся на границу автоматически. Проверьте 10 кг, сохраните, перезагрузите и раскройте созданную карточку. Аналогично можно создавать собственные типы инструментов и комплектующих через библиотеку.
+7. Для скрытого порта откройте ПКМ → **Передать атрибут…**, затем выберите поле, получателя и совместимый вход. ПКМ по проводу или кнопка × в свойствах удаляет связь. Поле остаётся в определении. У одного выхода может быть несколько получателей.
 
-## Данные и воспроизведение
+## Исполнение и совместимость
 
-- Каталог формирует библиотеку по категориям оборудования. Два насоса могут иметь один тип и разные модели, значения, патрубки и связи. В свойствах экземпляра можно выбрать запись каталога. Публикация сохраняет снимок значений выбранной записи. Для замены выберите другую запись в том же экземпляре. Штатная схема патрубков получает насос и переопределения текущего проекта при каждом вызове.
-- Связь хранит ID обоих экземпляров и ключи атрибутов. Имя для отображения можно менять. Совместимость определяется направлением, формой данных, инженерным смыслом и единицей. Для нового совместимого атрибута указывайте те же смысл и единицу, что у входного поля. Приведение единиц можно описать отдельным инструментом.
-- Пользовательская функция вычисляет значение именованного выхода по именам входов. Поддержаны числа, строки JSON, `true`, `false`, `null`, арифметика, сравнение, `??`, `&&`, `||`, `if`, `min`, `max`, `abs`, `round`, `sqrt`, `len`, `get` и `set`. Примеры — `override ?? catalog`, `get(port, "dn")`, `set(port, "dn", dn)`. На одно выражение отводится до 50 мс и 512 шагов интерпретатора. При разборе проверяются длина, число токенов и вложенность. Циклы, произвольный JavaScript, сеть и файловые операции в языке отсутствуют.
-- Черновик и история публикаций хранятся в D1. Публикация атомарно сохраняет документ, версию, программу и указатель на активную версию. Открываемый проект использует сохранённый `project.graphVersion`. Проекты прежних форматов начинают с `engineering-v1`. При воспроизведении расчёта также важны входные данные, версия сборки со встроенными функциями и использованные внешние каталоги. История графов хранит правила и значения экземпляров, отдельный архив всех внешних каталогов в неё не входит.
-- Встроенные функции вызывают ту же реализацию, что и обычный экран. В свойствах можно открыть тело операции текущей сборки и его SHA-256. Для изменения добавьте собственный узел с функцией либо измените связи. В штатном расчёте исходная схема компилируется в прямой вызов проверенной функции. Изменённая схема исполняется в порядке зависимостей и получает те же входы.
+Каждый контейнер ссылается на общее определение. Входы и результаты связаны через узлы границы. Из документа компилируется программа с адресами экземпляров, например `dn/live/choose/select`. Штатное окно запрашивает свой выход, движок исполняет только его зависимости. Проба использует тот же компилятор. Формулы допускают ограниченный язык выражений, включая `if`, `get`, `set`, `lookup`, `at` и `finite`. Функции интерполяции и другие встроенные операции доступны по проверенным контрактам.
+
+D1 хранит черновик, счётчик ревизий и неизменяемые публикации. Обновление указателя версии и запись публикации атомарны. Старые проекты сохраняют привязку к версии. Заводская программа `engineering-station-v2` зафиксирована в миграции. На установке с сохранёнными работами активная версия меняется только по команде администратора. Старые определения и пользовательские типы подхватываются при открытии черновика. Старый изменённый расчёт состава или 3D сохраняется отдельным контейнером. Для повторения исторического результата также требуются соответствующие каталоги и сборка встроенных операций.
 
 ## Карта покрытия
 
-Каждая строка ниже соответствует зарегистрированному входу в штатный расчёт. Технические ключи входов и тип результата совпадают с определениями редактора. Каталожные записи поставляют значения соответствующих типов. Датчики, клапаны, запорная арматура, мембранные баки, трубы, переходы, фланцы и крепёж также используются составными операциями спецификации и 3D. Поля, единицы и ограничения доступны в свойствах.
+| Штатный инструмент | Instrument и внутренние правила | Выходы и потребители | Проверка |
+|---|---|---|---|
+| Настройки, база и выбор | Настройки проекта, каталог, два экземпляра подбора, проектные переопределения. Извлечение контуров, фильтры, порог запаса, оценка кандидатов и принятие выбранного ID | Каталожная запись, данные контуров, условия для кривых, DN и состава | Два разных насоса и неполный каталог |
+| Кривая и карточка насоса | Рабочая точка, коэффициент сети, пересечение с характеристикой. Интерполяция, границы подачи и допуски. Паспортные поля и кривые | Q–H, характеристики, реальные кандидаты подбора | Сравнение рабочих точек и кандидатов с прежней версией |
+| Расчёт DN и обвязка | Тип контура и сторона, чтение патрубка, проверка ID, приоритет источника, выбор DN, предел резьбы и правила присоединения | Напорная линия, арматура, патрубки двух контуров в 3D | Публикация, откат и проверка обычного экрана и сборки |
+| Коллекторы, вставки и арматура | Расходы и режимы контуров, объединение расходов, генерация вставок, подбор состава обвязки | Данные линий, количества, предупреждения | Неполный каталог и HTTP-расчёт вставок |
+| Рама и шкаф | Подготовка насосных строк, применимость шкафа, пороги массы и варианты конструкции рамы | Строки комплектации, высота рамы 3D | Разные контуры и сопоставление состава и сборок |
+| 3D, документы и CAD | Сборка по проекту, профилям, патрубкам и раме. Отдельный выход CAD читает сохранённое положение элементов | Сборка с DN, выходные строки, CAD manifest | Сравнение сборки, тесты CAD и проверка изменения DN |
+| Спецификация и диагностика | Стадии насосов, шкафа, рамы, коллекторов, обвязки и опций, нормализация состава, проверка цены, количество × цена, оценка готовности | Позиции, предупреждения, итоговая стоимость и трасса строки | Состав, количество, итог и предупреждения до и после переноса |
+| Пользовательские инструменты | Конструктор типов и формул, выбор внешних портов, сворачивание нескольких узлов в общий тип | Выходы подключаются по типу, смыслу и единице | Перезагрузка вложенного расчёта 2,5 × 4 |
 
-Для всех 66 входов отдельный тест подменяет результат в опубликованной программе и вызывает реальную экспортированную функцию инструмента. В Chrome дополнительно проверяется штатное поле DN насоса из каталога до публикации, после публикации и после отката.
+### Реестр исполняемых операций
 
-**«Встроенная»** означает, что экран вызывает версионированную операцию и её базовые правила проверяются указанным предметным набором. Внутренние условия доступны в исходном коде операции. **«Сквозная»** означает дополнительную проверку изменения опубликованного правила, реального потребителя и отката. **«Составная»** означает, что в исходной схеме раскрыты промежуточные операции. Для остальных строк отдельная подмена правила через каждый штатный экран вручную не проверялась.
+Для каждой строки проверяется подключение штатной точки входа к редактируемому выходу. Сценарии с реальными инженерными значениями перечислены в таблице выше.
 
-| Инструмент и нода | Входные поля → результат | Штатный экран | Проверка в tests/ | Перенос |
-|---|---|---|---|---|
-| Данные патрубка насоса · [`resolvePort`](../app/pump-ports.ts) | `catalog`, `override` → `port` | Расчёт DN / обвязка / 3D | [geometry-nodes](../tests/geometry-nodes.test.mjs), [pump-nozzles](../tests/pump-nozzles.test.mjs) | Сквозная |
-| Фильтр насосов · [`matchesPumpFilters`](../app/pump-filters.ts) | `row`, `filters` → `match` | Подбор насосов | [pump-filters](../tests/pump-filters.test.mjs) | Встроенная |
-| Напор при заданной подаче · [`selectionHeadAtFlow`](../app/pump-catalog.ts) | `pump`, `flow` → `head` | Подбор насосов | [pump-catalog](../tests/pump-catalog.test.mjs), [curve-methods](../tests/curve-methods.test.mjs) | Встроенная |
-| Рабочая точка · [`operatingPoint`](../app/pump-catalog.ts) | `pump`, `count`, `input`, `method` → `point` | Гидравлическая кривая | [pump-catalog](../tests/pump-catalog.test.mjs), [curve-methods](../tests/curve-methods.test.mjs) | Встроенная |
-| Закупочная цена насоса · [`cataloguePurchasePriceRub`](../app/pump-catalog.ts) | `pump`, `settings` → `price` | Спецификация | [pump-catalog](../tests/pump-catalog.test.mjs), [curve-methods](../tests/curve-methods.test.mjs) | Встроенная |
-| Оценка кандидатов · [`evaluatePumpCandidates`](../app/pump-selection.ts) | `catalogue`, `input`, `settings`, `filters` → `candidates` | Подбор насосов | [pump-selection](../tests/pump-selection.test.mjs) | Встроенная |
-| Частотное регулирование · [`frequencyAdjustedPump`](../app/pump-frequency.ts) | `pump`, `frequencyHz`, `nominalHz` → `pump` | Гидравлическая кривая | [pump-frequency](../tests/pump-frequency.test.mjs) | Встроенная |
-| Проверка давления на входе · [`checkInletPressure`](../app/dn-defaults.ts) | `head`, `element`, `limit`, `limitLabel` → `pressureCheck` | Расчёт DN / спецификация | [dn-connections](../tests/dn-connections.test.mjs), [suction-pressure](../tests/suction-pressure.test.mjs) | Встроенная |
-| Выбор присоединения · [`resolveDnConnection`](../app/dn-defaults.ts) | `settings`, `dn`, `secondary`, `saved` → `connectionChoice` | Расчёт DN | [dn-connections](../tests/dn-connections.test.mjs), [suction-pressure](../tests/suction-pressure.test.mjs) | Встроенная |
-| Всасывающая линия · [`suctionHydraulics`](../app/dn-defaults.ts) | `entity`, `input`, `settings`, `secondary`, `pump` → `lineHydraulics` | Расчёт DN | [dn-connections](../tests/dn-connections.test.mjs), [suction-pressure](../tests/suction-pressure.test.mjs) | Встроенная |
-| Напорная линия · [`dischargeHydraulics`](../app/dn-defaults.ts) | `entity`, `input`, `settings`, `secondary`, `pump` → `lineHydraulics` | Расчёт DN | [dn-connections](../tests/dn-connections.test.mjs), [suction-pressure](../tests/suction-pressure.test.mjs) | Сквозная |
-| Параметры коллектора · [`collectorRecommendation`](../app/collector-project.ts) | `project`, `type`, `pumps` → `collectorConfig` | Конструктор коллекторов | [collectors](../tests/collectors.test.mjs), [station-specification](../tests/station-specification.test.mjs) | Встроенная |
-| Расход коллектора · [`collectorFlow`](../app/collector-calculations.ts) | `c` → `collectorFlow` | Конструктор коллекторов | [collectors](../tests/collectors.test.mjs), [collector-spacing](../tests/collector-spacing.test.mjs) | Встроенная |
-| Расчёт и состав коллектора · [`calculateCollector`](../app/collector-calculations.ts) | `c`, `catalog` → `collectorCalculation` | Конструктор коллекторов | [collectors](../tests/collectors.test.mjs), [collector-spacing](../tests/collector-spacing.test.mjs) | Встроенная |
-| Подбор перехода · [`selectLineReducer`](../app/line-insertion.ts) | `items`, `catalog`, `material`, `pumpDn`, `valveDn`, `pn`, `geometry` → `component` | Обвязка насосов | [line-assemblies](../tests/line-assemblies.test.mjs), [station-insertions](../tests/station-insertions.test.mjs) | Встроенная |
-| Подбор вставки · [`selectLineInsertion`](../app/line-insertion.ts) | `items`, `dn`, `pn`, `material` → `insertionChoice` | Обвязка насосов | [line-assemblies](../tests/line-assemblies.test.mjs), [station-insertions](../tests/station-insertions.test.mjs) | Встроенная |
-| Подбор прокладки · [`selectGasket`](../app/sealing-selection.ts) | `items`, `dn`, `pn` → `component` | Обвязка насосов | [sealing-selection](../tests/sealing-selection.test.mjs) | Встроенная |
-| Длина крепежа · [`jointFastenerLength`](../app/joint-fastener-length.ts) | `grip`, `nut`, `washer`, `ends` → `length` | Подбор крепежа | [flange-fasteners](../tests/flange-fasteners.test.mjs), [collector-valve-bolts](../tests/collector-valve-bolts.test.mjs) | Формула |
-| Подбор гидравлической арматуры · [`selectHydraulicProduct`](../app/hydraulic-option-selection.ts) | `items`, `need`, `selectedId` → `hydraulicSelection` | Спецификация | [hydraulic-option-selection](../tests/hydraulic-option-selection.test.mjs) | Встроенная |
-| Крепление мембранного бака · [`tankMounting`](../app/tank-mounting.ts) | `items`, `volume` → `tankMounting` | Спецификация / 3D | [tank-assemblies](../tests/tank-assemblies.test.mjs) | Встроенная |
-| Конструкция рамы по массе · [`frameConstructionForPumpMass`](../app/frame-selection.ts) | `massKg` → `frameConstruction` | Спецификация | [frame-selection](../tests/frame-selection.test.mjs) | Встроенная |
-| Подбор рамы · [`projectFrameSelection`](../app/frame-selection.ts) | `project`, `pumps` → `frameSelection` | Спецификация | [frame-selection](../tests/frame-selection.test.mjs) | Встроенная |
-| Подбор шкафа управления · [`projectControlCabinetItem`](../app/control-cabinet-selection.ts) | `controlCabinets`, `smartCabinets`, `settings`, `pump`, `totalPumpCount` → `specItem` | Конфигуратор ШУ | [station-specification](../tests/station-specification.test.mjs), [rendered-html](../tests/rendered-html.test.mjs) | Встроенная |
-| Комплектация гидравлических опций · [`buildHydraulicOptions`](../app/hydraulic-option-assembly.ts) | `project`, `resources` → `specItems` | Спецификация | [hydraulic-options](../tests/hydraulic-options.test.mjs) | Встроенная |
-| Спецификация всасывающей линии · [`buildSuctionSpec`](../app/suction-spec.ts) | `project`, `database`, `catalog`, `valves`, `pumps` → `specItems` | Спецификация | [suction-spec](../tests/suction-spec.test.mjs) | Встроенная |
-| Спецификация напорной линии · [`buildDischargeSpec`](../app/discharge-spec.ts) | `project`, `database`, `catalog`, `valves`, `pumps` → `specItems` | Спецификация | [discharge-spec](../tests/discharge-spec.test.mjs) | Встроенная |
-| Расчёт комплектующих и вставок · [`generateInsertCalculations`](../app/component-insert-calculations.ts) | `request`, `catalog` → `insertCalculations` | Расчёт комплектующих | [component-insert-calculations](../tests/component-insert-calculations.test.mjs), [insert-errors-20261031](../tests/insert-errors-20261031.test.mjs) | Встроенная |
-| Компоновка насосной станции · [`buildAssembly`](../app/model-editor/model.ts) | `project`, `pumps`, `profiles`, `lines` → `assembly` | 3D-модель | [model-editor](../tests/model-editor.test.mjs), [geometry-nodes](../tests/geometry-nodes.test.mjs) | Сквозная |
-| Скорость по номинальному DN · [`flowVelocity`](../app/dn-defaults.ts) | `flow`, `dn` → `velocity` | Расчёт DN | [dn-connections](../tests/dn-connections.test.mjs), [suction-pressure](../tests/suction-pressure.test.mjs) | Встроенная |
-| Рекомендация диаметра · [`recommendedDn`](../app/dn-defaults.ts) | `flow`, `rules` → `dn` | Расчёт DN | [dn-connections](../tests/dn-connections.test.mjs), [suction-pressure](../tests/suction-pressure.test.mjs) | Встроенная |
-| Напор в давление · [`inletPressureBar`](../app/dn-defaults.ts) | `head` → `pressure` | Проверки давления | [dn-connections](../tests/dn-connections.test.mjs), [suction-pressure](../tests/suction-pressure.test.mjs) | Встроенная |
-| Интерполяция характеристики · [`interpolateCurve`](../app/pump-catalog.ts) | `points`, `flow`, `method` → `head` | Гидравлическая кривая | [pump-catalog](../tests/pump-catalog.test.mjs), [curve-methods](../tests/curve-methods.test.mjs) | Встроенная |
-| Пригодность насоса к подбору · [`usablePump`](../app/pump-catalog.ts) | `pump`, `medium` → `match` | Подбор насосов | [pump-catalog](../tests/pump-catalog.test.mjs), [curve-methods](../tests/curve-methods.test.mjs) | Встроенная |
-| Допуск рабочей точки · [`preferredOperatingPoint`](../app/pump-selection.ts) | `deltaQPercent`, `deltaHPercent` → `match` | Подбор насосов | [pump-selection](../tests/pump-selection.test.mjs) | Встроенная |
-| Цена в рублях · [`cataloguePriceRub`](../app/pump-catalog.ts) | `pump`, `settings` → `price` | Спецификация | [pump-catalog](../tests/pump-catalog.test.mjs), [curve-methods](../tests/curve-methods.test.mjs) | Встроенная |
-| Скидка производителя · [`catalogueDiscount`](../app/pump-catalog.ts) | `pump`, `settings` → `percent` | Спецификация | [pump-catalog](../tests/pump-catalog.test.mjs), [curve-methods](../tests/curve-methods.test.mjs) | Встроенная |
-| Длина отвода коллектора · [`branchLength`](../app/collector-calculations.ts) | `outer`, `bolt` → `length` | Конструктор коллекторов | [collectors](../tests/collectors.test.mjs), [collector-spacing](../tests/collector-spacing.test.mjs) | Встроенная |
-| Тип фланца коллектора · [`flangeKinds`](../app/collector-calculations.ts) | `material`, `dn`, `pn` → `flangeKinds` | Конструктор коллекторов | [collectors](../tests/collectors.test.mjs), [collector-spacing](../tests/collector-spacing.test.mjs) | Встроенная |
-| Ограничения давления коллектора · [`collectorPressureChecks`](../app/collector-calculations.ts) | `c`, `inletHead`, `catalog`, `enabled` → `pressureChecks` | Конструктор коллекторов | [collectors](../tests/collectors.test.mjs), [collector-spacing](../tests/collector-spacing.test.mjs) | Встроенная |
-| Правила бобышек · [`resolveNippleRule`](../app/collector-nipple-rules.ts) | `rules`, `context` → `nippleSelection` | Конструктор коллекторов | [collector-nipple-rules](../tests/collector-nipple-rules.test.mjs) | Встроенная |
-| Применение проектных параметров коллектора · [`resolveCollector`](../app/collector-project.ts) | `recommended`, `state`, `settings` → `collectorConfig` | Конструктор коллекторов | [collectors](../tests/collectors.test.mjs), [station-specification](../tests/station-specification.test.mjs) | Встроенная |
-| Допустимое давление комплектующего · [`componentPressureLimit`](../app/suction-pressure.ts) | `item` → `pressureLimit` | Проверки давления | [suction-pressure](../tests/suction-pressure.test.mjs) | Встроенная |
-| Давление для КИП · [`stationInstrumentPressure`](../app/instrument-pressure.ts) | `project`, `pumps`, `circuit` → `instrumentPressure` | Спецификация | [instrument-pressure](../tests/instrument-pressure.test.mjs) | Встроенная |
-| Давление КИП на напоре · [`dischargeInstrumentPressure`](../app/instrument-pressure.ts) | `project`, `pumps`, `circuit` → `instrumentPressure` | Спецификация | [instrument-pressure](../tests/instrument-pressure.test.mjs) | Встроенная |
-| Варианты вставки · [`generateInsertCandidates`](../app/component-insert-calculations.ts) | `request`, `originalCatalog` → `insertCalculations` | Расчёт комплектующих | [component-insert-calculations](../tests/component-insert-calculations.test.mjs), [insert-errors-20261031](../tests/insert-errors-20261031.test.mjs) | Встроенная |
-| Стоимость позиции · [`specificationLineTotal`](../app/specification-readiness.ts) | `item` → `price` | Спецификация | [specification-items](../tests/specification-items.test.mjs), [diagnostics](../tests/diagnostics.test.mjs) | Встроенная |
-| Готовность спецификации · [`assessSpecification`](../app/specification-readiness.ts) | `project`, `displayedItems`, `existingIssues` → `specReadiness` | Спецификация | [specification-items](../tests/specification-items.test.mjs), [diagnostics](../tests/diagnostics.test.mjs) | Встроенная |
-| Диаметры и арматура контура · [`getCircuitDnConfig`](../app/station-hydraulic-calculation.ts) | `entity`, `input`, `settings`, `secondary`, `pump` → `circuitDn` | Расчёт DN | [line-assemblies](../tests/line-assemblies.test.mjs), [discharge-spec](../tests/discharge-spec.test.mjs) | Встроенная |
-| Выбор арматуры по DN и PN · [`selectValveComponent`](../app/station-hydraulic-calculation.ts) | `items`, `kind`, `dn`, `connection`, `pn`, `color`, `collectorMaterial` → `valveSelection` | Расчёт DN / спецификация | [line-assemblies](../tests/line-assemblies.test.mjs), [discharge-spec](../tests/discharge-spec.test.mjs) | Встроенная |
-| Состав арматуры контуров · [`buildValveSpecItems`](../app/station-hydraulic-calculation.ts) | `database`, `entity`, `input`, `secondaryInput`, `settings`, `dischargeMaterial`, `pumps` → `specItems` | Спецификация | [line-assemblies](../tests/line-assemblies.test.mjs), [discharge-spec](../tests/discharge-spec.test.mjs) | Встроенная |
-| Комплектация всаса и напора · [`refreshSuctionSpecification`](../app/station-hydraulic-calculation.ts) | `project`, `database`, `force`, `pumps` → `project` | Спецификация | [line-assemblies](../tests/line-assemblies.test.mjs), [discharge-spec](../tests/discharge-spec.test.mjs) | Встроенная |
-| Состав насосной станции · [`stationComposition`](../app/station-specification.ts) | `project`, `resources` → `project` | Рабочее пространство / спецификация | [station-specification](../tests/station-specification.test.mjs) | Составная |
-| Насосы, шкаф и рама · [`prepareStation`](../app/station-specification.ts) | `project`, `resources` → `stationWork` | Спецификация | [station-specification](../tests/station-specification.test.mjs) | Встроенная |
-| Коллекторы станции · [`stationCollectors`](../app/station-specification.ts) | `work` → `stationWork` | Спецификация | [station-specification](../tests/station-specification.test.mjs) | Встроенная |
-| Обвязка насосов · [`stationLines`](../app/station-specification.ts) | `work` → `stationWork` | Спецификация | [station-specification](../tests/station-specification.test.mjs) | Встроенная |
-| Гидравлические опции станции · [`stationOptions`](../app/station-specification.ts) | `work` → `stationWork` | Спецификация | [station-specification](../tests/station-specification.test.mjs) | Встроенная |
-| Проверка и итоговый состав · [`finalizeStation`](../app/station-specification.ts) | `work` → `project` | Спецификация | [station-specification](../tests/station-specification.test.mjs) | Встроенная |
-| Диагностика инженерного проекта · [`collectProjectIssues`](../app/diagnostics.ts) | `project`, `catalogue`, `catalog`, `cabinets`, `assetErrors` → `issues` | Ошибки и предупреждения | [diagnostics](../tests/diagnostics.test.mjs) | Встроенная |
-| Диагностика выбранного насоса · [`pumpIssues`](../app/diagnostics.ts) | `input`, `tool`, `catalogue` → `issues` | Подбор насосов | [diagnostics](../tests/diagnostics.test.mjs) | Встроенная |
-| Характеристики насоса · [`pumpCardSections`](../app/pump-card-data.ts) | `pump` → `cardSections` | Карточка насоса | [pump-card](../tests/pump-card.test.mjs) | Встроенная |
-| Кривые насоса · [`pumpCardCurves`](../app/pump-card-data.ts) | `pump` → `curves` | Карточка насоса | [pump-card](../tests/pump-card.test.mjs) | Встроенная |
-| Автоматический подбор датчика · [`selectAutomaticTransducer`](../app/pressure-transducers.ts) | `items`, `headM` → `hydraulicSelection` | КИП / спецификация | [suction-instruments](../tests/suction-instruments.test.mjs), [instrument-pressure](../tests/instrument-pressure.test.mjs) | Встроенная |
-| Исполнения вставок · [`selectInsertVariants`](../app/component-insert-variants.ts) | `rows`, `coreRows`, `catalog` → `insertCalculations` | Расчёт комплектующих | [insert-single-variants](../tests/insert-single-variants.test.mjs) | Встроенная |
-| Диапазон мощности шкафа · [`smartCabinetSupportsPower`](../app/control-cabinet-selection.ts) | `cabinet`, `power` → `match` | Конфигуратор ШУ | [station-specification](../tests/station-specification.test.mjs), [rendered-html](../tests/rendered-html.test.mjs) | Встроенная |
-| Шаблон коллектора для 3D · [`buildCollectorTemplate`](../app/model-editor/collector-template.ts) | `card`, `data`, `pumps`, `side`, `savedMount`, `pumpBranchOrientation` → `collectorTemplate` | 3D-модель / коллектор | [collector-3d](../tests/collector-3d.test.mjs) | Встроенная |
-| Шаблон вставки для 3D · [`prepareInsertionTemplate`](../app/model-editor/insertion-template.ts) | `row`, `context`, `record`, `angle` → `insertionTemplate` | 3D-шаблон вставки | [insertion-3d](../tests/insertion-3d.test.mjs) | Встроенная |
+| Штатный инструмент | Определение | Внутренние функции и правила | Выход и потребители |
+|---|---|---|---|
+| Расчёт DN / обвязка / 3D | [Данные патрубка насоса](../app/pump-ports.ts) · `resolvePort` | Выбор источника → DN патрубка → Параметры патрубка | port → Патрубок выбранного контура |
+| Подбор насосов | [Фильтр насосов](../app/pump-filters.ts) · `matchesPumpFilters` | Встроенная операция | match → Подбор насосов |
+| Подбор насосов | [Напор при заданной подаче](../app/pump-catalog.ts) · `selectionHeadAtFlow` | Диапазон подачи и точки характеристики → Интерполяция характеристики → Принятый напор | head → Подбор насосов |
+| Гидравлическая кривая | [Рабочая точка](../app/pump-catalog.ts) · `operatingPoint` | Коэффициент сети и статический напор → Пересечение характеристики и кривой сети | point → Расчёт насосной установки |
+| Спецификация | [Закупочная цена насоса](../app/pump-catalog.ts) · `cataloguePurchasePriceRub` | Цена в рублях → Скидка производителя → Цена со скидкой и округление | price → Спецификация |
+| Подбор насосов | [Оценка кандидатов](../app/pump-selection.ts) · `evaluatePumpCandidates` | Условия подбора и фильтрация каталога → Напор при подаче и отсев по запасу → Рабочая точка, цена и допуски | candidates → Подбор насосов |
+| Гидравлическая кривая | [Частотное регулирование](../app/pump-frequency.ts) · `frequencyAdjustedPump` | Встроенная операция | pump → Гидравлическая кривая |
+| Расчёт DN / спецификация | [Проверка давления на входе](../app/dn-defaults.ts) · `checkInletPressure` | Встроенная операция | pressureCheck → Расчёт DN / спецификация |
+| Расчёт DN | [Выбор присоединения](../app/dn-defaults.ts) · `resolveDnConnection` | Ограничение по типу станции → Предел резьбового исполнения → Соединение линии | connectionChoice → Расчёт DN |
+| Расчёт DN | [Всасывающая линия](../app/dn-defaults.ts) · `suctionHydraulics` | Встроенная операция | lineHydraulics → Расчёт DN |
+| Расчёт DN | [Напорная линия](../app/dn-defaults.ts) · `dischargeHydraulics` | Встроенная операция | lineHydraulics → Расчёт DN |
+| Конструктор коллекторов | [Параметры коллектора](../app/collector-project.ts) · `collectorRecommendation` | Встроенная операция | collectorConfig → Конструктор коллекторов |
+| Конструктор коллекторов | [Расход коллектора](../app/collector-calculations.ts) · `collectorFlow` | Расходы и режим контуров → Активные контуры, сумма или максимум → Расход коллектора | collectorFlow → Конструктор коллекторов |
+| Конструктор коллекторов | [Расчёт и состав коллектора](../app/collector-calculations.ts) · `calculateCollector` | Встроенная операция | collectorCalculation → Конструктор коллекторов |
+| Обвязка насосов | [Подбор перехода](../app/line-insertion.ts) · `selectLineReducer` | Встроенная операция | component → Обвязка насосов |
+| Обвязка насосов | [Подбор вставки](../app/line-insertion.ts) · `selectLineInsertion` | Встроенная операция | insertionChoice → Обвязка насосов |
+| Обвязка насосов | [Подбор прокладки](../app/sealing-selection.ts) · `selectGasket` | Встроенная операция | component → Обвязка насосов |
+| Подбор крепежа | [Длина крепежа](../app/joint-fastener-length.ts) · `jointFastenerLength` | Длина крепежа | length → Подбор крепежа |
+| Спецификация | [Подбор гидравлической арматуры](../app/hydraulic-option-selection.ts) · `selectHydraulicProduct` | Встроенная операция | hydraulicSelection → Спецификация |
+| Спецификация / 3D | [Крепление мембранного бака](../app/tank-mounting.ts) · `tankMounting` | Встроенная операция | tankMounting → Спецификация / 3D |
+| Спецификация | [Конструкция рамы по массе](../app/frame-selection.ts) · `frameConstructionForPumpMass` | Исполнение рамы по массе насоса | frameConstruction → Спецификация |
+| Спецификация | [Подбор рамы](../app/frame-selection.ts) · `projectFrameSelection` | Встроенная операция | frameSelection → Расчёт насосной установки, Проверка и позиция рамы |
+| Конфигуратор ШУ | [Подбор шкафа управления](../app/control-cabinet-selection.ts) · `projectControlCabinetItem` | Встроенная операция | specItem → Конфигуратор ШУ |
+| Спецификация | [Комплектация гидравлических опций](../app/hydraulic-option-assembly.ts) · `buildHydraulicOptions` | Встроенная операция | specItems → Спецификация |
+| Спецификация | [Спецификация всасывающей линии](../app/suction-spec.ts) · `buildSuctionSpec` | Встроенная операция | specItems → Спецификация |
+| Спецификация | [Спецификация напорной линии](../app/discharge-spec.ts) · `buildDischargeSpec` | Встроенная операция | specItems → Спецификация |
+| Расчёт комплектующих | [Расчёт комплектующих и вставок](../app/component-insert-calculations.ts) · `generateInsertCalculations` | Варианты вставки → Исходный вариант для сравнения → Базовые варианты без бобышки → Исполнения вставок | insertCalculations → Расчёт насосной установки |
+| 3D-модель | [Компоновка насосной станции](../app/model-editor/model.ts) · `buildAssembly` | Встроенная операция | assembly → 3D-модель |
+| Расчёт DN | [Скорость по номинальному DN](../app/dn-defaults.ts) · `flowVelocity` | Встроенная операция | velocity → Расчёт DN |
+| Расчёт DN | [Рекомендация диаметра](../app/dn-defaults.ts) · `recommendedDn` | Встроенная операция | dn → Расчёт DN |
+| Проверки давления | [Напор в давление](../app/dn-defaults.ts) · `inletPressureBar` | Перевод напора в давление | pressure → Проверки давления |
+| Гидравлическая кривая | [Интерполяция характеристики](../app/pump-catalog.ts) · `interpolateCurve` | Встроенная операция | head → Напор при заданной подаче |
+| Подбор насосов | [Пригодность насоса к подбору](../app/pump-catalog.ts) · `usablePump` | Встроенная операция | match → Подбор насосов |
+| Подбор насосов | [Допуск рабочей точки](../app/pump-selection.ts) · `preferredOperatingPoint` | Допуски по подаче и напору | match → Подбор насосов |
+| Спецификация | [Цена в рублях](../app/pump-catalog.ts) · `cataloguePriceRub` | Встроенная операция | price → Закупочная цена насоса |
+| Спецификация | [Скидка производителя](../app/pump-catalog.ts) · `catalogueDiscount` | Встроенная операция | percent → Закупочная цена насоса |
+| Конструктор коллекторов | [Длина отвода коллектора](../app/collector-calculations.ts) · `branchLength` | Встроенная операция | length → Конструктор коллекторов |
+| Конструктор коллекторов | [Тип фланца коллектора](../app/collector-calculations.ts) · `flangeKinds` | Встроенная операция | flangeKinds → Конструктор коллекторов |
+| Конструктор коллекторов | [Ограничения давления коллектора](../app/collector-calculations.ts) · `collectorPressureChecks` | Встроенная операция | pressureChecks → Конструктор коллекторов |
+| Конструктор коллекторов | [Правила бобышек](../app/collector-nipple-rules.ts) · `resolveNippleRule` | Встроенная операция | nippleSelection → Конструктор коллекторов |
+| Конструктор коллекторов | [Применение проектных параметров коллектора](../app/collector-project.ts) · `resolveCollector` | Встроенная операция | collectorConfig → Конструктор коллекторов |
+| Проверки давления | [Допустимое давление комплектующего](../app/suction-pressure.ts) · `componentPressureLimit` | Встроенная операция | pressureLimit → Проверки давления |
+| Спецификация | [Давление для КИП](../app/instrument-pressure.ts) · `stationInstrumentPressure` | Встроенная операция | instrumentPressure → Спецификация |
+| Спецификация | [Давление КИП на напоре](../app/instrument-pressure.ts) · `dischargeInstrumentPressure` | Встроенная операция | instrumentPressure → Спецификация |
+| Расчёт комплектующих | [Варианты вставки](../app/component-insert-calculations.ts) · `generateInsertCandidates` | Встроенная операция | insertCalculations → Расчёт комплектующих и вставок |
+| Спецификация | [Стоимость позиции](../app/specification-readiness.ts) · `specificationLineTotal` | Применимость цены позиции → Количество и цена позиции → Стоимость позиции | price → Расчёт насосной установки |
+| Спецификация | [Готовность спецификации](../app/specification-readiness.ts) · `assessSpecification` | Встроенная операция | specReadiness → Расчёт насосной установки |
+| Расчёт DN | [Диаметры и арматура контура](../app/station-hydraulic-calculation.ts) · `getCircuitDnConfig` | Встроенная операция | circuitDn → Расчёт DN |
+| Расчёт DN / спецификация | [Выбор арматуры по DN и PN](../app/station-hydraulic-calculation.ts) · `selectValveComponent` | Каталог по назначению арматуры → Кандидаты по типу и DN → Исполнение, PN, материал и цена | valveSelection → Расчёт DN / спецификация |
+| Спецификация | [Состав арматуры контуров](../app/station-hydraulic-calculation.ts) · `buildValveSpecItems` | Встроенная операция | specItems → Спецификация |
+| Спецификация | [Комплектация всаса и напора](../app/station-hydraulic-calculation.ts) · `refreshSuctionSpecification` | Встроенная операция | project → Спецификация |
+| Рабочее пространство / спецификация | [Состав насосной станции](../app/station-specification.ts) · `stationComposition` | Насосы, шкаф и рама → Коллекторы станции → Обвязка насосов → Гидравлические опции станции → Проверка и итоговый состав | project → Рабочее пространство / спецификация |
+| Спецификация | [Насосы, шкаф и рама](../app/station-specification.ts) · `prepareStation` | Позиции насосов контуров → Проверка и позиция шкафа → Проверка и позиция рамы | stationWork → Состав насосной станции |
+| Спецификация | [Коллекторы станции](../app/station-specification.ts) · `stationCollectors` | Встроенная операция | stationWork → Расчёт насосной установки, Состав насосной станции |
+| Спецификация | [Обвязка насосов](../app/station-specification.ts) · `stationLines` | Встроенная операция | stationWork → Расчёт насосной установки, Состав насосной станции |
+| Спецификация | [Гидравлические опции станции](../app/station-specification.ts) · `stationOptions` | Встроенная операция | stationWork → Расчёт насосной установки, Состав насосной станции |
+| Спецификация | [Проверка и итоговый состав](../app/station-specification.ts) · `finalizeStation` | Встроенная операция | project → Расчёт насосной установки, Состав насосной станции |
+| Ошибки и предупреждения | [Диагностика инженерного проекта](../app/diagnostics.ts) · `collectProjectIssues` | Встроенная операция | issues → Расчёт насосной установки |
+| Подбор насосов | [Диагностика выбранного насоса](../app/diagnostics.ts) · `pumpIssues` | Встроенная операция | issues → Подбор насосов |
+| Карточка насоса | [Характеристики насоса](../app/pump-card-data.ts) · `pumpCardSections` | Встроенная операция | cardSections → Расчёт насосной установки |
+| Карточка насоса | [Кривые насоса](../app/pump-card-data.ts) · `pumpCardCurves` | Встроенная операция | curves → Расчёт насосной установки |
+| КИП / спецификация | [Автоматический подбор датчика](../app/pressure-transducers.ts) · `selectAutomaticTransducer` | Встроенная операция | hydraulicSelection → КИП / спецификация |
+| Расчёт комплектующих | [Исполнения вставок](../app/component-insert-variants.ts) · `selectInsertVariants` | Встроенная операция | insertCalculations → Расчёт комплектующих и вставок |
+| Конфигуратор ШУ | [Диапазон мощности шкафа](../app/control-cabinet-selection.ts) · `smartCabinetSupportsPower` | Встроенная операция | match → Конфигуратор ШУ |
+| 3D-модель / коллектор | [Шаблон коллектора для 3D](../app/model-editor/collector-template.ts) · `buildCollectorTemplate` | Встроенная операция | collectorTemplate → 3D-модель / коллектор |
+| 3D-шаблон вставки | [Шаблон вставки для 3D](../app/model-editor/insertion-template.ts) · `prepareInsertionTemplate` | Встроенная операция | insertionTemplate → 3D-шаблон вставки |
+| Спецификация | [Позиции насосов контуров](../app/station-specification.ts) · `preparePumpRows` | Встроенная операция | pumpBatch → Расчёт насосной установки, Насосы, шкаф и рама |
+| Спецификация | [Проверка и позиция шкафа](../app/station-specification.ts) · `stationCabinetRows` | Проверка активных насосов перед подбором ШУ → Каталог шкафов по типу станции → Применение автоматического или ручного шкафа | cabinetBatch → Расчёт насосной установки, Насосы, шкаф и рама |
+| Спецификация | [Проверка и позиция рамы](../app/station-specification.ts) · `stationFrameRows` | Проект и насосы для расчёта рамы → Подбор рамы → Применение конструкции рамы | stationWork → Расчёт насосной установки, Насосы, шкаф и рама |
+| Подбор насосов | [Условия подбора и фильтрация каталога](../app/pump-selection.ts) · `filterSelectionCatalog` | Встроенная операция | pumps → Оценка кандидатов |
+| Подбор насосов | [Напор при подаче и отсев по запасу](../app/pump-selection.ts) · `reserveCandidates` | Встроенная операция | reserveRows → Оценка кандидатов |
+| Подбор насосов | [Рабочая точка, цена и допуски](../app/pump-selection.ts) · `measureCandidates` | Встроенная операция | candidates → Оценка кандидатов |
+| Подбор насосов | [Патрубок выбранного контура](../app/pump-ports.ts) · `resolvePumpPortData` | Выбранная модель → Каталожный патрубок → Переопределение контура и стороны → Проверить принадлежность переопределения → Данные патрубка насоса | port → Расчёт DN |
+| Подбор насосов | [Каталожный патрубок](../app/pump-ports.ts) · `catalogPumpPort` | Встроенная операция | port → Патрубок выбранного контура |
+| Спецификация | [Применимость цены позиции](../app/specification-readiness.ts) · `specificationHasPrice` | Встроенная операция | validPrice → Стоимость позиции |
+| 3D-компоновка по раме и патрубкам | [3D-компоновка по раме и патрубкам](../app/model-editor/model.ts) · `assembleWithInputs` | Размещение насосов и их патрубков → Рама, коллекторы, линии и сборка | assembly → Расчёт насосной установки |
+| CAD-экспорт сохранённой компоновки | [CAD-экспорт сохранённой компоновки](../app/cad-export.ts) · `createCadManifest` | Встроенная операция | cadManifest → Расчёт насосной установки |
+| Строки выходной спецификации | [Строки выходной спецификации](../app/specification-presentation.ts) · `visibleSpecificationItems` | Встроенная операция | specItems → Расчёт насосной установки |
+| Пересечение характеристики и кривой сети | [Пересечение характеристики и кривой сети](../app/pump-catalog.ts) · `intersectPumpCurve` | Встроенная операция | point → Рабочая точка |
+| Расчёт DN | [Арматура по принятому патрубку](../app/dn-defaults.ts) · `lineFromPort` | Встроенная операция | lineHydraulics → Расчёт насосной установки |
+| 3D-модель | [Размещение насосов и их патрубков](../app/model-editor/model.ts) · `placeStationPumps` | Встроенная операция | placedPumps → 3D-компоновка по раме и патрубкам |
+| 3D-модель | [Рама, коллекторы, линии и сборка](../app/model-editor/model.ts) · `buildStationLayout` | Встроенная операция | assembly → 3D-компоновка по раме и патрубкам |
+| Комплектующие | [Кандидаты по типу и DN](../app/station-hydraulic-calculation.ts) · `valvesByDn` | Встроенная операция | components → Выбор арматуры по DN и PN |
+| Комплектующие | [Исполнение, PN, материал и цена](../app/station-hydraulic-calculation.ts) · `rankValve` | Встроенная операция | valveSelection → Выбор арматуры по DN и PN |
+| Комплектующие | [Базовые варианты без бобышки](../app/component-insert-calculations.ts) · `insertBaseline` | Встроенная операция | insertCalculations → Расчёт комплектующих и вставок |
+| Спецификация | [Проверка активных насосов перед подбором ШУ](../app/station-specification.ts) · `cabinetSelectionReady` | Встроенная операция | flag → Проверка и позиция шкафа |
+| Спецификация | [Применение автоматического или ручного шкафа](../app/station-specification.ts) · `applyCabinetSelection` | Встроенная операция | cabinetBatch → Проверка и позиция шкафа |
+| Спецификация | [Применение конструкции рамы](../app/station-specification.ts) · `applyFrameSelection` | Встроенная операция | stationWork → Проверка и позиция рамы |
 
 ## Границы переноса
 
-В схеме патрубков раскрыты выбор между каталогом и проектом, извлечение DN и сборка результата. В схеме состава станции отдельно видны насосы, шкаф с рамой, коллекторы, обвязка, опции и итоговая спецификация. Для крепежа доступна редактируемая формула длины. Такие операции, как интерполяция Q–H, подбор вариантов вставки и построение 3D-шаблона коллектора, пока показывают входы и итог одного встроенного узла. Их внутренние условия и промежуточные величины можно изучать в реализации. Чтобы видеть каждое такое решение на полотне, эти операции предстоит разделить на более мелкие узлы.
-
-Запись проекта в PostgreSQL, публикация каталога, конвертация файлов и запуск CAD-экспорта остаются обязанностью соответствующих служб. Граф рассчитывает данные для этих действий. Ручное редактирование справочника оборудования и авторизация работают в существующих разделах приложения.
+Редактируются связи, аргументы, приоритет источника патрубка, допустимый DN для резьбы, режим суммирования расходов, пороги рамы, коэффициент перевода напора, допуски рабочей точки, формулы цены и количества. Часть инженерных решений всё ещё реализована в TypeScript. Среди них выбор исполнения и состава BOM коллектора, ранжирование отдельных комплектующих и шкафов, перебор вставок, детализация гидравлической сборки, геометрическое размещение 3D и подготовка CAD-деталей. Их аргументы и результаты можно перенаправить, тело можно открыть в свойствах. Полная пооперационная декомпозиция этих функций остаётся открытой. Интерактивное перемещение деталей и запись файлов выполняют существующие экраны и сервисы.
 
 ## Проверки из консоли
 

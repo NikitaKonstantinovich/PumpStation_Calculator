@@ -20,6 +20,8 @@ export type NodeType = {
   fields: Field[];
   formulas: Record<string, string>;
   native?: string;
+  instrument?: string;
+  section?: "input" | "edit" | "output";
 };
 export type GraphNode = {
   id: string;

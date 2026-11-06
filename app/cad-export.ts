@@ -1,3 +1,4 @@
+import {engineeringOperation, registerOperation} from "./engineering/runtime";
 import type { Assembly, Component, Vec3 } from "./model-editor/model";
 import { stampMissing, stampedPart } from "./model-editor/stamped-flanges";
 import type { InsertionPiece, InsertionShape } from "./model-editor/insertion-types";
@@ -48,7 +49,7 @@ export function cadTransform(...poses: Pose[]): number[] {
 const meshHash = (url?: string) => url?.match(/\/model-([a-f0-9]{64})-v1\.stl$/)?.[1];
 
 /** Snapshot only: never rebuild, follow connections, recenter, or auto-layout here. */
-export function createCadManifest(project: ProjectConfig): CadManifest {
+export function coreCreateCadManifest(project: ProjectConfig): CadManifest {
   const assembly = (project.entities["station-model"] as ModelEntity)?.editor?.assembly;
   return { version: 1, projectId: project.project.id, projectName: project.project.name, projectUpdatedAt: project.project.updatedAt,
     coordinates: "right-handed-z-up-mm", transformConvention: "solidworks-row-axes-metres", sourceFingerprint: assembly?.sourceFingerprint ?? "",
@@ -190,3 +191,6 @@ export async function digestSnapshot(canonical: string) {
   const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(canonical));
   return Array.from(new Uint8Array(digest), b => b.toString(16).padStart(2, "0")).join("");
 }
+
+export function createCadManifest(...args:Parameters<typeof coreCreateCadManifest>):ReturnType<typeof coreCreateCadManifest>{return engineeringOperation("createCadManifest",coreCreateCadManifest,args);}
+registerOperation("createCadManifest",["project"],coreCreateCadManifest);

@@ -1,8 +1,10 @@
+import { rowHistory, summarizeTrace } from "./trial-trace";
+import { compileTree, ROOT } from "./hierarchy";
 import { engineeringOperation, withEvaluationProgram } from "./runtime";
 import { db } from "../auth-server";
-import { compileDiagram, DiagramError, runPlan, validateDocument } from "./engine";
-import { initialDocument, signatures, compilePublication } from "./templates";
-import { equipmentTypes } from "./equipment-server";
+import { DiagramError, executableSlice, runPlan, validateDocument } from "./engine";
+import { initialDocument, signatures, compilePublication, upgradeDocument } from "./templates";
+import { equipmentTypes, trialResources } from "./equipment-server";
 import { nativeOperations } from "./native-server";
 import { GraphError } from "./publication-server";
 export { GraphError } from "./publication-server";
@@ -27,7 +29,7 @@ export async function editorState(): Promise<EditorState> {
   return {
     revision: row.revision,
     active: row.active,
-    draft: row.draft ? JSON.parse(row.draft) : await original(),
+    draft: row.draft ? upgradeDocument(JSON.parse(row.draft)) : await original(),
     versions: versions.results ?? [],
     sources: Object.fromEntries(sources)
   };
@@ -38,6 +40,8 @@ export type EditorCommand = {
   document?: Document;
   version?: string;
   diagram?: string;
+  useCatalog?: boolean;
+  output?: string;
   inputs?: Record<string, unknown>;
 };
 export async function command(body: EditorCommand, author: string) {
@@ -60,6 +64,7 @@ export async function command(body: EditorCommand, author: string) {
   if (!document) throw new GraphError("Нет графа");
   try {
     validateDocument(document, signatures, initialDocument().types, body.action === "publish" || body.action === "impact");
+    if (body.action === "impact" || body.action === "publish") compilePublication(document, "validate");
   } catch (error) {
     throw new GraphError((error as Error).message, 400, error instanceof DiagramError ? {
       diagram: error.diagram,
@@ -72,7 +77,7 @@ export async function command(body: EditorCommand, author: string) {
       revision: number;
     }>();
     if (!row || row.revision !== revision) throw conflict();
-    const previous: Document = row.document ? JSON.parse(row.document) : initialDocument();
+    const previous: Document = row.document ? upgradeDocument(JSON.parse(row.document)) : initialDocument();
     const changed = new Set(document.types.filter(t => JSON.stringify(t) !== JSON.stringify(previous.types.find(old => old.id === t.id))).map(t => t.id));
     return {
       uses: document.diagrams.flatMap(g => g.nodes.filter(n => changed.has(n.type)).map(n => ({
@@ -89,13 +94,35 @@ export async function command(body: EditorCommand, author: string) {
     if (!diagram) throw new GraphError("Неизвестная схема");
     try {
       const publication = compilePublication(document, "draft");
-      const result = withEvaluationProgram(publication, () => runPlan(compileDiagram(diagram, document.types), body.inputs ?? {}, (id, values) => {
+      const full = compileTree(document, diagram);
+      const output = body.output ?? (diagram.id === ROOT ? "stationComposition" : undefined);
+      if (output && !full.steps.find(s => s.id === "result")?.fields.some(f => f.key === output)) throw Error("Неизвестный выход " + output);
+      const plan = output ? executableSlice(full, [output]) : full;
+      let inputs = body.inputs ?? {};
+      if (body.useCatalog && diagram.id === ROOT) {
+        const resources = await trialResources();
+        inputs = {
+          ...inputs,
+          resources,
+          catalogue: resources.pumps,
+          cabinets: resources.smartCabinets,
+          collectorCatalog: resources.components?.collectorCatalog
+        };
+      }
+      const result = withEvaluationProgram(publication, () => runPlan(plan, inputs, (id, values, direct) => {
         if (!Object.hasOwn(nativeOperations, id)) throw Error("Недоступная операция");
         const fn = nativeOperations[id as keyof typeof nativeOperations] as (...args: unknown[]) => unknown;
         const args = signatures.find(s => s.id === id)!.args.map(f => values[f.key]);
-        return id === diagram.id ? fn(...args) : engineeringOperation(id, fn, args);
+        return direct || id === diagram.id ? fn(...args) : engineeringOperation(id, fn, args);
       }, true));
-      return result;
+      return {
+        ...result,
+        ...(diagram.id === ROOT ? {
+          rows: rowHistory(result.trace),
+          trace: summarizeTrace(result.trace)
+        } : {}),
+        value: output ? result.trace.result.inputs[output] : Object.hasOwn(result.trace.result.inputs, "value") ? result.value : result.trace.result.inputs
+      };
     } catch (error) {
       throw new GraphError((error as Error).message);
     }

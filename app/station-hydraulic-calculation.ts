@@ -62,7 +62,10 @@ type ValveSelectionKind="butterfly"|"ball"|"check";
 type ValveSelection={item:ComponentItem;price:ComponentPrice|null;execution:string;material:string|null};
 export const coreSelectValveComponent=(items:ComponentItem[],kind:ValveSelectionKind,dn:number,connection:ValveConnection,pn:ValvePn,color:"red"|"blue",collectorMaterial:CollectorMaterial):ValveSelection|null=>{
   const catalogId=kind==="butterfly"?"затворы":kind==="ball"?"шаровые-краны":"обратные-клапаны";
-  let candidates=items.filter(item=>item.catalogId===catalogId&&componentDn(item)===dn);
+  return rankValve(valvesByDn(items,catalogId,dn),kind,dn,connection,pn,color,collectorMaterial);
+};
+export function coreValvesByDn(items:ComponentItem[],category:string,dn:number){return items.filter(item=>item.catalogId===category&&componentDn(item)===dn);}
+export const coreRankValve=(candidates:ComponentItem[],kind:ValveSelectionKind,dn:number,connection:ValveConnection,pn:ValvePn,color:"red"|"blue",collectorMaterial:CollectorMaterial):ValveSelection|null=>{
   if(kind==="ball"){
     // Ball valves are always the brass lever-handle catalogue series. Colour
     // and collector material do not apply; DN, PN and connection still do.
@@ -156,3 +159,9 @@ export function refreshSuctionSpecification(...args: Parameters<typeof coreRefre
 }
 
 registerOperation("refreshSuctionSpecification", ["project","database","force","pumps"], coreRefreshSuctionSpecification);
+
+export function valvesByDn(...args:Parameters<typeof coreValvesByDn>):ReturnType<typeof coreValvesByDn>{return engineeringOperation("valvesByDn",coreValvesByDn,args);}
+registerOperation("valvesByDn",["items","category","dn"],coreValvesByDn);
+
+export function rankValve(...args:Parameters<typeof coreRankValve>):ReturnType<typeof coreRankValve>{return engineeringOperation("rankValve",coreRankValve,args);}
+registerOperation("rankValve",["items","kind","dn","connection","pn","color","collectorMaterial"],coreRankValve);

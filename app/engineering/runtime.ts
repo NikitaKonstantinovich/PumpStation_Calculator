@@ -19,8 +19,10 @@ export function provideRequestPublication(get: () => Publication | undefined) {
 export function setBrowserPublication(value: Publication) {
   if ("document" in globalThis) browserPublication = value;
 }
+const primitives = new Map<string, (inputs: Record<string, unknown>) => unknown>();
 const nativeRegistry = new Map<string, (inputs: Record<string, unknown>) => unknown>();
 export function registerOperation<A extends unknown[], R>(id: string, keys: string[], fn: (...args: A) => R) {
+  primitives.set(id, inputs => fn(...keys.map(k => inputs[k]) as A));
   nativeRegistry.set(id, inputs => engineeringOperation(id, fn, keys.map(k => inputs[k]) as A));
 }
 let executing: Publication | undefined;
@@ -37,14 +39,17 @@ export function currentPublication() {
   if (executing) return executing;
   return !("document" in globalThis) ? requestPublication() ?? initial : browserPublication;
 }
+let secondCircuit=false;
+export function withCircuit<T>(secondary:boolean,run:()=>T):T{const prior=secondCircuit;secondCircuit=secondary;try{return run();}finally{secondCircuit=prior;}}
 const activeOperations = new Set<string>();
 const browserSteps = new WeakMap<Plan, StepCache>();
 export function engineeringOperation<A extends unknown[], R>(id: string, native: (...args: A) => R, args: A): R {
   const publication = currentPublication(),
-    plan = publication.plans[id];
+    host=secondCircuit&&publication.plans[id+"@second"]?id+"@second":id,
+    plan = publication.plans[host];
   // Identity programs are compiled to a direct native invocation.
   if (!plan) return native(...args);
-  const keys = publication.args[id];
+  const keys = publication.args[host];
   const values = Object.fromEntries(keys.map((key, i) => [key, args[i]]));
   if (activeOperations.has(id)) throw Error("Цикл вызовов инструментов: " + [...activeOperations, id].join(" → "));
   activeOperations.add(id);
@@ -54,9 +59,9 @@ export function engineeringOperation<A extends unknown[], R>(id: string, native:
     browserSteps.set(plan, cache);
   }
   try {
-    return runPlan(plan, values, (operation, inputs) => {
-      if (operation === id) return native(...(keys.map(key => inputs[key]) as A));
-      const fn = nativeRegistry.get(operation);
+    return runPlan(plan, values, (operation, inputs, direct) => {
+      if (!direct && operation === id) return native(...(keys.map(key => inputs[key]) as A));
+      const fn = (direct ? primitives : nativeRegistry).get(operation);
       if (!fn) throw Error("Операция недоступна в этом профиле: " + operation);
       return fn(inputs);
     }, false, cache).value as R;

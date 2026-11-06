@@ -80,7 +80,11 @@ export function coreOperatingPoint(pump: Pump, count: number, input: {flowRate: 
   if (![count, input.flowRate, input.head, input.staticHead].every(Number.isFinite) ||
     !(count > 0 && input.flowRate > 0 && input.head >= input.staticHead && input.staticHead >= 0)) return null;
   const k = (input.head - input.staticHead) / input.flowRate ** 2;
-  const system = (q: number) => input.staticHead + k * q ** 2;
+  return intersectPumpCurve(pump,count,input.staticHead,k,method);
+}
+export function coreIntersectPumpCurve(pump:Pump,count:number,staticHead:number,k:number|null,method:CurveMethod="pchip") {
+  if(k==null)return null;
+  const system = (q: number) => staticHead + k * q ** 2;
   for (const segment of curveSegments(pump.curve, method)) {
     const start = segment.start * count, width = segment.width * count;
     const a = segment.a, b = segment.b - k * width ** 2;
@@ -163,3 +167,6 @@ export function catalogueDiscount(...args: Parameters<typeof coreCatalogueDiscou
 }
 
 registerOperation("catalogueDiscount", ["pump","settings"], coreCatalogueDiscount);
+
+export function intersectPumpCurve(...args:Parameters<typeof coreIntersectPumpCurve>):ReturnType<typeof coreIntersectPumpCurve>{return engineeringOperation("intersectPumpCurve",coreIntersectPumpCurve,args);}
+registerOperation("intersectPumpCurve",["pump","count","staticHead","coefficient","method"],coreIntersectPumpCurve);

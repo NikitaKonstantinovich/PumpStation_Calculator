@@ -5,6 +5,7 @@ import { readFile, readdir } from "node:fs/promises";
 import { resolve } from "node:path";
 import { DatabaseSync } from "node:sqlite";
 import { Miniflare } from "miniflare";
+import {loadTs} from "./load-ts.mjs";
 
 const release = JSON.parse(await readFile("dist/release.json", "utf8"));
 assert.equal(release.profile, "full", "Run npm run build:full first");
@@ -29,6 +30,8 @@ try {
   await db.batch(schemas.map(row => db.prepare(row.sql)));
   for (const statement of (await readFile("drizzle/0015_engineering_graphs.sql","utf8")).split(";").map(s=>s.trim()).filter(Boolean))
     await db.prepare(statement).run();
+  for(const row of scratch.prepare("SELECT id,program,author FROM engineering_versions WHERE id=?").all("engineering-station-v2"))await db.prepare("INSERT INTO engineering_versions(id,program,author) VALUES (?,?,?)").bind(row.id,row.program,row.author).run();
+  await db.prepare("UPDATE engineering_state SET active=\u0027engineering-station-v2\u0027 WHERE id=1").run();
   await db.prepare("INSERT OR IGNORE INTO component_calculator_source_revision(id,revision) VALUES(1,0)").run();
   const origin = (await worker.ready).origin;
   const adminPath="/api/admin/geometry-nodes";
@@ -65,6 +68,18 @@ try {
   assert.notEqual(a.values.id,b.values.id);
   const sandbox=await json(adminPath,{action:"test",revision:0,diagram:"lab",document:state.draft,inputs:{}});
   assert.equal(sandbox.value,10);
+  const {createProject}=await loadTs(new URL("../app/project-config.ts",import.meta.url));
+  const asset=async path=>(await url(path,"admin")).json();
+  const [catalogue,binding,control,cabinets]=await Promise.all(["/pumps.json","/binding-components.json","/control-cabinet-database.json","/control-cabinets.json"].map(asset));
+  const [one,two]=catalogue.filter(p=>p.curve?.length>=2).slice(0,2);
+  const specimen=createProject("Станция на заводском каталоге");specimen.entities["station-settings"].stationType="combined";
+  for(const [i,p] of [one,two].entries())Object.assign(specimen.entities[i?"system-input-2":"system-input"],{selectedPumpId:p.id,calculated:true,workingPumpCount:i+1,reservePumpCount:1,flowRate:12,head:20,staticHead:0});
+  specimen.entities["station-dn"].secondaryPumpDischargePort={pumpId:two.id,dn:65,source:"Проект",connection:"flanged"};
+  const stationTrial=await json(adminPath,{action:"test",revision:0,diagram:"station",output:"stationComposition",document:state.draft,inputs:{project:specimen},useCatalog:true});
+  assert.ok(stationTrial.value.entities["station-spec"].items.length>0);assert.ok(stationTrial.rows.some(r=>r.changes.length));
+  const {assembleComponentDatabase}=await loadTs(new URL("../app/component-database.ts",import.meta.url)),{stationComposition}=await loadTs(new URL("../app/station-specification.ts",import.meta.url));
+  const reference=stationComposition(structuredClone(specimen),{pumps:catalogue,cabinets,smartCabinets:control.cabinets,components:assembleComponentDatabase(binding,control,[])});
+  assert.deepEqual(stationTrial.value,JSON.parse(JSON.stringify(reference)),"Published station and prior calculation must agree on the shipped catalogs");
   const calculation={action:"calculate",input:{dnFrom:65,dnTo:65,materials:["st20"],withSensorNipple:false,includeEccentric:false}};
   const countRows=async()=> (await json("/api/component-calculator",calculation)).rows.length;
   const originalCount=await countRows();assert(originalCount>0,"The shipped insert catalogue must produce rows");
