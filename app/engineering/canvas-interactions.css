@@ -1,0 +1,22 @@
+.gn-ports .gn-port-interactive{cursor:crosshair;position:relative;overflow:visible}
+.gn-port-interactive i::after{content:"";position:absolute;inset:-8px;border-radius:50%}
+.gn-wires .gn-hit{vector-effect:non-scaling-stroke;stroke-width:14px}
+.gn-port-interactive:hover i{outline:3px solid color-mix(in srgb,var(--gn-accent) 30%,transparent)}
+.gn-port-compatible{background:color-mix(in srgb,#438d78 13%,transparent)}
+.gn-port-compatible i{background:#438d78}
+.gn-port-incompatible{color:var(--muted);background:color-mix(in srgb,#b24236 6%,transparent)}
+.gn-port-incompatible:hover{background:color-mix(in srgb,#b24236 17%,transparent)}
+.gn-wire-preview{position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none;z-index:4}
+.gn-wire-preview .gn-wire{stroke-dasharray:7 5;stroke-width:2.5}
+.gn-connection-hint{position:absolute;left:12px;top:12px;max-width:min(560px,calc(100% - 24px));z-index:5;background:var(--paper);border:1px solid var(--line);border-radius:6px;padding:9px 12px;box-shadow:0 3px 12px #10263820;pointer-events:auto}
+.gn-connection-hint button{margin-left:10px}
+.gn-node-summary{font-size:10px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:12px}
+.gn-node-state{position:absolute;top:-10px;right:6px;font-size:10px;padding:1px 4px;border-radius:3px;background:var(--paper);color:var(--muted);border:1px solid var(--line)}
+.station-card.expanded>.gn-expanded-ports{position:absolute;top:57px;left:0;right:0;pointer-events:none;z-index:2}
+.gn-expanded-ports .gn-port-interactive{background:var(--paper);pointer-events:auto;opacity:.9}
+.gn-flow-dim{opacity:.22}
+.gn-flow-dim:hover{opacity:.8}
+/* Layout frames use the outer card origin. Absolute children otherwise start
+   inside its border; deep zoom would magnify that one pixel by the world scale. */
+.gn-world .station-card>.station-inside,.gn-world .station-card>.station-boundaries{left:-1px;top:-1px}
+.gn-world .station-card[data-section]>.station-inside,.gn-world .station-card[data-section]>.station-boundaries{top:-4px}

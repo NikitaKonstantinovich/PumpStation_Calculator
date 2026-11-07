@@ -15,6 +15,13 @@ export type Field = {
   min?: number;
   max?: number;
 };
+export type ParameterSource = {
+  mode: "user" | "fixed" | "computed" | "source";
+  value?: unknown;
+  registry?: "workspace2" | "base-values";
+  /** An exact key or object path. $. prefixes the current Instrument scope. */
+  attribute?: string;
+};
 export type NodeType = {
   id: string;
   name: string;
@@ -23,7 +30,7 @@ export type NodeType = {
   fields: Field[];
   formulas: Record<string, string>;
   operation?: string;
-  parameter?: {key:string; field:Field; permission:"input"|"options"|"all"; defaultKey?:string};
+  parameter?: {key:string; field:Field; permission:"input"|"options"|"all"; defaultKey?:string; source?:ParameterSource};
   native?: string;
   instrument?: string;
   section?: "input" | "edit" | "output";

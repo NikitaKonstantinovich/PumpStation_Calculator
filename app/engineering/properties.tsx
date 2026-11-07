@@ -4,7 +4,7 @@ import { useState } from "react";
 import { accepts, display, type Diagram, type Edge, type GraphNode, type NodeType } from "./schema";
 import type { Trace } from "./engine";
 export function Properties({
-  extra,graph,
+  taskMode=false,extra,graph,
   node,
   type,
   trace,
@@ -18,6 +18,7 @@ export function Properties({
   pick,
   group
 }: {
+  taskMode?: boolean;
   extra: import("react").ReactNode;
   graph: Diagram;
   node: GraphNode;
@@ -35,10 +36,11 @@ export function Properties({
 }) {
   const [tab, setTab] = useState("Объект"),
     [error, setError] = useState("");
+  const [advanced,setAdvanced]=useState(false);
   const locked = !!type.native || type.id.startsWith("args.") || type.id.startsWith("return.");
   const links = graph.edges.filter(e => e.from === node.id || e.to === node.id),
     record = trace[node.id];
-  return <aside className="gn-props"><h2>Свойства</h2><strong>{node.name}</strong>{extra}<nav>{["Объект", "Атрибуты", "Функции и скрипты", "Связи и результат"].map(k => <button key={k} aria-pressed={tab === k} onClick={() => setTab(k)}>{k}</button>)}</nav>
+  return <aside className="gn-props"><h2>Свойства</h2><strong>{node.name}</strong>{extra}{taskMode&&<button onClick={()=>setAdvanced(!advanced)}>Расширенные свойства ноды</button>}{(!taskMode||advanced)&&<><nav>{["Объект", "Атрибуты", "Функции и скрипты", "Связи и результат"].map(k => <button key={k} aria-pressed={tab === k} onClick={() => setTab(k)}>{k}</button>)}</nav>
     {tab === "Объект" && <><label>Имя экземпляра<input key={node.id + node.name} defaultValue={node.name} onBlur={e => {
           if (e.target.value.trim() && e.target.value !== node.name) update({
             name: e.target.value.trim()
@@ -71,6 +73,6 @@ export function Properties({
     })}
     {tab === "Функции и скрипты" && <><p>{type.description}</p><p>Входы · {type.fields.filter(f => f.direction !== "output").map(f => f.key).join(", ") || "—"}</p><p>Выходы · {type.fields.filter(f => f.direction !== "input").map(f => f.key).join(", ") || "—"}</p>{source && <details open><summary>Встроенная операция · {type.native}</summary><pre>{source}</pre></details>}{Object.entries(type.formulas).map(([k, v]) => <pre key={k}>{k + " = " + v}</pre>)}{!locked && <button onClick={edit}>Редактировать функции типа</button>}<button onClick={test}>Тестовый запуск</button><details><summary>Язык формул</summary><p>Имена входов, числа, строки в двойных кавычках, true, false, null. Арифметика + − * / %, сравнения, ??, &&, ||. Функции if, min, max, abs, round, sqrt, len, get и set. Пример: mass * count.</p></details></>}
     {tab === "Связи и результат" && <>{links.map(e => <div className="gn-link-row" key={e.from + e.out + e.to + e.input}><button onClick={() => go(e.from === node.id ? e.to : e.from)}>{e.from}.{e.out} → {e.to}.{e.input}</button><button aria-label="Удалить связь" onClick={() => unlink(e)}>×</button></div>)}{!links.length && <p>Связей пока нет.</p>}<pre>{record ? JSON.stringify(record, null, 2) : "Выполните тестовый запуск"}</pre></>}
-    {error && <p role="alert">{error}</p>}
+    </>}{error && <p role="alert">{error}</p>}
   </aside>;
 }

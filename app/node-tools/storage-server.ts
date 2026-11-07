@@ -7,7 +7,7 @@ import { currentBasePublication, resolveBaseVersions } from "../base-values-serv
 import { defaultProjectSettings } from "../default-settings";
 import { evaluatePlan, canEditParameter } from "./runtime";
 import type { ToolContext, ToolDocument, ToolProgram, Values, WorkspaceData } from "./schema";
-import type { UserRole } from "../user-types";
+import { isUserRole, type UserRole } from "../user-types";
 export class ToolError extends Error {
   constructor(message: string, readonly status = 400) {
     super(message);
@@ -114,9 +114,11 @@ export async function toolCommand(body: {
   if (!["save", "test", "publish"].includes(body.action) || !body.document) throw new ToolError("Некорректная команда");
   const doc = body.document,
     program = compileTools(doc, "draft", body.action !== "save");
+  if (body.role != null && !isUserRole(body.role)) throw new ToolError("Неизвестная роль тестовой симуляции");
+  const sourceData = await toolDefaults();
   const context: ToolContext = {
     values: body.values ?? {},
-    defaults: (await toolDefaults()).defaults,
+    defaults: sourceData.defaults,
     role: body.role ?? "pro"
   };
   if (body.action === "test") {
@@ -125,6 +127,7 @@ export async function toolCommand(body: {
     const result = evaluatePlan(program.plans[tool.id], context);
     return {
       result,
+      dataset: {version:"draft", revision:state.revision, role:context.role, simulatedRole:true, sourceVersions:sourceData.baseVersions, values:context.values},
       tests: runTests(doc, context),
       writes: [{
         source: "workspace2",
@@ -175,14 +178,22 @@ export async function verifyWorkspace(next: WorkspaceData | undefined, prior: Wo
       };
     const result = evaluatePlan(plan, context);
     if (result.issues.length) throw new ToolError(result.issues.map(i => i.message).join("; "));
+    const previousValues = prior?.tools[id]?.values;
+    for (const binding of result.bindings) {
+      if ((binding.mode ?? "user") !== "user" || canEditParameter(role, binding.permission) || !previousValues || !Object.hasOwn(previousValues, binding.key)) continue;
+      if (JSON.stringify(binding.value) !== JSON.stringify(previousValues[binding.key])) throw new ToolError("Редактирование параметра недоступно · " + binding.field.name, 403);
+    }
     for (const [key, value] of Object.entries(saved.values)) {
       const binding = result.bindings.find(b => b.key === key);
       if (!binding) throw new ToolError("Неизвестный параметр " + key);
+      if (binding.mode && binding.mode !== "user") throw new ToolError("Запись параметра недоступна для источника «" + binding.origin + "» · " + binding.field.name + ". Примените миграцию версии.", 403);
       if (!accepts({
         ...binding.field,
         required: false
       }, value)) throw new ToolError("Неверный тип или диапазон · " + binding.field.name);
-      if (!canEditParameter(role, binding.permission) && JSON.stringify(value) !== JSON.stringify(prior?.tools[id]?.values[key] ?? binding.field.initial ?? defaults.defaults[key])) throw new ToolError("Редактирование параметра недоступно · " + binding.field.name, 403);
+      const previous = prior?.tools[id]?.values;
+      const allowed = previous && Object.hasOwn(previous, key) ? previous[key] : Object.hasOwn(defaults.defaults, key) ? defaults.defaults[key] : binding.field.initial;
+      if (!canEditParameter(role, binding.permission) && JSON.stringify(value) !== JSON.stringify(allowed)) throw new ToolError("Редактирование параметра недоступно · " + binding.field.name, 403);
     }
   }
 }

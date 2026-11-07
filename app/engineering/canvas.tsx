@@ -3,7 +3,9 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type PointerEvent, type ReactNode } from "react";
 import { classification, layout, WIDTH, type Address, type Frame } from "./canvas-layout";
 import { ROOT } from "./hierarchy";
-import type { Diagram, Document, Edge } from "./schema";
+import type { Diagram, Document, Edge, Field } from "./schema";
+import { connectionFeedback } from "./connection-feedback";
+import "./canvas-interactions.css";
 type Camera = Frame & {
   open: string[];
 };
@@ -12,6 +14,10 @@ export type Focus = Address & {
   serial: number;
 };
 type Props = {
+  connect?: (graph: Diagram, edge: Edge, at: Address) => void;
+  describe?: (at: Address) => { name?: string; summary?: string; status?: string };
+  inspect?: (at: Address, field: Field, direction: "input" | "output") => string;
+  highlight?: Set<string>;
   root?:string;
   overviewLabel?:string;
   doc: Document;
@@ -30,6 +36,16 @@ const origin: Frame = {
   y: 0,
   k: 1
 };
+const PORT_NAMES: Record<string,string> = {
+  values: "Значения проекта",
+  defaults: "Базовые значения",
+  role: "Роль пользователя",
+  scope: "Контур",
+  active: "Участвует в расчёте",
+  binding: "Поле формы",
+  context: "Контекст"
+};
+const portName = (field: Field) => field.name === field.key ? PORT_NAMES[field.key] ?? field.name : field.name;
 const curve = (x: number, y: number, u: number, v: number) => {
   const d = Math.max(32, Math.abs(u - x) * .46);
   return "M" + x + "," + y + " C" + (x + d) + "," + y + " " + (u - d) + "," + v + " " + u + "," + v;
@@ -46,7 +62,11 @@ export function Canvas({
   context,
   move,
   unlink,
-  overview
+  overview,
+  connect,
+  describe,
+  inspect,
+  highlight
 }: Props) {
   const el = useRef<HTMLDivElement>(null);
   const model = useMemo(() => layout(doc), [doc]);
@@ -75,6 +95,51 @@ export function Canvas({
     x: number;
     y: number;
   } | null>(null);
+  const [wire, setWire] = useState<{
+    graph: Diagram;
+    at: Address;
+    out: string;
+    x: number;
+    y: number;
+    u: number;
+    v: number;
+    target?: string;
+    input?: string;
+    problem?: string;
+  } | null>(null);
+  const wireRef = useRef(wire);
+  useLayoutEffect(() => { wireRef.current = wire; }, [wire]);
+  const [connectionMessage, setConnectionMessage] = useState("");
+  useEffect(() => {
+    const cancel = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setWire(null);
+        setConnectionMessage("");
+      }
+    };
+    window.addEventListener("keydown", cancel);
+    return () => window.removeEventListener("keydown", cancel);
+  }, []);
+  const highlighted = (key: string) => !highlight?.size || [...highlight].some(p => p === key || p.startsWith(key + "/"));
+  function wireStart(event: PointerEvent, graph: Diagram, at: Address, field: Field) {
+    if (!connect || event.button !== 0) return;
+    event.preventDefault();
+    event.stopPropagation();
+    gesture.current = null;
+    const bounds = el.current!.getBoundingClientRect();
+    const pin = event.currentTarget.querySelector("i")!.getBoundingClientRect();
+    el.current!.setPointerCapture(event.pointerId);
+    setConnectionMessage("");
+    select(at);
+    setWire({ graph, at, out: field.key, x: pin.x + pin.width / 2 - bounds.x, y: pin.y + pin.height / 2 - bounds.y, u: event.clientX - bounds.x, v: event.clientY - bounds.y });
+  }
+  function wireTarget(event: PointerEvent, current: NonNullable<typeof wire>) {
+    const pin = document.elementFromPoint(event.clientX, event.clientY)?.closest<HTMLElement>("[data-port-direction]");
+    if (!pin || pin.dataset.portDirection !== "input") return {};
+    if (pin.dataset.portGraph !== current.at.graph || pin.dataset.portPath !== current.at.path.join("/")) return { problem: "Соедините порты одного уровня. Для границы Instrument используйте его внешний порт" };
+    const target = pin.dataset.portNode!, input = pin.dataset.portKey!;
+    return { target, input, problem: connectionFeedback(current.graph, doc.types, { from: current.at.node, out: current.out, to: target, input }) };
+  }
   const fit = useCallback((id = root) => {
     if (!el.current) return;
     const g = model.diagrams.get(id);
@@ -200,6 +265,12 @@ export function Canvas({
     };
   }
   function motion(e: PointerEvent) {
+    const current = wireRef.current;
+    if (current) {
+      const bounds = el.current!.getBoundingClientRect();
+      setWire({ ...current, target: undefined, input: undefined, problem: undefined, u: e.clientX - bounds.x, v: e.clientY - bounds.y, ...wireTarget(e, current) });
+      return;
+    }
     const p = gesture.current;
     if (!p) return;
     const dx = e.clientX - p.x,
@@ -218,28 +289,47 @@ export function Canvas({
     }));
   }
   function end(e: PointerEvent) {
+    const current = wireRef.current;
+    if (current) {
+      const target = wireTarget(e, current);
+      if (target.target && target.input && !target.problem) {
+        connect?.(current.graph, { from: current.at.node, out: current.out, to: target.target, input: target.input }, current.at);
+      } else if (target.problem) setConnectionMessage(target.problem);
+      setWire(null);
+      return;
+    }
     const p = gesture.current;
     if (p?.moved && p.node) move(p.graph, p.node, p.nx + (e.clientX - p.x) / p.scale, p.ny + (e.clientY - p.y) / p.scale);
     setDrag(null);
     gesture.current = null;
   }
   function layer(g: Diagram, path: string[], frame: Frame): ReactNode {
-    const cards = g.nodes.map(n => model.card(g, drag?.g === g.id && drag.n === n.id ? {
+    const candidateLevel = wire?.at.graph === g.id && wire.at.path.join("/") === path.join("/");
+    const cards = g.nodes.map(n => {
+      const card = model.card(g, drag?.g === g.id && drag.n === n.id ? {
       ...n,
       x: drag.x,
       y: drag.y
-    } : n));
+      } : n);
+      if (!candidateLevel) return card;
+      const ins = [...card.ins, ...card.type.fields.filter(f => f.direction !== "output" && !card.ins.some(p => p.key === f.key))];
+      return { ...card, ins, h: Math.max(card.h, 64 + 27 * Math.max(ins.length, card.outs.length)) };
+    });
     const byId = new Map(cards.map(c => [c.n.id, c]));
     return <><svg className="gn-wires" aria-label="Связи">{g.edges.map((e, i) => {
           const a = byId.get(e.from),
             b = byId.get(e.to);
           if (!a || !b) return null;
           const d = curve(a.n.x + WIDTH, a.n.y + 71 + 27 * a.outs.findIndex(f => f.key === e.out), b.n.x, b.n.y + 71 + 27 * b.ins.findIndex(f => f.key === e.input));
-          return <g key={i}><path data-kind={e.kind??(a.type.fields.find(f=>f.key===e.out)?.meaning==="parameterBinding"?"binding":a.type.fields.find(f=>f.key===e.out)?.meaning==="saveCommand"?"command":"data")} className="gn-wire" d={d} /><path className="gn-hit" d={d} onDoubleClick={() => unlink(g, e)} onContextMenu={event => {
+          const out = a.type.fields.find(f => f.key === e.out);
+          const source = { graph: g.id, path, node: a.n.id };
+          const title = (inspect && out ? inspect(source, {...out, name:portName(out)}, "output") + "\n" : "") + a.n.name + " → " + b.n.name;
+          const lit = highlighted([...path, a.n.id].join("/")) && highlighted([...path, b.n.id].join("/"));
+          return <g key={i} className={lit ? "" : "gn-flow-dim"}><path data-kind={e.kind??(a.type.fields.find(f=>f.key===e.out)?.meaning==="parameterBinding"?"binding":a.type.fields.find(f=>f.key===e.out)?.meaning==="saveCommand"?"command":"data")} className="gn-wire" d={d} /><path className="gn-hit" d={d} onDoubleClick={() => unlink(g, e)} onContextMenu={event => {
               event.preventDefault();
               event.stopPropagation();
               unlink(g, e);
-            }}><title>{a.n.name} → {b.n.name}</title></path></g>;
+            }}><title>{title}</title></path></g>;
         })}</svg>{cards.map(({
         n,
         type,
@@ -257,7 +347,15 @@ export function Canvas({
           expanded = !!child && cam.open.includes(key) && path.length < 15;
         const sel = active.node === n.id && active.graph === g.id && active.path.join("/") === path.join("/");
         const next = child ? model.nested(frame, g, n, child) : frame;
-        return <div key={n.id} className={"gn-node station-card " + (sel ? "selected " : "") + (eligible?.has(n.id) && g.id === active.graph ? "eligible " : "") + (expanded ? "expanded" : "")} role="button" tabIndex={0} aria-label={n.name} onKeyDown={e => {
+        const description = describe?.(at);
+        const port = (f: Field, direction: "input" | "output") => {
+          const problem = candidateLevel && direction === "input" ? connectionFeedback(g, doc.types, { from: wire!.at.node, out: wire!.out, to: n.id, input: f.key }) : "";
+          const candidate = candidateLevel && direction === "input";
+          const name=portName(f);
+          const tooltip = (inspect?.(at, {...f,name}, direction) ?? [name, f.kind, f.unit].filter(Boolean).join(" · ")) + (candidate ? "\n" + (problem || "Совместимый вход") : "");
+          return <div title={tooltip} className={(direction === "input" ? "gn-in" : "gn-out") + (connect ? " gn-port-interactive" : "") + (candidate ? problem ? " gn-port-incompatible" : " gn-port-compatible" : "")} key={f.key} data-port-direction={direction} data-port-graph={g.id} data-port-path={path.join("/")} data-port-node={n.id} data-port-key={f.key} onPointerDown={direction === "output" && connect ? e => wireStart(e, g, at, f) : undefined}>{direction === "input" && <i />}{name}{direction === "output" && <i />}</div>;
+        };
+        return <div key={n.id} className={"gn-node station-card " + (highlighted(key) ? "" : "gn-flow-dim ") + (sel ? "selected " : "") + (eligible?.has(n.id) && g.id === active.graph ? "eligible " : "") + (expanded ? "expanded" : "")} role="button" tabIndex={0} aria-label={description?.name ?? n.name} onKeyDown={e => {
           if (e.key === "Enter") {
             e.stopPropagation();
             select(at);
@@ -276,8 +374,9 @@ export function Canvas({
           context(at, e.clientX, e.clientY);
         }}>
         <header className={frame.k * cam.k < .58 ? "station-overview" : undefined} style={{
-            fontSize: Math.min(31, Math.max(16, 11 / (frame.k * cam.k)))
-          }}><small>{child ? "Instrument · " : ""}{classification(type)}</small><strong>{n.name}</strong></header>
+            fontSize: Math.min(31, Math.max(16, 11 / (frame.k * cam.k))),
+            visibility: expanded && frame.k * cam.k > 2 ? "hidden" : undefined
+          }}><small>{child ? "Instrument · " : ""}{classification(type)}</small><strong>{description?.name ?? n.name}</strong>{description?.summary && <span className="gn-node-summary" title={description.summary}>{description.summary}</span>}{description?.status && <span className="gn-node-state" title={description.status}>{description.status}</span>}</header>
         {expanded && child && <svg className="station-boundaries" width={WIDTH} height={h}>{[...ins.map((f, i) => ({
               f,
               i,
@@ -303,21 +402,27 @@ export function Canvas({
             })}</svg>}
         {expanded && child ? <div className="station-inside" style={{
             transform: "translate(" + ((next.x - frame.x) / frame.k - n.x) + "px," + ((next.y - frame.y) / frame.k - n.y) + "px) scale(" + next.k / frame.k + ")"
-          }}>{layer(child, [...path, n.id], next)}</div> : <><div className="gn-ports"><div>{ins.map(f => <div title={f.name} className="gn-in" key={f.key}><i />{f.name}</div>)}</div><div>{outs.map(f => <div title={f.name} className="gn-out" key={f.key}>{f.name}<i /></div>)}</div></div>{!child && Object.keys(type.formulas).length > 0 && <small className="station-formula">{Object.values(type.formulas).join(" · ")}</small>}</>}
+          }}>{layer(child, [...path, n.id], next)}</div> : <><div className="gn-ports"><div>{ins.map(f => port(f, "input"))}</div><div>{outs.map(f => port(f, "output"))}</div></div>{!child && Object.keys(type.formulas).length > 0 && <small className="station-formula">{Object.values(type.formulas).join(" · ")}</small>}</>}
+        {expanded && connect && frame.k * cam.k <= 2 && <div className="gn-ports gn-expanded-ports"><div>{ins.map(f => port(f, "input"))}</div><div>{outs.map(f => port(f, "output"))}</div></div>}
       </div>;
       })}</>;
   }
   const graph = model.diagrams.get(base) ?? doc.diagrams[0];
+  const selectedFrame = model.at(base, active.path);
+  const levelScale = selectedFrame.graph.id === active.graph ? selectedFrame.frame.k : 1;
   return <div className="gn-canvas" ref={el} onPointerDown={e => start(e, graph, origin)} onPointerMove={motion} onPointerUp={end} onPointerCancel={() => {
     gesture.current = null;
     setDrag(null);
+    setWire(null);
   }}>
     <div className="gn-world" style={{
       transform: "translate(" + cam.x + "px," + cam.y + "px) scale(" + cam.k + ")"
     }}>{layer(graph, [], origin)}</div>
+    {wire && <><svg className="gn-wire-preview" aria-hidden="true"><path className="gn-wire" d={curve(wire.x, wire.y, wire.u, wire.v)} /></svg><div className="gn-connection-hint" role="status">{wire.problem || (wire.target ? "Отпустите для подключения" : "Перетащите к входному порту. Escape — отмена")}</div></>}
+    {!wire && connectionMessage && <div className="gn-connection-hint" role="alert">{connectionMessage}<button onClick={() => setConnectionMessage("")} aria-label="Закрыть сообщение соединения">×</button></div>}
     <div className="gn-controls" onPointerDown={e => e.stopPropagation()}><button onClick={() => {
         overview();
         fit(root);
-      }}>{overviewLabel}</button><span>{Math.round(cam.k * 100)}%</span><small className="station-legend">Ввод · Обработка и отображение · Вывод</small></div>
+      }}>{overviewLabel}</button><span title={"Масштаб выбранного уровня. Общий масштаб полотна · " + Math.round(cam.k * 100) + "%"}>{Math.round(cam.k * levelScale * 100)}%</span><small className="station-legend">Ввод · Обработка и отображение · Вывод</small></div>
   </div>;
 }

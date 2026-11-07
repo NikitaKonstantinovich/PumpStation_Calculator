@@ -17,6 +17,8 @@ export type ParameterBinding = {
   origin: string;
   value: unknown;
   node: string;
+  mode?: "user" | "fixed" | "computed" | "source";
+  source?: {registry:"workspace2"|"base-values";attribute:string};
 };
 export type View = {
   kind: "form" | "section" | "grid" | "field" | "condition" | "message";
@@ -86,6 +88,7 @@ export type WorkspaceData = {
   tools: Record<string, SavedTool>;
 };
 export type TestResult = {
+  inputs?: Values;
   expected?: unknown;
   actual?: unknown;
   node?: string;

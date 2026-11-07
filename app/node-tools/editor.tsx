@@ -4,6 +4,11 @@ import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { Canvas, type Focus } from "../engineering/canvas";
 import { layout, type Address } from "../engineering/canvas-layout";
 import { usesInStation } from "../engineering/uses";
+import { DataTree, FormTree, compactValue } from "./data-inspector";
+import { ParameterProperties, SOURCE_NAMES } from "./parameter-properties";
+import { addressFromTrace, graphBreadcrumbs, provenance } from "./navigation";
+import { ValueEditor } from "./value-editor";
+import type { UserRole } from "../user-types";
 import { Properties } from "../engineering/properties";
 import { TypeEditor } from "../engineering/type-editor";
 import { GroupDialog } from "../engineering/group-dialog";
@@ -13,7 +18,7 @@ import { compileTools, parameterType } from "./compiler";
 import { evaluatePlan, traceNode } from "./runtime";
 import { ToolForm } from "./form";
 import { loadTools } from "./workspace";
-import { API, ROOT, safeId, type ToolDocument, type ToolTest, type TestResult, type Values } from "./schema";
+import { API, ROOT, safeId, type ToolDocument, type ToolTest, type TestResult, type Values, type Evaluation } from "./schema";
 import type { ProjectConfig } from "../project-config";
 import "../engineering/editor.css";
 import "./tools.css";
@@ -112,6 +117,23 @@ export function ToolEditor({
       options: ""
     });
   const [metadata, setMetadata] = useState(false);
+  const [dataset, setDataset] = useState<"preview" | "saved" | "test">("preview");
+  const [role, setRole] = useState<UserRole>("pro"),
+    [sessionRole, setSessionRole] = useState<UserRole>("admin");
+  const [baseVersions, setBaseVersions] = useState<Record<string, string>>({}),
+    [savedDefaults, setSavedDefaults] = useState<Values | null>(null);
+  const [lastTest, setLastTest] = useState<{
+    result: Evaluation;
+    document: ToolDocument;
+    tool: string;
+    dataset: {
+      version: string;
+      revision: number;
+      role: UserRole;
+      sourceVersions: Record<string, string>;
+      values: Values;
+    };
+  } | null>(null);
   const tool = doc?.tools.find(t => t.id === toolId),
     root = tool?.diagram ?? ROOT;
   const graph = doc?.diagrams.find(g => g.id === at.graph),
@@ -129,6 +151,8 @@ export function ToolEditor({
       if (live) {
         accept(state);
         setDefaults(data.defaults);
+        setSessionRole(data.role);
+        setBaseVersions(data.baseVersions);
         setToolId(state.draft.tools[0]?.id ?? "");
         setAt({
           graph: state.draft.tools[0]?.diagram ?? ROOT,
@@ -166,6 +190,19 @@ export function ToolEditor({
     window.addEventListener("keydown", escape);
     return () => window.removeEventListener("keydown", escape);
   }, []);
+  const stored = project.workspace2?.tools[toolId];
+  useEffect(() => {
+    let active = true;
+    setSavedDefaults(null);
+    loadTools(undefined, stored?.baseVersions).then(data => {
+      if (active) setSavedDefaults(data.defaults);
+    }).catch(e => {
+      if (active) setError(e.message);
+    });
+    return () => {
+      active = false;
+    };
+  }, [stored?.baseVersions]);
   const trial = useMemo(() => {
     if (!doc || !tool) return {
       result: null,
@@ -175,9 +212,10 @@ export function ToolEditor({
       const program = compileTools(doc, "preview");
       return {
         result: evaluatePlan(program.plans[tool.id], {
-          values,
-          defaults,
-          role: "admin"
+          values: dataset === "saved" ? stored?.values ?? {} : values,
+          stored: dataset === "saved" ? stored?.values : undefined,
+          defaults: dataset === "saved" ? savedDefaults ?? defaults : defaults,
+          role: dataset === "saved" ? sessionRole : role
         }),
         error: ""
       };
@@ -187,11 +225,25 @@ export function ToolEditor({
         error: (e as Error).message
       };
     }
-  }, [doc, tool, values, defaults]);
+  }, [doc, tool, values, defaults, dataset, stored, savedDefaults, sessionRole, role]);
+  const viewed = dataset === "test" ? lastTest?.tool === toolId ? lastTest.result : null : trial.result;
+  const stale = dataset === "test" && JSON.stringify(lastTest?.document) !== JSON.stringify(doc);
+  const dataStatus = dataset === "test" ? lastTest ? stale ? "Устаревший результат · повторите проверку" : "Последняя серверная проба" : "Проба ещё не выполнена" : dataset === "saved" ? savedDefaults ? "Черновик на сохранённых входах проекта" : "Загрузка сохранённых источников…" : "Предпросмотр на тестовых значениях";
+  const chain = useMemo(() => doc ? provenance(doc, root, at) : null, [doc, root, at]);
   function change(next: ToolDocument) {
     if (busy) return;
     setHistory(h => [...h.slice(-39), doc!]);
-    setDoc(next);
+    setDoc({
+      ...next,
+      types: next.types.map(t => t.operation !== "field" ? t : {
+        ...t,
+        fields: [...t.fields, ...["visible", "enabled"].filter(key => !t.fields.some(f => f.key === key)).map(key => ({
+          ...makeField(key, key === "visible" ? "Показывать в форме" : "Доступно для ввода", "boolean", "flag"),
+          direction: "input" as const,
+          initial: true
+        }))]
+      })
+    });
     setTests(null);
     setError("");
     setMessage("");
@@ -212,6 +264,38 @@ export function ToolEditor({
       } : n)
     });
   }
+  function undo() {
+    if (history.length && !busy) {
+      setDoc(history.at(-1)!);
+      setHistory(history.slice(0, -1));
+      setTests(null);
+    }
+  }
+  useEffect(() => {
+    const key = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement;
+      if (target?.closest("input,textarea,select,[contenteditable]:not([contenteditable=false])") || target?.closest("[role=dialog],.gn-dialog,.gn-transfer,.gn-library")) return;
+      if (e.ctrlKey && e.key.toLowerCase() === "z") {
+        e.preventDefault();
+        undo();
+      } else if (e.key === "F2" && node) {
+        e.preventDefault();
+        const name = window.prompt("Имя экземпляра", node.name);
+        if (name?.trim()) updateNode({
+          name: name.trim()
+        });
+      } else if (e.key === "Delete" && graph && node && !["source", "result"].includes(node.id)) {
+        e.preventDefault();
+        if (window.confirm("Удалить узел «" + node.name + "» и его связи?")) updateGraph({
+          ...graph,
+          nodes: graph.nodes.filter(n => n.id !== node.id),
+          edges: graph.edges.filter(e => e.from !== node.id && e.to !== node.id)
+        });
+      }
+    };
+    window.addEventListener("keydown", key);
+    return () => window.removeEventListener("keydown", key);
+  });
   function navigate(target: Address, base = root) {
     setAt(target);
     setFocus({
@@ -451,12 +535,19 @@ export function ToolEditor({
             revision: remote.revision,
             tool: toolId,
             values,
-            role: "pro"
+            role
           })
         }),
         data = await response.json();
       if (!response.ok) throw Error(data.error);
       setTests(data.tests);
+      setLastTest({
+        result: data.result,
+        document: doc,
+        tool: toolId,
+        dataset: data.dataset
+      });
+      setDataset("test");
       setMessage("Проба выполнена. Запись данных представлена как план команды.");
     } catch (e) {
       setError((e as Error).message);
@@ -467,17 +558,11 @@ export function ToolEditor({
   const selectedAddress = [...at.path, at.node].join("/");
   function previewSelect(id: string) {
     if (!doc) return;
-    const path = id.split("/"),
-      node = path.pop()!;
-    const current = layout(doc).at(root, path);
-    navigate({
-      graph: current.graph.id,
-      path,
-      node
-    });
+    const address = addressFromTrace(doc, root, id);
+    if (address) navigate(address);
     setProps(true);
   }
-  const localTrace = trial.result ? traceNode(trial.result.trace, at.path) : {} as Trace;
+  const localTrace = viewed ? traceNode(viewed.trace, at.path) : {} as Trace;
   function newTool() {
     if (!doc) return;
     const name = window.prompt("Название нового инструмента");
@@ -577,7 +662,16 @@ export function ToolEditor({
           path: [],
           node: ""
         }, t.diagram);
-      }}>{doc.tools.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}</select><button onClick={newTool}>＋ Инструмент</button><button onClick={() => setMetadata(true)}>Определение</button><button onClick={() => setLibrary(!library)}>＋ Библиотека</button><button onClick={() => {
+      }}>{doc.tools.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}</select><select aria-label="Найти параметр" value="" onChange={e => {
+        if (e.target.value) {
+          navigate(JSON.parse(e.target.value));
+          setProps(true);
+        }
+      }}><option value="">Найти параметр…</option>{doc.types.filter(t => t.parameter).flatMap(t => usesInStation(doc, t.id, root).map(u => <option key={u.path.join("/") + u.node} value={JSON.stringify({
+          graph: u.diagram,
+          path: u.path,
+          node: u.node
+        })}>{u.name}</option>))}</select><button onClick={newTool}>＋ Инструмент</button><button onClick={() => setMetadata(true)}>Определение</button><button onClick={() => setLibrary(!library)}>＋ Библиотека</button><button onClick={() => {
         setParameter({
           key: "designation",
           name: "Обозначение установки",
@@ -596,7 +690,37 @@ export function ToolEditor({
     {(error || message) && <div className={error ? "gn-error" : "gn-status"} role={error ? "alert" : "status"}>{error || message}{error && errorAt && <button onClick={() => locate(errorAt.graph, errorAt.node ?? "")}>Перейти к ошибке</button>}{error.includes("другом окне") && <button onClick={() => {
         if (window.confirm("Загрузить сохранённую ревизию?")) void request().then(accept);
       }}>Загрузить актуальную</button>}</div>}
-    <div className="gn-body">{graph && <Canvas overviewLabel="Показать все инструменты" root={root} doc={doc} active={at} focus={focus} storageKey={"tools/" + project.project.id + "/" + toolId} eligible={out ? targets : null} select={choose} context={(target, x, y) => {
+    <nav className="nt-breadcrumbs" aria-label="Путь ноды">{graphBreadcrumbs(doc, root, at).map((c, i) => <span key={i}>{i > 0 && " → "}<button onClick={() => navigate(c.address)}>{c.label}</button></span>)}<small>{type?.instrument ? "Экземпляр Instrument" : at.path.length ? "Внутренний узел общего определения" : "Узел инструмента"}</small></nav>
+    <div className="gn-body">{graph && <Canvas overviewLabel="Показать все инструменты" root={root} doc={doc} active={at} focus={focus} storageKey={"tools/" + project.project.id + "/" + toolId} eligible={out ? targets : null} highlight={chain?.ids} describe={target => {
+        const g = doc.diagrams.find(g => g.id === target.graph),
+          n = g?.nodes.find(n => n.id === target.node),
+          t = doc.types.find(t => t.id === n?.type),
+          r = viewed?.trace[[...target.path, target.node].join("/")],
+          b = viewed?.bindings.find(b => b.node === [...target.path, target.node].join("/"));
+        return {
+          name: t?.parameter?.field.name ?? (t?.instrument && typeof n?.values.title === "string" ? n.values.title : n?.id === "source" && t?.fields.some(f => f.key === "context") ? "Данные инструмента" : t?.operation === "source" && n?.values.source === "base-values" ? "Базовые значения проекта" : t?.operation === "field" ? "Поле «" + String(n?.values.label || (r?.inputs.binding as {
+            field?: Field;
+          })?.field?.name || n?.name) + "»" : t?.operation === "grid" ? "Расположение полей" : n?.name),
+          summary: b ? b.field.kind + " · " + compactValue(b.field.optionNames?.[String(b.value)] ?? b.value) + (b.field.unit ? " " + b.field.unit : "") + " · " + SOURCE_NAMES[b.mode ?? "user"] : undefined,
+          status: b ? viewed?.issues.some(i => i.node === b.node) ? "Ошибка проверки" : "Проверено" : stale ? "Устаревший результат" : undefined
+        };
+      }} inspect={(target, f, direction) => {
+        const record = traceNode(viewed?.trace ?? {}, target.path)[target.node];
+        const v = direction === "output" ? record?.outputs[f.key] : record?.inputs[f.key];
+        return [f.name, f.kind + " · " + f.meaning + " " + f.unit, compactValue(v), "Источник · " + (record?.sources[f.key] ?? "Выход ноды"), dataStatus].join("\n");
+      }} connect={(g, edge) => {
+        const old = g.edges.find(e => e.to === edge.to && e.input === edge.input);
+        if (old && !window.confirm("Вход занят. Заменить источник?")) return;
+        const t = doc.types.find(t => t.id === g.nodes.find(n => n.id === edge.from)?.type),
+          f = t?.fields.find(f => f.key === edge.out);
+        updateGraph({
+          ...g,
+          edges: [...g.edges.filter(e => e !== old), {
+            ...edge,
+            kind: f?.meaning === "parameterBinding" ? "binding" : f?.meaning === "saveCommand" ? "command" : "data"
+          }]
+        });
+      }} select={choose} context={(target, x, y) => {
         setAt(target);
         setMenu({
           id: target.node,
@@ -615,31 +739,55 @@ export function ToolEditor({
         path: [],
         node: ""
       }, root)} />}
-    {props && graph && node && type && <Properties graph={graph} node={node} type={type} trace={localTrace} update={updateNode} edit={() => setEditing(type)} send={key => setTransfer({
+    {props && graph && node && type && <Properties taskMode graph={graph} node={node} type={type} trace={localTrace} update={updateNode} edit={() => setEditing(type)} send={key => setTransfer({
         from: node.id,
         out: key
       })} go={node => navigate({
         ...at,
         node
-      })} unlink={e => unlink(graph, e)} test={run} pick={() => {}} group={() => setPack(true)} extra={<><p>{type.operation ? "Базовая операция · " + type.operation : type.instrument ? "Общее определение Instrument" : "Функция"}</p>{type.instrument && <button onClick={() => navigate({
+      })} unlink={e => unlink(graph, e)} test={run} pick={() => {}} group={() => setPack(true)} extra={<><p>{type.instrument ? "Общее определение Instrument" : type.parameter ? "Параметр" : type.operation ? "Операция · " + type.name : "Функция"}</p>{type.instrument && <button onClick={() => navigate({
           graph: type.instrument!,
           path: [...at.path, node.id],
           node: ""
-        })}>Раскрыть Instrument</button>}<NodeProperties graph={graph} node={node} type={type} update={updateNode} />{type.parameter && <><small>{usesInStation(doc, type.id, root).map(u => u.name).join(" · ")}</small><ParameterProperties type={type} save={next => change({
-            ...doc,
-            types: doc.types.map(t => t.id === next.id ? next : t)
-          })} /></>}</>} />}
+        })}>Раскрыть Instrument</button>}{type.parameter ? <ParameterProperties key={type.id + at.path.join("/")} doc={doc} root={root} at={at} type={type} result={viewed} values={dataset === "test" ? lastTest?.dataset.values ?? {} : dataset === "saved" ? stored?.values ?? {} : values} defaults={dataset === "test" ? (lastTest?.result.trace.source?.outputs.context as {
+          defaults?: Values;
+        })?.defaults ?? defaults : dataset === "saved" ? savedDefaults ?? defaults : defaults} change={change} go={(address, base) => {
+          if (base && base !== root) {
+            const selected = doc.tools.find(t => t.diagram === base);
+            if (selected) setToolId(selected.id);
+            navigate(address, base);
+          } else navigate(address);
+        }} /> : <><NodeProperties graph={graph} node={node} type={type} update={updateNode} />{type.operation === "field" && <><label><input type="checkbox" aria-label="Показывать в форме" checked={node.values.visible !== false} onChange={e => updateNode({
+                values: {
+                  ...node.values,
+                  visible: e.target.checked
+                }
+              })} />Показывать в форме</label><label><input type="checkbox" checked={node.values.enabled !== false} onChange={e => updateNode({
+                values: {
+                  ...node.values,
+                  enabled: e.target.checked
+                }
+              })} />Доступно для ввода</label>{chain?.parameter && <button onClick={() => navigate(chain.parameter!)}>Свойства параметра</button>}</>}{Object.keys(type.formulas).length > 0 && <><h4>Выражения</h4>{Object.entries(type.formulas).map(([key, expr]) => <p key={key}>{key} = {expr}</p>)}<button onClick={() => setEditing(type)}>Изменить выражение и входы</button></>}</>}
+      <details><summary>К источнику</summary>{chain?.sources.map((d, i) => <button key={i} onClick={() => navigate(d.address)}>{d.label}</button>)}</details><details><summary>К получателям</summary>{chain?.consumers.map((d, i) => <button key={i} onClick={() => navigate(d.address)}>{d.label}</button>)}</details><DataTree value={localTrace[node.id]} label="Данные выбранной ноды" missing={!localTrace[node.id]} status={dataStatus} />{node.id === "source" && <p>context.values — входы инструмента; context.stored — сохранённые значения; context.defaults — базовая публикация; context.role — роль исполнения.</p>}
+      {viewed?.issues.filter(i => i.node === [...at.path, node.id].join("/")).map(i => <p key={i.key} role="alert">{i.message}<button onClick={() => previewSelect(i.node)}>Перейти к ошибке</button></p>)}</>} />}
     {preview && <aside className="nt-preview" style={{
         width
-      }}><header><strong>Предпросмотр</strong><input aria-label="Ширина предпросмотра" type="range" min="280" max="800" value={width} onChange={e => setWidth(Number(e.target.value))} /><button onClick={() => setPreview(false)}>×</button></header>{trial.error ? <p role="alert">{trial.error}</p> : <ToolForm view={trial.result?.view} issues={trial.result?.issues ?? []} change={(key, value) => setValues(v => ({
+      }}><header><strong>Предпросмотр</strong><input aria-label="Ширина предпросмотра" type="range" min="280" max="800" value={width} onChange={e => setWidth(Number(e.target.value))} /><button onClick={() => setPreview(false)}>×</button></header>
+      <label>Данные для просмотра<select aria-label="Данные для просмотра" value={dataset} onChange={e => setDataset(e.target.value as typeof dataset)}><option value="preview">Предпросмотр на тестовых значениях</option><option value="saved">Черновик на сохранённых входах проекта</option><option value="test">Результат последней тестовой пробы</option></select></label><p role="status">{dataStatus}</p><small>Граф · {dataset === "test" ? lastTest?.dataset.version + " / " + lastTest?.dataset.revision : "черновик " + remote.revision + (dirty ? " (изменён)" : "")} · роль {dataset === "test" ? lastTest?.dataset.role : dataset === "saved" ? sessionRole : role}{dataset !== "saved" ? " (симуляция)" : " (сессия)"}</small><details><summary>Версии источников</summary><DataTree value={dataset === "test" ? lastTest?.dataset.sourceVersions : dataset === "saved" ? stored?.baseVersions ?? baseVersions : baseVersions} label="Версии базовых значений" /></details>
+      {dataset !== "saved" && <label>Роль тестовой симуляции<select aria-label="Роль тестовой симуляции" value={role} onChange={e => setRole(e.target.value as UserRole)}>{["base", "plus", "pro", "admin"].map(r => <option key={r}>{r}</option>)}</select></label>}{dataset === "test" && <button onClick={run}>Повторить пробу</button>}
+      {dataset !== "test" && trial.error ? <p role="alert">{trial.error}</p> : viewed ? <ToolForm view={viewed.view} issues={viewed.issues} readOnly={dataset !== "preview"} change={(key, value) => setValues(v => ({
           ...v,
           [key]: value
-        }))} selected={selectedAddress} select={previewSelect} />}<details><summary>Тестовые значения</summary><textarea aria-label="Тестовые значения JSON" key={JSON.stringify(values)} defaultValue={JSON.stringify(values, null, 2)} onBlur={e => {
+        }))} selected={selectedAddress} select={previewSelect} /> : <p>Нет результата для выбранного набора данных.</p>}
+      {viewed && <><details><summary>Дерево формы · включая скрытые поля</summary><FormTree view={viewed.view} selected={selectedAddress} select={previewSelect} /></details><DataTree value={viewed.value} label="Действующие данные инструмента" />{viewed.issues.map(i => <p key={i.node + i.key} role="alert">{i.message}<button onClick={() => previewSelect(i.node)}>Перейти к ошибке</button></p>)}</>}
+      <details><summary>Тестовые значения · расширенный ввод</summary><textarea aria-label="Тестовые значения JSON" key={JSON.stringify(values)} defaultValue={JSON.stringify(values, null, 2)} onBlur={e => {
             try {
-              setValues(JSON.parse(e.target.value));
+              const v = JSON.parse(e.target.value);
+              if (!v || typeof v !== "object" || Array.isArray(v)) throw Error();
+              setValues(v);
               setError("");
             } catch {
-              setError("Некорректный JSON входов");
+              setError("Нужен JSON-объект входов");
             }
           }} /></details></aside>}</div>
     {menu && graph && <div className="gn-menu" style={{
@@ -747,63 +895,16 @@ export function ToolEditor({
             setError((e as Error).message);
           }
         }}>Сохранить примеры в черновик</button></section></div>}
-    {tests && <div className="gn-shade"><section className="gn-dialog nt-tests"><header><h2>Проверки определения</h2><button onClick={() => setTests(null)}>Закрыть</button></header><table><tbody>{tests.map(t => <tr key={t.id}><td>{t.passed ? "✓" : "Ошибка"}</td><td>{t.name}</td><td>{t.message}<details><summary>Ожидаемое и фактическое</summary><pre>{JSON.stringify({expected:t.expected,actual:t.actual},null,2)}</pre></details>{!t.passed&&t.node&&<button onClick={()=>{setTests(null);previewSelect(t.node!);}}>Перейти к узлу</button>}</td></tr>)}</tbody></table><p>Команда записи · Workspace 2 · пробный запуск</p></section></div>}
+    {tests && <div className="gn-shade"><section className="gn-dialog nt-tests"><header><h2>Проверки определения</h2><button onClick={() => setTests(null)}>Закрыть</button></header><table><tbody>{tests.map(t => <tr key={t.id}><td>{t.passed ? "✓" : "Ошибка"}</td><td>{t.name}</td><td>{t.message}<details><summary>Ожидаемое и фактическое</summary><pre>{JSON.stringify({
+                      inputs: t.inputs,
+                      expected: t.expected,
+                      actual: t.actual
+                    }, null, 2)}</pre></details>{!t.passed && t.node && <button onClick={() => {
+                  setTests(null);
+                  previewSelect(t.node!);
+                }}>Перейти к узлу</button>}</td></tr>)}</tbody></table><p>Команда записи · Workspace 2 · пробный запуск</p></section></div>}
     {versions && <div className="gn-shade"><section className="gn-dialog"><header><h2>Публикации Workspace 2</h2><button onClick={() => setVersions(false)}>Закрыть</button></header>{remote.versions.map(v => <p key={v.id}>{v.created} · {v.author}<br />{v.id}{v.id === remote.active ? " · Действующая" : <button onClick={() => action("rollback", v.id)}>Восстановить</button>}</p>)}</section></div>}
   </main>;
-}
-function ParameterProperties({
-  type,
-  save
-}: {
-  type: NodeType;
-  save: (t: NodeType) => void;
-}) {
-  const p = type.parameter!;
-  const [error, setError] = useState("");
-  const update = (field: Partial<Field>) => {
-    const next = {
-        ...p.field,
-        ...field
-      },
-      t = parameterType(type.id, type.name, next, p.permission);
-    t.parameter = {
-      ...p,
-      field: next
-    };
-    save(t);
-  };
-  return <details className="nt-parameter-definition" open><summary>Определение параметра</summary><p>{p.key}</p><label>Начальное значение (JSON)<input key={JSON.stringify(p.field.initial)} defaultValue={JSON.stringify(p.field.initial) ?? ""} onBlur={e => {
-        try {
-          update({
-            initial: e.target.value ? JSON.parse(e.target.value) : undefined
-          });
-          setError("");
-        } catch {
-          setError("Некорректное JSON-значение");
-        }
-      }} /></label><label>Права редактирования<select value={p.permission} onChange={e => {
-        const permission = e.target.value as "input" | "options" | "all";
-        const next = parameterType(type.id, type.name, p.field, permission);
-        next.parameter = {
-          ...p,
-          permission
-        };
-        save(next);
-      }}><option value="input">Все пользователи</option><option value="options">Plus, pro, admin</option><option value="all">Pro, admin</option></select></label>{error && <p role="alert">{error}</p>}<label>Название<input value={p.field.name} onChange={e => update({
-        name: e.target.value
-      })} /></label><label>Тип<select value={p.field.kind} onChange={e => update({
-        kind: e.target.value as Field["kind"]
-      })}>{["float", "int", "boolean", "string", "enum", "object", "array"].map(k => <option key={k}>{k}</option>)}</select></label><label>Единица<input value={p.field.unit} onChange={e => update({
-        unit: e.target.value
-      })} /></label><label>Инженерный смысл<input value={p.field.meaning} onChange={e => update({
-        meaning: e.target.value
-      })} /></label><label>Обязательный<input type="checkbox" checked={!!p.field.required} onChange={e => update({
-        required: e.target.checked
-      })} /></label>{(["min", "max"] as const).map(key => <label key={key}>{key}<input type="number" value={p.field[key] ?? ""} onChange={e => update({
-        [key]: e.target.value === "" ? undefined : Number(e.target.value)
-      })} /></label>)}<label>Варианты через запятую<input value={p.field.options?.join(",") ?? ""} onChange={e => update({
-        options: e.target.value.split(",").map(v => v.trim()).filter(Boolean)
-      })} /></label><small>Изменение определения применяется ко всем его экземплярам. Пути доступны в редакторе типа.</small></details>;
 }
 function NodeProperties({
   graph,
@@ -816,7 +917,7 @@ function NodeProperties({
   type: NodeType;
   update: (patch: Partial<GraphNode>) => void;
 }) {
-  const fields = type.fields.filter(f => f.direction !== "output" && !graph.edges.some(e => e.to === node.id && e.input === f.key) && !["object", "array", "reference"].includes(f.kind));
+  const fields = type.fields.filter(f => f.direction !== "output" && !graph.edges.some(e => e.to === node.id && e.input === f.key) && !(type.operation === "field" && ["visible", "enabled"].includes(f.key)) && !["object", "array", "reference"].includes(f.kind));
   return <details open className="nt-settings"><summary>Настройки экземпляра</summary>{fields.map(f => {
       const value = Object.hasOwn(node.values, f.key) ? node.values[f.key] : f.initial;
       const set = (value: unknown) => update({
@@ -825,6 +926,31 @@ function NodeProperties({
           [f.key]: value
         }
       });
-      return <label key={f.key}>{f.name}{f.kind === "boolean" ? <input type="checkbox" checked={value === true} onChange={e => set(e.target.checked)} /> : f.kind === "enum" ? <select value={String(value ?? "")} onChange={e => set(e.target.value)}><option value="">По умолчанию</option>{f.options?.map(v => <option key={v}>{v}</option>)}</select> : <input value={value == null ? "" : String(value)} type={["number", "float", "int"].includes(f.kind) ? "number" : "text"} onChange={e => set(["number", "float", "int"].includes(f.kind) ? e.target.value === "" ? null : Number(e.target.value) : e.target.value)} />}</label>;
+      const names: Record<string, string> = {
+        label: "Подпись поля",
+        hint: "Подсказка",
+        width: "Ширина поля в колонках",
+        columns: "Количество колонок",
+        title: "Заголовок",
+        collapsible: "Сворачиваемый раздел",
+        widget: "Вид элемента ввода",
+        source: "Источник данных",
+        visible: "Показывать в форме",
+        enabled: "Доступно для ввода"
+      };
+      const editorField = {
+        ...f,
+        optionNames: f.optionNames ?? (f.key === "widget" ? {
+          auto: "Автоматически",
+          number: "Число",
+          text: "Текст",
+          select: "Список",
+          toggle: "Переключатель"
+        } : f.key === "source" ? {
+          "workspace2": "Данные Workspace 2",
+          "base-values": "Базовые значения проекта"
+        } : undefined)
+      };
+      return <ValueEditor key={f.key} field={editorField} value={value} label={names[f.key] ?? f.name} change={set} />;
     })}</details>;
 }

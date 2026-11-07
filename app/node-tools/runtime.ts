@@ -5,17 +5,32 @@ import { canEditAllSettings, canEditProjectOptions } from "../user-types";
 export const OPERATIONS = ["source", "parameter", "object", "merge", "form", "section", "grid", "field", "condition", "message", "check", "save"] as const;
 const list = (v: Values) => Object.keys(v).filter(k => /^child\d+$/.test(k)).sort((a, b) => Number(a.slice(5)) - Number(b.slice(5))).map(k => v[k]).filter(Boolean) as View[];
 export const canEditParameter = (role: ToolContext["role"], permission: ParameterBinding["permission"]) => permission === "input" || permission === "options" && canEditProjectOptions(role) || canEditAllSettings(role);
+/** Explicit modes evaluate only their real dependencies; old publications retain their contract. */
+export function parameterExecutionPlan(plan: ToolProgram["plans"][string]): ToolProgram["plans"][string] {
+  return {...plan, steps:plan.steps.map(step => {
+    const mode=step.operation === "parameter" ? step.parameter?.source?.mode : undefined;
+    if(!mode)return step;
+    const inputs=new Set(["scope","active",...(mode==="user"?["values","defaults","role"]:mode==="computed"?["computed"]:[])]);
+    const fields=step.fields.filter(f=>f.direction==="output"||inputs.has(f.key));
+    const keys=new Set(fields.map(f=>f.key));
+    return {...step,fields,links:step.links.filter(e=>inputs.has(e.input)),values:Object.fromEntries(Object.entries(step.values).filter(([key])=>keys.has(key)))};
+  })};
+}
 const issue = (key: string, node: string, message: string): Diagnostic => ({
   key,
   node,
   message,
   severity: "error"
 });
+/** Prefer a persisted flattened key before traversing an actual object. */
+function attributeValue(values: Values, attribute: string): unknown {
+  if (Object.hasOwn(values, attribute)) return values[attribute];
+  return attribute.split(".").reduce<unknown>((value, key) => value && typeof value === "object" && Object.hasOwn(value, key) ? (value as Values)[key] : undefined, values);
+}
 function execute(step: Step, v: Values, context: ToolContext): Values {
   switch (step.operation) {
     case "source":
       {
-        const context = v.context as ToolContext;
         if (!context) throw Error("Источник данных не загружен");
         if (v.source === "workspace2") return {
           value: context.values,
@@ -38,9 +53,25 @@ function execute(step: Step, v: Values, context: ToolContext): Values {
           active = v.active !== false;
         const saved = Object.hasOwn(values, key),
           base = Object.hasOwn(defaults, def.defaultKey ?? key);
-        const value = saved ? values[key] : base ? defaults[def.defaultKey ?? key] : field.initial ?? null;
-        const origin = saved ? context.stored && Object.hasOwn(context.stored, key) && JSON.stringify(context.stored[key]) === JSON.stringify(value) ? "Сохранённое значение проекта" : "Введено пользователем" : base ? "Базовые значения" : "Значение определения";
+        const mode = def.source?.mode ?? "user";
+        let value = saved ? values[key] : base ? defaults[def.defaultKey ?? key] : field.initial ?? null;
+        let origin = saved ? context.stored && Object.hasOwn(context.stored, key) && JSON.stringify(context.stored[key]) === JSON.stringify(value) ? "Сохранённое значение проекта" : "Введено пользователем" : base ? "Базовые значения" : "Начальное значение определения";
+        let source: ParameterBinding["source"];
+        if (mode === "fixed") {
+          value = Object.hasOwn(def.source!, "value") ? def.source!.value : null;
+          origin = "Постоянное значение определения";
+        } else if (mode === "computed") {
+          value = v.computed ?? null;
+          origin = "Вычислено · " + (step.links.find(e => e.input === "computed")?.from ?? "вход computed");
+        } else if (mode === "source") {
+          const registry = def.source!.registry!;
+          const attribute = (def.source!.attribute ?? key).replace(/^\$\./, scope);
+          source = {registry, attribute};
+          value = attributeValue(registry === "workspace2" ? context.values : context.defaults, attribute) ?? null;
+          origin = (registry === "workspace2" ? "Workspace 2" : "Базовые значения проекта") + " · " + attribute;
+        }
         const diagnostics: Diagnostic[] = [];
+        if (active && source?.registry === "workspace2" && source.attribute === key) diagnostics.push(issue(key, step.id, field.name + " · источник Workspace 2 должен ссылаться на другой вводимый параметр"));
         if (active && !accepts(field, value)) diagnostics.push(issue(key, step.id, value == null ? field.name + " · обязательное значение" : field.name + " · проверьте тип, диапазон или варианты"));
         const binding: ParameterBinding = {
           key,
@@ -48,9 +79,11 @@ function execute(step: Step, v: Values, context: ToolContext): Values {
           value,
           active,
           permission: def.permission,
-          editable: canEditParameter((v.role ?? "base") as ToolContext["role"], def.permission),
+          editable: mode === "user" && canEditParameter(context.role, def.permission),
           origin,
-          node: step.id
+          node: step.id,
+          mode,
+          ...(source ? {source} : {})
         };
         return {
           value,
@@ -101,7 +134,9 @@ function execute(step: Step, v: Values, context: ToolContext): Values {
           binding: v.binding as ParameterBinding,
           widget: String(v.widget ?? "auto"),
           hint: String(v.hint ?? ""),
-          width: Number(v.width ?? 1)
+          width: Number(v.width ?? 1),
+          visible: v.visible !== false,
+          enabled: v.enabled !== false
         } satisfies View
       };
     case "condition":
@@ -134,7 +169,7 @@ function execute(step: Step, v: Values, context: ToolContext): Values {
   }
 }
 export function evaluatePlan(plan: ToolProgram["plans"][string], context: ToolContext, inputs: Values = {}): Evaluation {
-  const result = runPlan(plan, {
+  const result = runPlan(parameterExecutionPlan(plan), {
     context,
     ...inputs
   }, () => {
@@ -155,6 +190,10 @@ export function evaluatePlan(plan: ToolProgram["plans"][string], context: ToolCo
   for (const binding of bindings) {
     if (keys.has(binding.key)) throw Error("Повторяется идентификатор параметра " + binding.key);
     keys.add(binding.key);
+    if (binding.active && binding.source?.registry === "workspace2") {
+      const referenced = bindings.find(b => b.key === binding.source!.attribute);
+      if (referenced && referenced.mode !== "user") issues.push(issue(binding.key, binding.node, binding.field.name + " · источник должен быть параметром пользовательского ввода"));
+    }
   }
   let count = 0;
   function validateView(v: View | undefined, depth = 0) {
@@ -192,6 +231,10 @@ export function migrateValues(plan: ToolProgram["plans"][string], context: ToolC
     messages: string[] = [];
   for (const b of result.bindings) {
     if (!Object.hasOwn(context.values, b.key)) continue;
+    if (b.mode && b.mode !== "user") {
+      messages.push(b.field.name + " · прежнее введённое значение сохранено в истории; действует " + b.origin);
+      continue;
+    }
     if (accepts({
       ...b.field,
       required: false

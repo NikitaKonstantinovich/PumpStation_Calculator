@@ -37,7 +37,7 @@ function RuntimeTool({
     [error, setError] = useState(""),
     [message, setMessage] = useState("");
   const alive = useRef(true);
-  const dirty = JSON.stringify(values) !== JSON.stringify(initial?.values ?? {});
+  const dirty = JSON.stringify(values) !== JSON.stringify(initial?.values ?? {}) || !!remote && (remote.program.version !== initial?.version || JSON.stringify(remote.baseVersions) !== JSON.stringify(initial?.baseVersions));
   useEffect(() => {
     if (!dirty) return;
     const guard = (e: BeforeUnloadEvent) => {

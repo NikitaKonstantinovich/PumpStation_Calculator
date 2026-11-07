@@ -36,7 +36,7 @@ export function initialTools(manufacturers = ["cnp", "aquastrong", "onis", "vand
   type("ui.form", "Форма инструмента", [...uiSlots, F("title", "string", "text"), F("command", "object", "saveCommand"), output(view())], "form");
   type("ui.section", "Раздел", [...uiSlots, F("title", "string", "text"), F("collapsible", "boolean", "flag"), output(view())], "section");
   type("ui.grid", "Сетка", [...uiSlots, F("columns", "int", "columns"), output(view())], "grid");
-  type("ui.field", "Поле параметра", [F("binding", "object", "parameterBinding"), F("label", "string", "text"), F("widget", "enum", "widget"), F("hint", "string", "text"), F("width", "int", "columns"), output(view())], "field").fields.find(f => f.key === "widget")!.options = ["auto", "number", "text", "select", "toggle"];
+  type("ui.field", "Поле параметра", [F("binding", "object", "parameterBinding"), F("label", "string", "text"), F("widget", "enum", "widget"), F("hint", "string", "text"), F("width", "int", "columns"), {...bool("visible"),name:"Показывать в форме",initial:true}, {...bool("enabled"),name:"Доступно для ввода",initial:true}, output(view())], "field").fields.find(f => f.key === "widget")!.options = ["auto", "number", "text", "select", "toggle"];
   type("ui.condition", "Видимость и доступность", [F("child", "object", "view"), bool("visible"), bool("enabled"), output(view())], "condition");
   type("ui.message", "Сообщение", [F("text", "string", "text"), bool("visible"), F("issues", "array", "diagnostics"), output(view())], "message");
   type("data.source", "Зарегистрированный источник", [ctx(), {

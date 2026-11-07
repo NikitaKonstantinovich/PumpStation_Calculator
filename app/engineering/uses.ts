@@ -16,16 +16,17 @@ export function usesInStation(doc: Document, typeId: string, root=ROOT) {
     if (!g) return;
     const chain = new Set(parents).add(id);
     for (const n of g.nodes) {
+      const name = typeof n.values.title === "string" && n.values.title ? n.values.title : n.name;
       if (n.type === typeId) uses.push({
         diagram: id,
         node: n.id,
         path,
-        name: [...names, n.name].join(" → "),
+        name: [...names, name].join(" → "),
         links: g.edges.filter(e => e.from === n.id || e.to === n.id).length
       });
       const t = types.get(n.type),
         child = t && childDiagram(t, id);
-      if (child) visit(child, [...path, n.id], [...names, n.name], chain);
+      if (child) visit(child, [...path, n.id], [...names, name], chain);
     }
   }
   visit(root, [], [], new Set());
