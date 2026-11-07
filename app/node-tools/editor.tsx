@@ -802,9 +802,9 @@ export function ToolEditor({
     {preview && <aside className="nt-preview" style={{
         width
       }}><header><strong>Предпросмотр · {tool?.name}</strong><input aria-label="Ширина предпросмотра" type="range" min="280" max="800" value={width} onChange={e => setWidth(Number(e.target.value))} /><button onClick={() => setPreview(false)}>×</button></header>
-      {catalogNeeded && <section><strong>Новый каталог насосов</strong><p role="status">{catalogLoading ? "Загрузка…" : catalogError ? "Ошибка · " + catalogError : catalog ? catalog.status === "empty" ? "Каталог пуст" : "Загружен снимок " + catalog.id.slice(0, 12) : "Не загружен"}</p><button disabled={catalogLoading} onClick={() => {
+      {catalogNeeded && <section><strong>Новый каталог насосов</strong><p role="status">{catalogLoading ? catalog ? "Обновляем каталог · используется снимок " + catalog.id.slice(0, 12) : "Загрузка…" : catalogError ? (catalog ? "Не удалось обновить каталог · используется снимок " + catalog.id.slice(0, 12) + ". " : "Ошибка · ") + catalogError : catalog ? catalog.status === "empty" ? "Каталог пуст" : "Загружен снимок " + catalog.id.slice(0, 12) : "Не загружен"}</p><button disabled={catalogLoading} onClick={() => {
             setCatalogLoading(true);
-            setCatalog(null);
+            setCatalogError("");
             loadCatalog(undefined).then(s => {
               setCatalog(s);
               setCatalogError("");

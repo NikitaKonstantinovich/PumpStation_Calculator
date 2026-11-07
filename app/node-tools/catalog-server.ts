@@ -6,6 +6,7 @@ export class CatalogError extends Error {
   constructor(message: string, readonly status = 503) { super(message); }
 }
 type Header = Omit<CatalogSnapshot, "items">;
+let pendingLatest: Promise<CatalogSnapshot> | null = null;
 
 async function storedSnapshot(id: string): Promise<CatalogSnapshot | null> {
   try {
@@ -28,22 +29,38 @@ export async function catalogSnapshot(id?: string | null): Promise<CatalogSnapsh
     if (!stored) throw new CatalogError("Закреплённый снимок каталога не найден. Обновление источника выполняется явно.", 404);
     return stored;
   }
+  if (!pendingLatest) pendingLatest = captureLatestSnapshot().finally(() => { pendingLatest = null; });
+  return pendingLatest;
+}
+
+async function readSourceSnapshot(): Promise<CatalogSnapshot> {
   const service = catalogService();
   if (!service) throw new CatalogError("Зарегистрированный источник нового каталога не подключён к серверу");
-  let snapshot: CatalogSnapshot;
-  try {
-    const response = await service.fetch("http://node-catalog.internal/snapshot?source=" + PUMP_CATALOG_SOURCE);
-    if (!response.ok) {
-      const body = await response.json() as { error?: string };
-      throw new CatalogError(body.error || "Источник нового каталога недоступен", response.status === 400 ? 400 : 503);
+  for (let attempt = 0; attempt < 2; attempt++) {
+    let stage = "fetch";
+    try {
+      const response = await service.fetch("http://node-catalog.internal/snapshot?source=" + PUMP_CATALOG_SOURCE);
+      if (!response.ok) {
+        // An explicit HTTP failure is final even if its error body is unreadable.
+        const body = await response.json().catch(() => null) as { error?: string } | null;
+        throw new CatalogError(body?.error || "Источник нового каталога недоступен", response.status === 400 ? 400 : 503);
+      }
+      stage = "decode";
+      const body = await response.json();
+      stage = "validate";
+      validateCatalogSnapshot(body);
+      return body;
+    } catch (e) {
+      if (e instanceof CatalogError) throw e;
+      console.error("Node catalog snapshot failed", { stage, attempt: attempt + 1, name: e instanceof Error ? e.name : "Error", message: e instanceof Error ? e.message : String(e) });
+      if (stage === "validate" || attempt === 1) throw new CatalogError("Не удалось прочитать согласованный снимок нового каталога");
     }
-    const body = await response.json();
-    validateCatalogSnapshot(body);
-    snapshot = body;
-  } catch (e) {
-    if (e instanceof CatalogError) throw e;
-    throw new CatalogError("Не удалось прочитать согласованный снимок нового каталога");
   }
+  throw new CatalogError("Не удалось прочитать согласованный снимок нового каталога");
+}
+
+async function captureLatestSnapshot(): Promise<CatalogSnapshot> {
+  const snapshot = await readSourceSnapshot();
   const previous = await storedSnapshot(snapshot.id);
   if (previous) return previous;
   const { items, ...header } = snapshot;

@@ -88,3 +88,96 @@ test("immutable stored snapshots retain old catalogue data after live source cha
     assert.throws(()=>sql.exec("UPDATE node_catalog_chunks SET payload='[]'"),/immutable/);assert.throws(()=>sql.exec("DELETE FROM node_catalog_snapshots"),/immutable/);
   } finally {delete globalThis[unique];sql.close();await f.close();}
 });
+
+async function serverFixture() {
+  const f=await fixture(),sql=new DatabaseSync(":memory:"),unique="__nodeCatalogRetry"+crypto.randomUUID().replaceAll("-","");
+  try {
+    sql.exec(await readFile(new URL("../drizzle/0018_node_catalog_snapshots.sql",import.meta.url),"utf8"));
+    class Statement {constructor(query,params=[]){this.query=query;this.params=params;}bind(...params){return new Statement(this.query,params);}async first(){return sql.prepare(this.query).get(...this.params)??null;}async all(){return{results:sql.prepare(this.query).all(...this.params)};}async run(){return{meta:{changes:sql.prepare(this.query).run(...this.params).changes}};}}
+    const state={db:{prepare:query=>new Statement(query),async batch(statements){sql.exec("BEGIN");try{const result=[];for(const statement of statements)result.push(await statement.run());sql.exec("COMMIT");return result;}catch(e){sql.exec("ROLLBACK");throw e;}}},service:undefined};
+    globalThis[unique]=state;
+    const base=new URL("../app/",import.meta.url),server=await loadTs(new URL("node-tools/catalog-server.ts",base),{
+      [new URL("auth-server.ts",base).href]:`export const db=()=>globalThis.${unique}.db;`,
+      [new URL("node-tools/catalog-binding-server.ts",base).href]:`export const catalogService=()=>globalThis.${unique}.service;`
+    });
+    return {server,state,sql,snapshot:readCatalogSnapshot(f.path),async close(){delete globalThis[unique];sql.close();await f.close();}};
+  } catch(e) {delete globalThis[unique];sql.close();await f.close();throw e;}
+}
+
+test("latest catalogue retries one transient transport or decode failure and preserves its pinned snapshot",async()=>{
+  const f=await serverFixture();
+  try {
+    for(const failure of [()=>{throw new TypeError("connection reset");},()=>new Response("truncated json")]) {
+      let calls=0;
+      f.state.service={fetch:async()=>++calls===1?failure():Response.json(f.snapshot)};
+      const snapshot=await f.server.catalogSnapshot();
+      assert.equal(calls,2);assert.equal(snapshot.id,f.snapshot.id);
+      assert.equal((await f.server.catalogSnapshot(snapshot.id)).id,snapshot.id);assert.equal(calls,2);
+    }
+  } finally {await f.close();}
+});
+
+test("simultaneous latest catalogue requests share one source read and stored result",async()=>{
+  const f=await serverFixture();
+  try {
+    let calls=0,release;
+    f.state.service={fetch:()=>{calls++;return new Promise(resolve=>{release=resolve;});}};
+    const requests=[f.server.catalogSnapshot(),f.server.catalogSnapshot(),f.server.catalogSnapshot()];
+    assert.equal(calls,1);
+    release(Response.json(f.snapshot));
+    const snapshots=await Promise.all(requests);
+    assert.equal(calls,1);assert.equal(snapshots[0].id,f.snapshot.id);
+    assert.strictEqual(snapshots[0],snapshots[1]);assert.strictEqual(snapshots[1],snapshots[2]);
+  } finally {await f.close();}
+});
+
+test("permanent transport failures stop after two attempts and release the pending latest request",async()=>{
+  const f=await serverFixture();
+  try {
+    let calls=0;
+    f.state.service={fetch:async()=>{calls++;throw new TypeError("connection reset");}};
+    const failed=error=>error instanceof f.server.CatalogError&&error.status===503;
+    await assert.rejects(()=>f.server.catalogSnapshot(),failed);assert.equal(calls,2);
+    await assert.rejects(()=>f.server.catalogSnapshot(),failed);assert.equal(calls,4);
+    f.state.service={fetch:async()=>{calls++;return Response.json(f.snapshot);}};
+    assert.equal((await f.server.catalogSnapshot()).id,f.snapshot.id);assert.equal(calls,5);
+  } finally {await f.close();}
+});
+
+test("invalid snapshot contracts and explicit HTTP errors are never retried",async()=>{
+  const f=await serverFixture();
+  try {
+    for(const [response,status] of [
+      [()=>Response.json({...f.snapshot,sourceId:"invalid"}),503],
+      [()=>Response.json({error:"Invalid source"},{status:400}),400],
+      [()=>Response.json({error:"Unavailable source"},{status:503}),503],
+      [()=>new Response("unreadable error body",{status:503}),503]
+    ]) {
+      let calls=0;
+      f.state.service={fetch:async()=>{calls++;return response();}};
+      await assert.rejects(()=>f.server.catalogSnapshot(),error=>error instanceof f.server.CatalogError&&error.status===status);
+      assert.equal(calls,1);
+    }
+    f.state.service={fetch:async()=>Response.json(f.snapshot)};
+    assert.equal((await f.server.catalogSnapshot()).id,f.snapshot.id);
+  } finally {await f.close();}
+});
+
+test("missing or damaged pinned snapshots and storage failures never retry the live source",async()=>{
+  const f=await serverFixture();
+  try {
+    let calls=0;
+    f.state.service={fetch:async()=>{calls++;return Response.json(f.snapshot);}};
+    const snapshot=await f.server.catalogSnapshot();assert.equal(calls,1);
+    await assert.rejects(()=>f.server.catalogSnapshot("0".repeat(64)),error=>error.status===404);assert.equal(calls,1);
+    await assert.rejects(()=>f.server.catalogSnapshot("invalid"),error=>error.status===400);assert.equal(calls,1);
+    f.sql.prepare("INSERT INTO node_catalog_snapshots(id,source,header) VALUES(?,?,?)").run("c".repeat(64),"pump_catalog_v2","{");
+    await assert.rejects(()=>f.server.catalogSnapshot("c".repeat(64)),error=>error.status===503);assert.equal(calls,1);
+    const originalDb=f.state.db;
+    f.state.db={prepare(){throw Error("storage unavailable");}};
+    await assert.rejects(()=>f.server.catalogSnapshot(snapshot.id),error=>error.status===503);assert.equal(calls,1);
+    await assert.rejects(()=>f.server.catalogSnapshot(),error=>error.status===503);assert.equal(calls,2);
+    f.state.db=originalDb;
+    assert.equal((await f.server.catalogSnapshot(snapshot.id)).id,snapshot.id);assert.equal(calls,2);
+  } finally {await f.close();}
+});
