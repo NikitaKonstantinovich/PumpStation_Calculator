@@ -5,8 +5,11 @@ import { pruneProductParameters } from "./product";
 import { evaluate } from "../engineering/expression";
 import { PUMP_OPERATIONS } from "./pump-nodes";
 import { executePumpOperation } from "./pump-runtime";
+import { HYDRAULIC_OPERATIONS } from "./hydraulic-nodes";
+import { executeHydraulicOperation } from "./hydraulic-runtime";
+import { DETAIL_OPERATIONS, executeDetailOperation } from "./pump-detail-data";
 import { canEditAllSettings, canEditProjectOptions } from "../user-types";
-export const OPERATIONS = ["source", "parameter", "object", "merge", "form", "section", "grid", "field", "condition", "message", "check", "save", ...PUMP_OPERATIONS] as const;
+export const OPERATIONS = ["source", "parameter", "object", "merge", "form", "section", "grid", "field", "condition", "message", "check", "save", ...PUMP_OPERATIONS, ...HYDRAULIC_OPERATIONS, ...DETAIL_OPERATIONS] as const;
 const list = (v: Values) => Object.keys(v).filter(k => /^child\d+$/.test(k)).sort((a, b) => Number(a.slice(5)) - Number(b.slice(5))).map(k => v[k]).filter(Boolean) as View[];
 export const canEditParameter = (role: ToolContext["role"], permission: ParameterBinding["permission"]) => permission === "input" || permission === "options" && canEditProjectOptions(role) || canEditAllSettings(role);
 /** Explicit modes evaluate only their real dependencies; old publications retain their contract. */
@@ -172,7 +175,7 @@ function execute(step: Step, v: Values, context: ToolContext): Values {
       };
     default:
       {
-        const result = executePumpOperation(step, v, context);
+        const result = executePumpOperation(step, v, context) ?? executeHydraulicOperation(step, v, context) ?? executeDetailOperation(step, v, context);
         if (result) return result;
         throw Error("Неизвестная операция ноды");
       }
@@ -240,7 +243,7 @@ export function evaluatePlan(plan: ToolProgram["plans"][string], context: ToolCo
   }
   let count = 0;
   function validateView(v: View | undefined, depth = 0) {
-    if (!v || depth > 20 || ++count > 2000 || !["form", "section", "grid", "field", "condition", "message", "table", "select", "pump-card"].includes(v.kind) || typeof v.node !== "string") throw Error("Некорректная структура интерфейса");
+    if (!v || depth > 20 || ++count > 2000 || !["form", "section", "grid", "field", "condition", "message", "table", "select", "pump-card", "hydraulic-chart", "pump-detail"].includes(v.kind) || typeof v.node !== "string") throw Error("Некорректная структура интерфейса");
     if (v.kind === "field" || v.kind === "select" || v.kind === "table" && v.binding) {
       const b = bindings.find(b => b.key === v.binding?.key && b.node === v.binding?.node);
       if (!b || JSON.stringify(b) !== JSON.stringify(v.binding)) throw Error(v.node + " · подключите действительную привязку параметра");
@@ -259,6 +262,18 @@ export function evaluatePlan(plan: ToolProgram["plans"][string], context: ToolCo
         if (resetKeys.has(key)) throw Error(v.node + " · зависимый параметр подключён повторно");
         resetKeys.add(key);
       }
+    }
+    const actualBinding = (binding: ParameterBinding) => bindings.find(actual => actual.node === binding?.node && actual.key === binding?.key && actual.toolId === binding?.toolId && JSON.stringify(actual) === JSON.stringify(binding));
+    if (v.chartBindings != null) {
+      if (v.kind !== "hydraulic-chart") throw Error(v.node + " · привязки графика доступны только гидравлической кривой");
+      for (const [key, binding] of Object.entries(v.chartBindings)) if (binding) {
+        const expected = {method:"curveMethod",frequency:"pumpFrequencySettings",grid:"pumpChartGrid"}[key as "method"|"frequency"|"grid"];
+        if (!expected || !actualBinding(binding) || binding.toolId && binding.toolId !== v.node.split("/")[0] || binding.field.meaning !== expected || !(key === "method" ? ["enum", "string"].includes(binding.field.kind) : binding.field.kind === "object")) throw Error(v.node + " · подключите действительную привязку настройки графика");
+      }
+    }
+    if (v.pointBindings != null) {
+      const { flow, head } = v.pointBindings;
+      if (v.kind !== "hydraulic-chart" || !flow || !head || !actualBinding(flow) || !actualBinding(head) || flow.toolId !== head.toolId || flow.key === head.key || flow.field.meaning !== "flow" || head.field.meaning !== "head" || flow.field.unit !== "м³/ч" || head.field.unit !== "м" || ![flow, head].every(binding => ["float", "number", "int"].includes(binding.field.kind))) throw Error(v.node + " · подключите действительные параметры расхода и напора одного инструмента");
     }
     if (v.children) {
       if (!Array.isArray(v.children)) throw Error("Неверный список элементов формы");

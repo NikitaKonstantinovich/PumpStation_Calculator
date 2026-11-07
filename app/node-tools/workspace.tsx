@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState, useMemo, type ReactNode } from "react";
 import { ToolForm } from "./form";
+import { applyParameterWrites } from "./form-actions";
 import { evaluatePlan, evaluateProduct, migrateValues } from "./runtime";
 import { migrateProduct, productContexts } from "./product-state";
 import type { CatalogSnapshot } from "./catalog-schema";
@@ -123,6 +124,9 @@ function RuntimeTool({
         [key]: value
       }));
       setMessage("");
+    }} writes={writes => {
+      try { setValues(applyParameterWrites({[toolId]: values}, result.bindings, writes, toolId)[toolId]); setMessage(""); }
+      catch (e) { setError((e as Error).message); }
     }} save={persist} />
     {!!result.issues.length && <p role="status">Проверок с ошибками · {result.issues.length}</p>}
     {dirty && <small>Есть несохранённые значения</small>}{error && <p role="alert">{error}</p>}{message && <p role="status">{message}</p>}
@@ -192,6 +196,12 @@ function ProductTool({
         }
       });
       setMessage("");
+    }} writes={writes => {
+      try {
+        const next = applyParameterWrites(Object.fromEntries(Object.entries(data.tools).map(([id, tool]) => [id, tool.values])), value.bindings, writes, toolId);
+        change({ ...data, tools: Object.fromEntries(Object.entries(data.tools).map(([id, tool]) => [id, next[id] === tool.values ? tool : {...tool, values:next[id]}])) });
+        setMessage("");
+      } catch (e) { setMessage((e as Error).message); }
     }} save={() => {
       if (errors.length) {
         setMessage("Проверьте исходные данные и зависимости");

@@ -1,10 +1,12 @@
 import { makeField, type GraphNode, type NodeType } from "../engineering/schema";
 import { deriveTools, upgradeDocument } from "./product";
 import { pumpNodeTypes } from "./pump-nodes";
+import { hydraulicNodeTypes } from "./hydraulic-nodes";
+import { detailNodeTypes } from "./pump-detail-data";
 import type { ToolDocument } from "./schema";
 export function prepareDocument(document: ToolDocument): ToolDocument {
   const doc = upgradeDocument(document);
-  const missing = pumpNodeTypes().filter(type => !doc.types.some(t => t.id === type.id));
+  const missing = [...pumpNodeTypes(), ...hydraulicNodeTypes(), ...detailNodeTypes()].filter(type => !doc.types.some(t => t.id === type.id));
   return missing.length ? {
     ...doc,
     types: [...doc.types, ...missing]

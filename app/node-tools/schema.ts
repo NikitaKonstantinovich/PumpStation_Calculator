@@ -22,8 +22,9 @@ export type ParameterBinding = {
   mode?: "user" | "fixed" | "computed" | "source";
   source?: {registry:"workspace2"|"base-values";attribute:string};
 };
+export type ParameterWrite = { binding: ParameterBinding; value: unknown };
 export type View = {
-  kind: "form" | "section" | "grid" | "field" | "condition" | "message" | "table" | "select" | "pump-card";
+  kind: "form" | "section" | "grid" | "field" | "condition" | "message" | "table" | "select" | "pump-card" | "hydraulic-chart" | "pump-detail";
   node: string;
   label: string;
   rows?:Record<string,unknown>[];
@@ -34,6 +35,10 @@ export type View = {
   children?: View[];
   binding?: ParameterBinding;
   clearBindings?: ParameterBinding[];
+  chart?: import("./hydraulic-nodes").HydraulicChartData;
+  detail?: import("./pump-detail-data").PumpDetailData;
+  chartBindings?: { method?: ParameterBinding; frequency?: ParameterBinding; grid?: ParameterBinding };
+  pointBindings?: { flow: ParameterBinding; head: ParameterBinding };
   widget?: string;
   columns?: number;
   collapsible?: boolean;

@@ -64,6 +64,93 @@ test("source rejects unregistered queries and distinguishes an empty catalogue f
   } finally {await f.close();}
 });
 
+async function dimensionFixture() {
+  const f=await fixture(),db=new DatabaseSync(f.path);
+  db.exec(`
+    ALTER TABLE models ADD COLUMN family_id TEXT;UPDATE models SET family_id='family-a' WHERE id='a';
+    CREATE TABLE dimension_definitions(code TEXT PRIMARY KEY,name_ru TEXT,unit TEXT,meaning TEXT);
+    INSERT INTO dimension_definitions VALUES('overall_height','Общая высота','mm','От опоры'),('base_length','Длина основания','mm','Вдоль потока');
+    CREATE TABLE dimension_sets(id TEXT PRIMARY KEY,model_id TEXT,exact_designation TEXT,scope TEXT,source_document_name TEXT,source_document_sha256 TEXT,document_page INTEGER,applicability TEXT,source_id TEXT);
+    CREATE TABLE dimension_values(dimension_set_id TEXT,source_key TEXT,source_symbol TEXT,dimension_code TEXT,value_mm REAL,mapping_status TEXT,value_method TEXT);
+    CREATE TABLE preferred_dimension_sets(variant_id TEXT,dimension_set_id TEXT,printed_page INTEGER,applicability TEXT,source_id TEXT);
+    CREATE TABLE inline_dimension_selections(model_id TEXT,dimension_set_id TEXT,evidence_level TEXT,source_id TEXT);
+    CREATE TABLE catalogue_geometry_profiles(id TEXT PRIMARY KEY,family_id TEXT,axis_definition TEXT,applicability TEXT,source_id TEXT,pdf_page INTEGER,printed_page INTEGER);
+    CREATE TABLE catalogue_geometry_values(profile_id TEXT,code TEXT,value REAL,unit TEXT,source_symbol TEXT,source_dimension_text TEXT,dimension_code TEXT);
+    CREATE TABLE variant_geometry_bindings(variant_id TEXT,profile_id TEXT,applicability TEXT);
+    CREATE TABLE assets(id TEXT PRIMARY KEY,kind TEXT,path TEXT);
+    INSERT INTO assets VALUES('local-file','dimension_image','C:/private/library/pump.png'),('public-file','dimension_image','frontend/public/drawings/pump.png');
+    CREATE TABLE external_asset_references(variant_id TEXT,kind TEXT,url TEXT,local_asset_id TEXT);
+    INSERT INTO external_asset_references VALUES('variant-one','drawing_pdf','https://manufacturer.example/pump.pdf','local-file');
+  `);
+  return {...f,db,async close(){db.close();await f.close();}};
+}
+
+test("variant dimension preferences keep separate exact bindings, source symbols, scope and provenance without inventing asset URLs",async()=>{
+  const f=await dimensionFixture();
+  try {
+    f.db.exec(`
+      INSERT INTO dimension_sets VALUES('d1','a','Общее название','designation','C:/private/catalogue/official.pdf','hash-one',7,'catalogue_designation_not_factory_as_built','dims-one'),('d2','a','Общее название','designation','official2.pdf','hash-two',8,'another_motor_execution','dims-two');
+      INSERT INTO dimension_values VALUES('d1','H','H','overall_height',800,'semantic_source_key','official_source'),('d1','H1','H1',NULL,250,'symbol_only','source_symbol'),('d1','H-alternative','H','overall_height',999,'alternative_execution','other_motor'),('d2','H','H','overall_height',900,'semantic_source_key','official_source');
+      INSERT INTO preferred_dimension_sets VALUES('variant-one','d1',6,'selected_variant_binding','pref-one'),('variant-two','d2',7,'selected_variant_binding','pref-two');
+    `);
+    const before=await hash(f.path),snapshot=readCatalogSnapshot(f.path),first=snapshot.items.find(item=>item.variantId==='variant-one'),second=snapshot.items.find(item=>item.variantId==='variant-two');
+    assert.equal(await hash(f.path),before);assert.equal(first.pump.dimensions.overall_height,800);assert.equal(second.pump.dimensions.overall_height,900);
+    assert.equal(first.pump.dimensions.scope,'variant_bound_designation');assert.equal(first.pump.dimensions.sourceValues.length,3);assert.equal(first.pump.dimensions.sourceValues.find(row=>row.key==='H1').code,null);assert.equal(first.pump.dimensions.H1,undefined);
+    assert.equal(first.provenance.dimensions.document,'official.pdf');assert.equal(first.provenance.dimensions.documentSha256,'hash-one');assert.equal(first.provenance.dimensions.page,7);assert.equal(first.provenance.dimensions.printedPage,6);assert.equal(first.provenance.dimensions.sourceId,'dims-one');assert.equal(first.provenance.dimensions.bindingSourceId,'pref-one');
+    assert(first.issues.some(issue=>issue.includes('Альтернативные')));assert.equal(first.pump.drawing,null);assert.equal(first.pump.assets,undefined);
+    assert(!JSON.stringify(first.pump).includes('C:/private'));assert(!JSON.stringify(first.pump).includes('/drawings/pump.png'));assert(!JSON.stringify(first.pump).includes('manufacturer.example'));
+  } finally {await f.close();}
+});
+
+test("model reference dimensions and literal designation references never become verified factory article dimensions",async()=>{
+  const f=await dimensionFixture();
+  try {
+    f.db.exec(`
+      INSERT INTO dimension_sets VALUES('reference','b',NULL,'model_reference','reference.pdf','hash-ref',2,'reference_not_every_pressure_variant','ref-source'),('designation','a','Общее название','designation','designation.pdf','hash-exact',4,'exact_designation_only','designation-source');
+      INSERT INTO dimension_values VALUES('reference','H','H','overall_height',1000,'semantic_source_key','model_reference'),('designation','H','H','overall_height',850,'semantic_source_key','exact_designation');
+      INSERT INTO inline_dimension_selections VALUES('b','reference','official_model_table','inline-source');
+    `);
+    const snapshot=readCatalogSnapshot(f.path),reference=snapshot.items.find(item=>item.variantId==='variant-empty'),designation=snapshot.items.find(item=>item.variantId==='variant-one');
+    assert.equal(reference.pump.dimensions.scope,'model_reference');assert.equal(reference.pump.dimensions.overall_height,1000);assert.equal(reference.provenance.dimensions.selection,'explicit_model_selection');assert(reference.pump.dimensions.note.includes('не подтверждена'));
+    assert.equal(designation.pump.dimensions.scope,'designation_reference');assert.equal(designation.pump.dimensions.overall_height,850);assert.equal(designation.provenance.dimensions.selection,'exact_designation_reference');assert(designation.pump.dimensions.note.includes('привязка к артикулу отсутствует'));
+    f.db.exec("UPDATE dimension_sets SET exact_designation='Other manufacturer execution' WHERE id='designation'");
+    assert.equal(readCatalogSnapshot(f.path).items.find(item=>item.variantId==='variant-one').pump.dimensions,undefined);
+  } finally {await f.close();}
+});
+
+test("ambiguous dimension sets, conflicting semantic values and wrong model bindings remain explicitly unknown",async()=>{
+  const f=await dimensionFixture();
+  try {
+    f.db.exec(`
+      INSERT INTO dimension_sets VALUES('d1','a','Общее название','designation','one.pdf','h1',1,'exact','s1'),('d2','a','Общее название','designation','two.pdf','h2',2,'exact','s2');
+      INSERT INTO dimension_values VALUES('d1','H','H','overall_height',800,'semantic_source_key','source'),('d2','H','H','overall_height',900,'semantic_source_key','source');
+    `);
+    let item=readCatalogSnapshot(f.path).items.find(item=>item.variantId==='variant-one');
+    assert.equal(item.pump.dimensions.scope,'unknown');assert.equal(item.pump.dimensions.overall_height,undefined);assert(item.issues.some(issue=>issue.includes('однозначный набор')));
+    f.db.exec("INSERT INTO preferred_dimension_sets VALUES('variant-one','d1',1,'explicit','pref');INSERT INTO dimension_values VALUES('d1','H-conflict','H','overall_height',801,'semantic_source_key','other_source')");
+    item=readCatalogSnapshot(f.path).items.find(item=>item.variantId==='variant-one');
+    assert.equal(item.pump.dimensions.overall_height,null);assert.equal(item.pump.dimensions.sourceValues.length,2);assert(item.issues.some(issue=>issue.includes('Неоднозначные значения')));
+    f.db.exec("UPDATE dimension_sets SET model_id='b' WHERE id='d1'");
+    item=readCatalogSnapshot(f.path).items.find(item=>item.variantId==='variant-one');
+    assert.equal(item.pump.dimensions.scope,'unknown');assert(item.issues.some(issue=>issue.includes('не соответствует модели')));
+  } finally {await f.close();}
+});
+
+test("explicit family geometry stays in its own scoped block and is never inferred for another execution",async()=>{
+  const f=await dimensionFixture();
+  try {
+    f.db.exec(`
+      INSERT INTO catalogue_geometry_profiles VALUES('base','family-a','x along flow','motor_independent_base','base-source',10,9);
+      INSERT INTO catalogue_geometry_values VALUES('base','base_length_along_flow',150,'mm',NULL,'150','base_length'),('base','mounting_hole_count',4,'count',NULL,'4',NULL);
+      INSERT INTO variant_geometry_bindings VALUES('variant-one','base','exact_listed_execution');
+    `);
+    const before=await hash(f.path),snapshot=readCatalogSnapshot(f.path),first=snapshot.items.find(item=>item.variantId==='variant-one'),second=snapshot.items.find(item=>item.variantId==='variant-two');
+    assert.equal(await hash(f.path),before);assert.equal(first.pump.dimensions.scope,'unknown');assert.equal(first.pump.dimensions.base_length,undefined);assert.equal(first.pump.dimensions.baseGeometry.base_length,150);assert.equal(first.pump.dimensions.baseGeometry.scope,'variant_bound_family_geometry');assert.equal(first.pump.dimensions.baseGeometry.sourceValues.find(row=>row.key==='mounting_hole_count').unit,'count');assert.equal(first.provenance.dimensions.baseGeometry.sourceId,'base-source');assert.equal(second.pump.dimensions,undefined);
+    f.db.exec("UPDATE catalogue_geometry_profiles SET family_id='different-family'");
+    const rejected=readCatalogSnapshot(f.path).items.find(item=>item.variantId==='variant-one');assert.equal(rejected.pump.dimensions,undefined);assert(rejected.issues.some(issue=>issue.includes('Геометрия основания')));
+  } finally {await f.close();}
+});
+
 test("immutable stored snapshots retain old catalogue data after live source changes and pinned lookup never falls back",async()=>{
   const f=await fixture(), sql=new DatabaseSync(":memory:");
   const unique="__nodeCatalog"+crypto.randomUUID().replaceAll("-","");

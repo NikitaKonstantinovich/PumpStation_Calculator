@@ -86,7 +86,7 @@ export function FormTree({ view, selected, select }: { view?: View; selected?: s
   function render(node: View, hidden = false): React.ReactNode {
     const isHidden = hidden || node.visible === false;
     const current = selected === node.node || selected === node.binding?.node;
-    const label = node.label || node.binding?.field.name || ({ form: "Форма", section: "Раздел", grid: "Расположение полей", condition: "Условие отображения", field: "Поле", message: "Сообщение",table:"Таблица",select:"Список выбора","pump-card":"Карточка насоса" }[node.kind]);
+    const label = node.label || node.binding?.field.name || ({ form: "Форма", section: "Раздел", grid: "Расположение полей", condition: "Условие отображения", field: "Поле", message: "Сообщение",table:"Таблица",select:"Список выбора","pump-card":"Карточка насоса","hydraulic-chart":"Гидравлическая кривая","pump-detail":"Карточка насоса" }[node.kind]);
     return <li key={node.node}>
       <button type="button" aria-current={current ? "true" : undefined} className={current ? "nt-tree-selected" : ""} onClick={() => select(node.node)}>{label}{isHidden && <small> · Скрыто</small>}{node.enabled === false && <small> · Недоступно</small>}</button>
       {!!node.children?.length && <ul>{node.children.map(child => render(child, isHidden))}</ul>}

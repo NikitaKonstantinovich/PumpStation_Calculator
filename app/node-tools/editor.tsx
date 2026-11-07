@@ -17,6 +17,8 @@ import { compatible, makeField, type Diagram, type Edge, type Field, type GraphN
 import { compileTools, parameterType } from "./compiler";
 import { evaluatePlan, evaluateProduct, traceNode } from "./runtime";
 import { ToolForm } from "./form";
+import { applyParameterWrites } from "./form-actions";
+import { visualizationSources, addVisualizationTool } from "./visualization-tools";
 import { deriveTools, productConnectionProblem } from "./product";
 import { prepareDocument, addProductTool, updateToolMetadata } from "./authoring";
 import { loadCatalog } from "./catalog-client";
@@ -124,6 +126,7 @@ export function ToolEditor({
       options: ""
     });
   const [metadata, setMetadata] = useState(false);
+  const [template, setTemplate] = useState<null | {kind:"hydraulic"|"card";selectionId:string;settingsId:string}>(null);
   const [dataset, setDataset] = useState<"preview" | "saved" | "test">("preview");
   const [role, setRole] = useState<UserRole>("pro"),
     [sessionRole, setSessionRole] = useState<UserRole>("admin");
@@ -194,6 +197,7 @@ export function ToolEditor({
   useEffect(() => {
     const escape = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
+        setTemplate(null);
         setTransfer(null);
         setMenu(null);
         setLibrary(false);
@@ -686,7 +690,11 @@ export function ToolEditor({
           graph: u.diagram,
           path: u.path,
           node: u.node
-        })}>{u.name}</option>))}</select><button onClick={newTool}>＋ Инструмент</button><button onClick={() => setMetadata(true)}>Определение</button><button disabled={!trial.result?.view?.node} onClick={() => previewSelect(trial.result!.view.node)}>Свойства формы</button><button onClick={() => setLibrary(!library)}>＋ Библиотека</button><button onClick={() => {
+        })}>{u.name}</option>))}</select><button onClick={newTool}>＋ Инструмент</button><button onClick={() => {
+          const sources = visualizationSources(doc);
+          setError("");
+          setTemplate({kind:"hydraulic",selectionId:sources.selections[0]?.id??"",settingsId:sources.settings[0]?.id??""});
+        }}>Готовые инструменты</button><button onClick={() => setMetadata(true)}>Определение</button><button disabled={!trial.result?.view?.node} onClick={() => previewSelect(trial.result!.view.node)}>Свойства формы</button><button onClick={() => setLibrary(!library)}>＋ Библиотека</button><button onClick={() => {
         if (at.graph === root) {
           const instance = doc.diagrams.find(g => g.id === root)?.nodes.find(n => n.id === toolId),
             inside = doc.types.find(t => t.id === instance?.type)?.instrument;
@@ -816,7 +824,16 @@ export function ToolEditor({
           ...v,
           ...Object.fromEntries(clearKeys.map(key => [key, null])),
           [key]: value
-        }))} selected={selectedAddress} select={previewSelect} /> : <p>Нет результата для выбранного набора данных.</p>}
+        }))} writes={writes => {
+          if (dataset !== "preview" || !viewed) return;
+          try {
+            const current = Object.fromEntries(tools.map(t => [t.id, t.id === toolId ? values : toolValues[t.id] ?? {}]));
+            const next = applyParameterWrites(current, viewed.bindings, writes, toolId);
+            setToolValues(next);
+            setValues(next[toolId]);
+            setError("");
+          } catch(e) { setError((e as Error).message); }
+        }} selected={selectedAddress} select={previewSelect} /> : <p>Нет результата для выбранного набора данных.</p>}
       {viewed && <><details><summary>Дерево формы · включая скрытые поля</summary><FormTree view={viewed.view} selected={selectedAddress} select={previewSelect} /></details><DataTree value={viewed.value} label="Действующие данные инструмента" />{viewed.issues.map(i => <p key={diagnosticKey(i)} role={i.severity === "error" ? "alert" : "status"}>{i.message}<button onClick={() => previewSelect(i.node)}>Перейти к ошибке</button></p>)}</>}
       <details><summary>Тестовые значения · расширенный ввод</summary><textarea aria-label="Тестовые значения JSON" key={JSON.stringify(values)} defaultValue={JSON.stringify(values, null, 2)} onBlur={e => {
             try {
@@ -901,6 +918,24 @@ export function ToolEditor({
             setError((e as Error).message);
           }
         }}>Создать параметр</button>{error && <p role="alert">{error}</p>}</section></div>}
+    {template && <div className="gn-shade"><section className="gn-dialog" role="dialog" aria-label="Готовый инструмент"><header><h2>Готовый инструмент</h2><button onClick={() => setTemplate(null)}>Закрыть</button></header>
+      <label>Инструмент<select value={template.kind} onChange={e => setTemplate({...template,kind:e.target.value as "hydraulic"|"card"})}><option value="hydraulic">Гидравлическая кривая</option><option value="card">Карточка насоса</option></select></label>
+      <label>Источник выбранного насоса<select value={template.selectionId} onChange={e => setTemplate({...template,selectionId:e.target.value})}><option value="">Выберите инструмент подбора…</option>{visualizationSources(doc).selections.map(source=><option key={source.id} value={source.id}>{source.name}</option>)}</select></label>
+      {template.kind === "hydraulic" && <label>Источник настроек проекта<select value={template.settingsId} onChange={e => setTemplate({...template,settingsId:e.target.value})}><option value="">Без изменения рабочей точки на графике</option>{visualizationSources(doc).settings.map(source=><option key={source.id} value={source.id}>{source.name}</option>)}</select></label>}
+      <p>Создаётся отдельный инструмент на общем полотне с редактируемыми внутренними нодами и связями с выбранными источниками.</p>
+      {error && <p role="alert">{error}</p>}
+      <button disabled={!template.selectionId || busy} onClick={() => {
+        try {
+          const added=addVisualizationTool(doc,template.kind,{selectionId:template.selectionId,settingsId:template.settingsId||undefined});
+          change(added.document);
+          setToolId(added.id);
+          setValues({});
+          setAt({graph:added.document.product!.root,path:[],node:added.id});
+          setFocus({graph:added.document.product!.root,base:added.document.product!.root,path:[],node:added.id,serial:Date.now()});
+          setTemplate(null);setProps(true);setPreview(true);
+        } catch(e) { setError((e as Error).message); }
+      }}>Добавить инструмент</button>
+    </section></div>}
     {metadata && tool && <div className="gn-shade"><section className="gn-dialog"><header><h2>Определение инструмента</h2><button onClick={() => setMetadata(false)}>Закрыть</button></header><p>Устойчивый ID · {tool.id}</p><label>Название<input value={tool.name} onChange={e => change(updateToolMetadata(doc, tool.id, {
             name: e.target.value
           }))} /></label><label>Категория<input value={tool.category} onChange={e => change(updateToolMetadata(doc, tool.id, {
