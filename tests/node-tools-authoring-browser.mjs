@@ -54,7 +54,8 @@ async function run(){
   const project=JSON.parse(localStorage.getItem("authoringProject"));assert(!Object.hasOwn(project.workspace2.tools.settings.values,"main.medium"),"Старое переопределение не удалено миграцией");return;
  }
  await until(()=>input("Найти параметр"));await valuesJSON(originalValues);
- const source=await until(()=>document.querySelector('.gn-node[data-address="source"]'));source.dispatchEvent(new KeyboardEvent("keydown",{key:"Enter",bubbles:true}));await sleep();
+ await click("Раскрыть Instrument");
+ const source=await until(()=>document.querySelector('.gn-node[data-address="settings/source"]'));source.dispatchEvent(new KeyboardEvent("keydown",{key:"Enter",bubbles:true}));await sleep();
  const context=await until(()=>document.querySelector('.gn-props .nt-data-tree[aria-label="Данные выбранной ноды"]'));assert(context.textContent.includes("context")&&context.textContent.includes("main.medium")&&context.textContent.includes("wastewater"),"Входная нода не показывает фактический context");
  await fill(context.querySelector('input[type="search"]'),"main.medium");assert(context.textContent.includes("wastewater"),"Поиск дерева не сохранил значение найденного атрибута");
  await chooseParameter("inletHead",["settings"]);await click("Свойства поля");
@@ -122,7 +123,7 @@ async function run(){
  const result=JSON.parse(document.querySelector(".nt-tool pre").textContent);assert(result.main.medium==="water"&&result.secondary.medium==="water","Миграция не применила постоянный источник");
  const inletAfter=document.querySelector('[data-parameter="inletHead"]');assert(inletAfter&&inletAfter.querySelector("input").value===sessionStorage.getItem("originInletValue"),"Применение версии изменило базовое значение поля");assert(!inletAfter.querySelector(".nt-origin"),"Workspace 2 не применил скрытие подписи источника");
  assert(!document.querySelector(".nt-tool .nt-origin"),"Workspace 2 не применил общее отключение подписей источников");
- assert(document.querySelector(".nt-tool").textContent.includes("прежнее введённое значение"),"Нет сообщения об обработке старого переопределения");
+ assert(document.querySelector(".nt-workspace").textContent.includes("прежнее введённое значение"),"Нет сообщения об обработке старого переопределения");
  await click("Сохранить значения");await until(()=>localStorage.getItem("authoringProject"));
  sessionStorage.setItem("authoringSaved","1");location.reload();await new Promise(()=>{});
 }

@@ -12,11 +12,16 @@ import type { UserRole } from "../user-types";
 import { Properties } from "../engineering/properties";
 import { TypeEditor } from "../engineering/type-editor";
 import { GroupDialog } from "../engineering/group-dialog";
-import { connectionProblem, type Trace } from "../engineering/engine";
+import { type Trace } from "../engineering/engine";
 import { compatible, makeField, type Diagram, type Edge, type Field, type GraphNode, type NodeType } from "../engineering/schema";
 import { compileTools, parameterType } from "./compiler";
-import { evaluatePlan, traceNode } from "./runtime";
+import { evaluatePlan, evaluateProduct, traceNode } from "./runtime";
 import { ToolForm } from "./form";
+import { deriveTools, productConnectionProblem } from "./product";
+import { prepareDocument, addProductTool, updateToolMetadata } from "./authoring";
+import { loadCatalog } from "./catalog-client";
+import { unpackTrace } from "./trace-transport";
+import type { CatalogSnapshot } from "./catalog-schema";
 import { loadTools } from "./workspace";
 import { API, ROOT, safeId, type ToolDocument, type ToolTest, type TestResult, type Values, type Evaluation } from "./schema";
 import type { ProjectConfig } from "../project-config";
@@ -36,6 +41,7 @@ class ToolRequestError extends Error {
   constructor(message: string, readonly location?: {
     graph: string;
     node?: string;
+    path?: string[];
   }) {
     super(message);
   }
@@ -81,6 +87,7 @@ export function ToolEditor({
     [errorAt, setErrorAt] = useState<{
       graph: string;
       node?: string;
+      path?: string[];
     } | null>(null),
     [message, setMessage] = useState(""),
     [busy, setBusy] = useState(false);
@@ -134,35 +141,43 @@ export function ToolEditor({
       values: Values;
     };
   } | null>(null);
-  const tool = doc?.tools.find(t => t.id === toolId),
-    root = tool?.diagram ?? ROOT;
+  const tools = useMemo(() => doc ? deriveTools(doc) : [], [doc]);
+  const tool = tools.find(t => t.id === toolId),
+    root = doc?.product?.root ?? tool?.diagram ?? ROOT;
+  const [toolValues, setToolValues] = useState<Record<string, Values>>({});
+  const [catalog, setCatalog] = useState<CatalogSnapshot | null>(null),
+    [catalogError, setCatalogError] = useState(""),
+    [catalogLoading, setCatalogLoading] = useState(false);
+  const catalogNeeded = !!doc?.diagrams.some(g => g.nodes.some(n => doc.types.find(t => t.id === n.type)?.operation === "pump.catalog"));
   const graph = doc?.diagrams.find(g => g.id === at.graph),
     node = graph?.nodes.find(n => n.id === at.node),
     type = doc?.types.find(t => t.id === node?.type);
   const dirty = !!doc && doc !== remote?.draft;
   function accept(next: Remote) {
-    setRemote(next);
-    setDoc(next.draft);
+    const draft = prepareDocument(next.draft);
+    setRemote({
+      ...next,
+      draft
+    });
+    setDoc(draft);
+    const available=deriveTools(draft);setToolId(id=>available.some(t=>t.id===id)?id:available[0]?.id??"");setAt(previous=>draft.diagrams.some(g=>g.id===previous.graph&&(!previous.node||g.nodes.some(n=>n.id===previous.node)))?previous:{graph:draft.product!.root,path:[],node:available[0]?.id??""});
     setHistory([]);
   }
   useEffect(() => {
     let live = true;
-    Promise.all([request(), loadTools()]).then(([state, data]) => {
-      if (live) {
-        accept(state);
-        setDefaults(data.defaults);
-        setSessionRole(data.role);
-        setBaseVersions(data.baseVersions);
-        setToolId(state.draft.tools[0]?.id ?? "");
-        setAt({
-          graph: state.draft.tools[0]?.diagram ?? ROOT,
-          path: [],
-          node: "settings"
-        });
-      }
-    }).catch(e => {
-      if (live) setError(e.message);
-    });
+    let documentFailed=false;
+    request().then(state=>{
+      if(!live)return;
+      accept(state);
+      const ready=prepareDocument(state.draft),first=deriveTools(ready)[0];
+      setToolId(first?.id??"");
+      setAt({graph:ready.product!.root,path:[],node:first?.id??""});
+    }).catch(e=>{if(live){documentFailed=true;setError(e.message);}});
+    loadTools().then(data=>{
+      if(!live)return;
+      setDefaults(data.defaults);setSessionRole(data.role);setBaseVersions(data.baseVersions);
+      const sourceErrors=Object.values(data.sourceErrors??{});if(sourceErrors.length&&!documentFailed)setError(sourceErrors.join(" · "));
+    }).catch(e=>{if(live&&!documentFailed)setError("Данные предпросмотра недоступны: "+e.message);});
     return () => {
       live = false;
     };
@@ -203,6 +218,27 @@ export function ToolEditor({
       active = false;
     };
   }, [stored?.baseVersions]);
+  useEffect(() => {
+    if (!catalogNeeded) return;
+    let live = true;
+    const abort = new AbortController();
+    setCatalogLoading(true);
+    setCatalog(null);
+    loadCatalog(dataset === "saved" ? project.workspace2?.product?.sourceVersions?.pump_catalog_v2 : undefined, abort.signal).then(snapshot => {
+      if (live) {
+        setCatalog(snapshot);
+        setCatalogError("");
+      }
+    }).catch(e => {
+      if (live) setCatalogError(e.message);
+    }).finally(() => {
+      if (live) setCatalogLoading(false);
+    });
+    return () => {
+      live = false;
+      abort.abort();
+    };
+  }, [catalogNeeded, dataset, project.workspace2?.product?.sourceVersions?.pump_catalog_v2]);
   const trial = useMemo(() => {
     if (!doc || !tool) return {
       result: null,
@@ -211,7 +247,15 @@ export function ToolEditor({
     try {
       const program = compileTools(doc, "preview");
       return {
-        result: evaluatePlan(program.plans[tool.id], {
+        result: program.product ? evaluateProduct(program, tool.id, Object.fromEntries(tools.map(t => [t.id, {
+          values: dataset === "saved" ? project.workspace2?.tools[t.id]?.values ?? {} : t.id === toolId ? values : toolValues[t.id] ?? {},
+          stored: dataset === "saved" ? project.workspace2?.tools[t.id]?.values : undefined,
+          defaults: dataset === "saved" ? savedDefaults ?? defaults : defaults,
+          role: dataset === "saved" ? sessionRole : role,
+          resources: catalog ? {
+            pump_catalog_v2: catalog
+          } : undefined
+        }]))) : evaluatePlan(program.plans[tool.id], {
           values: dataset === "saved" ? stored?.values ?? {} : values,
           stored: dataset === "saved" ? stored?.values : undefined,
           defaults: dataset === "saved" ? savedDefaults ?? defaults : defaults,
@@ -225,9 +269,9 @@ export function ToolEditor({
         error: (e as Error).message
       };
     }
-  }, [doc, tool, values, defaults, dataset, stored, savedDefaults, sessionRole, role]);
+  }, [doc, tool, values, defaults, dataset, stored, savedDefaults, sessionRole, role, tools, toolValues, toolId, project.workspace2, catalog]);
   const viewed = dataset === "test" ? lastTest?.tool === toolId ? lastTest.result : null : trial.result;
-  const stale = dataset === "test" && JSON.stringify(lastTest?.document) !== JSON.stringify(doc);
+  const stale = dataset === "test" && (JSON.stringify(lastTest?.document) !== JSON.stringify(doc) || !!catalog && !!lastTest?.dataset.sourceVersions.pump_catalog_v2 && lastTest.dataset.sourceVersions.pump_catalog_v2 !== catalog.id);
   const dataStatus = dataset === "test" ? lastTest ? stale ? "Устаревший результат · повторите проверку" : "Последняя серверная проба" : "Проба ещё не выполнена" : dataset === "saved" ? savedDefaults ? "Черновик на сохранённых входах проекта" : "Загрузка сохранённых источников…" : "Предпросмотр на тестовых значениях";
   const chain = useMemo(() => doc ? provenance(doc, root, at) : null, [doc, root, at]);
   function change(next: ToolDocument) {
@@ -296,7 +340,19 @@ export function ToolEditor({
     window.addEventListener("keydown", key);
     return () => window.removeEventListener("keydown", key);
   });
+  function syncOwner(target: Address) {
+    const owner = target.path[0] || (target.graph === root ? target.node : undefined);
+    if (owner && tools.some(t => t.id === owner) && owner !== toolId) {
+      setToolValues(v => ({
+        ...v,
+        [toolId]: values
+      }));
+      setValues(toolValues[owner] ?? {});
+      setToolId(owner);
+    }
+  }
   function navigate(target: Address, base = root) {
+    syncOwner(target);
     setAt(target);
     setFocus({
       ...target,
@@ -323,6 +379,7 @@ export function ToolEditor({
       });else setError("Выберите совместимый вход");
       return;
     }
+    syncOwner(target);
     setAt(target);
     setMenu(null);
   }
@@ -330,7 +387,7 @@ export function ToolEditor({
     fromType = doc?.types.find(t => t.id === from?.type),
     out = fromType?.fields.find(f => f.key === transfer?.out);
   function inputsFor(n: GraphNode) {
-    return doc!.types.find(t => t.id === n.type)!.fields.filter(f => out && compatible(out, f) && !connectionProblem(graph!, doc!.types, {
+    return doc!.types.find(t => t.id === n.type)!.fields.filter(f => out && compatible(out, f) && !productConnectionProblem(doc!, graph!, {
       from: from!.id,
       out: out.key,
       to: n.id,
@@ -347,7 +404,7 @@ export function ToolEditor({
       input,
       kind: out?.meaning === "parameterBinding" ? "binding" : out?.meaning === "saveCommand" ? "command" : "data"
     };
-    const problem = connectionProblem(graph, doc!.types, edge);
+    const problem = productConnectionProblem(doc!, graph, edge);
     if (problem) {
       setError(problem);
       return;
@@ -381,7 +438,16 @@ export function ToolEditor({
       types,
       diagrams: doc!.diagrams.map(g => g.id === graph.id ? {
         ...g,
-        nodes: [...g.nodes, n]
+        nodes: [...g.nodes, n],
+        edges: t.parameter ? [...g.edges, ...[["workspace2", "values", "value"], ["workspace2", "role", "role"], ["base-values", "defaults", "value"]].flatMap(([source, input, out]) => {
+          const src = g.nodes.find(node => doc!.types.find(type => type.id === node.type)?.operation === "source" && node.values.source === source);
+          return src ? [{
+            from: src.id,
+            out,
+            to: n.id,
+            input
+          }] : [];
+        })] : g.edges
       } : g)
     });
     setAt({
@@ -508,7 +574,13 @@ export function ToolEditor({
         action,
         document: doc,
         revision: remote.revision,
-        version
+        version,
+        tool: toolId,
+        values,
+        contexts: Object.fromEntries(tools.map(t => [t.id, t.id === toolId ? values : toolValues[t.id] ?? {}])),
+        sourceVersions: catalog ? {
+          pump_catalog_v2: catalog.id
+        } : undefined
       }));
       setMessage(action === "save" ? "Черновик сохранён" : "Публикация обновлена");
       setVersions(false);
@@ -531,18 +603,23 @@ export function ToolEditor({
           },
           body: JSON.stringify({
             action: "test",
+            compactTrace: true,
             document: doc,
             revision: remote.revision,
             tool: toolId,
             values,
-            role
+            role,
+            contexts: Object.fromEntries(tools.map(t => [t.id, t.id === toolId ? values : toolValues[t.id] ?? {}])),
+            sourceVersions: catalog ? {
+              pump_catalog_v2: catalog.id
+            } : undefined
           })
         }),
         data = await response.json();
-      if (!response.ok) throw Error(data.error);
+      if (!response.ok) throw new ToolRequestError(data.error, data.location);
       setTests(data.tests);
       setLastTest({
-        result: data.result,
+        result: data.traceTransport ? {...data.result,trace:unpackTrace(data.traceTransport)} : data.result,
         document: doc,
         tool: toolId,
         dataset: data.dataset
@@ -551,6 +628,7 @@ export function ToolEditor({
       setMessage("Проба выполнена. Запись данных представлена как план команды.");
     } catch (e) {
       setError((e as Error).message);
+      if (e instanceof ToolRequestError) setErrorAt(e.location ?? null);
     } finally {
       setBusy(false);
     }
@@ -567,102 +645,39 @@ export function ToolEditor({
     if (!doc) return;
     const name = window.prompt("Название нового инструмента");
     if (!name?.trim()) return;
-    const id = "tool_" + uuid(),
-      context = makeField("context", "Контекст", "object", "toolContext"),
-      ui = makeField("ui", "Интерфейс", "object", "view"),
-      value = makeField("value", "Результат", "object", "record");
-    const input: NodeType = {
-        id: id + ".in",
-        name: "Входы",
-        category: "Границы",
-        description: "",
-        formulas: {},
-        fields: [{
-          ...context,
-          direction: "output"
-        }]
-      },
-      output: NodeType = {
-        id: id + ".out",
-        name: "Выходы",
-        category: "Границы",
-        description: "",
-        formulas: {},
-        fields: [{
-          ...ui,
-          direction: "input"
-        }, {
-          ...value,
-          direction: "input"
-        }]
-      };
-    const g: Diagram = {
-      id,
-      name,
-      groups: {},
-      nodes: [{
-        id: "source",
-        type: input.id,
-        name: "Контекст",
-        x: 0,
-        y: 0,
-        values: {}
-      }, {
-        id: "form",
-        type: "ui.form",
-        name: "Форма",
-        x: 350,
-        y: 0,
-        values: {
-          title: name
-        }
-      }, {
-        id: "result",
-        type: output.id,
-        name: "Результат",
-        x: 700,
-        y: 0,
-        values: {}
-      }],
-      edges: [{
-        from: "form",
-        out: "value",
-        to: "result",
-        input: "ui"
-      }]
-    };
-    change({
-      ...doc,
-      types: [...doc.types, input, output],
-      diagrams: [...doc.diagrams, g],
-      tools: [...doc.tools, {
-        id,
-        name,
-        category: "Ввод",
-        diagram: id,
-        tests: []
-      }]
-    });
-    setToolId(id);
-    navigate({
-      graph: id,
+    const added = addProductTool(doc, name.trim());
+    change(added.document);
+    setToolValues(v => ({
+      ...v,
+      [toolId]: values
+    }));
+    setToolId(added.id);
+    setValues({});
+    setAt({
+      graph: added.document.product!.root,
       path: [],
-      node: "form"
-    }, id);
+      node: added.id
+    });
+    setFocus({
+      graph: added.document.product!.root,
+      path: [],
+      node: added.id,
+      base: added.document.product!.root,
+      serial: Date.now()
+    });
   }
   if (!doc || !remote) return <main className="gn-editor"><header><button onClick={back}>←</button><h1>Нодовый редактор</h1></header><p role="status">{error || "Загрузка определений…"}</p></main>;
   return <main className="gn-editor nt-editor" aria-busy={busy}><header><button aria-label="Открыть меню" onClick={openMain}>☰</button><button onClick={() => {
         if (!dirty || window.confirm("Выйти с несохранённым черновиком?")) back();
       }}>←</button><h1>Нодовый редактор</h1><small>Workspace 2 · черновик {remote.revision}{dirty ? " · изменён" : ""}</small><div className="gn-actions"><button disabled={busy} onClick={() => action("save")}>Сохранить</button><button disabled={busy} onClick={() => action("publish")}>Опубликовать</button><button onClick={() => setProps(!props)}>☰ Свойства</button></div></header>{navigation}
     <div className="gn-toolbar"><select aria-label="Инструмент" value={toolId} onChange={e => {
-        const t = doc.tools.find(t => t.id === e.target.value)!;
-        setToolId(t.id);
+        const t = tools.find(t => t.id === e.target.value)!;
         navigate({
-          graph: t.diagram,
+          graph: root,
           path: [],
-          node: ""
-        }, t.diagram);
-      }}>{doc.tools.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}</select><select aria-label="Найти параметр" value="" onChange={e => {
+          node: t.id
+        });
+      }}>{tools.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}</select><select aria-label="Найти параметр" value="" onChange={e => {
         if (e.target.value) {
           navigate(JSON.parse(e.target.value));
           setProps(true);
@@ -672,6 +687,15 @@ export function ToolEditor({
           path: u.path,
           node: u.node
         })}>{u.name}</option>))}</select><button onClick={newTool}>＋ Инструмент</button><button onClick={() => setMetadata(true)}>Определение</button><button disabled={!trial.result?.view?.node} onClick={() => previewSelect(trial.result!.view.node)}>Свойства формы</button><button onClick={() => setLibrary(!library)}>＋ Библиотека</button><button onClick={() => {
+        if (at.graph === root) {
+          const instance = doc.diagrams.find(g => g.id === root)?.nodes.find(n => n.id === toolId),
+            inside = doc.types.find(t => t.id === instance?.type)?.instrument;
+          if (inside) navigate({
+            graph: inside,
+            path: [toolId],
+            node: "form"
+          });
+        }
         setParameter({
           key: "designation",
           name: "Обозначение установки",
@@ -683,26 +707,30 @@ export function ToolEditor({
           options: ""
         });
         setNewParam(true);
-      }}>Новый параметр</button><button disabled={!graph || !node} onClick={() => setPack(true)}>Собрать Instrument</button><button disabled={!history.length} onClick={() => {
+      }}>Новый параметр</button><button disabled={!graph || !node || at.graph===root} title={at.graph===root?"Для вложенной группы раскройте инструмент":"Создать внутренний Instrument"} onClick={() => setPack(true)}>Собрать Instrument</button><button disabled={!history.length} onClick={() => {
         setDoc(history.at(-1)!);
         setHistory(history.slice(0, -1));
       }}>↶</button><button disabled={busy} onClick={run}>▷ Проверить</button><button onClick={() => setVersions(true)}>Версии</button><button onClick={() => setPreview(!preview)}>Предпросмотр</button></div>
-    {(error || message) && <div className={error ? "gn-error" : "gn-status"} role={error ? "alert" : "status"}>{error || message}{error && errorAt && <button onClick={() => locate(errorAt.graph, errorAt.node ?? "")}>Перейти к ошибке</button>}{error.includes("другом окне") && <button onClick={() => {
+    {(error || message) && <div className={error ? "gn-error" : "gn-status"} role={error ? "alert" : "status"}>{error || message}{error && errorAt && <button onClick={() => locate(errorAt.graph, errorAt.node ?? "", errorAt.path)}>Перейти к ошибке</button>}{error.includes("другом окне") && <button onClick={() => {
         if (window.confirm("Загрузить сохранённую ревизию?")) void request().then(accept);
       }}>Загрузить актуальную</button>}</div>}
     <nav className="nt-breadcrumbs" aria-label="Путь ноды">{graphBreadcrumbs(doc, root, at).map((c, i) => <span key={i}>{i > 0 && " → "}<button onClick={() => navigate(c.address)}>{c.label}</button></span>)}<small>{type?.instrument ? "Экземпляр Instrument" : at.path.length ? "Внутренний узел общего определения" : "Узел инструмента"}</small></nav>
-    <div className="gn-body">{graph && <Canvas overviewLabel="Показать все инструменты" root={root} doc={doc} active={at} focus={focus} storageKey={"tools/" + project.project.id + "/" + toolId} eligible={out ? targets : null} highlight={chain?.ids} describe={target => {
+    <div className="gn-body">{graph && <Canvas overviewLabel="Показать все инструменты" root={root} doc={doc} active={at} focus={focus} storageKey={"product/" + project.project.id} eligible={out ? targets : null} connectionCheck={(g, e) => productConnectionProblem(doc, g, e)} highlight={chain?.ids} describe={target => {
         const g = doc.diagrams.find(g => g.id === target.graph),
           n = g?.nodes.find(n => n.id === target.node),
           t = doc.types.find(t => t.id === n?.type),
           r = viewed?.trace[[...target.path, target.node].join("/")],
-          b = viewed?.bindings.find(b => b.node === [...target.path, target.node].join("/"));
+          b = viewed?.bindings.find(b => b.node === [...target.path, target.node].join("/")),
+          productTool = target.graph === root && !!t?.instrument,
+          prefix = [...target.path, target.node].join("/"),
+          evaluated = !!viewed && Object.keys(viewed.trace).some(key => key.startsWith(prefix + "/")),
+          toolIssues = viewed?.issues.filter(issue => issue.node === prefix || issue.node.startsWith(prefix + "/")) ?? [];
         return {
-          name: t?.parameter?.field.name ?? (t?.instrument && typeof n?.values.title === "string" ? n.values.title : n?.id === "source" && t?.fields.some(f => f.key === "context") ? "Данные инструмента" : t?.operation === "source" && n?.values.source === "base-values" ? "Базовые значения проекта" : t?.operation === "field" ? "Поле «" + String(n?.values.label || (r?.inputs.binding as {
+          name: t?.parameter?.field.name ?? (t?.instrument && typeof n?.values.title === "string" ? n.values.title : n?.id === "source" && t?.fields.some(f => f.key === "context") ? target.path.length ? "Данные инструмента" : "Контекст продукта" : t?.operation === "source" && n?.values.source === "base-values" ? "Базовые значения проекта" : t?.operation === "field" ? "Поле «" + String(n?.values.label || (r?.inputs.binding as {
             field?: Field;
           })?.field?.name || n?.name) + "»" : t?.operation === "grid" ? "Расположение полей" : n?.name),
-          summary: b ? b.field.kind + " · " + compactValue(b.field.optionNames?.[String(b.value)] ?? b.value) + (b.field.unit ? " " + b.field.unit : "") + " · " + SOURCE_NAMES[b.mode ?? "user"] : undefined,
-          status: b ? viewed?.issues.some(i => i.node === b.node) ? "Ошибка проверки" : "Проверено" : stale ? "Устаревший результат" : undefined
+          summary: b ? b.field.kind + " · " + compactValue(b.field.optionNames?.[String(b.value)] ?? b.value) + (b.field.unit ? " " + b.field.unit : "") + " · " + SOURCE_NAMES[b.mode ?? "user"] : productTool ? t?.description || n?.tool?.category : undefined,
+          status: productTool ? n?.tool?.enabled === false ? "Отключён в продукте" : stale ? "Устаревший результат" : toolIssues.length ? "Проверка: " + toolIssues.length + " сообщений" : evaluated ? "Рассчитан для текущих данных" : "Не вычислен в этом предпросмотре" : b ? viewed?.issues.some(i => i.node === b.node) ? "Ошибка проверки" : "Проверено" : stale ? "Устаревший результат" : undefined
         };
       }} inspect={(target, f, direction) => {
         const record = traceNode(viewed?.trace ?? {}, target.path)[target.node];
@@ -721,6 +749,7 @@ export function ToolEditor({
           }]
         });
       }} select={choose} context={(target, x, y) => {
+        syncOwner(target);
         setAt(target);
         setMenu({
           id: target.node,
@@ -745,15 +774,15 @@ export function ToolEditor({
       })} go={node => navigate({
         ...at,
         node
-      })} unlink={e => unlink(graph, e)} test={run} pick={() => {}} group={() => setPack(true)} extra={<><p>{type.instrument ? "Общее определение Instrument" : type.parameter ? "Параметр" : type.operation ? "Операция · " + type.name : "Функция"}</p>{type.instrument && <button onClick={() => navigate({
+      })} unlink={e => unlink(graph, e)} test={run} pick={() => {}} group={() => {if(at.graph===root)setError("Вложенные группы создаются внутри инструмента. Сначала раскройте Instrument.");else setPack(true);}} extra={<><p>{type.instrument ? "Общее определение Instrument" : type.parameter ? "Параметр" : type.operation ? "Операция · " + type.name : "Функция"}</p>{type.instrument && <button onClick={() => navigate({
           graph: type.instrument!,
           path: [...at.path, node.id],
           node: ""
-        })}>Раскрыть Instrument</button>}{type.parameter ? <ParameterProperties key={type.id + at.path.join("/")} doc={doc} root={root} at={at} type={type} result={viewed} values={dataset === "test" ? lastTest?.dataset.values ?? {} : dataset === "saved" ? stored?.values ?? {} : values} defaults={dataset === "test" ? (lastTest?.result.trace.source?.outputs.context as {
+        })}>Раскрыть Instrument</button>}{type.instrument && <button onClick={() => setEditing(type)}>Входы и выходы инструмента</button>}{at.graph === root && type.instrument && <ToolProperties node={node} update={updateNode} />}{type.parameter ? <ParameterProperties key={type.id + at.path.join("/")} doc={doc} root={root} at={at} type={type} result={viewed} values={dataset === "test" ? lastTest?.dataset.values ?? {} : dataset === "saved" ? stored?.values ?? {} : values} defaults={dataset === "test" ? (lastTest?.result.trace.source?.outputs.context as {
           defaults?: Values;
         })?.defaults ?? defaults : dataset === "saved" ? savedDefaults ?? defaults : defaults} change={change} go={(address, base) => {
           if (base && base !== root) {
-            const selected = doc.tools.find(t => t.diagram === base);
+            const selected = tools.find(t => t.diagram === base);
             if (selected) setToolId(selected.id);
             navigate(address, base);
           } else navigate(address);
@@ -772,8 +801,16 @@ export function ToolEditor({
       {viewed?.issues.filter(i => i.node === [...at.path, node.id].join("/")).map(i => <p key={i.key} role="alert">{i.message}<button onClick={() => previewSelect(i.node)}>Перейти к ошибке</button></p>)}</>} />}
     {preview && <aside className="nt-preview" style={{
         width
-      }}><header><strong>Предпросмотр</strong><input aria-label="Ширина предпросмотра" type="range" min="280" max="800" value={width} onChange={e => setWidth(Number(e.target.value))} /><button onClick={() => setPreview(false)}>×</button></header>
-      <label>Данные для просмотра<select aria-label="Данные для просмотра" value={dataset} onChange={e => setDataset(e.target.value as typeof dataset)}><option value="preview">Предпросмотр на тестовых значениях</option><option value="saved">Черновик на сохранённых входах проекта</option><option value="test">Результат последней тестовой пробы</option></select></label><p role="status">{dataStatus}</p><small>Граф · {dataset === "test" ? lastTest?.dataset.version + " / " + lastTest?.dataset.revision : "черновик " + remote.revision + (dirty ? " (изменён)" : "")} · роль {dataset === "test" ? lastTest?.dataset.role : dataset === "saved" ? sessionRole : role}{dataset !== "saved" ? " (симуляция)" : " (сессия)"}</small><details><summary>Версии источников</summary><DataTree value={dataset === "test" ? lastTest?.dataset.sourceVersions : dataset === "saved" ? stored?.baseVersions ?? baseVersions : baseVersions} label="Версии базовых значений" /></details>
+      }}><header><strong>Предпросмотр · {tool?.name}</strong><input aria-label="Ширина предпросмотра" type="range" min="280" max="800" value={width} onChange={e => setWidth(Number(e.target.value))} /><button onClick={() => setPreview(false)}>×</button></header>
+      {catalogNeeded && <section><strong>Новый каталог насосов</strong><p role="status">{catalogLoading ? "Загрузка…" : catalogError ? "Ошибка · " + catalogError : catalog ? catalog.status === "empty" ? "Каталог пуст" : "Загружен снимок " + catalog.id.slice(0, 12) : "Не загружен"}</p><button disabled={catalogLoading} onClick={() => {
+            setCatalogLoading(true);
+            setCatalog(null);
+            loadCatalog(undefined).then(s => {
+              setCatalog(s);
+              setCatalogError("");
+            }).catch(e => setCatalogError(e.message)).finally(() => setCatalogLoading(false));
+          }}>Обновить снимок каталога</button>{catalog && <small>{catalog.items.length} исполнений · {catalog.schemaVersion}</small>}</section>}
+      <label>Данные для просмотра<select aria-label="Данные для просмотра" value={dataset} onChange={e => setDataset(e.target.value as typeof dataset)}><option value="preview">Предпросмотр на тестовых значениях</option><option value="saved">Черновик на сохранённых входах проекта</option><option value="test">Результат последней тестовой пробы</option></select></label><p role="status">{dataStatus}</p><small>Граф · {dataset === "test" ? lastTest?.dataset.version + " / " + lastTest?.dataset.revision : "черновик " + remote.revision + (dirty ? " (изменён)" : "")} · роль {dataset === "test" ? lastTest?.dataset.role : dataset === "saved" ? sessionRole : role}{dataset !== "saved" ? " (симуляция)" : " (сессия)"}</small><details><summary>Версии источников</summary><DataTree value={dataset === "test" ? lastTest?.dataset.sourceVersions : {...(dataset === "saved" ? stored?.baseVersions ?? baseVersions : baseVersions), ...(catalog ? {pump_catalog_v2:catalog.id} : {})}} label="Используемые версии источников" /></details>
       {dataset !== "saved" && <label>Роль тестовой симуляции<select aria-label="Роль тестовой симуляции" value={role} onChange={e => setRole(e.target.value as UserRole)}>{["base", "plus", "pro", "admin"].map(r => <option key={r}>{r}</option>)}</select></label>}{dataset === "test" && <button onClick={run}>Повторить пробу</button>}
       {dataset !== "test" && trial.error ? <p role="alert">{trial.error}</p> : viewed ? <ToolForm view={viewed.view} issues={viewed.issues} readOnly={dataset !== "preview"} change={(key, value) => setValues(v => ({
           ...v,
@@ -823,7 +860,7 @@ export function ToolEditor({
         description: "",
         fields: [],
         formulas: {}
-      })}>Создать функцию</button>{doc.types.filter(t => !t.id.endsWith(".in") && !t.id.endsWith(".out") && !t.parameter && t.name.toLowerCase().includes(search.toLowerCase()) && t.instrument !== graph.id).map(t => <button key={t.id} onClick={() => addType(t)}>{t.name}<small>{t.category}</small></button>)}</section>}
+      })}>Создать функцию</button>{doc.types.filter(t => !t.id.endsWith(".in") && !t.id.endsWith(".out") && (!t.parameter || t.id === "pump.selectionParameter") && t.name.toLowerCase().includes(search.toLowerCase()) && t.instrument !== graph.id).map(t => <button key={t.id} onClick={() => addType(t)}>{t.name}<small>{t.category}</small></button>)}</section>}
     {editing && <TypeEditor root={root} original={editing} doc={doc} close={() => setEditing(null)} save={saveType} navigate={(g, n, path) => {
       setEditing(null);
       locate(g, n, path);
@@ -863,19 +900,11 @@ export function ToolEditor({
             setError((e as Error).message);
           }
         }}>Создать параметр</button>{error && <p role="alert">{error}</p>}</section></div>}
-    {metadata && tool && <div className="gn-shade"><section className="gn-dialog"><header><h2>Определение инструмента</h2><button onClick={() => setMetadata(false)}>Закрыть</button></header><p>{tool.id}</p><label>Название<input value={tool.name} onChange={e => change({
-            ...doc,
-            tools: doc.tools.map(t => t.id === tool.id ? {
-              ...t,
-              name: e.target.value
-            } : t)
-          })} /></label><label>Категория<input value={tool.category} onChange={e => change({
-            ...doc,
-            tools: doc.tools.map(t => t.id === tool.id ? {
-              ...t,
-              category: e.target.value
-            } : t)
-          })} /></label><button onClick={() => {
+    {metadata && tool && <div className="gn-shade"><section className="gn-dialog"><header><h2>Определение инструмента</h2><button onClick={() => setMetadata(false)}>Закрыть</button></header><p>Устойчивый ID · {tool.id}</p><label>Название<input value={tool.name} onChange={e => change(updateToolMetadata(doc, tool.id, {
+            name: e.target.value
+          }))} /></label><label>Категория<input value={tool.category} onChange={e => change(updateToolMetadata(doc, tool.id, {
+            category: e.target.value
+          }))} /></label><button onClick={() => {
           setTestJson(JSON.stringify(tool.tests, null, 2));
           setMetadata(false);
         }}>Редактировать проверочные примеры</button></section></div>}
@@ -883,13 +912,9 @@ export function ToolEditor({
           try {
             const tests = JSON.parse(testJson) as ToolTest[];
             if (!Array.isArray(tests)) throw Error("Нужен массив примеров");
-            change({
-              ...doc,
-              tools: doc.tools.map(t => t.id === tool.id ? {
-                ...t,
-                tests
-              } : t)
-            });
+            change(updateToolMetadata(doc, tool.id, {
+              tests
+            }));
             setTestJson(null);
           } catch (e) {
             setError((e as Error).message);
@@ -974,4 +999,25 @@ function OriginControl({
           showOrigin: e.target.checked
         }
       })} />Показывать источник значения</label>{all && <small>Управляет подписями всех полей инструмента, включая вложенные разделы. Индивидуальные настройки полей сохраняются.</small>}</>;
+}
+function ToolProperties({
+  node,
+  update
+}: {
+  node: GraphNode;
+  update: (patch: Partial<GraphNode>) => void;
+}) {
+  const set = (patch: NonNullable<GraphNode["tool"]>) => update({
+    tool: {
+      ...node.tool,
+      ...patch
+    }
+  });
+  return <fieldset><legend>Инструмент продукта</legend><small>ID · {node.id}</small><label>Категория<input value={node.tool?.category ?? "Ввод"} onChange={e => set({
+        category: e.target.value
+      })} /></label><label>Порядок<input type="number" value={node.tool?.order ?? 0} onChange={e => set({
+        order: Number(e.target.value)
+      })} /></label><label><input type="checkbox" checked={node.tool?.enabled !== false} onChange={e => set({
+        enabled: e.target.checked
+      })} />Доступен в продукте</label></fieldset>;
 }

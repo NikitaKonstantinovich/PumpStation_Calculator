@@ -1,7 +1,8 @@
 import { compileTree, definitionPorts } from "../engineering/hierarchy";
 import { validateDocument, executableSlice, DiagramError } from "../engineering/engine";
 import { accepts, compatible, type Field, type NodeType } from "../engineering/schema";
-import { OPERATIONS, evaluatePlan, parameterExecutionPlan } from "./runtime";
+import { OPERATIONS, evaluatePlan, evaluateProduct, parameterExecutionPlan } from "./runtime";
+import { assertProductMetadata, deriveTools, flattenProduct, productEndpoint, validateProductPorts } from "./product";
 import { safeId, type ToolContext, type ToolDocument, type ToolProgram, type TestResult } from "./schema";
 function verifyField(f: Field, depth = 0) {
   if (depth > 5 || !f || !safeId(f.key) || !f.name || !f.meaning || typeof f.unit !== "string") throw Error("Неверное описание атрибута");
@@ -13,7 +14,9 @@ function verifyField(f: Field, depth = 0) {
 }
 export function compileTools(doc: ToolDocument, version: string, strict = true): ToolProgram {
   if (!Array.isArray(doc?.tools) || doc.tools.length > 30) throw Error("Некорректный список инструментов");
-  validateDocument(doc, [], [], strict);
+  validateDocument(doc, [], [], doc.product ? false : strict);
+  const tools = deriveTools(doc);
+  if (tools.length > 30) throw Error("Превышено число инструментов продукта");
   const definitions = new Set<string>();
   for (const type of doc.types) {
     if (type.native) throw Error("Инструменты используют собственный набор операций");
@@ -57,7 +60,7 @@ export function compileTools(doc: ToolDocument, version: string, strict = true):
   }
   if (!strict) return {
     version,
-    tools: doc.tools.map(({
+    tools: tools.map(({
       tests: _tests,
       ...tool
     }) => {
@@ -66,6 +69,40 @@ export function compileTools(doc: ToolDocument, version: string, strict = true):
     }),
     plans: {}
   };
+  if (doc.product) {
+    assertProductMetadata(doc);
+    const root = doc.diagrams.find(g => g.id === doc.product!.root)!;
+    const expanded = parameterExecutionPlan(flattenProduct(doc, root));
+    validateProductPorts(expanded, root.id);
+    for (const graph of doc.diagrams) for (const node of graph.nodes) {
+      const type = doc.types.find(t => t.id === node.type)!;
+      if (type.parameter?.source?.mode === "computed" && !graph.edges.some(e => e.to === node.id && e.input === "computed")) throw new DiagramError(type.name + " · подключите расчётный выход к входу вычисления", graph.id, node.id);
+    }
+    const plans: ToolProgram["plans"] = {},
+      dependencies: Record<string, string[]> = {};
+    for (const tool of tools.filter(t => t.enabled !== false)) {
+      const plan = productEndpoint(expanded, root.id, tool);
+      const owners = [...new Set(plan.steps.filter(s => s.id.includes("/")).map(s => s.id.split("/")[0]))].filter(id => tools.some(t => t.id === id));
+      for (const owner of owners) if (tools.find(t => t.id === owner)?.enabled === false) throw new DiagramError("Источник инструмента отключён · " + owner, root.id, owner);
+      plans[tool.id] = plan;
+      dependencies[tool.id] = owners.filter(id => id !== tool.id);
+    }
+    return {
+      version,
+      product: {
+        root: root.id,
+        dependencies
+      },
+      tools: tools.map(({
+        tests,
+        ...tool
+      }) => {
+        void tests;
+        return tool;
+      }),
+      plans
+    };
+  }
   // Validate interfaces even for definitions currently absent from the selected output.
   for (const graph of doc.diagrams) {
     for (const node of graph.nodes) {
@@ -75,7 +112,7 @@ export function compileTools(doc: ToolDocument, version: string, strict = true):
     compileTree(doc, graph);
   }
   const plans: ToolProgram["plans"] = {};
-  for (const tool of doc.tools) {
+  for (const tool of tools) {
     if (!safeId(tool.id) || definitions.has(tool.id) || !tool.name.trim() || !Array.isArray(tool.tests) || tool.tests.length > 100) throw Error("Неверное определение инструмента");
     definitions.add(tool.id);
     const graph = doc.diagrams.find(g => g.id === tool.diagram);
@@ -88,7 +125,7 @@ export function compileTools(doc: ToolDocument, version: string, strict = true):
   }
   return {
     version,
-    tools: doc.tools.map(({
+    tools: tools.map(({
       tests: _tests,
       ...tool
     }) => {
@@ -100,7 +137,7 @@ export function compileTools(doc: ToolDocument, version: string, strict = true):
 }
 export function runTests(doc: ToolDocument, context: ToolContext): TestResult[] {
   const publication = compileTools(doc, "trial");
-  return doc.tools.flatMap(tool => tool.tests.map(test => {
+  return deriveTools(doc).filter(tool=>tool.enabled!==false).flatMap(tool => tool.tests.map(test => {
     const actual: Record<string, unknown> = {};
     let node = "";
     const expectedReport = {
@@ -112,11 +149,17 @@ export function runTests(doc: ToolDocument, context: ToolContext): TestResult[] 
     try {
       const graph = test.diagram ? doc.diagrams.find(g => g.id === test.diagram) : null;
       const plan = graph ? compileTree(doc, graph) : publication.plans[tool.id];
-      const result = evaluatePlan(plan, {
+      const trialContext = {
         ...context,
         values: test.values,
         role: test.role ?? "pro"
-      }, test.diagram ? {
+      };
+      const testContexts: Record<string, ToolContext> = Object.fromEntries(deriveTools(doc).map(t => [t.id, {
+        ...context,
+        role: test.role ?? "pro",
+        values: (test.inputs?.contexts as Record<string, import("./schema").Values> | undefined)?.[t.id] ?? (t.id === tool.id ? test.values : {})
+      }]));
+      const result = doc.product && !test.diagram ? evaluateProduct(publication, tool.id, testContexts) : evaluatePlan(plan, trialContext, test.diagram ? {
         values: test.values,
         defaults: context.defaults,
         role: test.role ?? "pro",
@@ -153,7 +196,11 @@ export function runTests(doc: ToolDocument, context: ToolContext): TestResult[] 
         id: test.id,
         name: test.name,
         passed: false,
-        inputs: {values:test.values,inputs:test.inputs??{},role:test.role??"pro"},
+        inputs: {
+          values: test.values,
+          inputs: test.inputs ?? {},
+          role: test.role ?? "pro"
+        },
         expected: expectedReport,
         actual,
         node,

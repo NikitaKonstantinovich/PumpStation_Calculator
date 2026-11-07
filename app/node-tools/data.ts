@@ -9,5 +9,14 @@ export function parseWorkspaceData(raw: unknown): WorkspaceData | undefined {
     if (Object.keys(tool.values).some(k => !safeId(k))) throw Error("Некорректный идентификатор параметра");
     if (!tool.baseVersions || Object.values(tool.baseVersions).some(v => typeof v !== "string" || v.length > 100)) throw Error("Не указаны версии базовых значений");
   }
+  const refs = (value: unknown) => {
+    if (!value || typeof value !== "object" || Array.isArray(value) || Object.entries(value).some(([key, v]) => !safeId(key) || typeof v !== "string" || !v.length || v.length > 100)) throw Error("Некорректные версии источников");
+  };
+  if (data.product) {
+    if (typeof data.product.version !== "string" || !data.product.version || data.product.version.length > 100) throw Error("Не указана версия продукта");
+    refs(data.product.baseVersions);
+    if (data.product.sourceVersions) refs(data.product.sourceVersions);
+  }
+  for (const tool of Object.values(data.tools)) if (tool.sourceVersions) refs(tool.sourceVersions);
   return structuredClone(data);
 }

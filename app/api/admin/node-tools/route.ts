@@ -1,7 +1,9 @@
 import { DiagramError } from "../../../engineering/engine";
 import { currentUser, json } from "../../../auth-server";
+import { CatalogError } from "../../../node-tools/catalog-server";
 import { IS_BETA } from "../../../release-policy";
 import { toolCommand, toolState, ToolError } from "../../../node-tools/storage-server";
+import { packTrace } from "../../../node-tools/trace-transport";
 const reply = (v: unknown, status = 200) => json(v, status, {
   "Cache-Control": "private, no-store"
 });
@@ -21,9 +23,10 @@ export async function GET(request: Request) {
       error: (e as Error).message,
       location: e instanceof DiagramError ? {
         graph: e.diagram,
-        node: e.node
+        node: e.node,
+        path: (e as DiagramError & {path?:string[]}).path
       } : undefined
-    }, e instanceof ToolError ? e.status : 400);
+    }, e instanceof ToolError || e instanceof CatalogError ? e.status : 400);
   }
 }
 export async function POST(request: Request) {
@@ -31,14 +34,17 @@ export async function POST(request: Request) {
     const user = await guard(request);
     const text = await request.text();
     if (text.length > 2_000_000) throw new ToolError("Слишком большой документ", 413);
-    return reply(await toolCommand(JSON.parse(text), user.name));
+    const body=JSON.parse(text),data=await toolCommand(body,user.name);
+    if(body.compactTrace===true && "result" in data && data.result) return reply({...data,result:{...data.result,trace:{}},traceTransport:packTrace(data.result.trace)});
+    return reply(data);
   } catch (e) {
     return reply({
       error: (e as Error).message,
       location: e instanceof DiagramError ? {
         graph: e.diagram,
-        node: e.node
+        node: e.node,
+        path: (e as DiagramError & {path?:string[]}).path
       } : undefined
-    }, e instanceof ToolError ? e.status : 400);
+    }, e instanceof ToolError || e instanceof CatalogError ? e.status : 400);
   }
 }

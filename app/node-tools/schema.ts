@@ -10,6 +10,7 @@ export type Diagnostic = {
 };
 export type ParameterBinding = {
   key: string;
+  toolId?: string;
   field: Field;
   permission: "input" | "options" | "all";
   editable: boolean;
@@ -21,9 +22,14 @@ export type ParameterBinding = {
   source?: {registry:"workspace2"|"base-values";attribute:string};
 };
 export type View = {
-  kind: "form" | "section" | "grid" | "field" | "condition" | "message";
+  kind: "form" | "section" | "grid" | "field" | "condition" | "message" | "table" | "select" | "pump-card";
   node: string;
   label: string;
+  rows?:Record<string,unknown>[];
+  options?:{value:string;label:string}[];
+  columnsSpec?:{key:string;label:string;unit?:string}[];
+  selection?:{snapshotId:string;requestKey:string;variantId:string|null;valid:boolean;stale?:boolean;message?:string};
+  total?:number;
   children?: View[];
   binding?: ParameterBinding;
   widget?: string;
@@ -56,13 +62,17 @@ export type ToolDefinition = {
   name: string;
   category: string;
   diagram: string;
+  order?:number;
+  enabled?:boolean;
   tests: ToolTest[];
 };
 export type ToolDocument = Document & {
   tools: ToolDefinition[];
+  product?:{root:string};
 };
 export type ToolProgram = {
   version: string;
+  product?:{root:string;dependencies:Record<string,string[]>};
   tools: Omit<ToolDefinition, "tests">[];
   plans: Record<string, Plan>;
 };
@@ -71,6 +81,8 @@ export type ToolContext = {
   values: Values;
   defaults: Values;
   role: UserRole;
+  algorithmVersion?:string;
+  resources?:{pump_catalog_v2?:import("./catalog-schema").CatalogSnapshot};
 };
 export type Evaluation = {
   value: unknown;
@@ -83,9 +95,11 @@ export type SavedTool = {
   version: string;
   values: Values;
   baseVersions: Record<string, string>;
+  sourceVersions?:Record<string,string>;
 };
 export type WorkspaceData = {
   schema: 1;
+  product?:{version:string;baseVersions:Record<string,string>;sourceVersions?:Record<string,string>};
   tools: Record<string, SavedTool>;
 };
 export type TestResult = {

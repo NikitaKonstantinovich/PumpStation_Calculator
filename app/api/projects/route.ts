@@ -1,4 +1,5 @@
 import {verifyWorkspace,ToolError} from "../../node-tools/storage-server";
+import { CatalogError } from "../../node-tools/catalog-server";
 import type {ProjectConfig} from "../../project-config";
 import { guardDisabledBetaFeature } from "../../release-server";
 import { currentUser, json } from "../../auth-server";
@@ -55,6 +56,7 @@ async function dispatch(request: Request) {
     return storageOperation(user.id,{action:"save",config,operation:input.operation,baseRevision:input.baseRevision,restore:input.restore});
   } catch(error) {
     if(error instanceof ToolError)return json({error:error.message},error.status);
+    if(error instanceof CatalogError)return json({error:error.message},error.status);
     if (error instanceof BaseValuesError) return json({error:error.message},error.status);
     if (error instanceof SyntaxError || error instanceof TypeError) return json({error:"Некорректный JSON проекта."},400);
     return json({error:error instanceof Error?error.message:"Не удалось сохранить проект."},400);

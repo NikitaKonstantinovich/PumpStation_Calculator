@@ -5,7 +5,11 @@ import { initialTools } from "./factory";
 import { baseSnapshot, type AppliedBaseValues } from "../base-values";
 import { currentBasePublication, resolveBaseVersions } from "../base-values-server";
 import { defaultProjectSettings } from "../default-settings";
-import { evaluatePlan, canEditParameter } from "./runtime";
+import { evaluatePlan, evaluateProduct, canEditParameter } from "./runtime";
+import { deriveTools } from "./product";
+import { productContexts, ownBindings, usesCatalog, invalidSelections } from "./product-state";
+import { catalogSnapshot } from "./catalog-server";
+import type { CatalogSnapshot } from "./catalog-schema";
 import type { ToolContext, ToolDocument, ToolProgram, Values, WorkspaceData } from "./schema";
 import { isUserRole, type UserRole } from "../user-types";
 export class ToolError extends Error {
@@ -97,6 +101,8 @@ export async function toolCommand(body: {
   tool?: string;
   values?: Values;
   role?: UserRole;
+  contexts?: Record<string, Values>;
+  sourceVersions?: Record<string, string>;
 }, author: string) {
   await seed();
   const state = await stateRow();
@@ -121,13 +127,32 @@ export async function toolCommand(body: {
     defaults: sourceData.defaults,
     role: body.role ?? "pro"
   };
+  const catalogData = body.action === "save" ? {
+    resources: undefined,
+    sourceVersions: {}
+  } : await toolResources(program, body.sourceVersions);
+  context.resources = catalogData.resources;
+  const contexts = Object.fromEntries(program.tools.map(t => [t.id, {
+    ...context,
+    values: body.contexts?.[t.id] ?? (t.id === (body.tool ?? program.tools.find(t => t.enabled !== false)?.id) ? context.values : {})
+  }]));
   if (body.action === "test") {
-    const tool = doc.tools.find(t => t.id === (body.tool ?? doc.tools[0]?.id));
+    const tool = deriveTools(doc).find(t => t.id === (body.tool ?? program.tools.find(t => t.enabled !== false)?.id));
     if (!tool) throw new ToolError("Инструмент не выбран");
-    const result = evaluatePlan(program.plans[tool.id], context);
+    const result = program.product ? evaluateProduct(program, tool.id, contexts) : evaluatePlan(program.plans[tool.id], context);
     return {
       result,
-      dataset: {version:"draft", revision:state.revision, role:context.role, simulatedRole:true, sourceVersions:sourceData.baseVersions, values:context.values},
+      dataset: {
+        version: "draft",
+        revision: state.revision,
+        role: context.role,
+        simulatedRole: true,
+        sourceVersions: {
+          ...sourceData.baseVersions,
+          ...catalogData.sourceVersions
+        },
+        values: context.values
+      },
       tests: runTests(doc, context),
       writes: [{
         source: "workspace2",
@@ -145,13 +170,17 @@ export async function toolCommand(body: {
     const tests = runTests(doc, context),
       failed = tests.filter(t => !t.passed);
     if (failed.length) throw new ToolError("Проверки публикации · " + failed.map(t => t.name + ": " + t.message).join("; "));
-    for (const tool of doc.tools) {
+    for (const tool of deriveTools(doc).filter(t => t.enabled !== false)) {
       const example = tool.tests[0];
-      const result = evaluatePlan(program.plans[tool.id], {
+      const trialContext = {
         ...context,
         values: example?.values ?? {},
-        role: example?.role ?? "pro"
-      });
+        role: example?.role ?? "pro" as const
+      };
+      const result = program.product ? evaluateProduct(program, tool.id, {
+        ...contexts,
+        [tool.id]: trialContext
+      }) : evaluatePlan(program.plans[tool.id], trialContext);
       if (result.view?.kind !== "form") throw new ToolError(tool.name + " · выход интерфейса должен быть формой");
     }
     const id = crypto.randomUUID(),
@@ -164,36 +193,80 @@ export async function toolCommand(body: {
   }
   return toolState();
 }
-export async function verifyWorkspace(next: WorkspaceData | undefined, prior: WorkspaceData | undefined, role: UserRole) {
-  if (!next) return;
-  for (const [id, saved] of Object.entries(next.tools)) {
-    const program = await toolProgram(saved.version),
-      plan = program.plans[id];
-    if (!plan) throw new ToolError("Инструмент отсутствует в выбранной публикации");
-    const defaults = await toolDefaults(saved.baseVersions),
-      context = {
-        values: saved.values,
-        defaults: defaults.defaults,
-        role
-      };
-    const result = evaluatePlan(plan, context);
-    if (result.issues.length) throw new ToolError(result.issues.map(i => i.message).join("; "));
-    const previousValues = prior?.tools[id]?.values;
-    for (const binding of result.bindings) {
-      if ((binding.mode ?? "user") !== "user" || canEditParameter(role, binding.permission) || !previousValues || !Object.hasOwn(previousValues, binding.key)) continue;
-      if (JSON.stringify(binding.value) !== JSON.stringify(previousValues[binding.key])) throw new ToolError("Редактирование параметра недоступно · " + binding.field.name, 403);
+export async function toolResources(program: ToolProgram, versions?: Record<string, string>): Promise<{
+  resources?: {
+    pump_catalog_v2?: CatalogSnapshot;
+  };
+  sourceVersions: Record<string, string>;
+}> {
+  if (!usesCatalog(program)) return {
+    sourceVersions: versions ?? {}
+  };
+  const snapshot = await catalogSnapshot(versions?.pump_catalog_v2);
+  return {
+    resources: {
+      pump_catalog_v2: snapshot
+    },
+    sourceVersions: {
+      pump_catalog_v2: snapshot.id
     }
-    for (const [key, value] of Object.entries(saved.values)) {
-      const binding = result.bindings.find(b => b.key === key);
-      if (!binding) throw new ToolError("Неизвестный параметр " + key);
-      if (binding.mode && binding.mode !== "user") throw new ToolError("Запись параметра недоступна для источника «" + binding.origin + "» · " + binding.field.name + ". Примените миграцию версии.", 403);
-      if (!accepts({
-        ...binding.field,
-        required: false
-      }, value)) throw new ToolError("Неверный тип или диапазон · " + binding.field.name);
-      const previous = prior?.tools[id]?.values;
-      const allowed = previous && Object.hasOwn(previous, key) ? previous[key] : Object.hasOwn(defaults.defaults, key) ? defaults.defaults[key] : binding.field.initial;
-      if (!canEditParameter(role, binding.permission) && JSON.stringify(value) !== JSON.stringify(allowed)) throw new ToolError("Редактирование параметра недоступно · " + binding.field.name, 403);
-    }
+  };
+}
+function checkValues(id: string, saved: import("./schema").SavedTool, result: import("./schema").Evaluation, defaults: Values, prior: WorkspaceData | undefined, role: UserRole, plan: ToolProgram["plans"][string]) {
+  const bindings = ownBindings(result, id),
+    previous = prior?.tools[id]?.values;
+  const errors = result.issues.filter(i => i.severity === "error");
+  if (errors.length) throw new ToolError(errors.map(i => i.message).join("; "));
+  const selectionProblems = invalidSelections(result, id, saved.values, previous, plan);
+  if (selectionProblems.length) throw new ToolError(selectionProblems.join("; "), 403);
+  for (const b of bindings) if ((b.mode ?? "user") === "user" && !canEditParameter(role, b.permission) && previous && Object.hasOwn(previous, b.key) && JSON.stringify(b.value) !== JSON.stringify(previous[b.key])) throw new ToolError("Редактирование параметра недоступно · " + b.field.name, 403);
+  for (const [key, value] of Object.entries(saved.values)) {
+    const b = bindings.find(b => b.key === key);
+    if (!b) throw new ToolError("Неизвестный параметр " + key);
+    if (b.mode && b.mode !== "user") throw new ToolError("Запись параметра недоступна для источника «" + b.origin + "» · " + b.field.name + ". Примените миграцию версии.", 403);
+    if (!accepts({
+      ...b.field,
+      required: false
+    }, value)) throw new ToolError("Неверный тип или диапазон · " + b.field.name);
+    const allowed = previous && Object.hasOwn(previous, key) ? previous[key] : Object.hasOwn(defaults, key) ? defaults[key] : b.field.initial;
+    if (!canEditParameter(role, b.permission) && JSON.stringify(value) !== JSON.stringify(allowed)) throw new ToolError("Редактирование параметра недоступно · " + b.field.name, 403);
   }
+}
+export async function verifyWorkspace(next: WorkspaceData | undefined, prior: WorkspaceData | undefined, role: UserRole) {
+  if (!next) {
+    if (prior && role !== "admin") throw new ToolError("Удаление сохранённого состояния инструментов недоступно", 403);
+    return;
+  }
+  if (next.product) {
+    const program = await toolProgram(next.product.version);
+    if (!program.product) throw new ToolError("Выбрана публикация без общего графа продукта");
+    const base = await toolDefaults(next.product.baseVersions),
+      sources = await toolResources(program, next.product.sourceVersions),
+      contexts = productContexts(program, next, base.defaults, role, sources.resources);
+    if (usesCatalog(program) && !next.product.sourceVersions?.pump_catalog_v2) throw new ToolError("Закрепите снимок нового каталога");
+    for (const tool of program.tools.filter(t => t.enabled !== false)) {
+      const saved = next.tools[tool.id];
+      if (!saved) throw new ToolError("Отсутствует состояние инструмента · " + tool.name);
+      if (saved.version !== program.version || JSON.stringify(saved.baseVersions) !== JSON.stringify(next.product.baseVersions) || JSON.stringify(saved.sourceVersions ?? {}) !== JSON.stringify(next.product.sourceVersions ?? {})) throw new ToolError("Связанные инструменты должны использовать единую версию продукта и источников", 409);
+      checkValues(tool.id, saved, evaluateProduct(program, tool.id, contexts), base.defaults, prior, role, program.plans[tool.id]);
+    }
+    for (const [id, saved] of Object.entries(next.tools)) if (!program.tools.some(t => t.id === id && t.enabled !== false) && JSON.stringify(saved) !== JSON.stringify(prior?.tools[id])) throw new ToolError("Архив отключённого инструмента доступен только для чтения · " + id, 403);
+    for (const id of Object.keys(prior?.tools ?? {})) if (!next.tools[id]) throw new ToolError("Архив инструмента должен сохраняться в проекте · " + id, 403);
+    return;
+  }
+  for (const [id, saved] of Object.entries(next.tools)) {
+    const program = await toolProgram(saved.version);
+    if (program.product) throw new ToolError("Примените согласованную версию продукта целиком", 409);
+    const plan = program.plans[id];
+    if (!plan) throw new ToolError("Инструмент отсутствует в выбранной публикации");
+    const base = await toolDefaults(saved.baseVersions),
+      sources = await toolResources(program, saved.sourceVersions);
+    checkValues(id, saved, evaluatePlan(plan, {
+      values: saved.values,
+      defaults: base.defaults,
+      role,
+      resources: sources.resources
+    }), base.defaults, prior, role, plan);
+  }
+  for (const id of Object.keys(prior?.tools ?? {})) if (!next.tools[id] && role !== "admin") throw new ToolError("Сохранённый инструмент нельзя удалить обходом его прав · " + id, 403);
 }

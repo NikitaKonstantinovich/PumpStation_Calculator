@@ -43,6 +43,7 @@ export type GraphNode = {
   y: number;
   values: Record<string, unknown>;
   group?: string;
+  tool?: {category?:string;order?:number;enabled?:boolean;tests?:import("../node-tools/schema").ToolTest[]};
   catalog?: {
     id: string;
     name: string;

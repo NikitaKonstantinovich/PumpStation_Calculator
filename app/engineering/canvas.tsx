@@ -14,6 +14,7 @@ export type Focus = Address & {
   serial: number;
 };
 type Props = {
+  connectionCheck?: (graph:Diagram,edge:Edge)=>string;
   connect?: (graph: Diagram, edge: Edge, at: Address) => void;
   describe?: (at: Address) => { name?: string; summary?: string; status?: string };
   inspect?: (at: Address, field: Field, direction: "input" | "output") => string;
@@ -64,10 +65,12 @@ export function Canvas({
   unlink,
   overview,
   connect,
+  connectionCheck,
   describe,
   inspect,
   highlight
 }: Props) {
+  const checkConnection=(graph:Diagram,edge:Edge)=>connectionCheck?connectionCheck(graph,edge):connectionFeedback(graph,doc.types,edge);
   const el = useRef<HTMLDivElement>(null);
   const model = useMemo(() => layout(doc), [doc]);
   const [base, setBase] = useState(root);
@@ -138,7 +141,7 @@ export function Canvas({
     if (!pin || pin.dataset.portDirection !== "input") return {};
     if (pin.dataset.portGraph !== current.at.graph || pin.dataset.portPath !== current.at.path.join("/")) return { problem: "Соедините порты одного уровня. Для границы Instrument используйте его внешний порт" };
     const target = pin.dataset.portNode!, input = pin.dataset.portKey!;
-    return { target, input, problem: connectionFeedback(current.graph, doc.types, { from: current.at.node, out: current.out, to: target, input }) };
+    return { target, input, problem: checkConnection(current.graph, { from: current.at.node, out: current.out, to: target, input }) };
   }
   const fit = useCallback((id = root) => {
     if (!el.current) return;
@@ -349,7 +352,7 @@ export function Canvas({
         const next = child ? model.nested(frame, g, n, child) : frame;
         const description = describe?.(at);
         const port = (f: Field, direction: "input" | "output") => {
-          const problem = candidateLevel && direction === "input" ? connectionFeedback(g, doc.types, { from: wire!.at.node, out: wire!.out, to: n.id, input: f.key }) : "";
+          const problem = candidateLevel && direction === "input" ? checkConnection(g, { from: wire!.at.node, out: wire!.out, to: n.id, input: f.key }) : "";
           const candidate = candidateLevel && direction === "input";
           const name=portName(f);
           const tooltip = (inspect?.(at, {...f,name}, direction) ?? [name, f.kind, f.unit].filter(Boolean).join(" · ")) + (candidate ? "\n" + (problem || "Совместимый вход") : "");

@@ -4,8 +4,9 @@ import { useState } from "react";
 import { compatible, type Edge, type Field, type NodeType } from "../engineering/schema";
 import type { Address } from "../engineering/canvas-layout";
 import { compileExpression } from "../engineering/expression";
-import { connectionFeedback } from "../engineering/connection-feedback";
+import { productConnectionProblem } from "./product";
 import { usesInStation } from "../engineering/uses";
+import { deriveTools } from "./product";
 import { parameterType } from "./compiler";
 import { parameterRepresentations } from "./navigation";
 import { DataTree } from "./data-inspector";
@@ -43,7 +44,11 @@ export function ParameterProperties({
     mode = p.source?.mode ?? "user",
     graph = doc.diagrams.find(g => g.id === at.graph)!,
     node = graph.nodes.find(n => n.id === at.node)!;
-  const uses = doc.tools.flatMap(tool => usesInStation(doc, type.id, tool.diagram).map(use => ({
+  const uses = doc.product ? usesInStation(doc, type.id, root).map(use => ({
+      ...use,
+      root,
+      name: use.name
+    })) : deriveTools(doc).flatMap(tool => usesInStation(doc, type.id, tool.diagram).map(use => ({
       ...use,
       root: tool.diagram,
       name: tool.name + " → " + use.name
@@ -138,7 +143,7 @@ export function ParameterProperties({
       to: node.id,
       input: "computed"
     };
-    const problem = connectionFeedback(graph, doc.types, edge);
+    const problem = productConnectionProblem(doc, graph, edge);
     if (problem) {
       setError(problem);
       return;
@@ -157,7 +162,7 @@ export function ParameterProperties({
     const calc = "calc_" + node.id;
     const affected = changed.edges.filter(e => e.to === calc || e.from === calc || e.to === node.id && e.input === "computed");
     for (const edge of affected) {
-      const problem = connectionFeedback(changed, next.types, edge);
+      const problem = productConnectionProblem(next, changed, edge);
       if (problem) throw Error(problem);
     }
     setError("");

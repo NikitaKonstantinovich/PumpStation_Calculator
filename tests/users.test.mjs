@@ -25,7 +25,7 @@ const DB = {
 globalThis.__usersTestEnv = { DB };
 const serverUrl = new URL("../app/auth-server.ts", import.meta.url);
 const serverSource = (await readFile(serverUrl, "utf8")).replace('import { env } from "cloudflare:workers";', "const env = globalThis.__usersTestEnv;");
-const replacements = { [serverUrl.href]: serverSource };
+const replacements = { [new URL("../app/node-tools/catalog-binding-server.ts",import.meta.url).href]:"export const catalogService=()=>undefined;", [serverUrl.href]: serverSource };
 const projectRecords=new Map();
 globalThis.__rolesSave=(owner,config)=>{projectRecords.set(owner+config.project.id,JSON.stringify(config));return Response.json({revision:1});};
 replacements[new URL("../app/project-storage-server.ts",import.meta.url).href]='export const projectLimit=()=>10000000;export const storageOperation=(owner,{config})=>globalThis.__rolesSave(owner,config);';
