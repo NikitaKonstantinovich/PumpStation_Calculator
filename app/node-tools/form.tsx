@@ -123,9 +123,10 @@ export function ToolForm({
       [key]: !valid
     });
   }, []);
-  function render(v: View, disabled = false): React.ReactNode {
+  function render(v: View, disabled = false, inheritedShowOrigin = true): React.ReactNode {
     if (v.visible === false) return null;
     const blocked = disabled || v.enabled === false;
+    const showOrigin = inheritedShowOrigin && v.showOrigin !== false;
     const choose = (e: React.MouseEvent) => {
       if (select) {
         e.stopPropagation();
@@ -139,11 +140,11 @@ export function ToolForm({
         gridColumn: "span " + Math.min(2, Math.max(1, v.width ?? 1))
       }} role={select ? "button" : undefined} tabIndex={select ? 0 : undefined} onKeyDown={e => {
         if (select && e.target === e.currentTarget && e.key === "Enter") select(v.node);
-      }} onClick={choose}><Input validity={validity} binding={v.binding} label={v.label} hint={v.hint} widget={v.widget} showOrigin={v.showOrigin} disabled={blocked || !v.binding.editable || !v.binding.active} issues={issues} change={change} /></div>;
+      }} onClick={choose}><Input validity={validity} binding={v.binding} label={v.label} hint={v.hint} widget={v.widget} showOrigin={showOrigin} disabled={blocked || !v.binding.editable || !v.binding.active} issues={issues} change={change} /></div>;
     }
-    if (v.kind === "condition") return <div key={v.node} data-view-node={v.node} className="nt-condition">{v.children?.map(c => render(c, blocked))}</div>;
+    if (v.kind === "condition") return <div key={v.node} data-view-node={v.node} className="nt-condition">{v.children?.map(c => render(c, blocked, showOrigin))}</div>;
     if (v.kind === "message") return <p key={v.node} data-view-node={v.node} className={classes}>{v.label}{v.issues?.map(i => <small key={i.key}>{i.message}</small>)}</p>;
-    const children = v.children?.map(c => render(c, blocked));
+    const children = v.children?.map(c => render(c, blocked, showOrigin));
     if (v.kind === "section" && v.collapsible) return <details key={v.node} data-view-node={v.node} className={"nt-section " + classes}><summary onClick={choose}>{v.label}</summary>{children}</details>;
     if (v.kind === "section") return <section key={v.node} data-view-node={v.node} className={"nt-section " + classes}><h3>{select ? <button type="button" onClick={choose}>{v.label}</button> : v.label}</h3>{children}</section>;
     if (v.kind === "grid") return <div key={v.node} data-view-node={v.node} className={"nt-grid " + classes} style={{
@@ -152,7 +153,7 @@ export function ToolForm({
     return <form key={v.node} data-view-node={v.node} className="nt-form" onSubmit={e => {
       e.preventDefault();
       if (!blockedDraft) save?.();
-    }}><h2>{v.label}</h2>{children}{v.command && save && <button type="submit" disabled={blockedDraft}>Сохранить значения</button>}</form>;
+    }}><h2>{select ? <button type="button" onClick={choose}>{v.label}</button> : v.label}</h2>{children}{v.command && save && <button type="submit" disabled={blockedDraft}>Сохранить значения</button>}</form>;
   }
   return <div ref={container} className="nt-form-root">{view ? render(view, readOnly) : <p>Подключите выход интерфейса инструмента.</p>}</div>;
 }

@@ -33,7 +33,7 @@ export function initialTools(manufacturers = ["cnp", "aquastrong", "onis", "vand
   const uiSlots = Array.from({
     length: 64
   }, (_, i) => F("child" + i, "object", "view"));
-  type("ui.form", "Форма инструмента", [...uiSlots, F("title", "string", "text"), F("command", "object", "saveCommand"), output(view())], "form");
+  type("ui.form", "Форма инструмента", [...uiSlots, F("title", "string", "text"), F("command", "object", "saveCommand"), {...bool("showOrigin"),name:"Показывать источник значения",initial:true}, output(view())], "form");
   type("ui.section", "Раздел", [...uiSlots, F("title", "string", "text"), F("collapsible", "boolean", "flag"), output(view())], "section");
   type("ui.grid", "Сетка", [...uiSlots, F("columns", "int", "columns"), output(view())], "grid");
   type("ui.field", "Поле параметра", [F("binding", "object", "parameterBinding"), F("label", "string", "text"), F("widget", "enum", "widget"), F("hint", "string", "text"), F("width", "int", "columns"), {...bool("visible"),name:"Показывать в форме",initial:true}, {...bool("enabled"),name:"Доступно для ввода",initial:true}, {...bool("showOrigin"),name:"Показывать источник значения",initial:true}, output(view())], "field").fields.find(f => f.key === "widget")!.options = ["auto", "number", "text", "select", "toggle"];

@@ -120,7 +120,10 @@ function execute(step: Step, v: Values, context: ToolContext): Values {
           columns: Number(v.columns ?? 1),
           collapsible: v.collapsible === true
         };
-        if (step.operation === "form") view.command = v.command as View["command"];
+        if (step.operation === "form") {
+          view.command = v.command as View["command"];
+          view.showOrigin = v.showOrigin !== false;
+        }
         return {
           value: view
         };

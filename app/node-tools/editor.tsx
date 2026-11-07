@@ -235,9 +235,9 @@ export function ToolEditor({
     setHistory(h => [...h.slice(-39), doc!]);
     setDoc({
       ...next,
-      types: next.types.map(t => t.operation !== "field" ? t : {
+      types: next.types.map(t => !["field", "form"].includes(t.operation ?? "") ? t : {
         ...t,
-        fields: [...t.fields, ...["visible", "enabled", "showOrigin"].filter(key => !t.fields.some(f => f.key === key)).map(key => ({
+        fields: [...t.fields, ...(t.operation === "form" ? ["showOrigin"] : ["visible", "enabled", "showOrigin"]).filter(key => !t.fields.some(f => f.key === key)).map(key => ({
           ...makeField(key, key === "visible" ? "Показывать в форме" : key === "showOrigin" ? "Показывать источник значения" : "Доступно для ввода", "boolean", "flag"),
           direction: "input" as const,
           initial: true
@@ -671,7 +671,7 @@ export function ToolEditor({
           graph: u.diagram,
           path: u.path,
           node: u.node
-        })}>{u.name}</option>))}</select><button onClick={newTool}>＋ Инструмент</button><button onClick={() => setMetadata(true)}>Определение</button><button onClick={() => setLibrary(!library)}>＋ Библиотека</button><button onClick={() => {
+        })}>{u.name}</option>))}</select><button onClick={newTool}>＋ Инструмент</button><button onClick={() => setMetadata(true)}>Определение</button><button disabled={!trial.result?.view?.node} onClick={() => previewSelect(trial.result!.view.node)}>Свойства формы</button><button onClick={() => setLibrary(!library)}>＋ Библиотека</button><button onClick={() => {
         setParameter({
           key: "designation",
           name: "Обозначение установки",
@@ -767,7 +767,7 @@ export function ToolEditor({
                   ...node.values,
                   enabled: e.target.checked
                 }
-              })} />Доступно для ввода</label><label><input type="checkbox" aria-label="Показывать источник значения" checked={(graph.edges.some(e=>e.to===node.id&&e.input==="showOrigin") ? localTrace[node.id]?.inputs.showOrigin : node.values.showOrigin) !== false} disabled={graph.edges.some(e=>e.to===node.id&&e.input==="showOrigin")} title={graph.edges.some(e=>e.to===node.id&&e.input==="showOrigin")?"Значение задаётся связью — её можно изменить в расширенных свойствах":""} onChange={e=>updateNode({values:{...node.values,showOrigin:e.target.checked}})}/>Показывать источник значения</label>{chain?.parameter && <button onClick={() => navigate(chain.parameter!)}>Свойства параметра</button>}</>}{Object.keys(type.formulas).length > 0 && <><h4>Выражения</h4>{Object.entries(type.formulas).map(([key, expr]) => <p key={key}>{key} = {expr}</p>)}<button onClick={() => setEditing(type)}>Изменить выражение и входы</button></>}</>}
+              })} />Доступно для ввода</label>{chain?.parameter && <button onClick={() => navigate(chain.parameter!)}>Свойства параметра</button>}</>}{["field", "form"].includes(type.operation ?? "") && <OriginControl graph={graph} node={node} trace={localTrace} update={updateNode} all={type.operation === "form"} />}{Object.keys(type.formulas).length > 0 && <><h4>Выражения</h4>{Object.entries(type.formulas).map(([key, expr]) => <p key={key}>{key} = {expr}</p>)}<button onClick={() => setEditing(type)}>Изменить выражение и входы</button></>}</>}
       <details><summary>К источнику</summary>{chain?.sources.map((d, i) => <button key={i} onClick={() => navigate(d.address)}>{d.label}</button>)}</details><details><summary>К получателям</summary>{chain?.consumers.map((d, i) => <button key={i} onClick={() => navigate(d.address)}>{d.label}</button>)}</details><DataTree value={localTrace[node.id]} label="Данные выбранной ноды" missing={!localTrace[node.id]} status={dataStatus} />{node.id === "source" && <p>context.values — входы инструмента; context.stored — сохранённые значения; context.defaults — базовая публикация; context.role — роль исполнения.</p>}
       {viewed?.issues.filter(i => i.node === [...at.path, node.id].join("/")).map(i => <p key={i.key} role="alert">{i.message}<button onClick={() => previewSelect(i.node)}>Перейти к ошибке</button></p>)}</>} />}
     {preview && <aside className="nt-preview" style={{
@@ -917,7 +917,7 @@ function NodeProperties({
   type: NodeType;
   update: (patch: Partial<GraphNode>) => void;
 }) {
-  const fields = type.fields.filter(f => f.direction !== "output" && !graph.edges.some(e => e.to === node.id && e.input === f.key) && !(type.operation === "field" && ["visible", "enabled", "showOrigin"].includes(f.key)) && !["object", "array", "reference"].includes(f.kind));
+  const fields = type.fields.filter(f => f.direction !== "output" && !graph.edges.some(e => e.to === node.id && e.input === f.key) && !(type.operation === "field" && ["visible", "enabled", "showOrigin"].includes(f.key) || type.operation === "form" && f.key === "showOrigin") && !["object", "array", "reference"].includes(f.kind));
   return <details open className="nt-settings"><summary>Настройки экземпляра</summary>{fields.map(f => {
       const value = Object.hasOwn(node.values, f.key) ? node.values[f.key] : f.initial;
       const set = (value: unknown) => update({
@@ -953,4 +953,25 @@ function NodeProperties({
       };
       return <ValueEditor key={f.key} field={editorField} value={value} label={names[f.key] ?? f.name} change={set} />;
     })}</details>;
+}
+function OriginControl({
+  graph,
+  node,
+  trace,
+  update,
+  all
+}: {
+  graph: Diagram;
+  node: GraphNode;
+  trace: Trace;
+  update: (patch: Partial<GraphNode>) => void;
+  all: boolean;
+}) {
+  const linked = graph.edges.some(e => e.to === node.id && e.input === "showOrigin");
+  return <><label><input type="checkbox" aria-label="Показывать источник значения" checked={(linked ? trace[node.id]?.inputs.showOrigin : node.values.showOrigin) !== false} disabled={linked} title={linked ? "Значение задаётся связью — её можно изменить в расширенных свойствах" : ""} onChange={e => update({
+        values: {
+          ...node.values,
+          showOrigin: e.target.checked
+        }
+      })} />Показывать источник значения</label>{all && <small>Управляет подписями всех полей инструмента, включая вложенные разделы. Индивидуальные настройки полей сохраняются.</small>}</>;
 }

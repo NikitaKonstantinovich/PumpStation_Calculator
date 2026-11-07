@@ -12,8 +12,8 @@ const admin = await store.load("api/admin/node-tools/route"), runtime = await st
 const { toolState, toolCommand, toolProgram, toolDefaults, verifyWorkspace } = await store.load("node-tools/storage-server");
 const { parameterType } = await store.load("node-tools/compiler");
 const state = await toolState(), doc = state.draft, settings = doc.diagrams.find(g => g.id === "tool.settings");
-// Old published field contracts have no origin-visibility attribute and must keep their labels.
-doc.types.find(type => type.operation === "field").fields = doc.types.find(type => type.operation === "field").fields.filter(field => field.key !== "showOrigin");
+// Old published field/form contracts have no origin-visibility attribute and must keep their labels.
+for (const type of doc.types.filter(type => ["field", "form"].includes(type.operation))) type.fields = type.fields.filter(field => field.key !== "showOrigin");
 // An isolated, ordinary input provides a declared compatible source for the flow-mode checks.
 doc.types.push(parameterType("fixture.designFlow", "Проектный расход", { key: "designFlow", name: "Проектный расход", kind: "float", meaning: "flow", unit: "м³/ч", direction: "input", initial: 15 }));
 settings.nodes.push({ id: "designFlow", type: "fixture.designFlow", name: "Проектный расход", x: 350, y: 4400, values: {} }, { id: "field_designFlow", type: "ui.field", name: "Поле проектного расхода", x: 1000, y: 4400, values: {} });
@@ -38,6 +38,8 @@ const input=label=>[...document.querySelectorAll("input,select,textarea")].find(
 async function fill(el,value){if(!el)throw Error("Поле отсутствует · "+value);el.focus();const proto=el instanceof HTMLSelectElement?HTMLSelectElement.prototype:el instanceof HTMLTextAreaElement?HTMLTextAreaElement.prototype:HTMLInputElement.prototype;try{Object.getOwnPropertyDescriptor(proto,"value").set.call(el,value);}catch(e){throw Error("Неверный редактор "+el.tagName+" · "+el.getAttribute("aria-label")+" · "+value+" · "+e.message);}el.dispatchEvent(new Event(el instanceof HTMLSelectElement?"change":"input",{bubbles:true}));await sleep();el.dispatchEvent(new FocusEvent("focusout",{bubbles:true}));await sleep();}
 async function chooseParameter(node,path=["settings","main"]){const select=await until(()=>input("Найти параметр"));const option=[...select.options].find(o=>{try{const a=JSON.parse(o.value);return a.node===node&&JSON.stringify(a.path)===JSON.stringify(path);}catch{return false;}});assert(option,"Параметр не найден: "+node);await fill(select,option.value);await until(()=>input("Источник значения"));}
 const currentRows=key=>[...document.querySelectorAll('.nt-preview .nt-data-tree[aria-label="Действующие данные инструмента"] .nt-data-leaf')].filter(row=>row.querySelector(".nt-data-key")?.textContent===key).map(row=>row.querySelector(".nt-data-value")?.textContent);
+async function chooseForm(){await click("Свойства формы");await until(()=>document.querySelector('.gn-node.selected[data-address="settings/form"]'));await sleep();return await until(()=>input("Показывать источник значения"));}
+const previewInputs=()=>JSON.stringify([...document.querySelectorAll('.nt-preview [data-parameter]')].map(field=>{const control=field.querySelector("input,select,textarea");return [field.dataset.parameter,control?.value,control?.checked,control?.disabled];}));
 async function valuesJSON(values){const area=await until(()=>input("Тестовые значения JSON"));area.closest("details").open=true;await fill(area,JSON.stringify(values));}
 function App(){const [p,setP]=useState(()=>{const cached=localStorage.getItem("authoringProject");if(cached)return parseProjectConfig(JSON.parse(cached));return {...createProject("Проверка редактора"),workspace2:seed};}),[view,setView]=useState(sessionStorage.getItem("authoringView")??"editor"),[status,setStatus]=useState("Тестовый проект");function navigate(next){sessionStorage.setItem("authoringView",next);setView(next);}const nav=<nav><button onClick={()=>navigate("editor")}>Открыть редактор теста</button><button onClick={()=>navigate("runtime")}>Открыть Workspace 2 теста</button></nav>;return <>{nav}{view==="editor"?<ToolEditor project={p} back={()=>{}} openMain={()=>{}} navigation={null}/>:<NodeWorkspace project={p} update={async workspace2=>{const response=await fetch("/fixture-project",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(workspace2)});const data=await response.json();if(!response.ok){setStatus(data.error);return;}const next={...p,workspace2};localStorage.setItem("authoringProject",JSON.stringify(next));setP(next);setStatus("Сохранено сервером теста");}} back={()=>{}} openMain={()=>{}} navigation={null} status={status}/>}</>;}
 createRoot(document.getElementById("root")).render(<App/>);
@@ -48,6 +50,7 @@ async function run(){
   assert(!document.querySelector('[data-parameter="main.medium"]'),"Скрытое поле вернулось после перезагрузки");
   const result=JSON.parse(document.querySelector(".nt-tool pre").textContent);assert(result.main.medium==="water"&&result.secondary.medium==="water","Потеряно постоянное значение после перезагрузки");
   const inlet=document.querySelector('[data-parameter="inletHead"]');assert(inlet&&inlet.querySelector("input").value===sessionStorage.getItem("originInletValue"),"Поле или его базовое значение потеряно после перезагрузки");assert(!inlet.querySelector(".nt-origin"),"Скрытая подпись источника вернулась после перезагрузки");
+  assert(!document.querySelector(".nt-tool .nt-origin"),"Общее отключение подписей не сохранилось после перезагрузки");
   const project=JSON.parse(localStorage.getItem("authoringProject"));assert(!Object.hasOwn(project.workspace2.tools.settings.values,"main.medium"),"Старое переопределение не удалено миграцией");return;
  }
  await until(()=>input("Найти параметр"));await valuesJSON(originalValues);
@@ -65,6 +68,15 @@ async function run(){
  assert([...fieldInspector.querySelectorAll(".nt-data-leaf")].some(row=>row.querySelector(".nt-data-key")?.textContent==="origin"&&row.querySelector(".nt-data-value")?.textContent==="Базовые значения"),"Инспектор потерял происхождение скрытой подписи");
  input("Показывать источник значения").click();await until(()=>document.querySelector('.nt-preview [data-parameter="inletHead"] .nt-origin')?.textContent==="Базовые значения");
  input("Показывать источник значения").click();await until(()=>!document.querySelector('.nt-preview [data-parameter="inletHead"] .nt-origin'));
+
+ const originsBefore=document.querySelectorAll(".nt-preview .nt-origin").length,valuesBefore=previewInputs();
+ assert(originsBefore>1&&document.querySelector('.nt-preview [data-parameter="main.flowRate"] .nt-origin')&&document.querySelector('.nt-preview [data-parameter="secondary.flowRate"] .nt-origin'),"Не подготовлены подписи обоих контуров для общей настройки");
+ const formToggle=await chooseForm();assert(formToggle.checked,"Общая настройка выключена для старого определения формы");formToggle.click();await until(()=>!document.querySelector(".nt-preview .nt-origin"));
+ assert(previewInputs()===valuesBefore,"Общее отключение подписей изменило поля, значения или доступность");
+ const formInspector=document.querySelector('.gn-props .nt-data-tree[aria-label="Данные выбранной ноды"]');await fill(formInspector.querySelector('input[type="search"]'),"");
+ assert([...formInspector.querySelectorAll(".nt-data-leaf")].some(row=>row.querySelector(".nt-data-key")?.textContent==="origin"&&row.querySelector(".nt-data-value")?.textContent==="Базовые значения"),"Общее скрытие потеряло происхождение в инспекторе");
+ input("Показывать источник значения").click();await until(()=>document.querySelectorAll(".nt-preview .nt-origin").length===originsBefore);
+ assert(!document.querySelector('.nt-preview [data-parameter="inletHead"] .nt-origin'),"Общее включение изменило индивидуальную настройку скрытого поля");assert(previewInputs()===valuesBefore,"Возврат подписей изменил поля инструмента");
  await chooseParameter("medium");await fill(input("Источник значения"),"fixed");await fill(input("Постоянное значение"),"water");
  (await until(()=>input("Показывать в форме"))).click();await sleep();
  await until(()=>!document.querySelector('.nt-preview [data-parameter="main.medium"]')&&!document.querySelector('.nt-preview [data-parameter="secondary.medium"]'));
@@ -98,15 +110,18 @@ async function run(){
  assert(document.querySelector('.nt-preview [data-parameter="main.flowRate"] input')?.disabled,"Параметр источника допускает пользовательский ввод");
  await fill(input("Источник значения"),"user");await until(()=>currentRows("flowRate").includes("10")&&currentRows("flowRate").includes("5"));
  assert(document.querySelector('.nt-preview [data-parameter="main.flowRate"] input').value==="10"&&!document.querySelector('.nt-preview [data-parameter="main.flowRate"] [role="alert"]'),"Возврат пользовательского ввода сохранил неверный черновик");
+ const publishFormToggle=await chooseForm();assert(publishFormToggle.checked,"Общая настройка формы не восстановилась");publishFormToggle.click();await until(()=>!document.querySelector(".nt-preview .nt-origin"));
  await click("Сохранить");await until(()=>document.querySelector(".gn-status")?.textContent.includes("Черновик сохранён"));
  await click("Опубликовать");await until(()=>document.querySelector(".gn-status")?.textContent.includes("Публикация обновлена"));
  await click("Открыть Workspace 2 теста");
  await until(()=>document.querySelector('[data-parameter="main.medium"] select')?.value==="wastewater");
  assert(document.querySelector('[data-parameter="secondary.medium"] select')?.value==="wastewater","Историческая версия была изменена публикацией");
  assert(document.querySelector('[data-parameter="inletHead"] .nt-origin')?.textContent==="Базовые значения","Публикация изменила подпись в исторической версии");
+ assert(document.querySelectorAll(".nt-tool .nt-origin").length>1,"Общая настройка изменила прежнюю опубликованную форму");
  await click("Применить актуальную версию");await until(()=>!document.querySelector('[data-parameter="main.medium"]'));
  const result=JSON.parse(document.querySelector(".nt-tool pre").textContent);assert(result.main.medium==="water"&&result.secondary.medium==="water","Миграция не применила постоянный источник");
  const inletAfter=document.querySelector('[data-parameter="inletHead"]');assert(inletAfter&&inletAfter.querySelector("input").value===sessionStorage.getItem("originInletValue"),"Применение версии изменило базовое значение поля");assert(!inletAfter.querySelector(".nt-origin"),"Workspace 2 не применил скрытие подписи источника");
+ assert(!document.querySelector(".nt-tool .nt-origin"),"Workspace 2 не применил общее отключение подписей источников");
  assert(document.querySelector(".nt-tool").textContent.includes("прежнее введённое значение"),"Нет сообщения об обработке старого переопределения");
  await click("Сохранить значения");await until(()=>localStorage.getItem("authoringProject"));
  sessionStorage.setItem("authoringSaved","1");location.reload();await new Promise(()=>{});
@@ -182,7 +197,7 @@ try {
   assert.equal(Object.hasOwn(persisted.tools.settings.values, "secondary.medium"), false);
   assert.equal(persisted.tools.settings.values["main.flowRate"], 10);
   assert.equal(persisted.tools.settings.values["secondary.flowRate"], 5);
-  console.log("PASS · origin-label toggle + inspector + legacy compatibility + publication/reload, clean water, visibility restoration, shared modes, computed expression, registered source, exact server-test snapshot, stale inspection, pinned version, explicit migration, server save and reload");
+  console.log("PASS · global and per-field origin-label toggles + nested contours + preserved values/inspector + legacy compatibility + publication/reload, clean water, visibility restoration, shared modes, computed expression, registered source, exact server-test snapshot, stale inspection, pinned version, explicit migration, server save and reload");
 } finally {
   clearTimeout(timeout); debugSocket?.close(); browser.kill(); server.closeAllConnections(); server.close(); await closed; store.close();
   if (dirname(resolve(profile)) === resolve(tmpdir()) && basename(profile).startsWith("pumpstation-authoring-ui-")) await rm(profile, { recursive: true, force: true, maxRetries: 8, retryDelay: 300 });
