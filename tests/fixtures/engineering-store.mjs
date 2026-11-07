@@ -6,6 +6,7 @@ export async function engineeringStore(){
   const sql=new DatabaseSync(":memory:");
   sql.exec(await readFile(new URL("../../drizzle/0015_engineering_graphs.sql",import.meta.url),"utf8"));
   sql.exec(await readFile(new URL("../../drizzle/0016_station_instruments.sql",import.meta.url),"utf8"));
+  sql.exec(await readFile(new URL("../../drizzle/0017_node_tools.sql",import.meta.url),"utf8"));
   class Statement {
     constructor(query,params=[]){this.query=query;this.params=params;}
     bind(...args){return new Statement(this.query,args);}

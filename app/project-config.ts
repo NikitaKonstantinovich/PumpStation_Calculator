@@ -1,3 +1,5 @@
+import {parseWorkspaceData} from "./node-tools/data";
+import type {WorkspaceData} from "./node-tools/schema";
 import { normalizeHydraulicOptions } from "./hydraulic-option-config";
 import { normalizeEditor, type EditorState } from "./model-editor/model";
 import { createCollectors, normalizeCollectors, synchronizeCollectors, type CollectorsEntity } from "./collector-project";
@@ -128,6 +130,7 @@ export type ProjectEntity = InputEntity | ChartEntity | SketchEntity | SettingsE
 declare const __PSC_CALC_METHOD__:string;
 export const calculationMethod=typeof __PSC_CALC_METHOD__==="string"?__PSC_CALC_METHOD__:"development";
 export type ProjectConfig = {
+  workspace2?:WorkspaceData;
   schemaVersion: 1;
   project: { id: string; name: string; createdAt: string; updatedAt: string; modelLibraryVersion?: string; recalculatedAt?: string; calculationMethod?: string; graphVersion?: string };
   station: { selectedPumpId?: string; selectedPumpModel?: string; workingPumpCount?: number; reservePumpCount?: number; totalPumpCount?: number; secondaryPumpId?: string; secondaryPumpModel?: string; secondaryWorkingPumpCount?: number; secondaryReservePumpCount?: number; secondaryTotalPumpCount?: number };
@@ -264,6 +267,7 @@ export function parseProjectConfig(raw: unknown, preserveCalculation = false): P
   const fallbackCells=windows.filter(panel=>!panel.minimized).slice(0,cellCount).map(panel=>panel.id);
   const cells=Array.from({length:cellCount},(_,index)=>hasSavedCells?savedCells[index]??null:fallbackCells[index]??null);
   const config:ProjectConfig={
+    ...(candidate.workspace2?{workspace2:parseWorkspaceData(candidate.workspace2)}:{}),
     schemaVersion: 1,
     project: { ...candidate.project, name: candidate.project.name.trim() || "Без названия", createdAt: candidate.project.createdAt || now(), updatedAt: candidate.project.updatedAt || now() },
     station: candidate.station ?? {},

@@ -12,6 +12,8 @@ export type Focus = Address & {
   serial: number;
 };
 type Props = {
+  root?:string;
+  overviewLabel?:string;
   doc: Document;
   active: Address;
   focus: Focus | null;
@@ -34,6 +36,8 @@ const curve = (x: number, y: number, u: number, v: number) => {
 };
 export function Canvas({
   doc,
+  root=ROOT,
+  overviewLabel="Показать всю станцию",
   active,
   focus,
   storageKey,
@@ -46,7 +50,7 @@ export function Canvas({
 }: Props) {
   const el = useRef<HTMLDivElement>(null);
   const model = useMemo(() => layout(doc), [doc]);
-  const [base, setBase] = useState(ROOT);
+  const [base, setBase] = useState(root);
   const [cam, setCam] = useState<Camera>({
     ...origin,
     open: []
@@ -71,7 +75,7 @@ export function Canvas({
     x: number;
     y: number;
   } | null>(null);
-  const fit = useCallback((id = ROOT) => {
+  const fit = useCallback((id = root) => {
     if (!el.current) return;
     const g = model.diagrams.get(id);
     if (!g) return;
@@ -86,7 +90,7 @@ export function Canvas({
       y: (h - b.h * k) / 2 - b.y * k,
       open: []
     });
-  }, [model]);
+  }, [model,root]);
   const initialized = useRef("");
   useLayoutEffect(() => {
     if (initialized.current === saveKey) return;
@@ -94,18 +98,18 @@ export function Canvas({
       initialized.current = saveKey;
       try {
         const s = JSON.parse(localStorage.getItem(saveKey) ?? "null");
-        if (s && s.base === ROOT && [s.x, s.y, s.k].every(Number.isFinite) && s.k > 0 && Array.isArray(s.open)) {
+        if (s && s.base === root && [s.x, s.y, s.k].every(Number.isFinite) && s.k > 0 && Array.isArray(s.open)) {
           setCam(s);
           return;
         }
       } catch {/* Fit the station when saved camera data is damaged. */}
-      fit();
+      fit(root);
     });
     return () => cancelAnimationFrame(handle);
-  }, [fit, saveKey]);
+  }, [fit, saveKey,root]);
   useEffect(() => {
     const timer = setTimeout(() => {
-      if (base === ROOT) try {
+      if (base === root) try {
         localStorage.setItem(saveKey, JSON.stringify({
           ...cam,
           base
@@ -113,7 +117,7 @@ export function Canvas({
       } catch {/* Storage may be unavailable in a private window. */}
     }, 150);
     return () => clearTimeout(timer);
-  }, [cam, base, saveKey]);
+  }, [cam, base, saveKey,root]);
   useLayoutEffect(() => {
     if (!focus || lastFocus.current === focus || !el.current) return;
     const host = el.current;
@@ -231,7 +235,7 @@ export function Canvas({
             b = byId.get(e.to);
           if (!a || !b) return null;
           const d = curve(a.n.x + WIDTH, a.n.y + 71 + 27 * a.outs.findIndex(f => f.key === e.out), b.n.x, b.n.y + 71 + 27 * b.ins.findIndex(f => f.key === e.input));
-          return <g key={i}><path className="gn-wire" d={d} /><path className="gn-hit" d={d} onDoubleClick={() => unlink(g, e)} onContextMenu={event => {
+          return <g key={i}><path data-kind={e.kind??(a.type.fields.find(f=>f.key===e.out)?.meaning==="parameterBinding"?"binding":a.type.fields.find(f=>f.key===e.out)?.meaning==="saveCommand"?"command":"data")} className="gn-wire" d={d} /><path className="gn-hit" d={d} onDoubleClick={() => unlink(g, e)} onContextMenu={event => {
               event.preventDefault();
               event.stopPropagation();
               unlink(g, e);
@@ -313,7 +317,7 @@ export function Canvas({
     }}>{layer(graph, [], origin)}</div>
     <div className="gn-controls" onPointerDown={e => e.stopPropagation()}><button onClick={() => {
         overview();
-        fit();
-      }}>Показать всю станцию</button><span>{Math.round(cam.k * 100)}%</span><small className="station-legend">Ввод · Обработка и отображение · Вывод</small></div>
+        fit(root);
+      }}>{overviewLabel}</button><span>{Math.round(cam.k * 100)}%</span><small className="station-legend">Ввод · Обработка и отображение · Вывод</small></div>
   </div>;
 }

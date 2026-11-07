@@ -1,6 +1,6 @@
 import { childDiagram, ROOT } from "./hierarchy";
 import type { Document } from "./schema";
-export function usesInStation(doc: Document, typeId: string) {
+export function usesInStation(doc: Document, typeId: string, root=ROOT) {
   const graphs = new Map(doc.diagrams.map(g => [g.id, g])),
     types = new Map(doc.types.map(t => [t.id, t]));
   const uses: {
@@ -28,6 +28,6 @@ export function usesInStation(doc: Document, typeId: string) {
       if (child) visit(child, [...path, n.id], [...names, n.name], chain);
     }
   }
-  visit(ROOT, [], [], new Set());
+  visit(root, [], [], new Set());
   return uses;
 }

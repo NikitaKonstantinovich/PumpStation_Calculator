@@ -4,16 +4,18 @@ import { useState } from "react";
 import { accepts, makeField, validKey, type DataKind, type Document, type Field, type NodeType } from "./schema";
 import {usesInStation} from "./uses";
 import { compileExpression } from "./expression";
-const kinds: DataKind[] = ["number", "string", "boolean", "enum", "reference", "object", "array"];
-const kindLabels = ["Число", "Строка", "Логическое", "Перечисление", "Ссылка", "Объект", "Массив"];
+const kinds: DataKind[] = ["number", "float", "int", "string", "boolean", "enum", "reference", "object", "array"];
+const kindLabels = ["Число", "Дробное число", "Целое число", "Строка", "Логическое", "Перечисление", "Ссылка", "Объект", "Массив"];
 export function TypeEditor({
   original,
+  root,
   doc,
   close,
   save,
   navigate
 }: {
   original: NodeType;
+  root?:string;
   doc: Document;
   close: () => void;
   save: (t: NodeType) => void;
@@ -25,7 +27,7 @@ export function TypeEditor({
     g,
     n
   })));
-  const paths=usesInStation(doc,original.id);
+  const paths=usesInStation(doc,original.id,root);
   function patch(index: number, change: Partial<Field>) {
     setType(t => ({
       ...t,

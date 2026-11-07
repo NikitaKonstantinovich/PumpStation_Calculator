@@ -1,4 +1,4 @@
-export type DataKind = "number" | "string" | "boolean" | "enum" | "reference" | "object" | "array";
+export type DataKind = "number" | "float" | "int" | "string" | "boolean" | "enum" | "reference" | "object" | "array";
 export type Field = {
   key: string;
   name: string;
@@ -9,6 +9,9 @@ export type Field = {
   required?: boolean;
   initial?: unknown;
   options?: string[];
+  optionNames?: Record<string,string>;
+  shape?: Field[];
+  item?: Field;
   min?: number;
   max?: number;
 };
@@ -19,6 +22,8 @@ export type NodeType = {
   description: string;
   fields: Field[];
   formulas: Record<string, string>;
+  operation?: string;
+  parameter?: {key:string; field:Field; permission:"input"|"options"|"all"; defaultKey?:string};
   native?: string;
   instrument?: string;
   section?: "input" | "edit" | "output";
@@ -42,6 +47,7 @@ export type Edge = {
   out: string;
   to: string;
   input: string;
+  kind?: "data"|"binding"|"command";
 };
 export type Diagram = {
   id: string;
@@ -76,16 +82,22 @@ export type EditorState = {
   sources: Record<string, string>;
 };
 export const validKey = (value: unknown): value is string => typeof value === "string" && /^[a-zA-Z_][\w.-]{0,95}$/.test(value) && !["__proto__", "prototype", "constructor"].includes(value);
-export const compatible = (a: Field, b: Field) => a.direction !== "input" && b.direction !== "output" && a.kind === b.kind && a.meaning === b.meaning && a.unit === b.unit;
+function sameValueType(a:Field,b:Field):boolean {
+  return a.kind===b.kind && a.meaning===b.meaning && a.unit===b.unit && (!b.item || !!a.item && sameValueType(a.item,b.item)) && (!b.shape || !!a.shape && b.shape.every(field=>{const source=a.shape!.find(f=>f.key===field.key);return !!source&&sameValueType(source,field);}));
+}
+export const compatible = (a: Field, b: Field) => a.direction !== "input" && b.direction !== "output" && sameValueType(a,b);
 export function accepts(field: Field, value: unknown): boolean {
   if (value == null) return !field.required;
   switch (field.kind) {
+    case "int":
+      return typeof value==="number" && Number.isSafeInteger(value) && (field.min==null||value>=field.min) && (field.max==null||value<=field.max);
+    case "float":
     case "number":
       return typeof value === "number" && Number.isFinite(value) && (field.min == null || value >= field.min) && (field.max == null || value <= field.max);
     case "array":
-      return Array.isArray(value);
+      return Array.isArray(value) && (!field.item || value.every(v=>accepts(field.item!,v)));
     case "object":
-      return typeof value === "object" && !Array.isArray(value);
+      return typeof value === "object" && !Array.isArray(value) && (!field.shape || field.shape.every(f=>accepts(f,(value as Record<string,unknown>)[f.key])));
     case "reference":
     case "string":
       return typeof value === "string";

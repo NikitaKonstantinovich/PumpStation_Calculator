@@ -8,6 +8,8 @@ export type Step = {
   values: Record<string, unknown>;
   links: Edge[];
   expressions: Record<string, Expr>;
+  operation?: string;
+  parameter?: import("./schema").NodeType["parameter"];
   native?: string;
   direct?: boolean;
 };
@@ -82,6 +84,8 @@ export function compileDiagram(graph: Diagram, types: NodeType[], multi = false)
       values: node.values,
       links,
       expressions,
+      operation:type.operation,
+      parameter:type.parameter,
       native: type.native
     });
     visiting.delete(id);
@@ -97,7 +101,7 @@ export type StepCache = Map<string, {
   inputs: unknown[];
   outputs: Record<string, unknown>;
 }>;
-export function runPlan(plan: Plan, args: Record<string, unknown>, native: (name: string, values: Record<string, unknown>, direct?: boolean) => unknown, traceAll = false, cache?: StepCache) {
+export function runPlan(plan: Plan, args: Record<string, unknown>, native: (name: string, values: Record<string, unknown>, direct?: boolean) => unknown, traceAll = false, cache?: StepCache, operation?: (step:Step,values:Record<string,unknown>)=>Record<string,unknown>) {
   const trace: Trace = Object.create(null);
   const needed = new Set(["result"]);
   if (!traceAll) for (let i = plan.steps.length - 1; i >= 0; i--) {
@@ -135,6 +139,7 @@ export function runPlan(plan: Plan, args: Record<string, unknown>, native: (name
     }
     try {
       for (const f of step.fields) if (f.required && f.direction !== "output" && values[f.key] == null) throw Error(f.name + " · обязательный вход пуст");
+      if(step.operation){if(!operation)throw Error("Не задан исполнитель ноды");Object.assign(outputs,operation(step,values));}
       if (step.native) {
         outputs.value = native(step.native, values, step.direct);
         sources.value = "Встроенная операция · " + step.native;
@@ -180,7 +185,7 @@ export function validateDocument(doc: Document, sigs: Signature[], builtin: Node
     if (t.native !== original?.native) throw Error("Неизвестная встроенная операция");
     if (original && (t.native || t.id.startsWith("args.") || t.id.startsWith("return.")) && JSON.stringify(t.fields) !== JSON.stringify(original.fields)) throw Error(t.name + " · контракт штатного инструмента фиксирован");
     for (const f of t.fields) {
-      if (!["number", "string", "boolean", "enum", "reference", "object", "array"].includes(f.kind) || !["input", "output", "both"].includes(f.direction) || typeof f.unit !== "string" || !f.meaning || !f.name) throw Error(t.name + "." + f.key + " · неверное определение поля");
+      if (!["number", "float", "int", "string", "boolean", "enum", "reference", "object", "array"].includes(f.kind) || !["input", "output", "both"].includes(f.direction) || typeof f.unit !== "string" || !f.meaning || !f.name) throw Error(t.name + "." + f.key + " · неверное определение поля");
       if (f.initial != null && !accepts(f, f.initial)) throw Error(t.name + "." + f.key + " · неверное значение по умолчанию");
     }
   }
@@ -245,7 +250,7 @@ export function executableSlice(plan: Plan, outputs = ["value"]): Plan {
     for (const key of requested) {
       if (expressions[key]) references(expressions[key], inputs);else inputs.add(key);
     }
-    if (step.native) for (const f of step.fields) if (f.direction !== "output") inputs.add(f.key);
+    if (step.native || step.operation) for (const f of step.fields) if (f.direction !== "output") inputs.add(f.key);
     inputs.forEach(key => fields.add(key));
     const links = step.links.filter(e => inputs.has(e.input));
     for (const e of links) {
@@ -256,6 +261,8 @@ export function executableSlice(plan: Plan, outputs = ["value"]): Plan {
     const values = Object.fromEntries(Object.entries(step.values).filter(([key]) => fields.has(key)));
     steps.push({
       id: step.id,
+      operation:step.operation,
+      parameter:step.parameter,
       native: step.native,
       ...(step.direct ? {direct:true} : {}),
       fields: step.fields.filter(f => fields.has(f.key)),
