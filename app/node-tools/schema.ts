@@ -31,6 +31,7 @@ export type View = {
   collapsible?: boolean;
   visible?: boolean;
   enabled?: boolean;
+  showOrigin?: boolean;
   hint?: string;
   width?: number;
   issues?: Diagnostic[];

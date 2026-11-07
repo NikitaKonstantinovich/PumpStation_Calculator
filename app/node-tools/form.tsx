@@ -11,6 +11,7 @@ function Input({
   label,
   hint,
   widget,
+  showOrigin = true,
   disabled,
   issues,
   change,
@@ -21,6 +22,7 @@ function Input({
   label: string;
   hint?: string;
   widget?: string;
+  showOrigin?: boolean;
   disabled: boolean;
   issues: Diagnostic[];
   change: (key: string, value: unknown) => void;
@@ -70,7 +72,7 @@ function Input({
           e.currentTarget.blur();
         }
       }} />{field.unit && <small>{field.unit}</small>}</span>}
-    {hint && <small>{hint}</small>}<small className="nt-origin">{b.origin}</small>
+    {hint && <small>{hint}</small>}{showOrigin && <small className="nt-origin">{b.origin}</small>}
     {(error || messages.length > 0) && <small role="alert">{error || messages.map(m => m.message).join(" · ")}</small>}
   </label>;
 }
@@ -137,7 +139,7 @@ export function ToolForm({
         gridColumn: "span " + Math.min(2, Math.max(1, v.width ?? 1))
       }} role={select ? "button" : undefined} tabIndex={select ? 0 : undefined} onKeyDown={e => {
         if (select && e.target === e.currentTarget && e.key === "Enter") select(v.node);
-      }} onClick={choose}><Input validity={validity} binding={v.binding} label={v.label} hint={v.hint} widget={v.widget} disabled={blocked || !v.binding.editable || !v.binding.active} issues={issues} change={change} /></div>;
+      }} onClick={choose}><Input validity={validity} binding={v.binding} label={v.label} hint={v.hint} widget={v.widget} showOrigin={v.showOrigin} disabled={blocked || !v.binding.editable || !v.binding.active} issues={issues} change={change} /></div>;
     }
     if (v.kind === "condition") return <div key={v.node} data-view-node={v.node} className="nt-condition">{v.children?.map(c => render(c, blocked))}</div>;
     if (v.kind === "message") return <p key={v.node} data-view-node={v.node} className={classes}>{v.label}{v.issues?.map(i => <small key={i.key}>{i.message}</small>)}</p>;

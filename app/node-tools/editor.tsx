@@ -237,8 +237,8 @@ export function ToolEditor({
       ...next,
       types: next.types.map(t => t.operation !== "field" ? t : {
         ...t,
-        fields: [...t.fields, ...["visible", "enabled"].filter(key => !t.fields.some(f => f.key === key)).map(key => ({
-          ...makeField(key, key === "visible" ? "Показывать в форме" : "Доступно для ввода", "boolean", "flag"),
+        fields: [...t.fields, ...["visible", "enabled", "showOrigin"].filter(key => !t.fields.some(f => f.key === key)).map(key => ({
+          ...makeField(key, key === "visible" ? "Показывать в форме" : key === "showOrigin" ? "Показывать источник значения" : "Доступно для ввода", "boolean", "flag"),
           direction: "input" as const,
           initial: true
         }))]
@@ -767,7 +767,7 @@ export function ToolEditor({
                   ...node.values,
                   enabled: e.target.checked
                 }
-              })} />Доступно для ввода</label>{chain?.parameter && <button onClick={() => navigate(chain.parameter!)}>Свойства параметра</button>}</>}{Object.keys(type.formulas).length > 0 && <><h4>Выражения</h4>{Object.entries(type.formulas).map(([key, expr]) => <p key={key}>{key} = {expr}</p>)}<button onClick={() => setEditing(type)}>Изменить выражение и входы</button></>}</>}
+              })} />Доступно для ввода</label><label><input type="checkbox" aria-label="Показывать источник значения" checked={(graph.edges.some(e=>e.to===node.id&&e.input==="showOrigin") ? localTrace[node.id]?.inputs.showOrigin : node.values.showOrigin) !== false} disabled={graph.edges.some(e=>e.to===node.id&&e.input==="showOrigin")} title={graph.edges.some(e=>e.to===node.id&&e.input==="showOrigin")?"Значение задаётся связью — её можно изменить в расширенных свойствах":""} onChange={e=>updateNode({values:{...node.values,showOrigin:e.target.checked}})}/>Показывать источник значения</label>{chain?.parameter && <button onClick={() => navigate(chain.parameter!)}>Свойства параметра</button>}</>}{Object.keys(type.formulas).length > 0 && <><h4>Выражения</h4>{Object.entries(type.formulas).map(([key, expr]) => <p key={key}>{key} = {expr}</p>)}<button onClick={() => setEditing(type)}>Изменить выражение и входы</button></>}</>}
       <details><summary>К источнику</summary>{chain?.sources.map((d, i) => <button key={i} onClick={() => navigate(d.address)}>{d.label}</button>)}</details><details><summary>К получателям</summary>{chain?.consumers.map((d, i) => <button key={i} onClick={() => navigate(d.address)}>{d.label}</button>)}</details><DataTree value={localTrace[node.id]} label="Данные выбранной ноды" missing={!localTrace[node.id]} status={dataStatus} />{node.id === "source" && <p>context.values — входы инструмента; context.stored — сохранённые значения; context.defaults — базовая публикация; context.role — роль исполнения.</p>}
       {viewed?.issues.filter(i => i.node === [...at.path, node.id].join("/")).map(i => <p key={i.key} role="alert">{i.message}<button onClick={() => previewSelect(i.node)}>Перейти к ошибке</button></p>)}</>} />}
     {preview && <aside className="nt-preview" style={{
@@ -917,7 +917,7 @@ function NodeProperties({
   type: NodeType;
   update: (patch: Partial<GraphNode>) => void;
 }) {
-  const fields = type.fields.filter(f => f.direction !== "output" && !graph.edges.some(e => e.to === node.id && e.input === f.key) && !(type.operation === "field" && ["visible", "enabled"].includes(f.key)) && !["object", "array", "reference"].includes(f.kind));
+  const fields = type.fields.filter(f => f.direction !== "output" && !graph.edges.some(e => e.to === node.id && e.input === f.key) && !(type.operation === "field" && ["visible", "enabled", "showOrigin"].includes(f.key)) && !["object", "array", "reference"].includes(f.kind));
   return <details open className="nt-settings"><summary>Настройки экземпляра</summary>{fields.map(f => {
       const value = Object.hasOwn(node.values, f.key) ? node.values[f.key] : f.initial;
       const set = (value: unknown) => update({

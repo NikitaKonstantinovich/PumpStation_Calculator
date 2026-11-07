@@ -136,7 +136,8 @@ function execute(step: Step, v: Values, context: ToolContext): Values {
           hint: String(v.hint ?? ""),
           width: Number(v.width ?? 1),
           visible: v.visible !== false,
-          enabled: v.enabled !== false
+          enabled: v.enabled !== false,
+          showOrigin: v.showOrigin !== false
         } satisfies View
       };
     case "condition":
