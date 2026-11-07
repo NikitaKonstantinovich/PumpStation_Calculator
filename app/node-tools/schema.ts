@@ -33,6 +33,7 @@ export type View = {
   total?:number;
   children?: View[];
   binding?: ParameterBinding;
+  clearBindings?: ParameterBinding[];
   widget?: string;
   columns?: number;
   collapsible?: boolean;

@@ -245,6 +245,21 @@ export function evaluatePlan(plan: ToolProgram["plans"][string], context: ToolCo
       const b = bindings.find(b => b.key === v.binding?.key && b.node === v.binding?.node);
       if (!b || JSON.stringify(b) !== JSON.stringify(v.binding)) throw Error(v.node + " · подключите действительную привязку параметра");
     }
+    if (v.clearBindings != null) {
+      if (v.kind !== "select" || !v.binding || !Array.isArray(v.clearBindings) || v.clearBindings.length > 2) throw Error(v.node + " · неверное действие сброса зависимых параметров");
+      const main = v.binding, resetKeys = new Set<string>();
+      for (const target of v.clearBindings) {
+        const actual = bindings.find(binding => binding.key === target?.key && binding.node === target?.node && binding.toolId === target?.toolId);
+        if (!actual || JSON.stringify(actual) !== JSON.stringify(target)) throw Error(v.node + " · подключите действительную привязку зависимого параметра");
+        if (actual.toolId !== main.toolId) throw Error(v.node + " · зависимый параметр должен принадлежать тому же инструменту");
+        if (actual.node === main.node || actual.key === main.key) throw Error(v.node + " · параметр не может сбрасывать собственное значение");
+        if ((actual.mode ?? "user") !== "user" || actual.field.required) throw Error(v.node + " · сброс разрешён только для необязательного пользовательского параметра");
+        if (main.editable && !actual.editable) throw Error(v.node + " · сброс зависимого параметра недоступен для текущей роли");
+        const key = JSON.stringify([actual.toolId, actual.node, actual.key]);
+        if (resetKeys.has(key)) throw Error(v.node + " · зависимый параметр подключён повторно");
+        resetKeys.add(key);
+      }
+    }
     if (v.children) {
       if (!Array.isArray(v.children)) throw Error("Неверный список элементов формы");
       v.children.forEach(c => validateView(c, depth + 1));

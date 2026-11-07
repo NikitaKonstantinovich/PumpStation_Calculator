@@ -116,9 +116,10 @@ function RuntimeTool({
           setError((e as Error).message);
         }
       }}>Применить актуальную версию</button></header>
-    <ToolForm key={remote.program.version} view={result.view} issues={result.issues} change={(key, value) => {
+    <ToolForm key={remote.program.version} view={result.view} issues={result.issues} change={(key, value, clearKeys = []) => {
       setValues(v => ({
         ...v,
+        ...Object.fromEntries(clearKeys.map(key => [key, null])),
         [key]: value
       }));
       setMessage("");
@@ -174,7 +175,7 @@ function ProductTool({
   if (!result.value) return <p role="alert">{result.error}</p>;
   const value = result.value,
     errors = value.issues.filter(i => i.severity === "error");
-  return <article className="nt-tool"><header><strong>{remote.program.tools.find(t => t.id === toolId)?.name}</strong><small>Единый граф · {remote.program.version}</small></header><ToolForm view={value.view} issues={value.issues} change={(key, next) => {
+  return <article className="nt-tool"><header><strong>{remote.program.tools.find(t => t.id === toolId)?.name}</strong><small>Единый граф · {remote.program.version}</small></header><ToolForm view={value.view} issues={value.issues} change={(key, next, clearKeys = []) => {
       const old = data.tools[toolId];
       change({
         ...data,
@@ -184,6 +185,7 @@ function ProductTool({
             ...old,
             values: {
               ...old.values,
+              ...Object.fromEntries(clearKeys.map(key => [key, null])),
               [key]: next
             }
           }

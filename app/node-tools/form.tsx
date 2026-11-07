@@ -77,11 +77,16 @@ function Input({
     {(error || messages.length > 0) && <small role="alert">{error || messages.map(m => m.message).join(" · ")}</small>}
   </label>;
 }
-function DynamicSelect({ view: v, disabled, showOrigin, change }: { view: View; disabled: boolean; showOrigin: boolean; change: (key: string, value: unknown) => void }) {
+function DynamicSelect({ view: v, disabled, showOrigin, change }: { view: View; disabled: boolean; showOrigin: boolean; change: (key: string, value: unknown, clearKeys?: string[]) => void }) {
   const id = useId(), b = v.binding;
   if (!b) return <p role="alert">Подключите параметр фильтра</p>;
   return <label className="nt-field" htmlFor={id} data-parameter={b.key}><span>{v.label || b.field.name}</span>
-    <select id={id} disabled={disabled || !b.editable || !b.active} value={b.value == null ? "" : String(b.value)} onChange={e => change(b.key, e.target.value || null)}>
+    <select id={id} disabled={disabled || !b.editable || !b.active} value={b.value == null ? "" : String(b.value)} onChange={e => {
+      const next = e.target.value || null;
+      if ((b.value == null ? null : String(b.value)) === next) return;
+      const clearKeys = [...new Set((v.clearBindings ?? []).filter(target => target.key !== b.key && target.toolId === b.toolId && target.mode === "user" && target.editable && target.active && !target.field.required).map(target => target.key))];
+      change(b.key, next, clearKeys);
+    }}>
       <option value="">{v.hint || "Все"}</option>{v.options?.map(option => <option key={option.value} value={option.value}>{option.label}</option>)}
     </select>{showOrigin && <small className="nt-origin">{b.origin}</small>}{v.issues?.map(issue => <small role="alert" key={issue.key + issue.message}>{issue.message}</small>)}
   </label>;
@@ -125,7 +130,7 @@ export function ToolForm({
 }: {
   view?: View;
   issues: Diagnostic[];
-  change: (key: string, value: unknown) => void;
+  change: (key: string, value: unknown, clearKeys?: string[]) => void;
   save?: () => void;
   selected?: string;
   select?: (node: string) => void;

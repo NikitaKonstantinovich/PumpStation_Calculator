@@ -110,6 +110,69 @@ test("table, dynamic options and selected card retain real bindings and source p
   assert.deepEqual(card.rows[0].curvePoints, [{ flow: 0, head: 30 }, { flow: 10, head: 20 }, { flow: 20, head: 10 }]);
 });
 
+test("catalogue option cascade uses type and manufacturer while retaining records outside hydraulic eligibility", () => {
+  const catalogContext = { ...context, resources: { pump_catalog_v2: { ...snapshot, items: [
+    item("vertical-a", { manufacturer: "Alpha", series: "S1" }),
+    item("vertical-a-incomplete", { manufacturer: "Alpha", series: "S2", curve: [], selectable: false }),
+    item("vertical-b", { manufacturer: "Beta", series: "S3" }),
+    item("horizontal-a", { type: "end_suction", manufacturer: "Alpha", series: "S4" }),
+    item("horizontal-c", { type: "end_suction", manufacturer: "Gamma", series: "S5" })
+  ] } } };
+  const catalog = run("pump.catalog", {}, catalogContext).value;
+  const values = inputs => run("pump.options", { catalog, ...inputs }, catalogContext).options.map(option => option.value);
+  assert.deepEqual(values({ attribute: "manufacturer", type: "vertical_multistage" }), ["Alpha", "Beta"]);
+  assert.deepEqual(values({ attribute: "manufacturer", type: "end_suction" }), ["Alpha", "Gamma"]);
+  assert.deepEqual(values({ attribute: "series", type: "vertical_multistage", manufacturer: "Alpha" }), ["S1", "S2"]);
+  assert.deepEqual(values({ attribute: "series", type: "", manufacturer: "Alpha" }), ["S1", "S2", "S4"]);
+  assert.deepEqual(values({ attribute: "series", type: "vertical_multistage", manufacturer: null }), ["S1", "S2", "S3"]);
+  assert.deepEqual(values({ attribute: "manufacturer", type: null }), ["Alpha", "Beta", "Gamma"]);
+  assert.deepEqual(values({ attribute: "series", type: "missing" }), []);
+  const legacy = executePumpOperation({ id: "legacy/options", fields: [], values: {}, links: [], expressions: {}, operation: "pump.options" }, { catalog, attribute: "manufacturer" }, catalogContext);
+  assert.deepEqual(legacy.options.map(option => option.value), ["Alpha", "Beta", "Gamma"]);
+});
+
+function filterBinding(key, patch = {}) {
+  return { ...binding(), key, node: "selection/" + key, field: { key, name: key, kind: "string", meaning: "text", unit: "", direction: "input", required: false }, ...patch };
+}
+
+test("select reset descriptors are explicit, optional, user-owned and compatible with readonly roles", () => {
+  const main = filterBinding("type", { toolId: "selection" }), manufacturer = filterBinding("manufacturer", { toolId: "selection" }), series = filterBinding("series", { toolId: "selection" });
+  const value = run("ui.select", { binding: main, options: [], clear0: manufacturer, clear1: series }).value;
+  assert.deepEqual(value.clearBindings, [manufacturer, series]);
+  assert.deepEqual(JSON.parse(JSON.stringify(value)).clearBindings.map(target => target.key), ["manufacturer", "series"]);
+  assert.equal(run("ui.select", { binding: main, options: [] }).value.clearBindings, undefined);
+  assert.throws(() => run("ui.select", { binding: main, options: [], clear0: main }), /собственное значение/);
+  assert.throws(() => run("ui.select", { binding: main, options: [], clear0: { key: "fake" } }), /действительную привязку/);
+  assert.throws(() => run("ui.select", { binding: main, options: [], clear0: { ...series, toolId: "settings" } }), /тому же инструменту/);
+  for (const mode of ["fixed", "computed", "source"]) assert.throws(() => run("ui.select", { binding: main, options: [], clear0: { ...series, mode } }), /необязательный параметр пользовательского ввода/);
+  assert.throws(() => run("ui.select", { binding: main, options: [], clear0: { ...series, field: { ...series.field, required: true } } }), /необязательный параметр пользовательского ввода/);
+  assert.throws(() => run("ui.select", { binding: main, options: [], clear0: { ...series, editable: false } }), /текущей роли/);
+  assert.throws(() => run("ui.select", { binding: main, options: [], clear0: series, clear1: series }), /повторно/);
+  assert.equal(run("ui.select", { binding: { ...main, editable: false }, options: [], clear0: { ...series, editable: false } }).value.clearBindings.length, 1);
+});
+
+test("view reset actions reference evaluated bindings and observe actual user permissions", async () => {
+  const { parameterType } = await loadTs(new URL("../app/node-tools/compiler.ts", import.meta.url));
+  const selectType = byOperation.get("ui.select");
+  function parameter(id, permission = "input") {
+    const type = parameterType("cascade." + id, id, { key: id, name: id, kind: "string", meaning: "text", unit: "", direction: "input" }, permission);
+    return { id, fields: type.fields, values: {}, links: [], expressions: {}, operation: "parameter", parameter: type.parameter };
+  }
+  function plan(mainPermission = "input", dependentPermission = "input", fake) {
+    const main = parameter("type", mainPermission), dependent = parameter("series", dependentPermission);
+    return { id: "cascade", steps: [main, dependent, { id: "select", fields: selectType.fields, values: { options: [], ...(fake ? { clear0: fake } : {}) }, links: [{ from: "type", out: "binding", to: "select", input: "binding" }, ...(!fake ? [{ from: "series", out: "binding", to: "select", input: "clear0" }] : [])], expressions: {}, operation: "ui.select" }, { id: "result", fields: [{ key: "ui", name: "Форма", kind: "object", meaning: "view", unit: "", direction: "input" }], values: {}, links: [{ from: "select", out: "value", to: "result", input: "ui" }], expressions: {} }] };
+  }
+  const result = evaluatePlan(plan(), { ...context, role: "base" });
+  assert.equal(result.view.clearBindings[0], result.bindings.find(binding => binding.key === "series"));
+  assert.throws(() => evaluatePlan(plan("input", "all"), { ...context, role: "base" }), /текущей роли/);
+  const readonly = evaluatePlan(plan("all", "all"), { ...context, role: "base" });
+  assert.equal(readonly.view.binding.editable, false); assert.equal(readonly.view.clearBindings[0].editable, false);
+  assert.throws(() => evaluatePlan(plan("input", "input", filterBinding("forged")), context), /действительную привязку зависимого параметра/);
+  const primitiveView = { kind: "message", node: "forged", label: "Некорректное действие", clearBindings: [] };
+  const bad = { id: "bad-actions", steps: [{ id: "view", fields: [{ key: "value", kind: "object", meaning: "view", unit: "", direction: "output" }], values: { value: primitiveView }, links: [], expressions: {} }, { id: "result", fields: [{ key: "ui", kind: "object", meaning: "view", unit: "", direction: "input" }], values: {}, links: [{ from: "view", out: "value", to: "result", input: "ui" }], expressions: {} }] };
+  assert.throws(() => evaluatePlan(bad, context), /неверное действие сброса/);
+});
+
 test("collection operations do not mutate data and preserve zero, false and unknown values", () => {
   const source = [{ id: "a", n: 0, flag: false }, { id: "b", n: 10, flag: true }, { id: "c", n: null }], before = JSON.stringify(source);
   assert.deepEqual(run("collection.sort", { items: source, attribute: "n", direction: "desc" }).items.map(r => r.id), ["b", "a", "c"]);

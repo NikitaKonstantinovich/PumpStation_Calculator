@@ -361,10 +361,13 @@ export function executePumpOperation(step: Step, v: Values, context: ToolContext
     case "pump.options":
       {
         const source = dataset(v.catalog),
-          key = text(v.attribute);
+          key = text(v.attribute),
+          type = text(v.type).trim(),
+          manufacturer = text(v.manufacturer).trim();
         if (!["manufacturer", "series", "type"].includes(key)) throw Error("Выберите атрибут справочника");
+        const filtered = source.rows.filter(row => (!type || row.type === type) && (!manufacturer || row.manufacturer === manufacturer));
         return {
-          options: options(source.rows, key).map(option => ({
+          options: options(filtered, key).map(option => ({
             ...option,
             label: key === "type" ? pumpTypeLabel(option.value) : option.label
           }))
@@ -377,6 +380,17 @@ export function executePumpOperation(step: Step, v: Values, context: ToolContext
             value: text(row.value),
             label: text(row.label)
           }));
+        const clearBindings = [v.clear0, v.clear1].filter(value => value != null).map(value => realBinding(value));
+        const resets = new Set<string>();
+        for (const target of clearBindings) {
+          if (target.node === b.node || target.key === b.key && target.toolId === b.toolId) throw Error("Параметр не может сбрасывать собственное значение");
+          if (target.toolId !== b.toolId) throw Error("Зависимый параметр должен принадлежать тому же инструменту");
+          if ((target.mode ?? "user") !== "user" || target.field.required) throw Error("Сбрасывать можно только необязательный параметр пользовательского ввода");
+          if (b.editable && !target.editable) throw Error("Сброс зависимого параметра недоступен для текущей роли");
+          const key = target.node + ":" + target.key;
+          if (resets.has(key)) throw Error("Зависимый параметр подключён для сброса повторно");
+          resets.add(key);
+        }
         if (!["string", "enum"].includes(b.field.kind)) throw Error("Динамический список требует строковый параметр");
         const issues = b.active && b.value != null && b.value !== "" && !choices.some(option => option.value === b.value) ? [diagnostic(step, "Выбранный вариант отсутствует в текущем источнике", "error", b.key)] : [];
         return {
@@ -387,6 +401,7 @@ export function executePumpOperation(step: Step, v: Values, context: ToolContext
             hint: text(v.emptyLabel) || "Все",
             binding: b,
             options: choices,
+            ...(clearBindings.length ? { clearBindings } : {}),
             showOrigin: v.showOrigin !== false,
             issues
           } satisfies View,
