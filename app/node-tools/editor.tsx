@@ -23,7 +23,7 @@ import { loadCatalog } from "./catalog-client";
 import { unpackTrace } from "./trace-transport";
 import type { CatalogSnapshot } from "./catalog-schema";
 import { loadTools } from "./workspace";
-import { API, ROOT, safeId, type ToolDocument, type ToolTest, type TestResult, type Values, type Evaluation } from "./schema";
+import { API, ROOT, safeId, diagnosticKey, type ToolDocument, type ToolTest, type TestResult, type Values, type Evaluation } from "./schema";
 import type { ProjectConfig } from "../project-config";
 import "../engineering/editor.css";
 import "./tools.css";
@@ -798,7 +798,7 @@ export function ToolEditor({
                 }
               })} />Доступно для ввода</label>{chain?.parameter && <button onClick={() => navigate(chain.parameter!)}>Свойства параметра</button>}</>}{["field", "form"].includes(type.operation ?? "") && <OriginControl graph={graph} node={node} trace={localTrace} update={updateNode} all={type.operation === "form"} />}{Object.keys(type.formulas).length > 0 && <><h4>Выражения</h4>{Object.entries(type.formulas).map(([key, expr]) => <p key={key}>{key} = {expr}</p>)}<button onClick={() => setEditing(type)}>Изменить выражение и входы</button></>}</>}
       <details><summary>К источнику</summary>{chain?.sources.map((d, i) => <button key={i} onClick={() => navigate(d.address)}>{d.label}</button>)}</details><details><summary>К получателям</summary>{chain?.consumers.map((d, i) => <button key={i} onClick={() => navigate(d.address)}>{d.label}</button>)}</details><DataTree value={localTrace[node.id]} label="Данные выбранной ноды" missing={!localTrace[node.id]} status={dataStatus} />{node.id === "source" && <p>context.values — входы инструмента; context.stored — сохранённые значения; context.defaults — базовая публикация; context.role — роль исполнения.</p>}
-      {viewed?.issues.filter(i => i.node === [...at.path, node.id].join("/")).map(i => <p key={i.key} role="alert">{i.message}<button onClick={() => previewSelect(i.node)}>Перейти к ошибке</button></p>)}</>} />}
+      {viewed?.issues.filter(i => i.node === [...at.path, node.id].join("/")).map(i => <p key={diagnosticKey(i)} role={i.severity === "error" ? "alert" : "status"}>{i.message}<button onClick={() => previewSelect(i.node)}>Перейти к ошибке</button></p>)}</>} />}
     {preview && <aside className="nt-preview" style={{
         width
       }}><header><strong>Предпросмотр · {tool?.name}</strong><input aria-label="Ширина предпросмотра" type="range" min="280" max="800" value={width} onChange={e => setWidth(Number(e.target.value))} /><button onClick={() => setPreview(false)}>×</button></header>
@@ -816,7 +816,7 @@ export function ToolEditor({
           ...v,
           [key]: value
         }))} selected={selectedAddress} select={previewSelect} /> : <p>Нет результата для выбранного набора данных.</p>}
-      {viewed && <><details><summary>Дерево формы · включая скрытые поля</summary><FormTree view={viewed.view} selected={selectedAddress} select={previewSelect} /></details><DataTree value={viewed.value} label="Действующие данные инструмента" />{viewed.issues.map(i => <p key={i.node + i.key} role="alert">{i.message}<button onClick={() => previewSelect(i.node)}>Перейти к ошибке</button></p>)}</>}
+      {viewed && <><details><summary>Дерево формы · включая скрытые поля</summary><FormTree view={viewed.view} selected={selectedAddress} select={previewSelect} /></details><DataTree value={viewed.value} label="Действующие данные инструмента" />{viewed.issues.map(i => <p key={diagnosticKey(i)} role={i.severity === "error" ? "alert" : "status"}>{i.message}<button onClick={() => previewSelect(i.node)}>Перейти к ошибке</button></p>)}</>}
       <details><summary>Тестовые значения · расширенный ввод</summary><textarea aria-label="Тестовые значения JSON" key={JSON.stringify(values)} defaultValue={JSON.stringify(values, null, 2)} onBlur={e => {
             try {
               const v = JSON.parse(e.target.value);

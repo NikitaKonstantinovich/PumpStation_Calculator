@@ -5,7 +5,7 @@ import { ToolForm } from "./form";
 import { evaluatePlan, evaluateProduct, migrateValues } from "./runtime";
 import { migrateProduct, productContexts } from "./product-state";
 import type { CatalogSnapshot } from "./catalog-schema";
-import type { SavedTool, ToolProgram, Values, WorkspaceData } from "./schema";
+import { diagnosticKey, type SavedTool, type ToolProgram, type Values, type WorkspaceData } from "./schema";
 import type { UserRole } from "../user-types";
 import type { ProjectConfig } from "../project-config";
 import "./tools.css";
@@ -197,7 +197,7 @@ function ProductTool({
       }
       save();
       setMessage("Изменения переданы в сохранение проекта");
-    }} />{dirty && <small>Есть несохранённые изменения продукта</small>}{message && <p role="status">{message}</p>}{value.issues.map(i => <p key={i.node + i.key} role={i.severity === "error" ? "alert" : "status"}>{i.message}</p>)}<details><summary>Результат инструмента</summary><pre>{JSON.stringify(value.value, null, 2)}</pre></details></article>;
+    }} />{dirty && <small>Есть несохранённые изменения продукта</small>}{message && <p role="status">{message}</p>}{value.issues.map(i => <p key={diagnosticKey(i)} role={i.severity === "error" ? "alert" : "status"}>{i.message}</p>)}<details><summary>Результат инструмента</summary><pre>{JSON.stringify(value.value, null, 2)}</pre></details></article>;
 }
 export function NodeWorkspace({
   project,

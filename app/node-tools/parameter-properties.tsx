@@ -11,7 +11,7 @@ import { parameterType } from "./compiler";
 import { parameterRepresentations } from "./navigation";
 import { DataTree } from "./data-inspector";
 import { ValueEditor } from "./value-editor";
-import type { Evaluation, ToolDocument, Values } from "./schema";
+import { diagnosticKey, type Evaluation, type ToolDocument, type Values } from "./schema";
 export const SOURCE_NAMES = {
   user: "Ввод пользователя",
   fixed: "Постоянное",
@@ -228,7 +228,7 @@ export function ParameterProperties({
               } : g)
             });
           }} />Показывать в форме{reps.length > 1 ? " · " + r.label : ""}</label><button onClick={() => go(r.address)}>Свойства поля</button>{r.condition && <button onClick={() => go(r.condition!)}>Условная видимость</button>}</div>) : <small>Представления в форме отсутствуют</small>}</fieldset>
-    <h4>Текущее значение</h4><p>{binding?.origin ?? "Нет исполненного результата"} · {binding?.active === false ? "не участвует в активном расчёте" : "участвует в расчёте"}</p><DataTree value={binding?.value} missing={!binding} label={p.field.name} />{result?.issues.filter(i => i.node === binding?.node).map(i => <p role="alert" key={i.key}>{i.message}</p>)}
+    <h4>Текущее значение</h4><p>{binding?.origin ?? "Нет исполненного результата"} · {binding?.active === false ? "не участвует в активном расчёте" : "участвует в расчёте"}</p><DataTree value={binding?.value} missing={!binding} label={p.field.name} />{result?.issues.filter(i => i.node === binding?.node).map(i => <p role={i.severity === "error" ? "alert" : "status"} key={diagnosticKey(i)}>{i.message}</p>)}
     <details><summary>Общее определение · использований {uses.length}</summary>{uses.map(u => <p key={u.root + u.path.join("/") + u.node}><button onClick={() => go({
           graph: u.diagram,
           path: u.path,

@@ -8,6 +8,7 @@ export type Diagnostic = {
   message: string;
   severity: "error" | "warning";
 };
+export const diagnosticKey = (issue: Diagnostic) => JSON.stringify([issue.node, issue.key, issue.severity, issue.message]);
 export type ParameterBinding = {
   key: string;
   toolId?: string;

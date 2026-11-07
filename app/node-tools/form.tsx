@@ -4,7 +4,7 @@ import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { parseNumber } from "./runtime";
 import { accepts } from "../engineering/schema";
 import { DataTree } from "./data-inspector";
-import type { Diagnostic, ParameterBinding, View } from "./schema";
+import { diagnosticKey, type Diagnostic, type ParameterBinding, type View } from "./schema";
 import { TABLE_COLUMNS } from "./pump-nodes";
 const validationKey = (b: ParameterBinding) => JSON.stringify([b.key, b.mode, b.value, b.field, b.editable, b.active]);
 function Input({
@@ -184,7 +184,7 @@ export function ToolForm({
       }} onClick={choose}><Input validity={validity} binding={v.binding} label={v.label} hint={v.hint} widget={v.widget} showOrigin={showOrigin} disabled={blocked || !v.binding.editable || !v.binding.active} issues={issues} change={change} /></div>;
     }
     if (v.kind === "condition") return <div key={v.node} data-view-node={v.node} className="nt-condition">{v.children?.map(c => render(c, blocked, showOrigin))}</div>;
-    if (v.kind === "message") return <p key={v.node} data-view-node={v.node} className={classes}>{v.label}{v.issues?.map(i => <small key={i.key}>{i.message}</small>)}</p>;
+    if (v.kind === "message") return <p key={v.node} data-view-node={v.node} className={classes}>{v.label}{v.issues?.map(i => <small key={diagnosticKey(i)}>{i.message}</small>)}</p>;
     const children = v.children?.map(c => render(c, blocked, showOrigin));
     if (v.kind === "section" && v.collapsible) return <details key={v.node} data-view-node={v.node} className={"nt-section " + classes}><summary onClick={choose}>{v.label}</summary>{children}</details>;
     if (v.kind === "section") return <section key={v.node} data-view-node={v.node} className={"nt-section " + classes}><h3>{select ? <button type="button" onClick={choose}>{v.label}</button> : v.label}</h3>{children}</section>;
