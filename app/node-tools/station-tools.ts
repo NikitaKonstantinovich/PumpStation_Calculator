@@ -109,7 +109,7 @@ export function addStationTool(document: ToolDocument, kind: StationToolKind, so
     add("panel", "ui.collectorConstructor", "Карточки коллекторов", 2060, 0);
     wire("source", "dn", "recommend", "dn"); wire("recommend", "recommendations", "resolve", "recommendations"); wire("collectorState", "value", "resolve", "state"); wire("catalog", "catalog", "resolve", "catalog");
     wire("resolve", "resolved", "calculate", "resolved"); wire("resolve", "resolved", "calculation", "resolved"); wire("calculate", "calculations", "calculation", "calculations");
-    wire("calculation", "result", "result", "value"); wire("calculation", "result", "panel", "resolved"); wire("calculate", "calculations", "panel", "calculations"); wire("actions", "commands", "panel", "commands"); wire("collectorState", "binding", "panel", "stateBinding", true);
+    wire("calculation", "result", "result", "value"); wire("resolve", "resolved", "panel", "resolved"); wire("calculate", "calculations", "panel", "calculations"); wire("actions", "commands", "panel", "commands"); wire("collectorState", "binding", "panel", "stateBinding", true);
     for (const [key, meaning, name] of [["dnBinding", "dnOverrides", "Настройки DN — редактирование"], ["hydraulicBinding", "hydraulicOptions", "Комплектация — редактирование"]]) {
       const port = parameterBindingOutput(doc, nextRoot, sources.dnId!, meaning);
       if (port) { source.fields.push(field(key, name, "parameterBinding", "output")); result.fields.push(field("forward_" + key, name, "parameterBinding")); wire("source", key, "result", "forward_" + key, true); nextRoot.edges.push({ from: sources.dnId!, out: port, to: added.id, input: key, kind: "binding" }); }

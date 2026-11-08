@@ -15,7 +15,7 @@ async function fixture() {
     constructor(query, params = []) { this.query = query; this.params = params; }
     bind(...params) { return new Statement(this.query, params); }
     async first() { if (state.failDb) throw Error("D1 недоступна"); if (this.query.startsWith("SELECT revision,")) { state.markerCalls = (state.markerCalls ?? 0) + 1; if (state.changingMarker || state.changeOnce && state.markerCalls === 2) sql.exec("UPDATE component_calculator_source_revision SET revision=revision+1"); } return sql.prepare(this.query).get(...this.params) ?? null; }
-    async all() { if (state.failDb) throw Error("D1 недоступна"); return { results: sql.prepare(this.query).all(...this.params) }; }
+    async all() { if (state.failDb) throw Error("D1 недоступна"); if (this.query.startsWith("SELECT payload FROM node_catalog_chunks")) state.chunkReads = (state.chunkReads ?? 0) + 1; return { results: sql.prepare(this.query).all(...this.params) }; }
     async run() { if (state.failDb) throw Error("D1 недоступна"); state.statements.push(this); return { meta: { changes: sql.prepare(this.query).run(...this.params).changes } }; }
   }
   state.db = { prepare: query => new Statement(query), async batch(statements) { sql.exec("BEGIN"); try { const result = []; for (const statement of statements) result.push(await statement.run()); sql.exec("COMMIT"); return result; } catch (error) { sql.exec("ROLLBACK"); throw error; } } };
@@ -40,6 +40,38 @@ async function fixture() {
   return { state, sql, load, server: await load("node-tools/station-catalog-server"), client: await load("node-tools/station-catalog"), route: await load("api/node-station-catalog/route"), close() { delete globalThis[unique]; sql.close(); } };
 }
 const counts = state => JSON.stringify(state.calls);
+
+test("immutable station pins reuse at most two frozen payloads and coalesce cold concurrent reads", async () => {
+  const f = await fixture(); try {
+    const first = await f.server.stationCatalogSnapshot(), afterFirst = f.state.chunkReads;
+    const again = await f.server.stationCatalogSnapshot(first.id);
+    assert.strictEqual(again, first); assert.equal(f.state.chunkReads, afterFirst, "Warm pin skips the large chunk transfer");
+    assert(Object.isFrozen(again)); assert(Object.isFrozen(again.components.items));
+    assert.throws(() => { again.components.items[0].family = "accidental mutation"; }, TypeError);
+    f.state.saved[0].prices[0].amount = 201; await f.server.stationCatalogSnapshot();
+    f.state.saved[0].prices[0].amount = 202; await f.server.stationCatalogSnapshot();
+    const beforeReload = f.state.chunkReads;
+    const concurrent = await Promise.all([f.server.stationCatalogSnapshot(first.id), f.server.stationCatalogSnapshot(first.id), f.server.stationCatalogSnapshot(first.id)]);
+    assert.equal(f.state.chunkReads, beforeReload + 1, "The evicted pin is read once for concurrent callers");
+    assert.strictEqual(concurrent[0], concurrent[1]); assert.strictEqual(concurrent[1], concurrent[2]);
+    assert.notStrictEqual(concurrent[0], first, "The oldest of three snapshots was evicted");
+    f.state.failDb = true;
+    await assert.rejects(() => f.server.stationCatalogSnapshot(first.id), /D1 недоступна/);
+  } finally { f.close(); }
+});
+
+test("a cached station pin never crosses database bindings or hides appended storage chunks", async () => {
+  const f = await fixture(), other = await fixture(); try {
+    const first = await f.server.stationCatalogSnapshot(), originalBinding = f.state.db;
+    f.state.db = other.state.db;
+    await assert.rejects(() => f.server.stationCatalogSnapshot(first.id), error => error.status === 404);
+    f.state.db = originalBinding;
+    assert.equal((await f.server.stationCatalogSnapshot(first.id)).id, first.id);
+    const count = f.sql.prepare("SELECT COUNT(*) AS n FROM node_catalog_chunks WHERE snapshot_id=?").get(first.id).n;
+    f.sql.prepare("INSERT INTO node_catalog_chunks(snapshot_id,ordinal,payload) VALUES(?,?,?)").run(first.id, count, JSON.stringify("unexpected append"));
+    await assert.rejects(() => f.server.stationCatalogSnapshot(first.id), error => error.status === 503 && /повреждены/.test(error.message));
+  } finally { f.close(); other.close(); }
+});
 
 test("station catalogue captures current base, components, saved insertions and cabinets and pins each source revision immutably", async () => {
   const f = await fixture(); try {

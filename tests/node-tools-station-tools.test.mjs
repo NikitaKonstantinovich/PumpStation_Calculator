@@ -63,6 +63,39 @@ test("confirmed selection drives DN, collectors and complete specification stage
   assert(!s.trace["pumpFixture/table"]);assert(!s.trace["settings/form"]);
 });
 
+test("the complete station graph accepts deeply frozen shared catalogue snapshots without mutation",()=>{
+  const {program,dn,collectors,spec}=chain(),ctx=selectedContexts(program),resource=structuredClone(stationCatalog);
+  const freeze=value=>{if(value&&typeof value==="object"&&!Object.isFrozen(value)){Object.freeze(value);for(const child of Object.values(value))freeze(child);}return value;};
+  freeze(resource);const before=JSON.stringify(resource);
+  for(const context of Object.values(ctx))context.resources.station_catalog=resource;
+  for(const id of [dn.id,collectors.id,spec.id]){
+    const result=evaluateProduct(program,id,ctx);
+    assert(result.value?.project);assert(!result.issues.some(issue=>/read only|readonly|extensible|frozen|Cannot assign|Cannot add property|Cannot delete property/i.test(issue.message)));
+  }
+  const result=evaluateProduct(program,spec.id,ctx);
+  assert(result.value.project.entities["station-spec"].items.some(item=>item.option==="primaryPump"&&item.quantity===2));
+  assert.equal(JSON.stringify(resource),before);assert(Object.isFrozen(resource.components.items));
+});
+
+test("collector template retains a stale database record for refreshing in UI while excluding it from specification",()=>{
+  const {program,collectors,spec}=chain(),ctx=selectedContexts(program);
+  const initial=evaluateProduct(program,collectors.id,ctx),resolved=initial.trace[collectors.id+"/resolve"].outputs.resolved;
+  const state=structuredClone(resolved.entity),card=state.suction,calculation=structuredClone(initial.trace[collectors.id+"/calculate"].outputs.calculations.suction);
+  assert(card.code);assert(calculation);
+  // A formerly complete saved assembly belongs to an older catalogue revision.
+  calculation.catalogVersion="older-catalogue";calculation.complete=true;calculation.price=12345;
+  card.calculation=calculation;card.calculationSourceFingerprint=card.sourceFingerprint;card.databaseStatus="found";
+  card.database={id:"older-saved-collector",code:card.code,configuration:card.configuration,calculation,price:12345,priceUpdatedAt:"2026-01-01T00:00:00Z",source:"TEST FIXTURE ONLY"};
+  ctx[collectors.id].values={collectorState:state};
+  const current=evaluateProduct(program,collectors.id,ctx),panel=findView(current.view,"collector-constructor");
+  assert.equal(panel.collector.result.entity.suction.databaseStatus,"found");
+  assert.equal(panel.collector.result.entity.suction.database.id,"older-saved-collector");
+  assert.equal(panel.collector.result.entity.suction.status,"stale");
+  assert.equal(current.value.entity.suction.database,null);
+  const specification=evaluateProduct(program,spec.id,ctx),row=specification.value.project.entities["station-spec"].items.find(item=>item.option==="suctionCollector");
+  assert(row);assert.notEqual(row.status,"selected");assert.notEqual(row.technicalStatus,"ready");
+});
+
 test("manual DN settings propagate into collector recommendation while stale pump proof never remains selected",()=>{
   const {program,dn,collectors,spec}=chain(),ctx=selectedContexts(program);
   ctx[dn.id].values={dnOverrides:{...defaultDnOverrides(),suctionCollectorDn:125,dischargeCollectorDn:150,suctionValveDn:65,dischargeValveDn:80,connectionType:"flanged",pn:25,collectorMaterial:"st20"}};
