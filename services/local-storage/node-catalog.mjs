@@ -13,6 +13,9 @@ const grouped = (rows, key) => {
 const indexed = (rows, key = "id") => new Map(rows.map(row => [row[key], row]));
 const pointsValid = points => points.length >= 2 && points.every(([q, value], i) => Number.isFinite(q) && Number.isFinite(value) && q >= 0 && value >= 0 && (!i || q > points[i - 1][0]));
 const documentName = value => typeof value === "string" ? value.split(/[\\/]/).at(-1) : null;
+// The source catalogue uses a more specific ID than the application's filter.
+// Keep the original type record in provenance; never infer types from series names.
+const pumpType = value => value === "vertical_single_stage_inline" ? "inline" : ["vertical_multistage", "horizontal_multistage", "end_suction", "inline", "submersible"].includes(value) ? value : "unknown";
 
 function dimensionReader(optional) {
   const sets = indexed(optional("dimension_sets")), byModel = grouped([...sets.values()], "model_id");
@@ -133,7 +136,7 @@ export function readCatalogSnapshot(path) {
       const dimension = dimensionsFor(variant, model, issues);
       const pump = {
         id:String(variant.id), manufacturer:String(manufacturer.name), series:String(familySeries.code), group:String(familySeries.code), model:String(model.designation),
-        type:["vertical_multistage","horizontal_multistage","end_suction","inline","submersible"].includes(model.pump_type_id) ? model.pump_type_id : "unknown",
+        type:pumpType(model.pump_type_id),
         power:number(motor?.power_kw), efficiency:number(model.nominal_efficiency_pct), nominalFlow:number(model.nominal_flow_m3h),
         minFlow:qh.length ? qh[0][0] : null, maxFlow:qh.length ? qh.at(-1)[0] : null, minHead:qh.length ? Math.min(...qh.map(p=>p[1])) : null, maxHead:qh.length ? Math.max(...qh.map(p=>p[1])) : null,
         price:price?.amount ?? null, priceCurrency:price?.currency ?? null, ...(price ? {priceKind:price.kind,discountPercent:number(best.discount_percent)} : {}),

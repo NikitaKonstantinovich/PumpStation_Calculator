@@ -52,6 +52,41 @@ test("registered catalogue normalizes separate variants, preserves unknowns and 
   } finally {await f.close();}
 });
 
+test("source inline type reaches the type, manufacturer and series filters without changing unknown types", async () => {
+  const f = await fixture();
+  try {
+    const db = new DatabaseSync(f.path);
+    db.exec(`
+      INSERT INTO pump_types VALUES('vertical_single_stage_inline','Вертикальный одноступенчатый инлайн'),('inline','Инлайн'),('unmapped_type','Неизвестный тип');
+      UPDATE models SET pump_type_id='vertical_single_stage_inline' WHERE id='a';
+      UPDATE models SET pump_type_id='unmapped_type',designation='Inline TD model' WHERE id='b';
+    `);
+    db.close();
+    const before = await hash(f.path), snapshot = readCatalogSnapshot(f.path);
+    assert.equal(await hash(f.path), before);
+    const inline = snapshot.items.filter(item => item.modelId === "a");
+    assert.equal(inline.length, 2);
+    assert(inline.every(item => item.pump.type === "inline" && item.provenance.pumpType.id === "vertical_single_stage_inline"));
+    assert.equal(snapshot.items.find(item => item.modelId === "b").pump.type, "unknown");
+    const { executePumpOperation } = await loadTs(new URL("../app/node-tools/pump-runtime.ts", import.meta.url));
+    const sourceBefore = JSON.stringify(snapshot);
+    const context = { values: {}, defaults: {}, role: "admin", resources: { pump_catalog_v2: snapshot } };
+    const run = (operation, values) => executePumpOperation({ id: operation, operation, fields: [], values: {}, links: [], expressions: {} }, values, context);
+    const catalog = run("pump.catalog", { source: "pump_catalog_v2" }).value;
+    const types = run("pump.options", { catalog, attribute: "type" }).options;
+    assert.deepEqual(types.find(option => option.value === "inline"), { value: "inline", label: "Вертикальный in-line" });
+    assert.deepEqual(run("pump.options", { catalog, attribute: "manufacturer", type: "inline" }).options, [{ value: "Изготовитель", label: "Изготовитель" }]);
+    assert.deepEqual(run("pump.options", { catalog, attribute: "series", type: "inline", manufacturer: "Изготовитель" }).options, [{ value: "Серия", label: "Серия" }]);
+    const filtered = run("pump.filter", { catalog, type: "inline", request: { flowRate: 10, head: 30, staticHead: 0, workingPumpCount: 1, medium: "water" } }).value;
+    assert.deepEqual(filtered.rows.map(row => row.variantId).sort(), ["variant-one", "variant-two"]);
+    assert.equal(JSON.stringify(snapshot), sourceBefore);
+    const canonical = new DatabaseSync(f.path);
+    canonical.exec("UPDATE models SET pump_type_id='inline' WHERE id='a'");
+    canonical.close();
+    assert(readCatalogSnapshot(f.path).items.filter(item => item.modelId === "a").every(item => item.pump.type === "inline"));
+  } finally { await f.close(); }
+});
+
 test("source rejects unregistered queries and distinguishes an empty catalogue from a missing or invalid source",async()=>{
   const f=await fixture();
   try {
