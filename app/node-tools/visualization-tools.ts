@@ -75,12 +75,12 @@ export function visualizationSources(document: ToolDocument): VisualizationSourc
   return result;
 }
 
-function syncInstrument(doc: ToolDocument, graph: Diagram) {
+export function syncInstrument(doc: ToolDocument, graph: Diagram) {
   const ports = definitionPorts(graph, doc.types);
   doc.types = doc.types.map(type => type.instrument === graph.id ? { ...type, fields: ports } : type);
 }
 
-function boundaryType(doc: ToolDocument, graph: Diagram, id: "source" | "result") {
+export function boundaryType(doc: ToolDocument, graph: Diagram, id: "source" | "result") {
   const node = graph.nodes.find(node => node.id === id);
   if (!node) throw Error("В определении инструмента отсутствует граница «" + id + "»");
   let type = typeOf(doc, node);
@@ -112,7 +112,7 @@ function exposeLocation(doc: ToolDocument, location: Location, source: Ref, desi
   return port;
 }
 
-function selectedExports(doc: ToolDocument, root: Diagram, selectionId: string) {
+export function selectedExports(doc: ToolDocument, root: Diagram, selectionId: string) {
   const container = root.nodes.find(node => node.id === selectionId), graph = container && diagramOf(doc, container);
   if (!graph) throw Error("Выберите инструмент подбора насосов");
   const producers = selectionLocations(doc, graph);

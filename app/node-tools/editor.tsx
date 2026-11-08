@@ -19,9 +19,11 @@ import { evaluatePlan, evaluateProduct, traceNode } from "./runtime";
 import { ToolForm } from "./form";
 import { applyParameterWrites } from "./form-actions";
 import { visualizationSources, addVisualizationTool } from "./visualization-tools";
+import { addStationTool, stationToolSources, type StationToolKind } from "./station-tools";
 import { deriveTools, productConnectionProblem } from "./product";
 import { prepareDocument, addProductTool, updateToolMetadata } from "./authoring";
 import { loadCatalog } from "./catalog-client";
+import { loadStationCatalog, type StationCatalogResources } from "./station-catalog";
 import { unpackTrace } from "./trace-transport";
 import type { CatalogSnapshot } from "./catalog-schema";
 import { loadTools } from "./workspace";
@@ -126,7 +128,7 @@ export function ToolEditor({
       options: ""
     });
   const [metadata, setMetadata] = useState(false);
-  const [template, setTemplate] = useState<null | {kind:"hydraulic"|"card";selectionId:string;settingsId:string}>(null);
+  const [template, setTemplate] = useState<null | {kind:"hydraulic"|"card"|StationToolKind;selectionId:string;settingsId:string;secondarySelectionId?:string;dnId?:string;collectorsId?:string}>(null);
   const [dataset, setDataset] = useState<"preview" | "saved" | "test">("preview");
   const [role, setRole] = useState<UserRole>("pro"),
     [sessionRole, setSessionRole] = useState<UserRole>("admin");
@@ -152,6 +154,10 @@ export function ToolEditor({
     [catalogError, setCatalogError] = useState(""),
     [catalogLoading, setCatalogLoading] = useState(false);
   const catalogNeeded = !!doc?.diagrams.some(g => g.nodes.some(n => doc.types.find(t => t.id === n.type)?.operation === "pump.catalog"));
+  const stationCatalogNeeded = !!doc?.diagrams.some(g => g.nodes.some(n => doc.types.find(t => t.id === n.type)?.operation === "engineering.catalog"));
+  const [stationCatalog, setStationCatalog] = useState<StationCatalogResources | null>(null), [stationCatalogError, setStationCatalogError] = useState(""), [stationCatalogLoading, setStationCatalogLoading] = useState(false);
+  const stationBaseKey = JSON.stringify(dataset === "saved" ? project.workspace2?.product?.baseVersions ?? baseVersions : baseVersions);
+  const stationSnapshotId = dataset === "saved" ? project.workspace2?.product?.sourceVersions?.station_catalog : undefined;
   const graph = doc?.diagrams.find(g => g.id === at.graph),
     node = graph?.nodes.find(n => n.id === at.node),
     type = doc?.types.find(t => t.id === node?.type);
@@ -243,6 +249,13 @@ export function ToolEditor({
       abort.abort();
     };
   }, [catalogNeeded, dataset, project.workspace2?.product?.sourceVersions?.pump_catalog_v2]);
+  useEffect(() => {
+    if (!stationCatalogNeeded || stationBaseKey === "{}") return;
+    const abort = new AbortController();
+    setStationCatalog(null); setStationCatalogLoading(true); setStationCatalogError("");
+    loadStationCatalog(stationSnapshotId, JSON.parse(stationBaseKey), abort.signal).then(snapshot => { if (!abort.signal.aborted) setStationCatalog(snapshot); }).catch(error => { if (!abort.signal.aborted) setStationCatalogError(error.message); }).finally(() => { if (!abort.signal.aborted) setStationCatalogLoading(false); });
+    return () => abort.abort();
+  }, [stationCatalogNeeded, stationBaseKey, stationSnapshotId]);
   const trial = useMemo(() => {
     if (!doc || !tool) return {
       result: null,
@@ -256,9 +269,7 @@ export function ToolEditor({
           stored: dataset === "saved" ? project.workspace2?.tools[t.id]?.values : undefined,
           defaults: dataset === "saved" ? savedDefaults ?? defaults : defaults,
           role: dataset === "saved" ? sessionRole : role,
-          resources: catalog ? {
-            pump_catalog_v2: catalog
-          } : undefined
+          resources: { ...(catalog ? { pump_catalog_v2: catalog } : {}), ...(stationCatalog ? { station_catalog: stationCatalog } : {}) }
         }]))) : evaluatePlan(program.plans[tool.id], {
           values: dataset === "saved" ? stored?.values ?? {} : values,
           stored: dataset === "saved" ? stored?.values : undefined,
@@ -273,9 +284,9 @@ export function ToolEditor({
         error: (e as Error).message
       };
     }
-  }, [doc, tool, values, defaults, dataset, stored, savedDefaults, sessionRole, role, tools, toolValues, toolId, project.workspace2, catalog]);
+  }, [doc, tool, values, defaults, dataset, stored, savedDefaults, sessionRole, role, tools, toolValues, toolId, project.workspace2, catalog, stationCatalog]);
   const viewed = dataset === "test" ? lastTest?.tool === toolId ? lastTest.result : null : trial.result;
-  const stale = dataset === "test" && (JSON.stringify(lastTest?.document) !== JSON.stringify(doc) || !!catalog && !!lastTest?.dataset.sourceVersions.pump_catalog_v2 && lastTest.dataset.sourceVersions.pump_catalog_v2 !== catalog.id);
+  const stale = dataset === "test" && (JSON.stringify(lastTest?.document) !== JSON.stringify(doc) || !!catalog && !!lastTest?.dataset.sourceVersions.pump_catalog_v2 && lastTest.dataset.sourceVersions.pump_catalog_v2 !== catalog.id || !!stationCatalog && !!lastTest?.dataset.sourceVersions.station_catalog && lastTest.dataset.sourceVersions.station_catalog !== stationCatalog.id);
   const dataStatus = dataset === "test" ? lastTest ? stale ? "Устаревший результат · повторите проверку" : "Последняя серверная проба" : "Проба ещё не выполнена" : dataset === "saved" ? savedDefaults ? "Черновик на сохранённых входах проекта" : "Загрузка сохранённых источников…" : "Предпросмотр на тестовых значениях";
   const chain = useMemo(() => doc ? provenance(doc, root, at) : null, [doc, root, at]);
   function change(next: ToolDocument) {
@@ -582,9 +593,7 @@ export function ToolEditor({
         tool: toolId,
         values,
         contexts: Object.fromEntries(tools.map(t => [t.id, t.id === toolId ? values : toolValues[t.id] ?? {}])),
-        sourceVersions: catalog ? {
-          pump_catalog_v2: catalog.id
-        } : undefined
+        sourceVersions: { ...(catalog ? {pump_catalog_v2:catalog.id} : {}), ...(stationCatalog ? {station_catalog:stationCatalog.id} : {}) }
       }));
       setMessage(action === "save" ? "Черновик сохранён" : "Публикация обновлена");
       setVersions(false);
@@ -614,9 +623,7 @@ export function ToolEditor({
             values,
             role,
             contexts: Object.fromEntries(tools.map(t => [t.id, t.id === toolId ? values : toolValues[t.id] ?? {}])),
-            sourceVersions: catalog ? {
-              pump_catalog_v2: catalog.id
-            } : undefined
+            sourceVersions: { ...(catalog ? {pump_catalog_v2:catalog.id} : {}), ...(stationCatalog ? {station_catalog:stationCatalog.id} : {}) }
           })
         }),
         data = await response.json();
@@ -693,7 +700,8 @@ export function ToolEditor({
         })}>{u.name}</option>))}</select><button onClick={newTool}>＋ Инструмент</button><button onClick={() => {
           const sources = visualizationSources(doc);
           setError("");
-          setTemplate({kind:"hydraulic",selectionId:sources.selections[0]?.id??"",settingsId:sources.settings[0]?.id??""});
+          const stationSources = stationToolSources(doc);
+          setTemplate({kind:"hydraulic",selectionId:sources.selections[0]?.id??"",settingsId:sources.settings[0]?.id??"",dnId:stationSources.dn[0]?.id,collectorsId:stationSources.collectors[0]?.id});
         }}>Готовые инструменты</button><button onClick={() => setMetadata(true)}>Определение</button><button disabled={!trial.result?.view?.node} onClick={() => previewSelect(trial.result!.view.node)}>Свойства формы</button><button onClick={() => setLibrary(!library)}>＋ Библиотека</button><button onClick={() => {
         if (at.graph === root) {
           const instance = doc.diagrams.find(g => g.id === root)?.nodes.find(n => n.id === toolId),
@@ -818,7 +826,8 @@ export function ToolEditor({
               setCatalogError("");
             }).catch(e => setCatalogError(e.message)).finally(() => setCatalogLoading(false));
           }}>Обновить снимок каталога</button>{catalog && <small>{catalog.items.length} исполнений · {catalog.schemaVersion}</small>}</section>}
-      <label>Данные для просмотра<select aria-label="Данные для просмотра" value={dataset} onChange={e => setDataset(e.target.value as typeof dataset)}><option value="preview">Предпросмотр на тестовых значениях</option><option value="saved">Черновик на сохранённых входах проекта</option><option value="test">Результат последней тестовой пробы</option></select></label><p role="status">{dataStatus}</p><small>Граф · {dataset === "test" ? lastTest?.dataset.version + " / " + lastTest?.dataset.revision : "черновик " + remote.revision + (dirty ? " (изменён)" : "")} · роль {dataset === "test" ? lastTest?.dataset.role : dataset === "saved" ? sessionRole : role}{dataset !== "saved" ? " (симуляция)" : " (сессия)"}</small><details><summary>Версии источников</summary><DataTree value={dataset === "test" ? lastTest?.dataset.sourceVersions : {...(dataset === "saved" ? stored?.baseVersions ?? baseVersions : baseVersions), ...(catalog ? {pump_catalog_v2:catalog.id} : {})}} label="Используемые версии источников" /></details>
+      {stationCatalogNeeded && <section><strong>Справочники комплектации</strong><p role="status">{stationCatalogLoading ? "Загрузка справочников…" : stationCatalogError ? (stationCatalog ? "Используется предыдущий снимок. " : "") + stationCatalogError : stationCatalog ? "Закреплён снимок " + stationCatalog.id.slice(0, 12) : "Не загружены"}</p><button type="button" disabled={stationCatalogLoading || dataset === "saved"} onClick={() => { setStationCatalogLoading(true); setStationCatalogError(""); loadStationCatalog(undefined, baseVersions).then(setStationCatalog).catch(e => setStationCatalogError(e.message)).finally(() => setStationCatalogLoading(false)); }}>Обновить справочники комплектации</button></section>}
+      <label>Данные для просмотра<select aria-label="Данные для просмотра" value={dataset} onChange={e => setDataset(e.target.value as typeof dataset)}><option value="preview">Предпросмотр на тестовых значениях</option><option value="saved">Черновик на сохранённых входах проекта</option><option value="test">Результат последней тестовой пробы</option></select></label><p role="status">{dataStatus}</p><small>Граф · {dataset === "test" ? lastTest?.dataset.version + " / " + lastTest?.dataset.revision : "черновик " + remote.revision + (dirty ? " (изменён)" : "")} · роль {dataset === "test" ? lastTest?.dataset.role : dataset === "saved" ? sessionRole : role}{dataset !== "saved" ? " (симуляция)" : " (сессия)"}</small><details><summary>Версии источников</summary><DataTree value={dataset === "test" ? lastTest?.dataset.sourceVersions : {...(dataset === "saved" ? stored?.baseVersions ?? baseVersions : baseVersions), ...(catalog ? {pump_catalog_v2:catalog.id} : {}), ...(stationCatalog ? {station_catalog:stationCatalog.id} : {})}} label="Используемые версии источников" /></details>
       {dataset !== "saved" && <label>Роль тестовой симуляции<select aria-label="Роль тестовой симуляции" value={role} onChange={e => setRole(e.target.value as UserRole)}>{["base", "plus", "pro", "admin"].map(r => <option key={r}>{r}</option>)}</select></label>}{dataset === "test" && <button onClick={run}>Повторить пробу</button>}
       {dataset !== "test" && trial.error ? <p role="alert">{trial.error}</p> : viewed ? <ToolForm view={viewed.view} issues={viewed.issues} readOnly={dataset !== "preview"} change={(key, value, clearKeys = []) => setValues(v => ({
           ...v,
@@ -919,14 +928,17 @@ export function ToolEditor({
           }
         }}>Создать параметр</button>{error && <p role="alert">{error}</p>}</section></div>}
     {template && <div className="gn-shade"><section className="gn-dialog" role="dialog" aria-label="Готовый инструмент"><header><h2>Готовый инструмент</h2><button onClick={() => setTemplate(null)}>Закрыть</button></header>
-      <label>Инструмент<select value={template.kind} onChange={e => setTemplate({...template,kind:e.target.value as "hydraulic"|"card"})}><option value="hydraulic">Гидравлическая кривая</option><option value="card">Карточка насоса</option></select></label>
-      <label>Источник выбранного насоса<select value={template.selectionId} onChange={e => setTemplate({...template,selectionId:e.target.value})}><option value="">Выберите инструмент подбора…</option>{visualizationSources(doc).selections.map(source=><option key={source.id} value={source.id}>{source.name}</option>)}</select></label>
-      {template.kind === "hydraulic" && <label>Источник настроек проекта<select value={template.settingsId} onChange={e => setTemplate({...template,settingsId:e.target.value})}><option value="">Без изменения рабочей точки на графике</option>{visualizationSources(doc).settings.map(source=><option key={source.id} value={source.id}>{source.name}</option>)}</select></label>}
+      <label>Инструмент<select value={template.kind} onChange={e => setTemplate({...template,kind:e.target.value as NonNullable<typeof template>["kind"]})}><option value="hydraulic">Гидравлическая кривая</option><option value="card">Карточка насоса</option><option value="dn">Расчёт DN</option><option value="collectors">Конструктор коллекторов</option><option value="specification">Спецификация</option></select></label>
+      {["hydraulic", "card", "dn"].includes(template.kind) && <label>Источник выбранного насоса<select value={template.selectionId} onChange={e => setTemplate({...template,selectionId:e.target.value})}><option value="">Выберите инструмент подбора…</option>{visualizationSources(doc).selections.map(source=><option key={source.id} value={source.id}>{source.name}</option>)}</select></label>}
+      {["hydraulic", "dn"].includes(template.kind) && <label>Источник настроек проекта<select value={template.settingsId} onChange={e => setTemplate({...template,settingsId:e.target.value})}><option value="">{template.kind === "dn" ? "Выберите настройки проекта…" : "Без изменения рабочей точки на графике"}</option>{visualizationSources(doc).settings.map(source=><option key={source.id} value={source.id}>{source.name}</option>)}</select></label>}
+      {template.kind === "dn" && <label>Подбор насоса второго контура<select value={template.secondarySelectionId ?? ""} onChange={e => setTemplate({...template,secondarySelectionId:e.target.value})}><option value="">Не подключён</option>{visualizationSources(doc).selections.filter(s => s.id !== template.selectionId).map(source=><option key={source.id} value={source.id}>{source.name}</option>)}</select></label>}
+      {template.kind === "collectors" && <label>Источник расчёта DN<select value={template.dnId ?? ""} onChange={e => setTemplate({...template,dnId:e.target.value})}><option value="">Выберите расчёт DN…</option>{stationToolSources(doc).dn.map(source=><option key={source.id} value={source.id}>{source.name}</option>)}</select></label>}
+      {template.kind === "specification" && <label>Источник коллекторов и параметров установки<select value={template.collectorsId ?? ""} onChange={e => setTemplate({...template,collectorsId:e.target.value})}><option value="">Выберите конструктор коллекторов…</option>{stationToolSources(doc).collectors.map(source=><option key={source.id} value={source.id}>{source.name}</option>)}</select></label>}
       <p>Создаётся отдельный инструмент на общем полотне с редактируемыми внутренними нодами и связями с выбранными источниками.</p>
       {error && <p role="alert">{error}</p>}
-      <button disabled={!template.selectionId || busy} onClick={() => {
+      <button disabled={busy || (template.kind === "collectors" ? !template.dnId : template.kind === "specification" ? !template.collectorsId : !template.selectionId || template.kind === "dn" && !template.settingsId)} onClick={() => {
         try {
-          const added=addVisualizationTool(doc,template.kind,{selectionId:template.selectionId,settingsId:template.settingsId||undefined});
+          const added=template.kind === "hydraulic" || template.kind === "card" ? addVisualizationTool(doc,template.kind,{selectionId:template.selectionId,settingsId:template.settingsId||undefined}) : addStationTool(doc,template.kind,template);
           change(added.document);
           setToolId(added.id);
           setValues({});

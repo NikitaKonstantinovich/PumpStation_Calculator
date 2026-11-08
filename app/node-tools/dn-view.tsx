@@ -1,0 +1,60 @@
+"use client";
+import type { CollectorMaterial, DnEntity, ShutoffValveType, ValveConnection, ValvePn } from "../project-config";
+import { STANDARD_DN, defaultCollectorMaterial } from "../dn-defaults";
+import { pumpPortField } from "../pump-ports";
+import { dnSecondaryEnabled } from "./dn-runtime";
+import type { DnResult } from "./dn-nodes";
+import type { View } from "./schema";
+
+function DnNozzleFields({ data, secondary, title, onChange }: { data: DnResult; secondary: boolean; title: string; onChange: (patch: Partial<DnEntity>) => void }) {
+  const { entity, effectiveEntity } = data.context, input = secondary ? data.context.secondaryInput : data.context.input;
+  return <div>
+    {!input.selectedPumpId && <p className="dn-calculator__error">Выберите и подтвердите насос — его патрубки заполнятся из закреплённого каталога.</p>}
+    {(["inlet", "outlet"] as const).map(side => {
+      const field = pumpPortField(secondary, side), port = effectiveEntity[field], source = data.context.ports[secondary ? "secondary" : "primary"][side];
+      const manual = Boolean(input.selectedPumpId && entity[field]?.pumpId === input.selectedPumpId), label = side === "inlet" ? "Всасывающий патрубок" : "Напорный патрубок";
+      const sizes = [...new Set([8, 10, 15, 20, ...STANDARD_DN, ...(port?.dn ? [port.dn] : [])])].sort((a,b) => a-b);
+      const patchPort = (patch: {dn?: number; connection?: ValveConnection}) => {
+        if (input.selectedPumpId) onChange({ [field]: { pumpId: input.selectedPumpId, dn: patch.dn ?? port?.dn ?? null, connection: patch.connection ?? port?.connection ?? null, source: "Указано пользователем", maxPressure: port?.maxPressure ?? null, maxInletPressure: port?.maxInletPressure ?? null } });
+      };
+      return <div key={side}><div className="dn-calculator__controls">
+        <label><span>{label} насоса · DN</span><select aria-label={`${label} · DN: ${title}`} aria-required="true" aria-invalid={!!input.selectedPumpId && !port?.dn} disabled={!input.selectedPumpId} value={port?.dn ?? ""} onChange={event => patchPort({ dn: Number(event.target.value) })}><option value="" disabled>Выберите диаметр вручную</option>{sizes.map(dn => <option key={dn} value={dn}>DN{dn}</option>)}</select></label>
+        <label><span>{label} · тип соединения</span><select aria-label={`${label} · соединение: ${title}`} aria-required="true" aria-invalid={!!input.selectedPumpId && !port?.connection} disabled={!input.selectedPumpId} value={port?.connection ?? ""} onChange={event => patchPort({ connection: event.target.value as ValveConnection })}><option value="" disabled>Выберите соединение вручную</option><option value="threaded">Резьбовое</option><option value="flanged">Фланцевое</option></select><small>{manual ? "Указано пользователем" : source?.dn || source?.connection ? "Из закреплённого каталога насоса" : "Нет подтверждённых данных в каталоге"}</small></label>
+        <div><button className="button" disabled={!manual || !source} onClick={() => onChange({[field]:null})}>Патрубок из каталога</button></div>
+      </div>{port?.source && !manual && <p className="dn-calculator__port-source">Источник: {port.source}</p>}</div>;
+    })}
+  </div>;
+}
+
+export function DnCalculatorView({ view, disabled, change }: { view: View; disabled: boolean; change: (key: string, value: unknown) => void }) {
+  const data = view.dn, binding = view.binding;
+  if (!data || data.context.status !== "ready" || !data.primary) return <div className="dn-calculator__empty" role="status"><span aria-hidden="true">Ø</span><b>Сначала задайте рабочую точку</b><p>{data?.context.message || "Подключите настройки проекта и расчёт DN."}</p></div>;
+  const { entity, settings } = data.context, { primary, secondary } = data, circuits = [primary,...(secondary ? [secondary] : [])];
+  const editable = !disabled && !!binding?.active && binding.editable && (binding.mode ?? "user") === "user";
+  const onChange = (patch: Partial<DnEntity>) => { if (editable && binding) change(binding.key, { ...entity, ...patch }); };
+  const reset = () => { if (editable && binding) change(binding.key, data.resetOverrides); };
+  const patchField = <K extends keyof DnEntity>(field: K, value: DnEntity[K]) => onChange({[field]:value} as Partial<DnEntity>);
+  return <div className="dn-calculator">
+    <header className="dn-calculator__summary"><div><small>РАСЧЁТ DN И ПОДБОР АРМАТУРЫ</small><b>{secondary?2:1} {secondary?"контура":"контур"} · {settings.stationType==="combined"?"цвет по назначению контура":settings.stationType==="fire"?"приоритет красного исполнения":"приоритет синего исполнения"}</b><span>DN, материал коллекторов, PN, тип соединения и приводы сохраняются в проекте</span></div><div className="dn-calculator__actions"><button className="button" disabled={!editable} onClick={reset}>Заполнить по умолчанию</button><span className="access-note">Арматура передаётся в спецификацию по связям графа</span></div></header>
+    {!editable && <p className="access-note">Стандартное исполнение подбирается автоматически. Ручные изменения доступны с pro.</p>}
+    <fieldset className="access-fields" disabled={!editable} aria-label="Ручные настройки DN">
+    <div className="dn-calculator__material"><label><span>Материал коллекторов</span><select value={entity.collectorMaterial??defaultCollectorMaterial(settings)} onChange={event=>onChange?.({collectorMaterial:event.target.value as CollectorMaterial})}><option value="st20">Ст20</option><option value="aisi304">AISI 304</option></select></label><p><b>{settings.stationType==="fire"?"Пожарная НС":"Стандарт проекта"}</b><span>{settings.stationType==="fire"?"По умолчанию применяется Ст20":"По умолчанию применяется AISI 304"}</span></p></div>
+    {circuits.map(circuit=><section className="dn-circuit" key={circuit.id}><header className="dn-circuit__header"><div><small>{circuit.id==="secondary"?"ВТОРОЙ КОНТУР":"КОНТУР 1"}</small><b>{circuit.title}</b><span>Q = {circuit.stationFlow.toLocaleString("ru-RU",{maximumFractionDigits:2})} м³/ч · {circuit.workingPumpCount} раб. + {circuit.totalPumpCount-circuit.workingPumpCount} рез.</span></div><i className={circuit.color==="red"?"dn-circuit__color dn-circuit__color--red":"dn-circuit__color dn-circuit__color--blue"}>{circuit.color==="red"?"Красная арматура":"Синяя в приоритете"}</i></header>
+      <div className="dn-calculator__controls"><label><span>Соединение арматуры</span><select value={circuit.connection} onChange={event=>{const connection=event.target.value as ValveConnection;onChange?.({[circuit.connectionField]:connection,[circuit.suctionTypeField]:connection==="threaded"?"ball":"butterfly",[circuit.dischargeTypeField]:connection==="threaded"?"ball":"butterfly"} as Partial<DnEntity>);}}><option value="threaded" disabled={!circuit.threadedAllowed}>Резьбовое · до 2″</option><option value="flanged">Фланцевое</option></select><small>{circuit.forcedFlanged?"Для этого типа НС разрешено только фланцевое соединение":circuit.threadedAllowed?"Резьба — стандарт до DN50":"Для выбранного DN требуется фланец"}</small></label><label><span>Рабочее давление</span><select value={circuit.pn} onChange={event=>patchField(circuit.pnField,Number(event.target.value) as ValvePn)}><option value={10}>PN10</option><option value={16}>PN16</option><option value={25}>PN25</option></select></label><label><span>Запорная арматура на всасе</span><select value={circuit.suctionValveType} onChange={event=>patchField(circuit.suctionTypeField,event.target.value as ShutoffValveType)}><option value="butterfly" disabled={circuit.connection==="threaded"}>Затвор дисковый</option><option value="ball">Шаровой кран</option></select></label><label><span>Запорная арматура на напоре</span><select value={circuit.dischargeValveType} onChange={event=>patchField(circuit.dischargeTypeField,event.target.value as ShutoffValveType)}><option value="butterfly" disabled={circuit.connection==="threaded"}>Затвор дисковый</option><option value="ball">Шаровой кран</option></select></label></div>
+
+      <DnNozzleFields data={data} secondary={circuit.id==="secondary"} title={circuit.title} onChange={onChange}/>
+      <p>Всас: {circuit.suction.connection==="threaded"?"резьбовая арматура":"фланцевая арматура"}. {circuit.suction.locked?"DN крана равен DN патрубка и изменяется вместе с ним.":circuit.suction.nozzleDefault?"Для многоступенчатого насоса DN арматуры по умолчанию равен DN впускного патрубка; доступно ручное изменение.":"DN арматуры и коллекторов рассчитываются отдельно от патрубков насоса."}</p>
+      <p>Напор: {circuit.discharge.connection==="threaded"?"резьбовая арматура":"фланцевая арматура"}. {circuit.discharge.locked?"DN крана и обратного клапана равен DN напорного патрубка.":circuit.discharge.nozzleDefault?"Для многоступенчатого насоса DN арматуры по умолчанию равен DN выпускного патрубка; доступно ручное изменение.":"Между обратным клапаном и затвором устанавливается отдельная вставка ФФ."}</p>
+      {settings.vibrationCompensators
+        ? <p>На каждой стороне насоса: насос → виброкомпенсатор → прямая или переходная вставка → арматура. При изменении DN переходная вставка заменяет прямую. Уплотнения и крепёж учитываются для каждого соединения.</p>
+        : <p>Фланцевая арматура крепится прямо к насосу при одинаковых DN или непосредственно к переходу при изменении DN.</p>}
+      {circuit.suction.errors.map((error,index)=><p data-issue-id={`dn/${circuit.id}/suction/${index}`} key={error} role="alert" className="dn-calculator__error">{error}</p>)}
+      {circuit.discharge.errors.map((error,index)=><p data-issue-id={`dn/${circuit.id}/discharge/${index}`} key={error} role="alert" className="dn-calculator__error">{error}</p>)}
+      {circuit.suction.inletPressureCheck && <p data-issue-id={`dn/${circuit.id}/pressure`} className="collector-note">{circuit.suction.inletPressureCheck.message}</p>}
+      <div className="dn-calculator__grid">{circuit.rows.map(row=>{const dn=circuit.values[row.field],{velocity,limit,valid}=circuit.speeds[row.field];return <section data-issue-id={`dn/${circuit.id}/${row.field}`} className="dn-calculator__card" key={row.field}><div className="dn-calculator__card-title"><span><b>{row.title}</b><small>{row.subtitle} · {row.flow.toLocaleString("ru-RU",{maximumFractionDigits:2})} м³/ч</small></span><i className={valid?"dn-calculator__status dn-calculator__status--ok":"dn-calculator__status dn-calculator__status--warning"}>{valid?"В пределах":"Выше предела"}</i></div><div className="dn-calculator__values"><label><span>Условный проход</span><select value={dn} disabled={(circuit.suction.locked && /[Ss]uctionValveDn$/.test(row.field)) || (circuit.discharge.locked && /[Dd]ischargeValveDn$/.test(row.field))} onChange={event=>{const next=Number(event.target.value);onChange?.({[row.field]:next} as Partial<DnEntity>);}} aria-label={`Ду: ${circuit.title}, ${row.title}`}>{[15,20,...STANDARD_DN].map(value=><option key={value} value={value}>Ду {value}</option>)}</select></label><span className="dn-calculator__speed"><small>Скорость потока</small><b>{velocity.toLocaleString("ru-RU",{minimumFractionDigits:2,maximumFractionDigits:2})} <i>м/с</i></b><em>Допустимо до {limit} м/с</em></span></div></section>;})}</div>
+    </section>)}
+    {dnSecondaryEnabled(settings)&&!secondary&&<div className="dn-calculator__secondary-empty"><b>Контур 2 ожидает рабочую точку</b><span>Заполните «Подбор насосов 2» — DN и арматура появятся автоматически.</span></div>}
+    </fieldset>
+    <footer className="dn-calculator__note"><span>i</span><p><b>Правила автоподбора</b>{settings.baseValues?.values.velocity.map(r=>`DN${r.fromDn}–${r.toDn??"∞"}: до ${r.limit} м/с`).join("; ")??"До DN250 — 2 м/с, выше — 3 м/с"}. Резьба до DN50 (2″) включительно — по умолчанию для первого контура хоз-пит и SMART и для второго контура. При необходимости можно выбрать фланцевое соединение. Затворы до DN125 подбираются с рукояткой, от DN150 — с редуктором. Обратный клапан подбирается по DN напорной арматуры, PN и материалу коллектора. Шаровой кран — всегда латунный с ручкой-рычагом, независимо от цвета и материала коллектора.</p></footer>
+  </div>;
+}

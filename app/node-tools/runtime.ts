@@ -8,8 +8,15 @@ import { executePumpOperation } from "./pump-runtime";
 import { HYDRAULIC_OPERATIONS } from "./hydraulic-nodes";
 import { executeHydraulicOperation } from "./hydraulic-runtime";
 import { DETAIL_OPERATIONS, executeDetailOperation } from "./pump-detail-data";
+import { DN_OPERATIONS } from "./dn-nodes";
+import { executeDnOperation } from "./dn-runtime";
+import { executeStationCatalog } from "./station-catalog";
+import { COLLECTOR_OPERATIONS } from "./collector-nodes";
+import { executeCollectorOperation } from "./collector-runtime";
+import { SPECIFICATION_OPERATIONS } from "./specification-nodes";
+import { executeSpecificationOperation } from "./specification-runtime";
 import { canEditAllSettings, canEditProjectOptions } from "../user-types";
-export const OPERATIONS = ["source", "parameter", "object", "merge", "form", "section", "grid", "field", "condition", "message", "check", "save", ...PUMP_OPERATIONS, ...HYDRAULIC_OPERATIONS, ...DETAIL_OPERATIONS] as const;
+export const OPERATIONS = ["source", "parameter", "object", "merge", "form", "section", "grid", "field", "condition", "message", "check", "save", "engineering.catalog", ...PUMP_OPERATIONS, ...HYDRAULIC_OPERATIONS, ...DETAIL_OPERATIONS, ...DN_OPERATIONS, ...COLLECTOR_OPERATIONS, ...SPECIFICATION_OPERATIONS] as const;
 const list = (v: Values) => Object.keys(v).filter(k => /^child\d+$/.test(k)).sort((a, b) => Number(a.slice(5)) - Number(b.slice(5))).map(k => v[k]).filter(Boolean) as View[];
 export const canEditParameter = (role: ToolContext["role"], permission: ParameterBinding["permission"]) => permission === "input" || permission === "options" && canEditProjectOptions(role) || canEditAllSettings(role);
 /** Explicit modes evaluate only their real dependencies; old publications retain their contract. */
@@ -175,7 +182,7 @@ function execute(step: Step, v: Values, context: ToolContext): Values {
       };
     default:
       {
-        const result = executePumpOperation(step, v, context) ?? executeHydraulicOperation(step, v, context) ?? executeDetailOperation(step, v, context);
+        const result = executePumpOperation(step, v, context) ?? executeHydraulicOperation(step, v, context) ?? executeDetailOperation(step, v, context) ?? executeDnOperation(step, v, context) ?? executeStationCatalog(step, v, context) ?? executeCollectorOperation(step, v, context) ?? executeSpecificationOperation(step, v, context);
         if (result) return result;
         throw Error("Неизвестная операция ноды");
       }
@@ -205,18 +212,19 @@ export function evaluatePlan(plan: ToolProgram["plans"][string], context: ToolCo
   }, false, undefined, (step, values) => execute(step, values, context));
   for (const record of Object.values(result.trace)) for (const group of [record.inputs, record.outputs]) {
     const value = group.context as ToolContext | undefined;
-    const resource = value?.resources?.pump_catalog_v2;
-    if (resource) group.context = {
+    const resource = value?.resources?.pump_catalog_v2, station = value?.resources?.station_catalog;
+    if (resource || station) group.context = {
       ...value,
       resources: {
-        pump_catalog_v2: {
+        ...(resource ? {pump_catalog_v2: {
           reference: true,
           sourceId: resource.sourceId,
           snapshotId: resource.id,
           status: resource.status,
           schemaVersion: resource.schemaVersion,
           itemsCount: resource.items.length
-        }
+        }} : {}),
+        ...(station ? {station_catalog: {reference:true, sourceId:station.sourceId, snapshotId:station.id, itemsCount:station.components.items.length, baseVersions:station.baseSettings.versions}} : {})
       }
     };
   }
@@ -243,8 +251,8 @@ export function evaluatePlan(plan: ToolProgram["plans"][string], context: ToolCo
   }
   let count = 0;
   function validateView(v: View | undefined, depth = 0) {
-    if (!v || depth > 20 || ++count > 2000 || !["form", "section", "grid", "field", "condition", "message", "table", "select", "pump-card", "hydraulic-chart", "pump-detail"].includes(v.kind) || typeof v.node !== "string") throw Error("Некорректная структура интерфейса");
-    if (v.kind === "field" || v.kind === "select" || v.kind === "table" && v.binding) {
+    if (!v || depth > 20 || ++count > 2000 || !["form", "section", "grid", "field", "condition", "message", "table", "select", "pump-card", "hydraulic-chart", "pump-detail", "dn-calculator", "collector-constructor", "specification"].includes(v.kind) || typeof v.node !== "string") throw Error("Некорректная структура интерфейса");
+    if (v.kind === "field" || v.kind === "select" || ["table", "dn-calculator"].includes(v.kind) && v.binding) {
       const b = bindings.find(b => b.key === v.binding?.key && b.node === v.binding?.node);
       if (!b || JSON.stringify(b) !== JSON.stringify(v.binding)) throw Error(v.node + " · подключите действительную привязку параметра");
     }
@@ -264,6 +272,16 @@ export function evaluatePlan(plan: ToolProgram["plans"][string], context: ToolCo
       }
     }
     const actualBinding = (binding: ParameterBinding) => bindings.find(actual => actual.node === binding?.node && actual.key === binding?.key && actual.toolId === binding?.toolId && JSON.stringify(actual) === JSON.stringify(binding));
+    const ownBinding = (binding: ParameterBinding, meaning: string, kind: string, crossOwner = false) => actualBinding(binding) && binding.field.meaning === meaning && binding.field.kind === kind && (crossOwner || !binding.toolId || binding.toolId === v.node.split("/")[0]);
+    if (v.kind === "dn-calculator" && v.binding && !ownBinding(v.binding, "dnOverrides", "object")) throw Error(v.node + " · подключите действительный параметр настроек DN");
+    if (v.collector?.stateBinding && (v.kind !== "collector-constructor" || !ownBinding(v.collector.stateBinding, "collectorState", "object"))) throw Error(v.node + " · подключите действительный параметр коллекторов");
+    if (v.specificationBindings) {
+      if (v.kind !== "specification") throw Error(v.node + " · привязки спецификации доступны только её таблице");
+      for (const [key, binding] of Object.entries(v.specificationBindings)) if (binding) {
+        const contract = { manual: ["specManualRows", "array"], hydraulic: ["hydraulicOptions", "object"], dn: ["dnOverrides", "object"] }[key as "manual" | "hydraulic" | "dn"];
+        if (!contract || !ownBinding(binding, contract[0], contract[1], key === "dn" || key === "hydraulic")) throw Error(v.node + " · подключите действительный параметр спецификации");
+      }
+    }
     if (v.chartBindings != null) {
       if (v.kind !== "hydraulic-chart") throw Error(v.node + " · привязки графика доступны только гидравлической кривой");
       for (const [key, binding] of Object.entries(v.chartBindings)) if (binding) {

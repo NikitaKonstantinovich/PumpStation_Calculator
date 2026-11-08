@@ -54,11 +54,11 @@ export function useCollectorDatabase(project: ProjectConfig, setProject: Dispatc
   return { catalog, catalogError, setCatalog: acceptCatalog };
 }
 
-type Props = { canCustomize?: boolean; pressureChecksEnabled?: boolean; entity: CollectorsEntity; inletHead?: number | null; catalog: CollectorCatalog | null; catalogError: string; onCatalog: (catalog: CollectorCatalog) => void; onChange: (type: CollectorType, patch: Partial<CollectorCardState>, expectedFingerprint?: string) => void };
+type Props = { canCustomize?: boolean; pressureChecksEnabled?: boolean; previewByType?: Record<CollectorType, CollectorCardState["calculation"]>; allowedActions?: readonly ("calculate" | "lookup" | "create" | "refresh")[]; onCalculate?: (type: CollectorType, state: CollectorCardState, fingerprint: string) => void; entity: CollectorsEntity; inletHead?: number | null; catalog: CollectorCatalog | null; catalogError: string; onCatalog: (catalog: CollectorCatalog) => void; onChange: (type: CollectorType, patch: Partial<CollectorCardState>, expectedFingerprint?: string) => void };
 export function CollectorConstructor(props: Props) {
   return <div className="collector-constructor">{(["suction", "discharge"] as const).map(type => <CollectorCard key={type} {...props} type={type} state={props.entity[type]}/>)}</div>;
 }
-function CollectorCard({ canCustomize = false, pressureChecksEnabled = true, type, state, inletHead, catalog, catalogError, onCatalog, onChange }: Props & { type: CollectorType; state: CollectorCardState }) {
+function CollectorCard({ canCustomize = false, pressureChecksEnabled = true, previewByType, allowedActions, onCalculate, type, state, inletHead, catalog, catalogError, onCatalog, onChange }: Props & { type: CollectorType; state: CollectorCardState }) {
   const storedError = useStoredDiagnostic("collectors",`${type}/action`)?.message ?? "";
   const [busy, setBusy] = useState(false), [message, setMessage] = useState(storedError);
   const [actionError, setActionError] = useState(storedError);
@@ -66,18 +66,18 @@ function CollectorCard({ canCustomize = false, pressureChecksEnabled = true, typ
   useRuntimeDiagnostic("collectors",`${type}/action`,actionError);
   const c = state.configuration, recommended = state.recommended;
   if (!c || !recommended) return <article className="collector-card">Подготовка параметров…</article>;
-  const fingerprint = configurationFingerprint(c), preview = catalog ? calculateCollector(c, catalog) : null;
+  const fingerprint = configurationFingerprint(c), preview = previewByType ? previewByType[type] : catalog ? calculateCollector(c, catalog) : null;
   const diameterErrors = collectorBranchDiameterErrors(c, catalog), configurationErrors = [...new Set([...configurationWarnings(c), ...diameterErrors])];
   const stale = state.status === "stale" || Boolean(state.calculation && catalog && state.calculation.catalogVersion !== catalog.version);
-  const calculation = !stale && !configurationErrors.length && matchesCollectorConfiguration(state.calculation?.fingerprint,c) ? state.calculation : null;
+  const calculation = !stale && !configurationErrors.length && matchesCollectorConfiguration(state.calculation?.fingerprint,c) ? previewByType ? preview : state.calculation : null;
   const saved = !configurationErrors.length && state.databaseStatus === "found" && state.database?.code === state.code ? state.database : null;
   const values = preview ?? calculation;
   const velocityWarning = collectorVelocityWarning(c.dn, values?.velocities.collector,c.velocityRules);
   const pricedCalculation = calculation ?? (saved ? preview : null);
   const patch = (value: Partial<CollectorCardState>) => onChange(type, value);
   const override = (key: keyof CollectorOverrides, value: number | string | undefined) => { const overrides = { ...state.overrides, [key]: value }; if (value === undefined) delete overrides[key]; patch({ overrides }); };
-  const dnControl = (label: string, key: "dn" | "primaryDn" | "secondaryDn", value: number | null, source: number | null) => <label className="collector-field"><span>{label}</span><input type="number" min="15" max="1200" step="1" value={value ?? ""} onChange={e => override(key, e.target.value ? Number(e.target.value) : 0)}/><small>Из расчёта DN: {source ?? "не задано"}{state.overrides[key] !== undefined ? " · Вручную" : " · Автоматически"}</small>{state.overrides[key] !== undefined && <button className="collector-reset" onClick={() => override(key, undefined)}>Вернуть значение из расчёта DN</button>}</label>;
-  const connectionControl = (label: string, key: "connection" | "primaryConnection" | "secondaryConnection", value: string, dn: number | null) => <label className="collector-field"><span>{label}</span><select value={value} onChange={e => override(key, e.target.value)}><option value="flanged">Фланцевое</option><option value="threaded" disabled={!dn || dn > 50}>Резьбовое · до 2&quot;</option></select>{state.overrides[key] !== undefined && <button className="collector-reset" onClick={() => override(key, undefined)}>Вернуть из расчёта DN</button>}</label>;
+  const dnControl = (label: string, key: "dn" | "primaryDn" | "secondaryDn", value: number | null, source: number | null) => <label className="collector-field"><span>{label}</span><input type="number" min="15" max="1200" step="1" value={value ?? ""} onChange={e => override(key, e.target.value ? Number(e.target.value) : 0)}/><small>Из расчёта DN: {source ?? "не задано"}{state.overrides[key] !== undefined ? " · Вручную" : " · Автоматически"}</small>{state.overrides[key] !== undefined && <button type="button" className="collector-reset" onClick={() => override(key, undefined)}>Вернуть значение из расчёта DN</button>}</label>;
+  const connectionControl = (label: string, key: "connection" | "primaryConnection" | "secondaryConnection", value: string, dn: number | null) => <label className="collector-field"><span>{label}</span><select value={value} onChange={e => override(key, e.target.value)}><option value="flanged">Фланцевое</option><option value="threaded" disabled={!dn || dn > 50}>Резьбовое · до 2&quot;</option></select>{state.overrides[key] !== undefined && <button type="button" className="collector-reset" onClick={() => override(key, undefined)}>Вернуть из расчёта DN</button>}</label>;
   const spacingControl = (index: number) => {
     const circuit = index ? c.secondary! : c.primary, baseSpacing = collectorBaseSpacing(circuit,index);
     const manual = collectorSpacingIsManual(circuit), confirmed = collectorSpacingConfirmed(c,index);
@@ -118,9 +118,12 @@ function CollectorCard({ canCustomize = false, pressureChecksEnabled = true, typ
     </div>;
   };
   const run = async (action: "calculate" | "create" | "refresh" | "lookup") => {
+    if (allowedActions && !allowedActions.includes(action)) return;
     setBusy(true); setMessage(""); setActionError("");
     try {
-      if (action === "lookup") {
+      if (action === "calculate" && onCalculate) {
+        onCalculate(type, state, fingerprint);
+      } else if (action === "lookup") {
         const data = await api(`/api/collectors?code=${encodeURIComponent(state.code!)}&configuration=${encodeURIComponent(JSON.stringify(c))}`);
         onChange(type, { database: data.collector, databaseStatus: data.collector ? "found" : "missing", databaseError: undefined }, fingerprint);
       } else {
@@ -145,15 +148,15 @@ function CollectorCard({ canCustomize = false, pressureChecksEnabled = true, typ
     <div className="collector-fields">
       {dnControl("DN коллектора", "dn", c.dn, recommended.dn)}
       {connectionControl("Подключение к сети", "connection", c.connection, c.dn)}
-      <label className="collector-field"><span>PN коллектора</span><select value={c.pn} onChange={e => override("pn", Number(e.target.value))}>{[10,16,25].map(pn => <option key={pn} value={pn}>PN{pn}</option>)}</select><small>Из расчёта DN: PN{recommended.pn}</small>{state.overrides.pn !== undefined && <button className="collector-reset" onClick={() => override("pn", undefined)}>Вернуть из расчёта DN</button>}</label>
-      <label className="collector-field"><span>Материал</span><select value={c.material} onChange={e => override("material", e.target.value)}><option value="aisi304">AISI304</option><option value="st20">СТ20</option></select><small>Из расчёта DN: {recommended.material === "aisi304" ? "AISI304" : "СТ20"}</small>{state.overrides.material && <button className="collector-reset" onClick={() => override("material", undefined)}>Вернуть из расчёта DN</button>}</label>
+      <label className="collector-field"><span>PN коллектора</span><select value={c.pn} onChange={e => override("pn", Number(e.target.value))}>{[10,16,25].map(pn => <option key={pn} value={pn}>PN{pn}</option>)}</select><small>Из расчёта DN: PN{recommended.pn}</small>{state.overrides.pn !== undefined && <button type="button" className="collector-reset" onClick={() => override("pn", undefined)}>Вернуть из расчёта DN</button>}</label>
+      <label className="collector-field"><span>Материал</span><select value={c.material} onChange={e => override("material", e.target.value)}><option value="aisi304">AISI304</option><option value="st20">СТ20</option></select><small>Из расчёта DN: {recommended.material === "aisi304" ? "AISI304" : "СТ20"}</small>{state.overrides.material && <button type="button" className="collector-reset" onClick={() => override("material", undefined)}>Вернуть из расчёта DN</button>}</label>
     </div>
     {type === "suction" && <label className="collector-checkbox"><input type="checkbox" checked={c.eccentric} onChange={e => patch({ eccentric: e.target.checked })}/>Эксцентрическое исполнение</label>}
     {[c.primary, ...(c.secondary ? [c.secondary] : [])].map((circuit, i) => <section key={i} className="collector-circuit"><h3>Контур {i + 1}</h3><p>DN коллектора этого контура из расчёта DN: {(type === "suction" ? (i ? state.dnSource?.secondarySuctionCollectorDn : state.dnSource?.suctionCollectorDn) : (i ? state.dnSource?.secondaryDischargeCollectorDn : state.dnSource?.dischargeCollectorDn)) ?? "автоподбор"}</p><p>{circuit.pumpModel ?? circuit.pumpId ?? "Модель насоса не выбрана"}</p><p>{circuit.working ?? "—"} рабочих + {circuit.reserve ?? "—"} резервных · {pumpCount(circuit)} патрубков · PN{circuit.pn} · {measure(circuit.flow, "м³/ч")}</p><div className="collector-fields">
       {dnControl("DN патрубков", i ? "secondaryDn" : "primaryDn", circuit.dn, (i ? recommended.secondary : recommended.primary)?.dn ?? null)}
       {connectionControl("Присоединение к насосам", i ? "secondaryConnection" : "primaryConnection", circuit.connection, circuit.dn)}
       {spacingControl(i)}
-      {i === 1 && <label className="collector-field"><span>PN контура 2</span><select value={circuit.pn} onChange={e => override("secondaryPn", Number(e.target.value))}>{[10,16,25].map(pn => <option key={pn} value={pn}>PN{pn}</option>)}</select><small>Из расчёта DN: PN{recommended.secondary?.pn}</small>{state.overrides.secondaryPn && <button className="collector-reset" onClick={() => override("secondaryPn", undefined)}>Вернуть из расчёта DN</button>}</label>}
+      {i === 1 && <label className="collector-field"><span>PN контура 2</span><select value={circuit.pn} onChange={e => override("secondaryPn", Number(e.target.value))}>{[10,16,25].map(pn => <option key={pn} value={pn}>PN{pn}</option>)}</select><small>Из расчёта DN: PN{recommended.secondary?.pn}</small>{state.overrides.secondaryPn && <button type="button" className="collector-reset" onClick={() => override("secondaryPn", undefined)}>Вернуть из расчёта DN</button>}</label>}
     </div><p>Длина патрубка: {measure(values?.branchLengthsMm[i], "мм")} · болт затвора 017W: {measure(values?.branchBoltReferences?.[i]?.length, "мм")} · скорость: {measure(i ? values?.velocities.secondary : values?.velocities.primary, "м/с")}</p></section>)}
     </fieldset>
     <dl className="collector-metrics"><div><dt>Расчётный расход</dt><dd>{measure(collectorFlow(c).flow, "м³/ч")}</dd></div><div><dt>Длина коллектора</dt><dd>{measure(collectorLength(c), "мм")}</dd></div><div><dt>Скорость в коллекторе</dt><dd>{measure(values?.velocities.collector, "м/с")}</dd></div></dl>
@@ -168,7 +171,7 @@ function CollectorCard({ canCustomize = false, pressureChecksEnabled = true, typ
     <details><summary>Сварные швы · {measure(values?.weldLengthMm, "мм")} · {money(values?.weldCost)}</summary><div className="collector-table-wrap"><table><thead><tr><th>Операция</th><th>Кол-во</th><th>Шов, мм</th><th>Цена</th></tr></thead><tbody>{values?.welds.map(weld => <tr key={weld.role}><td>{weld.name}</td><td>{weld.count}</td><td>{measure(weld.lengthMm, "")}</td><td>{money(weld.cost)}</td></tr>)}</tbody></table></div><p>Тариф: {money(values?.bom.find(row=>row.role==="welding")?.unitPrice)} / м</p></details>
     {saved && <details><summary>Сохранённый состав · {new Date(saved.priceUpdatedAt).toLocaleString("ru-RU")}</summary><p>PN коллектора: {saved.configuration.pn} · PN патрубков: {saved.configuration.primary.pn}{saved.configuration.secondary ? ` / ${saved.configuration.secondary.pn}` : ""}</p><BomTable items={saved.calculation.bom}/></details>}
     <dl className="collector-prices"><div><dt>Цена из базы</dt><dd>{money(saved?.price)}</dd></div><div><dt>{pricedCalculation?.complete ? "Текущая расчётная цена" : "Расчёт неполный · промежуточная сумма"}</dt><dd>{money(pricedCalculation?.complete ? pricedCalculation.price : pricedCalculation?.subtotal)}</dd></div><div><dt>Разница с базой</dt><dd>{money(saved && pricedCalculation?.price != null ? pricedCalculation.price - saved.price : null)}</dd></div></dl>
-    <div className="collector-actions"><button className="button button--primary" disabled={busy || !state.code} onClick={() => void run("calculate")}>Рассчитать</button><button className="button" disabled={busy || !state.code} onClick={() => void run("lookup")}>Проверить базу</button>{saved ? <button className="button" disabled={busy} onClick={() => void run("refresh")}>Обновить цену в базе</button> : <button className="button" disabled={busy || !calculation?.complete || stale || state.databaseStatus !== "missing"} onClick={() => void run("create")}>Создать позицию в базе</button>}</div>
+    <div className="collector-actions"><button type="button" className="button button--primary" disabled={busy || !state.code || !!allowedActions && !allowedActions.includes("calculate")} onClick={() => void run("calculate")}>Рассчитать</button><button type="button" className="button" disabled={busy || !state.code || !!allowedActions && !allowedActions.includes("lookup")} onClick={() => void run("lookup")}>Проверить базу</button>{saved ? <button type="button" className="button" disabled={busy || !!allowedActions && !allowedActions.includes("refresh")} onClick={() => void run("refresh")}>Обновить цену в базе</button> : <button type="button" className="button" disabled={busy || !calculation?.complete || stale || state.databaseStatus !== "missing" || !!allowedActions && !allowedActions.includes("create")} onClick={() => void run("create")}>Создать позицию в базе</button>}</div>
     <p data-issue-id={`collectors/${type}/action`} role={actionError?"alert":"status"} className={actionError?"issue-notice issue-notice--error":undefined}>{busy ? "Выполняется расчёт…" : message}</p>
   </article>;
 }

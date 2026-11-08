@@ -22,7 +22,7 @@ export async function engineeringStore(options={}){
   const base=new URL("../../app/",import.meta.url);
   const replacements={
     [new URL("node-tools/catalog-binding-server.ts",base).href]:'export const catalogService=()=>globalThis.'+unique+'Catalog;',
-    [new URL("auth-server.ts",base).href]:'export const db=()=>globalThis.'+unique+';export const currentUser=async r=>r.headers.has("x-test-role")?{id:"fixture",name:"Тест",role:r.headers.get("x-test-role")}:null;export const json=(v,status=200,headers={})=>Response.json(v,{status,headers});',
+    [new URL("auth-server.ts",base).href]:'export const db=()=>globalThis.'+unique+';export const sha256=async value=>Buffer.from(await crypto.subtle.digest("SHA-256",new TextEncoder().encode(value))).toString("base64url");export const currentUser=async r=>r.headers.has("x-test-role")?{id:"fixture",name:"Тест",role:r.headers.get("x-test-role")}:null;export const json=(v,status=200,headers={})=>Response.json(v,{status,headers});',
     [new URL("release-policy.ts",base).href]:'export const IS_BETA=false;export const publicShellAsset=()=>false;export const betaApiAllowed=()=>true;export const betaDataAsset=()=>false;',
     [new URL("engineering/equipment-server.ts",base).href]:'export const trialResources=async()=>({pumps:[],cabinets:null,smartCabinets:null});export const equipmentTypes=async()=>[];export const equipmentSamples=async()=>[];',
   };

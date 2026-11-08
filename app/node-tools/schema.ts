@@ -24,7 +24,7 @@ export type ParameterBinding = {
 };
 export type ParameterWrite = { binding: ParameterBinding; value: unknown };
 export type View = {
-  kind: "form" | "section" | "grid" | "field" | "condition" | "message" | "table" | "select" | "pump-card" | "hydraulic-chart" | "pump-detail";
+  kind: "form" | "section" | "grid" | "field" | "condition" | "message" | "table" | "select" | "pump-card" | "hydraulic-chart" | "pump-detail" | "dn-calculator" | "collector-constructor" | "specification";
   node: string;
   label: string;
   rows?:Record<string,unknown>[];
@@ -37,6 +37,10 @@ export type View = {
   clearBindings?: ParameterBinding[];
   chart?: import("./hydraulic-nodes").HydraulicChartData;
   detail?: import("./pump-detail-data").PumpDetailData;
+  dn?: import("./dn-nodes").DnResult;
+  collector?: import("./collector-nodes").CollectorViewData;
+  specification?: import("./specification-nodes").SpecificationData;
+  specificationBindings?: import("./specification-nodes").SpecificationBindings;
   chartBindings?: { method?: ParameterBinding; frequency?: ParameterBinding; grid?: ParameterBinding };
   pointBindings?: { flow: ParameterBinding; head: ParameterBinding };
   widget?: string;
@@ -89,7 +93,7 @@ export type ToolContext = {
   defaults: Values;
   role: UserRole;
   algorithmVersion?:string;
-  resources?:{pump_catalog_v2?:import("./catalog-schema").CatalogSnapshot};
+  resources?:{pump_catalog_v2?:import("./catalog-schema").CatalogSnapshot;station_catalog?:import("./station-catalog").StationCatalogResources};
 };
 export type Evaluation = {
   value: unknown;

@@ -19,16 +19,17 @@ export async function GET(request: Request) {
       versions = raw ? JSON.parse(raw) : undefined;
     const program=await toolProgram(q.get("version")),
       sources=q.has("sources")?JSON.parse(q.get("sources")!):undefined;
+    const defaults = await toolDefaults(versions);
     let resourceData;
-    try { resourceData=await toolResources(program,sources); }
+    try { resourceData=await toolResources(program,sources,defaults.baseVersions); }
     catch(e) {
       if(!(e instanceof CatalogError) || e.status<404 || q.get("partial")!=="1") throw e;
-      resourceData={sourceVersions:sources??{},sourceErrors:{pump_catalog_v2:e.message}};
+      resourceData={sourceVersions:sources??{},sourceErrors:{catalog:e.message}};
     }
     return reply({
       program,
       ...resourceData,
-      ...(await toolDefaults(versions)),
+      ...defaults,
       role: user.role
     });
   } catch (e) {

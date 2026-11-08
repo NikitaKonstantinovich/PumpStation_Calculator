@@ -2,14 +2,18 @@
 
 import { useEffect, useRef, useState, useMemo, type ReactNode } from "react";
 import { ToolForm } from "./form";
+import { DataTree } from "./data-inspector";
 import { applyParameterWrites } from "./form-actions";
 import { evaluatePlan, evaluateProduct, migrateValues } from "./runtime";
 import { migrateProduct, productContexts } from "./product-state";
-import type { CatalogSnapshot } from "./catalog-schema";
-import { diagnosticKey, type SavedTool, type ToolProgram, type Values, type WorkspaceData } from "./schema";
+import { diagnosticKey, type SavedTool, type ToolContext, type ToolProgram, type Values, type WorkspaceData } from "./schema";
 import type { UserRole } from "../user-types";
 import type { ProjectConfig } from "../project-config";
 import "./tools.css";
+function ToolResult({ value }: { value: unknown }) {
+  const [open, setOpen] = useState(false);
+  return <details onToggle={event => setOpen(event.currentTarget.open)}><summary>Результат инструмента</summary>{open && <DataTree value={value} label="Вычисленные данные" />}</details>;
+}
 export async function loadTools(version?: string, base?: Record<string, string>, sources?: Record<string, string>) {
   const query = new URLSearchParams();
   query.set("partial", "1");
@@ -26,9 +30,7 @@ export async function loadTools(version?: string, base?: Record<string, string>,
     defaults: Values;
     baseVersions: Record<string, string>;
     role: UserRole;
-    resources?: {
-      pump_catalog_v2?: CatalogSnapshot;
-    };
+    resources?: ToolContext["resources"];
     sourceVersions: Record<string, string>;
     sourceErrors?: Record<string, string>;
   };
@@ -130,7 +132,7 @@ function RuntimeTool({
     }} save={persist} />
     {!!result.issues.length && <p role="status">Проверок с ошибками · {result.issues.length}</p>}
     {dirty && <small>Есть несохранённые значения</small>}{error && <p role="alert">{error}</p>}{message && <p role="status">{message}</p>}
-    <details><summary>Результат инструмента</summary><pre>{JSON.stringify(result.value, null, 2)}</pre></details>
+    <ToolResult value={result.value} />
   </article>;
 }
 type Loaded = Awaited<ReturnType<typeof loadTools>>;
@@ -209,7 +211,7 @@ function ProductTool({
       }
       save();
       setMessage("Изменения переданы в сохранение проекта");
-    }} />{dirty && <small>Есть несохранённые изменения продукта</small>}{message && <p role="status">{message}</p>}{value.issues.map(i => <p key={diagnosticKey(i)} role={i.severity === "error" ? "alert" : "status"}>{i.message}</p>)}<details><summary>Результат инструмента</summary><pre>{JSON.stringify(value.value, null, 2)}</pre></details></article>;
+    }} />{dirty && <small>Есть несохранённые изменения продукта</small>}{message && <p role="status">{message}</p>}{value.issues.map(i => <p key={diagnosticKey(i)} role={i.severity === "error" ? "alert" : "status"}>{i.message}</p>)}<ToolResult value={value.value} /></article>;
 }
 export function NodeWorkspace({
   project,

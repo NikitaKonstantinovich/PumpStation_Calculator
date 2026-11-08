@@ -1,13 +1,10 @@
 import { accepts } from "../engineering/schema";
 import { evaluateProduct } from "./runtime";
-import type { CatalogSnapshot } from "./catalog-schema";
 import type { Evaluation, ToolContext, ToolProgram, Values, WorkspaceData } from "./schema";
 import type { UserRole } from "../user-types";
 export const usesCatalog = (program: ToolProgram) => Object.values(program.plans).some(plan => plan.steps.some(step => step.operation === "pump.catalog"));
 export const ownBindings = (result: Evaluation, id: string) => result.bindings.filter(b => !b.toolId || b.toolId === id);
-export function productContexts(program: ToolProgram, data: WorkspaceData | undefined, defaults: Values, role: UserRole, resources?: {
-  pump_catalog_v2?: CatalogSnapshot;
-}): Record<string, ToolContext> {
+export function productContexts(program: ToolProgram, data: WorkspaceData | undefined, defaults: Values, role: UserRole, resources?: ToolContext["resources"]): Record<string, ToolContext> {
   return Object.fromEntries(program.tools.map(t => [t.id, {
     values: data?.tools[t.id]?.values ?? {},
     stored: data?.tools[t.id]?.values,
@@ -17,9 +14,7 @@ export function productContexts(program: ToolProgram, data: WorkspaceData | unde
     algorithmVersion: program.version
   }]));
 }
-export function migrateProduct(program: ToolProgram, previous: WorkspaceData | undefined, defaults: Values, baseVersions: Record<string, string>, role: UserRole, resources?: {
-  pump_catalog_v2?: CatalogSnapshot;
-}, sourceVersions: Record<string, string> = {}) {
+export function migrateProduct(program: ToolProgram, previous: WorkspaceData | undefined, defaults: Values, baseVersions: Record<string, string>, role: UserRole, resources?: ToolContext["resources"], sourceVersions: Record<string, string> = {}) {
   const messages: string[] = [],
     tools = {
       ...previous?.tools
