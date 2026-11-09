@@ -1,6 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useId, useRef, useState } from "react";
+import { GeometryView } from "./geometry-view";
+import { useParameterDraft } from "./parameter-drafts-context";
 import { parseNumber } from "./runtime";
 import { accepts } from "../engineering/schema";
 import { DataTree } from "./data-inspector";
@@ -35,19 +37,19 @@ function Input({
   change: (key: string, value: unknown) => void;
 }) {
   const uid = useId(),
-    [draft, setDraft] = useState<string | null>(null),
     [error, setError] = useState(""),
     [basis, setBasis] = useState(() => validationKey(b) + disabled);
+  const [draft,setDraft]=useParameterDraft(JSON.stringify([b.toolId,b.node,b.key]),validationKey(b)+disabled);
   const field = b.field,
     value = b.value,
     numeric = ["number", "float", "int"].includes(field.kind),
     structured = ["object", "array"].includes(field.kind);
   const pendingKey=validationKey(b);
   useEffect(()=>()=>validity(pendingKey,true),[pendingKey,validity]);
+  useEffect(()=>{if(draft!==null)validity(pendingKey,false);},[draft,pendingKey,validity]);
   const signature = pendingKey + disabled;
   if (basis !== signature) {
     setBasis(signature);
-    setDraft(null);
     setError("");
   }
   function commit() {
@@ -133,6 +135,7 @@ export function ToolForm({
   save,
   selected,
   select,
+  showTitle = true,
   readOnly = false
 }: {
   view?: View;
@@ -142,6 +145,7 @@ export function ToolForm({
   save?: () => void;
   selected?: string;
   select?: (node: string) => void;
+  showTitle?: boolean;
   readOnly?: boolean;
 }) {
   const [pending, setPending] = useState<Record<string, boolean>>({});
@@ -185,8 +189,8 @@ export function ToolForm({
       }
     };
     const classes = selected && (selected === v.node || selected === v.binding?.node) ? "nt-selected" : "";
-    if (["table", "select", "pump-card", "hydraulic-chart", "pump-detail", "dn-calculator", "collector-constructor", "specification"].includes(v.kind)) return <div key={v.node} data-view-node={v.node} data-binding-node={v.binding?.node} className={classes} role={select ? "button" : undefined} tabIndex={select ? 0 : undefined} onKeyDown={event=>{if(select && event.target===event.currentTarget && event.key==="Enter")select(v.node);}} onClick={choose}>
-      {v.kind === "dn-calculator" ? <DnCalculatorView view={v} disabled={blocked} change={change}/> : v.kind === "collector-constructor" ? <CollectorNodeView view={v} disabled={blocked} change={change} writes={writes}/> : v.kind === "specification" ? <NodeSpecificationView view={v} disabled={blocked} change={change} writes={writes}/> : v.kind === "table" ? <CandidateTable view={v} disabled={blocked} showOrigin={showOrigin} change={change}/> : v.kind === "select" ? <DynamicSelect view={v} disabled={blocked} showOrigin={showOrigin} change={change}/> : v.kind === "hydraulic-chart" ? <HydraulicChartView view={v} disabled={blocked} change={change} writes={writes}/> : v.kind === "pump-detail" ? <PumpDetailCard view={v} showOrigin={showOrigin}/> : <PumpCard view={v}/>}
+    if (["table", "select", "pump-card", "hydraulic-chart", "pump-detail", "dn-calculator", "collector-constructor", "specification", "station-geometry"].includes(v.kind)) return <div key={v.node} data-view-node={v.node} data-binding-node={v.binding?.node} className={classes} role={select ? "button" : undefined} tabIndex={select ? 0 : undefined} onKeyDown={event=>{if(select && event.target===event.currentTarget && event.key==="Enter")select(v.node);}} onClick={choose}>
+      {v.kind === "station-geometry" ? <GeometryView view={v} disabled={blocked} change={change}/> : v.kind === "dn-calculator" ? <DnCalculatorView view={v} disabled={blocked} change={change}/> : v.kind === "collector-constructor" ? <CollectorNodeView view={v} disabled={blocked} change={change} writes={writes}/> : v.kind === "specification" ? <NodeSpecificationView view={v} disabled={blocked} change={change} writes={writes}/> : v.kind === "table" ? <CandidateTable view={v} disabled={blocked} showOrigin={showOrigin} change={change}/> : v.kind === "select" ? <DynamicSelect view={v} disabled={blocked} showOrigin={showOrigin} change={change}/> : v.kind === "hydraulic-chart" ? <HydraulicChartView view={v} disabled={blocked} change={change} writes={writes}/> : v.kind === "pump-detail" ? <PumpDetailCard view={v} showOrigin={showOrigin}/> : <PumpCard view={v}/>}
     </div>;
     if (v.kind === "field") {
       if (!v.binding) return <p role="alert">Подключите параметр поля</p>;
@@ -204,10 +208,10 @@ export function ToolForm({
     if (v.kind === "grid") return <div key={v.node} data-view-node={v.node} className={"nt-grid " + classes} style={{
       gridTemplateColumns: "repeat(" + Math.min(3, Math.max(1, v.columns ?? 1)) + ",minmax(0,1fr))"
     }}>{children}</div>;
-    return <form key={v.node} data-view-node={v.node} className="nt-form" onSubmit={e => {
+    return <form key={v.node} data-view-node={v.node} className="nt-form" aria-label={v.label} onSubmit={e => {
       e.preventDefault();
       if (!blockedDraft) save?.();
-    }}><h2>{select ? <button type="button" onClick={choose}>{v.label}</button> : v.label}</h2>{children}{v.command && save && <button type="submit" disabled={blockedDraft}>Сохранить значения</button>}</form>;
+    }}>{showTitle && <h2>{select ? <button type="button" onClick={choose}>{v.label}</button> : v.label}</h2>}{children}{v.command && save && <button type="submit" disabled={blockedDraft}>Сохранить значения</button>}</form>;
   }
   return <div ref={container} className="nt-form-root">{view ? render(view, readOnly) : <p>Подключите выход интерфейса инструмента.</p>}</div>;
 }

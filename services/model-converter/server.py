@@ -24,6 +24,8 @@ import uuid
 
 FRONTEND = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(FRONTEND / "scripts"))
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from catalog_links import catalog_links, apply_catalog_links  # noqa: E402
 from model_assets import CONVERTER_VERSION, convert_step, file_hash, load_library, run_cad_command, source_path, valid_stl  # noqa: E402
 
 ACTIVE = {"queued", "searching", "converting"}
@@ -241,14 +243,17 @@ class Jobs:
             job.pop("fatalError", None)
             self.save(job)
             source_root = self.root
+            keys = [i["key"] for i in job["items"]]
+            links = catalog_links(os.environ.get("NODE_PUMP_CATALOG_PATH"), keys)
             if job.get("modelRelease"):
                 source_root = Path(os.environ["PROJECT_MODEL_LIBRARY"]).resolve()
                 with self.lock:
                     rows = self.db.execute("""SELECT model_id, source_path, profile FROM public.model_versions
-                        WHERE version=? AND model_id=ANY(?)""", (job["modelRelease"], [i["key"] for i in job["items"]])).fetchall()
+                        WHERE version=? AND model_id=ANY(?)""", (job["modelRelease"], list(set(keys + [link["sourceKey"] for link in links.values()])))).fetchall()
                 library = {key: {**profile, "source": path} for key, path, profile in rows}
             else:
                 library = load_library(self.root, self.registry)
+            apply_catalog_links(library, links)
             grouped, ready_hashes = {}, set()
             for item in job["items"]:
                 key = item["key"]

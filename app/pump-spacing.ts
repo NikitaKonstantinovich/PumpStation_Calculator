@@ -13,7 +13,7 @@ export type SpacingEvidence = { modelId: string; links: SpacingLink[]; motorKey:
 export type PumpLayout = {
   pumpId: string; modelId: string; snapshotId: string; contour: "primary" | "secondary";
   powerKw: number | null; motorKey: string; orientation: string; installed: number;
-  links: SpacingLink[]; geometry?: SpacingGeometry; reference?: SpacingReference; issues: string[];
+  links: SpacingLink[]; geometry?: SpacingGeometry; reference?: SpacingReference; width?: { mm: number; source: string }; issues: string[];
 };
 export type SpacingStatus = "confirmed" | "conditional" | "missing" | "conflict" | "stale";
 export type SpacingResult = {
@@ -22,6 +22,7 @@ export type SpacingResult = {
   ruleIds: string[]; ruleVersion: string | null; fingerprint: string; layout: PumpLayout;
   dimensions: { leftMm: number; rightMm: number; source: string } | null;
   message: string; missing: string[]; geometryCalculated: boolean; clearanceViolation: boolean;
+  calculationRule?: "width-plus-150-ceil-50-v1";
 };
 export const spacingJson = (v: unknown): string => JSON.stringify(v, (_k, x) => x && typeof x === "object" && !Array.isArray(x) ? Object.fromEntries(Object.entries(x).sort(([a], [b]) => a.localeCompare(b))) : x);
 export function spacingFingerprint(value: unknown): string {
@@ -94,7 +95,30 @@ export function checkSpacingClearance(result: SpacingResult, spacing = result.sp
   const violation = gap != null && result.requiredGap != null && gap < result.requiredGap;
   return { ...result, spacing, gap, clearanceViolation: violation, ...(violation ? { status: "conflict" as const, message: `Свободный зазор ${gap} мм меньше требуемого ${result.requiredGap} мм` } : {}) };
 }
+/** Product rule. Uses the pinned pump width; never substitutes DN, base width or an old spacing. */
+export function standardPumpSpacing(layout: PumpLayout): SpacingResult {
+  const rule = "width-plus-150-ceil-50-v1" as const;
+  const confirmed = layoutGeometry(layout), ref = layout.reference;
+  const referenceValid = ref && ref.variantId === layout.pumpId && ref.modelId === layout.modelId && ref.motorKey === layout.motorKey && ref.orientation === "transverse_to_flow" && positive(ref.leftMm) && positive(ref.rightMm) && ref.source && ref.version;
+  const width = positive(layout.width?.mm) ? layout.width : confirmed ? { mm: confirmed.leftMm + confirmed.rightMm, source: confirmed.source } : referenceValid ? { mm: ref.leftMm + ref.rightMm, source: ref.source } : undefined;
+  const applicable = layout.orientation === "transverse_to_flow";
+  const mm = applicable ? width?.mm : undefined;
+  const result: SpacingResult = {
+    calculationRule: rule, spacing: null, radius: null, gap: null, requiredGap: 150,
+    status: "missing", source: "none", ruleIds: [], ruleVersion: rule,
+    fingerprint: spacingFingerprint({ rule, layout }), layout, dimensions: null,
+    message: !applicable ? "Расчёт по ширине применяется к размещению насосов поперёк потока." : "В закреплённом каталоге не задана ширина выбранного насоса.",
+    missing: [!applicable ? "Размещение поперёк потока" : "Ширина насоса, мм"], geometryCalculated: false, clearanceViolation: false
+  };
+  if (!positive(mm) || !width) return result;
+  const spacing = Math.ceil((mm + 150) / 50) * 50;
+  return checkSpacingClearance({ ...result, spacing, radius: mm / 2, status: "confirmed", source: "calculation", geometryCalculated: true, missing: [],
+    dimensions: { leftMm: mm / 2, rightMm: mm / 2, source: width.source },
+    message: `Стандартное межосевое: ширина ${mm} мм + 150 мм, округление вверх до 50 мм = ${spacing} мм. Источник ширины: ${width.source}.`
+  });
+}
 export function resolvePumpSpacing(layout: PumpLayout, applied?: AppliedBaseValues, previous?: SpacingResult): SpacingResult {
+  if (previous?.calculationRule === "width-plus-150-ceil-50-v1") return standardPumpSpacing(layout);
   const rule = findSpacingRule(layout, applied);
   if (previous?.fingerprint === rule.fingerprint && previous.source !== "manual") return previous;
   return checkSpacingClearance(calculateSpacingFallback(rule, applied));

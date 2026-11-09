@@ -1,7 +1,10 @@
 "use client";
 import "./engineering/native-server";
 import {getCircuitDnConfig,refreshSuctionSpecification} from "./station-hydraulic-calculation";
-import {NodeWorkspace} from "./node-tools/workspace";
+import {NodeWorkspace,loadTools} from "./node-tools/workspace";
+import {AlgorithmLibrary} from "./node-tools/algorithm-library";
+import {DEFAULT_ALGORITHM,algorithmForProject} from "./node-tools/algorithm-schema";
+import {migrateProduct} from "./node-tools/product-state";
 import {ToolEditor} from "./node-tools/editor";
 import {EngineeringEditor} from "./engineering/editor";
 import {loadProgram} from "./engineering/client";
@@ -312,6 +315,7 @@ export default function Home() {
   const session=useRef<ProjectSession|null>(null);
   const [activeSession,setActiveSession]=useState<ProjectSession|null>(null);
   const [conflicted,setConflicted]=useState(false);
+  const [projectDirty,setProjectDirty]=useState(false);
   const activate=useCallback((user:AccountUser,project:ProjectConfig,revision:number,freeze:boolean)=>{
     session.current?.dispose();
     if (freeze && (project.entities["station-spec"] as SpecEntity).items.some(item => item.insertionAssembly)) resetComponentsDatabase();
@@ -319,7 +323,7 @@ export default function Home() {
       project={...project,project:{...project.project,modelLibraryVersion:libraryVersion.current}};
     }
     const active=new ProjectSession(user.id,project,revision,
-      message=>{if(session.current===active){setSaveMessage(message);setConflicted(active.blocked);}},
+      message=>{if(session.current===active){setSaveMessage(message);setConflicted(active.blocked);setProjectDirty(active.dirty);}},
       card=>setProjects(cards=>[card,...cards.filter(other=>other.id!==card.id)]),
       (next,previous)=>{
         if(session.current!==active)return;
@@ -333,13 +337,16 @@ export default function Home() {
         // Undo must not roll back changes received from another window.
         history.current=[next];historyIndex.current=0;setHistoryState({canUndo:false,canRedo:false});
       },next=>parseAccessibleProject(next,user.role));
-    session.current=active;setActiveSession(active);setConflicted(false); setSnapshot(freeze); setConfig(project);
+    session.current=active;setActiveSession(active);setConflicted(false);setProjectDirty(active.dirty); setSnapshot(freeze); setConfig(project);
     history.current=[project];historyIndex.current=0;setHistoryState({canUndo:false,canRedo:false});
     setSaveMessage(revision?"Сохранено на сервере":"Есть изменения");
     return active;
   },[]);
   useEffect(()=>activeSession?.connect(),[activeSession]);
-  const [view,setView]=useState<"workspace"|"projects"|"users"|"component-calculator"|"base-values"|"item-entry"|"equipment-admin"|"geometry-nodes"|"node-editor"|"workspace2"|"help">(()=>{const requested=typeof window!=="undefined"?new URLSearchParams(window.location.search).get("view"):null;return requested==="projects"||requested==="users"||requested==="component-calculator"||requested==="base-values"||requested==="item-entry"||requested==="equipment-admin"||requested==="node-editor"||requested==="workspace2"||requested==="geometry-nodes"||requested==="help"?requested:"workspace";});
+  const [view,setView]=useState<"workspace"|"projects"|"users"|"component-calculator"|"base-values"|"item-entry"|"equipment-admin"|"geometry-nodes"|"node-editor"|"workspace2"|"algorithm-library"|"help">(()=>{const requested=typeof window!=="undefined"?new URLSearchParams(window.location.search).get("view"):null;return requested==="projects"||requested==="users"||requested==="component-calculator"||requested==="base-values"||requested==="item-entry"||requested==="equipment-admin"||requested==="node-editor"||requested==="workspace2"||requested==="algorithm-library"||requested==="geometry-nodes"||requested==="help"?requested:"workspace";});
+  const [algorithmId,setAlgorithmId]=useState(()=>typeof window!=="undefined"?new URLSearchParams(window.location.search).get("algorithm")??DEFAULT_ALGORITHM:DEFAULT_ALGORITHM);
+  const [algorithmName,setAlgorithmName]=useState("Насосная установка");
+  const rememberedProducts=useRef(new Map<string,string>());
   const [catalogue,setCatalogue] = useState<Pump[]>([]);
   const [controlCabinets,setControlCabinets] = useState<ControlCabinet[]>([]);
   const [smartCabinets,setSmartCabinets] = useState<SmartCabinet[]>([]);
@@ -434,7 +441,7 @@ export default function Home() {
     return () => { controller.abort(); window.clearInterval(timer); document.removeEventListener("visibilitychange", visible); };
   }, [account?.id]);
   useEffect(() => {
-    const navigate = () => { const requested = new URLSearchParams(window.location.search).get("view"); setView(requested === "projects" || requested === "users" || requested === "component-calculator" || requested === "base-values" || requested === "item-entry" || requested === "equipment-admin" || requested === "node-editor" || requested === "workspace2" || requested === "geometry-nodes" || requested === "help" ? requested : "workspace"); setSidebar(false); };
+    const navigate = () => { const params=new URLSearchParams(window.location.search);setAlgorithmId(params.get("algorithm")??DEFAULT_ALGORITHM);const requested = params.get("view"); setView(requested === "projects" || requested === "users" || requested === "component-calculator" || requested === "base-values" || requested === "item-entry" || requested === "equipment-admin" || requested === "node-editor" || requested === "workspace2" || requested === "algorithm-library" || requested === "geometry-nodes" || requested === "help" ? requested : "workspace"); setSidebar(false); };
     window.addEventListener("popstate", navigate);
     return () => window.removeEventListener("popstate", navigate);
   }, []);
@@ -564,7 +571,9 @@ export default function Home() {
     const params=new URLSearchParams({project:id});
     if(detached && loaded.workspace.windows.some(panel=>panel.id===detached))params.set("panel",detached);
     else setDetached(null);
-    setAccessNotice("");setView("workspace");window.history.replaceState({},"","/?"+params.toString());
+    setAccessNotice("");
+    if(loaded.workspace2){const id=algorithmForProject(loaded.workspace2);setAlgorithmId(id);setView("workspace2");params.set("view","workspace2");params.set("algorithm",id);}else setView("workspace");
+    window.history.replaceState({},"","/?"+params.toString());
   };
   const openStoredProject=(card:StoredProject)=>{void openById(card.id).catch(error=>window.alert(error.message));};
   const reloadFromDatabase=()=>{void openById(config.project.id).catch(error=>setAccessNotice(error.message));};
@@ -601,21 +610,67 @@ export default function Home() {
       <div className="app-header__project"><small>ТЕКУЩИЙ ПРОЕКТ</small><button onClick={rename}>{config.project.name} <span>✎</span></button></div>
       <div className="app-header__actions"><span className="save-state" role="status"><i style={{background:saveMessage==="Сохранено на сервере"?"#48a96a":conflicted?"#d75a57":"#d29b44"}}/>{saveMessage}</span><button className="avatar" onClick={()=>{setSidebar(true)}} title={account.name}>{initials(account.name)}</button></div>
   </>;
+  const openAlgorithmEditor=(id:string)=>{setAlgorithmId(id);setView("node-editor");setDetached(null);window.history.pushState({},"","/?"+new URLSearchParams({view:"node-editor",algorithm:id,project:config.project.id}));};
+  const openAlgorithmProduct=async(id:string,name:string)=>{
+    try {
+      if(session.current && !await session.current.flush())throw Error("Сначала сохраните текущий проект или разрешите конфликт сохранения.");
+      let target:ProjectConfig|undefined,revision=0,persisted=false;
+      if(algorithmForProject(config.workspace2)===id){target=config;revision=session.current?.revision??0;persisted=revision>0;}
+      else {
+        let remembered=rememberedProducts.current.get(id);
+        try{remembered??=localStorage.getItem("product.last."+account.id+"."+id)??undefined;}catch{/* Optional shortcut to a server project. */}
+        if(remembered){try{const file=await projectApi<ProjectFile>("?id="+encodeURIComponent(remembered));const candidate=parseAccessibleProject(file.config,role);if(algorithmForProject(candidate.workspace2)===id){target=candidate;revision=file.revision;persisted=true;}}catch{/* A deleted shortcut does not delete any product state. */}}
+      }
+      const existing=target?.workspace2;
+      const remote=await loadTools(existing?.product?.version,existing?.product?.baseVersions,existing?.product?.sourceVersions,id);
+      if(!target)target=createProject(name,{baseValues:await fetchPublishedBaseValues()});
+      if(!target.workspace2){const settings=target.entities["station-settings"] as SettingsEntity;target={...target,workspace2:migrateProduct(remote.program,undefined,remote.defaults,remote.baseVersions,remote.role,remote.resources,remote.sourceVersions,{geometry:settings.geometryEnabled,pressure:settings.pressureChecksEnabled}).data};}
+      if(target.project.id!==config.project.id)activate(account,target,revision,persisted);else updateConfig(()=>target!);
+      rememberedProducts.current.set(id,target.project.id);try{localStorage.setItem("product.last."+account.id+"."+id,target.project.id);}catch{/* The project itself is stored on the server. */}
+      setAlgorithmId(id);setAlgorithmName(name);setView("workspace2");setDetached(null);setSidebar(false);
+      window.history.pushState({},"","/?"+new URLSearchParams({view:"workspace2",algorithm:id,project:target.project.id}));
+    }catch(e){window.alert((e as Error).message);}
+  };
+  const openProductWindow=(panelId:string)=>{
+    const current=session.current;if(!current)return;
+    const child=window.open("about:blank","_blank");
+    if(!child){setSaveMessage("Разрешите всплывающие окна для этого сайта.");return;}
+    child.opener=null;current.update(config);
+    void current.flush().then(saved=>{
+      if(!saved || session.current!==current){child.close();return;}
+      child.location.replace("/?"+new URLSearchParams({view:"workspace2",algorithm:algorithmId,project:config.project.id,nodePanel:panelId}));
+    }).catch(()=>{child.close();setSaveMessage("Не удалось сохранить проект перед открытием отдельного окна.");});
+  };
+  const newAlgorithmProject=async()=>{
+    try {
+      if(session.current && !await session.current.flush())throw Error("Сначала сохраните текущий проект или разрешите конфликт.");
+      const remote=await loadTools(undefined,undefined,undefined,algorithmId);
+      const next=createProject(algorithmName,{baseValues:await fetchPublishedBaseValues()});
+      next.workspace2=migrateProduct(remote.program,undefined,remote.defaults,remote.baseVersions,remote.role,remote.resources,remote.sourceVersions).data;
+      activate(account,next,0,true);setView("workspace2");
+      rememberedProducts.current.set(algorithmId,next.project.id);try{localStorage.setItem("product.last."+account.id+"."+algorithmId,next.project.id);}catch{/* Optional navigation shortcut. */}
+      window.history.pushState({},"","/?"+new URLSearchParams({view:"workspace2",algorithm:algorithmId,project:next.project.id}));
+    } catch(error){setSaveMessage((error as Error).message);}
+  };
   const navigateView = (next: AppView) => {
     setView(next); setDetached(null); setSidebar(false);
     const params = new URLSearchParams({ project: config.project.id });
     if (next !== "workspace") params.set("view", next);
+    if(next==="node-editor"||next==="workspace2")params.set("algorithm",algorithmId);
     window.history.pushState({}, "", "/?" + params.toString());
   };
   const renderPage = () => {
+  if(bootError)return <main className="base-page"><h1>Не удалось загрузить проект</h1><p role="alert">{bootError}</p><button className="button" onClick={()=>window.location.reload()}>Повторить загрузку</button></main>;
   if(view==="help")return <HelpCenter onBack={()=>{setView("workspace");window.history.pushState({},"",`/?project=${encodeURIComponent(config.project.id)}`);}}/>;
-  if(view==="node-editor")return account.role==="admin"?<ToolEditor project={config} back={()=>{setView("workspace");window.history.pushState({},"","/?project="+encodeURIComponent(config.project.id));}}/>:<main><h1>Доступ только для администратора</h1></main>;
-  if(view==="workspace2")return <NodeWorkspace key={config.project.id} project={config} status={saveMessage} update={workspace2=>updateConfig(current=>({...current,workspace2}))} back={()=>{setView("workspace");window.history.pushState({},"","/?project="+encodeURIComponent(config.project.id));}}/>;
-  if(view==="geometry-nodes")return account.role==="admin"?<><EngineeringEditor project={config} pumps={catalogue} back={()=>{setView("workspace");window.history.pushState({},"","/?project="+encodeURIComponent(config.project.id));}}/></>:<main className="users-page"><h1>Доступ только для администратора</h1><button onClick={()=>{setView("workspace");window.history.replaceState({},"","/");}}>В рабочее пространство</button></main>;
+  if(view==="algorithm-library")return account.role==="admin"?<AlgorithmLibrary openEditor={openAlgorithmEditor}/>:<main><h1>Доступ только для администратора</h1></main>;
+  if(view==="node-editor")return account.role==="admin"?<ToolEditor key={algorithmId} algorithmId={algorithmId} selectAlgorithm={openAlgorithmEditor} project={algorithmForProject(config.workspace2)===algorithmId?config:{...config,workspace2:undefined}} back={async()=>{if(session.current && !await session.current.flush())return;setView("workspace");window.history.pushState({},"","/?project="+encodeURIComponent(config.project.id));}}/>:<main><h1>Доступ только для администратора</h1></main>;
+  if(view==="workspace2" && algorithmForProject(config.workspace2)!==algorithmId)return <main className="nt-workspace"><h1>Рабочее пространство продукта</h1><p>Текущий проект относится к другому алгоритму. Его данные сохранены отдельно.</p><button onClick={()=>void openAlgorithmProduct(algorithmId,algorithmName)}>Открыть проект выбранного продукта</button></main>;
+  if(view==="workspace2")return <NodeWorkspace key={config.project.id+"/"+algorithmId} algorithmId={algorithmId} name={algorithmName} userId={account.id} pendingSave={projectDirty} flush={()=>{setTimeout(()=>void session.current?.flush(),0);}} projectActions={<><button aria-label="Новый проект" onClick={()=>void newAlgorithmProject()}><b>＋</b><small>Новый</small></button><button aria-label="Переименовать проект" onClick={rename}><b>✎</b><small>Переименовать</small></button><button onClick={async()=>{if(!session.current || await session.current.flush())setView("projects");}}><b>▤</b><small>Мои проекты</small></button><button onClick={download}><b>↓</b><small>Экспорт JSON</small></button>{conflicted&&<><button onClick={reloadFromDatabase}><small>Открыть из базы</small></button><button onClick={saveConflictCopy}><small>Сохранить копию</small></button></>}</>} detach={openProductWindow} project={config} status={saveMessage} update={workspace2=>updateConfig(current=>({...current,workspace2}))} back={async()=>{if(session.current && !await session.current.flush())return;setView("workspace");window.history.pushState({},"","/?project="+encodeURIComponent(config.project.id));}}/>;
+  if(view==="geometry-nodes")return account.role==="admin"?<><EngineeringEditor project={config} pumps={catalogue} back={async()=>{if(session.current && !await session.current.flush())return;setView("workspace");window.history.pushState({},"","/?project="+encodeURIComponent(config.project.id));}}/></>:<main className="users-page"><h1>Доступ только для администратора</h1><button onClick={()=>{setView("workspace");window.history.replaceState({},"","/");}}>В рабочее пространство</button></main>;
   if(view==="equipment-admin")return <EquipmentAdminPanel actor={account} onBack={()=>{setView("workspace");window.history.pushState({},"","/");}}/>;
   if(view==="item-entry")return <ItemEntryPanel actor={account} onSaved={pump=>setCatalogue(current=>mergePumpCatalog(current.filter(item=>item.id!==pump.id),[pump]))} onBack={()=>{setView("workspace");window.history.pushState({},"","/");}}/>;
   if(view==="base-values")return <BaseValuesPanel actor={account} onBack={()=>{setView("workspace");window.history.pushState({},"","/");}}/>;
-  if(bootError)return <main className="base-page"><h1>Не удалось загрузить проект</h1><p role="alert">{bootError}</p><button className="button" onClick={()=>window.location.reload()}>Повторить загрузку</button></main>;
+
   if(view==="projects")return <><ProjectsPage user={account} projects={projects} onBack={()=>{setView("workspace");window.history.pushState({},"","/");}} onOpen={openStoredProject} onCreate={newProject} onDelete={deleteProject} onLogout={logout}/>{nextPage!==null&&<button onClick={()=>void projectApi<{projects:StoredProject[];next:number|null}>("?offset="+nextPage).then(page=>{setProjects(old=>[...old,...page.projects.filter(p=>!old.some(item=>item.id===p.id))]);setNextPage(page.next);}).catch(e=>window.alert(e.message))}>Загрузить ещё</button>}</>;
   if(view==="component-calculator")return <ComponentCalculator actor={account} onBack={()=>{setView("workspace");window.history.pushState({},"","/");}} onSaved={()=>{resetComponentsDatabase();addSelectedPumpToSpec();}}/>;
   if(view==="users")return account.role==="admin"?<UsersPanel actor={account} onAccountChange={setAccount} onBack={()=>{setView("workspace");window.history.pushState({},"","/");}}/>:<main className="users-page"><div className="users-page__content"><h1>Доступ ограничен</h1><p>Список пользователей доступен только для admin.</p><button className="button" onClick={()=>{setView("workspace");window.history.replaceState({},"","/");}}>В рабочее пространство</button></div></main>;
@@ -699,7 +754,7 @@ export default function Home() {
     <footer className="app-footer"><span>Проект: {config.project.id}</span><span>Формат проекта v{config.schemaVersion} · JSON</span><span>RU <i>•</i> {new Date(config.project.updatedAt).toLocaleDateString("ru-RU")}</span></footer>
   </div></DiagnosticsProvider></CadProvider>;
   };
-  return <AppNavigation account={account} view={view} open={sidebar} setOpen={setSidebar} buttonRef={menuButton} header={header} navigate={navigateView} projectCount={projects.length} settings={()=>setSettingsOpen(true)} logout={logout}>
+  return <AppNavigation account={account} view={view} open={sidebar} setOpen={setSidebar} buttonRef={menuButton} header={header} navigate={navigateView} navigateAlgorithm={(id,name)=>void openAlgorithmProduct(id,name)} activeAlgorithm={algorithmId} projectCount={projects.length} settings={()=>setSettingsOpen(true)} logout={logout}>
     {renderPage()}
     {settingsOpen && <AppSettings theme={theme} onThemeChange={setTheme} profile={colorProfile} onProfileChange={setColorProfile} onClose={closeSettings}/>}
   </AppNavigation>;

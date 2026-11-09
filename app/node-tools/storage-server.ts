@@ -15,11 +15,10 @@ import { validateCollectorStateEdit } from "./collector-validation";
 import { verifyCollectorStateRecords } from "./collector-state-server";
 import type { ToolContext, ToolDocument, ToolProgram, Values, WorkspaceData } from "./schema";
 import { isUserRole, type UserRole } from "../user-types";
-export class ToolError extends Error {
-  constructor(message: string, readonly status = 400) {
-    super(message);
-  }
-}
+import { ToolError } from "./errors";
+export { ToolError } from "./errors";
+import { DEFAULT_ALGORITHM, algorithmForProject } from "./algorithm-schema";
+import { ensureAlgorithmLibrary, algorithmRow, algorithmHistory, algorithmSnapshot, checkRevision, saveAlgorithmDraft, saveAlgorithmVersion, restoreAlgorithm } from "./algorithm-store-server";
 const FACTORY = "node-tools-v1";
 const compiledCache = new Map<string, ToolProgram>();
 async function stateRow() {
@@ -40,45 +39,25 @@ async function seed() {
     await db().batch([db().prepare("INSERT OR IGNORE INTO node_tool_versions(id,document,program,author) VALUES(?,?,?,?)").bind(FACTORY, JSON.stringify(doc), JSON.stringify(program), "Заводской инструмент"), db().prepare("UPDATE node_tool_state SET active=? WHERE id=1 AND revision=0 AND active IS NULL AND draft IS NULL").bind(FACTORY)]);
   }
 }
-export async function toolState() {
-  await seed();
-  const row = await stateRow();
-  const versions = await db().prepare("SELECT id,author,created FROM node_tool_versions ORDER BY rowid DESC").all();
-  let doc: ToolDocument;
-  if (row.draft) doc = JSON.parse(row.draft);else if (row.active) {
-    const saved = await db().prepare("SELECT document FROM node_tool_versions WHERE id=?").bind(row.active).first<{
-      document: string;
-    }>();
-    doc = saved ? JSON.parse(saved.document) : initialTools();
-  } else doc = {
-    schema: 1,
-    types: [],
-    diagrams: [],
-    tools: []
-  };
-  return {
-    ...row,
-    draft: doc,
-    versions: versions.results ?? []
-  };
+export async function initializeAlgorithms() { await seed(); await ensureAlgorithmLibrary(); }
+export async function toolState(algorithmId = DEFAULT_ALGORITHM) {
+  await initializeAlgorithms();
+  const row = await algorithmRow(algorithmId), versions = await algorithmHistory(algorithmId);
+  const saved = row.draft ? row.draft : (await algorithmSnapshot(algorithmId,row.active)).document;
+  return { revision:row.revision, active:row.active, draft:JSON.parse(saved) as ToolDocument, versions,
+    algorithmId, name:row.name, connected:!!row.connected, hasDraft:!!row.draft_dirty };
 }
-export async function toolProgram(version?: string | null): Promise<ToolProgram> {
-  await seed();
-  const id = version || (await stateRow()).active;
-  if (!id) return {
-    version: "",
-    tools: [],
-    plans: {}
-  };
-  const cached = compiledCache.get(id);
+export async function toolProgram(version?: string | null, algorithmId = DEFAULT_ALGORITHM, allowDisconnected = true): Promise<ToolProgram> {
+  await initializeAlgorithms();
+  const state = await algorithmRow(algorithmId);
+  if (!allowDisconnected && !state.connected) throw new ToolError("Продукт отключён администратором. Проекты и введённые данные сохранены.",403);
+  const id = version || state.active;
+  const saved = await algorithmSnapshot(algorithmId,id);
+  const key = algorithmId + "/" + id, cached = compiledCache.get(key);
   if (cached) return cached;
-  const row = await db().prepare("SELECT program FROM node_tool_versions WHERE id=?").bind(id).first<{
-    program: string;
-  }>();
-  if (!row) throw new ToolError("Версия инструмента отсутствует", 404);
-  const program = JSON.parse(row.program) as ToolProgram;
+  const program = {...JSON.parse(saved.program), algorithmId} as ToolProgram;
   if (compiledCache.size >= 20) compiledCache.delete(compiledCache.keys().next().value!);
-  compiledCache.set(id, program);
+  compiledCache.set(key, program);
   return program;
 }
 export function defaultsFrom(applied: AppliedBaseValues): Values {
@@ -98,6 +77,8 @@ export async function toolDefaults(versions?: Record<string, string>) {
 }
 export async function toolCommand(body: {
   action: string;
+  algorithmId?: string;
+  discardDraft?: boolean;
   revision: number;
   document?: ToolDocument;
   version?: string;
@@ -107,22 +88,20 @@ export async function toolCommand(body: {
   contexts?: Record<string, Values>;
   sourceVersions?: Record<string, string>;
 }, author: string) {
-  await seed();
-  const state = await stateRow();
-  if (!Number.isSafeInteger(body.revision) || body.revision !== state.revision) throw new ToolError("Черновик изменён в другом окне. Загрузите актуальную ревизию.", 409);
-  const conflict = () => new ToolError("Черновик изменён в другом окне.", 409);
+  await initializeAlgorithms();
+  const algorithmId = body.algorithmId ?? DEFAULT_ALGORITHM, state = await algorithmRow(algorithmId);
+  checkRevision(state,body.revision);
   if (body.action === "rollback") {
-    const row = await db().prepare("SELECT document FROM node_tool_versions WHERE id=?").bind(body.version ?? "").first<{
-      document: string;
-    }>();
-    if (!row) throw new ToolError("Версия отсутствует", 404);
-    const changed = await db().prepare("UPDATE node_tool_state SET active=?,draft=?,revision=revision+1 WHERE id=1 AND revision=?").bind(body.version, row.document, body.revision).run();
-    if (changed.meta?.changes !== 1) throw conflict();
-    return toolState();
+    await restoreAlgorithm(algorithmId,body.revision,body.version ?? "",author,body.discardDraft);
+    return toolState(algorithmId);
   }
-  if (!["save", "test", "publish"].includes(body.action) || !body.document) throw new ToolError("Некорректная команда");
+  if (!["save", "test", "publish", "restore-preserve"].includes(body.action) || !body.document) throw new ToolError("Некорректная команда");
   const doc = body.document,
     program = compileTools(doc, "draft", body.action !== "save");
+  if (body.action === "save") {
+    await saveAlgorithmDraft(algorithmId,body.revision,doc);
+    return toolState(algorithmId);
+  }
   if (body.role != null && !isUserRole(body.role)) throw new ToolError("Неизвестная роль тестовой симуляции");
   const sourceData = await toolDefaults();
   const context: ToolContext = {
@@ -130,10 +109,7 @@ export async function toolCommand(body: {
     defaults: sourceData.defaults,
     role: body.role ?? "pro"
   };
-  const catalogData = body.action === "save" ? {
-    resources: undefined,
-    sourceVersions: {}
-  } : await toolResources(program, body.sourceVersions, sourceData.baseVersions);
+  const catalogData = await toolResources(program, body.sourceVersions, sourceData.baseVersions);
   context.resources = catalogData.resources;
   const contexts = Object.fromEntries(program.tools.map(t => [t.id, {
     ...context,
@@ -165,11 +141,7 @@ export async function toolCommand(body: {
       }]
     };
   }
-  const json = JSON.stringify(doc);
-  if (body.action === "save") {
-    const response = await db().prepare("UPDATE node_tool_state SET draft=?,revision=revision+1 WHERE id=1 AND revision=?").bind(json, body.revision).run();
-    if (response.meta?.changes !== 1) throw conflict();
-  } else {
+  {
     const tests = runTests(doc, context),
       failed = tests.filter(t => !t.passed);
     if (failed.length) throw new ToolError("Проверки публикации · " + failed.map(t => t.name + ": " + t.message).join("; "));
@@ -186,15 +158,10 @@ export async function toolCommand(body: {
       }) : evaluatePlan(program.plans[tool.id], trialContext);
       if (result.view?.kind !== "form") throw new ToolError(tool.name + " · выход интерфейса должен быть формой");
     }
-    const id = crypto.randomUUID(),
-      publication = {
-        ...program,
-        version: id
-      };
-    const [response] = await db().batch([db().prepare("INSERT INTO node_tool_versions(id,document,program,author) SELECT ?,?,?,? FROM node_tool_state WHERE id=1 AND revision=?").bind(id, json, JSON.stringify(publication), author, body.revision), db().prepare("UPDATE node_tool_state SET draft=?,active=?,revision=revision+1 WHERE id=1 AND revision=?").bind(json, id, body.revision)]);
-    if (response.meta?.changes !== 1) throw conflict();
+    if(body.action==="restore-preserve")await restoreAlgorithm(algorithmId,body.revision,body.version??"",author,false,{document:doc,program});
+    else await saveAlgorithmVersion(algorithmId,body.revision,doc,program,author);
   }
-  return toolState();
+  return toolState(algorithmId);
 }
 export async function toolResources(program: ToolProgram, versions?: Record<string, string>, baseVersions?: Record<string, string>): Promise<{
   resources?: ToolContext["resources"];
@@ -236,8 +203,12 @@ export async function verifyWorkspace(next: WorkspaceData | undefined, prior: Wo
     if (prior && role !== "admin") throw new ToolError("Удаление сохранённого состояния инструментов недоступно", 403);
     return;
   }
+  const algorithmId = algorithmForProject(next);
+  if(prior && algorithmForProject(prior)!==algorithmId)throw new ToolError("Нельзя изменить продукт существующего проекта. Создайте отдельный проект.",409);
+  next.algorithmId=algorithmId;
   if (next.product) {
-    const program = await toolProgram(next.product.version);
+    const program = await toolProgram(next.product.version,algorithmId);
+    next.product.algorithmId = algorithmId;
     if (!program.product) throw new ToolError("Выбрана публикация без общего графа продукта");
     const base = await toolDefaults(next.product.baseVersions),
       sources = await toolResources(program, next.product.sourceVersions, next.product.baseVersions);
@@ -256,7 +227,7 @@ export async function verifyWorkspace(next: WorkspaceData | undefined, prior: Wo
     return;
   }
   for (const [id, saved] of Object.entries(next.tools)) {
-    const program = await toolProgram(saved.version);
+    const program = await toolProgram(saved.version,algorithmId);
     if (program.product) throw new ToolError("Примените согласованную версию продукта целиком", 409);
     const plan = program.plans[id];
     if (!plan) throw new ToolError("Инструмент отсутствует в выбранной публикации");

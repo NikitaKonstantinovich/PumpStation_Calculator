@@ -1,6 +1,6 @@
 import { catalogSnapshot, CatalogError } from "./catalog-server";
 import { pumpLayout } from "./spacing-nodes";
-import { resolvePumpSpacing, manualSpacing } from "../pump-spacing";
+import { resolvePumpSpacing, standardPumpSpacing, manualSpacing } from "../pump-spacing";
 import { applyCollectorSpacingRules, collectorSpacingConfirmed } from "../collector-spacing";
 import type { CollectorConfiguration } from "../collector-calculations";
 import type { AppliedBaseValues } from "../base-values";
@@ -21,7 +21,7 @@ export async function applyVerifiedCollectorSpacing(configuration: CollectorConf
     const snapshot = await catalogSnapshot(declared.layout.snapshotId), item = snapshot.items.find(row => row.variantId === circuit.pumpId);
     if (!item) throw new CatalogError("Выбранное исполнение отсутствует в закреплённом снимке", 400);
     const layout = pumpLayout({ ...item.pump, spacingSnapshotId: snapshot.id }, index ? "secondary" : "primary", (circuit.working ?? 0) + (circuit.reserve ?? 0), declared.layout.orientation);
-    const result = resolvePumpSpacing(layout, applied);
+    const result = declared.calculationRule === "width-plus-150-ceil-50-v1" ? standardPumpSpacing(layout) : resolvePumpSpacing(layout, applied);
     circuit.spacingResult = result; circuit.spacingBase = result.spacing; circuit.radius = result.radius; circuit.spacingStatus = result.status; circuit.spacingNote = result.message;
     if (circuit.spacingManual === true || circuit.spacing !== (result.spacing ?? 0)) circuit.spacingManual = true;
     else delete circuit.spacingManual;

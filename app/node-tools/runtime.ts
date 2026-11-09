@@ -1,3 +1,4 @@
+import { GEOMETRY_OPERATION, executeGeometry } from "./geometry-nodes";
 import { CIRCUIT_OPERATIONS, executeCircuitOperation, inactiveCircuitView } from "./circuit-nodes";
 import { SPACING_OPERATIONS, executeSpacingOperation } from "./spacing-nodes";
 import { runPlan, type Step, type Trace, type Plan } from "../engineering/engine";
@@ -17,8 +18,8 @@ import { COLLECTOR_OPERATIONS } from "./collector-nodes";
 import { executeCollectorOperation } from "./collector-runtime";
 import { SPECIFICATION_OPERATIONS } from "./specification-nodes";
 import { executeSpecificationOperation } from "./specification-runtime";
-import { canEditAllSettings, canEditProjectOptions } from "../user-types";
-export const OPERATIONS = ["source", "parameter", "object", "merge", "form", "section", "grid", "field", "condition", "message", "check", "save", "engineering.catalog", ...PUMP_OPERATIONS, ...HYDRAULIC_OPERATIONS, ...DETAIL_OPERATIONS, ...DN_OPERATIONS, ...COLLECTOR_OPERATIONS, ...SPECIFICATION_OPERATIONS, ...SPACING_OPERATIONS, ...CIRCUIT_OPERATIONS] as const;
+import { canEditAllSettings, canEditProjectOptions, canUseGeometry } from "../user-types";
+export const OPERATIONS = [GEOMETRY_OPERATION, "source", "parameter", "object", "merge", "form", "section", "grid", "field", "condition", "message", "check", "save", "engineering.catalog", ...PUMP_OPERATIONS, ...HYDRAULIC_OPERATIONS, ...DETAIL_OPERATIONS, ...DN_OPERATIONS, ...COLLECTOR_OPERATIONS, ...SPECIFICATION_OPERATIONS, ...SPACING_OPERATIONS, ...CIRCUIT_OPERATIONS] as const;
 const list = (v: Values) => Object.keys(v).filter(k => /^child\d+$/.test(k)).sort((a, b) => Number(a.slice(5)) - Number(b.slice(5))).map(k => v[k]).filter(Boolean) as View[];
 export const canEditParameter = (role: ToolContext["role"], permission: ParameterBinding["permission"]) => permission === "input" || permission === "options" && canEditProjectOptions(role) || canEditAllSettings(role);
 /** Explicit modes evaluate only their real dependencies; old publications retain their contract. */
@@ -184,9 +185,9 @@ function execute(step: Step, v: Values, context: ToolContext): Values {
       };
     default:
       {
-        const result = executeCircuitOperation(step, v) ?? executeSpacingOperation(step, v) ?? executePumpOperation(step, v, context) ?? executeHydraulicOperation(step, v, context) ?? executeDetailOperation(step, v, context) ?? executeDnOperation(step, v, context) ?? executeStationCatalog(step, v, context) ?? executeCollectorOperation(step, v, context) ?? executeSpecificationOperation(step, v, context);
+        const result = executeGeometry(step, v, context) ?? executeCircuitOperation(step, v) ?? executeSpacingOperation(step, v) ?? executePumpOperation(step, v, context) ?? executeHydraulicOperation(step, v, context) ?? executeDetailOperation(step, v, context) ?? executeDnOperation(step, v, context) ?? executeStationCatalog(step, v, context) ?? executeCollectorOperation(step, v, context) ?? executeSpecificationOperation(step, v, context);
         if (result) return result;
-        throw Error("Неизвестная операция ноды");
+        throw Error(`Неизвестная операция ноды «${step.operation ?? "не задана"}» · ${step.id}`);
       }
   }
 }
@@ -253,8 +254,8 @@ export function evaluatePlan(plan: ToolProgram["plans"][string], context: ToolCo
   }
   let count = 0;
   function validateView(v: View | undefined, depth = 0) {
-    if (!v || depth > 20 || ++count > 2000 || !["form", "section", "grid", "field", "condition", "message", "table", "select", "pump-card", "hydraulic-chart", "pump-detail", "dn-calculator", "collector-constructor", "specification"].includes(v.kind) || typeof v.node !== "string") throw Error("Некорректная структура интерфейса");
-    if (v.kind === "field" || v.kind === "select" || ["table", "dn-calculator"].includes(v.kind) && v.binding) {
+    if (!v || depth > 20 || ++count > 2000 || !["form", "section", "grid", "field", "condition", "message", "table", "select", "pump-card", "hydraulic-chart", "pump-detail", "dn-calculator", "collector-constructor", "specification", "station-geometry"].includes(v.kind) || typeof v.node !== "string") throw Error("Некорректная структура интерфейса");
+    if (v.kind === "field" || v.kind === "select" || ["table", "dn-calculator", "station-geometry"].includes(v.kind) && v.binding) {
       const b = bindings.find(b => b.key === v.binding?.key && b.node === v.binding?.node);
       if (!b || JSON.stringify(b) !== JSON.stringify(v.binding)) throw Error(v.node + " · подключите действительную привязку параметра");
     }
@@ -419,7 +420,8 @@ function runProductPlan(plan: Plan, context: ToolContext, inputs: Values, contex
       v: Values = {};
     // Resolve the guard before asking for any dependent calculation or catalog.
     const inactive = step.operation === "circuit.guard" && input(step, "active") !== true;
-    for (const f of step.fields) if (f.direction !== "output" && (!inactive || f.key === "active")) v[f.key] = input(step, f.key);
+    const geometryOff = step.operation === GEOMETRY_OPERATION && (input(step,"enabled") !== true || !canUseGeometry(contextFor(step.id).role));
+    for (const f of step.fields) if (f.direction !== "output" && (!inactive || f.key === "active") && (!geometryOff || f.key!=="data")) v[f.key] = input(step, f.key);
     const values = execute(step, v, contextFor(step.id));
     if (values.binding && typeof values.binding === "object") (values.binding as ParameterBinding).toolId = step.id.split("/")[0];
     Object.assign(r.outputs, values);

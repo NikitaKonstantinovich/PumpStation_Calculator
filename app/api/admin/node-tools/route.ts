@@ -17,7 +17,7 @@ async function guard(request: Request) {
 export async function GET(request: Request) {
   try {
     await guard(request);
-    return reply(await toolState());
+    return reply(await toolState(new URL(request.url).searchParams.get("algorithm") ?? undefined));
   } catch (e) {
     return reply({
       error: (e as Error).message,

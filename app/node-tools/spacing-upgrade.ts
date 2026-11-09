@@ -1,6 +1,39 @@
 import { definitionPorts } from "../engineering/hierarchy";
 import { makeField, type Diagram, type GraphNode } from "../engineering/schema";
 import type { ToolDocument } from "./schema";
+import { spacingNodeTypes } from "./spacing-nodes";
+
+/** Explicit product edit, never applied automatically when an older publication is opened. */
+export function useStandardPumpSpacing(doc: ToolDocument): number {
+  const standard = spacingNodeTypes().find(t => t.operation === "spacing.standardWidth")!;
+  const existing = doc.types.find(t => t.id === standard.id);
+  if (existing && existing.operation !== standard.operation) throw Error("Идентификатор стандартного межосевого уже занят другим определением");
+  if (!existing) doc.types.push(standard);
+  let changed = 0;
+  for (const graph of doc.diagrams) {
+    const type = (id: string) => doc.types.find(t => t.id === graph.nodes.find(n => n.id === id)?.type);
+    // Only spacing chains actually feeding the DN result; unrelated custom graphs stay intact.
+    for (const edge of graph.edges.filter(e => ["primarySpacing", "secondarySpacing"].includes(e.input) && type(e.to)?.operation === "station.dnResult")) {
+      let id = edge.from;
+      const seen = new Set<string>();
+      while (!seen.has(id)) {
+        seen.add(id);
+        const node = graph.nodes.find(n => n.id === id), operation = type(id)?.operation;
+        if (!node || !operation?.startsWith("spacing.")) break;
+        if (operation === "spacing.standardWidth") break;
+        if (operation === "spacing.geometry") {
+          node.type = standard.id;
+          node.name = standard.name + (edge.input === "secondarySpacing" ? " — второй контур" : " — основной контур");
+          changed++; break;
+        }
+        const incoming = graph.edges.find(e => e.to === id && e.input === "work");
+        if (!incoming) break;
+        id = incoming.from;
+      }
+    }
+  }
+  return changed;
+}
 
 /** Add only missing stages/ports. Existing nodes, links, parameters and manual choices survive. */
 export function connectPumpSpacing(doc: ToolDocument) {

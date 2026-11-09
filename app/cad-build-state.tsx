@@ -1,4 +1,5 @@
 "use client";
+import { sharedToolRequest } from "./shared-tool-request";
 import { createContext, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { cadContents, cadJobActive, cadReady, cadSnapshotData, digestSnapshot, type CadJob, type CadFormat, type CadManifest } from "./cad-export";
 import type { DnEntity, ModelEntity, ProjectConfig, SettingsEntity, SpecEntity } from "./project-config";
@@ -52,7 +53,7 @@ function useBuild(project: ProjectConfig, enabled: boolean) {
       const version = sequence.current;
       let delay = 10000;
       try {
-        const next = await receive(await fetch(`/api/cad-export?projectId=${encodeURIComponent(projectId)}`, { cache: "no-store", signal: controller.signal }), projectId);
+        const next = await receive(await sharedToolRequest(`/api/cad-export?projectId=${encodeURIComponent(projectId)}`, { cache: "no-store", signal: controller.signal }), projectId);
         if (controller.signal.aborted) return;
         if (version === sequence.current && !lock.current) { setJob(next); setConnectionError(""); setLoaded(true); }
         if (cadJobActive(next) || Object.values(next?.artifacts ?? {}).includes("queued")) delay = 1200;

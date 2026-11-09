@@ -13,6 +13,8 @@ const { evaluateProduct }=await loadTs(new URL("node-tools/runtime.ts",base));
 const { applyParameterWrites }=await loadTs(new URL("node-tools/form-actions.ts",base));
 const { legacyBaseSnapshot }=await loadTs(new URL("base-values.ts",base));
 const { defaultDnOverrides }=await loadTs(new URL("node-tools/dn-runtime.ts",base));
+const { useStandardPumpSpacing }=await loadTs(new URL("node-tools/spacing-upgrade.ts",base));
+const {connectWorkspaceControls,addProductGeometry}=await loadTs(new URL("node-tools/workspace-upgrade.ts",base));
 
 function fixture(){
   const doc=addPumpProductFixture(prepareDocument(initialTools())),root=doc.diagrams.find(g=>g.id===doc.product.root);
@@ -37,6 +39,42 @@ function selectedContexts(program,role="admin"){
   return ctx;
 }
 const findView=(view,kind)=>view?.kind===kind?view:view?.children?.map(child=>findView(child,kind)).find(Boolean);
+
+test("window flags reach DN, collectors and specification; disabled geometry skips composition and re-enable uses current values",()=>{
+  const {spec,dn,collectors}=chain();connectWorkspaceControls(spec.document,"settings");
+  const doc=addProductGeometry(spec.document,"settings",spec.id),program=compileTools(doc,"window-flags-v1");
+  assert.equal(addProductGeometry(doc,"settings",spec.id),doc,"explicit addition is idempotent");
+  const geometry=program.tools.find(t=>program.plans[t.id].steps.some(s=>s.id.startsWith(t.id+"/")&&s.operation==="ui.stationGeometry")).id;
+  const ctx=selectedContexts(program);ctx.settings.values={...ctx.settings.values,pressureChecksEnabled:false,geometryEnabled:false,inletHead:200};
+  const disabled=evaluateProduct(program,geometry,ctx);assert.equal(findView(disabled.view,"station-geometry").enabled,false);
+  assert(!Object.keys(disabled.trace).some(id=>id.startsWith(spec.id+"/")),"disabled geometry does not evaluate the specification branch");
+  const d=evaluateProduct(program,dn.id,ctx),c=evaluateProduct(program,collectors.id,ctx),s=evaluateProduct(program,spec.id,ctx);
+  assert.equal(d.value.primary.suction.inletPressureCheck,null);assert.equal(d.value.primary.values.suctionValveDn,50);assert.equal(c.value.project.entities["station-settings"].pressureChecksEnabled,false);
+  assert.equal(s.value.project.entities["station-settings"].pressureChecksEnabled,false);assert(s.value.project.entities["station-spec"].items.some(item=>item.option==="primaryPump"));
+  ctx.settings.values={...ctx.settings.values,geometryEnabled:true};
+  const on=findView(evaluateProduct(program,geometry,ctx).view,"station-geometry");assert(on.geometry);assert.equal(on.geometry.project.entities["station-settings"].geometryEnabled,true);assert.equal(on.geometry.project.entities["station-settings"].inletHead,200);
+  ctx.settings.values={...ctx.settings.values,geometryEnabled:false,pressureChecksEnabled:true,inletHead:10};
+  const restored=evaluateProduct(program,dn.id,ctx);assert(restored.value.primary.suction.inletPressureCheck);assert.equal(restored.value.primary.suction.inletPressureCheck.status,"unknown-limit","missing passport pressure limit is checked again, never marked passed");
+  ctx.settings.values.geometryEnabled=true;
+  assert.equal(findView(evaluateProduct(program,geometry,ctx).view,"station-geometry").geometry.project.entities["station-settings"].inletHead,10);
+});
+
+test("explicit standard-spacing product edit reaches both collectors and preserves other nodes and historical graphs",()=>{
+ const {spec,dn,collectors,program:old}=chain(),document=structuredClone(spec.document),before=JSON.stringify(spec.document);
+ const edges=document.diagrams.map(g=>JSON.stringify(g.edges));
+ assert.equal(useStandardPumpSpacing(document),2);assert.equal(useStandardPumpSpacing(document),0);
+ assert.deepEqual(document.diagrams.map(g=>JSON.stringify(g.edges)),edges);assert.equal(JSON.stringify(spec.document),before);
+ const program=compileTools(document,"width-rule-v1"),ctx=selectedContexts(program);
+ const changedSnapshot=structuredClone(snapshot);changedSnapshot.items[0].pump.dimensions={overall_width:300};
+ for(const context of Object.values(ctx))context.resources.pump_catalog_v2=changedSnapshot;
+ const result=evaluateProduct(program,collectors.id,ctx);
+ for(const side of ["suction","discharge"]){
+  const circuit=result.value.entity[side].configuration.primary;
+  assert.equal(circuit.spacingBase,450);assert.equal(circuit.spacing,450);assert.equal(circuit.spacingStatus,"confirmed");
+ }
+ assert.equal(evaluateProduct(program,dn.id,ctx).value.spacing.primary.spacing,450);
+ assert.equal(evaluateProduct(old,dn.id,ctx).value.spacing.primary.spacing,null,"old publication still follows its pinned legacy rules");
+});
 
 test("station templates append editable graph stages and preserve prior nodes, wires and renamed sources",()=>{
   const {original,dn,collectors,spec,program}=chain();

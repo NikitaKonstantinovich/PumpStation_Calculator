@@ -1,4 +1,5 @@
 "use client";
+import { sharedToolRequest } from "../shared-tool-request";
 
 import { useEffect, useRef, useState } from "react";
 import { CollectorConstructor } from "../collector-constructor";
@@ -35,7 +36,7 @@ export function CollectorNodeView({ view, disabled, change, writes }: Props) {
       const state = d.result.entity[type];
       if (!state.code || !state.configuration || state.databaseStatus !== "unchecked") continue;
       const fingerprint = configurationFingerprint(state.configuration);
-      fetch(`/api/collectors?code=${encodeURIComponent(state.code)}&configuration=${encodeURIComponent(JSON.stringify(state.configuration))}`, { cache: "no-store", signal: controller.signal })
+      sharedToolRequest(`/api/collectors?code=${encodeURIComponent(state.code)}&configuration=${encodeURIComponent(JSON.stringify(state.configuration))}`, { cache: "no-store", signal: controller.signal })
         .then(async response => { const body = await response.json(); if (!response.ok) throw Error(body.error ?? "Не удалось проверить базу коллекторов"); return body; })
         .then(body => { if (!controller.signal.aborted) update(type, { database: body.collector, databaseStatus: body.collector ? "found" : "missing", databaseError: undefined }, fingerprint); })
         .catch(error => { if (!controller.signal.aborted) update(type, { database: null, databaseStatus: "error", databaseError: error instanceof Error ? error.message : String(error) }, fingerprint); });

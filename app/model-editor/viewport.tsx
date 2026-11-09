@@ -90,7 +90,7 @@ class Scene {
     this.orbit = new OrbitControls(this.camera, canvas);
     this.orbit.enableDamping = false; this.orbit.minDistance = 10; this.orbit.maxDistance = 1e6;
     this.transform = new TransformControls(this.camera, canvas);
-    this.transform.setSpace("world"); this.transform.setSize(.8);
+    this.transform.setSpace("world");
     this.scene.add(this.root, this.measurements, this.snapGuides, this.snapSelection, this.transform.getHelper(), this.selection, this.grid, this.axes);
     this.snapSelection.visible = false;
     this.selection.visible = false;
@@ -146,6 +146,9 @@ class Scene {
       const w = host.clientWidth || width, h = host.clientHeight || height;
       if (w < 1 || h < 1) return;
       this.renderer.setSize(w, h, false); this.camera.aspect = w / h; this.camera.updateProjectionMatrix();
+      // Keep handles about 80 screen pixels long, also under workspace CSS zoom.
+      const handlePixels = Math.min(80, Math.min(width, height) * .2);
+      this.transform.setSize(handlePixels * 4 / (.95 * height));
       this.refreshSnap();
     });
     this.observer.observe(host);

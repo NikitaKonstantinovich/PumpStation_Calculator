@@ -1,4 +1,5 @@
 "use client";
+import { sharedToolRequest } from "../shared-tool-request";
 
 import { useEffect, useRef, useState } from "react";
 import type { ProfileCatalog } from "./model";
@@ -35,7 +36,7 @@ export function useModelPreparation(projectId: string, items: ModelRequestItem[]
     const current = () => scope === generation.current && !controller.signal.aborted;
     const receive = async () => {
       try {
-        const next = await responseJob(await fetch(`/api/model-preparation?projectId=${encodeURIComponent(projectId)}`, { signal: controller.signal, cache: "no-store" }));
+        const next = await responseJob(await sharedToolRequest(`/api/model-preparation?projectId=${encodeURIComponent(projectId)}`, { signal: controller.signal, cache: "no-store" }));
         if (!current()) return;
         if (next && next.projectId !== projectId) throw new Error("Сервис вернул задание другого проекта");
         setJob(next); setError(""); setConnecting(false); setStarting(false); running.current = preparationActive(next);
@@ -81,13 +82,13 @@ export function useModelPreparation(projectId: string, items: ModelRequestItem[]
     refresh: () => poll.current() };
 }
 
-export function PreparationProgress({ preparation }: { preparation: ReturnType<typeof useModelPreparation> }) {
+export function PreparationProgress({ preparation, compact = false }: { preparation: ReturnType<typeof useModelPreparation>; compact?: boolean }) {
   const { job, starting, applying, error, sceneError, busy, start, refresh } = preparation;
   if (!job && !starting && !error) return null;
   const active = starting || preparationActive(job), searching = starting || job?.status === "searching" || job?.status === "queued";
   const phase = applying ? "Обновление сцены" : searching ? "Поиск моделей" : active ? "Конвертация" : !job && error ? "Подготовка недоступна" : job?.errors.length ? "Завершено с ошибками" : "Подготовка завершена";
-  return <section className="model-preparation" aria-label="Подготовка 3D-моделей">
-    <div className="model-preparation__heading" role="status"><b>{phase}</b><span>{job && !searching ? `${Math.floor(job.progress ?? 0)}%` : ""}</span></div>
+  const heading = <span className="model-preparation__heading" role="status"><b>{phase}</b><span>{job && !searching ? `${Math.floor(job.progress ?? 0)}%` : ""}</span></span>;
+  const content = <>
     <progress aria-label="Общий прогресс подготовки моделей" max={100} value={searching ? undefined : job?.progress ?? 0}/>
     {job && !searching && <p>Обработано {job.completed} из {job.total} · Успешных конвертаций: {job.converted} · Ошибок: {job.errors.length}</p>}
     {(active || applying) && <p><span className="model-preparation__spinner" aria-hidden="true"/>{applying ? "Загрузка готовых копий и обновление текущей компоновки…" : job?.current || "Ожидание обработки очереди…"}</p>}
@@ -100,5 +101,7 @@ export function PreparationProgress({ preparation }: { preparation: ReturnType<t
       {!!job.errors.length && <><ul>{job.errors.map((item, index) => <li key={index}><b>{item.name}</b>: {item.reason}</li>)}</ul><button disabled={busy} onClick={() => void start(true)}>Повторить неудачные конвертации</button></>}
       {!!job.missing.length && <details><summary>Без исходных моделей: {job.missing.length}</summary><ul>{job.missing.map((item, index) => <li key={index}>{item.position} · {item.name}: {item.reason}</li>)}</ul></details>}
     </>}
-  </section>;
+  </>;
+  return compact ? <details className="model-preparation model-preparation--compact"><summary>{heading}</summary>{content}</details>
+    : <section className="model-preparation" aria-label="Подготовка 3D-моделей">{heading}{content}</section>;
 }

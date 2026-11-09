@@ -24,7 +24,7 @@ export type ParameterBinding = {
 };
 export type ParameterWrite = { binding: ParameterBinding; value: unknown };
 export type View = {
-  kind: "form" | "section" | "grid" | "field" | "condition" | "message" | "table" | "select" | "pump-card" | "hydraulic-chart" | "pump-detail" | "dn-calculator" | "collector-constructor" | "specification";
+  kind: "form" | "section" | "grid" | "field" | "condition" | "message" | "table" | "select" | "pump-card" | "hydraulic-chart" | "pump-detail" | "dn-calculator" | "collector-constructor" | "specification" | "station-geometry";
   node: string;
   label: string;
   rows?:Record<string,unknown>[];
@@ -37,6 +37,7 @@ export type View = {
   clearBindings?: ParameterBinding[];
   compatibleClearValues?: Record<string, Record<string, string[]>>;
   chart?: import("./hydraulic-nodes").HydraulicChartData;
+  geometry?: import("./geometry-nodes").GeometryViewData;
   detail?: import("./pump-detail-data").PumpDetailData;
   cardPresentation?: import("./pump-card-presentation").CardPresentation;
   dn?: import("./dn-nodes").DnResult;
@@ -84,11 +85,14 @@ export type ToolDocument = Document & {
   pumpSpacingSchema?: number;
   secondaryTools?: Record<string, { selection: string; chart: string; card: string }>;
   tools: ToolDefinition[];
-  product?:{root:string};
+  product?:{root:string;controls?:ProductControls};
 };
+/** A flattened parameter node is stable across renaming tools and labels. */
+export type ProductControls = Partial<Record<"geometry" | "pressure", {toolId:string;node:string}>>;
 export type ToolProgram = {
+  algorithmId?: string;
   version: string;
-  product?:{root:string;dependencies:Record<string,string[]>};
+  product?:{root:string;dependencies:Record<string,string[]>;controls?:ProductControls};
   tools: Omit<ToolDefinition, "tests">[];
   plans: Record<string, Plan>;
 };
@@ -115,7 +119,8 @@ export type SavedTool = {
 };
 export type WorkspaceData = {
   schema: 1;
-  product?:{version:string;baseVersions:Record<string,string>;sourceVersions?:Record<string,string>};
+  algorithmId?: string;
+  product?:{algorithmId?:string;version:string;baseVersions:Record<string,string>;sourceVersions?:Record<string,string>};
   tools: Record<string, SavedTool>;
 };
 export type TestResult = {

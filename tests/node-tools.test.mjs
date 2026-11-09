@@ -55,7 +55,12 @@ test("draft, publication, optimistic conflicts, pinned versions and rollback are
   assert.equal(evaluatePlan((await toolProgram()).plans.settings,context).view.label,"Новое имя формы");
   assert.equal(evaluatePlan((await toolProgram(prior.version)).plans.settings,context).view.label,"Настройки проекта");
   await toolCommand({action:"rollback",revision:pub.revision,version:prior.version},"Тест");
-  assert.equal((await toolProgram()).version,prior.version);
+  const restored=await toolProgram();
+  assert.notEqual(restored.version,prior.version);
+  assert.notEqual(restored.version,pub.active);
+  assert.equal(evaluatePlan(restored.plans.settings,context).view.label,"Настройки проекта");
+  assert.equal((await toolProgram(prior.version)).version,prior.version);
+  assert.equal((await toolState()).versions[0].reason,"restore");
 });
 test("server rejects modified restricted fields, forged parameters and invalid values",async()=>{
   const program=await toolProgram(),base=await toolDefaults();

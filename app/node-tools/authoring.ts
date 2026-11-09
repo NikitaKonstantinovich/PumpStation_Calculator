@@ -1,3 +1,5 @@
+import { geometryNodeTypes } from "./geometry-nodes";
+import { initialTools } from "./factory";
 import { circuitNodeTypes } from "./circuit-nodes";
 import { spacingNodeTypes } from "./spacing-nodes";
 import { connectPumpSpacing } from "./spacing-upgrade";
@@ -14,7 +16,8 @@ import type { ToolDocument } from "./schema";
 import { connectPumpCardPoints } from "./pump-card-upgrade";
 export function prepareDocument(document: ToolDocument): ToolDocument {
   const doc = structuredClone(upgradeDocument(document));
-  const missing = [...circuitNodeTypes(), ...pumpNodeTypes(), ...hydraulicNodeTypes(), ...detailNodeTypes(), ...dnNodeTypes(), ...stationCatalogNodeTypes(), ...collectorNodeTypes(), ...specificationNodeTypes(), ...spacingNodeTypes()].filter(type => !doc.types.some(t => t.id === type.id));
+  const generic = initialTools([]).types.filter(t=>/^(ui\.|data\.|logic\.|command\.)/.test(t.id));
+  const missing = [...geometryNodeTypes(), ...generic, ...circuitNodeTypes(), ...pumpNodeTypes(), ...hydraulicNodeTypes(), ...detailNodeTypes(), ...dnNodeTypes(), ...stationCatalogNodeTypes(), ...collectorNodeTypes(), ...specificationNodeTypes(), ...spacingNodeTypes()].filter(type => !doc.types.some(t => t.id === type.id));
   doc.types.push(...missing);
   for (const builtin of [...pumpNodeTypes().filter(t => t.operation === "ui.select"), ...detailNodeTypes(), ...dnNodeTypes(), ...hydraulicNodeTypes().filter(t => t.operation === "pump.chartPoint")]) {
     for (const type of doc.types.filter(t => t.operation === builtin.operation)) {

@@ -1,6 +1,8 @@
+import { toolAvailable } from "./workspace-controls";
+import { algorithmForProject, DEFAULT_ALGORITHM } from "./algorithm-schema";
 import { accepts } from "../engineering/schema";
 import { evaluateProduct } from "./runtime";
-import type { Evaluation, ToolContext, ToolProgram, Values, WorkspaceData } from "./schema";
+import type { Evaluation, ProductControls, ToolContext, ToolProgram, Values, WorkspaceData } from "./schema";
 import type { UserRole } from "../user-types";
 export const usesCatalog = (program: ToolProgram) => Object.values(program.plans).some(plan => plan.steps.some(step => step.operation === "pump.catalog"));
 export const ownBindings = (result: Evaluation, id: string) => result.bindings.filter(b => !b.toolId || b.toolId === id);
@@ -14,18 +16,29 @@ export function productContexts(program: ToolProgram, data: WorkspaceData | unde
     algorithmVersion: program.version
   }]));
 }
-export function migrateProduct(program: ToolProgram, previous: WorkspaceData | undefined, defaults: Values, baseVersions: Record<string, string>, role: UserRole, resources?: ToolContext["resources"], sourceVersions: Record<string, string> = {}) {
+export function migrateProduct(program: ToolProgram, previous: WorkspaceData | undefined, defaults: Values, baseVersions: Record<string, string>, role: UserRole, resources?: ToolContext["resources"], sourceVersions: Record<string, string> = {}, projectControls: Partial<Record<keyof ProductControls, boolean>> = {}) {
+  if(previous && algorithmForProject(previous)!==(program.algorithmId??DEFAULT_ALGORITHM))throw Error("Нельзя переносить значения между независимыми продуктами");
   const messages: string[] = [],
     tools = {
       ...previous?.tools
     },
     contexts = productContexts(program, previous, defaults, role, resources);
+  // Only an explicit version application imports legacy project flags. A value
+  // already stored by the node instrument, including false, always wins.
+  for (const [kind, ref] of Object.entries(program.product?.controls ?? {})) {
+    const value=projectControls[kind as keyof ProductControls];
+    const key=program.plans[ref.toolId]?.steps.find(step=>step.id===ref.node)?.parameter?.key;
+    const context=contexts[ref.toolId];
+    if(typeof value==="boolean" && key && context && !Object.hasOwn(context.values,key)) {
+      contexts[ref.toolId]={...context,values:{...context.values,[key]:value}};
+    }
+  }
   const oldVersions = new Set(Object.values(previous?.tools ?? {}).map(t => t.version));
   if (oldVersions.size > 1) messages.push("Прежние инструменты использовали разные версии. Явно применяется единая выбранная публикация продукта; предыдущие версии остаются в истории.");
   for (const t of program.tools.filter(t => t.enabled !== false)) {
     const result = evaluateProduct(program, t.id, contexts),
       values: Values = {},
-      before = previous?.tools[t.id]?.values ?? {},
+      before = contexts[t.id].values,
       bindings = ownBindings(result, t.id);
     for (const b of bindings) {
       if (!Object.hasOwn(before, b.key)) continue;
@@ -52,9 +65,10 @@ export function migrateProduct(program: ToolProgram, previous: WorkspaceData | u
   return {
     data: invalidateInactiveSelections(program, {
       schema: 1 as const,
+      algorithmId: program.algorithmId,
       tools,
       product: {
-        version: program.version,
+        version: program.version, algorithmId: program.algorithmId,
         baseVersions,
         sourceVersions
       }
@@ -99,7 +113,7 @@ export function invalidateInactiveContexts(program: ToolProgram, contexts: Recor
     const plan = program.plans[tool.id];
     if (!plan?.steps.some(s => s.id.startsWith(tool.id + "/") && s.operation === "circuit.guard")) continue;
     let result: Evaluation;
-    try { result = evaluateProduct(program, tool.id, contexts); } catch { continue; }
+    try { if(toolAvailable(program,tool.id,contexts))continue; result = evaluateProduct(program, tool.id, contexts); } catch { continue; }
     if (!plan.steps.some(s => s.id.startsWith(tool.id + "/") && s.operation === "circuit.guard" && result.trace[s.id]?.inputs.active === false)) continue;
     for (const b of ownBindings(result, tool.id)) {
       if (b.field.meaning !== "pumpSelectionProof") continue;

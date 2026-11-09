@@ -12,9 +12,9 @@ export type PanelKind = "input" | "chart" | "sketch" | "input2" | "chart2" | "sk
 export type WorkspaceMode = "free" | "mobile" | "grid";
 export type WorkspaceGrid = { columns:number; rows:number; columnSizes:number[]; rowSizes:number[]; cells:Array<string|null> };
 
-export type PanelState = {
+export type PanelState<Tool extends string = PanelKind> = {
   id: string;
-  activeTool?: PanelKind;
+  activeTool?: Tool;
   entityId: string;
   minimized?: boolean;
   x: number;

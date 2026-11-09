@@ -33,5 +33,5 @@ export async function engineeringStore(options={}){
     const request=new Request("http://fixture/api/admin/geometry-nodes",{method:body?"POST":"GET",headers,body:body?JSON.stringify(body):undefined});
     const response=await route[body?"POST":"GET"](request);return {status:response.status,body:await response.json()};
   }
-  return {call,load,effective,close(){delete globalThis[unique];delete globalThis[unique+"Catalog"];sql.close();}};
+  return {call,load,effective,sql,db,close(){delete globalThis[unique];delete globalThis[unique+"Catalog"];sql.close();}};
 }

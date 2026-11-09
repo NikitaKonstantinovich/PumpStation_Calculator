@@ -12,6 +12,52 @@ const applied=()=>base.baseSnapshot("pinned-1",base.initialBaseValues());
 const layout=(changes={})=>({pumpId:"CNP:variant",modelId:"422",snapshotId:"a".repeat(64),contour:"primary",powerKw:5.5,motorKey:"motor-IE3",orientation:"transverse_to_flow",installed:3,links:[{legacyId:"422",scope:"execution",relation:"exact_model_and_factory_article",source:"reviewed"}],issues:[],...changes});
 const geometry=(l,changes={})=>({status:"confirmed",variantId:l.pumpId,motorKey:l.motorKey,orientation:l.orientation,leftMm:260,rightMm:280,covers:["body","motor","terminal_box","protrusions"],source:"Test confirmed envelope",version:"geometry-1",...changes});
 
+test("standard width rule rounds upward to 50 mm without a historical minimum or base publication",()=>{
+ for(const [width,expected] of [[120,300],[299,450],[300,450],[300.01,500],[470,650],[850,1000]]){
+  const r=core.standardPumpSpacing(layout({width:{mm:width,source:"catalog width"}}));
+  assert.equal(r.spacing,expected);assert.equal(r.requiredGap,150);assert(r.gap>=150);assert.equal(r.status,"confirmed");
+  assert.equal(core.resolvePumpSpacing(r.layout,base.legacyBaseSnapshot(),r).spacing,expected);
+ }
+ for(const mm of [0,-1,NaN,Infinity,undefined,"300"]){
+  assert.equal(core.standardPumpSpacing(layout({width:{mm,source:"invalid"}})).spacing,null);
+ }
+ const pump={id:"v",dimensions:{base_width:400,overall_length:800,D1:200}};
+ assert.equal(core.standardPumpSpacing(nodes.pumpLayout(pump,"primary",2)).spacing,null);
+});
+
+test("width node reads each contour's own pump and ignores conflicting old rules",()=>{
+ const context={settings:{stationType:"combined",baseValues:applied()},input:{selectedPumpId:"p1",workingPumpCount:2,reservePumpCount:1},secondaryInput:{selectedPumpId:"p2",workingPumpCount:1,reservePumpCount:1},pumps:[{id:"p1",dimensions:{overall_width:300}},{id:"p2",dimensions:{overall_width:470}}]};
+ for(const [secondary,expected] of [[false,450],[true,650]]){
+  const w=nodes.executeSpacingOperation({operation:"spacing.layout"},{context,secondary}).value;
+  w.result={status:"conflict",spacing:1500};
+  const r=nodes.executeSpacingOperation({operation:"spacing.standardWidth"},{work:w}).value.result;
+  assert.equal(r.spacing,expected);assert.equal(r.layout.contour,secondary?"secondary":"primary");
+ }
+ const p=context.pumps[0];p.dimensions.overall_width=301;
+ const w=nodes.executeSpacingOperation({operation:"spacing.layout"},{context,secondary:false}).value;
+ assert.equal(nodes.executeSpacingOperation({operation:"spacing.standardWidth"},{work:w}).value.result.spacing,500);
+});
+
+test("width fallback uses a linked transverse reference and rejects a different execution",()=>{
+ const l=layout();l.reference={variantId:l.pumpId,modelId:l.modelId,motorKey:l.motorKey,orientation:"transverse_to_flow",leftMm:270,rightMm:290,source:"linked drawing",version:"drawing-v1",basis:"transverse width"};
+ assert.equal(core.standardPumpSpacing(l).spacing,750);
+ assert.equal(core.standardPumpSpacing({...l,reference:{...l.reference,variantId:"other"}}).spacing,null);
+ assert.equal(core.standardPumpSpacing({...l,orientation:"along_flow"}).spacing,null);
+});
+
+test("server recomputes the width rule from pinned pump data instead of client dimensions",async()=>{
+ const l=layout(),a=base.legacyBaseSnapshot(),pump={id:l.pumpId,power:l.powerKw,dimensions:{overall_width:300},spacingEvidence:{modelId:l.modelId,motorKey:l.motorKey,links:[],issues:[]}};
+ globalThis.__standardSpacingSnapshot={id:l.snapshotId,items:[{variantId:l.pumpId,pump}]};
+ const server=await loadTs(new URL("../app/node-tools/spacing-server.ts",import.meta.url),{[new URL("../app/node-tools/catalog-server.ts",import.meta.url).href]:'export class CatalogError extends Error{};export async function catalogSnapshot(id){if(id!==globalThis.__standardSpacingSnapshot.id)throw Error("Pinned snapshot unavailable");return globalThis.__standardSpacingSnapshot;}'});
+ try{
+  const canonical=nodes.pumpLayout({...pump,spacingSnapshotId:l.snapshotId},"primary",3),r=core.standardPumpSpacing(canonical);
+  const c={type:"suction",baseVersions:a.versions,primary:{pumpId:l.pumpId,working:2,reserve:1,spacing:450,spacingResult:structuredClone(r)},secondary:null};
+  c.primary.spacingResult.layout.width.mm=1;c.primary.spacingResult.spacing=1;
+  await server.applyVerifiedCollectorSpacing(c,a);
+  assert.deepEqual(c.primary.spacingResult,r);assert.equal(c.primary.spacingBase,450);assert.equal(c.primary.spacingManual,undefined);
+ }finally{delete globalThis.__standardSpacingSnapshot;}
+});
+
 test("new variant retains the conservative 750 mm group result and skips geometry calculation",()=>{
  const l=layout();l.geometry=geometry(l,{leftMm:100,rightMm:100});
  const r=core.resolvePumpSpacing(l,applied());assert.equal(r.spacing,750);assert.equal(r.status,"confirmed");assert.equal(r.source,"rule");assert.equal(r.geometryCalculated,false);assert.equal(r.layout.pumpId,"CNP:variant");assert.equal(r.ruleIds[0],"research-9");

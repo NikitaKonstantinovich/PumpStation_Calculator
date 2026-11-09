@@ -80,6 +80,20 @@ class ConverterTests(unittest.TestCase):
         self.assertEqual(second["converted"], 1)
         self.assertNotEqual(first["profiles"]["profiles"]["a"]["sourceHash"], second["profiles"]["profiles"]["a"]["sourceHash"])
 
+    def test_new_catalog_variant_uses_existing_source_and_returns_new_id(self):
+        digest = service.file_hash(self.root / "a.step")
+        self.models[0]["sourceHash"] = digest
+        self.registry.write_text(json.dumps({"version": 1, "models": self.models}))
+        link = {"sourceKey": "pump:a", "sourceHash": digest, "scope": "model_default", "assemblyApproved": False}
+        with patch.object(service, "catalog_links", return_value={"pump:CNP:new": link}):
+            job = self.finished(self.submit(["pump:CNP:new", "pump:CNP:new"]))
+        self.assertEqual((job["converted"], job["missing"], self.calls), (1, [], ["a.step"]))
+        profile = job["profiles"]["profiles"]["CNP:new"]
+        self.assertEqual(profile["sourceHash"], digest)
+        self.assertEqual(profile["key"], "pump:CNP:new")
+        self.assertIn("pump:CNP:new", job["profiles"]["equipment"])
+        self.assertEqual(profile["ports"][0]["point"], [3, 4, 5])
+
     def test_failed_file_does_not_stop_queue_and_retry_only_failed(self):
         self.failures.add("bad.step")
         first = self.finished(self.submit(["pump:a", "equipment:bad", "equipment:valve-a"]))

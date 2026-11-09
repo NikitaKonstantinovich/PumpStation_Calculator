@@ -5,7 +5,7 @@ import { addSecondaryTools } from "./secondary-tools";
 import { invalidateInactiveContexts } from "./product-state";
 import { CARD_SECTIONS, CARD_MAIN_FIELDS, cardPresentation } from "./pump-card-presentation";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { Canvas, type Focus } from "../engineering/canvas";
 import { layout, type Address } from "../engineering/canvas-layout";
 import { usesInStation } from "../engineering/uses";
@@ -36,7 +36,13 @@ import { API, ROOT, safeId, diagnosticKey, type ToolDocument, type ToolTest, typ
 import type { ProjectConfig } from "../project-config";
 import "../engineering/editor.css";
 import "./tools.css";
+import { DEFAULT_ALGORITHM, algorithmForProject, type Algorithm } from "./algorithm-schema";
+import { algorithmRequest, versionDate, versionReason } from "./algorithm-client";
+import { CreateAlgorithmDialog } from "./algorithm-library";
+import "./algorithm-library.css";
 type Remote = {
+  name: string;
+  hasDraft: boolean;
   revision: number;
   active: string | null;
   draft: ToolDocument;
@@ -44,6 +50,8 @@ type Remote = {
     id: string;
     created: string;
     author: string;
+    number: number;
+    reason: import("./algorithm-schema").AlgorithmVersion["reason"];
   }[];
 };
 class ToolRequestError extends Error {
@@ -55,13 +63,13 @@ class ToolRequestError extends Error {
     super(message);
   }
 }
-async function request(body?: unknown): Promise<Remote> {
-  const response = await fetch(API, body ? {
+async function request(body?: unknown, algorithmId = DEFAULT_ALGORITHM): Promise<Remote> {
+  const response = await fetch(API + "?algorithm=" + encodeURIComponent(algorithmId), body ? {
     method: "POST",
     headers: {
       "Content-Type": "application/json"
     },
-    body: JSON.stringify(body)
+    body: JSON.stringify({...body as object,algorithmId})
   } : {
     cache: "no-store"
   });
@@ -73,9 +81,13 @@ const uuid = () => crypto.randomUUID().replaceAll("-", "").slice(0, 12);
 export function ToolEditor({
   project,
   back,
+  algorithmId = DEFAULT_ALGORITHM,
+  selectAlgorithm,
 }: {
   project: ProjectConfig;
   back: () => void;
+  algorithmId?: string;
+  selectAlgorithm: (id:string) => void;
 }) {
   const [remote, setRemote] = useState<Remote | null>(null),
     [doc, setDoc] = useState<ToolDocument | null>(null),
@@ -130,6 +142,7 @@ export function ToolEditor({
     });
   const [metadata, setMetadata] = useState(false);
   const [publishPrompt, setPublishPrompt] = useState(false);
+  const [restoreVersion,setRestoreVersion]=useState<string|null>(null);
   const [template, setTemplate] = useState<null | {kind:"hydraulic"|"card"|"secondary"|StationToolKind;selectionId:string;settingsId:string;secondarySelectionId?:string;dnId?:string;collectorsId?:string}>(null);
   const [dataset, setDataset] = useState<"preview" | "saved" | "test">("preview");
   const [role, setRole] = useState<UserRole>("pro"),
@@ -164,7 +177,34 @@ export function ToolEditor({
     node = graph?.nodes.find(n => n.id === at.node),
     type = doc?.types.find(t => t.id === node?.type);
   const dirty = !!doc && doc !== remote?.draft;
-  useAppNavigationGuard(dirty);
+  useAppNavigationGuard(dirty,undefined,saveDraft);
+  const [algorithms,setAlgorithms] = useState<Algorithm[]>([]), [createAlgorithm,setCreateAlgorithm] = useState(false);
+  const [leave,setLeave] = useState<null | (()=>void)>(null);
+  const latest = useRef({doc,remote}); useLayoutEffect(()=>{latest.current={doc,remote};});
+  const pendingSave = useRef<Promise<boolean>|null>(null);
+  const [autosaveError,setAutosaveError] = useState("");
+  useEffect(()=>{let live=true;algorithmRequest().then(data=>{if(live)setAlgorithms(data.algorithms);}).catch(e=>{if(live)setError(e.message);});return()=>{live=false;};},[]);
+  async function saveDraft():Promise<boolean> {
+    if(pendingSave.current){await pendingSave.current;if(latest.current.doc===latest.current.remote?.draft)return true;}
+    const snapshot=latest.current.doc, state=latest.current.remote;
+    if(!snapshot||!state)return false;
+    if(snapshot===state.draft)return true;
+    const saving=(async()=>{
+      try {
+        const next=await request({action:"save",revision:state.revision,document:snapshot},algorithmId);
+        const accepted={...next,draft:snapshot}; latest.current={...latest.current,remote:accepted};setRemote(accepted);
+        setAutosaveError("");setMessage("Черновик сохранён");return true;
+      }catch(e){setAutosaveError((e as Error).message);return false;}
+    })();pendingSave.current=saving;
+    try{return await saving;}finally{pendingSave.current=null;}
+  }
+  useEffect(()=>{
+    if(!dirty||busy||autosaveError)return;
+    const timer=window.setTimeout(()=>void saveDraft(),900);
+    return()=>window.clearTimeout(timer);
+  });
+  function requestLeave(action:()=>void) { if(dirty||pendingSave.current)setLeave(()=>action);else action(); }
+
   function accept(next: Remote) {
     const draft = prepareDocument(next.draft);
     setRemote({
@@ -178,14 +218,15 @@ export function ToolEditor({
   useEffect(() => {
     let live = true;
     let documentFailed=false;
-    request().then(state=>{
+    request(undefined,algorithmId).then(state=>{
       if(!live)return;
       accept(state);
       const ready=prepareDocument(state.draft),first=deriveTools(ready)[0];
-      setToolId(first?.id??"");
-      setAt({graph:ready.product!.root,path:[],node:first?.id??""});
+      let selected=first?.id??"";try{const saved=localStorage.getItem("algorithm.selected."+algorithmId);if(deriveTools(ready).some(t=>t.id===saved))selected=saved!;}catch{/* Optional preference. */}
+      setToolId(selected);
+      setAt({graph:ready.product!.root,path:[],node:selected});
     }).catch(e=>{if(live){documentFailed=true;setError(e.message);}});
-    loadTools().then(data=>{
+    loadTools(undefined,undefined,undefined,algorithmId,true).then(data=>{
       if(!live)return;
       setDefaults(data.defaults);setSessionRole(data.role);setBaseVersions(data.baseVersions);
       const sourceErrors=Object.values(data.sourceErrors??{});if(sourceErrors.length&&!documentFailed)setError(sourceErrors.join(" · "));
@@ -193,7 +234,7 @@ export function ToolEditor({
     return () => {
       live = false;
     };
-  }, []);
+  }, [algorithmId]);
   useEffect(() => {
     if (!dirty) return;
     const guard = (e: BeforeUnloadEvent) => {
@@ -227,11 +268,12 @@ export function ToolEditor({
     const data = Object.fromEntries(Object.entries(normalized).map(([id, c]) => [id, c.values]));
     setToolValues(data); setValues(data[toolId] ?? {});
   }
-  const stored = project.workspace2?.tools[toolId];
+  useEffect(()=>{if(remote&&toolId)try{localStorage.setItem("algorithm.selected."+algorithmId,toolId);}catch{/* Optional editor preference. */}},[algorithmId,toolId,remote]);
+  const stored = algorithmForProject(project.workspace2) === algorithmId ? project.workspace2?.tools[toolId] : undefined;
   useEffect(() => {
     let active = true;
-    setSavedDefaults(null);
-    loadTools(undefined, stored?.baseVersions).then(data => {
+    queueMicrotask(()=>{if(active)setSavedDefaults(null);});
+    loadTools(undefined, stored?.baseVersions,undefined,algorithmId,true).then(data => {
       if (active) setSavedDefaults(data.defaults);
     }).catch(e => {
       if (active) setError(e.message);
@@ -239,13 +281,12 @@ export function ToolEditor({
     return () => {
       active = false;
     };
-  }, [stored?.baseVersions]);
+  }, [stored?.baseVersions,algorithmId]);
   useEffect(() => {
     if (!catalogNeeded) return;
     let live = true;
     const abort = new AbortController();
-    setCatalogLoading(true);
-    setCatalog(null);
+    queueMicrotask(()=>{if(live){setCatalogLoading(true);setCatalog(null);}});
     loadCatalog(dataset === "saved" ? project.workspace2?.product?.sourceVersions?.pump_catalog_v2 : undefined, abort.signal).then(snapshot => {
       if (live) {
         setCatalog(snapshot);
@@ -264,7 +305,7 @@ export function ToolEditor({
   useEffect(() => {
     if (!stationCatalogNeeded || stationBaseKey === "{}") return;
     const abort = new AbortController();
-    setStationCatalog(null); setStationCatalogLoading(true); setStationCatalogError("");
+    queueMicrotask(()=>{if(!abort.signal.aborted){setStationCatalog(null);setStationCatalogLoading(true);setStationCatalogError("");}});
     loadStationCatalog(stationSnapshotId, JSON.parse(stationBaseKey), abort.signal).then(snapshot => { if (!abort.signal.aborted) setStationCatalog(snapshot); }).catch(error => { if (!abort.signal.aborted) setStationCatalogError(error.message); }).finally(() => { if (!abort.signal.aborted) setStationCatalogLoading(false); });
     return () => abort.abort();
   }, [stationCatalogNeeded, stationBaseKey, stationSnapshotId]);
@@ -591,23 +632,27 @@ export function ToolEditor({
     });
     setNewParam(false);
   }
-  async function action(action: "save" | "publish" | "rollback", version?: string) {
+  async function action(action: "save" | "publish" | "rollback" | "restore-preserve", version?: string) {
     if (!doc || !remote) return;
-    if (action === "rollback" && !window.confirm("Восстановить публикацию и её черновик?")) return;
+    if (action === "save") { await saveDraft(); return; }
+    if (pendingSave.current && !await pendingSave.current) return;
     setBusy(true);
     setError("");
     try {
       accept(await request({
         action,
         document: doc,
-        revision: remote.revision,
+        revision: latest.current.remote!.revision,
+        discardDraft: action === "rollback",
         version,
         tool: toolId,
         values,
         contexts: Object.fromEntries(tools.map(t => [t.id, t.id === toolId ? values : toolValues[t.id] ?? {}])),
         sourceVersions: { ...(catalog ? {pump_catalog_v2:catalog.id} : {}), ...(stationCatalog ? {station_catalog:stationCatalog.id} : {}) }
-      }));
-      setMessage(action === "save" ? "Черновик сохранён" : "Публикация обновлена");
+      },algorithmId));
+      window.dispatchEvent(new Event("algorithms-changed"));
+      setMessage("Сохранена новая версия алгоритма");
+      setRestoreVersion(null);
       setVersions(false);
     } catch (e) {
       setError((e as Error).message);
@@ -618,6 +663,7 @@ export function ToolEditor({
   }
   async function run() {
     if (!doc || !remote) return;
+    if(pendingSave.current && !await pendingSave.current)return;
     setBusy(true);
     setError("");
     try {
@@ -628,9 +674,10 @@ export function ToolEditor({
           },
           body: JSON.stringify({
             action: "test",
+            algorithmId,
             compactTrace: true,
             document: doc,
-            revision: remote.revision,
+            revision: latest.current.remote!.revision,
             tool: toolId,
             values,
             role,
@@ -690,9 +737,13 @@ export function ToolEditor({
     });
   }
   if (!doc || !remote) return <main className="gn-editor"><header><button onClick={back}>←</button><h1>Нодовый редактор</h1></header><p role="status">{error || "Загрузка определений…"}</p></main>;
-  return <main className="gn-editor nt-editor" aria-busy={busy}><header><button onClick={() => {
-        if (!dirty || window.confirm("Выйти с несохранённым черновиком?")) back();
-      }}>←</button><h1>Нодовый редактор</h1><small>Workspace 2 · черновик {remote.revision}{dirty ? " · изменён" : ""}</small><div className="gn-actions"><button disabled={busy} onClick={() => action("save")}>Сохранить</button><button disabled={busy} onClick={() => setPublishPrompt(true)}>Опубликовать</button><button onClick={() => setProps(!props)}>☰ Свойства</button></div></header>
+  return <main className="gn-editor nt-editor" aria-busy={busy}><header className="nt-editor-header"><button onClick={() => {
+        requestLeave(back);
+      }}>←</button><div className="nt-editor-heading"><h1>Нодовый редактор</h1><small>{remote.name} · {remote.hasDraft || dirty ? "Черновик" : "Сохранённая версия"}{dirty ? " · сохраняется…" : ""}</small></div>
+      <div className="al-algorithm-bar"><label>Алгоритм <select aria-label="Алгоритм" value={algorithmId} onChange={e=>{const id=e.target.value;requestLeave(()=>selectAlgorithm(id));}}>{algorithms.map(a=><option key={a.id} value={a.id}>{a.name}</option>)}</select></label><button onClick={()=>requestLeave(()=>setCreateAlgorithm(true))}>Создать алгоритм</button></div>
+      <div className="gn-actions"><button disabled={busy} onClick={() => action("save")}>Сохранить черновик</button><button disabled={busy} onClick={() => setPublishPrompt(true)}>Сохранить версию</button><button onClick={() => setProps(!props)}>☰ Свойства</button></div></header>
+    {autosaveError && <p className="gn-error" role="alert">Черновик не сохранён: {autosaveError} <button onClick={()=>{setAutosaveError("");void saveDraft();}}>Повторить сохранение</button><button onClick={()=>{if(window.confirm("Отбросить локальные изменения и загрузить серверный черновик?"))void request(undefined,algorithmId).then(accept).then(()=>setAutosaveError("")).catch(e=>setError(e.message));}}>Загрузить актуальную ревизию</button><button onClick={()=>{const url=URL.createObjectURL(new Blob([JSON.stringify(doc,null,2)],{type:"application/json"}));const a=document.createElement("a");a.href=url;a.download="algorithm-draft.json";a.click();URL.revokeObjectURL(url);}}>Скачать мой черновик</button></p>}
+    {!tools.length && <p className="al-empty">Пустой алгоритм. Нажмите «＋ Инструмент», чтобы начать создание продукта.</p>}
     <div className="gn-toolbar"><select aria-label="Инструмент" value={toolId} onChange={e => {
         const t = tools.find(t => t.id === e.target.value)!;
         navigate({
@@ -740,10 +791,10 @@ export function ToolEditor({
         setHistory(history.slice(0, -1));
       }}>↶</button><button disabled={busy} onClick={run}>▷ Проверить</button><button onClick={() => setVersions(true)}>Версии</button><button onClick={() => setPreview(!preview)}>Предпросмотр</button></div>
     {(error || message) && <div className={error ? "gn-error" : "gn-status"} role={error ? "alert" : "status"}>{error || message}{error && errorAt && <button onClick={() => locate(errorAt.graph, errorAt.node ?? "", errorAt.path)}>Перейти к ошибке</button>}{error.includes("другом окне") && <button onClick={() => {
-        if (window.confirm("Загрузить сохранённую ревизию?")) void request().then(accept);
+        if (window.confirm("Загрузить сохранённую ревизию?")) void request(undefined,algorithmId).then(accept);
       }}>Загрузить актуальную</button>}</div>}
-    <nav className="nt-breadcrumbs" aria-label="Путь ноды">{graphBreadcrumbs(doc, root, at).map((c, i) => <span key={i}>{i > 0 && " → "}<button onClick={() => navigate(c.address)}>{c.label}</button></span>)}<small>{type?.instrument ? "Экземпляр Instrument" : at.path.length ? "Внутренний узел общего определения" : "Узел инструмента"}</small></nav>
-    <div className="gn-body">{graph && <Canvas overviewLabel="Показать все инструменты" root={root} doc={doc} active={at} focus={focus} storageKey={"product/" + project.project.id} eligible={out ? targets : null} connectionCheck={(g, e) => productConnectionProblem(doc, g, e)} highlight={chain?.ids} describe={target => {
+    <nav className="nt-breadcrumbs" aria-label="Путь ноды">{graphBreadcrumbs(doc, root, at).map((c, i) => <span key={i}>{i > 0 && " → "}<button onClick={() => navigate(c.address)}>{i===0?remote.name:c.label}</button></span>)}<small>{type?.instrument ? "Экземпляр Instrument" : at.path.length ? "Внутренний узел общего определения" : "Узел инструмента"}</small></nav>
+    <div className="gn-body">{graph && <Canvas overviewLabel="Показать все инструменты" root={root} doc={doc} active={at} focus={focus} storageKey={"algorithm/" + algorithmId} eligible={out ? targets : null} connectionCheck={(g, e) => productConnectionProblem(doc, g, e)} highlight={chain?.ids} describe={target => {
         const g = doc.diagrams.find(g => g.id === target.graph),
           n = g?.nodes.find(n => n.id === target.node),
           t = doc.types.find(t => t.id === n?.type),
@@ -934,7 +985,7 @@ export function ToolEditor({
             setError((e as Error).message);
           }
         }}>Создать параметр</button>{error && <p role="alert">{error}</p>}</section></div>}
-    {publishPrompt && <div className="gn-shade"><section className="gn-dialog" role="dialog" aria-modal="true" aria-label="Публикация инструментов"><header><h2>Публикация инструментов</h2><button onClick={() => setPublishPrompt(false)}>Отмена</button></header><p>Проверить и опубликовать согласованную версию инструментов?</p><p>Сохранённые проекты продолжат использовать закреплённые версии. Новая версия применяется в проекте отдельной командой.</p><button disabled={busy} onClick={() => { setPublishPrompt(false); void action("publish"); }}>Проверить и опубликовать</button></section></div>}
+    {publishPrompt && <div className="gn-shade"><section className="gn-dialog" role="dialog" aria-modal="true" aria-label="Публикация инструментов"><header><h2>Сохранить версию алгоритма</h2><button onClick={() => setPublishPrompt(false)}>Отмена</button></header><p>Проверить и сохранить новую версию алгоритма?</p><p>Сохранённые проекты продолжат использовать закреплённые версии. Новая версия применяется в проекте отдельной командой.</p><button disabled={busy} onClick={() => { setPublishPrompt(false); void action("publish"); }}>Сохранить версию</button></section></div>}
     {template && <div className="gn-shade"><section className="gn-dialog" role="dialog" aria-label="Готовый инструмент"><header><h2>Готовый инструмент</h2><button onClick={() => setTemplate(null)}>Закрыть</button></header>
       <label>Инструмент<select value={template.kind} onChange={e => setTemplate({...template,kind:e.target.value as NonNullable<typeof template>["kind"]})}><option value="hydraulic">Гидравлическая кривая</option><option value="card">Карточка насоса</option><option value="dn">Расчёт DN</option><option value="collectors">Конструктор коллекторов</option><option value="specification">Спецификация</option><option value="secondary">Добавить инструменты второго контура</option></select></label>
       {["hydraulic", "card", "dn"].includes(template.kind) && <label>Источник выбранного насоса<select value={template.selectionId} onChange={e => setTemplate({...template,selectionId:e.target.value})}><option value="">Выберите инструмент подбора…</option>{visualizationSources(doc).selections.map(source=><option key={source.id} value={source.id}>{source.name}</option>)}</select></label>}
@@ -984,7 +1035,11 @@ export function ToolEditor({
                   setTests(null);
                   previewSelect(t.node!);
                 }}>Перейти к узлу</button>}</td></tr>)}</tbody></table><p>Команда записи · Workspace 2 · пробный запуск</p></section></div>}
-    {versions && <div className="gn-shade"><section className="gn-dialog"><header><h2>Публикации Workspace 2</h2><button onClick={() => setVersions(false)}>Закрыть</button></header>{remote.versions.map(v => <p key={v.id}>{v.created} · {v.author}<br />{v.id}{v.id === remote.active ? " · Действующая" : <button onClick={() => action("rollback", v.id)}>Восстановить</button>}</p>)}</section></div>}
+
+    {createAlgorithm && <CreateAlgorithmDialog algorithms={algorithms} close={()=>setCreateAlgorithm(false)} created={selectAlgorithm}/>}
+    {leave && <div className="gn-shade"><section className="gn-dialog" role="dialog" aria-modal="true" aria-label="Несохранённый черновик"><h2>Есть несохранённые изменения</h2><button onClick={async()=>{if(await saveDraft()){const go=leave;setLeave(null);go();}}}>Сохранить и перейти</button><button onClick={async()=>{if(pendingSave.current)await pendingSave.current;const go=leave;setLeave(null);go();}}>Отбросить локальные изменения и перейти</button><button onClick={()=>setLeave(null)}>Отмена</button></section></div>}
+    {versions && <div className="gn-shade"><section className="gn-dialog"><header><h2>Версии · {remote.name}</h2><button onClick={() => setVersions(false)}>Закрыть</button></header>{remote.versions.map(v => <p key={v.id}>Версия {v.number} · {versionDate(v.created)} · {v.author}<br />{versionReason(v.reason)}{v.id === remote.active ? " · Действующая" : <button onClick={() => setRestoreVersion(v.id)}>Восстановить</button>}</p>)}</section></div>}
+    {restoreVersion && <div className="gn-shade"><section className="gn-dialog" role="dialog" aria-modal="true" aria-label="Восстановить версию"><h2>Восстановить версию {remote.versions.find(v=>v.id===restoreVersion)?.number}</h2><p>Будет создана новая сохранённая версия. Закреплённые проекты не изменятся.</p>{(remote.hasDraft||dirty)&&<p>Есть изменённый черновик. Выберите, сохранить его отдельной версией или заменить.</p>}{error&&<p role="alert">{error}</p>}{(remote.hasDraft||dirty)&&<button disabled={busy} onClick={()=>void action("restore-preserve",restoreVersion)}>Сохранить черновик как версию и восстановить</button>}<button disabled={busy} onClick={()=>void action("rollback",restoreVersion)}>{remote.hasDraft||dirty?"Отбросить черновик и восстановить":"Восстановить"}</button><button disabled={busy} onClick={()=>setRestoreVersion(null)}>Отмена</button></section></div>}
   </main>;
 }
 function NodeProperties({

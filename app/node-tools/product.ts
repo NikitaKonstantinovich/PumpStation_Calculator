@@ -183,10 +183,13 @@ export function flattenProduct(doc: ToolDocument, root: Diagram): Plan {
       list.push(edge);
       incoming.set(edge.to, list);
     }
+    // The product root is a container; an empty product needs no visible result node.
+    const virtual = graph.id === root.id && !graph.nodes.some(n => n.id === "result");
     const plain = compileDiagram({
       ...graph,
+      nodes: virtual ? [...graph.nodes, {id:"result",type:"__root_result",name:"Результат продукта",x:0,y:0,values:{}}] : graph.nodes,
       edges: []
-    }, doc.types, true);
+    }, virtual ? [...doc.types,{id:"__root_result",name:"Результат продукта",category:"Границы",description:"",fields:[],formulas:{}}] : doc.types, true);
     for (const local of plain.steps) {
       if (steps.length > 18000) throw new DiagramError("Превышен размер развёрнутого продукта", graph.id, local.id);
       const id = path ? path + "/" + local.id : local.id;

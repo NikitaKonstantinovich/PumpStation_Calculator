@@ -1,3 +1,4 @@
+import { validateControls } from "./workspace-controls";
 import { compileTree, definitionPorts } from "../engineering/hierarchy";
 import { validateDocument, executableSlice, DiagramError } from "../engineering/engine";
 import { accepts, compatible, type Field, type NodeType } from "../engineering/schema";
@@ -15,6 +16,21 @@ function verifyField(f: Field, depth = 0) {
 export function compileTools(doc: ToolDocument, version: string, strict = true): ToolProgram {
   if (!Array.isArray(doc?.tools) || doc.tools.length > 30) throw Error("Некорректный список инструментов");
   validateDocument(doc, [], [], doc.product ? false : strict);
+  for (const type of doc.types) if (type.instrument && !doc.diagrams.some(g => g.id === type.instrument)) throw Error(type.name + " · отсутствует внутренний граф");
+  for (const graph of doc.diagrams) for (const edge of graph.edges) {
+    const from = doc.types.find(t => t.id === graph.nodes.find(n => n.id === edge.from)?.type);
+    const to = doc.types.find(t => t.id === graph.nodes.find(n => n.id === edge.to)?.type);
+    if (!from?.fields.some(f => f.key === edge.out) || !to?.fields.some(f => f.key === edge.input)) throw new DiagramError("Связь ссылается на отсутствующий узел или порт",graph.id,edge.to);
+  }
+  const checked = new Set<string>(), visiting = new Set<string>();
+  function checkDefinition(id:string) {
+    if(visiting.has(id))throw new DiagramError("Цикл внутренних определений Instrument",id);
+    if(checked.has(id))return;
+    visiting.add(id);
+    for(const node of doc.diagrams.find(g=>g.id===id)!.nodes){const nested=doc.types.find(t=>t.id===node.type)?.instrument;if(nested)checkDefinition(nested);}
+    visiting.delete(id);checked.add(id);
+  }
+  doc.diagrams.forEach(g=>checkDefinition(g.id));
   const tools = deriveTools(doc);
   if (tools.length > 30) throw Error("Превышено число инструментов продукта");
   const definitions = new Set<string>();
@@ -87,11 +103,13 @@ export function compileTools(doc: ToolDocument, version: string, strict = true):
       plans[tool.id] = plan;
       dependencies[tool.id] = owners.filter(id => id !== tool.id);
     }
+    validateControls(doc.product.controls, {version,tools,plans});
     return {
       version,
       product: {
         root: root.id,
-        dependencies
+        dependencies,
+        ...(doc.product.controls ? {controls: structuredClone(doc.product.controls)} : {})
       },
       tools: tools.map(({
         tests,
