@@ -1,11 +1,11 @@
 "use client";
 
-import { useEffect, useRef, useState, useMemo, type ReactNode } from "react";
+import { useEffect, useRef, useState, useMemo } from "react";
 import { ToolForm } from "./form";
 import { DataTree } from "./data-inspector";
 import { applyParameterWrites } from "./form-actions";
 import { evaluatePlan, evaluateProduct, migrateValues } from "./runtime";
-import { migrateProduct, productContexts } from "./product-state";
+import { migrateProduct, productContexts, invalidateInactiveSelections } from "./product-state";
 import { diagnosticKey, type SavedTool, type ToolContext, type ToolProgram, type Values, type WorkspaceData } from "./schema";
 import type { UserRole } from "../user-types";
 import type { ProjectConfig } from "../project-config";
@@ -217,15 +217,11 @@ export function NodeWorkspace({
   project,
   update,
   back,
-  openMain,
-  navigation,
   status
 }: {
   project: ProjectConfig;
   update: (data: WorkspaceData) => void;
   back: () => void;
-  openMain: () => void;
-  navigation: ReactNode;
   status: string;
 }) {
   const [working, setWorking] = useState<WorkspaceData>(() => project.workspace2 ?? {
@@ -294,14 +290,14 @@ export function NodeWorkspace({
     }));
   }, [remote, working, selected]);
   const archived = Object.keys(working.tools).filter(id => !tools.some(t => t.id === id));
-  return <main className="nt-workspace"><header><button aria-label="Открыть меню" onClick={openMain}>☰</button><h1>Рабочее пространство 2</h1><button onClick={back}>Рабочее пространство</button><span role="status">{status}</span></header>{navigation}<div><button onClick={async () => {
+  return <main className="nt-workspace"><header><h1>Рабочее пространство 2</h1><button onClick={back}>Рабочее пространство</button><span role="status">{status}</span></header><div><button onClick={async () => {
         try {
           apply(await loadTools());
         } catch (e) {
           setError((e as Error).message);
         }
       }}>Применить актуальную версию продукта</button>{working.product && <small>Закреплена единая версия · {working.product.version}</small>}</div>{error && <p role="alert">{error}</p>}{remote?.sourceErrors && <p role="alert">Ошибка источника: {Object.values(remote.sourceErrors).join("; ")}. Зависимые инструменты недоступны до восстановления источника; закреплённый снимок не заменяется.</p>}{message && <p role="status">{message}</p>}{!remote && !error && <p>Загружаем инструменты…</p>}<nav aria-label="Инструменты Workspace 2">{tools.map(t => <span key={t.id}><button aria-pressed={selected === t.id} onClick={() => setSelected(t.id)}>{t.name}</button>{toolStates[t.id] && <small role="status"> · {toolStates[t.id]}</small>}</span>)}</nav>
-  {remote && selected && (working.product ? <ProductTool key={selected} toolId={selected} data={working} remote={remote} initial={project.workspace2} change={setWorking} save={() => update(working)} /> : remote.program.product ? <p>Для работы с общим графом нажмите «Применить актуальную версию продукта». Предыдущие значения сохранятся.</p> : <RuntimeTool key={project.project.id + "/" + selected} toolId={selected} initial={working.tools[selected]} applyProduct={apply} save={data => {
+  {remote && selected && (working.product ? <ProductTool key={selected} toolId={selected} data={working} remote={remote} initial={project.workspace2} change={next => setWorking(invalidateInactiveSelections(remote.program, next, remote.defaults, remote.role, remote.resources))} save={() => update(working)} /> : remote.program.product ? <p>Для работы с общим графом нажмите «Применить актуальную версию продукта». Предыдущие значения сохранятся.</p> : <RuntimeTool key={project.project.id + "/" + selected} toolId={selected} initial={working.tools[selected]} applyProduct={apply} save={data => {
       const next = {
         ...working,
         tools: {

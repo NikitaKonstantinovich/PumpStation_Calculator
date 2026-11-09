@@ -13,6 +13,8 @@ export type PumpSpatialData = {
   source: string; rule: string; issues: string[];
 };
 export type Pump = {
+  spacingEvidence?: import("./pump-spacing").SpacingEvidence;
+  spacingSnapshotId?: string;
   id: string; manufacturer: string; series: string; group: string; model: string; type: PumpType;
   power: number | null; efficiency: number | null; nominalFlow: number | null;
   minFlow: number | null; maxFlow: number | null; minHead: number | null; maxHead: number | null;
@@ -20,6 +22,7 @@ export type Pump = {
   price: number | null; priceCurrency: "USD" | "CNY" | "RUB" | null;
   priceKind?: "list" | "net"; discountPercent?: number | null;
   priceSource: string | null; source: string | null; drawing: string | null; drawingSource?: string;
+  drawings?: { url: string; name: string; contentType: string; previewUrl?: string; scope: string; note: string; page?: number; source?: string }[];
   curve: Array<[number, number]>; efficiencyCurve?: Array<[number, number]>;
   powerCurve?: Array<[number, number]>; npshCurve?: Array<[number, number]>;
   medium?: "water" | "wastewater"; selectable?: boolean; active?: boolean;

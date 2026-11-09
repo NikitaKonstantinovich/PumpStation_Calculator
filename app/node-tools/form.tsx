@@ -90,7 +90,7 @@ function DynamicSelect({ view: v, disabled, showOrigin, change }: { view: View; 
     <select id={id} disabled={disabled || !b.editable || !b.active} value={b.value == null ? "" : String(b.value)} onChange={e => {
       const next = e.target.value || null;
       if ((b.value == null ? null : String(b.value)) === next) return;
-      const clearKeys = [...new Set((v.clearBindings ?? []).filter(target => target.key !== b.key && target.toolId === b.toolId && target.mode === "user" && target.editable && target.active && !target.field.required).map(target => target.key))];
+      const clearKeys = [...new Set((v.clearBindings ?? []).filter(target => (!v.compatibleClearValues || !target.value || !v.compatibleClearValues[next ?? ""]?.[target.key]?.includes(String(target.value))) && target.key !== b.key && target.toolId === b.toolId && target.mode === "user" && target.editable && target.active && !target.field.required).map(target => target.key))];
       change(b.key, next, clearKeys);
     }}>
       <option value="">{v.hint || "Все"}</option>{v.options?.map(option => <option key={option.value} value={option.value}>{option.label}</option>)}
@@ -108,7 +108,7 @@ function CandidateTable({ view: v, disabled, showOrigin, change }: { view: View;
     {b.value != null && <button type="button" disabled={blocked} onClick={() => change(b.key, null)}>Сбросить выбор</button>}
     {v.hint && <p>{v.hint}</p>}
     {!!v.rows?.length && <div className="nt-candidate-scroll"><table><thead><tr><th scope="col">Выбор</th>{v.columnsSpec?.map(column => <th scope="col" key={column.key}>{column.label}{column.unit && <small>{column.unit}</small>}</th>)}</tr></thead><tbody>{v.rows.map(row => <tr key={String(row.variantId)} className={state.variantId === row.variantId ? state.stale ? "nt-candidate-stale" : "nt-candidate-selected" : ""}>
-      <td><input type="radio" name={group} aria-label={"Выбрать " + String(row.execution || row.model || row.variantId) + " · " + row.variantId} checked={state.variantId === row.variantId} disabled={blocked || row.selectable !== true} onChange={() => change(b.key, { variantId: row.variantId, snapshotId: state.snapshotId, requestKey: state.requestKey })}/>{row.selectable !== true && <small>{String(row.pointIssue || "Нет подтверждённой рабочей точки")}</small>}</td>
+      <td><input type="radio" name={group} aria-label={"Выбрать " + String(row.execution || row.model || row.variantId) + " · " + row.variantId} checked={state.valid && state.variantId === row.variantId} disabled={blocked || row.selectable !== true} onChange={() => change(b.key, { variantId: row.variantId, snapshotId: state.snapshotId, requestKey: state.requestKey })}/>{row.selectable !== true && <small>{String(row.pointIssue || "Нет подтверждённой рабочей точки")}</small>}</td>
       {v.columnsSpec?.map(column => <td key={column.key}>{cellValue(row[column.key])}</td>)}
     </tr>)}</tbody></table></div>}
     {showOrigin && <small className="nt-origin">{b.origin}</small>}
@@ -186,7 +186,7 @@ export function ToolForm({
     };
     const classes = selected && (selected === v.node || selected === v.binding?.node) ? "nt-selected" : "";
     if (["table", "select", "pump-card", "hydraulic-chart", "pump-detail", "dn-calculator", "collector-constructor", "specification"].includes(v.kind)) return <div key={v.node} data-view-node={v.node} data-binding-node={v.binding?.node} className={classes} role={select ? "button" : undefined} tabIndex={select ? 0 : undefined} onKeyDown={event=>{if(select && event.target===event.currentTarget && event.key==="Enter")select(v.node);}} onClick={choose}>
-      {v.kind === "dn-calculator" ? <DnCalculatorView view={v} disabled={blocked} change={change}/> : v.kind === "collector-constructor" ? <CollectorNodeView view={v} disabled={blocked} change={change} writes={writes}/> : v.kind === "specification" ? <NodeSpecificationView view={v} disabled={blocked} change={change} writes={writes}/> : v.kind === "table" ? <CandidateTable view={v} disabled={blocked} showOrigin={showOrigin} change={change}/> : v.kind === "select" ? <DynamicSelect view={v} disabled={blocked} showOrigin={showOrigin} change={change}/> : v.kind === "hydraulic-chart" ? <HydraulicChartView view={v} disabled={blocked} change={change} writes={writes}/> : v.kind === "pump-detail" ? <PumpDetailCard view={v}/> : <PumpCard view={v}/>}
+      {v.kind === "dn-calculator" ? <DnCalculatorView view={v} disabled={blocked} change={change}/> : v.kind === "collector-constructor" ? <CollectorNodeView view={v} disabled={blocked} change={change} writes={writes}/> : v.kind === "specification" ? <NodeSpecificationView view={v} disabled={blocked} change={change} writes={writes}/> : v.kind === "table" ? <CandidateTable view={v} disabled={blocked} showOrigin={showOrigin} change={change}/> : v.kind === "select" ? <DynamicSelect view={v} disabled={blocked} showOrigin={showOrigin} change={change}/> : v.kind === "hydraulic-chart" ? <HydraulicChartView view={v} disabled={blocked} change={change} writes={writes}/> : v.kind === "pump-detail" ? <PumpDetailCard view={v} showOrigin={showOrigin}/> : <PumpCard view={v}/>}
     </div>;
     if (v.kind === "field") {
       if (!v.binding) return <p role="alert">Подключите параметр поля</p>;

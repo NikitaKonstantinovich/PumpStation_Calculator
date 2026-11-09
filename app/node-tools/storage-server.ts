@@ -7,7 +7,7 @@ import { currentBasePublication, resolveBaseVersions } from "../base-values-serv
 import { defaultProjectSettings } from "../default-settings";
 import { evaluatePlan, evaluateProduct, canEditParameter } from "./runtime";
 import { deriveTools } from "./product";
-import { productContexts, ownBindings, usesCatalog, invalidSelections } from "./product-state";
+import { productContexts, ownBindings, usesCatalog, invalidSelections, invalidateInactiveSelections } from "./product-state";
 import { catalogSnapshot } from "./catalog-server";
 import { stationCatalogSnapshot } from "./station-catalog-server";
 import { usesStationCatalog } from "./station-catalog";
@@ -240,8 +240,9 @@ export async function verifyWorkspace(next: WorkspaceData | undefined, prior: Wo
     const program = await toolProgram(next.product.version);
     if (!program.product) throw new ToolError("Выбрана публикация без общего графа продукта");
     const base = await toolDefaults(next.product.baseVersions),
-      sources = await toolResources(program, next.product.sourceVersions, next.product.baseVersions),
-      contexts = productContexts(program, next, base.defaults, role, sources.resources);
+      sources = await toolResources(program, next.product.sourceVersions, next.product.baseVersions);
+    next.tools = invalidateInactiveSelections(program, next, base.defaults, role, sources.resources).tools;
+    const contexts = productContexts(program, next, base.defaults, role, sources.resources);
     if (usesCatalog(program) && !next.product.sourceVersions?.pump_catalog_v2) throw new ToolError("Закрепите снимок нового каталога");
     if (usesStationCatalog(program) && !next.product.sourceVersions?.station_catalog) throw new ToolError("Закрепите справочники комплектации");
     for (const tool of program.tools.filter(t => t.enabled !== false)) {

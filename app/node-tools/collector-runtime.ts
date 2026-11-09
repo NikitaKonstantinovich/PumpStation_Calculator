@@ -22,11 +22,11 @@ const issue = (step: Step, message: string, key = ""): Diagnostic => ({ key, nod
 const empty = (issues: Diagnostic[] = []): CollectorNodeResult => ({ project: null, pumps: [], entity: createCollectors(), catalog: null, issues });
 const canonical = (value: unknown): string => JSON.stringify(value, (_key, child) => child && typeof child === "object" && !Array.isArray(child) ? Object.fromEntries(Object.entries(child).sort(([a], [b]) => a.localeCompare(b))) : child);
 const physicalIdentity = (c: CollectorConfiguration): string => canonical({ type: c.type, sectionBreaks: c.sectionBreaks ?? 0, dn: c.dn, pn: c.pn, material: c.material, connection: c.connection, eccentric: c.eccentric, circuits: [c.primary, c.secondary].filter(Boolean).map(v => ({ dn: v!.dn, pn: v!.pn, connection: v!.connection, spacing: v!.spacing, count: (v!.working ?? 0) + (v!.reserve ?? 0) })), ports: c.instrumentPorts === undefined ? "legacy" : collectorInstrumentPortIdentity(c.instrumentPorts) });
-function source(value: unknown): { project: ProjectConfig; pumps: Pump[]; issues: Diagnostic[] } | null {
+function source(value: unknown): { project: ProjectConfig; pumps: Pump[]; issues: Diagnostic[]; spacing?: import("./dn-nodes").DnResult["spacing"] } | null {
   const v = object(value), project = v.project as ProjectConfig | undefined;
   if (v.context && object(v.context).status !== "ready") return null;
   if (!project?.entities || !project.station || !project.entities["station-settings"] || !project.entities["station-dn"] || !project.entities["system-input"] || !project.entities["system-input-2"]) return null;
-  return { project, pumps: Array.isArray(v.pumps) ? v.pumps as Pump[] : [], issues: Array.isArray(v.issues) ? v.issues as Diagnostic[] : [] };
+  return { project, pumps: Array.isArray(v.pumps) ? v.pumps as Pump[] : [], issues: Array.isArray(v.issues) ? v.issues as Diagnostic[] : [], spacing: v.spacing as import("./dn-nodes").DnResult["spacing"] };
 }
 function catalog(value: unknown): CollectorCatalog | null {
   const c = value as CollectorCatalog | null;
@@ -56,7 +56,7 @@ function state(value: unknown): CollectorsEntity {
 function recommendations(step: Step, value: unknown): CollectorRecommendations {
   const dn = source(value);
   if (!dn) return { project: null, pumps: [], recommendations: null, issues: [issue(step, "Подключите результат инструмента «Расчёт DN»")] };
-  return { ...dn, recommendations: { suction: coreCollectorRecommendation(dn.project, "suction", dn.pumps), discharge: coreCollectorRecommendation(dn.project, "discharge", dn.pumps) } };
+  return { ...dn, recommendations: { suction: coreCollectorRecommendation(dn.project, "suction", dn.pumps, dn.spacing), discharge: coreCollectorRecommendation(dn.project, "discharge", dn.pumps, dn.spacing) } };
 }
 function resolve(step: Step, values: Values): CollectorNodeResult {
   const r = values.recommendations as CollectorRecommendations | null;

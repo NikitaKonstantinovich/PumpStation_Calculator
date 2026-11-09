@@ -1,6 +1,7 @@
 "use client";
+import { useAppNavigationGuard } from "../app-navigation";
 
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useState } from "react";
 import { betaOperations } from "./profile";
 import { Canvas, type Focus } from "./canvas";
 import { rowIdentity, type RowHistory } from "./trial-trace";
@@ -115,15 +116,11 @@ type Props = {
   project: ProjectConfig;
   pumps: Pump[];
   back: () => void;
-  openMain?: () => void;
-  navigation?: ReactNode;
 };
 export function EngineeringEditor({
   project,
   pumps,
   back,
-  openMain,
-  navigation
 }: Props) {
   const [remote, setRemote] = useState<EditorState | null>(null),
     [doc, setDoc] = useState<Document | null>(null),
@@ -172,6 +169,7 @@ export function EngineeringEditor({
     node = graph?.nodes.find(n => n.id === selected),
     type = doc?.types.find(t => t.id === node?.type);
   const dirty = !!doc && doc !== remote?.draft;
+  useAppNavigationGuard(dirty);
   function accept(state: EditorState) {
     setRemote(state);
     setDoc(state.draft);
@@ -549,14 +547,8 @@ export function EngineeringEditor({
   };
   const filtered = (s: string) => s.toLocaleLowerCase().includes(search.trim().toLocaleLowerCase());
   return <main className="gn-editor" aria-busy={busy}>
-    <header>{openMain && <button aria-label="Открыть меню" onClick={openMain}>☰</button>}<button aria-label="Вернуться в рабочее пространство" onClick={shellBack}>←</button><h1>Geometry Nodes</h1><span className="gn-revision" title={state.active}>Черновик {state.revision}{dirty ? " · изменён" : ""}</span><div className="gn-actions"><button disabled={busy} onClick={() => save("save")}>Сохранить</button><button disabled={busy} className="gn-primary" onClick={review}>Опубликовать</button><button onClick={() => setProps(!props)} aria-expanded={props}>☰ Свойства</button></div></header>
-    {navigation && <div onClickCapture={e => {
-      const link = (e.target as Element).closest(".sidebar__link,.sidebar__footer");
-      if (dirty && link && !window.confirm("При переходе несохранённые изменения могут быть потеряны. Продолжить?")) {
-        e.preventDefault();
-        e.stopPropagation();
-      }
-    }}>{navigation}</div>}
+    <header><button aria-label="Вернуться в рабочее пространство" onClick={shellBack}>←</button><h1>Geometry Nodes</h1><span className="gn-revision" title={state.active}>Черновик {state.revision}{dirty ? " · изменён" : ""}</span><div className="gn-actions"><button disabled={busy} onClick={() => save("save")}>Сохранить</button><button disabled={busy} className="gn-primary" onClick={review}>Опубликовать</button><button onClick={() => setProps(!props)} aria-expanded={props}>☰ Свойства</button></div></header>
+
     <div className="gn-toolbar"><strong>Расчёт насосной установки</strong><span className="gn-location">{id === ROOT ? "Станция" : g.name}</span><button onClick={() => setPack(true)}>Собрать Instrument</button>
     <button onClick={() => setLibrary(!library)}>＋ Библиотека</button><button disabled={!history.length || busy} onClick={() => {
         setDoc(history.at(-1)!);

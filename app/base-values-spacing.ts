@@ -38,13 +38,13 @@ export function availableSpacingSeries(rules: SpacingRule[], catalog: Record<str
     .sort((a,b) => a.type.localeCompare(b.type) || a.manufacturer.localeCompare(b.manufacturer,"ru") || a.series.localeCompare(b.series,"ru",{numeric:true}) || (a.nominalFlow??a.inletDn??0)-(b.nominalFlow??b.inletDn??0) || (a.outletDn??0)-(b.outletDn??0));
 }
 
-export function createSpacingRule(key: string, rules: SpacingRule[], input: {spacing: number; radius?: number | null; source?: string}, catalog: Record<string,SpacingPumpMetadata> = pumpMetadata): SpacingRule {
+export function createSpacingRule(key: string, rules: SpacingRule[], input: {spacing: number; radius?: number | null; source?: string}, catalog: Record<string,SpacingPumpMetadata> = pumpMetadata, policy = {minimum:400,increment:50,gap:150}): SpacingRule {
   const series = availableSpacingSeries(rules,catalog).find(s => s.key === key);
   if (!series) throw new Error("Серия отсутствует в актуальном каталоге или для неё уже есть правило.");
-  if (!positive(input.spacing) || input.spacing < 400 || input.spacing % 50 !== 0) throw new Error("Межосевое расстояние — от 400 мм с шагом 50 мм.");
+  if (!positive(input.spacing) || input.spacing < policy.minimum || input.spacing % policy.increment !== 0) throw new Error(`Межосевое расстояние — от ${policy.minimum} мм с шагом ${policy.increment} мм.`);
   const radius = input.radius ?? null, source = input.source?.trim() ?? "";
   if (radius !== null && !positive(radius)) throw new Error("Укажите положительный вылет от оси насоса.");
-  if (radius !== null && input.spacing-2*radius < 150) throw new Error("Свободный зазор между насосами должен быть не менее 150 мм.");
+  if (radius !== null && input.spacing-2*radius < policy.gap) throw new Error(`Свободный зазор между насосами должен быть не менее ${policy.gap} мм.`);
   if ((radius !== null) !== Boolean(source)) throw new Error("Для подтверждения заполните и вылет от оси, и источник размеров.");
   return {id:crypto.randomUUID(),manufacturer:series.manufacturer,type:series.type,series:series.series,nominalFlow:series.nominalFlow,inletDn:series.inletDn,outletDn:series.outletDn,
     modelId:"",modelIds:[...series.modelIds],powerMin:null,powerMax:null,execution:`${series.manufacturer} ${series.series}, ${spacingNominal(series)}`,

@@ -50,7 +50,7 @@ export function migrateProduct(program: ToolProgram, previous: WorkspaceData | u
   const inactive = Object.keys(previous?.tools ?? {}).filter(id => !program.tools.some(t => t.id === id && t.enabled !== false));
   if (inactive.length) messages.push("Состояние отключённых или удалённых инструментов сохранено в архиве проекта · " + inactive.join(", "));
   return {
-    data: {
+    data: invalidateInactiveSelections(program, {
       schema: 1 as const,
       tools,
       product: {
@@ -58,7 +58,7 @@ export function migrateProduct(program: ToolProgram, previous: WorkspaceData | u
         baseVersions,
         sourceVersions
       }
-    },
+    }, defaults, role, resources),
     messages
   };
 }
@@ -80,7 +80,37 @@ export function invalidSelections(result: Evaluation, toolId: string, values: Va
         s = trace?.outputs.selection as Values | undefined;
       return bound?.node === b.node && bound.key === b.key && s?.valid === true && s.bindingKey === b.key && s.variantId === proof.variantId && s.snapshotId === proof.snapshotId && s.requestKey === proof.requestKey;
     });
-    if (!valid && JSON.stringify(prior?.[b.key]) !== JSON.stringify(values[b.key])) errors.push("Выбранное исполнение не подтверждено текущими условиями и снимком каталога · " + b.field.name);
+    const suspended = plan.steps.some(s => s.id.startsWith(toolId + "/") && s.operation === "circuit.guard" && result.trace[s.id]?.inputs.active === false);
+    const revoked = suspended && JSON.stringify(suspendedProof(prior?.[b.key])) === JSON.stringify(values[b.key]);
+    if (!valid && !revoked && JSON.stringify(prior?.[b.key]) !== JSON.stringify(values[b.key])) errors.push("Выбранное исполнение не подтверждено текущими условиями и снимком каталога · " + b.field.name);
   }
   return errors;
+}
+
+/** Disable invalidates only the proof; filters and all other values remain intact. */
+export function suspendedProof(value: unknown): unknown {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return value;
+  const proof = value as Values;
+  return typeof proof.requestKey === "string" && !proof.requestKey.startsWith("inactive:") ? { ...proof, requestKey: "inactive:" + proof.requestKey } : value;
+}
+export function invalidateInactiveContexts(program: ToolProgram, contexts: Record<string, ToolContext>): Record<string, ToolContext> {
+  let next = contexts;
+  for (const tool of program.tools) {
+    const plan = program.plans[tool.id];
+    if (!plan?.steps.some(s => s.id.startsWith(tool.id + "/") && s.operation === "circuit.guard")) continue;
+    let result: Evaluation;
+    try { result = evaluateProduct(program, tool.id, contexts); } catch { continue; }
+    if (!plan.steps.some(s => s.id.startsWith(tool.id + "/") && s.operation === "circuit.guard" && result.trace[s.id]?.inputs.active === false)) continue;
+    for (const b of ownBindings(result, tool.id)) {
+      if (b.field.meaning !== "pumpSelectionProof") continue;
+      const old = next[tool.id]?.values[b.key], value = suspendedProof(old);
+      if (value !== old) next = { ...next, [tool.id]: { ...next[tool.id], values: { ...next[tool.id].values, [b.key]: value } } };
+    }
+  }
+  return next;
+}
+export function invalidateInactiveSelections(program: ToolProgram, data: WorkspaceData, defaults: Values, role: UserRole, resources?: ToolContext["resources"]): WorkspaceData {
+  const before = productContexts(program, data, defaults, role, resources), after = invalidateInactiveContexts(program, before);
+  if (after === before) return data;
+  return { ...data, tools: Object.fromEntries(Object.entries(data.tools).map(([id, saved]) => [id, after[id] && after[id] !== before[id] ? { ...saved, values: after[id].values } : saved])) };
 }

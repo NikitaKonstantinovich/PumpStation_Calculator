@@ -1,3 +1,4 @@
+import { secondaryCircuitEnabled } from "./circuit-nodes";
 import type { Step } from "../engineering/engine";
 import { withEvaluationProgram } from "../engineering/runtime";
 import type { AppliedBaseValues } from "../base-values";
@@ -17,7 +18,7 @@ export const withDnPrimitives = <T,>(run: () => T): T => withEvaluationProgram(p
 const record = (value: unknown): Values => value && typeof value === "object" && !Array.isArray(value) ? value as Values : {};
 const finite = (value: unknown): value is number => typeof value === "number" && Number.isFinite(value);
 const positive = (value: unknown): value is number => finite(value) && value > 0;
-export const dnSecondaryEnabled = (settings: SettingsEntity) => settings.stationType === "combined" || settings.stationType === "fire" && settings.jockeyPump;
+export const dnSecondaryEnabled = (settings: SettingsEntity) => secondaryCircuitEnabled(settings);
 export function defaultDnOverrides(): DnEntity {
   return { kind: "dn", suctionCollectorDn: null, dischargeCollectorDn: null, suctionValveDn: null, dischargeValveDn: null, collectorMaterial: null, connectionType: null, pn: null, suctionValveType: null, dischargeValveType: null, secondarySuctionCollectorDn: null, secondaryDischargeCollectorDn: null, secondarySuctionValveDn: null, secondaryDischargeValveDn: null, secondaryConnectionType: null, secondaryPn: null, secondarySuctionValveType: null, secondaryDischargeValveType: null };
 }
@@ -45,7 +46,7 @@ export function dnSelectedPump(value: unknown, selection: unknown, context: Tool
   if (state.valid !== true || state.stale === true) return { message: typeof state.message === "string" && state.message || "Выберите и подтвердите насос в подборе насосов." };
   const snapshot = context.resources?.pump_catalog_v2, canonical = snapshot?.items.find(row => row.variantId === item.variantId);
   if (!snapshot || !canonical || snapshot.id !== state.snapshotId || !state.requestKey || item.variantId !== item.pump?.id || state.variantId !== item.variantId || state.modelId !== item.modelId || state.curveSetId !== item.curveSetId || canonical.modelId !== item.modelId || canonical.curveSetId !== item.curveSetId || canonical.frequencyHz !== item.frequencyHz || JSON.stringify(canonical.pump) !== JSON.stringify(item.pump)) return { message: "Исполнение или снимок каталога не соответствует подтверждённому выбору. Подтвердите насос заново." };
-  return { pump: canonical.pump };
+  return { pump: { ...canonical.pump, spacingSnapshotId: snapshot.id } };
 }
 /** Source data only. Unknown connections remain unknown; no legacy nozzle index is read. */
 export function dnSourcePort(pump: Pump | undefined, side: "inlet" | "outlet"): PumpPortData | null {
@@ -117,7 +118,7 @@ export function buildDnResult(context: DnContext, primary: DnCircuit | null, sec
 export function executeDnOperation(step: Step, values: Values, context: ToolContext): Values | undefined {
   if (step.operation === "station.dnContext") { const result = buildDnContext(values, context); return { context: result, issues: result.warnings.map(message => ({ key: "", node: step.id, message, severity: "warning" })) }; }
   if (step.operation === "station.dnCircuit") return { circuit: values.context ? calculateDnCircuit(values.context as DnContext, values.secondary === true) : null };
-  if (step.operation === "station.dnResult") { if (!values.context) return { value: null, issues: [{ key: "context", node: step.id, message: "Подключите исходные данные DN.", severity: "error" }] }; const result = buildDnResult(values.context as DnContext, values.primary as DnCircuit | null ?? null, values.secondary as DnCircuit | null ?? null, step.id); return { value: result, issues: result.issues }; }
+  if (step.operation === "station.dnResult") { if (!values.context) return { value: null, issues: [{ key: "context", node: step.id, message: "Подключите исходные данные DN.", severity: "error" }] }; const result = buildDnResult(values.context as DnContext, values.primary as DnCircuit | null ?? null, values.secondary as DnCircuit | null ?? null, step.id); result.spacing = { primary: values.primarySpacing as import("../pump-spacing").SpacingResult | undefined, secondary: values.secondarySpacing as import("../pump-spacing").SpacingResult | undefined }; return { value: result, issues: result.issues }; }
   if (step.operation === "ui.dnCalculator") return { value: { kind: "dn-calculator", node: step.id, label: "Расчёт DN", dn: values.data as DnResult | undefined, binding: values.binding as ParameterBinding | undefined } as View };
   return undefined;
 }

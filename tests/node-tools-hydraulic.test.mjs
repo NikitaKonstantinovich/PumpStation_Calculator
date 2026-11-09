@@ -88,3 +88,28 @@ test("point editing is based on explicit unambiguous source bindings with the co
   assert.deepEqual(run("ui.chartPointBindings", { ui: { ...ui, children: [...ui.children, { kind: "field", binding: { ...flow, key: "secondary.flowRate", node: "other" } }] } }), { flowBinding: null, headBinding: null });
   assert.deepEqual(run("ui.chartPointBindings", { ui: { ...ui, children: [{ kind: "field", binding: { ...flow, field: { ...flow.field, unit: "л/с" } } }, ui.children[1]] } }), { flowBinding: null, headBinding: null });
 });
+
+
+test("card consumes the common intersection with identity, conditions and bounded auxiliary curves", async () => {
+  const { operatingPointSection } = await loadTs(new URL('../app/node-tools/pump-operating-point.ts',import.meta.url));
+  const exact = {...state,node:'selection/check',request};
+  const richer=structuredClone(item);
+  richer.pump.efficiencyCurve=[[0,40],[10,70],[20,40]];
+  richer.pump.powerCurve=[[0,1],[10,2],[20,3]];
+  richer.pump.npshCurve=[[0,1],[5,2]];
+  const ctx={...context,resources:{pump_catalog_v2:{...snapshot,items:[richer]}}};
+  const m=model({item:richer,selection:exact},ctx);
+  const result=run('pump.chartPoint',{model:m});
+  assert.deepEqual(result.details.point,result.point);
+  assert.deepEqual(result.details.metrics,{efficiency:70,power:2,npshr:null});
+  assert(operatingPointSection(result.details,richer,exact).rows.some(r=>r.key==='actualHead'&&r.value==='20 м'));
+  for(const contextPatch of [{selectionNode:'other-contour/check'},{variantId:'other'},{snapshotId:'other'},{sourceFrequencyHz:60},{request:{...request,head:21}},{request:{...request,contour:'secondary'}},{request:null}]) {
+    const rejected=operatingPointSection({...result.details,context:{...result.details.context,...contextPatch}},richer,exact);
+    assert.equal(rejected.rows.length,0); assert.match(rejected.note,/другому|устаревшим/);
+  }
+  const frequency={enabled:true,nominalHz:50,frequencyHz:40,showNominal:true,pumpId:item.variantId};
+  const adjusted=run('pump.chartPoint',{model:model({item:richer,selection:exact,frequency},ctx)}).details;
+  assert.equal(adjusted.context.frequencyHz,40); assert.equal(adjusted.metrics.npshr,null);
+  assert.notDeepEqual(adjusted.point,result.point);
+  assert.equal(operatingPointSection(adjusted,richer,exact).rows.find(r=>r.key==='workingFrequency').value,'40 Гц');
+});

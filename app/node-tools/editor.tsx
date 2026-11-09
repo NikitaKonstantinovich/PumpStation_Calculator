@@ -1,6 +1,11 @@
 "use client";
+import { useAppNavigationGuard } from "../app-navigation";
 
-import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { addSecondaryTools } from "./secondary-tools";
+import { invalidateInactiveContexts } from "./product-state";
+import { CARD_SECTIONS, CARD_MAIN_FIELDS, cardPresentation } from "./pump-card-presentation";
+
+import { useEffect, useMemo, useState } from "react";
 import { Canvas, type Focus } from "../engineering/canvas";
 import { layout, type Address } from "../engineering/canvas-layout";
 import { usesInStation } from "../engineering/uses";
@@ -68,13 +73,9 @@ const uuid = () => crypto.randomUUID().replaceAll("-", "").slice(0, 12);
 export function ToolEditor({
   project,
   back,
-  openMain,
-  navigation
 }: {
   project: ProjectConfig;
   back: () => void;
-  openMain: () => void;
-  navigation: ReactNode;
 }) {
   const [remote, setRemote] = useState<Remote | null>(null),
     [doc, setDoc] = useState<ToolDocument | null>(null),
@@ -128,7 +129,8 @@ export function ToolEditor({
       options: ""
     });
   const [metadata, setMetadata] = useState(false);
-  const [template, setTemplate] = useState<null | {kind:"hydraulic"|"card"|StationToolKind;selectionId:string;settingsId:string;secondarySelectionId?:string;dnId?:string;collectorsId?:string}>(null);
+  const [publishPrompt, setPublishPrompt] = useState(false);
+  const [template, setTemplate] = useState<null | {kind:"hydraulic"|"card"|"secondary"|StationToolKind;selectionId:string;settingsId:string;secondarySelectionId?:string;dnId?:string;collectorsId?:string}>(null);
   const [dataset, setDataset] = useState<"preview" | "saved" | "test">("preview");
   const [role, setRole] = useState<UserRole>("pro"),
     [sessionRole, setSessionRole] = useState<UserRole>("admin");
@@ -162,6 +164,7 @@ export function ToolEditor({
     node = graph?.nodes.find(n => n.id === at.node),
     type = doc?.types.find(t => t.id === node?.type);
   const dirty = !!doc && doc !== remote?.draft;
+  useAppNavigationGuard(dirty);
   function accept(next: Remote) {
     const draft = prepareDocument(next.draft);
     setRemote({
@@ -204,6 +207,7 @@ export function ToolEditor({
     const escape = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
         setTemplate(null);
+        setPublishPrompt(false);
         setTransfer(null);
         setMenu(null);
         setLibrary(false);
@@ -215,6 +219,14 @@ export function ToolEditor({
     window.addEventListener("keydown", escape);
     return () => window.removeEventListener("keydown", escape);
   }, []);
+  function changePreview(next: Record<string, Values>) {
+    if (!doc) return;
+    const program = compileTools(doc, "preview");
+    const contexts = Object.fromEntries(program.tools.map(t => [t.id, { values: next[t.id] ?? {}, defaults, role, resources: { ...(catalog ? { pump_catalog_v2: catalog } : {}), ...(stationCatalog ? { station_catalog: stationCatalog } : {}) } }]));
+    const normalized = invalidateInactiveContexts(program, contexts);
+    const data = Object.fromEntries(Object.entries(normalized).map(([id, c]) => [id, c.values]));
+    setToolValues(data); setValues(data[toolId] ?? {});
+  }
   const stored = project.workspace2?.tools[toolId];
   useEffect(() => {
     let active = true;
@@ -581,7 +593,7 @@ export function ToolEditor({
   }
   async function action(action: "save" | "publish" | "rollback", version?: string) {
     if (!doc || !remote) return;
-    if (action !== "save" && !window.confirm(action === "publish" ? "Проверить и опубликовать согласованную версию инструментов?" : "Восстановить публикацию и её черновик?")) return;
+    if (action === "rollback" && !window.confirm("Восстановить публикацию и её черновик?")) return;
     setBusy(true);
     setError("");
     try {
@@ -678,9 +690,9 @@ export function ToolEditor({
     });
   }
   if (!doc || !remote) return <main className="gn-editor"><header><button onClick={back}>←</button><h1>Нодовый редактор</h1></header><p role="status">{error || "Загрузка определений…"}</p></main>;
-  return <main className="gn-editor nt-editor" aria-busy={busy}><header><button aria-label="Открыть меню" onClick={openMain}>☰</button><button onClick={() => {
+  return <main className="gn-editor nt-editor" aria-busy={busy}><header><button onClick={() => {
         if (!dirty || window.confirm("Выйти с несохранённым черновиком?")) back();
-      }}>←</button><h1>Нодовый редактор</h1><small>Workspace 2 · черновик {remote.revision}{dirty ? " · изменён" : ""}</small><div className="gn-actions"><button disabled={busy} onClick={() => action("save")}>Сохранить</button><button disabled={busy} onClick={() => action("publish")}>Опубликовать</button><button onClick={() => setProps(!props)}>☰ Свойства</button></div></header>{navigation}
+      }}>←</button><h1>Нодовый редактор</h1><small>Workspace 2 · черновик {remote.revision}{dirty ? " · изменён" : ""}</small><div className="gn-actions"><button disabled={busy} onClick={() => action("save")}>Сохранить</button><button disabled={busy} onClick={() => setPublishPrompt(true)}>Опубликовать</button><button onClick={() => setProps(!props)}>☰ Свойства</button></div></header>
     <div className="gn-toolbar"><select aria-label="Инструмент" value={toolId} onChange={e => {
         const t = tools.find(t => t.id === e.target.value)!;
         navigate({
@@ -802,7 +814,7 @@ export function ToolEditor({
             if (selected) setToolId(selected.id);
             navigate(address, base);
           } else navigate(address);
-        }} /> : <><NodeProperties graph={graph} node={node} type={type} update={updateNode} />{type.operation === "field" && <><label><input type="checkbox" aria-label="Показывать в форме" checked={node.values.visible !== false} onChange={e => updateNode({
+        }} /> : <><NodeProperties graph={graph} node={node} type={type} update={updateNode} />{type.operation === "ui.pumpDetail" && <CardProperties graph={graph} node={node} update={updateNode}/>}{type.operation === "field" && <><label><input type="checkbox" aria-label="Показывать в форме" checked={node.values.visible !== false} onChange={e => updateNode({
                 values: {
                   ...node.values,
                   visible: e.target.checked
@@ -829,17 +841,12 @@ export function ToolEditor({
       {stationCatalogNeeded && <section><strong>Справочники комплектации</strong><p role="status">{stationCatalogLoading ? "Загрузка справочников…" : stationCatalogError ? (stationCatalog ? "Используется предыдущий снимок. " : "") + stationCatalogError : stationCatalog ? "Закреплён снимок " + stationCatalog.id.slice(0, 12) : "Не загружены"}</p><button type="button" disabled={stationCatalogLoading || dataset === "saved"} onClick={() => { setStationCatalogLoading(true); setStationCatalogError(""); loadStationCatalog(undefined, baseVersions).then(setStationCatalog).catch(e => setStationCatalogError(e.message)).finally(() => setStationCatalogLoading(false)); }}>Обновить справочники комплектации</button></section>}
       <label>Данные для просмотра<select aria-label="Данные для просмотра" value={dataset} onChange={e => setDataset(e.target.value as typeof dataset)}><option value="preview">Предпросмотр на тестовых значениях</option><option value="saved">Черновик на сохранённых входах проекта</option><option value="test">Результат последней тестовой пробы</option></select></label><p role="status">{dataStatus}</p><small>Граф · {dataset === "test" ? lastTest?.dataset.version + " / " + lastTest?.dataset.revision : "черновик " + remote.revision + (dirty ? " (изменён)" : "")} · роль {dataset === "test" ? lastTest?.dataset.role : dataset === "saved" ? sessionRole : role}{dataset !== "saved" ? " (симуляция)" : " (сессия)"}</small><details><summary>Версии источников</summary><DataTree value={dataset === "test" ? lastTest?.dataset.sourceVersions : {...(dataset === "saved" ? stored?.baseVersions ?? baseVersions : baseVersions), ...(catalog ? {pump_catalog_v2:catalog.id} : {}), ...(stationCatalog ? {station_catalog:stationCatalog.id} : {})}} label="Используемые версии источников" /></details>
       {dataset !== "saved" && <label>Роль тестовой симуляции<select aria-label="Роль тестовой симуляции" value={role} onChange={e => setRole(e.target.value as UserRole)}>{["base", "plus", "pro", "admin"].map(r => <option key={r}>{r}</option>)}</select></label>}{dataset === "test" && <button onClick={run}>Повторить пробу</button>}
-      {dataset !== "test" && trial.error ? <p role="alert">{trial.error}</p> : viewed ? <ToolForm view={viewed.view} issues={viewed.issues} readOnly={dataset !== "preview"} change={(key, value, clearKeys = []) => setValues(v => ({
-          ...v,
-          ...Object.fromEntries(clearKeys.map(key => [key, null])),
-          [key]: value
-        }))} writes={writes => {
+      {dataset !== "test" && trial.error ? <p role="alert">{trial.error}</p> : viewed ? <ToolForm view={viewed.view} issues={viewed.issues} readOnly={dataset !== "preview"} change={(key, value, clearKeys = []) => changePreview({ ...toolValues, [toolId]: { ...values, ...Object.fromEntries(clearKeys.map(key => [key, null])), [key]: value } })} writes={writes => {
           if (dataset !== "preview" || !viewed) return;
           try {
             const current = Object.fromEntries(tools.map(t => [t.id, t.id === toolId ? values : toolValues[t.id] ?? {}]));
             const next = applyParameterWrites(current, viewed.bindings, writes, toolId);
-            setToolValues(next);
-            setValues(next[toolId]);
+            changePreview(next);
             setError("");
           } catch(e) { setError((e as Error).message); }
         }} selected={selectedAddress} select={previewSelect} /> : <p>Нет результата для выбранного набора данных.</p>}
@@ -848,7 +855,7 @@ export function ToolEditor({
             try {
               const v = JSON.parse(e.target.value);
               if (!v || typeof v !== "object" || Array.isArray(v)) throw Error();
-              setValues(v);
+              changePreview({ ...toolValues, [toolId]: v });
               setError("");
             } catch {
               setError("Нужен JSON-объект входов");
@@ -927,18 +934,19 @@ export function ToolEditor({
             setError((e as Error).message);
           }
         }}>Создать параметр</button>{error && <p role="alert">{error}</p>}</section></div>}
+    {publishPrompt && <div className="gn-shade"><section className="gn-dialog" role="dialog" aria-modal="true" aria-label="Публикация инструментов"><header><h2>Публикация инструментов</h2><button onClick={() => setPublishPrompt(false)}>Отмена</button></header><p>Проверить и опубликовать согласованную версию инструментов?</p><p>Сохранённые проекты продолжат использовать закреплённые версии. Новая версия применяется в проекте отдельной командой.</p><button disabled={busy} onClick={() => { setPublishPrompt(false); void action("publish"); }}>Проверить и опубликовать</button></section></div>}
     {template && <div className="gn-shade"><section className="gn-dialog" role="dialog" aria-label="Готовый инструмент"><header><h2>Готовый инструмент</h2><button onClick={() => setTemplate(null)}>Закрыть</button></header>
-      <label>Инструмент<select value={template.kind} onChange={e => setTemplate({...template,kind:e.target.value as NonNullable<typeof template>["kind"]})}><option value="hydraulic">Гидравлическая кривая</option><option value="card">Карточка насоса</option><option value="dn">Расчёт DN</option><option value="collectors">Конструктор коллекторов</option><option value="specification">Спецификация</option></select></label>
+      <label>Инструмент<select value={template.kind} onChange={e => setTemplate({...template,kind:e.target.value as NonNullable<typeof template>["kind"]})}><option value="hydraulic">Гидравлическая кривая</option><option value="card">Карточка насоса</option><option value="dn">Расчёт DN</option><option value="collectors">Конструктор коллекторов</option><option value="specification">Спецификация</option><option value="secondary">Добавить инструменты второго контура</option></select></label>
       {["hydraulic", "card", "dn"].includes(template.kind) && <label>Источник выбранного насоса<select value={template.selectionId} onChange={e => setTemplate({...template,selectionId:e.target.value})}><option value="">Выберите инструмент подбора…</option>{visualizationSources(doc).selections.map(source=><option key={source.id} value={source.id}>{source.name}</option>)}</select></label>}
-      {["hydraulic", "dn"].includes(template.kind) && <label>Источник настроек проекта<select value={template.settingsId} onChange={e => setTemplate({...template,settingsId:e.target.value})}><option value="">{template.kind === "dn" ? "Выберите настройки проекта…" : "Без изменения рабочей точки на графике"}</option>{visualizationSources(doc).settings.map(source=><option key={source.id} value={source.id}>{source.name}</option>)}</select></label>}
+      {["hydraulic", "dn", "secondary"].includes(template.kind) && <label>Источник настроек проекта<select value={template.settingsId} onChange={e => setTemplate({...template,settingsId:e.target.value})}><option value="">{template.kind !== "hydraulic" ? "Выберите настройки проекта…" : "Без изменения рабочей точки на графике"}</option>{visualizationSources(doc).settings.map(source=><option key={source.id} value={source.id}>{source.name}</option>)}</select></label>}
       {template.kind === "dn" && <label>Подбор насоса второго контура<select value={template.secondarySelectionId ?? ""} onChange={e => setTemplate({...template,secondarySelectionId:e.target.value})}><option value="">Не подключён</option>{visualizationSources(doc).selections.filter(s => s.id !== template.selectionId).map(source=><option key={source.id} value={source.id}>{source.name}</option>)}</select></label>}
       {template.kind === "collectors" && <label>Источник расчёта DN<select value={template.dnId ?? ""} onChange={e => setTemplate({...template,dnId:e.target.value})}><option value="">Выберите расчёт DN…</option>{stationToolSources(doc).dn.map(source=><option key={source.id} value={source.id}>{source.name}</option>)}</select></label>}
       {template.kind === "specification" && <label>Источник коллекторов и параметров установки<select value={template.collectorsId ?? ""} onChange={e => setTemplate({...template,collectorsId:e.target.value})}><option value="">Выберите конструктор коллекторов…</option>{stationToolSources(doc).collectors.map(source=><option key={source.id} value={source.id}>{source.name}</option>)}</select></label>}
       <p>Создаётся отдельный инструмент на общем полотне с редактируемыми внутренними нодами и связями с выбранными источниками.</p>
       {error && <p role="alert">{error}</p>}
-      <button disabled={busy || (template.kind === "collectors" ? !template.dnId : template.kind === "specification" ? !template.collectorsId : !template.selectionId || template.kind === "dn" && !template.settingsId)} onClick={() => {
+      <button disabled={busy || (template.kind === "secondary" ? !template.settingsId : template.kind === "collectors" ? !template.dnId : template.kind === "specification" ? !template.collectorsId : !template.selectionId || template.kind === "dn" && !template.settingsId)} onClick={() => {
         try {
-          const added=template.kind === "hydraulic" || template.kind === "card" ? addVisualizationTool(doc,template.kind,{selectionId:template.selectionId,settingsId:template.settingsId||undefined}) : addStationTool(doc,template.kind,template);
+          const added=template.kind === "secondary" ? addSecondaryTools(doc, template.settingsId) : template.kind === "hydraulic" || template.kind === "card" ? addVisualizationTool(doc,template.kind,{selectionId:template.selectionId,settingsId:template.settingsId||undefined}) : addStationTool(doc,template.kind,template);
           change(added.document);
           setToolId(added.id);
           setValues({});
@@ -946,7 +954,7 @@ export function ToolEditor({
           setFocus({graph:added.document.product!.root,base:added.document.product!.root,path:[],node:added.id,serial:Date.now()});
           setTemplate(null);setProps(true);setPreview(true);
         } catch(e) { setError((e as Error).message); }
-      }}>Добавить инструмент</button>
+      }}>{template.kind === "secondary" ? "Добавить инструменты второго контура" : "Добавить инструмент"}</button>
     </section></div>}
     {metadata && tool && <div className="gn-shade"><section className="gn-dialog"><header><h2>Определение инструмента</h2><button onClick={() => setMetadata(false)}>Закрыть</button></header><p>Устойчивый ID · {tool.id}</p><label>Название<input value={tool.name} onChange={e => change(updateToolMetadata(doc, tool.id, {
             name: e.target.value
@@ -990,7 +998,7 @@ function NodeProperties({
   type: NodeType;
   update: (patch: Partial<GraphNode>) => void;
 }) {
-  const fields = type.fields.filter(f => f.direction !== "output" && !graph.edges.some(e => e.to === node.id && e.input === f.key) && !(type.operation === "field" && ["visible", "enabled", "showOrigin"].includes(f.key) || type.operation === "form" && f.key === "showOrigin") && !["object", "array", "reference"].includes(f.kind));
+  const fields = type.fields.filter(f => f.direction !== "output" && !graph.edges.some(e => e.to === node.id && e.input === f.key) && !(type.operation === "field" && ["visible", "enabled", "showOrigin"].includes(f.key) || type.operation === "form" && f.key === "showOrigin" || type.operation === "ui.pumpDetail" && f.key === "showPoint") && !["object", "array", "reference"].includes(f.kind));
   return <details open className="nt-settings"><summary>Настройки экземпляра</summary>{fields.map(f => {
       const value = Object.hasOwn(node.values, f.key) ? node.values[f.key] : f.initial;
       const set = (value: unknown) => update({
@@ -1026,6 +1034,14 @@ function NodeProperties({
       };
       return <ValueEditor key={f.key} field={editorField} value={value} label={names[f.key] ?? f.name} change={set} />;
     })}</details>;
+}
+function CardProperties({ graph, node, update }: { graph: Diagram; node: GraphNode; update: (patch: Partial<GraphNode>) => void }) {
+  const options = cardPresentation(node.values), linked = (key: string) => graph.edges.some(e => e.to === node.id && e.input === key);
+  const set = (key: string, value: unknown) => update({ values: { ...node.values, [key]: value } });
+  const move = (index: number, delta: number) => { const order = [...options.sectionOrder]; [order[index], order[index + delta]] = [order[index + delta], order[index]]; set("sectionOrder", order); };
+  return <><fieldset><legend>Основные поля карточки</legend>{Object.entries(CARD_MAIN_FIELDS).map(([key, name]) => <label key={key}><input type="checkbox" checked={options.mainFields.includes(key)} disabled={linked("mainFields")} onChange={e => set("mainFields", e.target.checked ? [...options.mainFields, key] : options.mainFields.filter(k => k !== key))}/>{name}</label>)}</fieldset>
+    <fieldset className="nt-card-order"><legend>Разделы карточки: видимость и порядок</legend>{options.sectionOrder.map((key, i) => <div key={key}><label><input type="checkbox" checked={!options.hiddenSections.includes(key)} disabled={linked("hiddenSections")} onChange={e => set("hiddenSections", e.target.checked ? options.hiddenSections.filter(k => k !== key) : [...options.hiddenSections, key])}/>{CARD_SECTIONS[key]}</label><button type="button" aria-label={"Поднять раздел «" + CARD_SECTIONS[key] + "»"} disabled={!i || linked("sectionOrder")} onClick={() => move(i, -1)}>↑</button><button type="button" aria-label={"Опустить раздел «" + CARD_SECTIONS[key] + "»"} disabled={i === options.sectionOrder.length - 1 || linked("sectionOrder")} onClick={() => move(i, 1)}>↓</button></div>)}</fieldset>
+  </>;
 }
 function OriginControl({
   graph,

@@ -5,6 +5,8 @@ import { MAX_WORKING_PUMPS } from "./pump-counts";
 
 export type PumpSortMode = "distance" | "price";
 export type PumpSelectionInput = {
+  /** Explicit node request scope; legacy station callers may omit it. */
+  contour?: "main" | "secondary";
   flowRate: number;
   head: number;
   staticHead: number;

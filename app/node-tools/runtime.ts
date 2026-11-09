@@ -1,3 +1,5 @@
+import { CIRCUIT_OPERATIONS, executeCircuitOperation, inactiveCircuitView } from "./circuit-nodes";
+import { SPACING_OPERATIONS, executeSpacingOperation } from "./spacing-nodes";
 import { runPlan, type Step, type Trace, type Plan } from "../engineering/engine";
 import { accepts, type Field } from "../engineering/schema";
 import type { Diagnostic, Evaluation, ParameterBinding, ToolContext, ToolProgram, Values, View } from "./schema";
@@ -16,7 +18,7 @@ import { executeCollectorOperation } from "./collector-runtime";
 import { SPECIFICATION_OPERATIONS } from "./specification-nodes";
 import { executeSpecificationOperation } from "./specification-runtime";
 import { canEditAllSettings, canEditProjectOptions } from "../user-types";
-export const OPERATIONS = ["source", "parameter", "object", "merge", "form", "section", "grid", "field", "condition", "message", "check", "save", "engineering.catalog", ...PUMP_OPERATIONS, ...HYDRAULIC_OPERATIONS, ...DETAIL_OPERATIONS, ...DN_OPERATIONS, ...COLLECTOR_OPERATIONS, ...SPECIFICATION_OPERATIONS] as const;
+export const OPERATIONS = ["source", "parameter", "object", "merge", "form", "section", "grid", "field", "condition", "message", "check", "save", "engineering.catalog", ...PUMP_OPERATIONS, ...HYDRAULIC_OPERATIONS, ...DETAIL_OPERATIONS, ...DN_OPERATIONS, ...COLLECTOR_OPERATIONS, ...SPECIFICATION_OPERATIONS, ...SPACING_OPERATIONS, ...CIRCUIT_OPERATIONS] as const;
 const list = (v: Values) => Object.keys(v).filter(k => /^child\d+$/.test(k)).sort((a, b) => Number(a.slice(5)) - Number(b.slice(5))).map(k => v[k]).filter(Boolean) as View[];
 export const canEditParameter = (role: ToolContext["role"], permission: ParameterBinding["permission"]) => permission === "input" || permission === "options" && canEditProjectOptions(role) || canEditAllSettings(role);
 /** Explicit modes evaluate only their real dependencies; old publications retain their contract. */
@@ -182,7 +184,7 @@ function execute(step: Step, v: Values, context: ToolContext): Values {
       };
     default:
       {
-        const result = executePumpOperation(step, v, context) ?? executeHydraulicOperation(step, v, context) ?? executeDetailOperation(step, v, context) ?? executeDnOperation(step, v, context) ?? executeStationCatalog(step, v, context) ?? executeCollectorOperation(step, v, context) ?? executeSpecificationOperation(step, v, context);
+        const result = executeCircuitOperation(step, v) ?? executeSpacingOperation(step, v) ?? executePumpOperation(step, v, context) ?? executeHydraulicOperation(step, v, context) ?? executeDetailOperation(step, v, context) ?? executeDnOperation(step, v, context) ?? executeStationCatalog(step, v, context) ?? executeCollectorOperation(step, v, context) ?? executeSpecificationOperation(step, v, context);
         if (result) return result;
         throw Error("Неизвестная операция ноды");
       }
@@ -415,7 +417,9 @@ function runProductPlan(plan: Plan, context: ToolContext, inputs: Values, contex
     running.add(token);
     const r = record(step.id),
       v: Values = {};
-    for (const f of step.fields) if (f.direction !== "output") v[f.key] = input(step, f.key);
+    // Resolve the guard before asking for any dependent calculation or catalog.
+    const inactive = step.operation === "circuit.guard" && input(step, "active") !== true;
+    for (const f of step.fields) if (f.direction !== "output" && (!inactive || f.key === "active")) v[f.key] = input(step, f.key);
     const values = execute(step, v, contextFor(step.id));
     if (values.binding && typeof values.binding === "object") (values.binding as ParameterBinding).toolId = step.id.split("/")[0];
     Object.assign(r.outputs, values);
@@ -434,7 +438,12 @@ function runProductPlan(plan: Plan, context: ToolContext, inputs: Values, contex
     if (!f) throw Error("Источник порта отсутствует · " + id + "." + key);
     const r = record(id);
     let value: unknown;
-    if (step.operation) {
+    if (step.operation === "circuit.guard") {
+      // A guard is lazy per output, so a DN dependency never evaluates the table UI.
+      const active = input(step, "active") === true;
+      value = active ? input(step, "in_" + key) : f.meaning === "view" ? inactiveCircuitView(step.id) : null;
+      r.sources[key] = active ? "Активный второй контур" : "Второй контур отключён";
+    } else if (step.operation) {
       operation(step);
       value = r.outputs[key];
     } else if (step.expressions[key]) {
@@ -459,6 +468,18 @@ function runProductPlan(plan: Plan, context: ToolContext, inputs: Values, contex
   const result = steps.get("result");
   if (!result) throw Error("Отсутствует результат продукта");
   for (const field of result.fields) input(result, field.key);
+  // Retain editable settings of a suspended tool without evaluating its algorithms.
+  // Only user parameters with trusted context and literal scope are eligible here.
+  const suspended = new Set(plan.steps.filter(s => s.operation === "circuit.guard" && trace[s.id]?.inputs.active === false).map(s => s.id.split("/")[0]));
+  for (const step of plan.steps) {
+    if (step.operation !== "parameter" || !suspended.has(step.id.split("/")[0]) || operated.has(step.id) || (step.parameter?.source?.mode ?? "user") !== "user") continue;
+    const dynamicScope = step.links.some(e => e.input === "scope");
+    if (dynamicScope) continue;
+    const own = contextFor(step.id);
+    const values = execute(step, { values: own.values, defaults: own.defaults, role: own.role, scope: step.values.scope, active: false }, own);
+    if (values.binding) (values.binding as ParameterBinding).toolId = step.id.split("/")[0];
+    Object.assign(record(step.id).outputs, values);
+  }
   return {
     value: record("result").inputs.value,
     trace,

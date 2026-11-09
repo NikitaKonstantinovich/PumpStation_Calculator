@@ -1,3 +1,4 @@
+import { connectPumpSpacing } from "./spacing-upgrade";
 import { makeField, type Diagram, type Field, type GraphNode, type NodeType } from "../engineering/schema";
 import { addProductTool, prepareDocument } from "./authoring";
 import { parameterType } from "./compiler";
@@ -132,5 +133,6 @@ export function addStationTool(document: ToolDocument, kind: StationToolKind, so
   graph.nodes.find(n => n.id === "form")!.values.showOrigin = false;
   syncInstrument(doc, graph);
   for (const { from, out, input } of links) nextRoot.edges.push({ from, out, to: added.id, input });
+  connectPumpSpacing(doc);
   return { document: doc, id: added.id, diagram: added.diagram };
 }

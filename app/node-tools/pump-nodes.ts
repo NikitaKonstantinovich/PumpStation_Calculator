@@ -15,6 +15,8 @@ export type SelectionState = {
   valid: boolean;
   stale: boolean;
   message: string;
+  request?: PumpSelectionInput | null;
+  purchasePriceRub?: number | null;
   modelId?: string;
   curveSetId?: string | null;
 };
@@ -190,7 +192,7 @@ export function pumpNodeTypes(): NodeType[] {
     max: 1000
   }, output(dataset()), output(records()), diagnostics()]);
   add("pump.options", "Варианты фильтра из каталога", "Производители, серии и типы формируются из текущего снимка. Необязательные тип и производитель сужают справочник; пустое значение означает «Все». Проверка Q/H здесь не выполняется.", [dataset("catalog", "Каталог"), enumeration("attribute", "Атрибут", ["manufacturer", "series", "type"], ["Производитель", "Серия", "Тип насоса"], "manufacturer"), text("type", "Тип насоса"), text("manufacturer", "Производитель"), output(optionsField())]);
-  add("ui.select", "Динамический список выбора", "Связывает строковый параметр с вариантами из каталога. Пустой выбор снимает фильтр. Явно подключённые зависимые пользовательские параметры сбрасываются вместе с изменением выбора.", [binding(), optionsField(), { ...binding(), key: "clear0", name: "Сбросить зависимый параметр 1" }, { ...binding(), key: "clear1", name: "Сбросить зависимый параметр 2" }, text("label", "Подпись"), text("emptyLabel", "Пустой вариант", "Все"), flag("showOrigin", "Показывать источник значения", true), view(), diagnostics()]);
+  add("ui.select", "Динамический список выбора", "Связывает строковый параметр с вариантами из каталога. Пустой выбор снимает фильтр. Явно подключённые зависимые пользовательские параметры сбрасываются вместе с изменением выбора.", [binding(), optionsField(), { ...binding(), key: "clear0", name: "Сбросить зависимый параметр 1" }, { ...binding(), key: "clear1", name: "Сбросить зависимый параметр 2" }, dataset("cascadeCatalog", "Каталог зависимых фильтров"), text("cascadeAttribute", "Зависимость: type или manufacturer"), text("cascadeType", "Действующий тип насоса"), text("label", "Подпись"), text("emptyLabel", "Пустой вариант", "Все"), flag("showOrigin", "Показывать источник значения", true), view(), diagnostics()]);
   add("pump.table", "Таблица кандидатов насосов", "Отображает результаты и записывает подтверждение выбранного исполнения в параметр. Пересчёт не выбирает строку сам.", [dataset("candidates", "Результаты подбора"), binding(), text("title", "Заголовок", "Результаты подбора"), enumeration("preset", "Колонки", ["short", "technical", "price", "custom"], ["Основные", "Технические", "Цена и отклонения", "Свой список"], "short"), text("customColumns", "Свои колонки через запятую", "model,manufacturer,series,power,headReservePercent,purchasePriceRub"), view(), diagnostics()]);
   add("pump.select", "Проверка выбранного исполнения", "Проверяет подтверждённые исполнение, снимок каталога и условия. При изменении условий старый выбор становится устаревшим.", [dataset("candidates", "Результаты подбора"), binding(), output(record("value", "Выбранное исполнение", "pumpCatalogItem")), output(record("selection", "Статус подтверждения", "pumpSelectionState")), output(flag("valid", "Выбор действителен")), diagnostics()]);
   add("pump.card", "Карточка выбранного насоса", "Показывает только подтверждённое исполнение и диагностику выбора.", [record("item", "Выбранное исполнение", "pumpCatalogItem"), record("selection", "Статус подтверждения", "pumpSelectionState"), view()]);

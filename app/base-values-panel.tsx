@@ -1,4 +1,5 @@
 "use client";
+import { useAppNavigationGuard } from "./app-navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { BASE_LABELS, BASE_SECTIONS, baseEqual, validateBaseValues, type BaseValues, type BaseSection, type BasePublication } from "./base-values";
 import { researchedThreadCuttingRates } from "./thread-cutting";
@@ -51,6 +52,7 @@ export function BaseValuesPanel({actor,onBack}:{actor:AccountUser;onBack:()=>voi
   useEffect(()=>{if(!dirty)return;const warn=(e:BeforeUnloadEvent)=>{e.preventDefault();e.returnValue="";};window.addEventListener("beforeunload",warn);return()=>window.removeEventListener("beforeunload",warn);},[dirty]);
   const errors=useMemo(()=>draft?validateBaseValues(draft):[],[draft]);
   const diff=useMemo(()=>state&&draft?diffRows(historical?.values??state.active.values,draft):[],[state,draft,historical]);
+  useAppNavigationGuard(dirty);
   if(actor.role!=="admin")return <main className="base-page"><h1>Доступ ограничен</h1><p>Базовые значения доступны только администратору.</p><button className="button" onClick={onBack}>Назад</button></main>;
   const close=()=>{if(!dirty||window.confirm("Есть несохранённые изменения. Закрыть редактор?"))onBack();};
   const patch=(change:(value:BaseValues)=>void)=>setDraft(current=>{if(!current)return current;const next=structuredClone(current);change(next);return next;});
@@ -73,7 +75,9 @@ export function BaseValuesPanel({actor,onBack}:{actor:AccountUser;onBack:()=>voi
     {section==="velocity"&&<section><h2>Скорости потока</h2><p>Границы DN включительно. Пустая верхняя граница означает отсутствие ограничения. Правила приложения используются для автоподбора и предупреждений; фактическая скорость коллектора считается по внутреннему диаметру трубы.</p><EditTable rows={draft.velocity as unknown as Row[]} columns={[{key:"fromDn",label:"DN от",type:"number",min:1,step:1},{key:"toDn",label:"DN до включительно",type:"number",nullable:true,min:1,step:1},{key:"limit",label:"Предел, м/с",type:"number",min:.01}]} onChange={(i,k,v)=>patch(d=>Object.assign(d.velocity[i],{[k]:v}))} onDelete={i=>patch(d=>{d.velocity.splice(i,1);})}/><button className="button" onClick={()=>patch(d=>{d.velocity.push({fromDn:251,toDn:null,limit:3});})}>Добавить диапазон</button></section>}
     {section==="painting"&&<section><h2>Окраска Ст20</h2><p>Версионируемые тарифы существующих записей каталога работ. Пустой тариф означает отсутствие цены.</p><EditTable rows={draft.painting.filter(matches) as unknown as Row[]} columns={[{key:"dn",label:"DN",readOnly:true},{key:"material",label:"Материал",readOnly:true},{key:"pricePerMeter",label:"Тариф, ₽/м",type:"number",nullable:true,min:.01},{key:"date",label:"Дата",type:"date"},{key:"source",label:"Источник",type:"textarea"},{key:"note",label:"Примечание",type:"textarea"}]} onChange={(i,k,v)=>{const row=draft.painting.filter(matches)[i];patch(d=>Object.assign(d.painting.find(p=>p.id===row.id)!,{[k]:v}));}}/></section>}
     {section==="spacing"&&<section className="base-spacing-section"><div className="base-section-heading"><h2>Межосевые расстояния</h2><button className="button" disabled={busy||addingSpacing} onClick={()=>setAddingSpacing(true)}>Добавить правило</button></div>
-      {addingSpacing&&<SpacingRuleForm rules={draft.spacing.rules} onCancel={()=>setAddingSpacing(false)} onAdd={rule=>{patch(d=>{d.spacing.rules.unshift(rule);});setAddingSpacing(false);setQuery("");setGroups([]);setSpacingFilters(EMPTY_PUMP_FILTERS);setPage(0);setError("");setNotice("Правило добавлено в черновик. Для применения в новых проектах опубликуйте изменения.");}}/>}
+      <p>Политика приложения для шага между осями соседних насосов. Изменения вступают в силу с новой публикацией; закреплённые проекты сохраняют прежние параметры.</p>
+      <EditTable rows={[draft.spacing] as unknown as Row[]} columns={[{key:"minimum",label:"Минимальный шаг, мм",type:"number",min:1},{key:"gap",label:"Требуемый зазор, мм",type:"number",min:1},{key:"increment",label:"Округление шага, мм",type:"number",min:1}]} onChange={(_i,key,value)=>patch(d=>Object.assign(d.spacing,{[key]:value}))}/>
+      {addingSpacing&&<SpacingRuleForm rules={draft.spacing.rules} policy={draft.spacing} onCancel={()=>setAddingSpacing(false)} onAdd={rule=>{patch(d=>{d.spacing.rules.unshift(rule);});setAddingSpacing(false);setQuery("");setGroups([]);setSpacingFilters(EMPTY_PUMP_FILTERS);setPage(0);setError("");setNotice("Правило добавлено в черновик. Для применения в новых проектах опубликуйте изменения.");}}/>}
       {(()=>{
       const rows=draft.spacing.rules.filter(r=>matchesPumpFilters(r,spacingFilters)&&matches([labels[r.type]??r.type,r.manufacturer,r.series,spacingNominal(r)])&&(!groups.length||groups.includes(r.spacing===null?"missing":String(r.spacing))));
       const lastPage=Math.max(0,Math.ceil(rows.length/15)-1),currentPage=Math.min(page,lastPage);
@@ -84,7 +88,7 @@ export function BaseValuesPanel({actor,onBack}:{actor:AccountUser;onBack:()=>voi
           {key:"manufacturer",label:"Производитель",readOnly:true},
           {key:"series",label:"Серия",readOnly:true},
           {key:"nominal",label:"Номинальный расход / диаметр",readOnly:true},
-          {key:"spacing",label:"Межосевое расстояние, мм",type:"number",nullable:true,min:400,step:50},
+          {key:"spacing",label:"Межосевое расстояние, мм",type:"number",nullable:true,min:draft.spacing.minimum,step:draft.spacing.increment},
         ]} onChange={(i,_key,value)=>patch(d=>{d.spacing.rules.find(r=>r.id===visible[i].id)!.spacing=value as number|null;})}/>
         {!rows.length&&<p>Насосы не найдены.</p>}
         {rows.length>15&&<div className="base-toolbar"><button className="button" disabled={!currentPage} onClick={()=>setPage(currentPage-1)}>Назад</button><span>Страница {currentPage+1} из {lastPage+1}</span><button className="button" disabled={currentPage===lastPage} onClick={()=>setPage(currentPage+1)}>Далее</button></div>}

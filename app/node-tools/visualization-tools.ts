@@ -1,3 +1,4 @@
+import { connectPumpSpacing } from "./spacing-upgrade";
 import { makeField, compatible, type Diagram, type Edge, type Field, type GraphNode } from "../engineering/schema";
 import { definitionPorts } from "../engineering/hierarchy";
 import { defaultChartGridSettings } from "../pump-chart-grid";
@@ -8,6 +9,7 @@ import { hydraulicNodeTypes } from "./hydraulic-nodes";
 import { detailNodeTypes } from "./pump-detail-data";
 import { deriveTools } from "./product";
 import type { ToolDocument } from "./schema";
+import { connectPumpCardPoints } from "./pump-card-upgrade";
 
 export type VisualizationKind = "hydraulic" | "card";
 export type VisualizationSource = { id: string; name: string };
@@ -44,6 +46,11 @@ function selectionLocations(doc: ToolDocument, graph: Diagram): Location[] {
     const next = new Set(seen).add(key), node = current.nodes.find(node => node.id === ref.from);
     if (!node) return;
     if (typeOf(doc, node).operation === "pump.select" && ref.out === "value") { found.push({ graph: current, node, parents }); return; }
+    if (typeOf(doc, node).operation === "circuit.guard") {
+      const gated = current.edges.find(e => e.to === node.id && e.input === "in_" + ref.out);
+      if (gated) follow(current, gated, parents, next);
+      return;
+    }
     const child = diagramOf(doc, node), edge = child?.edges.find(edge => edge.to === "result" && edge.input === ref.out);
     if (child && edge) follow(child, edge, [...parents, { graph: current, node }], next);
   }
@@ -99,9 +106,19 @@ function exposeOutput(doc: ToolDocument, graph: Diagram, source: Ref, desired: F
   if (!actual || !compatible({ ...actual, direction: "output" }, { ...desired, direction: "input" })) throw Error("Расчётный выход не соответствует контракту «" + desired.name + "»");
   const existing = graph.edges.find(edge => edge.to === "result" && edge.from === source.from && edge.out === source.out && boundary.fields.some(port => port.key === edge.input && compatible({ ...desired, direction: "output" }, port)));
   if (existing) return existing.input;
+  const guards = graph.nodes.filter(n => typeOf(doc, n).operation === "circuit.guard");
+  const guard = guards.length === 1 ? guards[0] : undefined;
+  if (guard) {
+    const incoming = graph.edges.find(e => e.to === guard.id && e.from === source.from && e.out === source.out);
+    const gated = incoming && graph.edges.find(e => e.from === guard.id && e.out === incoming.input.slice(3) && e.to === "result" && boundary.fields.some(f => f.key === e.input && compatible({ ...desired, direction: "output" }, f)));
+    if (gated) return gated.input;
+  }
   const key = unique(desired.key, definitionPorts(graph, doc.types).map(port => port.key));
   boundary.fields.push({ ...desired, key, direction: "input" });
-  graph.edges.push({ ...source, to: "result", input: key });
+  if (guard) {
+    typeOf(doc, guard).fields.push({ ...desired, key: "in_" + key, direction: "input" }, { ...desired, key, direction: "output" });
+    graph.edges.push({ ...source, to: guard.id, input: "in_" + key }, { from: guard.id, out: key, to: "result", input: key });
+  } else graph.edges.push({ ...source, to: "result", input: key });
   syncInstrument(doc, graph);
   return key;
 }
@@ -123,7 +140,7 @@ export function selectedExports(doc: ToolDocument, root: Diagram, selectionId: s
   const selection = exposeLocation(doc, producer, { from: producer.node.id, out: "selection" }, field("selection", "Статус подтверждения", "pumpSelectionState", "output"));
   // Read the request from precisely the dataset consumed by pump.select. Rebuilding
   // a pump.request here would lose configured contour/static-head/filter semantics.
-  const linked = producer.graph.edges.find(edge => edge.to === "result" && typeOf(doc, producer.graph.nodes.find(node => node.id === edge.from)!).formulas?.value === 'get(candidates,"request")' && producer.graph.edges.some(input => input.to === edge.from && input.input === "candidates" && input.from === incoming.from && input.out === incoming.out));
+  const linked = producer.graph.edges.find(edge => typeOf(doc, producer.graph.nodes.find(node => node.id === edge.from)!).formulas?.value === 'get(candidates,"request")' && producer.graph.edges.some(input => input.to === edge.from && input.input === "candidates" && input.from === incoming.from && input.out === incoming.out));
   let requestSource: Ref;
   if (linked) requestSource = { from: linked.from, out: linked.out };
   else {
@@ -138,11 +155,11 @@ export function selectedExports(doc: ToolDocument, root: Diagram, selectionId: s
   return { item, selection, request };
 }
 
-function mainInputView(doc: ToolDocument, root: Diagram, settingsId: string) {
+export function contourInputView(doc: ToolDocument, root: Diagram, settingsId: string, contour: "main" | "secondary" = "main") {
   const node = root.nodes.find(node => node.id === settingsId), graph = node && diagramOf(doc, node);
   if (!graph) throw Error("Не найден выбранный инструмент настроек проекта");
   const candidates = locations(doc, graph).filter(location => {
-    if (location.node.values.scope !== "main") return false;
+    if (location.node.values.scope !== contour) return false;
     const child = diagramOf(doc, location.node);
     if (!child) return false;
     const meanings = new Set(locations(doc, child).flatMap(({ node }) => typeOf(doc, node).parameter ? [typeOf(doc, node).parameter!.field.meaning] : []));
@@ -151,11 +168,11 @@ function mainInputView(doc: ToolDocument, root: Diagram, settingsId: string) {
   if (candidates.length !== 1) return null;
   const candidate = candidates[0], ports = typeOf(doc, candidate.node).fields.filter(port => port.direction === "output" && port.meaning === "view" && port.kind === "object");
   if (ports.length !== 1) return null;
-  return exposeLocation(doc, candidate, { from: candidate.node.id, out: ports[0].key }, field("mainInputsUi", "Основной контур — исходные данные", "view", "output"));
+  return exposeLocation(doc, candidate, { from: candidate.node.id, out: ports[0].key }, field(contour + "InputsUi", (contour === "secondary" ? "Второй" : "Основной") + " контур — исходные данные", "view", "output"));
 }
 
 /** Explicit editor action only: append a real, editable Instrument to the product. */
-export function addVisualizationTool(document: ToolDocument, kind: VisualizationKind, sources: { selectionId: string; settingsId?: string }): { document: ToolDocument; id: string; diagram: string } {
+export function addVisualizationTool(document: ToolDocument, kind: VisualizationKind, sources: { selectionId: string; settingsId?: string; contour?: "main" | "secondary" }): { document: ToolDocument; id: string; diagram: string } {
   if (!["hydraulic", "card"].includes(kind)) throw Error("Выберите шаблон инструмента");
   const doc = structuredClone(prepareDocument(document));
   const available = visualizationSources(doc);
@@ -165,14 +182,14 @@ export function addVisualizationTool(document: ToolDocument, kind: Visualization
   doc.types.push(...missing);
   const root = doc.diagrams.find(graph => graph.id === doc.product!.root)!;
   const exported = selectedExports(doc, root, sources.selectionId);
-  const projectUi = kind === "hydraulic" && sources.settingsId ? mainInputView(doc, root, sources.settingsId) : null;
-  const added = addProductTool(doc, kind === "hydraulic" ? "Гидравлическая кривая" : "Карточка насоса"), next = added.document;
+  const projectUi = kind === "hydraulic" && sources.settingsId ? contourInputView(doc, root, sources.settingsId, sources.contour) : null;
+  const added = addProductTool(doc, (kind === "hydraulic" ? "Гидравлическая кривая" : "Карточка насоса") + (sources.contour === "secondary" ? " (2 контур)" : "")), next = added.document;
   const targetRoot = next.diagrams.find(graph => graph.id === next.product!.root)!, graph = next.diagrams.find(graph => graph.id === added.diagram)!;
   const tool = targetRoot.nodes.find(node => node.id === added.id)!;
   tool.tool = { ...tool.tool, category: kind === "hydraulic" ? "Обработка и отображение" : "Вывод" };
   const source = boundaryType(next, graph, "source"), result = boundaryType(next, graph, "result");
   source.fields.push(field("item", "Выбранное исполнение", "pumpCatalogItem", "output"), field("selection", "Статус подтверждения", "pumpSelectionState", "output"));
-  if (kind === "hydraulic") source.fields.push(field("request", "Условия подбора", "pumpRequest", "output"), field("projectInputsUi", "Основной контур — исходные данные", "view", "output"));
+  if (kind === "hydraulic") source.fields.push(field("request", "Условия подбора", "pumpRequest", "output"), field("projectInputsUi", (sources.contour === "secondary" ? "Второй" : "Основной") + " контур — исходные данные", "view", "output"));
   result.fields = result.fields.map(port => port.key === "value" ? field("value", kind === "hydraulic" ? "Рабочая точка" : "Данные насоса", kind === "hydraulic" ? "pumpChartPoint" : "pumpCardData") : port);
   graph.nodes = graph.nodes.filter(node => node.id !== "record");
   graph.edges = graph.edges.filter(edge => edge.from !== "record");
@@ -219,5 +236,7 @@ export function addVisualizationTool(document: ToolDocument, kind: Visualization
   const exportedKeys: (keyof typeof exported)[] = kind === "hydraulic" ? ["item", "selection", "request"] : ["item", "selection"];
   for (const key of exportedKeys) targetRoot.edges.push({ from: sources.selectionId, out: exported[key], to: added.id, input: key });
   if (projectUi && sources.settingsId) targetRoot.edges.push({ from: sources.settingsId, out: projectUi, to: added.id, input: "projectInputsUi" });
+  connectPumpCardPoints(next, kind === "card" ? added.id : undefined);
+  connectPumpSpacing(next);
   return { document: next, id: added.id, diagram: added.diagram };
 }

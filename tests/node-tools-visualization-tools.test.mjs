@@ -62,7 +62,7 @@ test("explicit templates append root instruments and preserve existing nodes, fi
   assert.equal(sourceGraph.nodes.filter(node => node.name === "Условия подтверждённого подбора").length, 1);
   const program = compileTools(card.document, "visualization-v1");
   assert.deepEqual(new Set(program.product.dependencies[chart.id]), new Set(["settings", "pumpFixture"]));
-  assert.deepEqual(new Set(program.product.dependencies[card.id]), new Set(["settings", "pumpFixture"]));
+  assert.deepEqual(new Set(program.product.dependencies[card.id]), new Set(["settings", "pumpFixture", chart.id]));
   assert.equal(deriveTools(card.document).find(tool => tool.id === chart.id).tests.length, 0);
   assert.throws(() => addVisualizationTool(before, "hydraulic", { selectionId: "settings" }), /подбора/);
 });
@@ -76,6 +76,7 @@ test("chart and detail evaluate the confirmed variant and exact selected dataset
   assert.equal(hydraulic.trace[chart.id + "/model"].inputs.request.staticHead, 4);
   assert.equal(hydraulic.trace[chart.id + "/model"].inputs.request.workingPumpCount, 1);
   assert.equal(details.value.status, "ready");
+  assert(details.value.sections.find(s=>s.id==="point").rows.some(r=>r.key==="actualFlow"));
   assert.equal(details.value.identity.variantId, "v");
   assert.equal(details.value.identity.snapshotId, snapshot.id);
   assert(!hydraulic.trace["pumpFixture/table"]);
@@ -132,4 +133,33 @@ test("exports preserve occupied user ports and pass confirmation through nested 
   const details = evaluateProduct(program, card.id, ctx);
   assert.equal(details.value.status, "ready");
   assert.equal(details.value.identity.variantId, "v");
+});
+
+
+test("existing card migration preserves user values and wires and persists once", () => {
+  const chart=addVisualizationTool(fixture(),'hydraulic',{selectionId:'pumpFixture',settingsId:'settings'});
+  const card=addVisualizationTool(chart.document,'card',{selectionId:'pumpFixture'});
+  const legacy=structuredClone(card.document);
+  delete legacy.pumpCardSchema;
+  for(const type of legacy.types) type.fields=type.fields.filter(f=>f.meaning!=='pumpOperatingPoint');
+  for(const graph of legacy.diagrams) graph.edges=graph.edges.filter(e=>e.input!=='operatingPoint'&&e.out!=='operatingPoint'&&e.out!=='details');
+  const cg=legacy.diagrams.find(g=>g.id===legacy.types.find(t=>t.id===legacy.diagrams.find(g=>g.id===legacy.product.root).nodes.find(n=>n.id===card.id).type).instrument);
+  const view=cg.nodes.find(n=>legacy.types.find(t=>t.id===n.type).operation==='ui.pumpDetail');
+  view.values={...view.values,showOrigin:false,mainFields:['mass'],sectionOrder:['price','point']};
+  const before=JSON.stringify(legacy), upgraded=prepareDocument(legacy);
+  assert.equal(JSON.stringify(legacy),before);
+  for(const graph of legacy.diagrams) {
+    const after=upgraded.diagrams.find(g=>g.id===graph.id);
+    assert.deepEqual(after.nodes,graph.nodes);
+    for(const edge of graph.edges) assert(after.edges.some(e=>JSON.stringify(e)===JSON.stringify(edge)));
+  }
+  const root=upgraded.diagrams.find(g=>g.id===upgraded.product.root);
+  assert(root.edges.some(e=>e.from===chart.id&&e.to===card.id&&e.input==='operatingPoint'));
+  const restored=prepareDocument(JSON.parse(JSON.stringify(upgraded)));
+  assert.deepEqual(restored,JSON.parse(JSON.stringify(upgraded)));
+  const program=compileTools(restored,'migrated-card'),ctx=selectedContexts(program);
+  const detail=evaluateProduct(program,card.id,ctx);
+  assert.equal(detail.view.children[0].showOrigin,false);
+  assert.deepEqual(detail.view.children[0].cardPresentation.mainFields,['mass']);
+  assert(detail.value.sections.find(s=>s.id==='point').rows.length>0);
 });

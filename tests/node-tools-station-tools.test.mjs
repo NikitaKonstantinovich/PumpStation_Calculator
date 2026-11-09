@@ -77,8 +77,17 @@ test("the complete station graph accepts deeply frozen shared catalogue snapshot
   assert.equal(JSON.stringify(resource),before);assert(Object.isFrozen(resource.components.items));
 });
 
-test("collector template retains a stale database record for refreshing in UI while excluding it from specification",()=>{
+test("collector template retains a stale database record for refreshing in UI while excluding it from specification",async()=>{
   const {program,collectors,spec}=chain(),ctx=selectedContexts(program);
+  // New catalogue executions require an explicit spacing decision when the pinned legacy version has no rule.
+  const { collectorSpacingConfirmation }=await loadTs(new URL("collector-spacing.ts",base));
+  const preliminary=evaluateProduct(program,collectors.id,ctx).trace[collectors.id+"/resolve"].outputs.resolved;
+  const manual=structuredClone(preliminary.entity);
+  for(const side of ["suction","discharge"]){manual[side].spacing1=500;manual[side].spacing1Manual=true;}
+  ctx[collectors.id].values={collectorState:manual};
+  const pending=evaluateProduct(program,collectors.id,ctx).trace[collectors.id+"/resolve"].outputs.resolved;
+  for(const side of ["suction","discharge"])manual[side].spacing1Confirmation=collectorSpacingConfirmation(pending.entity[side].configuration,0);
+  ctx[collectors.id].values={collectorState:manual};
   const initial=evaluateProduct(program,collectors.id,ctx),resolved=initial.trace[collectors.id+"/resolve"].outputs.resolved;
   const state=structuredClone(resolved.entity),card=state.suction,calculation=structuredClone(initial.trace[collectors.id+"/calculate"].outputs.calculations.suction);
   assert(card.code);assert(calculation);

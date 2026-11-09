@@ -1,3 +1,5 @@
+import { applyVerifiedCollectorSpacing } from "../../node-tools/spacing-server";
+import { CatalogError } from "../../node-tools/catalog-server";
 import { guardDisabledBetaFeature } from "../../release-server";
 import { currentUser, db, json } from "../../auth-server";
 import { calculateCollector, collectorCode, collectorStorageCode, configurationWarnings, type CollectorConfiguration } from "../../collector-calculations";
@@ -5,7 +7,7 @@ import type { SavedCollector } from "../../collector-project";
 import { currentCollectorCatalog } from "../../collector-catalog-server";
 import { BaseValuesError, resolveBaseVersions } from "../../base-values-server";
 import { applyBaseTariffs } from "../../base-values";
-import { applyCollectorSpacingRules, collectorSpacingIsManual } from "../../collector-spacing";
+import { collectorSpacingIsManual } from "../../collector-spacing";
 import { canEditAllSettings } from "../../user-types";
 import { readManualPumps } from "../../manual-pump-server";
 import { collectorAccessError } from "../../project-access";
@@ -66,7 +68,7 @@ export async function POST(request: Request) {
     if(rawConfiguration?.primary && typeof rawConfiguration.primary === "object" && (rawConfiguration.secondary === null || typeof rawConfiguration.secondary === "object")){
       if(applied)rawConfiguration.velocityRules=applied.values.velocity;
       else delete rawConfiguration.velocityRules;
-      applyCollectorSpacingRules(rawConfiguration,applied?.values);
+      await applyVerifiedCollectorSpacing(rawConfiguration,applied);
       if(!canEditAllSettings(user.role)&&[rawConfiguration.primary,rawConfiguration.secondary].some(circuit=>circuit&&(collectorSpacingIsManual(circuit)||circuit.spacingConfirmation)))return json({error:"Ручное межосевое расстояние и его подтверждение доступны с уровня pro."},403);
     }
     const configuration = parseConfiguration(body.configuration);
@@ -99,5 +101,5 @@ export async function POST(request: Request) {
       throw error;
     }
     return json({ collector: mapRow((await findExecution(configuration))!), catalog }, previous ? 200 : 201);
-  } catch (error) { if(error instanceof BaseValuesError)return json({error:error.message},error.status); console.error("Collector operation failed", error); return json({ error: "Не удалось выполнить операцию с базой коллекторов. Проверьте миграцию 0005." }, 503); }
+  } catch (error) { if(error instanceof BaseValuesError || error instanceof CatalogError)return json({error:error.message},error.status); console.error("Collector operation failed", error); return json({ error: "Не удалось выполнить операцию с базой коллекторов. Проверьте миграцию 0005." }, 503); }
 }

@@ -1,3 +1,4 @@
+import { findSpacingRule, checkSpacingClearance, layoutGeometry } from "./pump-spacing";
 import seed from "../data/base-values-seed.json";
 import pumpMetadata from "../data/base-values-pumps.json";
 import { validateCollectorNippleRules, type CollectorNippleConfiguration } from "./collector-nipple-rules";
@@ -9,7 +10,7 @@ import { validateThreadCuttingRates, type ThreadCuttingRate } from "./thread-cut
 export const BASE_SECTIONS = ["financial", "spacing", "welding", "velocity", "painting", "preferences"] as const;
 export type BaseSection = typeof BASE_SECTIONS[number];
 export const BASE_LABELS: Record<BaseSection, string> = { financial: "Курсы и скидки", spacing: "Межосевые расстояния", welding: "Сварка", velocity: "Скорости потока", painting: "Окраска", preferences: "Предпочтительные комплектующие" };
-export type SpacingRule = { id: string; manufacturer: string; type: string; series: string; nominalFlow: number | null; inletDn: number | null; outletDn: number | null; modelId: string; modelIds: string[]; powerMin: number | null; powerMax: number | null; execution: string; radius: number | null; spacing: number | null; status: "confirmed" | "conditional" | "missing"; source: string; note: string };
+export type SpacingRule = { variantIds?: string[]; applicability?: import("./pump-spacing").SpacingApplicability; geometry?: import("./pump-spacing").SpacingGeometry; id: string; manufacturer: string; type: string; series: string; nominalFlow: number | null; inletDn: number | null; outletDn: number | null; modelId: string; modelIds: string[]; powerMin: number | null; powerMax: number | null; execution: string; radius: number | null; spacing: number | null; status: "confirmed" | "conditional" | "missing"; source: string; note: string };
 export type VelocityRule = { fromDn: number; toDn: number | null; limit: number };
 export type PreferenceRule = { id: string; stationType: "all" | "utility" | "fire" | "combined" | "smart"; side: "suction" | "discharge"; role: "tank" | "transducer" | "plug" | "separator"; productIds: string[] };
 export type BaseValues = {
@@ -59,17 +60,20 @@ export function validateBaseValues(raw: unknown): string[] {
   for (const k of ["aisi304", "st20"] as const) if (!validBaseNumber(v.welding[k])) errors.push(`Сварка ${k}: укажите положительный тариф ₽/м.`);
   errors.push(...validateThreadCuttingRates(v.welding.threadCutting));
   for (const date of [v.financial.date, v.welding.date, ...v.painting.map(r => r.date)]) if (typeof date !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(date) || Number.isNaN(Date.parse(date)) || new Date(date).toISOString().slice(0,10)!==date) errors.push("Укажите корректную дату актуальности.");
-  if (v.spacing.minimum !== 400 || v.spacing.increment !== 50 || v.spacing.gap !== 150 || typeof v.spacing.legacy !== "boolean") errors.push("Группировка: минимум 400 мм, интервал 50 мм, зазор 150 мм.");
+  if (!validBaseNumber(v.spacing.minimum) || !validBaseNumber(v.spacing.increment) || !validBaseNumber(v.spacing.gap) || typeof v.spacing.legacy !== "boolean") errors.push("Минимум, интервал округления и требуемый зазор должны быть положительными.");
   const ids = new Set<string>(), models = new Map<string,SpacingRule[]>();
   for (const r of v.spacing.rules) {
     if (!r || !r.id || ids.has(r.id)) { errors.push("Повтор или отсутствие ID правила расстояния."); continue; } ids.add(r.id);
     if (!Array.isArray(r.modelIds) || r.modelIds.some(id=>typeof id!=="string") || ![r.id,r.manufacturer,r.series,r.modelId,r.source,r.execution,r.note].every(s=>typeof s==="string") || !r.manufacturer || !r.series || !["vertical_multistage","inline"].includes(r.type) || !["confirmed","conditional","missing"].includes(r.status)) { errors.push(`${r.id}: неполное правило.`); continue; }
-    if(!r.modelId&&!r.modelIds.length)errors.push(`${r.id}: укажите ID точного исполнения или список моделей.`);
+    if (r.variantIds !== undefined && (!Array.isArray(r.variantIds) || r.variantIds.some(id => typeof id !== "string" || !id))) errors.push(`${r.id}: некорректные ID исполнений.`);
+    if (r.applicability && (!Array.isArray(r.applicability.motorKeys) || !r.applicability.motorKeys.length || !Array.isArray(r.applicability.orientations) || !r.applicability.orientations.length)) errors.push(`${r.id}: укажите двигатели и ориентации области применимости.`);
+    if (r.geometry && !layoutGeometry({ pumpId:r.geometry.variantId, modelId:"", snapshotId:"", contour:"primary", powerKw:null, motorKey:r.geometry.motorKey, orientation:r.geometry.orientation, installed:0, links:[], issues:[], geometry:r.geometry })) errors.push(`${r.id}: геометрия должна содержать подтверждённые полные вылеты, двигатель, ориентацию, источник и версию.`);
+    if(!r.modelId&&!r.modelIds.length&&!r.variantIds?.length)errors.push(`${r.id}: укажите ID точного исполнения или список моделей.`);
     if((r.modelId?[r.modelId]:r.modelIds).some(id=>!Object.hasOwn(pumpMetadata,id)))errors.push(`${r.id}: ID исполнения отсутствует в действующем каталоге насосов.`);
     if([r.nominalFlow,r.inletDn,r.outletDn].some(n=>n!==null&&!validBaseNumber(n)))errors.push(`${r.id}: подача и DN должны быть положительными.`);
-    if (r.spacing !== null && (!validBaseNumber(r.spacing) || r.spacing < 400 || r.spacing % 50 !== 0)) errors.push(`${r.id}: шаг от 400 мм с интервалом 50 мм.`);
+    if (r.spacing !== null && (!validBaseNumber(r.spacing) || r.spacing < v.spacing.minimum || r.spacing % v.spacing.increment !== 0)) errors.push(`${r.id}: шаг от ${v.spacing.minimum} мм с интервалом ${v.spacing.increment} мм.`);
     if (r.radius !== null && !validBaseNumber(r.radius)) errors.push(`${r.id}: некорректный вылет R.`);
-    if (r.radius !== null && r.spacing !== null && r.spacing - 2*r.radius < 150) errors.push(`${r.id}: свободный зазор меньше 150 мм.`);
+    if (r.radius !== null && r.spacing !== null && r.spacing - 2*r.radius < v.spacing.gap) errors.push(`${r.id}: свободный зазор меньше ${v.spacing.gap} мм.`);
     if (r.status === "confirmed" && (!validBaseNumber(r.radius) || !validBaseNumber(r.spacing) || !r.source?.trim())) errors.push(`${r.id}: для подтверждения нужны габарит, шаг и источник.`);
     if ((r.powerMin !== null && !validBaseNumber(r.powerMin)) || (r.powerMax !== null && !validBaseNumber(r.powerMax)) || (r.powerMin !== null && r.powerMax !== null && r.powerMin > r.powerMax)) errors.push(`${r.id}: некорректный диапазон мощности.`);
     for (const id of r.modelId ? [`exact:${r.modelId}`] : r.modelIds) { const prior=models.get(id)??[];if(prior.some(p=>Math.max(p.powerMin??0,r.powerMin??0)<=Math.min(p.powerMax??Infinity,r.powerMax??Infinity)))errors.push(`Пересечение правил для ${id}.`);models.set(id,[...prior,r]); }
@@ -94,11 +98,9 @@ export function validateBaseValues(raw: unknown): string[] {
 export function spacingForPump(values: BaseValues | undefined, pumpId: string | undefined, secondary = false) {
   if (!values || values.spacing.legacy) return { spacing: secondary ? 400 : 500, radius: null, gap: null, status: "legacy", message: "Сохранённое стандартное исполнение", rule: undefined };
   const pump = (pumpMetadata as Record<string,{power: number | null}>)[pumpId ?? ""];
-  const matches = values.spacing.rules.filter(r => (r.modelId ? r.modelId === pumpId : r.modelIds.includes(pumpId ?? "")) && (r.powerMin === null || pump?.power != null && pump.power >= r.powerMin) && (r.powerMax === null || pump?.power != null && pump.power <= r.powerMax));
-  const exact = matches.filter(r => r.modelId); const candidates = exact.length ? exact : matches;
-  if (candidates.length !== 1) return { spacing: null, radius: null, gap: null, status: "missing", message: candidates.length ? "Пересечение правил расстояния" : "Требуется уточнение межосевого расстояния: нет правила для исполнения", rule: undefined };
-  const rule = candidates[0], gap = rule.spacing !== null && rule.radius !== null ? rule.spacing-2*rule.radius : null;
-  return { spacing: rule.spacing, radius: rule.radius, gap, status: rule.status, rule, message: rule.status === "confirmed" ? "По подтверждённым размерам" : `${rule.status === "missing" ? "Требуется уточнение" : "Условное расстояние"}: ${rule.execution}. ${rule.note}` };
+  const result = checkSpacingClearance(findSpacingRule({ pumpId: pumpId ?? "", modelId: pumpId ?? "", snapshotId: "legacy-catalog", contour: secondary ? "secondary" : "primary", installed: 0, powerKw: pump?.power ?? null, motorKey: "legacy-execution", orientation: "legacy-layout", links: [{legacyId: pumpId ?? "", scope: "execution", relation: "original_registry", source: "base-values"}], issues: [] }, { values, versions: Object.fromEntries(BASE_SECTIONS.map(key=>[key,"original-registry"])) as BaseVersions }));
+  const rule = result.ruleIds.length === 1 ? values.spacing.rules.find(r => r.id === result.ruleIds[0]) : undefined;
+  return { spacing: result.spacing, radius: result.radius, gap: result.gap, status: result.status === "conflict" ? "missing" : result.status, message: !rule && result.status === "missing" ? "Требуется уточнение межосевого расстояния: нет правила для исполнения" : result.message, rule };
 }
 export const baseVelocityLimit = (dn: number, rules?: VelocityRule[]) => rules ? rules.find(r => dn >= r.fromDn && (r.toDn === null || dn <= r.toDn))?.limit ?? NaN : dn <= 250 ? 2 : 3;
 export function paintingItemForBase<T extends {id:string;prices:Array<{label:string;amount:number;currency:string}>}>(item:T,applied?:AppliedBaseValues):T {

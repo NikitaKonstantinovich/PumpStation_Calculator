@@ -11,7 +11,7 @@ export function collectorSpacingConfirmation(configuration: CollectorConfigurati
   if (!circuit) return "";
   return JSON.stringify([configuration.type, index, circuit.pumpId ?? circuit.pumpModel ?? null,
     configuration.baseVersions?.spacing ?? "legacy-v1", circuit.spacing, collectorBaseSpacing(circuit, index),
-    circuit.radius ?? null, circuit.spacingStatus ?? "legacy"]);
+    circuit.radius ?? null, circuit.spacingStatus ?? "legacy", ...(circuit.spacingResult ? [circuit.spacingResult.fingerprint] : [])]);
 }
 
 export function collectorSpacingConfirmed(configuration: CollectorConfiguration, index: number): boolean {

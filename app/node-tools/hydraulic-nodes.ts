@@ -4,6 +4,7 @@ import type { PumpSelectionInput } from "../pump-selection";
 import type { CurveMethod } from "../curve-methods";
 import type { PumpFrequencySettings } from "../pump-frequency";
 import type { ChartAxisScale, ChartGridSettings } from "../pump-chart-grid";
+import type { OperatingPointContext } from "./pump-operating-point";
 
 export type HydraulicChartModel = {
   status: "ready" | "empty";
@@ -19,6 +20,7 @@ export type HydraulicChartModel = {
   frequencySettings: PumpFrequencySettings & { pumpId?: string };
   frequency?: { nominalHz: number; frequencyHz: number; minimumHz: number; ratio: number; assumedNominal: boolean };
   warnings: string[];
+  pointContext?: OperatingPointContext;
 };
 export type HydraulicChartAxes = { flow: ChartAxisScale; head: ChartAxisScale; grid: ChartGridSettings; issues: string[] };
 export type HydraulicChartSegments = { solid: string; dashed: string };
@@ -36,7 +38,7 @@ export function hydraulicNodeTypes(): NodeType[] {
   add("pump.chartModel", "Характеристика выбранного насоса", "Проверяет подтверждённое исполнение и подготавливает исходную или частотно изменённую характеристику. Исходный каталог и подбор не изменяются.", [field("item", "Выбранное исполнение", "pumpCatalogItem"), field("selection", "Статус подтверждения", "pumpSelectionState"), field("request", "Условия подбора", "pumpRequest"), { ...field("method", "Способ построения", "curveMethod", "enum", "pchip"), options: ["pchip", "linear", "polynomial"], optionNames: { pchip: "PCHIP — через точки", linear: "Ломаная — по точкам", polynomial: "Полиномиальное сглаживание" } }, field("frequency", "Частотное регулирование", "pumpFrequencySettings"), out(model()), out(field("issues", "Проверки", "diagnostics", "array"))]);
   add("pump.chartAxes", "Масштаб и сетка графика", "Рассчитывает оси Q/H с учётом всей характеристики и рабочих насосов. Некорректная ручная сетка явно возвращает автоматический масштаб и замечания.", [model(), field("grid", "Настройки сетки и осей", "pumpChartGrid"), out(axes())]);
   add("pump.chartSystem", "Кривая системы", "H(Q) = Hст + (Hзад − Hст) × (Q/Qзад)². Разделяет доступную и недоступную части относительно характеристики насосов.", [model(), axes(), out(field("segments", "Участки кривой системы", "pumpChartSegments"))]);
-  add("pump.chartPoint", "Фактическая рабочая точка", "Находит пересечение характеристики насоса и системы тем же методом, который выбран для отображения.", [model(), out(field("point", "Фактическая рабочая точка", "pumpChartPoint"))]);
+  add("pump.chartPoint", "Фактическая рабочая точка", "Находит пересечение характеристики насоса и системы тем же методом, который выбран для отображения.", [model(), out(field("point", "Фактическая рабочая точка", "pumpChartPoint")), out(field("details", "Рабочая точка с условиями расчёта", "pumpOperatingPoint"))]);
   add("ui.chartPointBindings", "Редактирование точки проекта", "Получает привязки расхода и напора из явно подключённого интерфейса контура. При неоднозначности изменение точки недоступно.", [field("ui", "Поля контура проекта", "view"), out(binding("flowBinding", "Параметр расхода")), out(binding("headBinding", "Параметр напора"))]);
   add("ui.hydraulicChart", "График гидравлической характеристики", "Отображает результаты вычислительных нод, настройки, фактическую точку и экспорт. Двойной щелчок изменяет только явно подключённые доступные параметры проекта.", [model(), axes(), field("segments", "Участки кривой системы", "pumpChartSegments"), field("point", "Фактическая рабочая точка", "pumpChartPoint"), binding("methodBinding", "Параметр способа построения"), binding("frequencyBinding", "Параметр частотного регулирования"), binding("gridBinding", "Параметр сетки"), binding("flowBinding", "Параметр расхода"), binding("headBinding", "Параметр напора"), out(field("value", "Интерфейс", "view"))]);
   return types;

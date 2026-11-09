@@ -94,6 +94,7 @@ test("collector API requires pro/admin confirmation, rejects stale or forged rul
   const database={prepare(sql){let args=[];return {bind(...values){args=values;return this;},async first(){return sqlite.prepare(sql).get(...args)??null;},async run(){sqlite.prepare(sql).run(...args);return {success:true};}};},async batch(statements){sqlite.exec("BEGIN");try{const result=[];for(const s of statements)result.push(await s.run());sqlite.exec("COMMIT");return result;}catch(e){sqlite.exec("ROLLBACK");throw e;}}};
   globalThis.__spacingTest={database,user:{id:"test",role:"pro"},applied:applied(),catalog};
   const replacements={
+    [new URL("../app/node-tools/catalog-binding-server.ts",import.meta.url).href]:"export const catalogService=()=>undefined;",
     [new URL("../app/auth-server.ts",import.meta.url).href]:'export const db=()=>globalThis.__spacingTest.database;export const currentUser=async()=>globalThis.__spacingTest.user;export const json=(body,status=200,headers)=>Response.json(body,{status,headers});',
     [new URL("../app/base-values-server.ts",import.meta.url).href]:'export class BaseValuesError extends Error{};export const resolveBaseVersions=async()=>globalThis.__spacingTest.applied;',
     [new URL("../app/collector-catalog-server.ts",import.meta.url).href]:'export const currentCollectorCatalog=async()=>globalThis.__spacingTest.catalog;'

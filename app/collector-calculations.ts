@@ -8,7 +8,7 @@ import { collectorInstrumentPortErrors, collectorInstrumentPortIdentity, type Co
 import { collectorSpacingConfirmed, collectorSpacingIsManual } from "./collector-spacing";
 
 export type CollectorType = "suction" | "discharge";
-export type CollectorCircuit = { flow: number | null; working: number | null; reserve: number | null; pumpId?: string; pumpModel?: string; dn: number | null; connection: ValveConnection; spacing: number; pn: number; radius?: number | null; spacingStatus?: string; spacingNote?: string; spacingBase?: number | null; spacingManual?: boolean; spacingConfirmation?: string };
+export type CollectorCircuit = { spacingResult?: import("./pump-spacing").SpacingResult; flow: number | null; working: number | null; reserve: number | null; pumpId?: string; pumpModel?: string; dn: number | null; connection: ValveConnection; spacing: number; pn: number; radius?: number | null; spacingStatus?: string; spacingNote?: string; spacingBase?: number | null; spacingManual?: boolean; spacingConfirmation?: string };
 export type CollectorConfiguration = { type: CollectorType; dn: number | null; pn: number; material: CollectorMaterial; connection: ValveConnection; eccentric: boolean; stationType: StationType; simultaneous: boolean; jockey: boolean; primary: CollectorCircuit; secondary: CollectorCircuit | null; instrumentPorts?: CollectorInstrumentPort[]; instrumentRuleIssue?:string; sectionBreaks?: number; baseVersions?:BaseVersions; velocityRules?:VelocityRule[] };
 export type ComponentKind = "pipe" | "weldFlange" | "looseFlange" | "collar" | "nipple" | "plug";
 export type CollectorComponent = { id: string; kind: ComponentKind; name: string; dn: number; pn: number | null; material: CollectorMaterial | "brass"; threadGender?: "female" | "male"; price: number | null; outerDiameter: number | null; innerDiameter: number | null; requiredPipeOuterDiameterMm?: number; source: string };
@@ -54,7 +54,9 @@ export function configurationWarnings(c: CollectorConfiguration): string[] {
     if (collectorSpacingIsManual(circuit)) {
       if (!collectorSpacingConfirmed(c, i)) warnings.push(`Контур ${i+1}: подтвердите ручное межосевое расстояние или верните базовое значение.`);
     } else if(circuit.spacingStatus && circuit.spacingStatus !== "confirmed" && circuit.spacingStatus !== "legacy") warnings.push(`Контур ${i+1}: ${circuit.spacingNote ?? "Межосевое расстояние требует уточнения"}`);
-    if(positive(circuit.radius) && circuit.spacing-2*circuit.radius<150) warnings.push(`Контур ${i+1}: свободный зазор ${circuit.spacing-2*circuit.radius} мм меньше 150 мм.`);
+    const knownGap = circuit.spacingResult?.dimensions ? circuit.spacing-circuit.spacingResult.dimensions.leftMm-circuit.spacingResult.dimensions.rightMm : null;
+    if (knownGap !== null && circuit.spacingResult?.requiredGap != null && knownGap < circuit.spacingResult.requiredGap) warnings.push(`Контур ${i+1}: свободный зазор ${knownGap} мм меньше ${circuit.spacingResult.requiredGap} мм.`);
+    if(!circuit.spacingResult && positive(circuit.radius) && circuit.spacing-2*circuit.radius<150) warnings.push(`Контур ${i+1}: свободный зазор ${circuit.spacing-2*circuit.radius} мм меньше 150 мм.`);
     if (![10, 16, 25].includes(circuit.pn)) warnings.push(`Контур ${i + 1}: неизвестный PN`);
   });
   if (c.sectionBreaks !== undefined && (!Number.isInteger(c.sectionBreaks) || c.sectionBreaks < 0 || c.sectionBreaks > 30 || (c.sectionBreaks > 0 && !["fire", "combined"].includes(c.stationType)))) warnings.push("Некорректное количество разделительных стыков коллектора");

@@ -1,4 +1,5 @@
 "use client";
+import { useAppNavigationGuard } from "./app-navigation";
 /* eslint-disable @next/next/no-img-element */
 import { useCallback, useEffect, useMemo, useState } from "react";
 import type { AccountUser } from "./user-types";
@@ -43,6 +44,7 @@ export function ItemEntryPanel({ actor, onBack, onSaved }: { actor: AccountUser;
     const needle = query.trim().toLocaleLowerCase("ru-RU");
     return records.filter(({ pump }) => `${pump.manufacturer} ${pump.model} ${pump.series} ${pump.article ?? ""}`.toLocaleLowerCase("ru-RU").includes(needle));
   }, [records, query]);
+  useAppNavigationGuard(dirty);
   if (actor.role !== "admin") return <main className="item-entry"><h1>Доступ ограничен</h1><p>Заведение позиций доступно только администратору.</p><button className="button" onClick={onBack}>В рабочее пространство</button></main>;
   const confirmDiscard = () => !dirty || window.confirm("Есть несохранённые данные насоса. Продолжить без сохранения?");
   const open = (record: ManualPumpRecord | null) => {

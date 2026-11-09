@@ -8,6 +8,7 @@ import { pumpIssues } from "./diagnostics";
 import { AllowedPumpPanel } from "./allowed-pump-tools";
 import { FloatingPanel, GridWorkspace, Icon } from "./workspace-panels";
 import { AppSettings } from "./app-settings";
+import { AppNavigation } from "./app-navigation";
 import { BaseValuesPanel } from "./base-values-panel";
 import { ItemEntryPanel } from "./item-entry-panel";
 import { EquipmentAdminPanel } from "./equipment-admin-panel";
@@ -130,6 +131,12 @@ function BetaTools({ account, onAccountChange }: { account: AccountUser; onAccou
   const derivedIssues=useMemo(()=>pumpIssues(config.input,"input",catalogue),[config.input,catalogue]);
   const diagnostics=useDiagnosticRegistry(diagnosticProject,derivedIssues);
   const diagnosticsValue={...diagnostics,onNavigate:()=>{}};
+  const header = <>
+      <Link className="brand" href="/"><span className="brand__mark">PS</span><span><b>Pump Station</b><small>Calculator</small></span></Link>
+      <div className="app-header__project"><small>Внутреннее тестирование</small><button disabled title={BETA_LOCK}>{RELEASE_LABEL}</button></div>
+      <div className="app-header__actions"><span className="save-state"><i />{saveMessage}</span><button className="avatar" onClick={()=>{setSidebar(true)}} title={account.name}>{initials(account.name)}</button></div>
+  </>;
+  const renderPage = () => {
   if(view==="help")return <HelpCenter onBack={()=>navigateView("workspace")}/>;
   if(view==="equipment-admin")return <EquipmentAdminPanel actor={account} onBack={()=>navigateView("workspace")}/>;
   if(view==="item-entry")return <ItemEntryPanel actor={account} onSaved={pump=>setCatalogue(current=>mergePumpCatalog(current.filter(item=>item.id!==pump.id),[pump]))} onBack={()=>navigateView("workspace")}/>;
@@ -142,16 +149,10 @@ function BetaTools({ account, onAccountChange }: { account: AccountUser; onAccou
   const renderWorkspacePanel=(panel:PanelState,mode:WorkspaceMode="free")=><FloatingPanel key={panel.id} panel={panel} zoom={zoom} layoutMode={mode} content={renderTool(panel.activeTool)} isToolEnabled={isBetaTool} secondaryEnabled={false} onFocus={()=>focus(panel.id)} onChange={change} onDetach={()=>openPanel(panel.id)} onMinimize={()=>minimizePanel(panel.id)} onClose={()=>closePanel(panel.id)}/>;
   const workspaceHint=workspaceMode==="free"?"Окна можно перемещать, масштабировать и прикреплять к границам":workspaceMode==="mobile"?"Один инструмент в строке на всю ширину рабочего пространства":`Фиксированная сетка ${workspaceGrid.columns} × ${workspaceGrid.rows}`;
   return <DiagnosticsProvider value={diagnosticsValue}><div className={`app-shell beta-edition app-shell--${workspaceMode} ${ribbonCollapsed ? "app-shell--ribbon-collapsed" : ""} ${minimizedPanels.length?"app-shell--tasks":""}`}>
-    <header className="app-header">
-      <button ref={menuButton} className="icon-button app-header__menu" onClick={() => setSidebar(true)} aria-label="Открыть меню"><Icon name="menu" /></button>
-      <Link className="brand" href="/"><span className="brand__mark">PS</span><span><b>Pump Station</b><small>Calculator</small></span></Link>
-      <div className="app-header__project"><small>Внутреннее тестирование</small><button disabled title={BETA_LOCK}>{RELEASE_LABEL}</button></div>
-      <div className="app-header__actions"><span className="save-state"><i />{saveMessage}</span><button className="avatar" onClick={()=>{setSidebar(true)}} title={account.name}>{initials(account.name)}</button></div>
-    </header>
+
 
     <BaseValuesUpdateNotice project={diagnosticProject} latest={latest} error={pinnedError||baseValuesError} onApply={next=>accept((next.entities["station-settings"] as SettingsEntity).baseValues!)}/>
     {accessNotice && <p className="access-note" role="status">{accessNotice}<button className="button" onClick={()=>setAccessNotice("")}>Понятно</button></p>}
-    <div className={`sidebar ${sidebar ? "sidebar--open" : ""}`} inert={!sidebar}><button className="sidebar__backdrop" onClick={() => setSidebar(false)} aria-label="Закрыть меню"/><aside className="sidebar__panel"><div className="sidebar__top"><div className="brand"><span className="brand__mark">PS</span><span><b>Pump Station</b><small>Calculator</small></span></div><button className="icon-button" onClick={() => setSidebar(false)}><Icon name="close" /></button></div><div className="user-card"><span className="avatar avatar--large">{initials(account.name)}</span><div><div className="user-card__name"><b>{account.name}</b><span className="user-role">{account.role}</span></div><small>{account.email}</small></div></div><nav className="sidebar__nav"><button className="sidebar__link sidebar__link--active" onClick={()=>setSidebar(false)}>▦ <span>Рабочее пространство</span></button><button className="sidebar__link" disabled title={BETA_LOCK}>▤ <span>Мои проекты</span></button>{account.role==="admin"&&<button className="sidebar__link" disabled title={BETA_LOCK}>⌘ <span>Geometry Nodes</span></button>}{account.role==="admin"&&<button className="sidebar__link" onClick={()=>navigateView("equipment-admin")}>⌁ <span>База комплектующих</span></button>}{account.role==="admin"&&<button className="sidebar__link" disabled title={BETA_LOCK}>⌗ <span>Расчёт комплектующих</span></button>}{account.role==="admin"&&<button className="sidebar__link" onClick={()=>navigateView("item-entry")}>＋ <span>Заведение позиций</span></button>}{account.role==="admin"&&<button className="sidebar__link" onClick={()=>navigateView("base-values")}>⚙ <span>Базовые значения</span></button>}{account.role==="admin"&&<button className="sidebar__link" onClick={()=>navigateView("users")}>♙ <span>Список пользователей</span></button>}<button className="sidebar__link" onClick={() => { setSidebar(false); setSettingsOpen(true); }}>⚙ <span>Настройки</span></button><Link className="sidebar__link" href="/?auth=forgot">⌘ <span>Сменить пароль</span></Link><button className="sidebar__link" onClick={logout}>↪ <span>Выйти</span></button></nav><button className="sidebar__footer help-center-entry" onClick={()=>navigateView("help")}><span className="help-center-entry__icon" aria-hidden="true">?</span><span><b>Центр помощи</b><small>Документация и поддержка</small></span></button></aside></div>
 
     <nav className="ribbon">
       <div className="ribbon__tabs">
@@ -165,7 +166,13 @@ function BetaTools({ account, onAccountChange }: { account: AccountUser; onAccou
 
     <main className={`workspace workspace--${workspaceMode}`}><div className="workspace__bar"><div><span className="workspace__status"/><b>Рабочее пространство</b><small>{workspaceHint}</small></div>{workspaceMode==="free"&&<div className="workspace__zoom"><button onClick={() => setZoom(value => Math.max(50, value - 10))} disabled={zoom === 50} aria-label="Уменьшить масштаб">−</button><button className="workspace__zoom-value" onClick={() => setZoom(100)} aria-label="Сбросить масштаб">{zoom}%</button><button onClick={() => setZoom(value => Math.min(150, value + 10))} disabled={zoom === 150} aria-label="Увеличить масштаб">＋</button></div>}</div>{workspaceMode==="free"?<div className="workspace__canvas"><div className="workspace__surface" style={{width:`${10000/zoom}%`,height:`${10000/zoom}%`,transform:`scale(${zoom/100})`}}>{panels.filter(panel=>!panel.minimized).map(panel=>renderWorkspacePanel(panel,"free"))}</div></div>:workspaceMode==="mobile"?<div className="workspace__canvas workspace__canvas--mobile"><div className="workspace-mobile">{panels.filter(panel=>!panel.minimized).map(panel=>renderWorkspacePanel(panel,"mobile"))}</div></div>:<div className="workspace__canvas workspace__canvas--grid"><GridWorkspace isToolEnabled={isBetaTool} grid={workspaceGrid} heightScreens={gridHeightScreens} panels={panels} secondaryEnabled={secondaryEnabled} renderPanel={renderWorkspacePanel} onGridChange={setWorkspaceGrid} onCreate={createGridTool}/></div>}</main>
     {minimizedPanels.length>0&&<div className="window-dock" role="toolbar" aria-label="Свернутые инструменты"><span className="window-dock__label">Свернутые</span>{minimizedPanels.map(panel=><button key={panel.id} onClick={()=>restorePanel(panel.id)}><i aria-hidden="true"/>{panel.activeTool?PANEL_INFO[panel.activeTool].title:"Пустой инструмент"}<span>Развернуть</span></button>)}</div>}
-    {settingsOpen && <AppSettings theme={theme} onThemeChange={setTheme} profile={colorProfile} onProfileChange={setColorProfile} onClose={closeSettings} />}
     <footer className="app-footer"><span>{RELEASE_LABEL} · Внутреннее тестирование</span><span>Недоступные инструменты заблокированы</span><span>{RELEASE_VERSION}</span></footer>
   </div></DiagnosticsProvider>;
+  };
+  return <AppNavigation account={account} view={view} open={sidebar} setOpen={setSidebar} buttonRef={menuButton} header={header} beta navigate={next=>{
+    if(next === "workspace" || next === "users" || next === "base-values" || next === "item-entry" || next === "equipment-admin" || next === "help") navigateView(next);
+  }} settings={()=>setSettingsOpen(true)} logout={logout}>
+    {renderPage()}
+    {settingsOpen && <AppSettings theme={theme} onThemeChange={setTheme} profile={colorProfile} onProfileChange={setColorProfile} onClose={closeSettings}/>}
+  </AppNavigation>;
 }

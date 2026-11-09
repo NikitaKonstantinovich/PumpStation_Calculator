@@ -10,6 +10,7 @@ import type { CatalogItem } from "./catalog-schema";
 import type { SelectionState } from "./pump-nodes";
 import type { Diagnostic, ParameterBinding, ToolContext, Values, View } from "./schema";
 import type { HydraulicChartAxes, HydraulicChartData, HydraulicChartModel, HydraulicChartSegments } from "./hydraulic-nodes";
+import { samePumpRequest, type PumpOperatingPoint } from "./pump-operating-point";
 
 const primitiveProgram = { version: "node-hydraulic-primitives", plans: {}, args: {} };
 const pure = <T,>(run: () => T): T => withEvaluationProgram(primitiveProgram, run);
@@ -46,13 +47,15 @@ function chartModel(v: Values, context: ToolContext): HydraulicChartModel {
   if (item.variantId !== item.pump.id || state.variantId !== item.variantId || state.modelId !== item.modelId || state.curveSetId !== item.curveSetId || resource && (resource.id !== state.snapshotId || !actual || actual.modelId !== item.modelId || actual.curveSetId !== item.curveSetId || actual.frequencyHz !== item.frequencyHz || JSON.stringify(actual.pump) !== JSON.stringify(item.pump))) return empty("Исполнение или снимок каталога не соответствует подтверждённому выбору. Выберите насос заново.", method);
   if (!finite(request.flowRate) || request.flowRate <= 0 || !finite(request.head) || request.head <= 0 || !finite(request.staticHead) || request.staticHead < 0 || request.staticHead > request.head || !finite(request.workingPumpCount) || !Number.isInteger(request.workingPumpCount) || request.workingPumpCount < 1 || request.workingPumpCount > MAX_WORKING_PUMPS || !["water", "wastewater"].includes(String(request.medium))) return empty("Подключите корректные условия расчёта из подбора насосов", method);
   if (!pure(() => coreUsablePump(item.pump, request.medium as "water" | "wastewater"))) return empty("Для выбранного исполнения нет подтверждённой рабочей характеристики", method);
+  if (state.request && !samePumpRequest(state.request, request as PumpSelectionInput)) return empty("Условия графика отличаются от подтверждённого подбора", method);
   const settings = frequencySettings(v.frequency, item.variantId), frequency = pumpFrequencyState(item.pump, settings);
   const effective = settings.enabled ? coreFrequencyAdjustedPump(item.pump, frequency.frequencyHz, frequency.nominalHz) : item.pump;
   const polynomialAvailable = curveSegments(effective.curve, "polynomial").length > 0, resolvedMethod = method === "polynomial" && !polynomialAvailable ? "pchip" : method;
   const warnings: string[] = [];
   if (method !== resolvedMethod) warnings.push("Полиномиальное сглаживание недоступно для этой характеристики; показан PCHIP.");
   if (frequency.assumedNominal) warnings.push("Частота в каталоге не указана: принято 50 Гц. Укажите подтверждённую номинальную частоту при необходимости.");
-  return { status: "ready", message: "", selectedPump: item.pump, pump: effective, ...(settings.enabled && settings.showNominal && frequency.ratio !== 1 ? { referencePump: item.pump } : {}), request: request as PumpSelectionInput, count: request.workingPumpCount, method: resolvedMethod, requestedMethod: method, polynomialAvailable, frequencySettings: settings, frequency, warnings };
+  const pointContext = { variantId: item.variantId, modelId: item.modelId, curveSetId: item.curveSetId, snapshotId: state.snapshotId, requestKey: state.requestKey, selectionNode: state.node ?? "", sourceFrequencyHz: item.frequencyHz, request: request as PumpSelectionInput, method: resolvedMethod, frequencyHz: settings.enabled ? frequency.frequencyHz : frequency.nominalHz, nominalHz: frequency.nominalHz, frequencyAdjusted: settings.enabled, assumedFrequency: frequency.assumedNominal };
+  return { status: "ready", message: "", selectedPump: item.pump, pump: effective, ...(settings.enabled && settings.showNominal && frequency.ratio !== 1 ? { referencePump: item.pump } : {}), request: request as PumpSelectionInput, count: request.workingPumpCount, method: resolvedMethod, requestedMethod: method, polynomialAvailable, frequencySettings: settings, frequency, warnings, pointContext };
 }
 function chartAxes(v: Values): HydraulicChartAxes | null {
   const m = model(v.model); if (!m) return null;
@@ -92,7 +95,12 @@ export function executeHydraulicOperation(step: Step, v: Values, context: ToolCo
     case "pump.chartModel": { const value = pure(() => chartModel(v, context)); return { model: value, issues: value.warnings.map(message => diagnostic(step, message)) }; }
     case "pump.chartAxes": return { axes: pure(() => chartAxes(v)) };
     case "pump.chartSystem": return { segments: pure(() => chartSystem(v)) };
-    case "pump.chartPoint": { const m = model(v.model); return { point: m ? pure(() => coreOperatingPoint(m.pump!, m.count, m.request!, m.method)) : null }; }
+    case "pump.chartPoint": {
+      const m = model(v.model), point = m ? pure(() => coreOperatingPoint(m.pump!, m.count, m.request!, m.method)) : null;
+      const at = (curve: [number, number][] | undefined) => point && m && curve && curve.length >= 2 && curve.every((p, i) => p.every(Number.isFinite) && (!i || p[0] > curve[i - 1][0])) && point.flow / m.count >= curve[0][0] && point.flow / m.count <= curve.at(-1)![0] ? pure(() => coreInterpolateCurve(curve, point.flow / m.count, m.method)) : null;
+      const details: PumpOperatingPoint = { status: point ? "ready" : "unavailable", message: point ? "" : m ? "Пересечение характеристик в расчётном диапазоне не найдено." : "Выбранный насос или условия расчёта не подтверждены.", ...(m?.pointContext ? { context: m.pointContext } : {}), point, ...(m && point ? { metrics: { efficiency: at(m.pump!.efficiencyCurve), power: at(m.pump!.powerCurve), npshr: at(m.pump!.npshCurve) } } : {}) };
+      return { point, details };
+    }
     case "ui.chartPointBindings": return pointBindings(v.ui);
     case "ui.hydraulicChart": {
       const m = v.model as HydraulicChartModel | undefined;

@@ -117,6 +117,8 @@ export function validatePumpSelection(data: PumpDataset, value: unknown, binding
     variantId: id,
     snapshotId: data.snapshotId,
     requestKey: data.requestKey,
+    request: data.request,
+    purchasePriceRub: valid ? row?.candidate?.purchasePriceRub ?? null : null,
     valid,
     stale: value != null && !valid,
     message,
@@ -202,6 +204,7 @@ export function executePumpOperation(step: Step, v: Values, context: ToolContext
         const settings = record(v.settings),
           source = record(settings[v.contour === "secondary" ? "secondary" : "main"]);
         const value = {
+          contour: v.contour === "secondary" ? "secondary" as const : "main" as const,
           flowRate: source.flowRate,
           head: source.head,
           workingPumpCount: source.workingPumpCount,
@@ -236,10 +239,12 @@ export function executePumpOperation(step: Step, v: Values, context: ToolContext
           rows: [],
           issues: errors
         };
+        const { contour, ...legacyRequest } = request ?? {};
         next.requestKey = selectionRequestKey({
           snapshot: source.snapshotId,
           algorithm: context.algorithmVersion ?? "legacy",
-          request,
+          // Adding explicit main scope must not invalidate existing main-circuit proofs.
+          request: request ? contour === "secondary" ? request : legacyRequest : null,
           filters
         });
         if (!request) return output(next, step);
@@ -391,6 +396,19 @@ export function executePumpOperation(step: Step, v: Values, context: ToolContext
           if (resets.has(key)) throw Error("Зависимый параметр подключён для сброса повторно");
           resets.add(key);
         }
+        const compatibleClearValues: Record<string, Record<string, string[]>> = {};
+        const cascade = text(v.cascadeAttribute);
+        if (v.cascadeCatalog && ["type", "manufacturer"].includes(cascade)) {
+          const catalog = dataset(v.cascadeCatalog);
+          for (const choice of ["", ...choices.map(o => o.value)]) {
+            const type = cascade === "type" ? choice : text(v.cascadeType);
+            const typed = catalog.rows.filter(row => !type || row.type === type);
+            const manufacturers = [...new Set(typed.map(row => text(row.manufacturer)))];
+            const manufacturer = cascade === "manufacturer" ? choice : manufacturers.includes(text(clearBindings[0]?.value)) ? text(clearBindings[0]?.value) : "";
+            const series = [...new Set(typed.filter(row => !manufacturer || row.manufacturer === manufacturer).map(row => text(row.series)))];
+            compatibleClearValues[choice] = Object.fromEntries(clearBindings.map((target, index) => [target.key, cascade === "type" && index === 0 ? manufacturers : series]));
+          }
+        }
         if (!["string", "enum"].includes(b.field.kind)) throw Error("Динамический список требует строковый параметр");
         const issues = b.active && b.value != null && b.value !== "" && !choices.some(option => option.value === b.value) ? [diagnostic(step, "Выбранный вариант отсутствует в текущем источнике", "error", b.key)] : [];
         return {
@@ -402,6 +420,7 @@ export function executePumpOperation(step: Step, v: Values, context: ToolContext
             binding: b,
             options: choices,
             ...(clearBindings.length ? { clearBindings } : {}),
+            ...(Object.keys(compatibleClearValues).length ? { compatibleClearValues } : {}),
             showOrigin: v.showOrigin !== false,
             issues
           } satisfies View,

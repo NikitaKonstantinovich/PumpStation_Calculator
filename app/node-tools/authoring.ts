@@ -1,3 +1,6 @@
+import { circuitNodeTypes } from "./circuit-nodes";
+import { spacingNodeTypes } from "./spacing-nodes";
+import { connectPumpSpacing } from "./spacing-upgrade";
 import { makeField, type GraphNode, type NodeType } from "../engineering/schema";
 import { deriveTools, upgradeDocument } from "./product";
 import { pumpNodeTypes } from "./pump-nodes";
@@ -8,13 +11,19 @@ import { stationCatalogNodeTypes } from "./station-catalog";
 import { collectorNodeTypes } from "./collector-nodes";
 import { specificationNodeTypes } from "./specification-nodes";
 import type { ToolDocument } from "./schema";
+import { connectPumpCardPoints } from "./pump-card-upgrade";
 export function prepareDocument(document: ToolDocument): ToolDocument {
-  const doc = upgradeDocument(document);
-  const missing = [...pumpNodeTypes(), ...hydraulicNodeTypes(), ...detailNodeTypes(), ...dnNodeTypes(), ...stationCatalogNodeTypes(), ...collectorNodeTypes(), ...specificationNodeTypes()].filter(type => !doc.types.some(t => t.id === type.id));
-  return missing.length ? {
-    ...doc,
-    types: [...doc.types, ...missing]
-  } : doc;
+  const doc = structuredClone(upgradeDocument(document));
+  const missing = [...circuitNodeTypes(), ...pumpNodeTypes(), ...hydraulicNodeTypes(), ...detailNodeTypes(), ...dnNodeTypes(), ...stationCatalogNodeTypes(), ...collectorNodeTypes(), ...specificationNodeTypes(), ...spacingNodeTypes()].filter(type => !doc.types.some(t => t.id === type.id));
+  doc.types.push(...missing);
+  for (const builtin of [...pumpNodeTypes().filter(t => t.operation === "ui.select"), ...detailNodeTypes(), ...dnNodeTypes(), ...hydraulicNodeTypes().filter(t => t.operation === "pump.chartPoint")]) {
+    for (const type of doc.types.filter(t => t.operation === builtin.operation)) {
+      type.fields.push(...builtin.fields.filter(f => !type.fields.some(existing => existing.key === f.key)));
+    }
+  }
+  if (!doc.pumpCardSchema) { connectPumpCardPoints(doc); doc.pumpCardSchema = 1; }
+  if (!doc.pumpSpacingSchema) { connectPumpSpacing(doc); doc.pumpSpacingSchema = 1; }
+  return doc;
 }
 export function addProductTool(document: ToolDocument, name: string): {
   document: ToolDocument;

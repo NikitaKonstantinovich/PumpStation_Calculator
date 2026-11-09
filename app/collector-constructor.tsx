@@ -81,7 +81,8 @@ function CollectorCard({ canCustomize = false, pressureChecksEnabled = true, pre
   const spacingControl = (index: number) => {
     const circuit = index ? c.secondary! : c.primary, baseSpacing = collectorBaseSpacing(circuit,index);
     const manual = collectorSpacingIsManual(circuit), confirmed = collectorSpacingConfirmed(c,index);
-    const valid = Number.isFinite(circuit.spacing) && circuit.spacing > 0 && circuit.spacing <= 100000 && (!circuit.radius || circuit.spacing-2*circuit.radius >= 150);
+    const knownGap = circuit.spacingResult?.dimensions ? circuit.spacing-circuit.spacingResult.dimensions.leftMm-circuit.spacingResult.dimensions.rightMm : null;
+    const valid = (knownGap === null || knownGap >= (circuit.spacingResult?.requiredGap ?? 150)) && Number.isFinite(circuit.spacing) && circuit.spacing > 0 && circuit.spacing <= 100000 && (!circuit.radius || circuit.spacing-2*circuit.radius >= (circuit.spacingResult?.requiredGap ?? 150));
     const accepted = valid && (manual ? confirmed : !circuit.spacingStatus || ["confirmed","legacy"].includes(circuit.spacingStatus));
     const inputId = `${spacingFieldId}-${index}`;
     const statusLabel = accepted ? "Межосевое расстояние принято" : "Межосевое расстояние требует внимания";
@@ -102,7 +103,8 @@ function CollectorCard({ canCustomize = false, pressureChecksEnabled = true, pre
           <p>{baseSpacing === null ? "Базовое межосевое расстояние для этого насоса не задано." : `Используется базовое расстояние: ${measure(baseSpacing,"мм")}.`}</p>
           <p>{circuit.spacingNote ?? "Сохранённое стандартное исполнение."}</p>
         </>}
-        {circuit.radius == null && <p>Габариты насоса не подтверждены: зазор 150 мм необходимо проверить отдельно.</p>}
+        {circuit.radius == null && knownGap == null && <p>Габариты насоса не подтверждены: требуемый зазор {circuit.spacingResult?.requiredGap ?? 150} мм необходимо проверить отдельно.</p>}
+        {circuit.spacingResult && <><p>{circuit.spacingResult.message}</p>{circuit.spacingResult.missing.map(text => <p key={text}>{text}</p>)}</>}
         {manual && <div className="collector-spacing-actions">
           {!confirmed && <button type="button" className="button" disabled={!valid || busy} onClick={event => {
             const details = event.currentTarget.closest("details");

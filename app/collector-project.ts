@@ -1,3 +1,5 @@
+import { resolvePumpSpacing, manualSpacing, type SpacingResult } from "./pump-spacing";
+import { pumpLayout } from "./node-tools/spacing-nodes";
 import { engineeringOperation, registerOperation } from "./engineering/runtime";
 import type { Pump } from "./pump-catalog";
 import { baseConfigurationIdentity, spacingForPump } from "./base-values";
@@ -36,19 +38,24 @@ export function normalizeCollectors(raw: unknown): CollectorsEntity {
   };
   return { kind: "collectors", suction: card(value.suction, "suction"), discharge: card(value.discharge, "discharge") };
 }
-export function coreCollectorRecommendation(project: ProjectConfig, type: CollectorType, pumps?: readonly Pump[] | null): CollectorConfiguration {
+export function coreCollectorRecommendation(project: ProjectConfig, type: CollectorType, pumps?: readonly Pump[] | null, spacing?: Partial<Record<"primary" | "secondary", SpacingResult>>): CollectorConfiguration {
   const dn = project.entities["station-dn"] as DnEntity, settings = project.entities["station-settings"] as SettingsEntity;
   const first = project.entities["system-input"] as InputEntity, second = project.entities["system-input-2"] as InputEntity;
   const circuit = (input: InputEntity, secondary: boolean) => {
     const selectedPumpId = input.selectedPumpId ?? (secondary ? project.station.secondaryPumpId : project.station.selectedPumpId);
-    const spacingRule = spacingForPump(settings.baseValues?.values, selectedPumpId, secondary);
+    const selected = pumps?.find(p => p.id === selectedPumpId), contour = secondary ? "secondary" : "primary";
+    const modern = selected?.catalogSource === "pump_catalog_v2" || selected?.spacingSnapshotId;
+    const linked = spacing?.[contour];
+    const layout = pumpLayout(selected, contour, (input.workingPumpCount ?? 0) + (input.reservePumpCount ?? 0), linked?.layout.orientation);
+    const resolved = modern ? resolvePumpSpacing(layout, settings.baseValues, linked) : undefined;
+    const spacingRule = resolved ?? spacingForPump(settings.baseValues?.values, selectedPumpId, secondary);
     const prefix = secondary ? "secondary" : "", branch = type === "suction" ? (secondary ? "secondarySuctionValveDn" : "suctionValveDn") : (secondary ? "secondaryDischargeValveDn" : "dischargeValveDn");
     const pumpDn = positive(input.flowRate) && positive(input.workingPumpCount) ? recommendedDn(input.flowRate / input.workingPumpCount, settings.baseValues?.values.velocity) : null;
     const suction = (type === "suction" ? suctionHydraulics : dischargeHydraulics)(dn,input,settings,secondary,pumps?.find(pump=>pump.id===selectedPumpId));
     const branchDn = suction && positive(input.flowRate) ? suction.dn : dn[branch] ?? pumpDn;
     const pair = secondary ? [dn.secondarySuctionValveDn, dn.secondaryDischargeValveDn] : [dn.suctionValveDn, dn.dischargeValveDn];
     const connection = suction?.connection ?? resolveDnConnection(settings, Math.max(...pair.map(v => v ?? pumpDn ?? 0)), secondary, secondary ? dn.secondaryConnectionType : dn.connectionType).connection;
-    return { flow: input.flowRate, working: input.workingPumpCount, reserve: input.reservePumpCount, pumpId: selectedPumpId, pumpModel: input.selectedPumpModel ?? (input.selectedPumpId && input.selectedPumpId !== (prefix ? project.station.secondaryPumpId : project.station.selectedPumpId) ? undefined : prefix ? project.station.secondaryPumpModel : project.station.selectedPumpModel), dn: branchDn, connection, pn: (secondary ? dn.secondaryPn : dn.pn) ?? 16, spacing: spacingRule.spacing ?? 0, ...(settings.baseValues && !settings.baseValues.values.spacing.legacy ? { spacingBase:spacingRule.spacing, radius:spacingRule.radius, spacingStatus:spacingRule.status, spacingNote:spacingRule.message } : {}) } as CollectorConfiguration["primary"];
+    return { flow: input.flowRate, working: input.workingPumpCount, reserve: input.reservePumpCount, pumpId: selectedPumpId, pumpModel: input.selectedPumpModel ?? (input.selectedPumpId && input.selectedPumpId !== (prefix ? project.station.secondaryPumpId : project.station.selectedPumpId) ? undefined : prefix ? project.station.secondaryPumpModel : project.station.selectedPumpModel), dn: branchDn, connection, pn: (secondary ? dn.secondaryPn : dn.pn) ?? 16, spacing: spacingRule.spacing ?? 0, ...(resolved ? { spacingResult: resolved, spacingBase: resolved.spacing, radius: resolved.radius, spacingStatus: resolved.status, spacingNote: resolved.message } : {}), ...(settings.baseValues && !settings.baseValues.values.spacing.legacy ? { spacingBase:spacingRule.spacing, radius:spacingRule.radius, spacingStatus:spacingRule.status, spacingNote:spacingRule.message } : {}) } as CollectorConfiguration["primary"];
   };
   const base = { ...(settings.baseValues ? {baseVersions:settings.baseValues.versions,velocityRules:settings.baseValues.values.velocity} : {}), stationType: settings.stationType, jockey: settings.jockeyPump, simultaneous: settings.combinedCircuitsSimultaneous };
   const firstDn = type === "suction" ? dn.suctionCollectorDn : dn.dischargeCollectorDn;
@@ -76,6 +83,7 @@ export function coreResolveCollector(recommended: CollectorConfiguration, state:
   if ((result.dn ?? 0) > 50) result.connection = "flanged";
   for (const circuit of [result.primary, result.secondary]) if (circuit && (circuit.dn ?? 0) > 50) circuit.connection = "flanged";
   if(settings){const resolved=resolveStationCollectorInstrumentPorts(settings,result.type,result);result.instrumentPorts=resolved.ports;if(resolved.error)result.instrumentRuleIssue=resolved.error;else delete result.instrumentRuleIssue;}
+  for (const [i, circuit] of [result.primary, result.secondary].entries()) if (circuit?.spacingResult && circuit.spacingManual) circuit.spacingResult = manualSpacing(circuit.spacingResult, circuit.spacing, collectorSpacingConfirmed(result, i));
   return result;
 }
 export function syncCollectorSpec(items: SpecItem[], collectors: CollectorsEntity, inletHead?: number | null, catalog?: CollectorCatalog, checkPressure = true): SpecItem[] {

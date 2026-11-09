@@ -25,6 +25,19 @@ function run(operation, values, context) {
 }
 function render(data) { return renderToStaticMarkup(createElement(PumpDetailCard, { view: { kind: "pump-detail", label: "Карточка насоса", node: "card/ui", detail: data } })); }
 
+test("both circuit cards show verified PDF pages and preserve the original download and scope", () => {
+  const original="/api/pumps/catalog-drawings/"+"c".repeat(64)+".pdf", preview="/api/pumps/catalog-drawings/"+"d".repeat(64)+".png";
+  for (const circuit of ["primary","secondary"]) {
+    const {item,selection,context}=fixture();selection.node=circuit+"/selection";
+    item.pump.drawings=[{url:original,previewUrl:preview,name:"Размерный лист.pdf",contentType:"application/pdf",scope:"model_reference",note:"Справочная схема модели",page:56}];
+    const data=buildPumpDetailData(item,selection,context),html=render(data);
+    assert.equal(data.assets[0].url,original);assert.equal(data.assets[0].previewUrl,preview);
+    for (const text of [preview,original,"страница PDF 56","Скачать оригинал","Справочная схема модели","Увеличить чертёж"]) assert(html.includes(text),text);
+    const forged=structuredClone(data);forged.assets[0].previewUrl="https://untrusted.invalid/a.png";assert(!render(forged).includes("untrusted.invalid"));
+    const stale=structuredClone(selection);stale.snapshotId="b".repeat(64);assert.equal(buildPumpDetailData(item,stale,context).status,"stale");
+  }
+});
+
 test("detail nodes preserve exact source identity, all source attributes and every curve without mutation", () => {
   assert.deepEqual(types.map(type => type.operation), [...DETAIL_OPERATIONS]);
   const { item, selection, context } = fixture(), before = JSON.stringify(item), result = run("pump.detailData", { item, selection }, context), data = result.value;
@@ -35,8 +48,13 @@ test("detail nodes preserve exact source identity, all source attributes and eve
   const view = run("ui.pumpDetail", { data }, context).value;
   assert.equal(view.kind, "pump-detail");assert.strictEqual(view.detail, data);
   const html = render(data);
-  for (const label of ["Двигатель и электрика", "Материалы", "Подключения и монтаж", "Условия эксплуатации", "Габариты и масса", "Цена и наличие", "Источники и идентификаторы", "Происхождение и применимость данных", "Расход — напор", "КПД", "Мощность по кривой", "Кавитационный запас"]) assert(html.includes(label), label);
-  assert(html.includes("SKU-60"));assert(html.includes("AISI316"));assert(html.includes("Ток, А"));assert(html.includes("Номинальное PN, бар"));assert(html.includes(selection.snapshotId));
+  for (const label of ["Двигатель и электрика", "Материалы", "Присоединения", "Условия эксплуатации", "Габариты и масса", "Цена за один насос", "Источники и применимость", "Расход — напор", "КПД", "Мощность по кривой", "NPSHr"]) assert(html.includes(label), label);
+  assert(html.includes("SKU-60")); assert(html.includes("AISI316")); assert(html.includes("PN 16"));
+  for (const hidden of [selection.snapshotId, "archive/evidence", "jsonPointer", "SHA-256", "additionalEvidence", "Компоненты ·"]) assert(!html.includes(hidden), hidden);
+  assert.equal((html.match(/Мощность двигателя/g) ?? []).length, 1);
+  assert(!html.includes('nt-card-details" open'));
+  assert(html.includes("Корпус")); assert(html.includes("Вал"));
+
 });
 
 test("stale, mismatched or missing selections never expose a replacement pump or source curves", () => {
@@ -70,11 +88,11 @@ test("unknowns, zero and false remain distinct and no legacy card supplement or 
   selection.variantId = "1";
   const data = buildPumpDetailData(item, selection, context), html = render(data), rows = data.sections.flatMap(section => section.rows);
   assert.equal(data.status, "ready");assert.deepEqual(data.assets, []);
-  assert.equal(rows.find(row => row.label === "Масса, кг").value, "Не указано в источнике");
-  assert.equal(rows.find(row => row.label === "DN всасывающего патрубка").value, "Не указано в источнике");
-  assert.equal(rows.find(row => row.label === "Закупочная цена из каталога").value, "0");
-  assert.equal(rows.find(row => row.label === "Монтаж · Датчики").value, "Нет");
-  assert.equal(rows.find(row => row.label === "Частота вращения, об/мин").value, "Не указано в источнике");
+  assert.equal(rows.find(row => row.key === "mass").value, "Нет данных");
+  assert.equal(data.sections.find(s => s.id === "connections").table.rows[0][1], "Нет данных");
+  assert.equal(rows.find(row => row.key === "price").value, "0 RUB");
+  assert.equal(rows.find(row => row.key === "sensors").value, "Нет");
+  assert.equal(rows.find(row => row.key === "rpm").value, "Нет данных");
   assert.equal(data.curves[1].points.length, 0);assert(html.includes("Подтверждённый чертёж не указан"));assert(!html.includes("cnp-drawings"));assert(!html.includes("Принято 50"));
   item.frequencyHz = null;item.pump.frequencyHz = null;item.provenance.curveSet.frequency_hz = null;
   assert.equal(buildPumpDetailData(item, selection, context).identity.frequencyHz, null);
@@ -92,6 +110,22 @@ test("asset links allow explicit local files and reject executable, external, tr
   assert(!render(forged).includes('src="javascript:'));assert(!render(forged).includes('href="javascript:'));
 });
 
+test("legacy card settings cannot restore working-point or collector-spacing sections", () => {
+  const { item, selection, context } = fixture(), data = buildPumpDetailData(item, selection, context);
+  const legacy = { sectionOrder: ["point", "spacing", "electric"], hiddenSections: [], showPoint: true };
+  const view = { kind: "pump-detail", node: "card/ui", detail: data, cardPresentation: legacy };
+  const check = () => {
+    for (const html of [render(data), renderToStaticMarkup(createElement(PumpDetailCard, { view }))]) {
+      for (const removed of ["Рабочая точка по расчёту", "Межосевое расстояние в текущей компоновке", "Подключите результат инструмента", "Подключите результат конструктора", "Расчётный расход группы", "Расчётный шаг насосов"]) assert(!html.includes(removed), removed);
+      assert(html.includes("Двигатель и электрика")); assert(html.includes("Число фаз"));
+    }
+  };
+  check();
+  data.sections.find(s => s.id === "point").rows.push({ key: "actualFlow", label: "Расчётный расход группы", value: "12 м³/ч" });
+  data.sections.find(s => s.id === "spacing").rows.push({ key: "suction", label: "Расчётный шаг насосов", value: "750 мм" });
+  check();
+});
+
 test("large point arrays remain complete while the card initially renders only the first page", () => {
   const { item, selection, context } = fixture();
   item.pump.curve = Array.from({ length: 137 }, (_, q) => [q, 200 - q]);
@@ -99,4 +133,49 @@ test("large point arrays remain complete while the card initially renders only t
   assert.equal(data.curves[0].points.length, 137);assert.deepEqual(data.curves[0].points[136], [136, 64]);
   assert(html.includes("Показано 50 из 137"));assert(html.includes("Показать ещё 50 точек"));
   assert.equal(data.record.pump.curve.length, 137);assert.equal(data.curves.length, 4);
+});
+
+test("card presentation hides and orders sections without discarding inspector data or inherited origin controls", () => {
+  const { item, selection, context } = fixture(), data = buildPumpDetailData(item, selection, context);
+  const v = run("ui.pumpDetail", { data, sectionOrder: ["price", "connections"], hiddenSections: ["materials"], mainFields: ["power"], showPassport: false, showPoint: false, showOrigin: false }, context).value;
+  const html = renderToStaticMarkup(createElement(PumpDetailCard, { view: v }));
+  assert(html.indexOf("Цена за один насос") < html.indexOf("Присоединения"));
+  assert(!html.includes("AISI316")); assert(!html.includes("Паспортные характеристики модели")); assert(!html.includes("Рабочая точка по расчёту")); assert(!html.includes('class="nt-origin"'));
+  assert.equal(v.detail.record.pump.materials.components[0].material, "AISI316");
+  const inherited = renderToStaticMarkup(createElement(PumpDetailCard, { view: run("ui.pumpDetail", { data }, context).value, showOrigin: false }));
+  assert(!inherited.includes('class="nt-origin"'));
+});
+
+test("connection designations and dimension applicability survive compact formatting", () => {
+  const { item, selection, context } = fixture();
+  item.pump.inlet = { dn: 25, thread_designation: 'G 1', connection_type: "thread", pn_designation: "PN 16" };
+  item.pump.dimensions = { scope: "model_reference", overall_width: 201.25, sourceValues: [{ symbol: "D2", valueMm: 99, mappingStatus: "symbol_only" }] };
+  const data = buildPumpDetailData(item, selection, context), html = render(data);
+  assert(html.includes("G 1")); assert(html.includes("Резьбовое")); assert(!html.includes("DN 25 мм"));
+  assert(html.includes("исполнение не подтверждено")); assert(html.includes("201,3 мм")); assert(!data.sections.find(s=>s.id==="dimensions").rows.some(r=>r.label.includes("D2"))); assert(data.sections.find(s=>s.id==="dimensionSymbols").additional);
+  assert.equal(data.record.pump.dimensions.sourceValues[0].symbol, "D2");
+});
+
+
+test("engineering materials accept catalogue Russian names and retain conflicts", () => {
+  const {item,selection,context}=fixture();
+  item.pump.materials={scope:'catalog_model_default',components:[{component:'корпус',material:'Чугун',state:'source_value'},{component:'рабочее колесо',material:'AISI 304',state:'source_value'},{component:'pump_shaft_material',material:'AISI 304',state:'conflict'},{component:'торцевое уплотнение',material:'Карбид / графит',state:'source_value'}]};
+  item.pump.fluid={operatingLimits:{liquid_min_c:-15,liquid_standard_max_c:70,liquid_high_temperature_option_max_c:120}};
+  const data=buildPumpDetailData(item,selection,context),rows=data.sections.find(s=>s.id==='materials').rows;
+  assert.deepEqual(rows.map(r=>r.label),['Корпус','Рабочее колесо','Вал','Уплотнение']);
+  assert.match(rows[2].value,/Конфликт источников/);
+  assert.match(data.sections.find(s=>s.id==='fluid').note,/специального исполнения/);
+  assert.equal(data.sections.find(s=>s.id==='fluid').rows.find(r=>r.key==='liquid_standard_max_c').value,'70 °C');
+});
+
+
+test("voltage appears once and stays paired with current for multiple modes", () => {
+  const {item,selection,context}=fixture();
+  item.pump.electric={ratings:[{voltageV:380,currentA:4.5,phaseCount:3,connectionScheme:'star'}]};
+  let html=render(buildPumpDetailData(item,selection,context));
+  assert.equal((html.match(/380/g)||[]).length,1);
+  item.pump.electric.ratings=[{voltageV:230,currentA:8,phaseCount:3,connectionScheme:'delta'},{voltageV:400,currentA:4.6,phaseCount:3,connectionScheme:'star'}];
+  html=render(buildPumpDetailData(item,selection,context));
+  assert.equal((html.match(/230/g)||[]).length,1); assert.equal((html.match(/400/g)||[]).length,1);
+  assert.match(html,/230<\/td><td>8/); assert.match(html,/400<\/td><td>4,6/);
 });

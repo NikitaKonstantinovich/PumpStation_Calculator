@@ -1,3 +1,5 @@
+import { spacingEvidenceReader } from "./node-spacing.mjs";
+import { catalogDrawings, readDrawingFile } from "./node-drawings.mjs";
 import { DatabaseSync } from "node:sqlite";
 import { createHash } from "node:crypto";
 import { resolve } from "node:path";
@@ -94,8 +96,10 @@ export function readCatalogSnapshot(path) {
     const review = optional(tables.has("v_current_review_issues") ? "v_current_review_issues" : "review_issues");
     const reviewsByModel = grouped(review.filter(row => row.model_id != null), "model_id"), reviewsByVariant = grouped(review.filter(row => row.variant_id != null), "variant_id");
     const cad = grouped(optional("cad_bindings"), "model_id"), variantPressure = indexed(optional("variant_pressure_limits"), "variant_id");
+    const pressureRatings = grouped(optional("pressure_ratings"), "variant_id");
+    const operatingLimits = indexed(optional("variant_operating_limits"), "variant_id"), seriesEnvelopes = indexed(optional("series_operating_envelopes"), "series_id");
     const rawViews = indexed(optional("v_catalog"), "variant_id"), archives = optional("source_archives").sort((a,b) => a.path.localeCompare(b.path));
-    const dimensionsFor = dimensionReader(optional);
+    const dimensionsFor = dimensionReader(optional), spacingFor = spacingEvidenceReader(optional);
     const items = variants.map(variant => {
       const model = models.get(variant.model_id);
       if (!model) throw Error("Исполнение каталога ссылается на отсутствующую модель");
@@ -132,26 +136,30 @@ export function readCatalogSnapshot(path) {
       const best = preferredPrices[0], ambiguousPrice = preferredPrices.length > 1 && preferredPrices[0].source_date === preferredPrices[1].source_date;
       const price = best && !ambiguousPrice && ["USD","CNY","RUB"].includes(best.currency) ? { amount:decimal(net.length ? best.net_amount_decimal : best.list_amount_decimal), currency:best.currency, kind:net.length ? "net" : "list" } : null;
       if (!price) issues.push(ambiguousPrice ? "Не выбран однозначный ценовой снимок" : "Подтверждённая цена отсутствует");
-      const material = materials.get(variant.material_profile_id ?? model.material_profile_id), rating = (ratings.get(variant.id) ?? []).find(row => row.voltage_v === 380), view = rawViews.get(variant.id);
+      const material = materials.get(variant.material_profile_id ?? model.material_profile_id), electricalRatings = (ratings.get(variant.id) ?? []).map(row => ({ voltageV:number(row.voltage_v), currentA:number(row.current_a), phaseCount:number(row.phase_count), connectionScheme:row.connection_scheme ?? null })).sort((a,b) => (a.voltageV ?? 0) - (b.voltageV ?? 0)), view = rawViews.get(variant.id);
+      // A scalar rating exists only when the source supplies one unambiguous mode.
+      const rating = electricalRatings.length === 1 ? electricalRatings[0] : null;
       const dimension = dimensionsFor(variant, model, issues);
       const pump = {
+        spacingEvidence:spacingFor(variant, model, motor, electricalRatings, {manufacturer:String(manufacturer.name),series:String(familySeries.code),dimensions:dimension.dimensions,evidence:dimension.evidence}),
         id:String(variant.id), manufacturer:String(manufacturer.name), series:String(familySeries.code), group:String(familySeries.code), model:String(model.designation),
         type:pumpType(model.pump_type_id),
         power:number(motor?.power_kw), efficiency:number(model.nominal_efficiency_pct), nominalFlow:number(model.nominal_flow_m3h),
         minFlow:qh.length ? qh[0][0] : null, maxFlow:qh.length ? qh.at(-1)[0] : null, minHead:qh.length ? Math.min(...qh.map(p=>p[1])) : null, maxHead:qh.length ? Math.max(...qh.map(p=>p[1])) : null,
         price:price?.amount ?? null, priceCurrency:price?.currency ?? null, ...(price ? {priceKind:price.kind,discountPercent:number(best.discount_percent)} : {}),
         priceSource:price ? String(best.source_id) + (best.source_date ? " · " + best.source_date : "") : null, source:String(model.source_id), drawing:null,
+        drawings:catalogDrawings({variant,model,motor,manufacturer:manufacturer.name,series:familySeries.code}),
         curve:qh, ...(characteristics.efficiency ? {efficiencyCurve:characteristics.efficiency} : {}), ...(characteristics.power ? {powerCurve:characteristics.power} : {}), ...(characteristics.npshr ? {npshCurve:characteristics.npshr} : {}),
         ...(knownMedium ? {medium:model.medium} : {}), active:modelActive, selectable:modelActive && model.selection_enabled === 1 && knownMedium && !!set && qh.length >= 2,
-        article:String(variant.manufacturer_article), execution:String(variant.designation), dataWarnings:[...new Set(issues)], ratedHead:number(model.nominal_head_m), voltage:rating ? String(rating.voltage_v) : null,
+        ...(variant.manufacturer_article != null ? {article:String(variant.manufacturer_article)} : {}), execution:String(variant.designation), dataWarnings:[...new Set(issues)], ratedHead:number(model.nominal_head_m), voltage:rating?.voltageV != null ? String(rating.voltageV) : null,
         frequencyHz, speedRpm:number(motor?.speed_rpm), weightKg:number(variant.mass_kg), inletDn:number(inlet?.dn), outletDn:number(outlet?.dn),
         description:material?.description ?? null, availability:availability.get(model.id)?.confirmed_availability ?? null, catalogSource:SOURCE,
         ...(dimension.dimensions ? {dimensions:dimension.dimensions} : {}),
-        electric:{powerKw:number(motor?.power_kw),voltageV:number(rating?.voltage_v),currentA:number(rating?.current_a),phaseCount:number(motor?.phase_count),frequencyHz,speedRpm:number(motor?.speed_rpm),protectionClass:motor?.protection_class ?? null,insulationClass:motor?.insulation_class ?? null,efficiencyClass:motor?.efficiency_class ?? null},
-        materials:material ? {profileId:material.id,scope:material.scope,description:material.description,components:(materialComponents.get(material.id) ?? []).map(row=>({component:row.component,material:row.material,state:row.state}))} : {},
+        electric:{powerKw:number(motor?.power_kw),voltageV:rating?.voltageV ?? null,currentA:rating?.currentA ?? null,phaseCount:number(motor?.phase_count),frequencyHz,speedRpm:number(motor?.speed_rpm),protectionClass:motor?.protection_class ?? null,insulationClass:motor?.insulation_class ?? null,efficiencyClass:motor?.efficiency_class ?? null,ratings:electricalRatings},
+        materials:material ? {profileId:material.id,scope:material.scope,description:material.description,sealDescription:material.default_seal_description ?? null,sealCode:variant.seal_code ?? null,components:(materialComponents.get(material.id) ?? []).map(row=>({component:row.component,material:row.material,state:row.state}))} : {},
         inlet:inlet ? {...inlet} : {}, outlet:outlet ? {...outlet} : {},
         mounting:{hasSensors:variant.has_sensors===1 ? true : variant.has_sensors===0 ? false : null,sensorStatus:variant.sensor_status ?? "unknown"},
-        fluid:{medium:model.medium ?? null,nominalNpshrM:number(model.nominal_npshr_m),maxWorkingPressureBar:variantPressure.get(variant.id)?.max_working_pressure_bar ?? null,pressureTemperatureCondition:variantPressure.get(variant.id)?.temperature_condition ?? null},
+        fluid:{medium:model.medium ?? null,operatingLimits:operatingLimits.get(variant.id) ?? null,seriesEnvelope:seriesEnvelopes.get(model.series_id) ?? null,nominalNpshrM:number(model.nominal_npshr_m),maxWorkingPressureBar:variantPressure.get(variant.id)?.max_working_pressure_bar ?? null,pressureTemperatureCondition:variantPressure.get(variant.id)?.temperature_condition ?? null,pressureRatings:(pressureRatings.get(variant.id) ?? []).map(row=>({temperatureC:number(row.temperature_c),maxWorkingPressureBar:number(row.max_working_pressure_bar)}))},
       };
       const sourceIds = [...new Set([model.source_id,variant.source_id,motor?.source_id,set?.source_id,inlet?.source_id,outlet?.source_id,best?.source_id,...dimension.sourceIds].filter(Boolean))];
       return {modelId:String(model.id),variantId:String(variant.id),curveSetId:set?.id ?? null,frequencyHz,pump,issues:[...new Set(issues)],provenance:{
@@ -176,6 +184,7 @@ export function nodeCatalogService(path) {
   const registeredPath = resolve(path);
   return async request => {
     const url = new URL(request.url);
+    if (url.pathname.startsWith("/files/") && !url.search) return readDrawingFile(registeredPath, url.pathname.slice(7), request.method);
     if (request.method !== "GET" || url.pathname !== "/snapshot" || url.searchParams.get("source") !== SOURCE || [...url.searchParams.keys()].some(key => key !== "source")) return Response.json({error:"Неизвестный зарегистрированный источник"},{status:400});
     try { return Response.json(readCatalogSnapshot(registeredPath)); }
     catch { return Response.json({error:"Новый каталог насосов недоступен или его схема/связи данных не согласованы"},{status:503}); }

@@ -303,3 +303,24 @@ test("missing or damaged pinned snapshots and storage failures never retry the l
     assert.equal((await f.server.catalogSnapshot(snapshot.id)).id,snapshot.id);assert.equal(calls,2);
   } finally {await f.close();}
 });
+
+
+test("electrical ratings preserve non-380V modes and paired currents without changing source bytes", async () => {
+  const f = await fixture();
+  try {
+    const db = new DatabaseSync(f.path);
+    db.exec(`CREATE TABLE motor_ratings(variant_id TEXT,voltage_v REAL,current_a REAL,phase_count INTEGER,connection_scheme TEXT);
+      INSERT INTO motor_ratings VALUES('variant-one',230,8,3,'delta'),('variant-one',400,4.6,3,'star'),('variant-two',220,12,1,NULL);
+      CREATE TABLE pressure_ratings(variant_id TEXT,temperature_c REAL,max_working_pressure_bar REAL);
+      INSERT INTO pressure_ratings VALUES('variant-one',20,16),('variant-one',120,10);
+      UPDATE variants SET manufacturer_article=NULL WHERE id='variant-two';`);
+    db.close();
+    const before = await hash(f.path), snapshot = readCatalogSnapshot(f.path);
+    assert.equal(await hash(f.path),before);
+    const a = snapshot.items.find(i=>i.variantId==='variant-one').pump, b = snapshot.items.find(i=>i.variantId==='variant-two').pump;
+    assert.deepEqual(a.electric.ratings,[{voltageV:230,currentA:8,phaseCount:3,connectionScheme:'delta'},{voltageV:400,currentA:4.6,phaseCount:3,connectionScheme:'star'}]);
+    assert.equal(a.voltage,null); assert.equal(a.electric.currentA,null);
+    assert.equal(b.voltage,'220'); assert.equal(b.electric.currentA,12); assert.equal(b.article,undefined);
+    assert.deepEqual(a.fluid.pressureRatings,[{temperatureC:20,maxWorkingPressureBar:16},{temperatureC:120,maxWorkingPressureBar:10}]);
+  } finally { await f.close(); }
+});

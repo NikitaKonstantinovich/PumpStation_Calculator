@@ -35,8 +35,10 @@ export type View = {
   children?: View[];
   binding?: ParameterBinding;
   clearBindings?: ParameterBinding[];
+  compatibleClearValues?: Record<string, Record<string, string[]>>;
   chart?: import("./hydraulic-nodes").HydraulicChartData;
   detail?: import("./pump-detail-data").PumpDetailData;
+  cardPresentation?: import("./pump-card-presentation").CardPresentation;
   dn?: import("./dn-nodes").DnResult;
   collector?: import("./collector-nodes").CollectorViewData;
   specification?: import("./specification-nodes").SpecificationData;
@@ -78,6 +80,9 @@ export type ToolDefinition = {
   tests: ToolTest[];
 };
 export type ToolDocument = Document & {
+  pumpCardSchema?: number;
+  pumpSpacingSchema?: number;
+  secondaryTools?: Record<string, { selection: string; chart: string; card: string }>;
   tools: ToolDefinition[];
   product?:{root:string};
 };
