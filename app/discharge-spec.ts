@@ -13,7 +13,7 @@ import { suctionCatalogItems, type AssemblyComponent } from "./suction-catalog";
 import { field, number, itemDn, itemName, lineSpecParts } from "./line-spec-parts";
 import fastenerReference from "./suction-fasteners.json";
 import { selectDischargeInstruments } from "./suction-instruments";
-import { addPumpConnectionAssembly } from "./line-vibration";
+import { addPumpConnectionAssembly, selectStraightThreadedNipple } from "./line-vibration";
 import { PUMP_LINE_RULES_REVISION, selectLineInsertion as selectDischargeInsertion } from "./line-insertion";
 import { insertionEndThickness, flangeStack, equipmentFlangeThickness, pumpFlangeReference } from "./line-joint-stack";
 import { jointFlangeThickness } from "./joint-flange-dimensions";
@@ -108,7 +108,7 @@ export function buildDischargeSpec(project: ProjectConfig, database: { items: As
       valveJoints(`${prefix}-valve`, v, pn, count, selected(`${prefix}DischargeValve`),end(between,"to"),generic===null?null:generic/2);
       if (!secondary && (settings.stationType === "fire" || settings.stationType === "combined") && h.valveType === "butterfly") addValveLimitSwitches(parts, database.items, prefix, count, v, selected(`${prefix}DischargeValve`));
     } else {
-      const nipple = database.items.find(item => item.catalogId === "резьбовые-фитинги" && /Ниппель латунный НР\/НР/i.test(item.family) && itemDn(item) === v && (componentPressureLimit(item)?.bar ?? Infinity) >= pn);
+      const nipple = selectStraightThreadedNipple(database.items, v, pn);
       add(`${prefix}-between-valves-nipple`, `Ниппель латунный НР/НР DN${v}`, count, `${title} · обратный клапан → шаровой кран · PN${pn}`, nipple);
       threads += 2;
     }

@@ -15,7 +15,9 @@ const source = [
   "export { selectValveComponent, valveSpecItem };",
 ].join("\n");
 const { selectValveComponent: select, valveSpecItem: specItem } = await loadTs(url, { [url.href]: source });
-const { items } = JSON.parse(await readFile(new URL("../public/binding-components.json", import.meta.url), "utf8"));
+const binding = JSON.parse(await readFile(new URL("../public/binding-components.json", import.meta.url), "utf8"));
+const { suctionCatalogItems } = await loadTs(new URL("../app/suction-catalog.ts", import.meta.url));
+const items = [...binding.items, ...suctionCatalogItems];
 
 test("valve colour falls back only within compatible sizes and actuator executions",()=>{
   const select100=(database,color)=>select(database,"butterfly",100,"flanged",16,color,"aisi304");
@@ -26,8 +28,8 @@ test("valve colour falls back only within compatible sizes and actuator executio
   assert.equal(select([red.item,blue.item],"butterfly",80,"flanged",16,"red","aisi304"),null);
 });
 
-test("ball valves always use brass lever series for both colours and collector materials", () => {
-  for (const dn of [25, 32, 40, 50]) for (const color of ["red", "blue"]) for (const material of ["st20", "aisi304"]) {
+test("ball valves use LD Pride 47 ВР/ВР for both colours and collector materials", () => {
+  for (const dn of [15, 20, 25, 32, 40, 50]) for (const color of ["red", "blue"]) for (const material of ["st20", "aisi304"]) {
     const selected = select(items, "ball", dn, "threaded", 16, color, material);
     const expected = items.find(item => item.family === "Кран шаровой латунный ВР · ручка-рычаг" && item.fields.some(field => field.value === `DN${dn}`));
     assert.equal(selected?.item.id, expected.id);
@@ -35,6 +37,7 @@ test("ball valves always use brass lever series for both colours and collector m
     assert.equal(selected.material, "Латунь");
     const row = specItem(selected, "ball", { connection: "threaded", pn: 16, color, title: "Контур 2", totalPumpCount: 3 }, dn, "discharge", "04.02", "secondaryDischargeValve", material);
     assert.equal(row.equipmentId, expected.id);
+    assert.equal(row.name, `Кран шаровой LD Pride 47.${dn}.В-В.Р`);
     assert.equal(row.quantity, 3);
     assert.equal(row.status, "selected");
     assert.match(row.details, /Латунь/);
@@ -49,6 +52,9 @@ test("missing brass lever size or price does not fall back to butterfly-handle o
   assert.equal(select(noLever, "ball", 25, "threaded", 16, "blue", "st20"), null);
   const unpriced = items.map(item => /ручка-рычаг/.test(item.family) ? { ...item, prices: [] } : item);
   assert.equal(select(unpriced, "ball", 25, "threaded", 16, "blue", "st20"), null);
+  const legacy = select(items, "ball", 25, "threaded", 16, "blue", "st20").item;
+  const otherSeries = { ...legacy, id: "other-series", prices: [{ ...legacy.prices[0], amount: 1 }] };
+  assert.equal(select([otherSeries, ...items], "ball", 25, "threaded", 16, "blue", "st20").item.id, legacy.id);
 });
 
 test("ball-valve exception preserves explicit PN and connection constraints", () => {
@@ -63,4 +69,14 @@ test("butterfly and check valve selection retain colour and material rules", () 
   const check = select(items, "check", 50, "flanged", 16, "red", "aisi304");
   assert.match(check.item.family, /Красный/);
   assert.match(check.price.label, /Нержавеющая сталь/);
+});
+
+test("threaded check valve selects a brass core at the required pressure", () => {
+  const selectCheck = (dn, pn, source = items) => select(source, "check", dn, "threaded", pn, "blue", "aisi304");
+  assert.equal(selectCheck(40, 10).item.id, "обратные-клапаны-004-r0187");
+  assert.equal(selectCheck(40, 16).item.id, "suction-table:check-valtec-40");
+  assert.equal(selectCheck(25, 25).item.id, "suction-table:check-valtec-25");
+  assert.equal(selectCheck(40, 25), null);
+  const compatible = selectCheck(40, 16).item;
+  assert.equal(selectCheck(40, 16, [{ ...compatible, family: "Клапан обратный латунный с пластиковым сердечником" }]), null);
 });

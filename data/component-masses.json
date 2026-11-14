@@ -1,0 +1,3180 @@
+{
+  "sourceSha256": "f68b4519e1e6786982e026472d49553d70159e87154417c02f53b9ced3a1464c",
+  "items": {
+    "SMART-2-0,37-0,75": [
+      {
+        "value": 26,
+        "unit": "kg",
+        "method": "estimated",
+        "source": "Предварительно по шкафу Wenard BP-2-0,75 с частотным пуском из public/control-cabinets.json: 2 насоса, ближайшая мощность не ниже верхней границы 0.75 кВт. Заводская масса собранного BP-Smart неизвестна, составы двух серий различаются."
+      }
+    ],
+    "SMART-2-0,8-1,5": [
+      {
+        "value": 26,
+        "unit": "kg",
+        "method": "estimated",
+        "source": "Предварительно по шкафу Wenard BP-2-1,5 с частотным пуском из public/control-cabinets.json: 2 насоса, ближайшая мощность не ниже верхней границы 1.5 кВт. Заводская масса собранного BP-Smart неизвестна, составы двух серий различаются."
+      }
+    ],
+    "SMART-2-1,6-2,2": [
+      {
+        "value": 26,
+        "unit": "kg",
+        "method": "estimated",
+        "source": "Предварительно по шкафу Wenard BP-2-2,2 с частотным пуском из public/control-cabinets.json: 2 насоса, ближайшая мощность не ниже верхней границы 2.2 кВт. Заводская масса собранного BP-Smart неизвестна, составы двух серий различаются."
+      }
+    ],
+    "SMART-2-2,4-4": [
+      {
+        "value": 27,
+        "unit": "kg",
+        "method": "estimated",
+        "source": "Предварительно по шкафу Wenard BP-2-5,5 с частотным пуском из public/control-cabinets.json: 2 насоса, ближайшая мощность не ниже верхней границы 4.0 кВт. Заводская масса собранного BP-Smart неизвестна, составы двух серий различаются."
+      }
+    ],
+    "SMART-2-4,1-5,5": [
+      {
+        "value": 27,
+        "unit": "kg",
+        "method": "estimated",
+        "source": "Предварительно по шкафу Wenard BP-2-5,5 с частотным пуском из public/control-cabinets.json: 2 насоса, ближайшая мощность не ниже верхней границы 5.5 кВт. Заводская масса собранного BP-Smart неизвестна, составы двух серий различаются."
+      }
+    ],
+    "SMART-2-5,6-7,5": [
+      {
+        "value": 38,
+        "unit": "kg",
+        "method": "estimated",
+        "source": "Предварительно по шкафу Wenard BP-2-7,5 с частотным пуском из public/control-cabinets.json: 2 насоса, ближайшая мощность не ниже верхней границы 7.5 кВт. Заводская масса собранного BP-Smart неизвестна, составы двух серий различаются."
+      }
+    ],
+    "SMART-3-0,37-0,75": [
+      {
+        "value": 27,
+        "unit": "kg",
+        "method": "estimated",
+        "source": "Предварительно по шкафу Wenard BP-3-0,75 с частотным пуском из public/control-cabinets.json: 3 насоса, ближайшая мощность не ниже верхней границы 0.75 кВт. Заводская масса собранного BP-Smart неизвестна, составы двух серий различаются."
+      }
+    ],
+    "SMART-3-0,8-1,5": [
+      {
+        "value": 27,
+        "unit": "kg",
+        "method": "estimated",
+        "source": "Предварительно по шкафу Wenard BP-3-1,5 с частотным пуском из public/control-cabinets.json: 3 насоса, ближайшая мощность не ниже верхней границы 1.5 кВт. Заводская масса собранного BP-Smart неизвестна, составы двух серий различаются."
+      }
+    ],
+    "SMART-3-1,6-2,2": [
+      {
+        "value": 27,
+        "unit": "kg",
+        "method": "estimated",
+        "source": "Предварительно по шкафу Wenard BP-3-2,2 с частотным пуском из public/control-cabinets.json: 3 насоса, ближайшая мощность не ниже верхней границы 2.2 кВт. Заводская масса собранного BP-Smart неизвестна, составы двух серий различаются."
+      }
+    ],
+    "SMART-3-2,4-4": [
+      {
+        "value": 28,
+        "unit": "kg",
+        "method": "estimated",
+        "source": "Предварительно по шкафу Wenard BP-3-5,5 с частотным пуском из public/control-cabinets.json: 3 насоса, ближайшая мощность не ниже верхней границы 4.0 кВт. Заводская масса собранного BP-Smart неизвестна, составы двух серий различаются."
+      }
+    ],
+    "SMART-3-4,1-5,5": [
+      {
+        "value": 28,
+        "unit": "kg",
+        "method": "estimated",
+        "source": "Предварительно по шкафу Wenard BP-3-5,5 с частотным пуском из public/control-cabinets.json: 3 насоса, ближайшая мощность не ниже верхней границы 5.5 кВт. Заводская масса собранного BP-Smart неизвестна, составы двух серий различаются."
+      }
+    ],
+    "SMART-3-5,6-7,5": [
+      {
+        "value": 42,
+        "unit": "kg",
+        "method": "estimated",
+        "source": "Предварительно по шкафу Wenard BP-3-7,5 с частотным пуском из public/control-cabinets.json: 3 насоса, ближайшая мощность не ниже верхней границы 7.5 кВт. Заводская масса собранного BP-Smart неизвестна, составы двух серий различаются."
+      }
+    ],
+    "bkarm-gost-pn10:dn250": [
+      {
+        "value": 10.76,
+        "unit": "kg",
+        "method": "calculated",
+        "source": "Теоретическая масса кольца с вычетом болтовых отверстий и учётом уплотнительного выступа. Размеры по карточке БК-Арматуры и ГОСТ 33259-2015, таблица 1. https://bkarm.ru/product/flanecz-stalnoj-nerzhaveyushhij-ploskij-pn-10-dn-250/ https://www.htpipe.com/d/files/flanges-standard/gost-33259-2015.pdf Плотность AISI304 7900 кг/м³ по Outokumpu, таблица 7. https://otke-cdn.outokumpu.com/-/media/files/products/core/outokumpu-core-range-datasheet.pdf?modified=20221122121748&revision=f7b9e135-3cda-4a66-a99c-cf9de462e819"
+      }
+    ],
+    "bkarm-gost-pn10:dn300": [
+      {
+        "value": 13.33,
+        "unit": "kg",
+        "method": "calculated",
+        "source": "Теоретическая масса кольца с вычетом болтовых отверстий и учётом уплотнительного выступа. Размеры по карточке БК-Арматуры и ГОСТ 33259-2015, таблица 1. https://bkarm.ru/product/flanecz-stalnoj-nerzhaveyushhij-ploskij-pn-10-dn-300/ https://www.htpipe.com/d/files/flanges-standard/gost-33259-2015.pdf Плотность AISI304 7900 кг/м³ по Outokumpu, таблица 7. https://otke-cdn.outokumpu.com/-/media/files/products/core/outokumpu-core-range-datasheet.pdf?modified=20221122121748&revision=f7b9e135-3cda-4a66-a99c-cf9de462e819"
+      }
+    ],
+    "bkarm-gost-pn10:dn400": [
+      {
+        "value": 22.21,
+        "unit": "kg",
+        "method": "calculated",
+        "source": "Теоретическая масса кольца с вычетом болтовых отверстий и учётом уплотнительного выступа. Размеры по карточке БК-Арматуры и ГОСТ 33259-2015, таблица 1. https://bkarm.ru/product/flanecz-stalnoj-nerzhaveyushhij-ploskij-pn-10-dn-400/ https://www.htpipe.com/d/files/flanges-standard/gost-33259-2015.pdf Плотность AISI304 7900 кг/м³ по Outokumpu, таблица 7. https://otke-cdn.outokumpu.com/-/media/files/products/core/outokumpu-core-range-datasheet.pdf?modified=20221122121748&revision=f7b9e135-3cda-4a66-a99c-cf9de462e819"
+      }
+    ],
+    "grossner-en01:35547": [
+      {
+        "value": 1.84,
+        "unit": "kg",
+        "method": "calculated",
+        "source": "Теоретическая масса кольца с вычетом болтовых отверстий. Grossner, вариант 35547. Номинальная толщина и диаметр болтовых отверстий по EN 1092-1:2018, таблица 13, тип 01/A PN16. https://grossner.ru/shop/soedinitelnaya-armatura/flancevye-soedineniya/flanec-ploskij-nerzhaveyushhij/flanec-ploskij-en-1092-1-tip-01/ https://www.womicsteel.com/uploads/EN1092-1-2018_Flanges-and-their-joints-Circular-flanges-for-pipes-valvesfittings-and-accessories-PN-designated-Part-1-Steel-flanges.pdf Плотность AISI304 7900 кг/м³ по Outokumpu, таблица 7. https://otke-cdn.outokumpu.com/-/media/files/products/core/outokumpu-core-range-datasheet.pdf?modified=20221122121748&revision=f7b9e135-3cda-4a66-a99c-cf9de462e819"
+      }
+    ],
+    "grossner-en01:35549": [
+      {
+        "value": 2.1,
+        "unit": "kg",
+        "method": "calculated",
+        "source": "Теоретическая масса кольца с вычетом болтовых отверстий. Grossner, вариант 35549. Номинальная толщина и диаметр болтовых отверстий по EN 1092-1:2018, таблица 13, тип 01/A PN16. https://grossner.ru/shop/soedinitelnaya-armatura/flancevye-soedineniya/flanec-ploskij-nerzhaveyushhij/flanec-ploskij-en-1092-1-tip-01/ https://www.womicsteel.com/uploads/EN1092-1-2018_Flanges-and-their-joints-Circular-flanges-for-pipes-valvesfittings-and-accessories-PN-designated-Part-1-Steel-flanges.pdf Плотность AISI304 7900 кг/м³ по Outokumpu, таблица 7. https://otke-cdn.outokumpu.com/-/media/files/products/core/outokumpu-core-range-datasheet.pdf?modified=20221122121748&revision=f7b9e135-3cda-4a66-a99c-cf9de462e819"
+      }
+    ],
+    "grossner-en01:35551": [
+      {
+        "value": 2.75,
+        "unit": "kg",
+        "method": "calculated",
+        "source": "Теоретическая масса кольца с вычетом болтовых отверстий. Grossner, вариант 35551. Номинальная толщина и диаметр болтовых отверстий по EN 1092-1:2018, таблица 13, тип 01/A PN16. https://grossner.ru/shop/soedinitelnaya-armatura/flancevye-soedineniya/flanec-ploskij-nerzhaveyushhij/flanec-ploskij-en-1092-1-tip-01/ https://www.womicsteel.com/uploads/EN1092-1-2018_Flanges-and-their-joints-Circular-flanges-for-pipes-valvesfittings-and-accessories-PN-designated-Part-1-Steel-flanges.pdf Плотность AISI304 7900 кг/м³ по Outokumpu, таблица 7. https://otke-cdn.outokumpu.com/-/media/files/products/core/outokumpu-core-range-datasheet.pdf?modified=20221122121748&revision=f7b9e135-3cda-4a66-a99c-cf9de462e819"
+      }
+    ],
+    "grossner-en01:35553": [
+      {
+        "value": 3.19,
+        "unit": "kg",
+        "method": "calculated",
+        "source": "Теоретическая масса кольца с вычетом болтовых отверстий. Grossner, вариант 35553. Номинальная толщина и диаметр болтовых отверстий по EN 1092-1:2018, таблица 13, тип 01/A PN16. https://grossner.ru/shop/soedinitelnaya-armatura/flancevye-soedineniya/flanec-ploskij-nerzhaveyushhij/flanec-ploskij-en-1092-1-tip-01/ https://www.womicsteel.com/uploads/EN1092-1-2018_Flanges-and-their-joints-Circular-flanges-for-pipes-valvesfittings-and-accessories-PN-designated-Part-1-Steel-flanges.pdf Плотность AISI304 7900 кг/м³ по Outokumpu, таблица 7. https://otke-cdn.outokumpu.com/-/media/files/products/core/outokumpu-core-range-datasheet.pdf?modified=20221122121748&revision=f7b9e135-3cda-4a66-a99c-cf9de462e819"
+      }
+    ],
+    "grossner-en01:35555": [
+      {
+        "value": 3.63,
+        "unit": "kg",
+        "method": "calculated",
+        "source": "Теоретическая масса кольца с вычетом болтовых отверстий. Grossner, вариант 35555. Номинальная толщина и диаметр болтовых отверстий по EN 1092-1:2018, таблица 13, тип 01/A PN16. https://grossner.ru/shop/soedinitelnaya-armatura/flancevye-soedineniya/flanec-ploskij-nerzhaveyushhij/flanec-ploskij-en-1092-1-tip-01/ https://www.womicsteel.com/uploads/EN1092-1-2018_Flanges-and-their-joints-Circular-flanges-for-pipes-valvesfittings-and-accessories-PN-designated-Part-1-Steel-flanges.pdf Плотность AISI304 7900 кг/м³ по Outokumpu, таблица 7. https://otke-cdn.outokumpu.com/-/media/files/products/core/outokumpu-core-range-datasheet.pdf?modified=20221122121748&revision=f7b9e135-3cda-4a66-a99c-cf9de462e819"
+      }
+    ],
+    "grossner-en01:35557": [
+      {
+        "value": 4.42,
+        "unit": "kg",
+        "method": "calculated",
+        "source": "Теоретическая масса кольца с вычетом болтовых отверстий. Grossner, вариант 35557. Номинальная толщина и диаметр болтовых отверстий по EN 1092-1:2018, таблица 13, тип 01/A PN16. https://grossner.ru/shop/soedinitelnaya-armatura/flancevye-soedineniya/flanec-ploskij-nerzhaveyushhij/flanec-ploskij-en-1092-1-tip-01/ https://www.womicsteel.com/uploads/EN1092-1-2018_Flanges-and-their-joints-Circular-flanges-for-pipes-valvesfittings-and-accessories-PN-designated-Part-1-Steel-flanges.pdf Плотность AISI304 7900 кг/м³ по Outokumpu, таблица 7. https://otke-cdn.outokumpu.com/-/media/files/products/core/outokumpu-core-range-datasheet.pdf?modified=20221122121748&revision=f7b9e135-3cda-4a66-a99c-cf9de462e819"
+      }
+    ],
+    "ifitting-en01:1154": [
+      {
+        "value": 6.35,
+        "unit": "kg",
+        "method": "calculated",
+        "source": "Теоретическая масса кольца с вычетом болтовых отверстий и учётом уплотнительного выступа. IFitting, артикул 1154. Геометрия EN 1092-1:2018, тип 01/B1 DN100 PN40, выступ Ø162×3 мм по таблице INCOVES. https://ifitting.ru/catalog/flantsy_nerzhaveyushchie/flantsy_ploskie/1154/ https://incoves.com/en/product/flat-flange-type-01-b1-en1092-1-pn40/ Плотность AISI304 7900 кг/м³ по Outokumpu, таблица 7. https://otke-cdn.outokumpu.com/-/media/files/products/core/outokumpu-core-range-datasheet.pdf?modified=20221122121748&revision=f7b9e135-3cda-4a66-a99c-cf9de462e819"
+      }
+    ],
+    "lunda-ld-67-504:LD.67.504.15": [
+      {
+        "value": 0.025,
+        "unit": "kg",
+        "method": "catalog",
+        "source": "Каталог LD Pride от 24.03.2025, с. 26, LD.67.504.15: https://image.stoking.ru/uploads/image/stoking-library/ld/pride/ld-47-247-15/katalog-latunnykh-kranov-ld-pride-ot-24-03-2025.pdf#page=26"
+      }
+    ],
+    "lunda-ld-67-504:LD.67.504.20": [
+      {
+        "value": 0.036,
+        "unit": "kg",
+        "method": "catalog",
+        "source": "Каталог LD Pride от 24.03.2025, с. 26, LD.67.504.20: https://image.stoking.ru/uploads/image/stoking-library/ld/pride/ld-47-247-15/katalog-latunnykh-kranov-ld-pride-ot-24-03-2025.pdf#page=26"
+      }
+    ],
+    "lunda-ld-67-504:LD.67.504.25": [
+      {
+        "value": 0.057,
+        "unit": "kg",
+        "method": "catalog",
+        "source": "Каталог LD Pride от 24.03.2025, с. 26, LD.67.504.25: https://image.stoking.ru/uploads/image/stoking-library/ld/pride/ld-47-247-15/katalog-latunnykh-kranov-ld-pride-ot-24-03-2025.pdf#page=26"
+      }
+    ],
+    "lunda-ld-67-504:LD.67.504.32": [
+      {
+        "value": 0.09,
+        "unit": "kg",
+        "method": "catalog",
+        "source": "Каталог LD Pride от 24.03.2025, с. 26, LD.67.504.32: https://image.stoking.ru/uploads/image/stoking-library/ld/pride/ld-47-247-15/katalog-latunnykh-kranov-ld-pride-ot-24-03-2025.pdf#page=26"
+      }
+    ],
+    "lunda-ld-67-504:LD.67.504.40": [
+      {
+        "value": 0.115,
+        "unit": "kg",
+        "method": "catalog",
+        "source": "Каталог LD Pride от 24.03.2025, с. 26, LD.67.504.40: https://image.stoking.ru/uploads/image/stoking-library/ld/pride/ld-47-247-15/katalog-latunnykh-kranov-ld-pride-ot-24-03-2025.pdf#page=26"
+      }
+    ],
+    "lunda-ld-67-504:LD.67.504.50": [
+      {
+        "value": 0.185,
+        "unit": "kg",
+        "method": "catalog",
+        "source": "Каталог LD Pride от 24.03.2025, с. 26, LD.67.504.50: https://image.stoking.ru/uploads/image/stoking-library/ld/pride/ld-47-247-15/katalog-latunnykh-kranov-ld-pride-ot-24-03-2025.pdf#page=26"
+      }
+    ],
+    "newkey-din2503:NK-FDh125-4": [
+      {
+        "value": 7.65,
+        "unit": "kg",
+        "method": "calculated",
+        "source": "Теоретическая масса кольца с вычетом болтовых отверстий. Номинальная геометрия DIN2503 PN40 по Hyupshin для артикула Newkey NK-FDh125/4. https://www.newkey.ru/catalog/flantsy/flantsy-ploskie-din2503/ https://www.hsflanges.com/DIN_2503_PN40_plate_flanges Плотность CF8 7900 кг/м³ по HJ Elements. https://hjelements.com/alloy-steel-astm-steel/cast-stainless-steel-wire-cf8%2C-astm-a744.html"
+      }
+    ],
+    "newkey-din2503:NK-FDh150-4": [
+      {
+        "value": 9.65,
+        "unit": "kg",
+        "method": "calculated",
+        "source": "Теоретическая масса кольца с вычетом болтовых отверстий. Номинальная геометрия DIN2503 PN40 по Hyupshin для артикула Newkey NK-FDh150/4. https://www.newkey.ru/catalog/flantsy/flantsy-ploskie-din2503/ https://www.hsflanges.com/DIN_2503_PN40_plate_flanges Плотность CF8 7900 кг/м³ по HJ Elements. https://hjelements.com/alloy-steel-astm-steel/cast-stainless-steel-wire-cf8%2C-astm-a744.html"
+      }
+    ],
+    "newkey-din2503:NK-FDh32-4": [
+      {
+        "value": 1.84,
+        "unit": "kg",
+        "method": "calculated",
+        "source": "Теоретическая масса кольца с вычетом болтовых отверстий. Номинальная геометрия DIN2503 PN40 по Hyupshin для артикула Newkey NK-FDh32/4. https://www.newkey.ru/product/flanets-ploskii-din2503-nerzhaveiushchii-aisi304-dn32-114-cf8-rn40/ https://www.hsflanges.com/DIN_2503_PN40_plate_flanges Плотность CF8 7900 кг/м³ по HJ Elements. https://hjelements.com/alloy-steel-astm-steel/cast-stainless-steel-wire-cf8%2C-astm-a744.html"
+      }
+    ],
+    "newkey-din2503:NK-FDh40-4": [
+      {
+        "value": 2.1,
+        "unit": "kg",
+        "method": "calculated",
+        "source": "Теоретическая масса кольца с вычетом болтовых отверстий. Номинальная геометрия DIN2503 PN40 по Hyupshin для артикула Newkey NK-FDh40/4. https://www.newkey.ru/catalog/flantsy/flantsy-ploskie-din2503/ https://www.hsflanges.com/DIN_2503_PN40_plate_flanges Плотность CF8 7900 кг/м³ по HJ Elements. https://hjelements.com/alloy-steel-astm-steel/cast-stainless-steel-wire-cf8%2C-astm-a744.html"
+      }
+    ],
+    "newkey-din2503:NK-FDh50-4": [
+      {
+        "value": 2.75,
+        "unit": "kg",
+        "method": "calculated",
+        "source": "Теоретическая масса кольца с вычетом болтовых отверстий. Номинальная геометрия DIN2503 PN40 по Hyupshin для артикула Newkey NK-FDh50/4. https://www.newkey.ru/product/flanets-ploskii-din2503-nerzhaveiushchii-aisi304-dn50-2-cf8-rn40/ https://www.hsflanges.com/DIN_2503_PN40_plate_flanges Плотность CF8 7900 кг/м³ по HJ Elements. https://hjelements.com/alloy-steel-astm-steel/cast-stainless-steel-wire-cf8%2C-astm-a744.html"
+      }
+    ],
+    "nhi-gost-pn16:dn700": [
+      {
+        "value": 84.2,
+        "unit": "kg",
+        "method": "catalog",
+        "source": "Спецификация ТД «НХИ-Групп» на фланец 01-1-B PN16 из 12Х18Н10Т, артикул A00000000213169. https://www.nhi-group.ru/catalog/detali_truboprovoda/flantsy/i_flanets_700-16-01-1-v-st_12h18/"
+      }
+    ],
+    "nhi-gost-pn16:dn800": [
+      {
+        "value": 104.4,
+        "unit": "kg",
+        "method": "catalog",
+        "source": "Спецификация ТД «НХИ-Групп» на фланец 01-1-B PN16 из 12Х18Н10Т, артикул A00000000213170. https://tdnhi.ru/catalog/detali_truboprovoda/flantsy/i_flanets_800-16-01-1-v-st_12h18/?pdf="
+      }
+    ],
+    "nhi-gost-pn16:dn900": [
+      {
+        "value": 129,
+        "unit": "kg",
+        "method": "catalog",
+        "source": "Спецификация ТД «НХИ-Групп» на фланец 01-1-B PN16 из 12Х18Н10Т. https://tdnhi.ru/catalog/detali_truboprovoda/flantsy/i_flanets_900-16-01-1-v-st_12h18/?pdf="
+      }
+    ],
+    "onyx-gost-pn16:00000051379": [
+      {
+        "value": 10.2,
+        "unit": "kg",
+        "method": "catalog",
+        "source": "Карточка ОНИКС, артикул 00000051379, характеристика «Вес». https://onyxspb.ru/catalog/flantsy/flantsy-ploskie/flantsy-ploskie-stal-12kh18n10t/flanets-ploskiy-200-16-01-1-b-st-12kh18n10t-iv-gost-33259-2015/"
+      }
+    ],
+    "onyx-gost-pn16:00000051387": [
+      {
+        "value": 14.5,
+        "unit": "kg",
+        "method": "catalog",
+        "source": "Карточка ОНИКС, артикул 00000051387, характеристика «Вес». https://onyxspb.ru/catalog/flantsy/flantsy-ploskie/flantsy-ploskie-stal-12kh18n10t/flanets-ploskiy-250-16-01-1-b-st-12kh18n10t-iv-gost-33259-2015/"
+      }
+    ],
+    "onyx-gost-pn16:00000051391": [
+      {
+        "value": 17.8,
+        "unit": "kg",
+        "method": "catalog",
+        "source": "Карточка ОНИКС, артикул 00000051391, характеристика «Вес». https://onyxspb.ru/catalog/flantsy/flantsy-ploskie/flantsy-ploskie-stal-12kh18n10t/flanets-ploskiy-300-16-01-1-b-st-12kh18n10t-iv-gost-33259-2015/"
+      }
+    ],
+    "onyx-gost-pn16:00000051406": [
+      {
+        "value": 31,
+        "unit": "kg",
+        "method": "catalog",
+        "source": "Карточка ОНИКС, артикул 00000051406, характеристика «Вес». https://onyxspb.ru/catalog/flantsy/flantsy-ploskie/flantsy-ploskie-stal-12kh18n10t/flanets-ploskiy-400-16-01-1-b-st-12kh18n10t-iv-gost-33259-2015/"
+      }
+    ],
+    "onyx-gost-pn16:00000051413": [
+      {
+        "value": 57,
+        "unit": "kg",
+        "method": "catalog",
+        "source": "Карточка ОНИКС, артикул 00000051413, характеристика «Вес». https://onyxspb.ru/catalog/flantsy/flantsy-ploskie/flantsy-ploskie-stal-12kh18n10t/flanets-ploskiy-500-16-01-1-b-st-12kh18n10t-iv-gost-33259-2015/"
+      }
+    ],
+    "onyx-gost-pn16:00000062250": [
+      {
+        "value": 80,
+        "unit": "kg",
+        "method": "catalog",
+        "source": "Карточка ОНИКС, артикул 00000062250, характеристика «Вес». https://onyxspb.ru/catalog/flantsy/flantsy-ploskie/flantsy-ploskie-stal-12kh18n10t/flanets-ploskiy-600-16-01-1-b-st-12kh18n10t-iv-gost-33259-2015/"
+      }
+    ],
+    "onyx-gost-pn16:51399": [
+      {
+        "value": 22.9,
+        "unit": "kg",
+        "method": "catalog",
+        "source": "Карточка ОНИКС, артикул 51399, характеристика «Вес». https://onyxspb.ru/catalog/flantsy/flantsy-ploskie/flantsy-ploskie-stal-12kh18n10t/flanets-ploskiy-350-16-01-1-b-st-12kh18n10t-iv-gost-33259-2015/"
+      }
+    ],
+    "st20-concentric:r0005": [
+      {
+        "value": 0.05,
+        "unit": "kg",
+        "method": "catalog",
+        "source": "ГОСТ 17378-2001, таблица 1, исполнение 1. Справочная масса при совпадении обоих наружных диаметров, стенок и длины 38 мм. https://files.stroyinf.ru/Data2/1/4294846/4294846097.pdf"
+      }
+    ],
+    "st20-concentric:r0006": [
+      {
+        "value": 0.047,
+        "unit": "kg",
+        "method": "calculated",
+        "source": "Теоретическая масса усечённого конуса по двум наружным диаметрам, толщине стенок на торцах и осевой длине. Длина 38 мм по проектному геометрическому аналогу переходы-005-r0336. Плотность углеродистой стали 7850 кг/м³ по ГОСТ 8732-2025. https://files.stroyinf.ru/Data2/1/4294846/4294846097.pdf https://normadocs.ru/gost_8732-2025"
+      }
+    ],
+    "st20-concentric:r0007": [
+      {
+        "value": 0.07,
+        "unit": "kg",
+        "method": "catalog",
+        "source": "ГОСТ 17378-2001, таблица 1, исполнение 1. Справочная масса при совпадении обоих наружных диаметров, стенок и длины 38 мм. https://files.stroyinf.ru/Data2/1/4294846/4294846097.pdf"
+      }
+    ],
+    "st20-concentric:r0008": [
+      {
+        "value": 0.09,
+        "unit": "kg",
+        "method": "catalog",
+        "source": "ГОСТ 17378-2001, таблица 1, исполнение 1. Справочная масса при совпадении обоих наружных диаметров, стенок и длины 51 мм. https://files.stroyinf.ru/Data2/1/4294846/4294846097.pdf"
+      }
+    ],
+    "st20-concentric:r0009": [
+      {
+        "value": 0.12,
+        "unit": "kg",
+        "method": "catalog",
+        "source": "ГОСТ 17378-2001, таблица 1, исполнение 1. Справочная масса при совпадении обоих наружных диаметров, стенок и длины 51 мм. https://files.stroyinf.ru/Data2/1/4294846/4294846097.pdf"
+      }
+    ],
+    "st20-concentric:r0010": [
+      {
+        "value": 0.16,
+        "unit": "kg",
+        "method": "catalog",
+        "source": "ГОСТ 17378-2001, таблица 1, исполнение 1. Справочная масса при совпадении обоих наружных диаметров, стенок и длины 51 мм. https://files.stroyinf.ru/Data2/1/4294846/4294846097.pdf"
+      }
+    ],
+    "st20-concentric:r0011": [
+      {
+        "value": 0.09,
+        "unit": "kg",
+        "method": "catalog",
+        "source": "ГОСТ 17378-2001, таблица 1, исполнение 1. Справочная масса при совпадении обоих наружных диаметров, стенок и длины 51 мм. https://files.stroyinf.ru/Data2/1/4294846/4294846097.pdf"
+      }
+    ],
+    "st20-concentric:r0012": [
+      {
+        "value": 0.0958,
+        "unit": "kg",
+        "method": "calculated",
+        "source": "Теоретическая масса усечённого конуса по двум наружным диаметрам, толщине стенок на торцах и осевой длине. Длина 51 мм по проектному геометрическому аналогу переходы-005-r0342. Плотность углеродистой стали 7850 кг/м³ по ГОСТ 8732-2025. https://files.stroyinf.ru/Data2/1/4294846/4294846097.pdf https://normadocs.ru/gost_8732-2025"
+      }
+    ],
+    "st20-concentric:r0013": [
+      {
+        "value": 0.129,
+        "unit": "kg",
+        "method": "calculated",
+        "source": "Теоретическая масса усечённого конуса по двум наружным диаметрам, толщине стенок на торцах и осевой длине. Длина 51 мм по проектному геометрическому аналогу переходы-005-r0343. Плотность углеродистой стали 7850 кг/м³ по ГОСТ 8732-2025. https://files.stroyinf.ru/Data2/1/4294846/4294846097.pdf https://normadocs.ru/gost_8732-2025"
+      }
+    ],
+    "st20-concentric:r0014": [
+      {
+        "value": 0.13,
+        "unit": "kg",
+        "method": "catalog",
+        "source": "ГОСТ 17378-2001, таблица 1, исполнение 1. Справочная масса при совпадении обоих наружных диаметров, стенок и длины 51 мм. https://files.stroyinf.ru/Data2/1/4294846/4294846097.pdf"
+      }
+    ],
+    "st20-concentric:r0015": [
+      {
+        "value": 0.17,
+        "unit": "kg",
+        "method": "catalog",
+        "source": "ГОСТ 17378-2001, таблица 1, исполнение 1. Справочная масса при совпадении обоих наружных диаметров, стенок и длины 51 мм. https://files.stroyinf.ru/Data2/1/4294846/4294846097.pdf"
+      }
+    ],
+    "st20-concentric:r0016": [
+      {
+        "value": 0.23,
+        "unit": "kg",
+        "method": "catalog",
+        "source": "ГОСТ 17378-2001, таблица 1, исполнение 1. Справочная масса при совпадении обоих наружных диаметров, стенок и длины 51 мм. https://files.stroyinf.ru/Data2/1/4294846/4294846097.pdf"
+      }
+    ],
+    "st20-concentric:r0017": [
+      {
+        "value": 0.13,
+        "unit": "kg",
+        "method": "catalog",
+        "source": "ГОСТ 17378-2001, таблица 1, исполнение 1. Справочная масса при совпадении обоих наружных диаметров, стенок и длины 51 мм. https://files.stroyinf.ru/Data2/1/4294846/4294846097.pdf"
+      }
+    ],
+    "st20-concentric:r0018": [
+      {
+        "value": 0.17,
+        "unit": "kg",
+        "method": "catalog",
+        "source": "ГОСТ 17378-2001, таблица 1, исполнение 1. Справочная масса при совпадении обоих наружных диаметров, стенок и длины 51 мм. https://files.stroyinf.ru/Data2/1/4294846/4294846097.pdf"
+      }
+    ],
+    "st20-concentric:r0019": [
+      {
+        "value": 0.23,
+        "unit": "kg",
+        "method": "catalog",
+        "source": "ГОСТ 17378-2001, таблица 1, исполнение 1. Справочная масса при совпадении обоих наружных диаметров, стенок и длины 51 мм. https://files.stroyinf.ru/Data2/1/4294846/4294846097.pdf"
+      }
+    ],
+    "st20-concentric:r0020": [
+      {
+        "value": 0.13,
+        "unit": "kg",
+        "method": "catalog",
+        "source": "ГОСТ 17378-2001, таблица 1, исполнение 1. Справочная масса при совпадении обоих наружных диаметров, стенок и длины 51 мм. https://files.stroyinf.ru/Data2/1/4294846/4294846097.pdf"
+      }
+    ],
+    "st20-concentric:r0021": [
+      {
+        "value": 0.17,
+        "unit": "kg",
+        "method": "catalog",
+        "source": "ГОСТ 17378-2001, таблица 1, исполнение 1. Справочная масса при совпадении обоих наружных диаметров, стенок и длины 51 мм. https://files.stroyinf.ru/Data2/1/4294846/4294846097.pdf"
+      }
+    ],
+    "st20-concentric:r0022": [
+      {
+        "value": 0.23,
+        "unit": "kg",
+        "method": "catalog",
+        "source": "ГОСТ 17378-2001, таблица 1, исполнение 1. Справочная масса при совпадении обоих наружных диаметров, стенок и длины 51 мм. https://files.stroyinf.ru/Data2/1/4294846/4294846097.pdf"
+      }
+    ],
+    "st20-concentric:r0023": [
+      {
+        "value": 0.19,
+        "unit": "kg",
+        "method": "catalog",
+        "source": "ГОСТ 17378-2001, таблица 1, исполнение 1. Справочная масса при совпадении обоих наружных диаметров, стенок и длины 64 мм. https://files.stroyinf.ru/Data2/1/4294846/4294846097.pdf"
+      }
+    ],
+    "st20-concentric:r0024": [
+      {
+        "value": 0.25,
+        "unit": "kg",
+        "method": "catalog",
+        "source": "ГОСТ 17378-2001, таблица 1, исполнение 1. Справочная масса при совпадении обоих наружных диаметров, стенок и длины 64 мм. https://files.stroyinf.ru/Data2/1/4294846/4294846097.pdf"
+      }
+    ],
+    "st20-concentric:r0025": [
+      {
+        "value": 0.34,
+        "unit": "kg",
+        "method": "catalog",
+        "source": "ГОСТ 17378-2001, таблица 1, исполнение 1. Справочная масса при совпадении обоих наружных диаметров, стенок и длины 64 мм. https://files.stroyinf.ru/Data2/1/4294846/4294846097.pdf"
+      }
+    ],
+    "st20-concentric:r0026": [
+      {
+        "value": 0.19,
+        "unit": "kg",
+        "method": "catalog",
+        "source": "ГОСТ 17378-2001, таблица 1, исполнение 1. Справочная масса при совпадении обоих наружных диаметров, стенок и длины 64 мм. https://files.stroyinf.ru/Data2/1/4294846/4294846097.pdf"
+      }
+    ],
+    "st20-concentric:r0027": [
+      {
+        "value": 0.25,
+        "unit": "kg",
+        "method": "catalog",
+        "source": "ГОСТ 17378-2001, таблица 1, исполнение 1. Справочная масса при совпадении обоих наружных диаметров, стенок и длины 64 мм. https://files.stroyinf.ru/Data2/1/4294846/4294846097.pdf"
+      }
+    ],
+    "st20-concentric:r0028": [
+      {
+        "value": 0.34,
+        "unit": "kg",
+        "method": "catalog",
+        "source": "ГОСТ 17378-2001, таблица 1, исполнение 1. Справочная масса при совпадении обоих наружных диаметров, стенок и длины 64 мм. https://files.stroyinf.ru/Data2/1/4294846/4294846097.pdf"
+      }
+    ],
+    "st20-concentric:r0029": [
+      {
+        "value": 0.19,
+        "unit": "kg",
+        "method": "catalog",
+        "source": "ГОСТ 17378-2001, таблица 1, исполнение 1. Справочная масса при совпадении обоих наружных диаметров, стенок и длины 64 мм. https://files.stroyinf.ru/Data2/1/4294846/4294846097.pdf"
+      }
+    ],
+    "st20-concentric:r0030": [
+      {
+        "value": 0.25,
+        "unit": "kg",
+        "method": "catalog",
+        "source": "ГОСТ 17378-2001, таблица 1, исполнение 1. Справочная масса при совпадении обоих наружных диаметров, стенок и длины 64 мм. https://files.stroyinf.ru/Data2/1/4294846/4294846097.pdf"
+      }
+    ],
+    "st20-concentric:r0031": [
+      {
+        "value": 0.34,
+        "unit": "kg",
+        "method": "catalog",
+        "source": "ГОСТ 17378-2001, таблица 1, исполнение 1. Справочная масса при совпадении обоих наружных диаметров, стенок и длины 64 мм. https://files.stroyinf.ru/Data2/1/4294846/4294846097.pdf"
+      }
+    ],
+    "st20-concentric:r0032": [
+      {
+        "value": 0.31,
+        "unit": "kg",
+        "method": "catalog",
+        "source": "ГОСТ 17378-2001, таблица 1, исполнение 1. Справочная масса при совпадении обоих наружных диаметров, стенок и длины 76 мм. https://files.stroyinf.ru/Data2/1/4294846/4294846097.pdf"
+      }
+    ],
+    "st20-concentric:r0033": [
+      {
+        "value": 0.42,
+        "unit": "kg",
+        "method": "catalog",
+        "source": "ГОСТ 17378-2001, таблица 1, исполнение 1. Справочная масса при совпадении обоих наружных диаметров, стенок и длины 76 мм. https://files.stroyinf.ru/Data2/1/4294846/4294846097.pdf"
+      }
+    ],
+    "st20-concentric:r0034": [
+      {
+        "value": 0.58,
+        "unit": "kg",
+        "method": "catalog",
+        "source": "ГОСТ 17378-2001, таблица 1, исполнение 1. Справочная масса при совпадении обоих наружных диаметров, стенок и длины 76 мм. https://files.stroyinf.ru/Data2/1/4294846/4294846097.pdf"
+      }
+    ],
+    "st20-concentric:r0035": [
+      {
+        "value": 0.31,
+        "unit": "kg",
+        "method": "catalog",
+        "source": "ГОСТ 17378-2001, таблица 1, исполнение 1. Справочная масса при совпадении обоих наружных диаметров, стенок и длины 76 мм. https://files.stroyinf.ru/Data2/1/4294846/4294846097.pdf"
+      }
+    ],
+    "st20-concentric:r0036": [
+      {
+        "value": 0.42,
+        "unit": "kg",
+        "method": "catalog",
+        "source": "ГОСТ 17378-2001, таблица 1, исполнение 1. Справочная масса при совпадении обоих наружных диаметров, стенок и длины 76 мм. https://files.stroyinf.ru/Data2/1/4294846/4294846097.pdf"
+      }
+    ],
+    "st20-concentric:r0037": [
+      {
+        "value": 0.58,
+        "unit": "kg",
+        "method": "catalog",
+        "source": "ГОСТ 17378-2001, таблица 1, исполнение 1. Справочная масса при совпадении обоих наружных диаметров, стенок и длины 76 мм. https://files.stroyinf.ru/Data2/1/4294846/4294846097.pdf"
+      }
+    ],
+    "st20-concentric:r0038": [
+      {
+        "value": 0.31,
+        "unit": "kg",
+        "method": "catalog",
+        "source": "ГОСТ 17378-2001, таблица 1, исполнение 1. Справочная масса при совпадении обоих наружных диаметров, стенок и длины 76 мм. https://files.stroyinf.ru/Data2/1/4294846/4294846097.pdf"
+      }
+    ],
+    "st20-concentric:r0039": [
+      {
+        "value": 0.42,
+        "unit": "kg",
+        "method": "catalog",
+        "source": "ГОСТ 17378-2001, таблица 1, исполнение 1. Справочная масса при совпадении обоих наружных диаметров, стенок и длины 76 мм. https://files.stroyinf.ru/Data2/1/4294846/4294846097.pdf"
+      }
+    ],
+    "st20-concentric:r0040": [
+      {
+        "value": 0.58,
+        "unit": "kg",
+        "method": "catalog",
+        "source": "ГОСТ 17378-2001, таблица 1, исполнение 1. Справочная масса при совпадении обоих наружных диаметров, стенок и длины 76 мм. https://files.stroyinf.ru/Data2/1/4294846/4294846097.pdf"
+      }
+    ],
+    "st20-concentric:r0041": [
+      {
+        "value": 0.47,
+        "unit": "kg",
+        "method": "catalog",
+        "source": "ГОСТ 17378-2001, таблица 1, исполнение 1. Справочная масса при совпадении обоих наружных диаметров, стенок и длины 89 мм. https://files.stroyinf.ru/Data2/1/4294846/4294846097.pdf"
+      }
+    ],
+    "st20-concentric:r0042": [
+      {
+        "value": 0.78,
+        "unit": "kg",
+        "method": "catalog",
+        "source": "ГОСТ 17378-2001, таблица 1, исполнение 1. Справочная масса при совпадении обоих наружных диаметров, стенок и длины 89 мм. https://files.stroyinf.ru/Data2/1/4294846/4294846097.pdf"
+      }
+    ],
+    "st20-concentric:r0043": [
+      {
+        "value": 1.1,
+        "unit": "kg",
+        "method": "catalog",
+        "source": "ГОСТ 17378-2001, таблица 1, исполнение 1. Справочная масса при совпадении обоих наружных диаметров, стенок и длины 89 мм. https://files.stroyinf.ru/Data2/1/4294846/4294846097.pdf"
+      }
+    ],
+    "st20-concentric:r0044": [
+      {
+        "value": 0.47,
+        "unit": "kg",
+        "method": "catalog",
+        "source": "ГОСТ 17378-2001, таблица 1, исполнение 1. Справочная масса при совпадении обоих наружных диаметров, стенок и длины 89 мм. https://files.stroyinf.ru/Data2/1/4294846/4294846097.pdf"
+      }
+    ],
+    "st20-concentric:r0045": [
+      {
+        "value": 0.78,
+        "unit": "kg",
+        "method": "catalog",
+        "source": "ГОСТ 17378-2001, таблица 1, исполнение 1. Справочная масса при совпадении обоих наружных диаметров, стенок и длины 89 мм. https://files.stroyinf.ru/Data2/1/4294846/4294846097.pdf"
+      }
+    ],
+    "st20-concentric:r0046": [
+      {
+        "value": 1.1,
+        "unit": "kg",
+        "method": "catalog",
+        "source": "ГОСТ 17378-2001, таблица 1, исполнение 1. Справочная масса при совпадении обоих наружных диаметров, стенок и длины 89 мм. https://files.stroyinf.ru/Data2/1/4294846/4294846097.pdf"
+      }
+    ],
+    "st20-concentric:r0047": [
+      {
+        "value": 0.47,
+        "unit": "kg",
+        "method": "catalog",
+        "source": "ГОСТ 17378-2001, таблица 1, исполнение 1. Справочная масса при совпадении обоих наружных диаметров, стенок и длины 89 мм. https://files.stroyinf.ru/Data2/1/4294846/4294846097.pdf"
+      }
+    ],
+    "st20-concentric:r0048": [
+      {
+        "value": 0.78,
+        "unit": "kg",
+        "method": "catalog",
+        "source": "ГОСТ 17378-2001, таблица 1, исполнение 1. Справочная масса при совпадении обоих наружных диаметров, стенок и длины 89 мм. https://files.stroyinf.ru/Data2/1/4294846/4294846097.pdf"
+      }
+    ],
+    "st20-concentric:r0049": [
+      {
+        "value": 1.1,
+        "unit": "kg",
+        "method": "catalog",
+        "source": "ГОСТ 17378-2001, таблица 1, исполнение 1. Справочная масса при совпадении обоих наружных диаметров, стенок и длины 89 мм. https://files.stroyinf.ru/Data2/1/4294846/4294846097.pdf"
+      }
+    ],
+    "st20-concentric:r0050": [
+      {
+        "value": 0.6,
+        "unit": "kg",
+        "method": "estimated",
+        "source": "Масса для предварительного расчёта по эксцентрическому переходу СТ20 переходы-001-r0050 из исходной книги «Калькулятор по ОБВЯЗКЕ.xlsm». Совпадают DN, PN, оба диаметра и стенки. Осевую длину и заводскую массу концентрического исполнения требуется уточнить."
+      }
+    ],
+    "st20-concentric:r0051": [
+      {
+        "value": 1,
+        "unit": "kg",
+        "method": "estimated",
+        "source": "Масса для предварительного расчёта по эксцентрическому переходу СТ20 переходы-001-r0051 из исходной книги «Калькулятор по ОБВЯЗКЕ.xlsm». Совпадают DN, PN, оба диаметра и стенки. Осевую длину и заводскую массу концентрического исполнения требуется уточнить."
+      }
+    ],
+    "st20-concentric:r0052": [
+      {
+        "value": 1.4,
+        "unit": "kg",
+        "method": "estimated",
+        "source": "Масса для предварительного расчёта по эксцентрическому переходу СТ20 переходы-001-r0052 из исходной книги «Калькулятор по ОБВЯЗКЕ.xlsm». Совпадают DN, PN, оба диаметра и стенки. Осевую длину и заводскую массу концентрического исполнения требуется уточнить."
+      }
+    ],
+    "st20-concentric:r0053": [
+      {
+        "value": 0.6,
+        "unit": "kg",
+        "method": "estimated",
+        "source": "Масса для предварительного расчёта по эксцентрическому переходу СТ20 переходы-001-r0053 из исходной книги «Калькулятор по ОБВЯЗКЕ.xlsm». Совпадают DN, PN, оба диаметра и стенки. Осевую длину и заводскую массу концентрического исполнения требуется уточнить."
+      }
+    ],
+    "st20-concentric:r0054": [
+      {
+        "value": 1,
+        "unit": "kg",
+        "method": "estimated",
+        "source": "Масса для предварительного расчёта по эксцентрическому переходу СТ20 переходы-001-r0054 из исходной книги «Калькулятор по ОБВЯЗКЕ.xlsm». Совпадают DN, PN, оба диаметра и стенки. Осевую длину и заводскую массу концентрического исполнения требуется уточнить."
+      }
+    ],
+    "st20-concentric:r0055": [
+      {
+        "value": 1.4,
+        "unit": "kg",
+        "method": "estimated",
+        "source": "Масса для предварительного расчёта по эксцентрическому переходу СТ20 переходы-001-r0055 из исходной книги «Калькулятор по ОБВЯЗКЕ.xlsm». Совпадают DN, PN, оба диаметра и стенки. Осевую длину и заводскую массу концентрического исполнения требуется уточнить."
+      }
+    ],
+    "st20-concentric:r0056": [
+      {
+        "value": 0.6,
+        "unit": "kg",
+        "method": "catalog",
+        "source": "ГОСТ 17378-2001, таблица 2, исполнение 2. Справочная масса при совпадении обоих наружных диаметров, стенок и длины 75 мм. https://files.stroyinf.ru/Data2/1/4294846/4294846097.pdf"
+      }
+    ],
+    "st20-concentric:r0057": [
+      {
+        "value": 0.9,
+        "unit": "kg",
+        "method": "catalog",
+        "source": "ГОСТ 17378-2001, таблица 2, исполнение 2. Справочная масса при совпадении обоих наружных диаметров, стенок и длины 75 мм. https://files.stroyinf.ru/Data2/1/4294846/4294846097.pdf"
+      }
+    ],
+    "st20-concentric:r0058": [
+      {
+        "value": 1.2,
+        "unit": "kg",
+        "method": "catalog",
+        "source": "ГОСТ 17378-2001, таблица 2, исполнение 2. Справочная масса при совпадении обоих наружных диаметров, стенок и длины 75 мм. https://files.stroyinf.ru/Data2/1/4294846/4294846097.pdf"
+      }
+    ],
+    "st20-concentric:r0059": [
+      {
+        "value": 0.9,
+        "unit": "kg",
+        "method": "estimated",
+        "source": "Масса для предварительного расчёта по эксцентрическому переходу СТ20 переходы-001-r0059 из исходной книги «Калькулятор по ОБВЯЗКЕ.xlsm». Совпадают DN, PN, оба диаметра и стенки. Осевую длину и заводскую массу концентрического исполнения требуется уточнить."
+      }
+    ],
+    "st20-concentric:r0060": [
+      {
+        "value": 1.7,
+        "unit": "kg",
+        "method": "estimated",
+        "source": "Масса для предварительного расчёта по эксцентрическому переходу СТ20 переходы-001-r0060 из исходной книги «Калькулятор по ОБВЯЗКЕ.xlsm». Совпадают DN, PN, оба диаметра и стенки. Осевую длину и заводскую массу концентрического исполнения требуется уточнить."
+      }
+    ],
+    "st20-concentric:r0061": [
+      {
+        "value": 2.3,
+        "unit": "kg",
+        "method": "estimated",
+        "source": "Масса для предварительного расчёта по эксцентрическому переходу СТ20 переходы-001-r0061 из исходной книги «Калькулятор по ОБВЯЗКЕ.xlsm». Совпадают DN, PN, оба диаметра и стенки. Осевую длину и заводскую массу концентрического исполнения требуется уточнить."
+      }
+    ],
+    "st20-concentric:r0062": [
+      {
+        "value": 1,
+        "unit": "kg",
+        "method": "estimated",
+        "source": "Масса для предварительного расчёта по эксцентрическому переходу СТ20 переходы-001-r0062 из исходной книги «Калькулятор по ОБВЯЗКЕ.xlsm». Совпадают DN, PN, оба диаметра и стенки. Осевую длину и заводскую массу концентрического исполнения требуется уточнить."
+      }
+    ],
+    "st20-concentric:r0063": [
+      {
+        "value": 1.8,
+        "unit": "kg",
+        "method": "estimated",
+        "source": "Масса для предварительного расчёта по эксцентрическому переходу СТ20 переходы-001-r0063 из исходной книги «Калькулятор по ОБВЯЗКЕ.xlsm». Совпадают DN, PN, оба диаметра и стенки. Осевую длину и заводскую массу концентрического исполнения требуется уточнить."
+      }
+    ],
+    "st20-concentric:r0064": [
+      {
+        "value": 2.1,
+        "unit": "kg",
+        "method": "estimated",
+        "source": "Масса для предварительного расчёта по эксцентрическому переходу СТ20 переходы-001-r0064 из исходной книги «Калькулятор по ОБВЯЗКЕ.xlsm». Совпадают DN, PN, оба диаметра и стенки. Осевую длину и заводскую массу концентрического исполнения требуется уточнить."
+      }
+    ],
+    "st20-concentric:r0065": [
+      {
+        "value": 1,
+        "unit": "kg",
+        "method": "estimated",
+        "source": "Масса для предварительного расчёта по эксцентрическому переходу СТ20 переходы-001-r0065 из исходной книги «Калькулятор по ОБВЯЗКЕ.xlsm». Совпадают DN, PN, оба диаметра и стенки. Осевую длину и заводскую массу концентрического исполнения требуется уточнить."
+      }
+    ],
+    "st20-concentric:r0066": [
+      {
+        "value": 1.6,
+        "unit": "kg",
+        "method": "estimated",
+        "source": "Масса для предварительного расчёта по эксцентрическому переходу СТ20 переходы-001-r0066 из исходной книги «Калькулятор по ОБВЯЗКЕ.xlsm». Совпадают DN, PN, оба диаметра и стенки. Осевую длину и заводскую массу концентрического исполнения требуется уточнить."
+      }
+    ],
+    "st20-concentric:r0067": [
+      {
+        "value": 2,
+        "unit": "kg",
+        "method": "estimated",
+        "source": "Масса для предварительного расчёта по эксцентрическому переходу СТ20 переходы-001-r0067 из исходной книги «Калькулятор по ОБВЯЗКЕ.xlsm». Совпадают DN, PN, оба диаметра и стенки. Осевую длину и заводскую массу концентрического исполнения требуется уточнить."
+      }
+    ],
+    "st20-concentric:r0068": [
+      {
+        "value": 1.7,
+        "unit": "kg",
+        "method": "estimated",
+        "source": "Масса для предварительного расчёта по эксцентрическому переходу СТ20 переходы-001-r0068 из исходной книги «Калькулятор по ОБВЯЗКЕ.xlsm». Совпадают DN, PN, оба диаметра и стенки. Осевую длину и заводскую массу концентрического исполнения требуется уточнить."
+      }
+    ],
+    "st20-concentric:r0069": [
+      {
+        "value": 2.6,
+        "unit": "kg",
+        "method": "estimated",
+        "source": "Масса для предварительного расчёта по эксцентрическому переходу СТ20 переходы-001-r0069 из исходной книги «Калькулятор по ОБВЯЗКЕ.xlsm». Совпадают DN, PN, оба диаметра и стенки. Осевую длину и заводскую массу концентрического исполнения требуется уточнить."
+      }
+    ],
+    "st20-concentric:r0070": [
+      {
+        "value": 4.1,
+        "unit": "kg",
+        "method": "estimated",
+        "source": "Масса для предварительного расчёта по эксцентрическому переходу СТ20 переходы-001-r0070 из исходной книги «Калькулятор по ОБВЯЗКЕ.xlsm». Совпадают DN, PN, оба диаметра и стенки. Осевую длину и заводскую массу концентрического исполнения требуется уточнить."
+      }
+    ],
+    "st20-concentric:r0071": [
+      {
+        "value": 1.3,
+        "unit": "kg",
+        "method": "catalog",
+        "source": "ГОСТ 17378-2001, таблица 2, исполнение 2. Справочная масса при совпадении обоих наружных диаметров, стенок и длины 100 мм. https://files.stroyinf.ru/Data2/1/4294846/4294846097.pdf"
+      }
+    ],
+    "st20-concentric:r0072": [
+      {
+        "value": 1.59,
+        "unit": "kg",
+        "method": "calculated",
+        "source": "Теоретическая масса усечённого конуса по двум наружным диаметрам, толщине стенок на торцах и осевой длине. Длина 100 мм по принятой в базе размерной группе ГОСТ 17378-2001. Плотность углеродистой стали 7850 кг/м³ по ГОСТ 8732-2025. https://files.stroyinf.ru/Data2/1/4294846/4294846097.pdf https://normadocs.ru/gost_8732-2025"
+      }
+    ],
+    "st20-concentric:r0073": [
+      {
+        "value": 2.28,
+        "unit": "kg",
+        "method": "calculated",
+        "source": "Теоретическая масса усечённого конуса по двум наружным диаметрам, толщине стенок на торцах и осевой длине. Длина 100 мм по принятой в базе размерной группе ГОСТ 17378-2001. Плотность углеродистой стали 7850 кг/м³ по ГОСТ 8732-2025. https://files.stroyinf.ru/Data2/1/4294846/4294846097.pdf https://normadocs.ru/gost_8732-2025"
+      }
+    ],
+    "st20-concentric:r0074": [
+      {
+        "value": 1.7,
+        "unit": "kg",
+        "method": "estimated",
+        "source": "Масса для предварительного расчёта по эксцентрическому переходу СТ20 переходы-001-r0074 из исходной книги «Калькулятор по ОБВЯЗКЕ.xlsm». Совпадают DN, PN, оба диаметра и стенки. Осевую длину и заводскую массу концентрического исполнения требуется уточнить."
+      }
+    ],
+    "st20-concentric:r0075": [
+      {
+        "value": 2.6,
+        "unit": "kg",
+        "method": "estimated",
+        "source": "Масса для предварительного расчёта по эксцентрическому переходу СТ20 переходы-001-r0075 из исходной книги «Калькулятор по ОБВЯЗКЕ.xlsm». Совпадают DN, PN, оба диаметра и стенки. Осевую длину и заводскую массу концентрического исполнения требуется уточнить."
+      }
+    ],
+    "st20-concentric:r0076": [
+      {
+        "value": 4.1,
+        "unit": "kg",
+        "method": "estimated",
+        "source": "Масса для предварительного расчёта по эксцентрическому переходу СТ20 переходы-001-r0076 из исходной книги «Калькулятор по ОБВЯЗКЕ.xlsm». Совпадают DN, PN, оба диаметра и стенки. Осевую длину и заводскую массу концентрического исполнения требуется уточнить."
+      }
+    ],
+    "st20-concentric:r0077": [
+      {
+        "value": 2.3,
+        "unit": "kg",
+        "method": "catalog",
+        "source": "ГОСТ 17378-2001, таблица 2, исполнение 2. Справочная масса при совпадении обоих наружных диаметров, стенок и длины 130 мм. https://files.stroyinf.ru/Data2/1/4294846/4294846097.pdf"
+      }
+    ],
+    "st20-concentric:r0078": [
+      {
+        "value": 2.49,
+        "unit": "kg",
+        "method": "calculated",
+        "source": "Теоретическая масса усечённого конуса по двум наружным диаметрам, толщине стенок на торцах и осевой длине. Длина 130 мм по принятой в базе размерной группе ГОСТ 17378-2001. Плотность углеродистой стали 7850 кг/м³ по ГОСТ 8732-2025. https://files.stroyinf.ru/Data2/1/4294846/4294846097.pdf https://normadocs.ru/gost_8732-2025"
+      }
+    ],
+    "st20-concentric:r0079": [
+      {
+        "value": 3.54,
+        "unit": "kg",
+        "method": "calculated",
+        "source": "Теоретическая масса усечённого конуса по двум наружным диаметрам, толщине стенок на торцах и осевой длине. Длина 130 мм по принятой в базе размерной группе ГОСТ 17378-2001. Плотность углеродистой стали 7850 кг/м³ по ГОСТ 8732-2025. https://files.stroyinf.ru/Data2/1/4294846/4294846097.pdf https://normadocs.ru/gost_8732-2025"
+      }
+    ],
+    "st20-concentric:r0080": [
+      {
+        "value": 2.4,
+        "unit": "kg",
+        "method": "estimated",
+        "source": "Масса для предварительного расчёта по эксцентрическому переходу СТ20 переходы-001-r0080 из исходной книги «Калькулятор по ОБВЯЗКЕ.xlsm». Совпадают DN, PN, оба диаметра и стенки. Осевую длину и заводскую массу концентрического исполнения требуется уточнить."
+      }
+    ],
+    "st20-concentric:r0081": [
+      {
+        "value": 3.9,
+        "unit": "kg",
+        "method": "estimated",
+        "source": "Масса для предварительного расчёта по эксцентрическому переходу СТ20 переходы-001-r0081 из исходной книги «Калькулятор по ОБВЯЗКЕ.xlsm». Совпадают DN, PN, оба диаметра и стенки. Осевую длину и заводскую массу концентрического исполнения требуется уточнить."
+      }
+    ],
+    "st20-concentric:r0082": [
+      {
+        "value": 5.8,
+        "unit": "kg",
+        "method": "estimated",
+        "source": "Масса для предварительного расчёта по эксцентрическому переходу СТ20 переходы-001-r0082 из исходной книги «Калькулятор по ОБВЯЗКЕ.xlsm». Совпадают DN, PN, оба диаметра и стенки. Осевую длину и заводскую массу концентрического исполнения требуется уточнить."
+      }
+    ],
+    "st20-concentric:r0083": [
+      {
+        "value": 2.3,
+        "unit": "kg",
+        "method": "catalog",
+        "source": "ГОСТ 17378-2001, таблица 2, исполнение 2. Справочная масса при совпадении обоих наружных диаметров, стенок и длины 130 мм. https://files.stroyinf.ru/Data2/1/4294846/4294846097.pdf"
+      }
+    ],
+    "st20-concentric:r0084": [
+      {
+        "value": 3.0,
+        "unit": "kg",
+        "method": "calculated",
+        "source": "Теоретическая масса усечённого конуса по двум наружным диаметрам, толщине стенок на торцах и осевой длине. Длина 130 мм по принятой в базе размерной группе ГОСТ 17378-2001. Плотность углеродистой стали 7850 кг/м³ по ГОСТ 8732-2025. https://files.stroyinf.ru/Data2/1/4294846/4294846097.pdf https://normadocs.ru/gost_8732-2025"
+      }
+    ],
+    "st20-concentric:r0085": [
+      {
+        "value": 4.57,
+        "unit": "kg",
+        "method": "calculated",
+        "source": "Теоретическая масса усечённого конуса по двум наружным диаметрам, толщине стенок на торцах и осевой длине. Длина 130 мм по принятой в базе размерной группе ГОСТ 17378-2001. Плотность углеродистой стали 7850 кг/м³ по ГОСТ 8732-2025. https://files.stroyinf.ru/Data2/1/4294846/4294846097.pdf https://normadocs.ru/gost_8732-2025"
+      }
+    ],
+    "st20-concentric:r0086": [
+      {
+        "value": 5.3,
+        "unit": "kg",
+        "method": "estimated",
+        "source": "Масса для предварительного расчёта по эксцентрическому переходу СТ20 переходы-001-r0086 из исходной книги «Калькулятор по ОБВЯЗКЕ.xlsm». Совпадают DN, PN, оба диаметра и стенки. Осевую длину и заводскую массу концентрического исполнения требуется уточнить."
+      }
+    ],
+    "st20-concentric:r0087": [
+      {
+        "value": 6.5,
+        "unit": "kg",
+        "method": "estimated",
+        "source": "Масса для предварительного расчёта по эксцентрическому переходу СТ20 переходы-001-r0087 из исходной книги «Калькулятор по ОБВЯЗКЕ.xlsm». Совпадают DN, PN, оба диаметра и стенки. Осевую длину и заводскую массу концентрического исполнения требуется уточнить."
+      }
+    ],
+    "st20-concentric:r0088": [
+      {
+        "value": 9,
+        "unit": "kg",
+        "method": "estimated",
+        "source": "Масса для предварительного расчёта по эксцентрическому переходу СТ20 переходы-001-r0088 из исходной книги «Калькулятор по ОБВЯЗКЕ.xlsm». Совпадают DN, PN, оба диаметра и стенки. Осевую длину и заводскую массу концентрического исполнения требуется уточнить."
+      }
+    ],
+    "st20-concentric:r0089": [
+      {
+        "value": 5.3,
+        "unit": "kg",
+        "method": "estimated",
+        "source": "Масса для предварительного расчёта по эксцентрическому переходу СТ20 переходы-001-r0089 из исходной книги «Калькулятор по ОБВЯЗКЕ.xlsm». Совпадают DN, PN, оба диаметра и стенки. Осевую длину и заводскую массу концентрического исполнения требуется уточнить."
+      }
+    ],
+    "st20-concentric:r0090": [
+      {
+        "value": 6.5,
+        "unit": "kg",
+        "method": "estimated",
+        "source": "Масса для предварительного расчёта по эксцентрическому переходу СТ20 переходы-001-r0090 из исходной книги «Калькулятор по ОБВЯЗКЕ.xlsm». Совпадают DN, PN, оба диаметра и стенки. Осевую длину и заводскую массу концентрического исполнения требуется уточнить."
+      }
+    ],
+    "st20-concentric:r0091": [
+      {
+        "value": 9,
+        "unit": "kg",
+        "method": "estimated",
+        "source": "Масса для предварительного расчёта по эксцентрическому переходу СТ20 переходы-001-r0091 из исходной книги «Калькулятор по ОБВЯЗКЕ.xlsm». Совпадают DN, PN, оба диаметра и стенки. Осевую длину и заводскую массу концентрического исполнения требуется уточнить."
+      }
+    ],
+    "st20-concentric:r0092": [
+      {
+        "value": 5.3,
+        "unit": "kg",
+        "method": "estimated",
+        "source": "Масса для предварительного расчёта по эксцентрическому переходу СТ20 переходы-001-r0092 из исходной книги «Калькулятор по ОБВЯЗКЕ.xlsm». Совпадают DN, PN, оба диаметра и стенки. Осевую длину и заводскую массу концентрического исполнения требуется уточнить."
+      }
+    ],
+    "st20-concentric:r0093": [
+      {
+        "value": 6.5,
+        "unit": "kg",
+        "method": "estimated",
+        "source": "Масса для предварительного расчёта по эксцентрическому переходу СТ20 переходы-001-r0093 из исходной книги «Калькулятор по ОБВЯЗКЕ.xlsm». Совпадают DN, PN, оба диаметра и стенки. Осевую длину и заводскую массу концентрического исполнения требуется уточнить."
+      }
+    ],
+    "st20-concentric:r0094": [
+      {
+        "value": 9,
+        "unit": "kg",
+        "method": "estimated",
+        "source": "Масса для предварительного расчёта по эксцентрическому переходу СТ20 переходы-001-r0094 из исходной книги «Калькулятор по ОБВЯЗКЕ.xlsm». Совпадают DN, PN, оба диаметра и стенки. Осевую длину и заводскую массу концентрического исполнения требуется уточнить."
+      }
+    ],
+    "st20-concentric:r0095": [
+      {
+        "value": 6,
+        "unit": "kg",
+        "method": "catalog",
+        "source": "ГОСТ 17378-2001, таблица 2, исполнение 2. Справочная масса при совпадении обоих наружных диаметров, стенок и длины 140 мм. https://files.stroyinf.ru/Data2/1/4294846/4294846097.pdf"
+      }
+    ],
+    "st20-concentric:r0096": [
+      {
+        "value": 5.63,
+        "unit": "kg",
+        "method": "calculated",
+        "source": "Теоретическая масса усечённого конуса по двум наружным диаметрам, толщине стенок на торцах и осевой длине. Длина 140 мм по принятой в базе размерной группе ГОСТ 17378-2001. Плотность углеродистой стали 7850 кг/м³ по ГОСТ 8732-2025. https://files.stroyinf.ru/Data2/1/4294846/4294846097.pdf https://normadocs.ru/gost_8732-2025"
+      }
+    ],
+    "st20-concentric:r0097": [
+      {
+        "value": 7.37,
+        "unit": "kg",
+        "method": "calculated",
+        "source": "Теоретическая масса усечённого конуса по двум наружным диаметрам, толщине стенок на торцах и осевой длине. Длина 140 мм по принятой в базе размерной группе ГОСТ 17378-2001. Плотность углеродистой стали 7850 кг/м³ по ГОСТ 8732-2025. https://files.stroyinf.ru/Data2/1/4294846/4294846097.pdf https://normadocs.ru/gost_8732-2025"
+      }
+    ],
+    "st20-concentric:r0098": [
+      {
+        "value": 8.3,
+        "unit": "kg",
+        "method": "catalog",
+        "source": "ГОСТ 17378-2001, таблица 2, исполнение 2. Справочная масса при совпадении обоих наружных диаметров, стенок и длины 180 мм. https://files.stroyinf.ru/Data2/1/4294846/4294846097.pdf"
+      }
+    ],
+    "st20-concentric:r0099": [
+      {
+        "value": 7.99,
+        "unit": "kg",
+        "method": "calculated",
+        "source": "Теоретическая масса усечённого конуса по двум наружным диаметрам, толщине стенок на торцах и осевой длине. Длина 180 мм по принятой в базе размерной группе ГОСТ 17378-2001. Плотность углеродистой стали 7850 кг/м³ по ГОСТ 8732-2025. https://files.stroyinf.ru/Data2/1/4294846/4294846097.pdf https://normadocs.ru/gost_8732-2025"
+      }
+    ],
+    "st20-concentric:r0100": [
+      {
+        "value": 10.5,
+        "unit": "kg",
+        "method": "calculated",
+        "source": "Теоретическая масса усечённого конуса по двум наружным диаметрам, толщине стенок на торцах и осевой длине. Длина 180 мм по принятой в базе размерной группе ГОСТ 17378-2001. Плотность углеродистой стали 7850 кг/м³ по ГОСТ 8732-2025. https://files.stroyinf.ru/Data2/1/4294846/4294846097.pdf https://normadocs.ru/gost_8732-2025"
+      }
+    ],
+    "st20-concentric:r0101": [
+      {
+        "value": 7.0,
+        "unit": "kg",
+        "method": "calculated",
+        "source": "Теоретическая масса усечённого конуса по двум наружным диаметрам, толщине стенок на торцах и осевой длине. Длина 178 мм по проектному геометрическому аналогу переходы-005-r0431. Плотность углеродистой стали 7850 кг/м³ по ГОСТ 8732-2025. https://files.stroyinf.ru/Data2/1/4294846/4294846097.pdf https://normadocs.ru/gost_8732-2025"
+      }
+    ],
+    "st20-concentric:r0102": [
+      {
+        "value": 12,
+        "unit": "kg",
+        "method": "catalog",
+        "source": "ГОСТ 17378-2001, таблица 1, исполнение 1. Справочная масса при совпадении обоих наружных диаметров, стенок и длины 178 мм. https://files.stroyinf.ru/Data2/1/4294846/4294846097.pdf"
+      }
+    ],
+    "st20-concentric:r0103": [
+      {
+        "value": 12.6,
+        "unit": "kg",
+        "method": "calculated",
+        "source": "Теоретическая масса усечённого конуса по двум наружным диаметрам, толщине стенок на торцах и осевой длине. Длина 178 мм по проектному геометрическому аналогу переходы-005-r0433. Плотность углеродистой стали 7850 кг/м³ по ГОСТ 8732-2025. https://files.stroyinf.ru/Data2/1/4294846/4294846097.pdf https://normadocs.ru/gost_8732-2025"
+      }
+    ],
+    "st20-concentric:r0104": [
+      {
+        "value": 11,
+        "unit": "kg",
+        "method": "catalog",
+        "source": "ГОСТ 17378-2001, таблица 2, исполнение 2. Справочная масса при совпадении обоих наружных диаметров, стенок и длины 140 мм. https://files.stroyinf.ru/Data2/1/4294846/4294846097.pdf"
+      }
+    ],
+    "st20-concentric:r0105": [
+      {
+        "value": 14,
+        "unit": "kg",
+        "method": "catalog",
+        "source": "ГОСТ 17378-2001, таблица 2, исполнение 2. Справочная масса при совпадении обоих наружных диаметров, стенок и длины 140 мм. https://files.stroyinf.ru/Data2/1/4294846/4294846097.pdf"
+      }
+    ],
+    "st20-concentric:r0106": [
+      {
+        "value": 16,
+        "unit": "kg",
+        "method": "catalog",
+        "source": "ГОСТ 17378-2001, таблица 2, исполнение 2. Справочная масса при совпадении обоих наружных диаметров, стенок и длины 140 мм. https://files.stroyinf.ru/Data2/1/4294846/4294846097.pdf"
+      }
+    ],
+    "st20-concentric:r0107": [
+      {
+        "value": 11,
+        "unit": "kg",
+        "method": "catalog",
+        "source": "ГОСТ 17378-2001, таблица 2, исполнение 2. Справочная масса при совпадении обоих наружных диаметров, стенок и длины 180 мм. https://files.stroyinf.ru/Data2/1/4294846/4294846097.pdf"
+      }
+    ],
+    "st20-concentric:r0108": [
+      {
+        "value": 14,
+        "unit": "kg",
+        "method": "catalog",
+        "source": "ГОСТ 17378-2001, таблица 2, исполнение 2. Справочная масса при совпадении обоих наружных диаметров, стенок и длины 180 мм. https://files.stroyinf.ru/Data2/1/4294846/4294846097.pdf"
+      }
+    ],
+    "st20-concentric:r0109": [
+      {
+        "value": 17,
+        "unit": "kg",
+        "method": "catalog",
+        "source": "ГОСТ 17378-2001, таблица 2, исполнение 2. Справочная масса при совпадении обоих наружных диаметров, стенок и длины 180 мм. https://files.stroyinf.ru/Data2/1/4294846/4294846097.pdf"
+      }
+    ],
+    "st20-concentric:r0110": [
+      {
+        "value": 11,
+        "unit": "kg",
+        "method": "catalog",
+        "source": "ГОСТ 17378-2001, таблица 2, исполнение 2. Справочная масса при совпадении обоих наружных диаметров, стенок и длины 180 мм. https://files.stroyinf.ru/Data2/1/4294846/4294846097.pdf"
+      }
+    ],
+    "st20-concentric:r0111": [
+      {
+        "value": 14,
+        "unit": "kg",
+        "method": "catalog",
+        "source": "ГОСТ 17378-2001, таблица 2, исполнение 2. Справочная масса при совпадении обоих наружных диаметров, стенок и длины 180 мм. https://files.stroyinf.ru/Data2/1/4294846/4294846097.pdf"
+      }
+    ],
+    "st20-concentric:r0112": [
+      {
+        "value": 17,
+        "unit": "kg",
+        "method": "catalog",
+        "source": "ГОСТ 17378-2001, таблица 2, исполнение 2. Справочная масса при совпадении обоих наружных диаметров, стенок и длины 180 мм. https://files.stroyinf.ru/Data2/1/4294846/4294846097.pdf"
+      }
+    ],
+    "st20-concentric:r0113": [
+      {
+        "value": 13.6,
+        "unit": "kg",
+        "method": "calculated",
+        "source": "Теоретическая масса усечённого конуса по двум наружным диаметрам, толщине стенок на торцах и осевой длине. Длина 220 мм по принятой в базе размерной группе ГОСТ 17378-2001. Плотность углеродистой стали 7850 кг/м³ по ГОСТ 8732-2025. https://files.stroyinf.ru/Data2/1/4294846/4294846097.pdf https://normadocs.ru/gost_8732-2025"
+      }
+    ],
+    "st20-concentric:r0114": [
+      {
+        "value": 22,
+        "unit": "kg",
+        "method": "catalog",
+        "source": "ГОСТ 17378-2001, таблица 2, исполнение 2. Справочная масса при совпадении обоих наружных диаметров, стенок и длины 220 мм. https://files.stroyinf.ru/Data2/1/4294846/4294846097.pdf"
+      }
+    ],
+    "st20-concentric:r0115": [
+      {
+        "value": 18.9,
+        "unit": "kg",
+        "method": "calculated",
+        "source": "Теоретическая масса усечённого конуса по двум наружным диаметрам, толщине стенок на торцах и осевой длине. Длина 220 мм по принятой в базе размерной группе ГОСТ 17378-2001. Плотность углеродистой стали 7850 кг/м³ по ГОСТ 8732-2025. https://files.stroyinf.ru/Data2/1/4294846/4294846097.pdf https://normadocs.ru/gost_8732-2025"
+      }
+    ],
+    "st20-concentric:r0116": [
+      {
+        "value": 20,
+        "unit": "kg",
+        "method": "catalog",
+        "source": "ГОСТ 17378-2001, таблица 2, исполнение 2. Справочная масса при совпадении обоих наружных диаметров, стенок и длины 220 мм. https://files.stroyinf.ru/Data2/1/4294846/4294846097.pdf"
+      }
+    ],
+    "st20-concentric:r0117": [
+      {
+        "value": 24,
+        "unit": "kg",
+        "method": "catalog",
+        "source": "ГОСТ 17378-2001, таблица 2, исполнение 2. Справочная масса при совпадении обоих наружных диаметров, стенок и длины 220 мм. https://files.stroyinf.ru/Data2/1/4294846/4294846097.pdf"
+      }
+    ],
+    "st20-concentric:r0118": [
+      {
+        "value": 28,
+        "unit": "kg",
+        "method": "catalog",
+        "source": "ГОСТ 17378-2001, таблица 2, исполнение 2. Справочная масса при совпадении обоих наружных диаметров, стенок и длины 220 мм. https://files.stroyinf.ru/Data2/1/4294846/4294846097.pdf"
+      }
+    ],
+    "st20-concentric:r0119": [
+      {
+        "value": 20,
+        "unit": "kg",
+        "method": "catalog",
+        "source": "ГОСТ 17378-2001, таблица 2, исполнение 2. Справочная масса при совпадении обоих наружных диаметров, стенок и длины 220 мм. https://files.stroyinf.ru/Data2/1/4294846/4294846097.pdf"
+      }
+    ],
+    "st20-concentric:r0120": [
+      {
+        "value": 24,
+        "unit": "kg",
+        "method": "catalog",
+        "source": "ГОСТ 17378-2001, таблица 2, исполнение 2. Справочная масса при совпадении обоих наружных диаметров, стенок и длины 220 мм. https://files.stroyinf.ru/Data2/1/4294846/4294846097.pdf"
+      }
+    ],
+    "st20-concentric:r0121": [
+      {
+        "value": 28,
+        "unit": "kg",
+        "method": "catalog",
+        "source": "ГОСТ 17378-2001, таблица 2, исполнение 2. Справочная масса при совпадении обоих наружных диаметров, стенок и длины 220 мм. https://files.stroyinf.ru/Data2/1/4294846/4294846097.pdf"
+      }
+    ],
+    "st20-concentric:r0122": [
+      {
+        "value": 35,
+        "unit": "kg",
+        "method": "estimated",
+        "source": "Масса для предварительного расчёта по эксцентрическому переходу СТ20 переходы-001-r0122 из исходной книги «Калькулятор по ОБВЯЗКЕ.xlsm». Совпадают DN, PN, оба диаметра и стенки. Осевую длину и заводскую массу концентрического исполнения требуется уточнить."
+      }
+    ],
+    "st20-concentric:r0123": [
+      {
+        "value": 45,
+        "unit": "kg",
+        "method": "estimated",
+        "source": "Масса для предварительного расчёта по эксцентрическому переходу СТ20 переходы-001-r0123 из исходной книги «Калькулятор по ОБВЯЗКЕ.xlsm». Совпадают DN, PN, оба диаметра и стенки. Осевую длину и заводскую массу концентрического исполнения требуется уточнить."
+      }
+    ],
+    "st20-concentric:r0124": [
+      {
+        "value": 55,
+        "unit": "kg",
+        "method": "estimated",
+        "source": "Масса для предварительного расчёта по эксцентрическому переходу СТ20 переходы-001-r0124 из исходной книги «Калькулятор по ОБВЯЗКЕ.xlsm». Совпадают DN, PN, оба диаметра и стенки. Осевую длину и заводскую массу концентрического исполнения требуется уточнить."
+      }
+    ],
+    "st20-concentric:r0125": [
+      {
+        "value": 35,
+        "unit": "kg",
+        "method": "estimated",
+        "source": "Масса для предварительного расчёта по эксцентрическому переходу СТ20 переходы-001-r0125 из исходной книги «Калькулятор по ОБВЯЗКЕ.xlsm». Совпадают DN, PN, оба диаметра и стенки. Осевую длину и заводскую массу концентрического исполнения требуется уточнить."
+      }
+    ],
+    "st20-concentric:r0126": [
+      {
+        "value": 45,
+        "unit": "kg",
+        "method": "estimated",
+        "source": "Масса для предварительного расчёта по эксцентрическому переходу СТ20 переходы-001-r0126 из исходной книги «Калькулятор по ОБВЯЗКЕ.xlsm». Совпадают DN, PN, оба диаметра и стенки. Осевую длину и заводскую массу концентрического исполнения требуется уточнить."
+      }
+    ],
+    "st20-concentric:r0127": [
+      {
+        "value": 55,
+        "unit": "kg",
+        "method": "estimated",
+        "source": "Масса для предварительного расчёта по эксцентрическому переходу СТ20 переходы-001-r0127 из исходной книги «Калькулятор по ОБВЯЗКЕ.xlsm». Совпадают DN, PN, оба диаметра и стенки. Осевую длину и заводскую массу концентрического исполнения требуется уточнить."
+      }
+    ],
+    "st20-concentric:r0128": [
+      {
+        "value": 35,
+        "unit": "kg",
+        "method": "estimated",
+        "source": "Масса для предварительного расчёта по эксцентрическому переходу СТ20 переходы-001-r0128 из исходной книги «Калькулятор по ОБВЯЗКЕ.xlsm». Совпадают DN, PN, оба диаметра и стенки. Осевую длину и заводскую массу концентрического исполнения требуется уточнить."
+      }
+    ],
+    "st20-concentric:r0129": [
+      {
+        "value": 45,
+        "unit": "kg",
+        "method": "estimated",
+        "source": "Масса для предварительного расчёта по эксцентрическому переходу СТ20 переходы-001-r0129 из исходной книги «Калькулятор по ОБВЯЗКЕ.xlsm». Совпадают DN, PN, оба диаметра и стенки. Осевую длину и заводскую массу концентрического исполнения требуется уточнить."
+      }
+    ],
+    "st20-concentric:r0130": [
+      {
+        "value": 55,
+        "unit": "kg",
+        "method": "estimated",
+        "source": "Масса для предварительного расчёта по эксцентрическому переходу СТ20 переходы-001-r0130 из исходной книги «Калькулятор по ОБВЯЗКЕ.xlsm». Совпадают DN, PN, оба диаметра и стенки. Осевую длину и заводскую массу концентрического исполнения требуется уточнить."
+      }
+    ],
+    "st20-concentric:r0131": [
+      {
+        "value": 29.8,
+        "unit": "kg",
+        "method": "calculated",
+        "source": "Теоретическая масса усечённого конуса по двум наружным диаметрам, толщине стенок на торцах и осевой длине. Длина 300 мм по принятой в базе размерной группе ГОСТ 17378-2001. Плотность углеродистой стали 7850 кг/м³ по ГОСТ 8732-2025. https://files.stroyinf.ru/Data2/1/4294846/4294846097.pdf https://normadocs.ru/gost_8732-2025"
+      }
+    ],
+    "st20-concentric:r0132": [
+      {
+        "value": 46,
+        "unit": "kg",
+        "method": "catalog",
+        "source": "ГОСТ 17378-2001, таблица 2, исполнение 2. Справочная масса при совпадении обоих наружных диаметров, стенок и длины 300 мм. https://files.stroyinf.ru/Data2/1/4294846/4294846097.pdf"
+      }
+    ],
+    "st20-concentric:r0133": [
+      {
+        "value": 54,
+        "unit": "kg",
+        "method": "catalog",
+        "source": "ГОСТ 17378-2001, таблица 2, исполнение 2. Справочная масса при совпадении обоих наружных диаметров, стенок и длины 300 мм. https://files.stroyinf.ru/Data2/1/4294846/4294846097.pdf"
+      }
+    ],
+    "st20-concentric:r0134": [
+      {
+        "value": 29.7,
+        "unit": "kg",
+        "method": "calculated",
+        "source": "Теоретическая масса усечённого конуса по двум наружным диаметрам, толщине стенок на торцах и осевой длине. Длина 300 мм по принятой в базе размерной группе ГОСТ 17378-2001. Плотность углеродистой стали 7850 кг/м³ по ГОСТ 8732-2025. https://files.stroyinf.ru/Data2/1/4294846/4294846097.pdf https://normadocs.ru/gost_8732-2025"
+      }
+    ],
+    "st20-concentric:r0135": [
+      {
+        "value": 46,
+        "unit": "kg",
+        "method": "catalog",
+        "source": "ГОСТ 17378-2001, таблица 2, исполнение 2. Справочная масса при совпадении обоих наружных диаметров, стенок и длины 300 мм. https://files.stroyinf.ru/Data2/1/4294846/4294846097.pdf"
+      }
+    ],
+    "st20-concentric:r0136": [
+      {
+        "value": 54,
+        "unit": "kg",
+        "method": "catalog",
+        "source": "ГОСТ 17378-2001, таблица 2, исполнение 2. Справочная масса при совпадении обоих наружных диаметров, стенок и длины 300 мм. https://files.stroyinf.ru/Data2/1/4294846/4294846097.pdf"
+      }
+    ],
+    "st20-concentric:r0137": [
+      {
+        "value": 47,
+        "unit": "kg",
+        "method": "estimated",
+        "source": "Масса для предварительного расчёта по эксцентрическому переходу СТ20 переходы-001-r0137 из исходной книги «Калькулятор по ОБВЯЗКЕ.xlsm». Совпадают DN, PN, оба диаметра и стенки. Осевую длину и заводскую массу концентрического исполнения требуется уточнить."
+      }
+    ],
+    "st20-concentric:r0138": [
+      {
+        "value": 56,
+        "unit": "kg",
+        "method": "estimated",
+        "source": "Масса для предварительного расчёта по эксцентрическому переходу СТ20 переходы-001-r0138 из исходной книги «Калькулятор по ОБВЯЗКЕ.xlsm». Совпадают DN, PN, оба диаметра и стенки. Осевую длину и заводскую массу концентрического исполнения требуется уточнить."
+      }
+    ],
+    "st20-concentric:r0139": [
+      {
+        "value": 66,
+        "unit": "kg",
+        "method": "estimated",
+        "source": "Масса для предварительного расчёта по эксцентрическому переходу СТ20 переходы-001-r0139 из исходной книги «Калькулятор по ОБВЯЗКЕ.xlsm». Совпадают DN, PN, оба диаметра и стенки. Осевую длину и заводскую массу концентрического исполнения требуется уточнить."
+      }
+    ],
+    "st20-concentric:r0140": [
+      {
+        "value": 67,
+        "unit": "kg",
+        "method": "estimated",
+        "source": "Масса для предварительного расчёта по эксцентрическому переходу СТ20 переходы-001-r0140 из исходной книги «Калькулятор по ОБВЯЗКЕ.xlsm». Совпадают DN, PN, оба диаметра и стенки. Осевую длину и заводскую массу концентрического исполнения требуется уточнить."
+      }
+    ],
+    "st20-concentric:r0141": [
+      {
+        "value": 80,
+        "unit": "kg",
+        "method": "estimated",
+        "source": "Масса для предварительного расчёта по эксцентрическому переходу СТ20 переходы-001-r0141 из исходной книги «Калькулятор по ОБВЯЗКЕ.xlsm». Совпадают DN, PN, оба диаметра и стенки. Осевую длину и заводскую массу концентрического исполнения требуется уточнить."
+      }
+    ],
+    "st20-concentric:r0142": [
+      {
+        "value": 93,
+        "unit": "kg",
+        "method": "estimated",
+        "source": "Масса для предварительного расчёта по эксцентрическому переходу СТ20 переходы-001-r0142 из исходной книги «Калькулятор по ОБВЯЗКЕ.xlsm». Совпадают DN, PN, оба диаметра и стенки. Осевую длину и заводскую массу концентрического исполнения требуется уточнить."
+      }
+    ],
+    "st20-concentric:r0143": [
+      {
+        "value": 69,
+        "unit": "kg",
+        "method": "estimated",
+        "source": "Масса для предварительного расчёта по эксцентрическому переходу СТ20 переходы-001-r0143 из исходной книги «Калькулятор по ОБВЯЗКЕ.xlsm». Совпадают DN, PN, оба диаметра и стенки. Осевую длину и заводскую массу концентрического исполнения требуется уточнить."
+      }
+    ],
+    "st20-concentric:r0144": [
+      {
+        "value": 82,
+        "unit": "kg",
+        "method": "estimated",
+        "source": "Масса для предварительного расчёта по эксцентрическому переходу СТ20 переходы-001-r0144 из исходной книги «Калькулятор по ОБВЯЗКЕ.xlsm». Совпадают DN, PN, оба диаметра и стенки. Осевую длину и заводскую массу концентрического исполнения требуется уточнить."
+      }
+    ],
+    "st20-concentric:r0145": [
+      {
+        "value": 95,
+        "unit": "kg",
+        "method": "estimated",
+        "source": "Масса для предварительного расчёта по эксцентрическому переходу СТ20 переходы-001-r0145 из исходной книги «Калькулятор по ОБВЯЗКЕ.xlsm». Совпадают DN, PN, оба диаметра и стенки. Осевую длину и заводскую массу концентрического исполнения требуется уточнить."
+      }
+    ],
+    "st20-concentric:r0146": [
+      {
+        "value": 70,
+        "unit": "kg",
+        "method": "estimated",
+        "source": "Масса для предварительного расчёта по эксцентрическому переходу СТ20 переходы-001-r0146 из исходной книги «Калькулятор по ОБВЯЗКЕ.xlsm». Совпадают DN, PN, оба диаметра и стенки. Осевую длину и заводскую массу концентрического исполнения требуется уточнить."
+      }
+    ],
+    "st20-concentric:r0147": [
+      {
+        "value": 83,
+        "unit": "kg",
+        "method": "estimated",
+        "source": "Масса для предварительного расчёта по эксцентрическому переходу СТ20 переходы-001-r0147 из исходной книги «Калькулятор по ОБВЯЗКЕ.xlsm». Совпадают DN, PN, оба диаметра и стенки. Осевую длину и заводскую массу концентрического исполнения требуется уточнить."
+      }
+    ],
+    "st20-concentric:r0148": [
+      {
+        "value": 97,
+        "unit": "kg",
+        "method": "estimated",
+        "source": "Масса для предварительного расчёта по эксцентрическому переходу СТ20 переходы-001-r0148 из исходной книги «Калькулятор по ОБВЯЗКЕ.xlsm». Совпадают DN, PN, оба диаметра и стенки. Осевую длину и заводскую массу концентрического исполнения требуется уточнить."
+      }
+    ],
+    "st20-concentric:r0149": [
+      {
+        "value": 94,
+        "unit": "kg",
+        "method": "estimated",
+        "source": "Масса для предварительного расчёта по эксцентрическому переходу СТ20 переходы-001-r0149 из исходной книги «Калькулятор по ОБВЯЗКЕ.xlsm». Совпадают DN, PN, оба диаметра и стенки. Осевую длину и заводскую массу концентрического исполнения требуется уточнить."
+      }
+    ],
+    "st20-concentric:r0150": [
+      {
+        "value": 112,
+        "unit": "kg",
+        "method": "estimated",
+        "source": "Масса для предварительного расчёта по эксцентрическому переходу СТ20 переходы-001-r0150 из исходной книги «Калькулятор по ОБВЯЗКЕ.xlsm». Совпадают DN, PN, оба диаметра и стенки. Осевую длину и заводскую массу концентрического исполнения требуется уточнить."
+      }
+    ],
+    "st20-concentric:r0151": [
+      {
+        "value": 130,
+        "unit": "kg",
+        "method": "estimated",
+        "source": "Масса для предварительного расчёта по эксцентрическому переходу СТ20 переходы-001-r0151 из исходной книги «Калькулятор по ОБВЯЗКЕ.xlsm». Совпадают DN, PN, оба диаметра и стенки. Осевую длину и заводскую массу концентрического исполнения требуется уточнить."
+      }
+    ],
+    "st20-concentric:r0152": [
+      {
+        "value": 97,
+        "unit": "kg",
+        "method": "estimated",
+        "source": "Масса для предварительного расчёта по эксцентрическому переходу СТ20 переходы-001-r0152 из исходной книги «Калькулятор по ОБВЯЗКЕ.xlsm». Совпадают DN, PN, оба диаметра и стенки. Осевую длину и заводскую массу концентрического исполнения требуется уточнить."
+      }
+    ],
+    "st20-concentric:r0153": [
+      {
+        "value": 116,
+        "unit": "kg",
+        "method": "estimated",
+        "source": "Масса для предварительного расчёта по эксцентрическому переходу СТ20 переходы-001-r0153 из исходной книги «Калькулятор по ОБВЯЗКЕ.xlsm». Совпадают DN, PN, оба диаметра и стенки. Осевую длину и заводскую массу концентрического исполнения требуется уточнить."
+      }
+    ],
+    "st20-concentric:r0154": [
+      {
+        "value": 135,
+        "unit": "kg",
+        "method": "estimated",
+        "source": "Масса для предварительного расчёта по эксцентрическому переходу СТ20 переходы-001-r0154 из исходной книги «Калькулятор по ОБВЯЗКЕ.xlsm». Совпадают DN, PN, оба диаметра и стенки. Осевую длину и заводскую массу концентрического исполнения требуется уточнить."
+      }
+    ],
+    "st20-concentric:r0155": [
+      {
+        "value": 98,
+        "unit": "kg",
+        "method": "estimated",
+        "source": "Масса для предварительного расчёта по эксцентрическому переходу СТ20 переходы-001-r0155 из исходной книги «Калькулятор по ОБВЯЗКЕ.xlsm». Совпадают DN, PN, оба диаметра и стенки. Осевую длину и заводскую массу концентрического исполнения требуется уточнить."
+      }
+    ],
+    "st20-concentric:r0156": [
+      {
+        "value": 117,
+        "unit": "kg",
+        "method": "estimated",
+        "source": "Масса для предварительного расчёта по эксцентрическому переходу СТ20 переходы-001-r0156 из исходной книги «Калькулятор по ОБВЯЗКЕ.xlsm». Совпадают DN, PN, оба диаметра и стенки. Осевую длину и заводскую массу концентрического исполнения требуется уточнить."
+      }
+    ],
+    "st20-concentric:r0157": [
+      {
+        "value": 137,
+        "unit": "kg",
+        "method": "estimated",
+        "source": "Масса для предварительного расчёта по эксцентрическому переходу СТ20 переходы-001-r0157 из исходной книги «Калькулятор по ОБВЯЗКЕ.xlsm». Совпадают DN, PN, оба диаметра и стенки. Осевую длину и заводскую массу концентрического исполнения требуется уточнить."
+      }
+    ],
+    "st20-concentric:r0158": [
+      {
+        "value": 118,
+        "unit": "kg",
+        "method": "estimated",
+        "source": "Масса для предварительного расчёта по эксцентрическому переходу СТ20 переходы-001-r0158 из исходной книги «Калькулятор по ОБВЯЗКЕ.xlsm». Совпадают DN, PN, оба диаметра и стенки. Осевую длину и заводскую массу концентрического исполнения требуется уточнить."
+      }
+    ],
+    "st20-concentric:r0159": [
+      {
+        "value": 141,
+        "unit": "kg",
+        "method": "estimated",
+        "source": "Масса для предварительного расчёта по эксцентрическому переходу СТ20 переходы-001-r0159 из исходной книги «Калькулятор по ОБВЯЗКЕ.xlsm». Совпадают DN, PN, оба диаметра и стенки. Осевую длину и заводскую массу концентрического исполнения требуется уточнить."
+      }
+    ],
+    "st20-concentric:r0160": [
+      {
+        "value": 164,
+        "unit": "kg",
+        "method": "estimated",
+        "source": "Масса для предварительного расчёта по эксцентрическому переходу СТ20 переходы-001-r0160 из исходной книги «Калькулятор по ОБВЯЗКЕ.xlsm». Совпадают DN, PN, оба диаметра и стенки. Осевую длину и заводскую массу концентрического исполнения требуется уточнить."
+      }
+    ],
+    "st20-concentric:r0161": [
+      {
+        "value": 122,
+        "unit": "kg",
+        "method": "estimated",
+        "source": "Масса для предварительного расчёта по эксцентрическому переходу СТ20 переходы-001-r0161 из исходной книги «Калькулятор по ОБВЯЗКЕ.xlsm». Совпадают DN, PN, оба диаметра и стенки. Осевую длину и заводскую массу концентрического исполнения требуется уточнить."
+      }
+    ],
+    "st20-concentric:r0162": [
+      {
+        "value": 146,
+        "unit": "kg",
+        "method": "estimated",
+        "source": "Масса для предварительного расчёта по эксцентрическому переходу СТ20 переходы-001-r0162 из исходной книги «Калькулятор по ОБВЯЗКЕ.xlsm». Совпадают DN, PN, оба диаметра и стенки. Осевую длину и заводскую массу концентрического исполнения требуется уточнить."
+      }
+    ],
+    "st20-concentric:r0163": [
+      {
+        "value": 170,
+        "unit": "kg",
+        "method": "estimated",
+        "source": "Масса для предварительного расчёта по эксцентрическому переходу СТ20 переходы-001-r0163 из исходной книги «Калькулятор по ОБВЯЗКЕ.xlsm». Совпадают DN, PN, оба диаметра и стенки. Осевую длину и заводскую массу концентрического исполнения требуется уточнить."
+      }
+    ],
+    "st20-concentric:r0164": [
+      {
+        "value": 123,
+        "unit": "kg",
+        "method": "estimated",
+        "source": "Масса для предварительного расчёта по эксцентрическому переходу СТ20 переходы-001-r0164 из исходной книги «Калькулятор по ОБВЯЗКЕ.xlsm». Совпадают DN, PN, оба диаметра и стенки. Осевую длину и заводскую массу концентрического исполнения требуется уточнить."
+      }
+    ],
+    "st20-concentric:r0165": [
+      {
+        "value": 148,
+        "unit": "kg",
+        "method": "estimated",
+        "source": "Масса для предварительного расчёта по эксцентрическому переходу СТ20 переходы-001-r0165 из исходной книги «Калькулятор по ОБВЯЗКЕ.xlsm». Совпадают DN, PN, оба диаметра и стенки. Осевую длину и заводскую массу концентрического исполнения требуется уточнить."
+      }
+    ],
+    "st20-concentric:r0166": [
+      {
+        "value": 172,
+        "unit": "kg",
+        "method": "estimated",
+        "source": "Масса для предварительного расчёта по эксцентрическому переходу СТ20 переходы-001-r0166 из исходной книги «Калькулятор по ОБВЯЗКЕ.xlsm». Совпадают DN, PN, оба диаметра и стенки. Осевую длину и заводскую массу концентрического исполнения требуется уточнить."
+      }
+    ],
+    "suction-table:check-valtec-15": [
+      {
+        "value": 0.131,
+        "unit": "kg",
+        "method": "catalog",
+        "source": "Паспорт VALTEC VT.151.N.04, раздел 6, DN15. https://valtec.ru/document/technical/VT.151-0525.pdf#page=3"
+      }
+    ],
+    "suction-table:check-valtec-20": [
+      {
+        "value": 0.2,
+        "unit": "kg",
+        "method": "catalog",
+        "source": "Паспорт VALTEC VT.151.N.05, раздел 6, DN20. https://valtec.ru/document/technical/VT.151-0525.pdf#page=3"
+      }
+    ],
+    "suction-table:check-valtec-25": [
+      {
+        "value": 0.298,
+        "unit": "kg",
+        "method": "catalog",
+        "source": "Паспорт VALTEC VT.151.N.06, раздел 6, DN25. https://valtec.ru/document/technical/VT.151-0525.pdf#page=3"
+      }
+    ],
+    "suction-table:check-valtec-32": [
+      {
+        "value": 0.443,
+        "unit": "kg",
+        "method": "catalog",
+        "source": "Паспорт VALTEC VT.151.N.07, раздел 6, DN32. https://valtec.ru/document/technical/VT.151-0525.pdf#page=3"
+      }
+    ],
+    "suction-table:check-valtec-40": [
+      {
+        "value": 0.606,
+        "unit": "kg",
+        "method": "catalog",
+        "source": "Паспорт VALTEC VT.151.N.08, раздел 6, DN40. https://valtec.ru/document/technical/VT.151-0525.pdf#page=3"
+      }
+    ],
+    "suction-table:check-valtec-50": [
+      {
+        "value": 0.887,
+        "unit": "kg",
+        "method": "catalog",
+        "source": "Паспорт VALTEC VT.151.N.09, раздел 6, DN50. https://valtec.ru/document/technical/VT.151-0525.pdf#page=3"
+      }
+    ],
+    "suction-table:rf-20": [
+      {
+        "value": 0.92,
+        "unit": "kg",
+        "method": "estimated",
+        "source": "Предварительно по стальной сборке из фланца DN20 PN16 тип 01, Ст20, 0.86 кг (фланцы-002-r0028, ГОСТ 33259-2015) и готового патрубка НР 1/2″ 0.038 кг (ДН.ру D270-18510). Для меньшей резьбы добавлена оценка стальной втулки Ø26/21,3×16 мм (0,022 кг); точный чертёж отсутствует. Длина, материал и исполнение фактической ответной части не подтверждены."
+      }
+    ],
+    "suction-table:rf-25": [
+      {
+        "value": 1.27,
+        "unit": "kg",
+        "method": "estimated",
+        "source": "Предварительно по стальной сборке из фланца DN25 PN16 тип 01, Ст20, 1.17 кг (фланцы-002-r0029, ГОСТ 33259-2015) и готового патрубка НР 1″ 0.091 кг (ДН.ру D270-18512). Близкий цельный аналог ИНОТЭК ФСОРХ PN16 весит 0.97 кг по упаковочным данным продавца (https://xn--h1aeieu0e.xn--p1ai/product-category/inzhenernoe-oborudovanie/rezbovye-flancy/); для оценки взята большая масса сборки. Длина, материал и исполнение фактической ответной части не подтверждены."
+      }
+    ],
+    "suction-table:rf-32": [
+      {
+        "value": 1.7,
+        "unit": "kg",
+        "method": "estimated",
+        "source": "Предварительно по стальной сборке из фланца DN32 PN16 тип 01, Ст20, 1.58 кг (фланцы-002-r0030, ГОСТ 33259-2015) и готового патрубка НР 1 1/4″ 0.117 кг (ДН.ру D270-18513). Близкий цельный аналог ИНОТЭК ФСОРХ PN16 весит 1.23 кг по упаковочным данным продавца (https://xn--h1aeieu0e.xn--p1ai/product-category/inzhenernoe-oborudovanie/rezbovye-flancy/); для оценки взята большая масса сборки. Длина, материал и исполнение фактической ответной части не подтверждены."
+      }
+    ],
+    "suction-table:rf-40": [
+      {
+        "value": 2.12,
+        "unit": "kg",
+        "method": "estimated",
+        "source": "Предварительно по стальной сборке из фланца DN40 PN16 тип 01, Ст20, 1.96 кг (фланцы-002-r0031, ГОСТ 33259-2015) и готового патрубка НР 1 1/2″ 0.154 кг (ДН.ру D270-18514). Близкий цельный аналог ИНОТЭК ФСОРХ PN16 весит 1.5 кг по упаковочным данным продавца (https://xn--h1aeieu0e.xn--p1ai/product-category/inzhenernoe-oborudovanie/rezbovye-flancy/); для оценки взята большая масса сборки. Длина, материал и исполнение фактической ответной части не подтверждены."
+      }
+    ],
+    "suction-table:rf-50": [
+      {
+        "value": 2.81,
+        "unit": "kg",
+        "method": "estimated",
+        "source": "Предварительно по стальной сборке из фланца DN50 PN16 тип 01, Ст20, 2.58 кг (фланцы-002-r0032, ГОСТ 33259-2015) и готового патрубка НР 2″ 0.229 кг (ДН.ру D270-18288). Близкий цельный аналог ИНОТЭК ФСОРХ PN16 весит 2.15 кг по упаковочным данным продавца (https://xn--h1aeieu0e.xn--p1ai/product-category/inzhenernoe-oborudovanie/rezbovye-flancy/); для оценки взята большая масса сборки. Длина, материал и исполнение фактической ответной части не подтверждены."
+      }
+    ],
+    "suction-table:union-25": [
+      {
+        "value": 0.232,
+        "unit": "kg",
+        "method": "estimated",
+        "source": "Паспорт GAPPO, с. 19, никелированная НР–НР G2227.06. В исходной позиции нет артикула. https://www.gappohome.ru/upload/iblock/983/jqsk59eyfgc3est28h3sto1bw82alge7/%D0%A4%D0%B8%D1%82%D0%B8%D0%BD%D0%B3%D0%B8%20%D1%80%D0%B5%D0%B7%D1%8C%D0%B1%D0%BE%D0%B2%D1%8B%D0%B5%20%281%29.pdf"
+      }
+    ],
+    "suction-table:union-32": [
+      {
+        "value": 0.39,
+        "unit": "kg",
+        "method": "estimated",
+        "source": "Паспорт GAPPO, с. 18, латунная НР–НР G1227.07 той же резьбы. Исходная позиция никелированная, артикул неизвестен. https://www.gappohome.ru/upload/iblock/983/jqsk59eyfgc3est28h3sto1bw82alge7/%D0%A4%D0%B8%D1%82%D0%B8%D0%BD%D0%B3%D0%B8%20%D1%80%D0%B5%D0%B7%D1%8C%D0%B1%D0%BE%D0%B2%D1%8B%D0%B5%20%281%29.pdf"
+      }
+    ],
+    "suction-table:union-40": [
+      {
+        "value": 0.49,
+        "unit": "kg",
+        "method": "estimated",
+        "source": "Паспорт GAPPO, с. 18, латунная НР–НР G1227.08 той же резьбы. Исходная позиция никелированная, артикул неизвестен. https://www.gappohome.ru/upload/iblock/983/jqsk59eyfgc3est28h3sto1bw82alge7/%D0%A4%D0%B8%D1%82%D0%B8%D0%BD%D0%B3%D0%B8%20%D1%80%D0%B5%D0%B7%D1%8C%D0%B1%D0%BE%D0%B2%D1%8B%D0%B5%20%281%29.pdf"
+      }
+    ],
+    "suction-table:union-50": [
+      {
+        "value": 0.9,
+        "unit": "kg",
+        "method": "estimated",
+        "source": "Аналог РУСЕВРОСТАЛЬ из AISI 304/316, НР–НР 2″ с коническим уплотнением. В исходной позиции неизвестны артикул, уплотнение и тип резьбы. https://rusevrosteel.ru/amerikanka-nr-nr"
+      }
+    ],
+    "suction-table:union-valtec-15": [
+      {
+        "value": 0.092,
+        "unit": "kg",
+        "method": "catalog",
+        "source": "Паспорт VALTEC VTr.341.N.0004, раздел 6, DN15. https://valtec.ru/document/technical/VTr.098-340-340C-341-728-0924.pdf#page=3"
+      }
+    ],
+    "suction-table:union-valtec-20": [
+      {
+        "value": 0.146,
+        "unit": "kg",
+        "method": "catalog",
+        "source": "Паспорт VALTEC VTr.341.N.0005, раздел 6, DN20. https://valtec.ru/document/technical/VTr.098-340-340C-341-728-0924.pdf#page=3"
+      }
+    ],
+    "suction-table:union-valtec-25": [
+      {
+        "value": 0.276,
+        "unit": "kg",
+        "method": "catalog",
+        "source": "Паспорт VALTEC VTr.341.N.0006, раздел 6, DN25. https://valtec.ru/document/technical/VTr.098-340-340C-341-728-0924.pdf#page=3"
+      }
+    ],
+    "suction-table:union-valtec-32": [
+      {
+        "value": 0.424,
+        "unit": "kg",
+        "method": "catalog",
+        "source": "Паспорт VALTEC VTr.341.N.0007, раздел 6, DN32. https://valtec.ru/document/technical/VTr.098-340-340C-341-728-0924.pdf#page=3"
+      }
+    ],
+    "suction-table:union-valtec-40": [
+      {
+        "value": 0.588,
+        "unit": "kg",
+        "method": "catalog",
+        "source": "Паспорт VALTEC VTr.341.N.0008, раздел 6, DN40. https://valtec.ru/document/technical/VTr.098-340-340C-341-728-0924.pdf#page=3"
+      }
+    ],
+    "suction-table:union-valtec-50": [
+      {
+        "value": 1.331,
+        "unit": "kg",
+        "method": "catalog",
+        "source": "Паспорт VALTEC VTr.341.N.0009, раздел 6, DN50. https://valtec.ru/document/technical/VTr.098-340-340C-341-728-0924.pdf#page=3"
+      }
+    ],
+    "thread-end:dnru-d270-17412": [
+      {
+        "method": "catalog",
+        "source": "Масса в характеристиках изделия D270-17412 Н-304-W-НР. https://dn.ru/fiting/nipples/stalnye/dn-ru/h-304-w-nr-ru20/50",
+        "unit": "kg",
+        "value": 0.2
+      }
+    ],
+    "thread-end:dnru-d270-18288": [
+      {
+        "method": "estimated",
+        "source": "По массе цилиндрической заготовки Ø60×3.5 мм, L=47 мм, плотность 7850 кг/м³. Резьба и фаски уменьшают массу. https://dn.ru/fiting/rezby/stalnye/kitai/gost3262-75/dn50",
+        "unit": "kg",
+        "value": 0.229
+      }
+    ],
+    "thread-end:dnru-d270-18510": [
+      {
+        "method": "estimated",
+        "source": "По массе цилиндрической заготовки Ø21.3×2.8 мм, L=30 мм, плотность 7850 кг/м³. Резьба и фаски уменьшают массу. https://dn.ru/fiting/rezby/stalnye/kitai/gost3262-75/dn15",
+        "unit": "kg",
+        "value": 0.038
+      }
+    ],
+    "thread-end:dnru-d270-18511": [
+      {
+        "method": "estimated",
+        "source": "По массе цилиндрической заготовки Ø26.8×2.8 мм, L=30 мм, плотность 7850 кг/м³. Резьба и фаски уменьшают массу. https://dn.ru/fiting/rezby/stalnye/kitai/gost3262-75/dn20",
+        "unit": "kg",
+        "value": 0.05
+      }
+    ],
+    "thread-end:dnru-d270-18512": [
+      {
+        "method": "estimated",
+        "source": "По массе цилиндрической заготовки Ø33.5×3.2 мм, L=38 мм, плотность 7850 кг/м³. Резьба и фаски уменьшают массу. https://dn.ru/fiting/rezby/stalnye/kitai/gost3262-75/dn25",
+        "unit": "kg",
+        "value": 0.091
+      }
+    ],
+    "thread-end:dnru-d270-18513": [
+      {
+        "method": "estimated",
+        "source": "По массе цилиндрической заготовки Ø42.3×3.2 мм, L=38 мм, плотность 7850 кг/м³. Резьба и фаски уменьшают массу. https://dn.ru/fiting/rezby/stalnye/kitai/gost3262-75/dn32",
+        "unit": "kg",
+        "value": 0.117
+      }
+    ],
+    "thread-end:dnru-d270-18514": [
+      {
+        "method": "estimated",
+        "source": "По массе цилиндрической заготовки Ø48×3.5 мм, L=40 мм, плотность 7850 кг/м³. Резьба и фаски уменьшают массу. https://dn.ru/fiting/rezby/stalnye/kitai/gost3262-75/dn40",
+        "unit": "kg",
+        "value": 0.154
+      }
+    ],
+    "thread-end:newkey-nk-ne15-4": [
+      {
+        "method": "estimated",
+        "source": "По массе цилиндрической заготовки Ø21.3×2.5 мм, L=35 мм, плотность 7900 кг/м³. Резьба и фаски уменьшают массу. https://cdn.vseinstrumenti.ru/instruction/nomenclaturecontent/202512/57887258.pdf/20807990_other.pdf",
+        "unit": "kg",
+        "value": 0.041
+      }
+    ],
+    "thread-end:newkey-nk-ne20-4": [
+      {
+        "method": "catalog",
+        "source": "Карточка производителя NEWKEY NK-NE20/4, масса округлена до 0,1 кг. https://www.newkey.ru/product/nippel-privarnoi-34-dn20-aisi304-cf8-pn63-nk-ne204/",
+        "unit": "kg",
+        "value": 0.1
+      }
+    ],
+    "thread-end:newkey-nk-ne25-4": [
+      {
+        "method": "catalog",
+        "source": "Карточка производителя NEWKEY NK-NE25/4, масса округлена до 0,1 кг. https://www.newkey.ru/product/nippel-privarnoi-1-dn25-aisi304-cf8-pn63-nk-ne254/",
+        "unit": "kg",
+        "value": 0.1
+      }
+    ],
+    "thread-end:newkey-nk-ne32-4": [
+      {
+        "method": "catalog",
+        "source": "Карточка производителя NEWKEY NK-NE32/4, масса округлена до 0,1 кг. https://www.newkey.ru/product/nippel-privarnoi-114-dn32-aisi304-cf8-pn63-nk-ne324/",
+        "unit": "kg",
+        "value": 0.1
+      }
+    ],
+    "thread-end:newkey-nk-ne40-4": [
+      {
+        "method": "catalog",
+        "source": "Карточка производителя NEWKEY NK-NE40/4, масса округлена до 0,1 кг. https://www.newkey.ru/product/nippel-privarnoi-112-dn40-aisi304-cf8-pn63-nk-ne404/",
+        "unit": "kg",
+        "value": 0.1
+      }
+    ],
+    "thread-end:newkey-nk-ne50-4": [
+      {
+        "method": "catalog",
+        "source": "Карточка производителя NEWKEY NK-NE50/4, масса округлена до 0,1 кг. https://www.newkey.ru/product/nippel-privarnoi-2-dn50-aisi304-cf8-pn63-nk-ne504/",
+        "unit": "kg",
+        "value": 0.2
+      }
+    ],
+    "user-seals-2026-09-28:flax-40-10": [
+      {
+        "method": "estimated",
+        "source": "Ориентир по аналогу VALTEC VT.FLAX.0.110 (99 г на 110 м по каталогу, стр. 280). Изготовитель исходной позиции, плотность её пряди и учёт упаковки в массе аналога неизвестны. https://valtec.ru/document/Price_VALTEC_2024_web.pdf",
+        "unit": "kg/m",
+        "value": 0.0009
+      }
+    ],
+    "user-seals-2026-09-28:flax-50-10": [
+      {
+        "method": "estimated",
+        "source": "Ориентир по аналогу VALTEC VT.FLAX.0.110 (99 г на 110 м по каталогу, стр. 280). Изготовитель исходной позиции, плотность её пряди и учёт упаковки в массе аналога неизвестны. https://valtec.ru/document/Price_VALTEC_2024_web.pdf",
+        "unit": "kg/m",
+        "value": 0.0009
+      }
+    ],
+    "user-seals-2026-09-28:gasket-100-40": [
+      {
+        "method": "catalog",
+        "source": "ГОСТ 15180-86, табл. 3, предельная масса 1000 шт. / 1000. https://www.zaar.ru/gosty/gost-15180-86.pdf",
+        "unit": "kg",
+        "value": 0.052,
+        "variant": "PN 25/40"
+      }
+    ],
+    "user-seals-2026-09-28:gasket-125-40": [
+      {
+        "method": "catalog",
+        "source": "ГОСТ 15180-86, табл. 3, предельная масса 1000 шт. / 1000. https://www.zaar.ru/gosty/gost-15180-86.pdf",
+        "unit": "kg",
+        "value": 0.061,
+        "variant": "PN 25/40"
+      }
+    ],
+    "user-seals-2026-09-28:gasket-150-40": [
+      {
+        "method": "catalog",
+        "source": "ГОСТ 15180-86, табл. 3, предельная масса 1000 шт. / 1000. https://www.zaar.ru/gosty/gost-15180-86.pdf",
+        "unit": "kg",
+        "value": 0.075,
+        "variant": "PN 25/40"
+      }
+    ],
+    "user-seals-2026-09-28:gasket-200-40": [
+      {
+        "method": "catalog",
+        "source": "ГОСТ 15180-86, табл. 3, предельная масса 1000 шт. / 1000. https://www.zaar.ru/gosty/gost-15180-86.pdf",
+        "unit": "kg",
+        "value": 0.116,
+        "variant": "PN 40"
+      }
+    ],
+    "user-seals-2026-09-28:gasket-250-40": [
+      {
+        "method": "catalog",
+        "source": "ГОСТ 15180-86, табл. 3, предельная масса 1000 шт. / 1000. https://www.zaar.ru/gosty/gost-15180-86.pdf",
+        "unit": "kg",
+        "value": 0.17,
+        "variant": "PN 40"
+      }
+    ],
+    "заглушки-001-r0005": [
+      {
+        "value": 0.041,
+        "unit": "kg",
+        "method": "estimated",
+        "source": "ГОСТ 17379-2001, табл. 1, исполнение 1, DN15 (21,3×3,2 мм), масса 0.04 кг. https://ural-stk.ru/uploadedFiles/files/gost-17379.pdf Оценка той же формы в AISI304 с поправкой на плотность 7900/7850 и округлением вверх до грамма. В исходной строке нет артикула, толщины или цены."
+      }
+    ],
+    "заглушки-002-r0029": [
+      {
+        "value": 0.041,
+        "unit": "kg",
+        "method": "estimated",
+        "source": "ГОСТ 17379-2001, табл. 1, исполнение 1, DN15 (21,3×3,2 мм), масса 0.04 кг. https://ural-stk.ru/uploadedFiles/files/gost-17379.pdf Оценка той же формы в AISI304 с поправкой на плотность 7900/7850 и округлением вверх до грамма. В исходной строке нет артикула, толщины или цены."
+      }
+    ],
+    "заглушки-003-r0053": [
+      {
+        "value": 0.04,
+        "unit": "kg",
+        "method": "estimated",
+        "source": "ГОСТ 17379-2001, табл. 1, исполнение 1, DN15 (21,3×3,2 мм), масса 0.04 кг. https://ural-stk.ru/uploadedFiles/files/gost-17379.pdf Справочный аналог Ст20. В исходной строке нет артикула, толщины или цены."
+      }
+    ],
+    "заглушки-003-r0054": [
+      {
+        "value": 0.07,
+        "unit": "kg",
+        "method": "estimated",
+        "source": "ГОСТ 17379-2001, табл. 1, исполнение 1, DN20 (26,9×3,2 мм), масса 0.07 кг. https://ural-stk.ru/uploadedFiles/files/gost-17379.pdf Справочный аналог Ст20. В исходной строке нет артикула, толщины или цены."
+      }
+    ],
+    "заглушки-004-r0077": [
+      {
+        "value": 0.04,
+        "unit": "kg",
+        "method": "estimated",
+        "source": "ГОСТ 17379-2001, табл. 1, исполнение 1, DN15 (21,3×3,2 мм), масса 0.04 кг. https://ural-stk.ru/uploadedFiles/files/gost-17379.pdf Справочный аналог Ст20. В исходной строке нет артикула, толщины или цены."
+      }
+    ],
+    "заглушки-004-r0078": [
+      {
+        "value": 0.07,
+        "unit": "kg",
+        "method": "estimated",
+        "source": "ГОСТ 17379-2001, табл. 1, исполнение 1, DN20 (26,9×3,2 мм), масса 0.07 кг. https://ural-stk.ru/uploadedFiles/files/gost-17379.pdf Справочный аналог Ст20. В исходной строке нет артикула, толщины или цены."
+      }
+    ],
+    "затворы-003-r0015": [
+      {
+        "value": 7.1,
+        "unit": "kg",
+        "method": "estimated",
+        "source": "Предварительная масса затвора DN65 со штоком 6.3 кг из Обвязка!W15 плюс большая из двух масс рукоятки: разность P15–O15 для 017W PN16 (0.5 кг) и чугунная рукоятка Coreline Fig.503 подходящего DN (0.8 кг, https://www.coreline.dk/action/download?file=300#page=12). Паспорт актуального 017W.ZS PN25 приводит массу без исполнительного механизма; точный артикул рукоятки исходной серии не установлен. https://dendor.ru/re/017wred.ys_zs.pdf#page=14",
+        "variant": "С рукояткой"
+      }
+    ],
+    "затворы-003-r0016": [
+      {
+        "value": 8.0,
+        "unit": "kg",
+        "method": "estimated",
+        "source": "Предварительная масса затвора DN80 со штоком 7.2 кг из Обвязка!W16 плюс большая из двух масс рукоятки: разность P16–O16 для 017W PN16 (0.5 кг) и чугунная рукоятка Coreline Fig.503 подходящего DN (0.8 кг, https://www.coreline.dk/action/download?file=300#page=12). Паспорт актуального 017W.ZS PN25 приводит массу без исполнительного механизма; точный артикул рукоятки исходной серии не установлен. https://dendor.ru/re/017wred.ys_zs.pdf#page=14",
+        "variant": "С рукояткой"
+      }
+    ],
+    "затворы-003-r0017": [
+      {
+        "value": 10.1,
+        "unit": "kg",
+        "method": "estimated",
+        "source": "Предварительная масса затвора DN100 со штоком 8.9 кг из Обвязка!W17 плюс большая из двух масс рукоятки: разность P17–O17 для 017W PN16 (0.5 кг) и чугунная рукоятка Coreline Fig.503 подходящего DN (1.2 кг, https://www.coreline.dk/action/download?file=300#page=12). Паспорт актуального 017W.ZS PN25 приводит массу без исполнительного механизма; точный артикул рукоятки исходной серии не установлен. https://dendor.ru/re/017wred.ys_zs.pdf#page=14",
+        "variant": "С рукояткой"
+      }
+    ],
+    "затворы-003-r0018": [
+      {
+        "value": 12.0,
+        "unit": "kg",
+        "method": "estimated",
+        "source": "Предварительная масса затвора DN125 со штоком 10.8 кг из Обвязка!W18 плюс большая из двух масс рукоятки: разность P18–O18 для 017W PN16 (0.5 кг) и чугунная рукоятка Coreline Fig.503 подходящего DN (1.2 кг, https://www.coreline.dk/action/download?file=300#page=12). Паспорт актуального 017W.ZS PN25 приводит массу без исполнительного механизма; точный артикул рукоятки исходной серии не установлен. https://dendor.ru/re/017wred.ys_zs.pdf#page=14",
+        "variant": "С рукояткой"
+      }
+    ],
+    "затворы-003-r0019": [
+      {
+        "value": 18.7,
+        "unit": "kg",
+        "method": "estimated",
+        "source": "Предварительная масса затвора DN150 со штоком 17.5 кг из Обвязка!W19 плюс большая из двух масс рукоятки: разность P19–O19 для 017W PN16 (0.5 кг) и чугунная рукоятка Coreline Fig.503 подходящего DN (1.2 кг, https://www.coreline.dk/action/download?file=300#page=12). Паспорт актуального 017W.ZS PN25 приводит массу без исполнительного механизма; точный артикул рукоятки исходной серии не установлен. https://dendor.ru/re/017wred.ys_zs.pdf#page=14",
+        "variant": "С рукояткой"
+      }
+    ],
+    "затворы-003-r0020": [
+      {
+        "value": 28.9,
+        "unit": "kg",
+        "method": "estimated",
+        "source": "Предварительная масса затвора DN200 со штоком 26.9 кг из Обвязка!W20 плюс большая из двух масс рукоятки: разность P20–O20 для 017W PN16 (2 кг) и чугунная рукоятка Coreline Fig.503 подходящего DN (1.6 кг, https://www.coreline.dk/action/download?file=300#page=12). Паспорт актуального 017W.ZS PN25 приводит массу без исполнительного механизма; точный артикул рукоятки исходной серии не установлен. https://dendor.ru/re/017wred.ys_zs.pdf#page=14",
+        "variant": "С рукояткой"
+      }
+    ],
+    "затворы-003-r0021": [
+      {
+        "value": 38,
+        "unit": "kg",
+        "method": "estimated",
+        "source": "Предварительная масса затвора DN250 со штоком 36 кг из Обвязка!W21 плюс большая из двух масс рукоятки: разность P21–O21 для 017W PN16 (2 кг) и чугунная рукоятка Coreline Fig.503 подходящего DN (1.6 кг, https://www.coreline.dk/action/download?file=300#page=12). Паспорт актуального 017W.ZS PN25 приводит массу без исполнительного механизма; точный артикул рукоятки исходной серии не установлен. https://dendor.ru/re/017wred.ys_zs.pdf#page=14",
+        "variant": "С рукояткой"
+      }
+    ],
+    "кипиа-001-r0005": [
+      {
+        "value": 0.4,
+        "unit": "kg",
+        "method": "catalog",
+        "source": "Паспорт Экомера МД02, п. 2.3, для диаметра корпуса 100 мм указана предельная масса: https://dn.ru/storage/certificates/ecomera/Manometr%20radial%27nyj/md100/pasport_kipia_manometry_radialnyi_ekomera_dm02-100.pdf"
+      }
+    ],
+    "кипиа-001-r0006": [
+      {
+        "value": 0.4,
+        "unit": "kg",
+        "method": "catalog",
+        "source": "Паспорт Экомера МД02, п. 2.3, для диаметра корпуса 100 мм указана предельная масса: https://dn.ru/storage/certificates/ecomera/Manometr%20radial%27nyj/md100/pasport_kipia_manometry_radialnyi_ekomera_dm02-100.pdf"
+      }
+    ],
+    "кипиа-001-r0007": [
+      {
+        "value": 0.4,
+        "unit": "kg",
+        "method": "catalog",
+        "source": "Паспорт Экомера МД02, п. 2.3, для диаметра корпуса 100 мм указана предельная масса: https://dn.ru/storage/certificates/ecomera/Manometr%20radial%27nyj/md100/pasport_kipia_manometry_radialnyi_ekomera_dm02-100.pdf"
+      }
+    ],
+    "кипиа-001-r0008": [
+      {
+        "value": 0.4,
+        "unit": "kg",
+        "method": "catalog",
+        "source": "Паспорт Экомера МД02, п. 2.3, для диаметра корпуса 100 мм указана предельная масса: https://dn.ru/storage/certificates/ecomera/Manometr%20radial%27nyj/md100/pasport_kipia_manometry_radialnyi_ekomera_dm02-100.pdf"
+      }
+    ],
+    "кипиа-002-r0013": [
+      {
+        "value": 0.33,
+        "unit": "kg",
+        "method": "catalog",
+        "source": "Каталог РОСМА, РД-2Р IP44 G¼: https://rosma.spb.ru/rele_davleniya/rd_2r_rele_davleniya_dlya_zhidkih_i_gazoobraznyh_neagressivnyh_sred/"
+      }
+    ],
+    "кипиа-002-r0014": [
+      {
+        "value": 0.33,
+        "unit": "kg",
+        "method": "catalog",
+        "source": "Каталог РОСМА, РД-2Р IP44 G¼: https://rosma.spb.ru/rele_davleniya/rd_2r_rele_davleniya_dlya_zhidkih_i_gazoobraznyh_neagressivnyh_sred/"
+      }
+    ],
+    "кипиа-002-r0015": [
+      {
+        "value": 0.33,
+        "unit": "kg",
+        "method": "estimated",
+        "source": "Каталог РОСМА, РД-2Р IP44 G¼. Предварительно по исполнению 0,1…1 МПа, в исходной строке нижняя граница записана как −0,1 МПа: https://rosma.spb.ru/rele_davleniya/rd_2r_rele_davleniya_dlya_zhidkih_i_gazoobraznyh_neagressivnyh_sred/"
+      }
+    ],
+    "кипиа-002-r0016": [
+      {
+        "value": 0.33,
+        "unit": "kg",
+        "method": "catalog",
+        "source": "Каталог РОСМА, РД-2Р IP44 G¼: https://rosma.spb.ru/rele_davleniya/rd_2r_rele_davleniya_dlya_zhidkih_i_gazoobraznyh_neagressivnyh_sred/"
+      }
+    ],
+    "кипиа-003-r0021": [
+      {
+        "value": 0.2,
+        "unit": "kg",
+        "method": "catalog",
+        "source": "Паспорт EKF PRT-1XX, с. 4, максимальная масса PRT-100 для серии: https://ekfgroup.com/uploads/products/3C2A0D3C44D40CFE811E8E3DF1E97D8A.pdf#page=4"
+      }
+    ],
+    "кипиа-003-r0022": [
+      {
+        "value": 0.2,
+        "unit": "kg",
+        "method": "catalog",
+        "source": "Паспорт EKF PRT-1XX, с. 4, максимальная масса PRT-100 для серии: https://ekfgroup.com/uploads/products/3C2A0D3C44D40CFE811E8E3DF1E97D8A.pdf#page=4"
+      }
+    ],
+    "кипиа-003-r0023": [
+      {
+        "value": 0.2,
+        "unit": "kg",
+        "method": "catalog",
+        "source": "Паспорт EKF PRT-1XX, с. 4, максимальная масса PRT-100 для серии: https://ekfgroup.com/uploads/products/3C2A0D3C44D40CFE811E8E3DF1E97D8A.pdf#page=4"
+      }
+    ],
+    "кипиа-004-r0028": [
+      {
+        "value": 0.135,
+        "unit": "kg",
+        "method": "catalog",
+        "source": "Паспорт EKF TZ-8 PROxima, таблица 2, масса нетто TZ-8111: https://ekfgroup.com/uploads/products/EEE03F9524B556CBD1F51611E1ED8222.pdf#page=3"
+      }
+    ],
+    "кипиа-004-r0029": [
+      {
+        "value": 0.145,
+        "unit": "kg",
+        "method": "catalog",
+        "source": "Паспорт EKF TZ-8 PROxima, таблица 2, масса нетто TZ-8108: https://ekfgroup.com/uploads/products/EEE03F9524B556CBD1F51611E1ED8222.pdf#page=3"
+      }
+    ],
+    "кронштейны-001-r0005": [
+      {
+        "method": "catalog",
+        "source": "ГК «Венард», масса на чертеже Equipment/FabricatedParts/3D/Кронштейны/Кронштейн концевых выключателей для Dendor 017W Dn50-80.pdf.",
+        "unit": "kg",
+        "value": 0.21
+      }
+    ],
+    "кронштейны-001-r0006": [
+      {
+        "method": "catalog",
+        "source": "Масса на чертеже, привязка DN100–125 в valve-control-mounts.json. Equipment/FabricatedParts/3D/Кронштейны/Кронштейн концевых выключателей 017W Dn125 мал.pdf.",
+        "unit": "kg",
+        "value": 0.26,
+        "variant": "DN100–125"
+      },
+      {
+        "method": "calculated",
+        "source": "Объём замкнутой CAD-сетки, сталь 7850 кг/м³. Привязка в valve-control-mounts.json: Equipment/FabricatedParts/3D/Кронштейны/Кронштейн концевых выключателей 017W Dn150.SLDPRT.",
+        "unit": "kg",
+        "value": 0.312,
+        "variant": "DN150"
+      }
+    ],
+    "кронштейны-001-r0007": [
+      {
+        "method": "calculated",
+        "source": "Объём замкнутого тела STEP, сталь 7850 кг/м³. Equipment/FabricatedParts/3D/Кронштейны/Кронштейн концевых выключателей задвижка с редуктором 30_1.STEP.",
+        "unit": "kg",
+        "value": 0.6
+      }
+    ],
+    "кронштейны-001-r0008": [
+      {
+        "method": "estimated",
+        "source": "Масса по чертежу флажка Ø64 мм. Соответствие исполнению 30:1 не подтверждено. Equipment/FabricatedParts/3D/Кронштейны/Флажок концевого выключателя ф64.pdf.",
+        "unit": "kg",
+        "value": 0.069
+      }
+    ],
+    "кронштейны-001-r0009": [
+      {
+        "method": "calculated",
+        "source": "Площадь DXF-контура за вычетом отверстий 25 647,45 мм², лист 3 мм по чертежу серии, сталь 7850 кг/м³. Equipment/FabricatedParts/3D/Кронштейны/DXF/Кронштейн концевых выключателей задвижка с редуктором 50_1.DXF.",
+        "unit": "kg",
+        "value": 0.604
+      }
+    ],
+    "кронштейны-001-r0010": [
+      {
+        "method": "estimated",
+        "source": "Масса по чертежу флажка Ø85 мм. Соответствие исполнению 50:1 не подтверждено. Equipment/FabricatedParts/3D/Кронштейны/Флажок концевого выключателя ф85.pdf.",
+        "unit": "kg",
+        "value": 0.104
+      }
+    ],
+    "кронштейны-001-r0011": [
+      {
+        "value": 0.62,
+        "unit": "kg",
+        "method": "estimated",
+        "source": "Аналог кронштейна той же серии: 0,61423 кг по объёму замкнутого тела STEP при 7850 кг/м³, больше 0,604 кг по DXF исполнения 50:1. Equipment/FabricatedParts/3D/Кронштейны/Кронштейн концевых выключателей задвижка с редуктором.STEP. В руководстве DENDOR 47GV/47GV.Z для DN350 и DN500 одинаковый присоединительный фланец редуктора F10 Ø125 мм (https://dendor.ru/re/re47gv%2Cgvz.pdf#page=16); фактический контур кронштейна 70:1 не установлен."
+      }
+    ],
+    "кронштейны-001-r0012": [
+      {
+        "value": 0.105,
+        "unit": "kg",
+        "method": "estimated",
+        "source": "Предварительно по наиболее тяжёлому локальному флажку Ø85, 0,10434 кг по объёму STEP при 7850 кг/м³, округлено вверх. Equipment/FabricatedParts/3D/Кронштейны/Флажок концевого выключателя ф85.STEP. В руководстве DENDOR 47GV/47GV.Z у DN350 и DN500 одинаковый входной вал редуктора Ø20 мм (https://dendor.ru/re/re47gv%2Cgvz.pdf#page=16); исполнение флажка 70:1 не установлено."
+      }
+    ],
+    "кронштейны-001-r0013": [
+      {
+        "value": 1.21,
+        "unit": "kg",
+        "method": "estimated",
+        "source": "Предварительная оценка от 0,61423 кг по местному STEP (Equipment/FabricatedParts/3D/Кронштейны/Кронштейн концевых выключателей задвижка с редуктором.STEP) с масштабом площади (175/125)² при неизменной толщине листа 3 мм. В руководстве DENDOR 47GV/47GV.Z указан переход от фланца редуктора F10 Ø125 мм (DN350) к F14 Ø175 мм (DN700, https://dendor.ru/re/re47gv%2Cgvz.pdf#page=16); исполнение кронштейна 90:1 не установлено."
+      }
+    ],
+    "кронштейны-001-r0014": [
+      {
+        "value": 0.235,
+        "unit": "kg",
+        "method": "estimated",
+        "source": "Предварительная оценка от самого тяжёлого местного флажка Ø85, 0,10434 кг по STEP (Equipment/FabricatedParts/3D/Кронштейны/Флажок концевого выключателя ф85.STEP), с масштабом площади (30/20)² при той же толщине. В руководстве DENDOR 47GV/47GV.Z входной вал DN700 Ø30 мм вместо Ø20 мм у DN350 (https://dendor.ru/re/re47gv%2Cgvz.pdf#page=16); исполнение флажка 90:1 не установлено."
+      }
+    ],
+    "мембранный-бак-002-r0011": [
+      {
+        "value": 0.398,
+        "unit": "kg",
+        "method": "estimated",
+        "source": "Позиция Петрович 1095651 (https://moscow.petrovich.ru/product/1095651/) соответствует изделию ТР 26391 / 0234.1.01-100, 1000 мм (https://sanriks.ru/brand/tr/). Петрович публикует массу 0,398 кг без указания типа, а ВсеИнструменты для того же артикула указывают те же 0,398 кг как массу единичной упаковки (https://www.vseinstrumenti.ru/product/podvodka-dlya-vody-tr-santehnika-gigant-nerzhaveyuschaya-stal-100-sm-v-n-3-4-uglovaya-26391-1223164/). Значение принято как верхняя предварительная оценка нетто. В исходном XLSM E11 записана масса 1,55 кг, в точности совпадающая с E4 бака Wester WAV 8; как массу подводки не учитывали."
+      }
+    ],
+    "мембранный-бак-002-r0012": [
+      {
+        "value": 0.88,
+        "unit": "kg",
+        "method": "estimated",
+        "source": "Паспорт STOUT SHF, п. 4, угловые подводки НР–ВР 1″: 0,618 кг на 600 мм, 0,760 кг на 800 мм и 0,880 кг на 1000 мм (https://www.stout.ru/upload/iblock/069/dzfel5lyzzfmahlr7xi06eofyjk5a1vk/%D0%93%D0%B8%D0%B1%D0%BA%D0%B0%D1%8F%20%D0%BF%D0%BE%D0%B4%D0%B2%D0%BE%D0%B4%D0%BA%D0%B0%20%D1%82%D0%B8%D0%BF%20SHF%20%D0%A2%D0%B5%D1%85%D0%BD%D0%B8%D1%87%D0%B5%D1%81%D0%BA%D0%B8%D0%B9%20%D0%BF%D0%B0%D1%81%D0%BF%D0%BE%D1%80%D1%82%2025.03.2026.pdf#page=5). Ссылка исходной строки ведёт на всю группу https://lunda.ru/catalog/category/c12322/product/podvodka-stout_31597.html; длина неизвестна, выбрана наибольшая каталожная масса. В исходном XLSM E12 записано 9,2 кг, в точности как E5 бака Wester WAV 50; как массу подводки не учитывали."
+      }
+    ],
+    "металл-002-r0020": [
+      {
+        "method": "catalog",
+        "source": "Калькулятор по ОБВЯЗКЕ.xlsm, лист «Металл», I20 (масса погонного метра).",
+        "unit": "kg/m",
+        "value": 4.31
+      }
+    ],
+    "металл-002-r0021": [
+      {
+        "method": "catalog",
+        "source": "Калькулятор по ОБВЯЗКЕ.xlsm, лист «Металл», I21 (масса погонного метра).",
+        "unit": "kg/m",
+        "value": 6.82
+      }
+    ],
+    "металл-002-r0022": [
+      {
+        "method": "catalog",
+        "source": "Калькулятор по ОБВЯЗКЕ.xlsm, лист «Металл», I22 (масса погонного метра).",
+        "unit": "kg/m",
+        "value": 7.13
+      }
+    ],
+    "металл-002-r0023": [
+      {
+        "method": "catalog",
+        "source": "Калькулятор по ОБВЯЗКЕ.xlsm, лист «Металл», I23 (масса погонного метра).",
+        "unit": "kg/m",
+        "value": 9.33
+      }
+    ],
+    "металл-002-r0024": [
+      {
+        "method": "catalog",
+        "source": "Калькулятор по ОБВЯЗКЕ.xlsm, лист «Металл», I24 (масса погонного метра).",
+        "unit": "kg/m",
+        "value": 14.58
+      }
+    ],
+    "металл-002-r0025": [
+      {
+        "value": 17.55,
+        "unit": "kg/m",
+        "method": "estimated",
+        "source": "Номинальная масса соответствующего сечения по ГОСТ 30245-2012, табл. 1. В исходной книге указано 20,99 кг/м для 120×120×5. Марка и сортамент конкретной поставки не подтверждены. https://mssz.spb.ru/assets/files/gost/gost-30245-2012.pdf"
+      },
+      {
+        "value": 20.99,
+        "unit": "kg/m",
+        "method": "estimated",
+        "source": "Консервативное значение из «Калькулятор по ОБВЯЗКЕ.xlsm», лист «Металл», I25. Для номинального сечения 120×120×5 ГОСТ 30245-2012 даёт 17,55 кг/м, а расчёт без скруглений даёт 18,055 кг/м. Значение 20,99 кг/м превышает обе величины и может относиться к другой толщине. Требуется сверить толщину или взвесить профиль.",
+        "variant": "Расчётная верхняя оценка"
+      }
+    ],
+    "металл-002-r0026": [
+      {
+        "method": "estimated",
+        "source": "Номинальная масса 140×140×7 по ГОСТ 30245-2012, табл. 1. https://mssz.spb.ru/assets/files/gost/gost-30245-2012.pdf Выбрано большее значение.",
+        "unit": "kg/m",
+        "value": 27.91,
+        "alternatives": [
+          {
+            "value": 24.76,
+            "source": "Калькулятор по ОБВЯЗКЕ.xlsm, лист «Металл», I26."
+          }
+        ]
+      }
+    ],
+    "металл-002-r0027": [
+      {
+        "method": "catalog",
+        "source": "Калькулятор по ОБВЯЗКЕ.xlsm, лист «Металл», I27 (масса погонного метра).",
+        "unit": "kg/m",
+        "value": 28.29
+      }
+    ],
+    "обратные-клапаны-003-r0092": [
+      {
+        "value": 7.6,
+        "unit": "kg",
+        "method": "catalog",
+        "variant": "012F.M",
+        "source": "Техническое описание ДЕНДОР 012F.M, DN50, таблица массогабаритных характеристик. https://dendor.ru/re/tech/012F.M.pdf#page=2"
+      }
+    ],
+    "обратные-клапаны-003-r0093": [
+      {
+        "value": 10,
+        "unit": "kg",
+        "method": "catalog",
+        "variant": "012F.M",
+        "source": "Техническое описание ДЕНДОР 012F.M, DN65, таблица массогабаритных характеристик. https://dendor.ru/re/tech/012F.M.pdf#page=2"
+      }
+    ],
+    "обратные-клапаны-003-r0094": [
+      {
+        "value": 12.4,
+        "unit": "kg",
+        "method": "catalog",
+        "variant": "012F.M",
+        "source": "Техническое описание ДЕНДОР 012F.M, DN80, таблица массогабаритных характеристик. https://dendor.ru/re/tech/012F.M.pdf#page=2"
+      }
+    ],
+    "обратные-клапаны-003-r0095": [
+      {
+        "value": 18,
+        "unit": "kg",
+        "method": "catalog",
+        "variant": "012F.M",
+        "source": "Техническое описание ДЕНДОР 012F.M, DN100, таблица массогабаритных характеристик. https://dendor.ru/re/tech/012F.M.pdf#page=2"
+      }
+    ],
+    "обратные-клапаны-003-r0096": [
+      {
+        "value": 26,
+        "unit": "kg",
+        "method": "catalog",
+        "variant": "012F.Z",
+        "source": "Техническое описание ДЕНДОР 012F.Z, DN125, таблица массогабаритных характеристик. https://dendor.ru/re/tech/012F.Z.pdf#page=2"
+      },
+      {
+        "value": 26,
+        "unit": "kg",
+        "method": "catalog",
+        "variant": "012F.M",
+        "source": "Техническое описание ДЕНДОР 012F.M, DN125, таблица массогабаритных характеристик. https://dendor.ru/re/tech/012F.M.pdf#page=2"
+      }
+    ],
+    "обратные-клапаны-003-r0097": [
+      {
+        "value": 31,
+        "unit": "kg",
+        "method": "catalog",
+        "variant": "012F.Z",
+        "source": "Техническое описание ДЕНДОР 012F.Z, DN150, таблица массогабаритных характеристик. https://dendor.ru/re/tech/012F.Z.pdf#page=2"
+      },
+      {
+        "value": 39,
+        "unit": "kg",
+        "method": "catalog",
+        "variant": "012F.M",
+        "source": "Техническое описание ДЕНДОР 012F.M, DN150, таблица массогабаритных характеристик. https://dendor.ru/re/tech/012F.M.pdf#page=2"
+      }
+    ],
+    "обратные-клапаны-003-r0098": [
+      {
+        "value": 67,
+        "unit": "kg",
+        "method": "catalog",
+        "variant": "012F.Z",
+        "source": "Техническое описание ДЕНДОР 012F.Z, DN200, таблица массогабаритных характеристик. https://dendor.ru/re/tech/012F.Z.pdf#page=2"
+      },
+      {
+        "value": 67,
+        "unit": "kg",
+        "method": "catalog",
+        "variant": "012F.M",
+        "source": "Техническое описание ДЕНДОР 012F.M, DN200, таблица массогабаритных характеристик. https://dendor.ru/re/tech/012F.M.pdf#page=2"
+      }
+    ],
+    "обратные-клапаны-003-r0099": [
+      {
+        "value": 85,
+        "unit": "kg",
+        "method": "catalog",
+        "variant": "012F.Z",
+        "source": "Техническое описание ДЕНДОР 012F.Z, DN250, таблица массогабаритных характеристик. https://dendor.ru/re/tech/012F.Z.pdf#page=2"
+      },
+      {
+        "value": 115,
+        "unit": "kg",
+        "method": "catalog",
+        "variant": "012F.M",
+        "source": "Техническое описание ДЕНДОР 012F.M, DN250, таблица массогабаритных характеристик. https://dendor.ru/re/tech/012F.M.pdf#page=2"
+      }
+    ],
+    "обратные-клапаны-003-r0100": [
+      {
+        "value": 120,
+        "unit": "kg",
+        "method": "catalog",
+        "variant": "012F.Z",
+        "source": "Техническое описание ДЕНДОР 012F.Z, DN300, таблица массогабаритных характеристик. https://dendor.ru/re/tech/012F.Z.pdf#page=2"
+      },
+      {
+        "value": 144,
+        "unit": "kg",
+        "method": "catalog",
+        "variant": "012F.M",
+        "source": "Техническое описание ДЕНДОР 012F.M, DN300, таблица массогабаритных характеристик. https://dendor.ru/re/tech/012F.M.pdf#page=2"
+      }
+    ],
+    "обратные-клапаны-003-r0101": [
+      {
+        "value": 175,
+        "unit": "kg",
+        "method": "catalog",
+        "variant": "012F.Z",
+        "source": "Техническое описание ДЕНДОР 012F.Z, DN350, таблица массогабаритных характеристик. https://dendor.ru/re/tech/012F.Z.pdf#page=2"
+      }
+    ],
+    "обратные-клапаны-003-r0102": [
+      {
+        "value": 310,
+        "unit": "kg",
+        "method": "catalog",
+        "variant": "012F.Z",
+        "source": "Техническое описание ДЕНДОР 012F.Z, DN400, таблица массогабаритных характеристик. https://dendor.ru/re/tech/012F.Z.pdf#page=2"
+      }
+    ],
+    "обратные-клапаны-003-r0103": [
+      {
+        "value": 550,
+        "unit": "kg",
+        "method": "catalog",
+        "variant": "012F.Z",
+        "source": "Техническое описание ДЕНДОР 012F.Z, DN500, таблица массогабаритных характеристик. https://dendor.ru/re/tech/012F.Z.pdf#page=2"
+      }
+    ],
+    "обратные-клапаны-003-r0104": [
+      {
+        "value": 1200,
+        "unit": "kg",
+        "method": "estimated",
+        "source": "Предварительная оценка по чугунным фланцевым шаровым обратным клапанам DN600. Взята наибольшая опубликованная теоретическая масса: AVK 53-600-35-0207 PN10 с шаром PUR 1200 кг (https://www.avkchina.com/-/media/websites/local-websites/avk-china/files/downloads/avk-building-solutions-brochure.pdf?rev=93c3c1503bd245c78a7cf68d4884eaef); REON RSV34/35 PN16/10 с шаром NBR 976 кг (https://reon-armatura.ru/upload/iblock/a39/j53umlsbl7io5xe5oebl0ggz7r5w469d.pdf). Тип 012F.Z ДЕНДОР документирован только до DN500 (https://dendor.ru/re/012f.z.pdf)."
+      }
+    ],
+    "обратные-клапаны-003-r0105": [
+      {
+        "value": 1910,
+        "unit": "kg",
+        "method": "estimated",
+        "source": "Предварительная оценка массы DN700 по подобию 1200×(700/600)³, округление вверх до 10 кг. База — максимальная найденная масса чугунного фланцевого шарового обратного клапана DN600, AVK 53-600-35-0207 (https://www.avkchina.com/-/media/websites/local-websites/avk-china/files/downloads/avk-building-solutions-brochure.pdf?rev=93c3c1503bd245c78a7cf68d4884eaef). Габариты и масса изделия DN700 не подтверждены; ДЕНДОР 012F.Z ограничен DN500 (https://dendor.ru/re/012f.z.pdf); FAF 2290 объявлен до DN800, таблица массы для DN700 не найдена (https://www.fafvana.com.tr/sp/2290-ball-check-valve/)."
+      }
+    ],
+    "обратные-клапаны-003-r0106": [
+      {
+        "value": 2850,
+        "unit": "kg",
+        "method": "estimated",
+        "source": "Предварительная оценка массы DN800 по подобию 1200×(800/600)³, округление вверх до 10 кг. База — максимальная найденная масса чугунного фланцевого шарового обратного клапана DN600, AVK 53-600-35-0207 (https://www.avkchina.com/-/media/websites/local-websites/avk-china/files/downloads/avk-building-solutions-brochure.pdf?rev=93c3c1503bd245c78a7cf68d4884eaef). Габариты и масса изделия DN800 не подтверждены; ДЕНДОР 012F.Z ограничен DN500 (https://dendor.ru/re/012f.z.pdf); FAF 2290 объявлен до DN800, таблица массы для DN800 не найдена (https://www.fafvana.com.tr/sp/2290-ball-check-valve/)."
+      }
+    ],
+    "обратные-клапаны-004-r0183": [
+      {
+        "value": 0.094,
+        "unit": "kg",
+        "method": "catalog",
+        "source": "Паспорт MVI AquaHit CV.720.04, с. 5, таблица размеров и массы: https://cdn.lunda.ru/catalog/binary/document/pasport-texnicheskij-mvi-aquahit-cv_d19734.pdf#page=5"
+      }
+    ],
+    "обратные-клапаны-004-r0184": [
+      {
+        "value": 0.142,
+        "unit": "kg",
+        "method": "catalog",
+        "source": "Паспорт MVI AquaHit CV.720.05, с. 5, таблица размеров и массы: https://cdn.lunda.ru/catalog/binary/document/pasport-texnicheskij-mvi-aquahit-cv_d19734.pdf#page=5"
+      }
+    ],
+    "обратные-клапаны-004-r0185": [
+      {
+        "value": 0.205,
+        "unit": "kg",
+        "method": "catalog",
+        "source": "Паспорт MVI AquaHit CV.720.06, с. 5, таблица размеров и массы: https://cdn.lunda.ru/catalog/binary/document/pasport-texnicheskij-mvi-aquahit-cv_d19734.pdf#page=5"
+      }
+    ],
+    "обратные-клапаны-004-r0186": [
+      {
+        "value": 0.467,
+        "unit": "kg",
+        "method": "catalog",
+        "source": "Паспорт MVI AquaHit CV.720.07, с. 5, таблица размеров и массы: https://cdn.lunda.ru/catalog/binary/document/pasport-texnicheskij-mvi-aquahit-cv_d19734.pdf#page=5"
+      }
+    ],
+    "обратные-клапаны-004-r0187": [
+      {
+        "value": 0.319,
+        "unit": "kg",
+        "method": "catalog",
+        "source": "Паспорт MVI AquaHit CV.720.08, с. 5, таблица размеров и массы: https://cdn.lunda.ru/catalog/binary/document/pasport-texnicheskij-mvi-aquahit-cv_d19734.pdf#page=5"
+      }
+    ],
+    "обратные-клапаны-004-r0188": [
+      {
+        "value": 0.645,
+        "unit": "kg",
+        "method": "catalog",
+        "source": "Паспорт MVI AquaHit CV.720.09, с. 5, таблица размеров и массы: https://cdn.lunda.ru/catalog/binary/document/pasport-texnicheskij-mvi-aquahit-cv_d19734.pdf#page=5"
+      }
+    ],
+    "пожарная-арматура-001-r0245": [
+      {
+        "value": 0.15,
+        "unit": "kg",
+        "method": "catalog",
+        "source": "Каталог Цветлит, с. 14, ГМ-50 ПМ УХЛ1, масса не более: https://dn.ru/storage/certificates/cvetlit/pasport_krany_cvetlit.pdf"
+      }
+    ],
+    "пожарная-арматура-001-r0246": [
+      {
+        "value": 0.23,
+        "unit": "kg",
+        "method": "catalog",
+        "source": "Каталог Цветлит, с. 14, ГМ-65 ПМ УХЛ1, масса не более: https://dn.ru/storage/certificates/cvetlit/pasport_krany_cvetlit.pdf"
+      }
+    ],
+    "пожарная-арматура-001-r0247": [
+      {
+        "value": 0.3,
+        "unit": "kg",
+        "method": "catalog",
+        "source": "Каталог Цветлит, с. 14, ГМ-80 ПМ УХЛ1, масса не более: https://dn.ru/storage/certificates/cvetlit/pasport_krany_cvetlit.pdf"
+      }
+    ],
+    "пожарная-арматура-002-r0252": [
+      {
+        "value": 0.2,
+        "unit": "kg",
+        "method": "estimated",
+        "source": "Предварительная оценка по паспорту аналога Татполимер ГЗ-50АП, алюминий/пластик, масса не более. Производитель исходной позиции не указан: https://dn.ru/storage/certificates/tatpolimer/golovki-pojarnye/pasport_tatpolimer_gz.pdf"
+      }
+    ],
+    "пожарная-арматура-002-r0253": [
+      {
+        "value": 0.27,
+        "unit": "kg",
+        "method": "estimated",
+        "source": "Предварительная оценка по паспорту аналога Татполимер ГЗ-65АП, алюминий/пластик, масса не более. Производитель исходной позиции не указан: https://dn.ru/storage/certificates/tatpolimer/golovki-pojarnye/pasport_tatpolimer_gz.pdf"
+      }
+    ],
+    "пожарная-арматура-002-r0254": [
+      {
+        "value": 0.34,
+        "unit": "kg",
+        "method": "estimated",
+        "source": "Предварительная оценка по паспорту аналога Татполимер ГЗ-80АП, алюминий/пластик, масса не более. Производитель исходной позиции не указан: https://dn.ru/storage/certificates/tatpolimer/golovki-pojarnye/pasport_tatpolimer_gz.pdf"
+      }
+    ],
+    "прокладки-001-r0004": [
+      {
+        "method": "catalog",
+        "source": "ГОСТ 15180-86, табл. 3, предельная масса 1000 шт. / 1000. https://www.zaar.ru/gosty/gost-15180-86.pdf",
+        "unit": "kg",
+        "value": 0.007
+      }
+    ],
+    "прокладки-001-r0005": [
+      {
+        "method": "catalog",
+        "source": "ГОСТ 15180-86, табл. 3, предельная масса 1000 шт. / 1000. https://www.zaar.ru/gosty/gost-15180-86.pdf",
+        "unit": "kg",
+        "value": 0.009
+      }
+    ],
+    "прокладки-001-r0006": [
+      {
+        "method": "catalog",
+        "source": "ГОСТ 15180-86, табл. 3, предельная масса 1000 шт. / 1000. https://www.zaar.ru/gosty/gost-15180-86.pdf",
+        "unit": "kg",
+        "value": 0.013
+      }
+    ],
+    "прокладки-001-r0007": [
+      {
+        "method": "catalog",
+        "source": "ГОСТ 15180-86, табл. 3, предельная масса 1000 шт. / 1000. https://www.zaar.ru/gosty/gost-15180-86.pdf",
+        "unit": "kg",
+        "value": 0.016
+      }
+    ],
+    "прокладки-001-r0008": [
+      {
+        "method": "catalog",
+        "source": "ГОСТ 15180-86, табл. 3, предельная масса 1000 шт. / 1000. https://www.zaar.ru/gosty/gost-15180-86.pdf",
+        "unit": "kg",
+        "value": 0.02
+      }
+    ],
+    "прокладки-001-r0009": [
+      {
+        "method": "catalog",
+        "source": "ГОСТ 15180-86, табл. 3, предельная масса 1000 шт. / 1000. https://www.zaar.ru/gosty/gost-15180-86.pdf",
+        "unit": "kg",
+        "value": 0.026
+      }
+    ],
+    "прокладки-001-r0010": [
+      {
+        "method": "catalog",
+        "source": "ГОСТ 15180-86, табл. 3, предельная масса 1000 шт. / 1000. https://www.zaar.ru/gosty/gost-15180-86.pdf",
+        "unit": "kg",
+        "value": 0.033
+      }
+    ],
+    "прокладки-001-r0011": [
+      {
+        "method": "catalog",
+        "source": "ГОСТ 15180-86, табл. 3, предельная масса 1000 шт. / 1000. https://www.zaar.ru/gosty/gost-15180-86.pdf",
+        "unit": "kg",
+        "value": 0.04
+      }
+    ],
+    "прокладки-001-r0012": [
+      {
+        "method": "catalog",
+        "source": "ГОСТ 15180-86, табл. 3, предельная масса 1000 шт. / 1000. https://www.zaar.ru/gosty/gost-15180-86.pdf",
+        "unit": "kg",
+        "value": 0.047,
+        "variant": "PN 10/16"
+      }
+    ],
+    "прокладки-001-r0013": [
+      {
+        "method": "catalog",
+        "source": "ГОСТ 15180-86, табл. 3, предельная масса 1000 шт. / 1000. https://www.zaar.ru/gosty/gost-15180-86.pdf",
+        "unit": "kg",
+        "value": 0.061,
+        "variant": "PN 10/16"
+      }
+    ],
+    "прокладки-001-r0014": [
+      {
+        "method": "catalog",
+        "source": "ГОСТ 15180-86, табл. 3, предельная масса 1000 шт. / 1000. https://www.zaar.ru/gosty/gost-15180-86.pdf",
+        "unit": "kg",
+        "value": 0.066,
+        "variant": "PN 10/16"
+      }
+    ],
+    "прокладки-001-r0015": [
+      {
+        "method": "catalog",
+        "source": "ГОСТ 15180-86, табл. 3, предельная масса 1000 шт. / 1000. https://www.zaar.ru/gosty/gost-15180-86.pdf",
+        "unit": "kg",
+        "value": 0.086,
+        "variant": "PN 10/16"
+      }
+    ],
+    "прокладки-001-r0016": [
+      {
+        "method": "catalog",
+        "source": "ГОСТ 15180-86, табл. 3, предельная масса 1000 шт. / 1000. https://www.zaar.ru/gosty/gost-15180-86.pdf",
+        "unit": "kg",
+        "value": 0.12,
+        "variant": "PN 10/16"
+      }
+    ],
+    "прокладки-001-r0017": [
+      {
+        "method": "catalog",
+        "source": "ГОСТ 15180-86, табл. 3, предельная масса 1000 шт. / 1000. https://www.zaar.ru/gosty/gost-15180-86.pdf",
+        "unit": "kg",
+        "value": 0.129
+      }
+    ],
+    "прокладки-001-r0018": [
+      {
+        "method": "catalog",
+        "source": "ГОСТ 15180-86, табл. 3, предельная масса 1000 шт. / 1000. https://www.zaar.ru/gosty/gost-15180-86.pdf",
+        "unit": "kg",
+        "value": 0.166
+      }
+    ],
+    "прокладки-001-r0019": [
+      {
+        "method": "catalog",
+        "source": "ГОСТ 15180-86, табл. 3, предельная масса 1000 шт. / 1000. https://www.zaar.ru/gosty/gost-15180-86.pdf",
+        "unit": "kg",
+        "value": 0.192
+      }
+    ],
+    "прокладки-001-r0020": [
+      {
+        "method": "catalog",
+        "source": "ГОСТ 15180-86, табл. 3, предельная масса 1000 шт. / 1000. https://www.zaar.ru/gosty/gost-15180-86.pdf",
+        "unit": "kg",
+        "value": 0.21
+      }
+    ],
+    "прокладки-001-r0021": [
+      {
+        "method": "catalog",
+        "source": "ГОСТ 15180-86, табл. 3, предельная масса 1000 шт. / 1000. https://www.zaar.ru/gosty/gost-15180-86.pdf",
+        "unit": "kg",
+        "value": 0.301
+      }
+    ],
+    "прокладки-001-r0022": [
+      {
+        "method": "catalog",
+        "source": "ГОСТ 15180-86, табл. 3, предельная масса 1000 шт. / 1000. https://www.zaar.ru/gosty/gost-15180-86.pdf",
+        "unit": "kg",
+        "value": 0.422
+      }
+    ],
+    "прокладки-001-r0023": [
+      {
+        "method": "catalog",
+        "source": "ГОСТ 15180-86, табл. 3, предельная масса 1000 шт. / 1000. https://www.zaar.ru/gosty/gost-15180-86.pdf",
+        "unit": "kg",
+        "value": 0.517
+      }
+    ],
+    "рама-001-r0005": [
+      {
+        "method": "estimated",
+        "source": "Масса рамы 400×600×5 по чертежу Equipment/Frames/3D/Рама 400х600х5 2Н.pdf, масштабированная по длине 600 мм и толщине листа 3 мм при том же поперечном сечении. Точная развёртка и отверстия неизвестны.",
+        "unit": "kg",
+        "value": 7.8
+      }
+    ],
+    "рама-001-r0006": [
+      {
+        "method": "estimated",
+        "source": "Масса рамы 400×600×5 по чертежу Equipment/Frames/3D/Рама 400х600х5 2Н.pdf, масштабированная по длине 900 мм и толщине листа 3 мм при том же поперечном сечении. Точная развёртка и отверстия неизвестны.",
+        "unit": "kg",
+        "value": 11.7
+      }
+    ],
+    "рама-001-r0007": [
+      {
+        "method": "estimated",
+        "source": "Масса рамы 400×600×5 по чертежу Equipment/Frames/3D/Рама 400х600х5 2Н.pdf, масштабированная по длине 1500 мм и толщине листа 3 мм при том же поперечном сечении. Точная развёртка и отверстия неизвестны.",
+        "unit": "kg",
+        "value": 19.5
+      }
+    ],
+    "рама-001-r0008": [
+      {
+        "method": "estimated",
+        "source": "Масса рамы 400×600×5 по чертежу Equipment/Frames/3D/Рама 400х600х5 2Н.pdf, масштабированная по длине 1800 мм и толщине листа 3 мм при том же поперечном сечении. Точная развёртка и отверстия неизвестны.",
+        "unit": "kg",
+        "value": 23.5
+      }
+    ],
+    "рама-001-r0009": [
+      {
+        "method": "catalog",
+        "source": "ГК «Венард», масса на чертеже Equipment/Frames/3D/Рама 400х600х5 2Н.pdf.",
+        "unit": "kg",
+        "value": 13.03
+      }
+    ],
+    "рама-001-r0010": [
+      {
+        "method": "calculated",
+        "source": "Площадь DXF-развёртки с вычетом отверстий 502 062,59 мм², лист 5 мм, сталь 7850 кг/м³. Equipment/Frames/3D/Рама 2Н15 400х900х5.DXF.",
+        "unit": "kg",
+        "value": 19.71
+      }
+    ],
+    "рама-001-r0011": [
+      {
+        "method": "estimated",
+        "source": "Масса рамы 400×600×5 по чертежу Equipment/Frames/3D/Рама 400х600х5 2Н.pdf, масштабированная по длине 1500 мм и толщине листа 5 мм при том же поперечном сечении. Точная развёртка и отверстия неизвестны.",
+        "unit": "kg",
+        "value": 32.6
+      }
+    ],
+    "рама-001-r0012": [
+      {
+        "method": "estimated",
+        "source": "Масса рамы 400×600×5 по чертежу Equipment/Frames/3D/Рама 400х600х5 2Н.pdf, масштабированная по длине 1800 мм и толщине листа 5 мм при том же поперечном сечении. Точная развёртка и отверстия неизвестны.",
+        "unit": "kg",
+        "value": 39.1
+      }
+    ],
+    "резьбовые-фитинги-001-r0216": [
+      {
+        "value": 0.028,
+        "unit": "kg",
+        "method": "catalog",
+        "source": "Каталог LD Pride от 24.03.2025, прямой ниппель НР–НР, DN15: https://image.stoking.ru/uploads/image/stoking-library/ld/pride/ld-47-247-15/katalog-latunnykh-kranov-ld-pride-ot-24-03-2025.pdf"
+      }
+    ],
+    "резьбовые-фитинги-001-r0217": [
+      {
+        "value": 0.046,
+        "unit": "kg",
+        "method": "catalog",
+        "source": "Каталог LD Pride от 24.03.2025, прямой ниппель НР–НР, DN20: https://image.stoking.ru/uploads/image/stoking-library/ld/pride/ld-47-247-15/katalog-latunnykh-kranov-ld-pride-ot-24-03-2025.pdf"
+      }
+    ],
+    "резьбовые-фитинги-001-r0218": [
+      {
+        "value": 0.08,
+        "unit": "kg",
+        "method": "catalog",
+        "source": "Каталог LD Pride от 24.03.2025, прямой ниппель НР–НР, DN25: https://image.stoking.ru/uploads/image/stoking-library/ld/pride/ld-47-247-15/katalog-latunnykh-kranov-ld-pride-ot-24-03-2025.pdf"
+      }
+    ],
+    "резьбовые-фитинги-001-r0219": [
+      {
+        "value": 0.123,
+        "unit": "kg",
+        "method": "catalog",
+        "source": "Каталог LD Pride от 24.03.2025, прямой ниппель НР–НР, DN32: https://image.stoking.ru/uploads/image/stoking-library/ld/pride/ld-47-247-15/katalog-latunnykh-kranov-ld-pride-ot-24-03-2025.pdf"
+      }
+    ],
+    "резьбовые-фитинги-001-r0220": [
+      {
+        "value": 0.138,
+        "unit": "kg",
+        "method": "catalog",
+        "source": "Каталог LD Pride от 24.03.2025, прямой ниппель НР–НР, DN40: https://image.stoking.ru/uploads/image/stoking-library/ld/pride/ld-47-247-15/katalog-latunnykh-kranov-ld-pride-ot-24-03-2025.pdf"
+      }
+    ],
+    "резьбовые-фитинги-001-r0221": [
+      {
+        "value": 0.24,
+        "unit": "kg",
+        "method": "catalog",
+        "source": "Каталог LD Pride от 24.03.2025, прямой ниппель НР–НР, DN50: https://image.stoking.ru/uploads/image/stoking-library/ld/pride/ld-47-247-15/katalog-latunnykh-kranov-ld-pride-ot-24-03-2025.pdf"
+      }
+    ],
+    "резьбовые-фитинги-002-r0225": [
+      {
+        "value": 0.024,
+        "unit": "kg",
+        "method": "catalog",
+        "source": "Каталог LD Pride от 24.03.2025, футорка НР–ВР, DN15×8: https://image.stoking.ru/uploads/image/stoking-library/ld/pride/ld-47-247-15/katalog-latunnykh-kranov-ld-pride-ot-24-03-2025.pdf"
+      }
+    ],
+    "резьбовые-фитинги-002-r0226": [
+      {
+        "value": 0.031,
+        "unit": "kg",
+        "method": "catalog",
+        "source": "Каталог LD Pride от 24.03.2025, футорка НР–ВР, DN20×15: https://image.stoking.ru/uploads/image/stoking-library/ld/pride/ld-47-247-15/katalog-latunnykh-kranov-ld-pride-ot-24-03-2025.pdf"
+      }
+    ],
+    "резьбовые-фитинги-002-r0227": [
+      {
+        "value": 0.051,
+        "unit": "kg",
+        "method": "catalog",
+        "source": "Каталог LD Pride от 24.03.2025, футорка НР–ВР, DN25×20: https://image.stoking.ru/uploads/image/stoking-library/ld/pride/ld-47-247-15/katalog-latunnykh-kranov-ld-pride-ot-24-03-2025.pdf"
+      }
+    ],
+    "резьбовые-фитинги-002-r0229": [
+      {
+        "value": 0.087,
+        "unit": "kg",
+        "method": "catalog",
+        "source": "Каталог LD Pride от 24.03.2025, футорка НР–ВР, DN40×32: https://image.stoking.ru/uploads/image/stoking-library/ld/pride/ld-47-247-15/katalog-latunnykh-kranov-ld-pride-ot-24-03-2025.pdf"
+      }
+    ],
+    "резьбовые-фитинги-002-r0230": [
+      {
+        "value": 0.191,
+        "unit": "kg",
+        "method": "catalog",
+        "source": "Технический каталог LD Pride 67, артикул LD.67.507.50x40, таблица футорок НР–ВР: https://image.stoking.ru/uploads/image/stoking-library/ld/pride-67/ld-67-523-25x15x25/ld67-catalog.pdf"
+      }
+    ],
+    "резьбовые-фитинги-003-r0235": [
+      {
+        "value": 0.0105,
+        "unit": "kg",
+        "method": "catalog",
+        "source": "Паспорт MVI серии BF.500, переходник BF.575.0402: https://dn.ru/storage/certificates/mvi/fitingy/passport-fitingi-mvi-bf-500.pdf"
+      }
+    ],
+    "резьбовые-фитинги-003-r0236": [
+      {
+        "value": 0.115,
+        "unit": "kg",
+        "method": "catalog",
+        "source": "Паспорт MVI серии BF.500, переходник BF.575.0705. Порядок размеров 3/4×1 1/4 совпадает с карточкой Lunda, в паспорте указано 1 1/4 ВР × 3/4 НР: https://dn.ru/storage/certificates/mvi/fitingy/passport-fitingi-mvi-bf-500.pdf"
+      }
+    ],
+    "резьбовые-фитинги-003-r0237": [
+      {
+        "value": 0.068,
+        "unit": "kg",
+        "method": "catalog",
+        "source": "Паспорт MVI серии BF.500, переходник BF.575.0605: https://dn.ru/storage/certificates/mvi/fitingy/passport-fitingi-mvi-bf-500.pdf"
+      }
+    ],
+    "резьбовые-фитинги-003-r0239": [
+      {
+        "value": 0.14,
+        "unit": "kg",
+        "method": "catalog",
+        "source": "Паспорт MVI серии BF.500, переходник BF.575.0807: https://dn.ru/storage/certificates/mvi/fitingy/passport-fitingi-mvi-bf-500.pdf"
+      }
+    ],
+    "резьбовые-фитинги-003-r0240": [
+      {
+        "value": 0.23,
+        "unit": "kg",
+        "method": "catalog",
+        "source": "Паспорт MVI серии BF.500, переходник BF.575.0908: https://dn.ru/storage/certificates/mvi/fitingy/passport-fitingi-mvi-bf-500.pdf"
+      }
+    ],
+    "шаровые-краны-001-r0193": [
+      {
+        "value": 0.163,
+        "unit": "kg",
+        "method": "catalog",
+        "source": "Каталог LD Pride, 47.301.15 по связанному ассортименту Lunda: https://image.stoking.ru/uploads/image/stoking-library/ld/pride/ld-67-504-25-1/katalog-ld-pride-2509-4.pdf#page=9"
+      }
+    ],
+    "шаровые-краны-001-r0194": [
+      {
+        "value": 0.229,
+        "unit": "kg",
+        "method": "catalog",
+        "source": "Каталог LD Pride, 47.301.20 по связанному ассортименту Lunda: https://image.stoking.ru/uploads/image/stoking-library/ld/pride/ld-67-504-25-1/katalog-ld-pride-2509-4.pdf#page=9"
+      }
+    ],
+    "шаровые-краны-001-r0195": [
+      {
+        "value": 0.39,
+        "unit": "kg",
+        "method": "catalog",
+        "source": "Каталог LD Pride, 47.301.25 по связанному ассортименту Lunda: https://image.stoking.ru/uploads/image/stoking-library/ld/pride/ld-67-504-25-1/katalog-ld-pride-2509-4.pdf#page=9"
+      }
+    ],
+    "шаровые-краны-001-r0196": [
+      {
+        "value": 0.51,
+        "unit": "kg",
+        "method": "catalog",
+        "source": "Каталог LD Pride, 47.112.1.32.M02 по связанному ассортименту Lunda: https://image.stoking.ru/uploads/image/stoking-library/ld/pride/ld-67-504-25-1/katalog-ld-pride-2509-4.pdf#page=9"
+      }
+    ],
+    "шаровые-краны-001-r0197": [
+      {
+        "value": 0.915,
+        "unit": "kg",
+        "method": "catalog",
+        "source": "Каталог LD Pride, 47.112.1.40.M02 по связанному ассортименту Lunda: https://image.stoking.ru/uploads/image/stoking-library/ld/pride/ld-67-504-25-1/katalog-ld-pride-2509-4.pdf#page=9"
+      }
+    ],
+    "шаровые-краны-001-r0198": [
+      {
+        "value": 1.205,
+        "unit": "kg",
+        "method": "catalog",
+        "source": "Каталог LD Pride, 47.112.1.50.M02 по связанному ассортименту Lunda: https://image.stoking.ru/uploads/image/stoking-library/ld/pride/ld-67-504-25-1/katalog-ld-pride-2509-4.pdf#page=9"
+      }
+    ],
+    "шаровые-краны-002-r0203": [
+      {
+        "value": 0.211,
+        "unit": "kg",
+        "method": "catalog",
+        "source": "Каталог LD Pride, LD 44.344.15 по связанной карточке Lunda, масса одинаковая для чёрной и красной рукояток: https://dn.ru/storage/certificates/ld/krany/krany-sharovye/katalog_latunnykh_kranov_ld_pride.pdf"
+      }
+    ],
+    "шаровые-краны-003-r0208": [
+      {
+        "value": 0.155,
+        "unit": "kg",
+        "method": "catalog",
+        "source": "Каталог LD Pride, серия 47 ВР–ВР, ручка-бабочка, 47.300.15 по семейству связанного каталога Lunda: https://image.stoking.ru/uploads/image/stoking-library/ld/pride/ld-67-504-25-1/katalog-ld-pride-2509-4.pdf#page=9"
+      }
+    ],
+    "шаровые-краны-003-r0209": [
+      {
+        "value": 0.222,
+        "unit": "kg",
+        "method": "catalog",
+        "source": "Каталог LD Pride, серия 47 ВР–ВР, ручка-бабочка, 47.300.20 по семейству связанного каталога Lunda: https://image.stoking.ru/uploads/image/stoking-library/ld/pride/ld-67-504-25-1/katalog-ld-pride-2509-4.pdf#page=9"
+      }
+    ],
+    "шаровые-краны-003-r0210": [
+      {
+        "value": 0.368,
+        "unit": "kg",
+        "method": "catalog",
+        "source": "Каталог LD Pride, серия 47 ВР–ВР, ручка-бабочка, 47.300.25 по семейству связанного каталога Lunda: https://image.stoking.ru/uploads/image/stoking-library/ld/pride/ld-67-504-25-1/katalog-ld-pride-2509-4.pdf#page=9"
+      }
+    ],
+    "шаровые-краны-003-r0211": [
+      {
+        "value": 0.5,
+        "unit": "kg",
+        "method": "estimated",
+        "source": "Каталог LD Pride, серия 47 ВР–ВР, ручка-бабочка, 47.111.1.32.M02 по семейству связанного каталога Lunda: https://image.stoking.ru/uploads/image/stoking-library/ld/pride/ld-67-504-25-1/katalog-ld-pride-2509-4.pdf#page=9"
+      }
+    ],
+    "электроприводы-001-r0136": [
+      {
+        "value": 11,
+        "unit": "kg",
+        "method": "catalog",
+        "source": "Руководство ДЕНДОР, QT5-1, 3×380 В, табл. 4. https://dendor.ru/re/qt.pdf#page=4 Выбрана большая из опубликованных масс данной маркировки. Ревизию электропривода следует сверить по шильдику.",
+        "alternatives": [
+          {
+            "value": 7.5,
+            "source": "Калькулятор по ОБВЯЗКЕ.xlsm, лист «Обвязка», D136."
+          }
+        ]
+      }
+    ],
+    "электроприводы-001-r0140": [
+      {
+        "value": 17.3,
+        "unit": "kg",
+        "method": "catalog",
+        "source": "Калькулятор по ОБВЯЗКЕ.xlsm, лист «Обвязка», D140. Выбрана большая из опубликованных масс данной маркировки. Ревизию электропривода следует сверить по шильдику.",
+        "alternatives": [
+          {
+            "value": 11,
+            "source": "Руководство ДЕНДОР, QT10-1, 3×380 В, табл. 4. https://dendor.ru/re/qt.pdf#page=4"
+          }
+        ]
+      }
+    ],
+    "электроприводы-001-r0142": [
+      {
+        "value": 23,
+        "unit": "kg",
+        "method": "catalog",
+        "source": "Калькулятор по ОБВЯЗКЕ.xlsm, лист «Обвязка», D142. Выбрана большая из опубликованных масс данной маркировки. Ревизию электропривода следует сверить по шильдику.",
+        "alternatives": [
+          {
+            "value": 15,
+            "source": "Руководство ДЕНДОР, QT20-1, 3×380 В, табл. 4. https://dendor.ru/re/qt.pdf#page=4"
+          }
+        ]
+      }
+    ],
+    "электроприводы-001-r0143": [
+      {
+        "value": 23,
+        "unit": "kg",
+        "method": "catalog",
+        "source": "Калькулятор по ОБВЯЗКЕ.xlsm, лист «Обвязка», D143. Выбрана большая из опубликованных масс данной маркировки. Ревизию электропривода следует сверить по шильдику.",
+        "alternatives": [
+          {
+            "value": 19,
+            "source": "Руководство ДЕНДОР, QT30-1, 3×380 В, табл. 4. https://dendor.ru/re/qt.pdf#page=4"
+          }
+        ]
+      }
+    ],
+    "электроприводы-001-r0144": [
+      {
+        "value": 29,
+        "unit": "kg",
+        "method": "catalog",
+        "source": "Калькулятор по ОБВЯЗКЕ.xlsm, лист «Обвязка», D144. Выбрана большая из опубликованных масс данной маркировки. Ревизию электропривода следует сверить по шильдику.",
+        "alternatives": [
+          {
+            "value": 20,
+            "source": "Руководство ДЕНДОР, QT50-1, 3×380 В, табл. 4. https://dendor.ru/re/qt.pdf#page=4"
+          }
+        ]
+      }
+    ],
+    "электроприводы-001-r0145": [
+      {
+        "value": 29,
+        "unit": "kg",
+        "method": "catalog",
+        "source": "Калькулятор по ОБВЯЗКЕ.xlsm, лист «Обвязка», D145. Выбрана большая из опубликованных масс данной маркировки. Ревизию электропривода следует сверить по шильдику.",
+        "alternatives": [
+          {
+            "value": 28,
+            "source": "Руководство ДЕНДОР, QT80-1, 3×380 В, табл. 4. https://dendor.ru/re/qt.pdf#page=4"
+          }
+        ]
+      }
+    ],
+    "электроприводы-001-r0147": [
+      {
+        "value": 83,
+        "unit": "kg",
+        "method": "catalog",
+        "source": "Калькулятор по ОБВЯЗКЕ.xlsm, лист «Обвязка», D147. Выбрана большая из опубликованных масс данной маркировки. Ревизию электропривода следует сверить по шильдику.",
+        "alternatives": [
+          {
+            "value": 37,
+            "source": "Руководство ДЕНДОР, QT120-0.3, 3×380 В, табл. 4. https://dendor.ru/re/qt.pdf#page=4"
+          }
+        ]
+      }
+    ]
+  }
+}

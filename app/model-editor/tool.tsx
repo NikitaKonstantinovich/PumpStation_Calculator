@@ -6,7 +6,7 @@ import type { Pump } from "../pump-catalog";
 import { useRuntimeDiagnostic } from "../diagnostics-ui";
 import {
   addManualPipe, assemblyBounds, buildAssembly, componentBounds, connectionIssues, createHistory, dimensions,
-  distance, worldPoint, editComponent, emptyEditor, execute, mergeAssembly, recoverEmptyCollectors, recoverLostInsertions, pipePoints, redo, routeLength, setAutomaticRoute,
+  distance, worldPoint, editComponent, emptyEditor, execute, mergeAssembly, recoverEmptyCollectors, recoverLostInsertions, recoverThreadedLineGeometry, pipePoints, redo, routeLength, setAutomaticRoute,
   sourceFingerprint, undo, combineProfiles, refreshModelAssets, type Assembly, type Component, type Edit, type EditorState, type ProfileCatalog, type Vec3,
 } from "./model";
 import type { ViewportHandle, EditorMode } from "./viewport";
@@ -52,10 +52,14 @@ export function ModelTool({ project, catalogue, entity, onChange }: {
   const [profiles, setProfiles] = useState<ProfileCatalog | null>(null), [catalogError, setCatalogError] = useState("");
   const [assetError, setAssetError] = useState("");
   const [warningsOpen, setWarningsOpen] = useState(false);
-  const [lineData, setLineData] = useState<LineCatalog>();
+  const [lineResponse, setLineResponse] = useState<{ key: string; data: LineCatalog }>();
   const [lineError, setLineError] = useState("");
   const [lineReload, setLineReload] = useState(0);
   const lineIds = JSON.stringify(lineGeometryIds(project));
+  const lineRequestKey = JSON.stringify([project.project.id, lineIds, lineReload]);
+  const lineData = lineResponse?.key === lineRequestKey ? lineResponse.data : undefined;
+  const requestedLineRefresh = useRef<{ key: string; fingerprint: string }>(undefined);
+  const lineRecoveryKey = useRef<string>(undefined);
   const [mode, setMode] = useState<EditorMode>("translate");
   const [measurement, setMeasurement] = useState<SnapPick[]>([]);
   const [snapOpen, setSnapOpen] = useState(false);
@@ -76,11 +80,6 @@ export function ModelTool({ project, catalogue, entity, onChange }: {
   const snaps = editor.objectSnaps ?? defaultSnaps();
   const generated = useMemo(() => buildAssembly(project, catalogue, profiles ?? EMPTY_PROFILES, lineData ?? EMPTY_LINES), [project, catalogue, profiles, lineData]);
   const spec = project.entities["station-spec"] as SpecEntity | undefined;
-  useEffect(()=>{
-    if(!editor.assembly || !profiles || !catalogue.length || !lineData || !spec?.items) return;
-    const repaired=recoverLostInsertions(editor.assembly,generated,spec.items);
-    if(repaired!==editor.assembly) onChange({...entity,editor:{...editor,assembly:repaired}});
-  },[editor,profiles,catalogue.length,lineData,spec,generated,onChange,entity]);
   const assembly = useMemo(() => editor.assembly ? recoverEmptyCollectors(editor.assembly, generated) : generated, [editor.assembly, generated]);
   const missingPlane = useMemo(() => snaps.plane === "face" && !workingPlane(snaps, snapGeometry(assembly)), [snaps, assembly]);
   const displayAssembly = useMemo(() => {
@@ -126,10 +125,35 @@ export function ModelTool({ project, catalogue, entity, onChange }: {
     const controller = new AbortController();
     void fetch("/api/model-line-data", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ids: JSON.parse(lineIds) }), signal: controller.signal })
       .then(async response => { const data = await response.json(); if (!response.ok || data.version !== 1) throw new Error(data.error ?? "Некорректные данные обвязки"); return data as LineCatalog; })
-      .then(data => { if (!controller.signal.aborted) { setLineData(data); setLineError(""); } })
+      .then(data => { if (!controller.signal.aborted) { setLineResponse({ key: lineRequestKey, data }); setLineError(""); } })
       .catch(error => { if (!controller.signal.aborted) setLineError(`Геометрия обвязки: ${error.message}. Сохранённая сборка остаётся доступной.`); });
     return () => controller.abort();
-  }, [lineIds, project.project.id, lineReload]);
+  }, [lineIds, lineRequestKey]);
+  useEffect(() => {
+    if (!profiles || !catalogue.length || !lineData || !spec?.items) return;
+    const current = latest.current;
+    const request = requestedLineRefresh.current;
+    if (request?.key === lineRequestKey) requestedLineRefresh.current = undefined;
+    const saved = current.editor.assembly;
+    if (!saved) return;
+    const explicit = request?.key === lineRequestKey && request.fingerprint === generated.sourceFingerprint;
+    const recover = !explicit && lineRecoveryKey.current !== lineRequestKey;
+    lineRecoveryKey.current = lineRequestKey;
+    const repair = (value: Assembly) => {
+      const restored = recoverLostInsertions(value, generated, spec.items);
+      return recover ? recoverThreadedLineGeometry(restored, generated) : restored;
+    };
+    const next = explicit ? mergeAssembly(current.assembly, generated) : repair(saved);
+    if (next === saved) return;
+    const history = explicit ? execute(current.currentHistory, next) : {
+      past: current.currentHistory.past.map(repair), present: next, future: current.currentHistory.future.map(repair),
+    };
+    const updatedEditor = { ...current.editor, assembly: next };
+    const updatedEntity = { ...current.entity, editor: updatedEditor };
+    latest.current = { ...current, currentHistory: history, assembly: next, editor: updatedEditor, entity: updatedEntity };
+    setHistory(history);
+    current.onChange(updatedEntity);
+  }, [editor.assembly, profiles, catalogue.length, lineData, lineRequestKey, spec, generated]);
   useEffect(() => {
     const controller = new AbortController();
     void fetch("/model-assets/manifest.json"+(project.project.modelLibraryVersion?"?version="+encodeURIComponent(project.project.modelLibraryVersion):""), { signal: controller.signal }).then(r => { if (!r.ok) throw new Error(); return r.json(); }).then((data: ProfileCatalog) => {
@@ -170,6 +194,11 @@ export function ModelTool({ project, catalogue, entity, onChange }: {
     update({ assembly: nextHistory.present });
   };
   const edit = (id: string, patch: Edit["patch"]) => commit(editComponent(assembly, { id, patch }));
+  const reloadLineGeometry = () => {
+    const revision = lineReload + 1;
+    requestedLineRefresh.current = { key: JSON.stringify([project.project.id, lineIds, revision]), fingerprint: generated.sourceFingerprint };
+    setLineReload(revision);
+  };
   const addFromLibrary = async (model: LibraryModel, signal: AbortSignal) => {
     const projectId = project.project.id;
     if (!viewport.current || !model.meshUrl) throw new Error("3D-сцена ещё не готова");
@@ -244,7 +273,7 @@ export function ModelTool({ project, catalogue, entity, onChange }: {
         <label><input type="checkbox" checked={editor.grid} onChange={e => update({ grid: e.target.checked })}/>Сетка</label><label><input type="checkbox" checked={editor.snap} onChange={e => update({ snap: e.target.checked })}/>К сетке</label><label>Шаг <select aria-label="Шаг привязки, мм" value={editor.snapStep} onChange={e => update({ snapStep: Number(e.target.value) })}>{[1, 5, 10, 25, 50, 100, 250, 500, ...(![1, 5, 10, 25, 50, 100, 250, 500].includes(editor.snapStep) ? [editor.snapStep] : [])].sort((a, b) => a - b).map(v => <option key={v} value={v}>{v} мм</option>)}</select></label>
         <label><input type="checkbox" checked={editor.showFasteners !== false} onChange={e => update({ showFasteners: e.target.checked })}/>Показывать крепёж</label>
         <button disabled={!catalogue.length || !profiles || !lineData} onClick={() => commit(mergeAssembly(assembly, generated))}>Обновить состав</button>
-        <button onClick={() => setLineReload(value => value + 1)}>Обновить размеры из базы</button>
+        <button onClick={reloadLineGeometry}>Обновить размеры из базы</button>
         <button disabled={preparation.busy || !profiles || !catalogue.length} onClick={() => void preparation.start()}>{preparation.busy && !preparation.connecting ? "Подготовка…" : "Подготовить 3D-модели спецификации"}</button>
         <button disabled={!catalogue.length || !profiles || !lineData} onClick={() => setResetOpen(true)}>Автокомпоновка</button>
         <button disabled={assembly.components.length >= 500} onClick={() => commit(addManualPipe(assembly, `manual-pipe-${crypto.randomUUID()}`))}>＋ Труба</button>
@@ -309,7 +338,14 @@ export function ModelTool({ project, catalogue, entity, onChange }: {
             {selected.kind === "pipe" && <><NumberField label="Толщина стенки, мм" value={selected.parameters.wallThickness ?? 0} disabled={selected.locked} min={.1} onCommit={v => changeParameter(selected, "wallThickness", v)}/>{!selected.parameters.wallThickness && <p>Толщина стенки не задана: показан предварительный контур.</p>}</>}
             <h4>Габариты в осях установки</h4><p data-testid="component-dimensions">{selected.pumpGeometry?.envelope === "incomplete" ? "Не подтверждены полностью" : selected.collector && !selected.collector.template.main ? "Не подтверждены" : sizeText(selectedBounds)}</p>
             {selected.pumpGeometry && <p>Габариты насоса L × W × H: {selected.pumpGeometry.dimensionsMm.map(v => v === null ? "—" : fmt(v)).join(" × ")} мм{selected.pumpGeometry.envelope === "incomplete" ? " · неизвестные размеры обозначены прочерком" : ""}</p>}
-            {selected.ports.length > 0 && <details><summary>Точки подключения ({selected.ports.length})</summary>{selected.ports.map(p => <p key={p.id}>{p.id}: локальные X/Y/Z = {p.point.map(fmt).join("; ")} мм; в установке X/Y/Z = {worldPoint(selected, p.point).map(fmt).join("; ")} мм{p.provisional ? " · предварительно" : ""}</p>)}</details>}
+            {selected.ports.length > 0 && <details><summary>Точки подключения ({selected.ports.length})</summary>{selected.ports.map(p => {
+              const fit = assembly.lineJoints?.find(j => j.axialThreadFit && [j.a, j.b].some(end => end.componentId === selected.id && end.portId === p.id));
+              return <p key={p.id}>{p.id} · локальные X/Y/Z {p.point.map(fmt).join(" / ")} мм · в установке {worldPoint(selected, p.point).map(fmt).join(" / ")} мм
+                {p.thread && ` · ${p.thread}${p.gender === "male" ? " НР" : p.gender === "female" ? " ВР" : ""}`}
+                {p.threadDepthMm !== undefined && ` · предел захода ${fmt(p.threadDepthMm)} мм`}
+                {fit && ` · посадка в 3D ${fmt(fit.overlap)} мм`}
+                {p.provisional ? " · предварительно" : ""}</p>;
+            })}</details>}
             {selected.routing && <details><summary>Точки трассы</summary>{pipePoints(assembly, selected).map((p, i) => <p key={i}>{p.map(fmt).join("; ")} мм</p>)}</details>}
           </div> : <p>Выберите компонент в сцене или дереве сборки.</p>}
         </aside>

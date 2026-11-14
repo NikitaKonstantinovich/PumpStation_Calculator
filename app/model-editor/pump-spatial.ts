@@ -1,6 +1,7 @@
 import type { Pump, PumpSpatialData } from "../pump-catalog";
 import type { Bounds, Port, PumpProfile, Vec3 } from "./model";
 import { applyMvFlowReview } from "./onis-flow";
+import echMounts from "../../data/ech-threaded-mounts.json";
 
 export type PumpGeometryInfo = {
   version: 1;
@@ -14,6 +15,8 @@ const finite = (v: unknown): v is number => typeof v === "number" && Number.isFi
 const positive = (v: unknown): v is number => finite(v) && v > 0;
 const vector = (v: unknown): v is Vec3 => Array.isArray(v) && v.length === 3 && v.every(finite);
 const validBounds = (v: unknown): v is Bounds => Array.isArray(v) && v.length === 6 && v.every(finite) && [0, 1, 2].every(i => v[i + 3] > v[i]);
+type ThreadedPumpMount = { point: number[]; dn: number; thread: string; depthMm: number };
+const echThreadedMounts: Record<string, { model: string; mounts: { inlet?: ThreadedPumpMount; outlet?: ThreadedPumpMount } }> = echMounts;
 export function parseCatalogPumpSpatial(raw: unknown): PumpSpatialData | undefined {
   if (!raw || typeof raw !== "object") return;
   const v = raw as PumpSpatialData, b = v.boundsMm;
@@ -80,6 +83,18 @@ export function resolvePumpSpatial(pump: Pump, profile?: PumpProfile): { bounds:
   }
   const horizontal = pump.type === "horizontal_multistage" || pump.type === "end_suction";
   ports = ports.map(p => p.id === "outlet" && !p.axis && horizontal ? { ...p, axis: [0, 0, 1], source: [p.source, "Решение пользователя 30.10.2026: напор горизонтального насоса вверх (+Z)"].filter(Boolean).join("; ") } : p);
+  const sourceHash = profile?.sourceHash;
+  const measuredThreads = sourceHash ? echThreadedMounts[sourceHash] : undefined;
+  if (measuredThreads) ports = ports.map(port => {
+    if (port.id !== "inlet" && port.id !== "outlet") return port;
+    const mount = measuredThreads.mounts[port.id];
+    const expectedAxis = port.id === "inlet" ? [-1, 0, 0] : [0, 0, 1];
+    if (!mount || !port.axis?.every((value, index) => Math.abs(value - expectedAxis[index]) < 1e-5)
+      || !port.point.every((value, index) => Math.abs(value - mount.point[index]) < 1e-4)) return port;
+    return { ...port, dn: mount.dn, connection: "threaded", plane: "thread-reference", gender: "female", thread: mount.thread,
+      threadDepthMm: mount.depthMm, provisional: true,
+      source: `${measuredThreads.model}, измерение осевых поверхностей по STEP ${sourceHash}. Геометрический предел захода ${mount.depthMm} мм.` };
+  });
   for (const [id, label] of [["inlet", "всасывающего"], ["outlet", "напорного"]] as const) {
     if (id === "inlet" && pump.type === "submersible") continue;
     const port = ports.find(p => p.id === id);

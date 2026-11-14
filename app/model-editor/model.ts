@@ -10,7 +10,7 @@ import { defaultSnaps, normalizeSnaps, type SnapSettings } from "./snap-settings
 import { specificationModels } from "./specification-models";
 import { parseInsertionTemplate, parseConnectionPoint, type InsertionTemplate, type InsertionShape, type ConnectionPoint } from "./insertion-types";
 import { addLineAssemblies } from "./line-assembly";
-import { parseLineBinding, parseLineJoints, parseLineShape, type LineBinding, type LineCatalog, type LineJoint } from "./line-types";
+import { parseLineBinding, parseLineJoints, parseLineShape, pipeThreadDesignation, type LineBinding, type LineCatalog, type LineJoint } from "./line-types";
 import { COLLECTOR_INSTRUMENT_RULES_REVISION, parseCollectorBinding, type CollectorBinding } from "./collector-types";
 import { applyCollectorTemplate, buildCollectorTemplate, finishCollectorTemplate } from "./collector-template";
 import { resolvedCollectorMetal } from "./collector-mesh";
@@ -27,7 +27,7 @@ import { addInstrumentAssemblies, followInstrumentAssemblies, parseInstrumentMou
 /** All positions, source CAD coordinates and dimensions use mm; Euler angles use degrees, XYZ. */
 export type Vec3 = [number, number, number];
 export type Bounds = [number, number, number, number, number, number];
-export type Port = { id: string; point: Vec3; axis?: Vec3; provisional?: boolean } & Partial<Omit<ConnectionPoint, "id" | "point" | "axis" | "provisional">>;
+export type Port = { id: string; point: Vec3; axis?: Vec3; provisional?: boolean; threadDepthMm?: number } & Partial<Omit<ConnectionPoint, "id" | "point" | "axis" | "provisional">>;
 export type PortRef = { componentId: string; portId: string };
 export type PumpProfile = {
   pumpId?: string; key?: string; bounds: Bounds; ports: Port[]; source: string; sourceHash: string;
@@ -101,7 +101,14 @@ export function normalizeEditor(raw: unknown, rebuildGeometry = true): EditorSta
     ids.add(c.id);
     const ports: Port[] = Array.isArray(c.ports) ? c.ports.slice(0, 100).flatMap(raw => {
       const port = object(raw);
-      const full = parseConnectionPoint(raw); if (full) return [full];
+      const threadDepth = port.connection === "threaded" && port.plane === "thread-reference" && finite(port.threadDepthMm) && port.threadDepthMm > 0 && port.threadDepthMm <= 1e6
+        ? { threadDepthMm: port.threadDepthMm } : {};
+      const full = parseConnectionPoint(raw);
+      if (full) {
+        const base: Port = full;
+        delete base.threadDepthMm;
+        return [{ ...base, ...threadDepth }];
+      }
       return safeId(port.id) && vec(port.point) ? [{ id: port.id, point: [...port.point] as Vec3, ...(vec(port.axis) ? { axis: [...port.axis] as Vec3 } : {}), provisional: port.provisional === true,
         ...(["flanged", "threaded", "weld", "collar"].includes(String(port.connection)) ? { connection: port.connection as Port["connection"] } : {}),
         ...(finite(port.dn) && port.dn > 0 ? { dn: port.dn } : {}), ...(finite(port.pn) && port.pn > 0 ? { pn: port.pn } : {}),
@@ -109,7 +116,7 @@ export function normalizeEditor(raw: unknown, rebuildGeometry = true): EditorSta
         ...(typeof port.thread === "string" ? { thread: port.thread.slice(0, 24) } : {}), ...(typeof port.material === "string" ? { material: port.material.slice(0, 2000) } : {}),
         ...(["male", "female"].includes(String(port.gender)) ? { gender: port.gender as Port["gender"] } : {}),
         ...(["mating-face", "weld-end", "thread-reference"].includes(String(port.plane)) ? { plane: port.plane as Port["plane"] } : {}),
-        ...(typeof port.source === "string" ? { source: port.source.slice(0, 12000) } : {}), ...(vec(port.up) ? { up: [...port.up] as Vec3 } : {}) }] : [];
+        ...(typeof port.source === "string" ? { source: port.source.slice(0, 12000) } : {}), ...(vec(port.up) ? { up: [...port.up] as Vec3 } : {}), ...threadDepth }] : [];
     }) : [];
     const component: Component = {
       id: c.id, name: typeof c.name === "string" ? c.name.slice(0, 300) : c.id, kind: c.kind as Component["kind"],
@@ -326,13 +333,14 @@ export function connectionIssues(assembly: Assembly): Array<{ id: string; messag
     if (!a || !b) issues.push({ id: j.a.componentId, message: `${owner?.name ?? j.id}: точка подключения стыка не найдена.` });
     else {
       const gap = distance(a, b);
-      if (Math.abs(gap - j.overlap) > .1) issues.push({ id: j.a.componentId, message: `${owner?.name ?? j.id}: соединение нарушено, расстояние между плоскостями ${gap.toFixed(2)} мм. Автокомпоновка доступна отдельной командой.` });
+      const error = j.axialThreadFit && axisA ? distance(b, subtract(a, axisA.map(n => n * j.overlap) as Vec3)) : Math.abs(gap - j.overlap);
+      if (error > .1) issues.push({ id: j.a.componentId, message: `${owner?.name ?? j.id}: соединение нарушено, ${j.axialThreadFit ? `отклонение от осевой посадки ${error.toFixed(2)} мм` : `расстояние между плоскостями ${gap.toFixed(2)} мм`}. Автокомпоновка доступна отдельной командой.` });
       if (axisA && axisB && axisA.reduce((s, n, i) => s + n * axisB[i], 0) > -.999) issues.push({ id: j.a.componentId, message: `${owner?.name ?? j.id}: оси стыка не соосны или направлены неверно.` });
       if (j.provisional) issues.push({ id: j.a.componentId, message: `${owner?.name ?? j.id}: монтажные данные стыка предварительные.` });
       const pa = owner?.ports.find(p => p.id === j.a.portId), pb = assembly.components.find(c => c.id === j.b.componentId)?.ports.find(p => p.id === j.b.portId);
       if (pa?.dn && pb?.dn && pa.dn !== pb.dn) issues.push({ id: j.a.componentId, message: `${owner?.name ?? j.id}: несовместимые DN стыка ${pa.dn}/${pb.dn}.` });
       if (pa?.connection && pb?.connection && pa.connection !== pb.connection && ![pa.connection, pb.connection].every(v => v === "weld" || v === "collar")) issues.push({ id: j.a.componentId, message: `${owner?.name ?? j.id}: типы соединения стыка не совпадают (${pa.connection}/${pb.connection}).` });
-      if (pa?.connection === "threaded" && pb?.connection === "threaded" && (pa.gender && pb.gender && pa.gender === pb.gender || pa.thread && pb.thread && pa.thread !== pb.thread)) issues.push({ id: j.a.componentId, message: `${owner?.name ?? j.id}: резьбы стыка несовместимы.` });
+      if (pa?.connection === "threaded" && pb?.connection === "threaded" && (pa.gender && pb.gender && pa.gender === pb.gender || pa.thread && pb.thread && (pipeThreadDesignation(pa.thread) ?? pa.thread) !== (pipeThreadDesignation(pb.thread) ?? pb.thread))) issues.push({ id: j.a.componentId, message: `${owner?.name ?? j.id}: резьбы стыка несовместимы.` });
     }
   }
   return issues;
@@ -375,7 +383,16 @@ export function buildAssembly(project: ProjectConfig, pumps: Pump[], profiles: P
       if (lines) c.ports = c.ports.map(port => {
         if (port.id !== "inlet" && port.id !== "outlet") return port;
         const metadata = resolvePumpPortData(dn, { ...input, selectedPumpId: pump.id }, circuit === 2, port.id, pump);
-        return metadata ? { ...port, dn: metadata.dn ?? undefined, connection: metadata.connection ?? undefined, source: [metadata.source, port.source].filter(Boolean).join("; ") } : port;
+        if (!metadata) return port;
+        const resolved = { ...port, dn: metadata.dn ?? undefined, connection: metadata.connection ?? undefined, source: [metadata.source, port.source].filter(Boolean).join("; ") };
+        if (port.threadDepthMm !== undefined && (resolved.connection !== port.connection || resolved.dn !== port.dn)) {
+          delete resolved.threadDepthMm;
+          delete resolved.thread;
+          delete resolved.gender;
+          delete resolved.plane;
+          resolved.source = metadata.source;
+        }
+        return resolved;
       });
       c.sourceNote = spatial.note;
       if (profile) {
@@ -550,6 +567,24 @@ export function recoverLostInsertions(saved: Assembly, generated: Assembly, rows
       sourceNote:fresh.sourceNote, line:{...c.line,issues:fresh.line.issues,fidelity:fresh.line.fidelity}};
   });
   return repaired ? rebuildFasteners({...saved,components}) : saved;
+}
+
+/** A saved automatic placeholder can claim an exact model that became available
+ * for the same selected part. Changes to the project composition remain explicit. */
+export function recoverThreadedLineGeometry(saved: Assembly, generated: Assembly): Assembly {
+  if (saved.sourceFingerprint !== generated.sourceFingerprint) return saved;
+  const fresh = new Map(generated.components.map(component => [component.id, component]));
+  const automatic = (component: Component) => component.line && !component.locked && !component.line.manualGeometry &&
+    distance(component.position, component.line.baseline.position) < 1e-6 && distance(component.rotation, component.line.baseline.rotation) < 1e-6;
+  let recovered = false;
+  for (const old of saved.components) {
+    if (!automatic(old)) continue;
+    const next = fresh.get(old.id);
+    if (old.line?.fidelity === "cad" && next?.line?.fidelity !== "cad") return saved;
+    if (!next?.line || old.equipmentId !== next.equipmentId) continue;
+    if ((old.line?.fidelity === "missing" || old.shape?.kind === "marker") && next.line.fidelity === "cad" && next.shape?.kind === "mesh" && next.ports.some(port => port.connection === "threaded")) recovered = true;
+  }
+  return recovered ? mergeAssembly(saved, generated) : saved;
 }
 
 /** Synchronization retains manual geometry, removed components, and unsupported connections for review. */

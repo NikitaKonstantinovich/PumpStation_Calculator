@@ -23,7 +23,7 @@ const authUrl = new URL("../app/auth-server.ts",import.meta.url), sourceUrl = ne
 const replacements = { [authUrl.href]: (await readFile(authUrl,"utf8")).replace('import { env } from "cloudflare:workers";', 'const env = globalThis.__lineServer;'),
   [sourceUrl.href]: 'export const currentInsertSource=async()=>globalThis.__lineServer.source; export const currentInsertCatalog=async()=>globalThis.__lineServer.catalog;' };
 const auth = await loadTs(authUrl,replacements), api = await loadTs(new URL("../app/api/model-line-data/route.ts",import.meta.url),replacements);
-sqlite.prepare("INSERT INTO users(id,email,name,password_hash,email_verified_at,role) VALUES(?,?,?,?,CURRENT_TIMESTAMP,?)").run("line-user","line@example.test","Geometry test","not-used","user");
+sqlite.prepare("INSERT INTO users(id,email,name,password_hash,email_verified_at,role,access_level) VALUES(?,?,?,?,CURRENT_TIMESTAMP,?,?)").run("line-user","line@example.test","Geometry test","not-used","user","pro");
 const token = await auth.createSession("line-user");
 const request = (ids, session = token, headers = {}) => new Request("http://localhost/api/model-line-data",{method:"POST",headers:{"Content-Type":"application/json",...(session?{Cookie:`ps_session=${session}`} : {}),...headers},body:JSON.stringify({ids})});
 
@@ -67,6 +67,31 @@ test("ordinary 3D clients receive the documented KMS dimensions by PN and an exa
   assert.equal(geometry.vibrationModels.find(m=>m.pn===16).shape.kind,"mesh");
   assert.equal(geometry.vibrationModels.find(m=>m.pn===25).length,null);
   assert.equal(geometry.vibrationModels.find(m=>m.pn===25).shape,undefined);
+});
+
+test("threaded branch geometry serves exact DN25 nipple and check valve with provisional axial depths", async () => {
+  const nippleId = "резьбовые-фитинги-001-r0218", checkId = "suction-table:check-valtec-25";
+  const response = await api.POST(request([nippleId, checkId]));
+  assert.equal(response.status, 200);
+  const { items, issues } = await response.json();
+  assert.deepEqual(issues, []);
+  for (const [id, length, gender, depth, article] of [
+    [nippleId, 35, "male", 14, /ЛД Прайд|LD Pride/],
+    [checkId, 61.5, "female", 15.5, /VT\.151\.N\.06/],
+  ]) {
+    const item = items[id];
+    assert.equal(item.equipmentId, id);
+    assert.equal(item.length, length);
+    assert.equal(item.fidelity, "cad");
+    assert.equal(item.shape.kind, "mesh");
+    assert.match(item.source, article);
+    assert.match(item.cadSource.path, /\.(?:step|stp)$/i);
+    assert.equal(item.shape.meshUrl, `/model-assets/model-${item.cadSource.hash}-v1.stl`);
+    assert.ok((await readFile(new URL(`../public${item.shape.meshUrl}`, import.meta.url))).length > 84);
+    assert.deepEqual(item.ports.map(port => [port.id, port.point, port.axis]), [["left", [0, 0, 0], [-1, 0, 0]], ["right", [length, 0, 0], [1, 0, 0]]]);
+    assert.deepEqual(item.ports.map(port => [port.connection, port.thread, port.gender, port.threadDepthMm, port.provisional]),
+      Array.from({ length: 2 }, () => ["threaded", "G1", gender, depth, true]));
+  }
 });
 
 test("DN20 membrane-tank nipple gets its reviewed wall through the real geometry endpoint", async () => {

@@ -10,11 +10,55 @@ import { field, number, itemDn } from "./line-spec-parts";
 import valveDimensions from "./suction-fasteners.json";
 import gasketModels from "../data/line-gasket-models.json";
 import valveModels from "../data/line-valve-models.json";
+import threadedLineMounts from "../data/threaded-line-mounts.json";
 import type { Bounds, Vec3 } from "./model-editor/model";
 import { vibrationExecutions } from "./vibration-dimensions";
 import { eccentricOffset } from "./model-editor/eccentric-offset";
 
 const positive = (v: number | null | undefined): v is number => typeof v === "number" && Number.isFinite(v) && v > 0;
+
+type ThreadedLineMount = {
+  equipmentId: string;
+  source: string;
+  lengthMm: number;
+  threads: [{ designation: string; gender: "male" | "female"; depthMm?: number }, { designation: string; gender: "male" | "female"; depthMm?: number }];
+  meshHash?: string;
+  cadPath?: string;
+  bounds?: Bounds;
+  position?: Vec3;
+  rotation?: Vec3;
+  fidelity?: "outline";
+  outlineOuterMm?: number;
+  outlineInnerMm?: number;
+  notes?: string[];
+};
+
+const threadedMounts = new Map((threadedLineMounts as unknown as ThreadedLineMount[]).map(mount => [mount.equipmentId, mount]));
+
+function applyThreadedMount(result: LineGeometry, mount: ThreadedLineMount): LineGeometry {
+  const length = mount.lengthMm;
+  const hasMesh = mount.meshHash && mount.bounds && mount.position && mount.rotation;
+  const fidelity = hasMesh && mount.fidelity !== "outline" ? "cad" : "outline";
+  const shape: InsertionShape = hasMesh ? {
+    kind: "mesh", meshUrl: `/model-assets/model-${mount.meshHash}-v1.stl`, modelHash: mount.meshHash,
+    meshBounds: mount.bounds, modelPosition: mount.position, modelRotation: mount.rotation,
+  } : mount.outlineOuterMm && mount.outlineInnerMm ? {
+    kind: "tube", lengthMm: length, outerMm: mount.outlineOuterMm, innerMm: mount.outlineInnerMm,
+  } : { kind: "marker", lengthMm: length };
+  const ports: Port[] = mount.threads.map((thread, index) => ({
+    id: index ? "right" : "left", point: [index ? length : 0, 0, 0], axis: [index ? 1 : -1, 0, 0], up: [0, 0, 1],
+    connection: "threaded", dn: result.dn, pn: result.pn, plane: "thread-reference", purpose: "connection",
+    thread: thread.designation, gender: thread.gender, threadDepthMm: thread.depthMm,
+    provisional: true, source: mount.source,
+  }));
+  const issues = [...mount.notes ?? []];
+  if (fidelity !== "cad" && !hasMesh) issues.push("Использованы размерные базы по чертежу. Точная 3D-модель корпуса не привязана.");
+  if (ports.some(port => !positive(port.threadDepthMm))) issues.push("Предел захода одного или обоих резьбовых концов не подтверждён.");
+  const cadSource = fidelity === "cad" && mount.cadPath && mount.meshHash ? { path: mount.cadPath, hash: mount.meshHash } : undefined;
+  const radius = !hasMesh && mount.outlineOuterMm ? mount.outlineOuterMm / 2 : undefined;
+  const bounds: Bounds | undefined = radius ? [0, -radius, -radius, length, radius, radius] : undefined;
+  return { ...result, kind: "threaded-catalog-fitting", length, shape, fidelity, bounds, source: mount.source, issues, ports, cadSource };
+}
 
 /** Read the selected row, never select a replacement by name, DN or price. */
 export function lineGeometry(item: AssemblyComponent, catalog: InsertCatalog, context: InsertGeometryContext): LineGeometry {
@@ -22,6 +66,8 @@ export function lineGeometry(item: AssemblyComponent, catalog: InsertCatalog, co
   const get = (pattern: RegExp) => number(field(item, pattern));
   const source = part ? Object.values(part.dimensionSources).join("; ") || part.source : `Каталог: ${item.id}`;
   const result: LineGeometry = { equipmentId: item.id, revision: catalog.version, source, length: null, ports: [], fidelity: "missing", issues: [], kind: part?.kind, dn: itemDn(item) ?? undefined, pn: get(/^PN$/i) ?? undefined };
+  const mount = threadedMounts.get(item.id);
+  if (mount) return applyThreadedMount(result, mount);
   const vibrations = vibrationExecutions(item);
   if (vibrations.length) {
     result.kind = "vibration-compensator";
@@ -126,7 +172,8 @@ export function lineGeometry(item: AssemblyComponent, catalog: InsertCatalog, co
   } else result.issues.push("Нет подтверждённой геометрии выбранного исполнения");
   if (!positive(result.length)) result.issues.push("Неизвестна монтажная длина");
   if (part) result.issues.push(...part.warnings);
-  const threaded = /резьб|американ|ниппель|шаров/i.test(item.family) || part?.kind === "nipple";
+  const brassCoreCheck = item.catalogId === "обратные-клапаны" && /латунн[а-яё]*\s+сердечник/i.test(item.family) && !/фланц/i.test(item.family);
+  const threaded = brassCoreCheck || /резьб|американ|ниппель|шаров/i.test(item.family) || part?.kind === "nipple";
   const connection = threaded ? "threaded" : ["pipe", "reducer", "collar"].includes(part?.kind ?? "") ? "weld" : "flanged";
   const provisional = !positive(result.length) || threaded || !shape || result.fidelity === "outline";
   if (threaded) result.issues.push("Не подтверждены монтажные плоскости и глубина навинчивания резьбы");
@@ -137,5 +184,26 @@ export function lineGeometry(item: AssemblyComponent, catalog: InsertCatalog, co
     if (positive(result.lipThickness)) result.ports.push({ ...common, id: "flange-seat", point: [result.lipThickness, 0, 0], axis: [1, 0, 0], connection: "collar", plane: "mating-face" });
   }
   if (part?.kind === "looseFlange") for (const port of result.ports) port.connection = "collar";
+  if (/^suction-table:rf-\d+$/.test(item.id)) {
+    Object.assign(result.ports[0], { connection: "flanged", plane: "mating-face" });
+    Object.assign(result.ports[1], { dn: get(/^DN резьбы$/i) ?? undefined, gender: "male" });
+  }
+  if (/^suction-table:union-valtec-\d+$/.test(item.id)) {
+    const threadValue = field(item, /^Резьба$/i);
+    const thread = typeof threadValue === "string" ? threadValue : undefined;
+    Object.assign(result.ports[0], { gender: "male", thread });
+    Object.assign(result.ports[1], { gender: "female", thread });
+    const bodyLength = get(/^Габаритная длина, мм$/i);
+    if (positive(bodyLength)) result.issues.push(`Паспортный габарит ${bodyLength} мм указан для справки`);
+    const passport = field(item, /^Источник$/i);
+    if (typeof passport === "string") {
+      result.source = passport;
+      for (const port of result.ports) port.source = passport;
+    }
+  }
+  if (brassCoreCheck || item.catalogId === "шаровые-краны" && /ВР|В-В/i.test(item.family) || item.catalogId === "резьбовые-фитинги" && /ниппель.*НР\/НР/i.test(item.family)) {
+    const gender = item.catalogId === "резьбовые-фитинги" ? "male" : "female";
+    for (const port of result.ports) port.gender = gender;
+  }
   return result;
 }

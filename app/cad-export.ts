@@ -100,7 +100,7 @@ export function cadContents(assembly?: Assembly | null, spec: SpecItem[] = [], s
     if(s.kind==="flange" && s.stampedHash) {
       const stock=stampedPart(s);
       add(c,p.id,stock ? {...s} : {kind:"unavailable",reason:stampMissing},[p],hidden,stock?.name??p.name,p.componentId===c.id?c.equipmentId:p.componentId);
-    } else if (s.kind === "mesh" && s.modelHash) {
+    } else if (s.kind === "mesh" && s.modelHash && p.fidelity !== "outline" && p.fidelity !== "missing") {
       add(c, p.id, { kind: "native", hash: s.modelHash }, [p, { position: s.modelPosition ?? zero, rotation: s.modelRotation ?? zero }], hidden, p.name, p.componentId===c.id?c.equipmentId:p.componentId);
     } else if (["marker", "reducer-outline"].includes(s.kind) || p.fidelity === "missing" || p.fidelity === "outline") {
       add(c, p.id, { kind: "unavailable", shape: s, reason: "Для детали задана только условная геометрия." }, [p], hidden, p.name,p.componentId===c.id?c.equipmentId:p.componentId);

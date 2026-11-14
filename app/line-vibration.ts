@@ -24,6 +24,11 @@ export function selectVibrationCompensator(items: AssemblyComponent[], dn: numbe
     }).sort((a, b) => a.pn - b.pn || a.price - b.price || a.item.id.localeCompare(b.item.id))[0];
 }
 
+export function selectStraightThreadedNipple(items: AssemblyComponent[], dn: number, pn: number) {
+  return items.find(item => item.catalogId === "резьбовые-фитинги" && /Ниппель (?:прямой )?латунный НР\/НР/i.test(item.family) &&
+    itemDn(item) === dn && (componentPressureLimit(item)?.bar ?? Infinity) >= pn);
+}
+
 type Assembly = {
   parts: ReturnType<typeof lineSpecParts>;
   database: { items: AssemblyComponent[] };
@@ -134,9 +139,13 @@ export function addPumpConnectionAssembly(args: Assembly & { vibration: boolean;
     });
   };
   if (p.connection === "threaded" && connection === "threaded") {
-    const part = pn <= 16 ? suctionCatalogItems.find(item => item.id === `suction-table:union-${v}`) : undefined;
-    add(`${prefix}-union`, part?.family ?? `Американка НР-НР DN${v}`, count, `${title} · DN${v} · PN${pn} · ответные резьбы`, part);
-    return 3;
+    const part = suctionCatalogItems.find(item => item.id === `suction-table:union-valtec-${v}` && (componentPressureLimit(item)?.bar ?? 0) >= pn);
+    add(`${prefix}-union`, part?.family ?? `Сгон разъёмный (американка) НР/ВР DN${v}`, count,
+      `${title} · DN${v} · PN${pn} · НР к патрубку насоса, ВР к ниппелю`, part);
+    const nipple = selectStraightThreadedNipple(database.items, v, pn);
+    add(`${prefix}-pump-nipple`, `Ниппель прямой латунный НР/НР DN${v}`, count, `${title} · американка → ниппель → ${terminal === "check" ? "обратный клапан" : "шаровой кран"} · PN${pn}`, nipple);
+    // The union seals internally with its own ring. Count external thread joints only.
+    return 4;
   }
   if (p.connection !== connection) {
     const flangeDn = p.connection === "flanged" ? p.dn : v, threadDn = p.connection === "threaded" ? p.dn : v;

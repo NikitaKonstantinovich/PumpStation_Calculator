@@ -8,9 +8,10 @@ import physicalSupplement from "./pump-card-supplement.json";
 import { pumpSketchFor } from "./pump-sketches";
 import { suctionCatalogItems } from "./suction-catalog";
 import { withEquipmentCadSources } from "./equipment-cad-sources";
+import { componentMassByUnit, componentMassSourceSha256, withAssemblyMass, withComponentMass } from "./component-masses";
 
 type RecordData = Record<string, unknown>;
-type BindingData = {items: RecordData[]; catalogs?: Array<{id:string;name:string}>};
+type BindingData = {items: RecordData[]; catalogs?: Array<{id:string;name:string}>; source?: {sha256?: string}};
 export async function equipmentAsset(path: string, method = "GET") {
   return (env as unknown as {ASSETS: Fetcher}).ASSETS.fetch(new Request(`http://equipment.internal${path}`, {method}));
 }
@@ -31,7 +32,7 @@ function decode(row: RecordData): RecordData {
   }));
 }
 async function bindingCatalog(): Promise<BindingData> {
-  const active = await db().prepare("SELECT id FROM catalog_imports WHERE is_active=1 ORDER BY imported_at DESC,id DESC LIMIT 1").first<{id:number}>();
+  const active = await db().prepare("SELECT id,source_sha256 AS sha256 FROM catalog_imports WHERE is_active=1 ORDER BY imported_at DESC,id DESC LIMIT 1").first<{id:number;sha256:string}>();
   if (!active) {
     const [full, supplement] = await Promise.all([assetJson<BindingData>("/binding-components.json"), assetJson<BindingData>("/component-insert-source.json")]);
     const rows = new Map(full.items.map(item => [item.id,item]));
@@ -51,7 +52,7 @@ async function bindingCatalog(): Promise<BindingData> {
     return map;
   };
   const fieldMap=byComponent(fields),priceMap=byComponent(prices);
-  return {catalogs:catalogs as BindingData["catalogs"],items:items.map(item => ({...decode(item),id:item.sourceId,
+  return {source:{sha256:active.sha256},catalogs:catalogs as BindingData["catalogs"],items:items.map(item => ({...decode(item),id:item.sourceId,
     fields:(fieldMap.get(item.id) ?? []).map(field => ({...decode(field),column:field.sourceColumn,headerPath:JSON.parse(String(field.headerPath)),value:field.numeric_value ?? field.text_value ?? (field.boolean_value == null ? null : Boolean(field.boolean_value)) ?? field.date_value ?? (typeof field.json_value === "string" ? JSON.parse(field.json_value) : null)})),
     prices:(priceMap.get(item.id) ?? []).map(price => ({...decode(price),amount:Number(price.amount_microunits)/Number(price.scale)})),
   }))};
@@ -83,13 +84,15 @@ async function readCatalog(): Promise<EquipmentCatalog> {
     if(!row.sources.drawing&&sketch){row.sources.drawing=sketch.src;row.values["Каталожный чертёж"]={"Описание":sketch.caption,"Источник":sketch.source};}
     return row;
   });
-  const componentRows=new Map([...suctionCatalogItems,...binding.items].map(item=>[item.id,item]));
+  const bindingItems = binding.source?.sha256 === componentMassSourceSha256 ? binding.items.map(item => withComponentMass(item)) : binding.items;
+  const componentRows=new Map([...suctionCatalogItems.map(item => withComponentMass(item)),...bindingItems].map(item=>[item.id,item]));
   rows.push(...[...componentRows.values()].map(item=>genericEquipment("equipment",`binding:${item.catalogId}`,categoryNames.get(String(item.catalogId)) ?? String(item.catalogId),item)));
+  const componentMasses = new Map([...componentRows].map(([id, item]) => [id, componentMassByUnit(item)]));
   rows.push(...standardCabinets.map(item=>genericEquipment("cabinet","cabinets","Шкафы управления",item)));
-  rows.push(...(cabinets.length ? cabinets.map(row=>({...decode(row),items:cabinetItems.filter(item=>item.cabinet_id===row.id).map(decode)})) : electrical.cabinets).map(row=>genericEquipment("control-cabinet","cabinets","Шкафы управления",row)));
-  rows.push(...(controlParts.length ? controlParts.map(decode) : electrical.components).map(row=>genericEquipment("control-part",`electrical:${row.category}`,`Электрика · ${row.category}`,row)));
-  rows.push(...collectors.map(row=>genericEquipment("collector","collectors","Коллекторы",{...decode(row),name:row.code,items:collectorItems.filter(item=>item.collector_id===row.id).map(decode)})));
-  rows.push(...insertions.map(row=>genericEquipment("insertion","insertions","Расчётные вставки",decode(row))));
+  rows.push(...(cabinets.length ? cabinets.map(row=>({...decode(row),items:cabinetItems.filter(item=>item.cabinet_id===row.id).map(decode)})) : electrical.cabinets).map(row=>genericEquipment("control-cabinet","cabinets","Шкафы управления",withComponentMass(row))));
+  rows.push(...(controlParts.length ? controlParts.map(decode) : electrical.components).map(row=>genericEquipment("control-part",`electrical:${row.category}`,`Электрика · ${row.category}`,withComponentMass(row, true))));
+  rows.push(...collectors.map(row=>genericEquipment("collector","collectors","Коллекторы",withAssemblyMass({...decode(row),name:row.code,items:collectorItems.filter(item=>item.collector_id===row.id).map(decode)},componentMasses))));
+  rows.push(...insertions.map(row=>genericEquipment("insertion","insertions","Расчётные вставки",withAssemblyMass(decode(row),componentMasses))));
   return {rows:rows.map(withEquipmentCadSources),warnings:[]};
 }
 // Short request-coalescing cache avoids rereading large catalogues for every file probe.

@@ -54,6 +54,18 @@ test("symbolic instances carry an actionable diagnosis and leave usable geometry
   const m=createCadManifest(project([component({kind:"frame",cadSource:undefined,equipmentId:"frame-1"})]));
   assert.equal(m.instances[0].geometry.kind,"catalogue");
 });
+test("threaded fitting exports a reviewed STEP but omits a dimension-only mesh", () => {
+  const hash = "a".repeat(64);
+  const local = pose([5, 2, 3], [0, 0, -90]);
+  const shape = { kind: "mesh", modelHash: hash, modelPosition: local.position, modelRotation: local.rotation };
+  const exact = component({ id: "exact", kind: "equipment", name: "Ниппель LD Pride", line: { fidelity: "cad", role: "primary-pump-nipple" }, shape });
+  const outline = component({ id: "outline", kind: "equipment", name: "Ниппель LD Pride", line: { fidelity: "outline", role: "primary-between-valves-nipple" }, cadSource: undefined, shape });
+  const { instances } = createCadManifest(project([exact, outline]));
+  assert.deepEqual(instances[0].geometry, { kind: "native", hash, source: "Equipment/fixture.step" });
+  close(instances[0].transform, cadTransform(exact, local));
+  assert.equal(instances[1].geometry.kind, "unavailable");
+  assert.match(instances[1].geometry.reason, /геометри|контур|оболоч/i);
+});
 test("BOM hardware rows do not duplicate physical fasteners", () => {
   const m=createCadManifest(project([component(),component({id:"bom",line:{role:"fasteners-bolts"}})]));
   assert.equal(m.instances.length,1);

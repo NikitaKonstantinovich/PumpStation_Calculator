@@ -318,6 +318,11 @@ class Scene {
         if (!target) return;
         for (const child of [...target.children]) { target.remove(child); disposeObject(child); }
         const finish=material({ ...c, opacity: c.opacity * (c.collector?.pieceOpacities?.[piece.id] ?? 1) });
+        if (c.line?.fidelity === "outline" && piece.id === "line-body") {
+          finish.color.setHex(0xd1a24c);
+          finish.opacity *= .55;
+          finish.transparent = true;
+        }
         // The stainless backing ring is a separate part, including inside a coloured fitting.
         if(stamped){ finish.color.setHex(0xb7c2c9); finish.metalness=.55; finish.roughness=.38; }
         const mesh = new THREE.Mesh(geometry.clone(), finish);

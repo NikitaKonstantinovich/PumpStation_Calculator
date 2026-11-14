@@ -35,7 +35,8 @@ def library(root):
     paths = [root / "frontend/public/model-assets/library.json", root / "frontend/data/instrument-mounts.json",
              root / "frontend/data/tank-models.json", root / "frontend/data/valve-control-mounts.json",
              root / "frontend/data/line-valve-models.json", root / "frontend/data/line-gasket-models.json",
-             root / "frontend/data/collar-cad-models.json"]
+             root / "frontend/data/collar-cad-models.json",
+             root / "Equipment/Pumps/PreparedForAssembly/export-library.json"]
     if os.environ.get("CAD_EXPORT_LIBRARY"):
         paths.append(Path(os.environ["CAD_EXPORT_LIBRARY"]))
     for path in paths:
@@ -50,6 +51,8 @@ class SourceProblem(ValueError):
 
 
 def source(root, entry):
+    if entry.get("importError"):
+        raise SourceProblem("import_error", entry["importError"])
     relative = Path(entry["source"])
     path = (root / relative).resolve()
     if relative.is_absolute() or not path.is_relative_to((root / "Equipment").resolve()) or path.suffix.lower() not in (".step", ".stp", ".sldprt", ".sldasm"):

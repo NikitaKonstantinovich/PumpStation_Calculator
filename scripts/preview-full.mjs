@@ -7,7 +7,7 @@ import { fork } from "node:child_process";
 import { localModelAssets } from "./local-model-assets.mjs";
 import { pumpFileService } from "../services/local-storage/pump-files.mjs";
 import { equipmentAssetService } from "../services/local-storage/equipment-assets.mjs";
-import { syncRuntimeModelAssets } from "./local-runtime-models.mjs";
+import { loadRuntimeModelAssets, syncRuntimeModelAssets } from "./local-runtime-models.mjs";
 import { loadLocalAIEnv } from "./local-ai-env.mjs";
 import { localAIProvider } from "./local-ai-provider.mjs";
 import { connectStore, numberSetting, projectService } from "../services/local-storage/store.mjs";
@@ -30,7 +30,12 @@ const bindings = { ...config.vars, APP_BASE_URL: `http://localhost:${port}`, PUB
 bindings.PROJECT_LIMIT_BYTES = String(numberSetting(process.env.PROJECT_LIMIT_BYTES, 10_000_000));
 const library = process.env.PROJECT_MODEL_LIBRARY;
 if (!library) throw new Error("Задайте PROJECT_MODEL_LIBRARY — постоянный каталог опубликованных моделей.");
-console.log('Runtime CAD assets:',await syncRuntimeModelAssets({library}));
+const runtimeModels = await readFile(resolve(built, "runtime-model-assets.json"), "utf8").then(JSON.parse).catch(error => {
+  if (error.code !== "ENOENT") throw error;
+  // Older full snapshots predate the threaded line models and have no lockfile.
+  return loadRuntimeModelAssets({ includeThreaded: false });
+});
+console.log('Runtime CAD assets:',await syncRuntimeModelAssets({library, assets: runtimeModels}));
 const projects = await connectStore();
 Object.assign(bindings, await loadLocalAIEnv());
 for (const name of ["MODEL_CONVERTER_URL", "MODEL_CONVERTER_TOKEN", "CAD_EXPORT_URL", "CAD_EXPORT_TOKEN", "RESEND_API_KEY", "EMAIL_FROM"]) if (process.env[name]) bindings[name] = process.env[name];

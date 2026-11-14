@@ -52,8 +52,10 @@ export function pumpEquipment(pump: Pump): EquipmentRow {
 export function genericEquipment(prefix: string, category: string, categoryName: string, data: Record<string, unknown>): EquipmentRow {
   const fields = Array.isArray(data.fields) ? data.fields as Array<{headerPath: string[]; value: unknown; column: string}> : [];
   const values: Record<string, unknown> = {...data};
+  const adoptedMass = new Set(fields.filter(field => /^MASS_KG(?:_PER_M)?(?:$|:)/.test(field.column)).map(field => field.headerPath.join(" / ")));
   for (const field of fields) {
-    const key = field.headerPath.join(" / ") || field.column;
+    const label = field.headerPath.join(" / ") || field.column;
+    const key = adoptedMass.has(label) && !/^MASS_KG(?:_PER_M)?(?:$|:)/.test(field.column) ? `Исходное значение / ${label}` : label;
     values[key in values ? `${key} [${field.column}]` : key] = field.value;
   }
   const variant=fields.filter(f=>/^(DN|PN|DN1|DN2)$/i.test(f.headerPath.at(-1)??"")).map(f=>`${f.headerPath.at(-1)} ${String(f.value??"—").replace(/^(?:DN|PN)\s*/i,"")}`).join(" · ");

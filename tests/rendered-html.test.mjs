@@ -167,7 +167,7 @@ test("provides a persisted DN calculator with SP velocity defaults", async () =>
   assert.match(page, /Добавить арматуру в спецификацию/);
   assert.match(page, /const buildValveSpecItems=/);
   assert.match(page, /const checkValvePns=/);
-  assert.match(page, /if\(\/латунн\.\*сердечник\/i\.test\(text\)\|\|\/010C\\\.Y\.\*красн\/i\.test\(text\)\)return \[16\]/);
+  assert.match(page, /if\(\/010C\\\.Y\.\*красн\/i\.test\(text\)\)return \[16\]/);
   assert.match(page, /if\(\/\\b\(\?:010C/);
   assert.match(page, /const checkValveMaterial=/);
   assert.match(page, /material==="aisi304"\?"Нержавеющая сталь":"Чугун"/);
