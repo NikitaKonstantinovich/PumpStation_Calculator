@@ -1,0 +1,82 @@
+{
+  "version": 1,
+  "revision": "frame-cabinets-v1",
+  "assets": {
+    "600": {
+      "source": "Equipment/Electrical/3D/Шкафы/ШУ600_800_250.SLDPRT",
+      "sourceHash": "1abe7a35a7401fdaa6568f2da764d4aab9b5b814c5351aae280e589a217c7758",
+      "meshUrl": "/model-assets/model-1abe7a35a7401fdaa6568f2da764d4aab9b5b814c5351aae280e589a217c7758-v1.stl",
+      "meshHash": "29e15f4a78c22d32d02dc9ee909470655faef0343c584a0f0af10252f98ce246",
+      "bounds": [
+        -300,
+        -400,
+        0,
+        300,
+        400,
+        266
+      ],
+      "mountingPoints": [
+        [
+          -279,
+          -279,
+          0
+        ],
+        [
+          -279,
+          279,
+          0
+        ],
+        [
+          279,
+          -279,
+          0
+        ],
+        [
+          279,
+          279,
+          0
+        ]
+      ],
+      "widthMm": 600,
+      "heightMm": 800
+    },
+    "800": {
+      "source": "Equipment/Electrical/3D/Шкафы/ШУ800_1000_300 4Н Пожарка.SLDPRT",
+      "sourceHash": "2c060b101ff6cd414ce7d4279a59b5331d9129d02f64c82ad3ea60cbd0cacb2b",
+      "meshUrl": "/model-assets/model-2c060b101ff6cd414ce7d4279a59b5331d9129d02f64c82ad3ea60cbd0cacb2b-v1.stl",
+      "meshHash": "a4deda3624befbcd715a87cc7eb703ea9c3bd0bd671417997ccc16d9b171773a",
+      "bounds": [
+        -400,
+        -500,
+        0,
+        400,
+        500,
+        316
+      ],
+      "mountingPoints": [
+        [
+          -379,
+          -479,
+          0
+        ],
+        [
+          -379,
+          479,
+          0
+        ],
+        [
+          379,
+          -479,
+          0
+        ],
+        [
+          379,
+          479,
+          0
+        ]
+      ],
+      "widthMm": 800,
+      "heightMm": 1000
+    }
+  }
+}

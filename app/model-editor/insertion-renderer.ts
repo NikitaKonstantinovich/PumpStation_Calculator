@@ -27,18 +27,24 @@ function reducer(s: InsertionShape): THREE.BufferGeometry {
   const geometry = new THREE.BufferGeometry(); geometry.setAttribute("position", new THREE.Float32BufferAttribute(points, 3)); geometry.setIndex(triangles); geometry.computeVertexNormals(); return geometry;
 }
 export function disposeInsertionObject(object: THREE.Object3D) {
-  object.traverse(o => { if (o instanceof THREE.InstancedMesh) o.dispose(); if (o instanceof THREE.Mesh || o instanceof THREE.LineSegments) { o.geometry.dispose(); for (const m of Array.isArray(o.material) ? o.material : [o.material]) m.dispose(); } });
+  object.traverse(o => { if (o instanceof THREE.InstancedMesh) o.dispose(); if (o instanceof THREE.Mesh || o instanceof THREE.Line) { o.geometry.dispose(); for (const m of Array.isArray(o.material) ? o.material : [o.material]) m.dispose(); } });
 }
 export function pieceObject(p: InsertionPiece): THREE.Group {
   const group = new THREE.Group(), s: InsertionShape = p.shape.stampedHash ? {kind:"marker"} : p.shape;
   group.userData.pieceId = p.id;
   const outline = p.fidelity === "outline" || p.fidelity === "missing";
-  const pipeBody = (s.kind === "tube" || s.kind === "reducer-outline") && p.fidelity !== "missing";
+  const openTube = s.kind === "tube" && p.fidelity === "outline" && !s.innerMm;
+  const pipeBody = (s.kind === "tube" || s.kind === "reducer-outline") && p.fidelity !== "missing" && !openTube;
   const mat = new THREE.MeshStandardMaterial({ ...(pipeBody ? PIPE_APPEARANCE : { color: outline ? 0xd1a24c : p.auxiliary ? 0x6d8ba0 : 0xaabdc6, metalness: .35, roughness: .5 }), side: THREE.DoubleSide, transparent: outline && !pipeBody, opacity: outline && !pipeBody ? .55 : 1, wireframe: p.fidelity === "missing" });
   if (s.kind === "flange" && s.faceHeightMm && s.faceDiameterMm) {
     // x=0 is the mating face. The raised face is part of total b, never added to it.
     group.add(new THREE.Mesh(ringGeometry({ ...s, lengthMm: s.lengthMm! - s.faceHeightMm }).translate(s.faceHeightMm, 0, 0), mat));
     group.add(new THREE.Mesh(ringGeometry({ kind: "tube", outerMm: s.faceDiameterMm, innerMm: s.innerMm, lengthMm: s.faceHeightMm }), mat));
+  } else if (openTube) {
+    const radius = s.outerMm! / 2, length = s.lengthMm!;
+    const surface = new THREE.CylinderGeometry(radius, radius, length, 32, 1, true)
+      .rotateZ(-Math.PI / 2).translate(length / 2, 0, 0);
+    group.add(new THREE.Mesh(surface, mat));
   } else if (s.kind === "tube" && s.thread) {
     const data = threadedTubeMesh(s), geometry = new THREE.BufferGeometry();
     geometry.setAttribute("position", new THREE.Float32BufferAttribute(data.positions, 3));
@@ -86,7 +92,11 @@ export class InsertionRenderCache {
     }
     const copy = original.clone(true);
     copy.traverse(o => {
-      if (o instanceof THREE.Mesh || o instanceof THREE.LineSegments) { o.geometry = o.geometry.clone(); o.material = Array.isArray(o.material) ? o.material.map(m => m.clone()) : o.material.clone();
+      if (o instanceof THREE.Mesh || o instanceof THREE.Line) {
+        o.geometry = o.geometry.clone();
+        o.material = Array.isArray(o.material) ? o.material.map(m => m.clone()) : o.material.clone();
+      }
+      if (o instanceof THREE.Mesh || o instanceof THREE.LineSegments) {
         for (const m of Array.isArray(o.material) ? o.material : [o.material]) { m.opacity *= c.opacity; m.transparent ||= m.opacity < 1; }
       }
       if (o.userData.pieceId) o.visible = !insertion.hiddenPieceIds.includes(o.userData.pieceId);

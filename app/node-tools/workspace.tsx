@@ -1,9 +1,8 @@
 "use client";
-import { sharedToolRequest } from "../shared-tool-request";
-
 import { useEffect, useRef, useState, useMemo } from "react";
 import { DEFAULT_ALGORITHM } from "./algorithm-schema";
 import { useAppNavigationGuard } from "../app-navigation";
+import { sameJson } from "../project-merge";
 import { ToolForm } from "./form";
 import { DataTree } from "./data-inspector";
 import { applyParameterWrites } from "./form-actions";
@@ -19,6 +18,8 @@ import {ProductRibbon,type WindowRibbonActions} from "./product-ribbon";
 import { ParameterDraftProvider, usePendingParameterDrafts } from "./parameter-drafts-context";
 import { CalculationToggle } from "../pressure-check-toggle";
 import { controlInfo, productEvaluator, toolAvailable, workspaceControls, writeControl } from "./workspace-controls";
+import { toolSourceDependencies } from "./workspace-sources";
+import { useWorkspaceCatalogs, WorkspaceCatalogGate } from "./workspace-catalogs";
 import type { Evaluation, View } from "./schema";
 import "./tools.css";
 import "./product-workspace.css";
@@ -27,31 +28,43 @@ function ToolResult({ value }: { value: unknown }) {
   const [open, setOpen] = useState(false);
   return <details onToggle={event => setOpen(event.currentTarget.open)}><summary>Результат инструмента</summary>{open && <DataTree value={value} label="Вычисленные данные" />}</details>;
 }
-export async function loadTools(version?: string, base?: Record<string, string>, sources?: Record<string, string>, algorithmId = DEFAULT_ALGORITHM, editor = false) {
+type Loaded = {
+  program: ToolProgram;
+  algorithm: {id:string;name:string};
+  defaults: Values;
+  baseVersions: Record<string, string>;
+  role: UserRole;
+  resources?: ToolContext["resources"];
+  sourceVersions: Record<string, string>;
+  sourceErrors?: Record<string, string>;
+};
+const pendingRuntimeLoads = new Map<string, Promise<Loaded>>();
+export function loadTools(version?: string, base?: Record<string, string>, sources?: Record<string, string>, algorithmId = DEFAULT_ALGORITHM, mode?: "manifest" | "initialize") {
   const query = new URLSearchParams();
   query.set("partial", "1");
   query.set("algorithm",algorithmId);
-  if(editor) query.set("editor","1");
+  if (mode) query.set("manifest", "1");
+  if (mode === "initialize") query.set("resolveSources", "1");
   if (version) query.set("version", version);
   if (base) query.set("base", JSON.stringify(base));
   if (sources) query.set("sources", JSON.stringify(sources));
-  const response = await sharedToolRequest("/api/workspace2?" + query, {
-      cache: "no-store",
-      headers: { [NODE_RUNTIME_HEADER]: OPERATIONS.join(",") }
-    }),
-    body = await response.json();
+  const url = "/api/workspace2?" + query;
+  let pending = pendingRuntimeLoads.get(url);
+  if (!pending) {
+    pending = fetchRuntime(url).finally(() => pendingRuntimeLoads.delete(url));
+    pendingRuntimeLoads.set(url, pending);
+  }
+  return pending;
+}
+async function fetchRuntime(url: string): Promise<Loaded> {
+  const response = await fetch(url, {
+    cache: "no-store",
+    headers: { [NODE_RUNTIME_HEADER]: OPERATIONS.join(",") }
+  });
+  const body = await response.json();
   if (!response.ok) throw Error(body.error ?? "Не удалось загрузить инструменты");
   if (missingRuntimeOperations(body.program, OPERATIONS).length) throw Error(NODE_RUNTIME_UPDATE_MESSAGE);
-  return body as {
-    program: ToolProgram;
-    algorithm: {id:string;name:string};
-    defaults: Values;
-    baseVersions: Record<string, string>;
-    role: UserRole;
-    resources?: ToolContext["resources"];
-    sourceVersions: Record<string, string>;
-    sourceErrors?: Record<string, string>;
-  };
+  return body;
 }
 function RuntimeTool({
   toolId,
@@ -160,12 +173,19 @@ function RuntimeTool({
     <ToolResult value={result.value} />
   </article>;
 }
-type Loaded = Awaited<ReturnType<typeof loadTools>>;
+function workspacePins(data: WorkspaceData) {
+  const first = Object.values(data.tools)[0];
+  return {
+    version: data.product?.version ?? first?.version,
+    base: JSON.stringify(data.product?.baseVersions ?? first?.baseVersions),
+    sources: JSON.stringify(data.product?.sourceVersions ?? first?.sourceVersions)
+  };
+}
 function ProductTool({
   toolId,
   data,
   remote,
-  initial,
+  dirty,
   change,
   save,
   evaluate
@@ -174,7 +194,7 @@ function ProductTool({
   evaluate: (id:string)=>Evaluation;
   data: WorkspaceData;
   remote: Loaded;
-  initial?: WorkspaceData;
+  dirty: boolean;
   change: (data: WorkspaceData) => void;
   save: () => void;
 }) {
@@ -192,19 +212,6 @@ function ProductTool({
     }
   }, [evaluate, toolId]);
   const [message, setMessage] = useState("");
-  const dirty = JSON.stringify(data) !== JSON.stringify(initial ?? {
-    schema: 1,
-    tools: {}
-  });
-  useEffect(() => {
-    if (!dirty) return;
-    const guard = (e: BeforeUnloadEvent) => {
-      e.preventDefault();
-      e.returnValue = "";
-    };
-    window.addEventListener("beforeunload", guard);
-    return () => window.removeEventListener("beforeunload", guard);
-  }, [dirty]);
   if (!result.value) return <p role="alert">{result.error}</p>;
   const value = result.value,
     errors = value.issues.filter(i => i.severity === "error");
@@ -251,7 +258,9 @@ function NodeWorkspaceContent({
   userId,
   flush,
   projectActions,
+  projectError,
   detach,
+  initialRuntime,
   pendingSave = false
 }: {
   project: ProjectConfig;
@@ -264,7 +273,9 @@ function NodeWorkspaceContent({
   userId: string;
   flush: () => void;
   projectActions?: React.ReactNode;
+  projectError?: string;
   detach: (panelId:string)=>void;
+  initialRuntime?: Loaded;
 }) {
   const [working, setWorking] = useState<WorkspaceData>(() => project.workspace2 ?? {
       schema: 1,
@@ -278,25 +289,29 @@ function NodeWorkspaceContent({
       tools: {}
     });
   }
-  const [loaded, setRemote] = useState<Loaded | null>(null),
+  const {version, base, sources} = workspacePins(working);
+  const requestKey = JSON.stringify([project.project.id, algorithmId, version, base, sources]);
+  const [runtime, setRuntime] = useState<{data: Loaded; key: string} | null>(() =>
+      initialRuntime ? {data: initialRuntime, key: requestKey} : null),
     [error, setError] = useState(""),
     [message, setMessage] = useState(""),
-    [catalogUpdatePrompt, setCatalogUpdatePrompt] = useState(false),
+    [catalogUpdatePrompt, setCatalogUpdatePrompt] = useState<"pumps" | "station" | null>(null),
     [updatingCatalog, setUpdatingCatalog] = useState(false);
   const pendingInput=usePendingParameterDrafts();
-  const dirty = pendingInput || JSON.stringify(working) !== JSON.stringify(project.workspace2 ?? {schema:1,tools:{}});
+  const dataDirty = useMemo(() => !sameJson(working, project.workspace2 ?? {schema:1,tools:{}}), [working, project.workspace2]);
+  const dirty = pendingInput || dataDirty;
   useAppNavigationGuard(dirty || pendingSave,"Есть несохранённые данные продукта. Сохраните их или подтвердите переход без сохранения.");
   useEffect(()=>{if(!dirty && !pendingSave)return;const guard=(event:BeforeUnloadEvent)=>{event.preventDefault();event.returnValue="";};window.addEventListener("beforeunload",guard);return()=>window.removeEventListener("beforeunload",guard);},[dirty,pendingSave]);
-  const legacyFirst = Object.values(working.tools)[0],
-    version = working.product?.version ?? legacyFirst?.version,
-    base = JSON.stringify(working.product?.baseVersions ?? legacyFirst?.baseVersions),
-    sources = JSON.stringify(working.product?.sourceVersions ?? legacyFirst?.sourceVersions);
-  const remote=loaded&&(!working.product||loaded.program.version===working.product.version&&JSON.stringify(loaded.baseVersions)===JSON.stringify(working.product.baseVersions)&&JSON.stringify(loaded.sourceVersions??{})===JSON.stringify(working.product.sourceVersions??{}))?loaded:null;
+  const runtimeCurrent = runtime?.key === requestKey;
+  const loaded = runtimeCurrent ? runtime.data : null;
+  const remote=loaded&&(!working.product||loaded.program.version===working.product.version&&sameJson(loaded.baseVersions,working.product.baseVersions)&&sameJson(loaded.sourceVersions??{},working.product.sourceVersions??(sources ? JSON.parse(sources) : {})))?loaded:null;
+  const catalogs = useWorkspaceCatalogs(remote);
   useEffect(() => {
+    if (runtimeCurrent) return;
     let live = true;
-    loadTools(version, base ? JSON.parse(base) : undefined, sources ? JSON.parse(sources) : undefined,algorithmId).then(data => {
+    loadTools(version, base ? JSON.parse(base) : undefined, sources ? JSON.parse(sources) : undefined,algorithmId,"manifest").then(data => {
       if (live) {
-        setRemote(data);
+        setRuntime({data, key: requestKey});
         setError("");
 
       }
@@ -306,38 +321,43 @@ function NodeWorkspaceContent({
     return () => {
       live = false;
     };
-  }, [version, base, sources, project.project.id, algorithmId]);
+  }, [version, base, sources, requestKey, runtimeCurrent, algorithmId]);
   function apply(next: Loaded) {
     if(pendingInput)throw Error("Завершите ввод в поле перед применением версии или каталога. Набранный текст сохранён в окнах этого проекта.");
     if (next.sourceErrors && Object.keys(next.sourceErrors).length) throw Error("Версия не применена: " + Object.values(next.sourceErrors).join("; "));
     if (!next.program.product) {
-      setRemote(next);
+      setRuntime({data: next, key: requestKey});
       return;
     }
     const oldSettings=project.entities["station-settings"] as SettingsEntity;
     const migrated = migrateProduct(next.program, working, next.defaults, next.baseVersions, next.role, next.resources, next.sourceVersions ?? {}, {geometry:oldSettings?.geometryEnabled,pressure:oldSettings?.pressureChecksEnabled});
     setWorking(migrated.data);
     update(migrated.data);
-    setRemote(next);
+    const pins = workspacePins(migrated.data);
+    setRuntime({data: next, key: JSON.stringify([project.project.id, algorithmId, pins.version, pins.base, pins.sources])});
 
     setMessage(migrated.messages.join(" · ") || "Применена согласованная версия продукта. Изменения переданы в сохранение проекта.");
     setError("");
   }
   const tools = remote?.program.tools.filter(t => t.enabled !== false) ?? [];
-  const contexts = useMemo(()=>remote ? productContexts(remote.program,working,remote.defaults,remote.role,remote.resources) : {},[remote,working]);
+  const contexts = useMemo(()=>remote ? productContexts(remote.program,working,remote.defaults,remote.role,catalogs.resources) : {},[remote,working,catalogs.resources]);
   const evaluate = useMemo(()=>remote ? productEvaluator(remote.program,contexts) : ()=>{throw Error("Загружаем граф");},[remote,contexts]);
+  const controlSources = useMemo(() => remote && working.product
+    ? [...new Set(Object.values(remote.program.product?.controls ?? {}).flatMap(ref => toolSourceDependencies(remote.program, ref.toolId)))]
+    : [], [remote, working.product]);
+  const controlsReady = controlSources.every(source => catalogs.available.has(source));
   const controls = useMemo(()=>{
-    try { return {items:remote&&working.product?workspaceControls(remote.program,evaluate):[],error:""}; }
+    try { return {items:remote&&working.product&&controlsReady?workspaceControls(remote.program,evaluate):[],error:""}; }
     catch(e) { return {items:[],error:(e as Error).message}; }
-  },[remote,working.product,evaluate]);
-  const options = useMemo(()=>remote ? remote.program.tools.filter(t=>t.enabled!==false).map(t=>{
+  },[remote,working.product,evaluate,controlsReady]);
+  const options = useMemo(()=>remote ? remote.program.tools.filter(t=>t.enabled!==false && t.workspaceVisible!==false).map(t=>{
     let available=true;
-    try { available=toolAvailable(remote.program,t.id,contexts); } catch { /* Input errors belong in the tool, not the menu. */ }
+    try { available=toolAvailable(remote.program,t.id,contexts,catalogs.available); } catch { /* Input errors belong in the tool, not the menu. */ }
     return {id:t.id,name:t.name,category:t.category,disabled:!available,reason:available?undefined:"контур не используется"};
-  }) : [],[remote,contexts]);
+  }) : [],[remote,contexts,catalogs.available]);
   function changeData(next:WorkspaceData) {
     if(!remote)return;
-    const checked=invalidateInactiveSelections(remote.program,next,remote.defaults,remote.role,remote.resources);
+    const checked=invalidateInactiveSelections(remote.program,next,remote.defaults,remote.role,catalogs.resources,catalogs.available);
     setWorking(checked);
     update(checked);
     setMessage("");
@@ -359,29 +379,39 @@ function NodeWorkspaceContent({
       <span className="nt-ribbon-save" role="status">{pendingInput?"Есть незавершённый ввод":dirty?"Есть несохранённые изменения":status}</span>
     </>}
     calculation={<>
+    {remote && !controlsReady && <WorkspaceCatalogGate catalogs={catalogs} sources={controlSources} versions={remote.sourceVersions}>{null}</WorkspaceCatalogGate>}
 {controls.items.map(control=><CalculationToggle key={control.kind} label={controlInfo[control.kind].label} hint={controlInfo[control.kind].hint} enabled={control.binding.value===true} disabled={!control.binding.editable||!control.binding.active} onChange={enabled=>{try{changeData(writeControl(working,control,enabled));}catch(e){setError((e as Error).message);}}}/>)}
     <details className="nt-workspace-menu"><summary>Действия продукта</summary><div><button onClick={async () => {
         try { apply(await loadTools(undefined,base ? JSON.parse(base) : undefined,sources ? JSON.parse(sources) : undefined,algorithmId)); }
         catch (e) { setError((e as Error).message); }
-      }} disabled={updatingCatalog}>Применить актуальную версию продукта</button>{remote?.sourceVersions.pump_catalog_v2 && <button disabled={updatingCatalog} onClick={()=>setCatalogUpdatePrompt(true)}>Обновить каталог насосов</button>}{working.product && <small>Закреплена версия · {working.product.version}</small>}<button onClick={()=>{if(pendingInput){setError("Завершите ввод в поле перед выходом из продукта.");return;}back();}}>Первое рабочее пространство</button>
+      }} disabled={updatingCatalog}>Применить актуальную версию продукта</button>{remote?.sourceVersions.pump_catalog_v2 && <button disabled={updatingCatalog} onClick={()=>setCatalogUpdatePrompt("pumps")}>Обновить каталог насосов</button>}{remote?.sourceVersions.station_catalog && <button disabled={updatingCatalog} onClick={()=>setCatalogUpdatePrompt("station")}>Обновить справочники комплектации</button>}{working.product && <small>Закреплена версия · {working.product.version}</small>}<button onClick={()=>{if(pendingInput){setError("Завершите ввод в поле перед выходом из продукта.");return;}back();}}>Первое рабочее пространство</button>
       {!!archived.length && <details><summary>Архив инструментов · {archived.length}</summary>{archived.map(id=><p key={id}>{id} · данные сохранены</p>)}</details>}
     </div></details>
     {controls.items.filter(c=>c.binding.value!==true).map(c=><small role="status" key={c.kind}>{c.kind==="geometry"?"Расчёт геометрии отключён":"Проверки давления отключены"}</small>)}
     </>}/>;
   const notices=<>
+  {projectError && <p role="alert">Не удалось открыть новый проект. {projectError}</p>}
   {controls.error && <p role="alert">{controls.error}</p>}
-  {catalogUpdatePrompt && <div className="nt-catalog-shade"><section className="nt-catalog-dialog" role="dialog" aria-modal="true" aria-label="Обновление каталога насосов"><h2>Обновить каталог насосов?</h2><p>В проект будет загружен актуальный снимок с габаритами, характеристиками и ценами. Выбранные насосы потребуется повторно подтвердить. Настройки проекта, версия алгоритма и остальные справочники сохранятся.</p><footer><button disabled={updatingCatalog} onClick={async()=>{
+  {catalogUpdatePrompt && <div className="nt-catalog-shade"><section className="nt-catalog-dialog" role="dialog" aria-modal="true" aria-label={catalogUpdatePrompt === "station" ? "Обновление справочников комплектации" : "Обновление каталога насосов"}><h2>{catalogUpdatePrompt === "station" ? "Обновить справочники комплектации?" : "Обновить каталог насосов?"}</h2><p>{catalogUpdatePrompt === "station" ? "В проект будут загружены актуальные комплектующие, рамы и их цены. Состав и расчёт рамы пересчитаются; 3D-компоновка может потребовать явного обновления. Настройки проекта, версия алгоритма, базовые тарифы и каталог насосов сохранятся." : "В проект будет загружен актуальный снимок с габаритами, характеристиками и ценами. Выбранные насосы потребуется повторно подтвердить. Настройки проекта, версия алгоритма и остальные справочники сохранятся."}</p><footer><button disabled={updatingCatalog} onClick={async()=>{
     setUpdatingCatalog(true);
     try {
-      const nextSources={...(working.product?.sourceVersions ?? legacyFirst?.sourceVersions ?? {})};delete nextSources.pump_catalog_v2;
+      const nextSources=sources ? JSON.parse(sources) as Record<string, string> : {};delete nextSources[catalogUpdatePrompt === "station" ? "station_catalog" : "pump_catalog_v2"];
       apply(await loadTools(version,base ? JSON.parse(base) : undefined,nextSources,algorithmId));
-      setCatalogUpdatePrompt(false);
+      setCatalogUpdatePrompt(null);
     } catch(e){setError((e as Error).message);} finally{setUpdatingCatalog(false);}
-  }}>{updatingCatalog ? "Загрузка каталога…" : "Обновить каталог"}</button><button disabled={updatingCatalog} onClick={()=>setCatalogUpdatePrompt(false)}>Отмена</button></footer>{error && <p role="alert">{error}</p>}</section></div>}
+  }}>{updatingCatalog ? "Загрузка…" : catalogUpdatePrompt === "station" ? "Обновить справочники" : "Обновить каталог"}</button><button disabled={updatingCatalog} onClick={()=>setCatalogUpdatePrompt(null)}>Отмена</button></footer>{error && <p role="alert">{error}</p>}</section></div>}
   {error && <p role="alert">{error}{error===NODE_RUNTIME_UPDATE_MESSAGE && <button onClick={()=>window.location.reload()}>Обновить страницу</button>}</p>}{remote?.sourceErrors && <p role="alert">Ошибка источника: {Object.values(remote.sourceErrors).join("; ")}. Зависимые инструменты недоступны до восстановления источника; закреплённый снимок не заменяется.</p>}{message && <p role="status">{message}</p>}{!remote && !error && <p>Загружаем инструменты…</p>}
   {remote && !tools.length && <p className="al-empty">В этом продукте пока нет инструментов. Администратор может добавить их в нодовом редакторе.</p>}
   </>;
-  return <main className="nt-workspace nt-product-workspace"><h1 className="visually-hidden">{loaded?.algorithm.name??name}</h1>{remote && tools.length>0 ? <ProductIdentityContext.Provider value={project.project}><ProductWindows renderToolbar={ribbon} notices={notices} detach={id=>{if(pendingInput){setError("Завершите ввод в поле перед открытием отдельной вкладки.");return;}detach(id);}} key={userId+"/"+algorithmId+"/"+project.project.id} userId={userId} algorithmId={algorithmId} projectId={project.project.id} tools={options} renderTool={toolId=>working.product ? <ProductTool toolId={toolId} data={working} remote={remote} initial={project.workspace2} change={changeData} save={()=>{update(working);flush();}} evaluate={evaluate}/> : remote.program.product ? <p>В меню «Действия продукта» нажмите «Применить актуальную версию продукта». Предыдущие значения сохранятся.</p> : <RuntimeTool key={project.project.id+"/"+toolId} algorithmId={algorithmId} toolId={toolId} initial={working.tools[toolId]} applyProduct={apply} save={data=>changeData({...working,algorithmId,tools:{...working.tools,[toolId]:data}})}/>}/></ProductIdentityContext.Provider> : <>{ribbon()}{notices}</>}</main>;
+  function renderTool(toolId: string) {
+    if (!remote) return null;
+    if (working.product) return <WorkspaceCatalogGate catalogs={catalogs} sources={toolSourceDependencies(remote.program, toolId)} versions={remote.sourceVersions}>
+      <ProductTool toolId={toolId} data={working} remote={remote} dirty={dataDirty} change={changeData} save={()=>{update(working);flush();}} evaluate={evaluate}/>
+    </WorkspaceCatalogGate>;
+    if (remote.program.product) return <p>В меню «Действия продукта» нажмите «Применить актуальную версию продукта». Предыдущие значения сохранятся.</p>;
+    return <RuntimeTool key={project.project.id+"/"+toolId} algorithmId={algorithmId} toolId={toolId} initial={working.tools[toolId]} applyProduct={apply} save={data=>changeData({...working,algorithmId,tools:{...working.tools,[toolId]:data}})}/>;
+  }
+  return <main className="nt-workspace nt-product-workspace"><h1 className="visually-hidden">{loaded?.algorithm.name??name}</h1>{remote && tools.length>0 ? <ProductIdentityContext.Provider value={project.project}><ProductWindows renderToolbar={ribbon} notices={notices} detach={id=>{if(pendingInput){setError("Завершите ввод в поле перед открытием отдельной вкладки.");return;}detach(id);}} key={userId+"/"+algorithmId+"/"+project.project.id} userId={userId} algorithmId={algorithmId} projectId={project.project.id} tools={options} renderTool={renderTool}/></ProductIdentityContext.Provider> : <>{ribbon()}{notices}</>}</main>;
 }
 export function NodeWorkspace(props:Parameters<typeof NodeWorkspaceContent>[0]) {
   return <ParameterDraftProvider key={props.userId+"/"+props.algorithmId+"/"+props.project.project.id}><NodeWorkspaceContent {...props}/></ParameterDraftProvider>;

@@ -1,0 +1,186 @@
+{
+  "version": 1,
+  "revision": "frame-stands-v2",
+  "assets": {
+    "left": {
+      "componentId": "frame-hardware-stand-left",
+      "source": "Equipment/FabricatedParts/3D/Стойки под шкафы/Стойка левая.STEP",
+      "sourceHash": "cb42cd94f0fb960189f4db1a92af677bbca443913ed731e379dee2df6e36d690",
+      "meshUrl": "/model-assets/model-cb42cd94f0fb960189f4db1a92af677bbca443913ed731e379dee2df6e36d690-v1.stl",
+      "meshHash": "883e84de26b2d0544efc1b8f951b80dd10e69cca2d8ecd6fc716b983f89d48f3",
+      "bounds": [
+        -6.0,
+        -6.0,
+        -40.0,
+        398.0,
+        1500.0,
+        0.0
+      ],
+      "heightMm": 1500,
+      "cabinetPoints": [
+        [
+          -6.0,
+          921.0,
+          -21.0
+        ],
+        [
+          -6.0,
+          1479.0,
+          -21.0
+        ]
+      ],
+      "mountingPoints": [
+        [
+          24.0,
+          -6.0,
+          -20.0
+        ],
+        [
+          374.0,
+          -6.0,
+          -20.0
+        ]
+      ],
+      "mountingCenter": [
+        199.0,
+        -6.0,
+        -20.0
+      ]
+    },
+    "right": {
+      "componentId": "frame-hardware-stand-right",
+      "source": "Equipment/FabricatedParts/3D/Стойки под шкафы/Стойка правая.STEP",
+      "sourceHash": "6cdafa54f025bf492e00812246a0e3d8f27e325d71be89576ad089158a2e5849",
+      "meshUrl": "/model-assets/model-6cdafa54f025bf492e00812246a0e3d8f27e325d71be89576ad089158a2e5849-v1.stl",
+      "meshHash": "e7db93779c8caf0258aabc0eb112355ca724b4079bfcd2ec14199c4537f01036",
+      "bounds": [
+        -6.0,
+        -6.0,
+        -3.0,
+        398.0,
+        1500.0,
+        37.0
+      ],
+      "heightMm": 1500,
+      "cabinetPoints": [
+        [
+          -6.0,
+          921.0,
+          18.0
+        ],
+        [
+          -6.0,
+          1479.0,
+          18.0
+        ]
+      ],
+      "mountingPoints": [
+        [
+          24.0,
+          -6.0,
+          17.0
+        ],
+        [
+          374.0,
+          -6.0,
+          17.0
+        ]
+      ],
+      "mountingCenter": [
+        199.0,
+        -6.0,
+        17.0
+      ]
+    },
+    "left1800": {
+      "componentId": "frame-hardware-stand-left-1800",
+      "source": "Equipment/FabricatedParts/3D/Стойки под шкафы/Стойка левая 1800х400 WD.STEP",
+      "sourceHash": "3f3151e8b5d450293363ad0782503b4769edf08b1640f8a1121afcc8b187e2cd",
+      "meshUrl": "/model-assets/model-3f3151e8b5d450293363ad0782503b4769edf08b1640f8a1121afcc8b187e2cd-v1.stl",
+      "meshHash": "2f6a101454aa860541ecf971c06a4ea5f4d0ebb1f21ab98368b346d9e95ad46f",
+      "bounds": [
+        -6.0,
+        -6.0,
+        -40.0,
+        398.0,
+        1794.0,
+        0.0
+      ],
+      "heightMm": 1800,
+      "cabinetPoints": [
+        [
+          -6.0,
+          815.0,
+          -24.0
+        ],
+        [
+          -6.0,
+          1773.0,
+          -24.0
+        ]
+      ],
+      "mountingPoints": [
+        [
+          19.5,
+          -6.0,
+          -20.0
+        ],
+        [
+          369.5,
+          -6.0,
+          -20.0
+        ]
+      ],
+      "mountingCenter": [
+        194.5,
+        -6.0,
+        -20.0
+      ]
+    },
+    "right1800": {
+      "componentId": "frame-hardware-stand-right-1800",
+      "source": "Equipment/FabricatedParts/3D/Стойки под шкафы/Стойка правая 1800х400 WD.STEP",
+      "sourceHash": "1aa20234c0aebd3ef16c8d0ac50396d5e58511a7cfdfbf71c1114ddb0adb5c20",
+      "meshUrl": "/model-assets/model-1aa20234c0aebd3ef16c8d0ac50396d5e58511a7cfdfbf71c1114ddb0adb5c20-v1.stl",
+      "meshHash": "0d61e601d573b3ae3b280a8cfea7315fd6bdac625f525832a5ea4044ef296e97",
+      "bounds": [
+        -6.0,
+        -6.0,
+        -3.0,
+        398.0,
+        1794.0,
+        37.0
+      ],
+      "heightMm": 1800,
+      "cabinetPoints": [
+        [
+          -6.0,
+          815.0,
+          21.0
+        ],
+        [
+          -6.0,
+          1773.0,
+          21.0
+        ]
+      ],
+      "mountingPoints": [
+        [
+          19.5,
+          -6.0,
+          17.0
+        ],
+        [
+          369.5,
+          -6.0,
+          17.0
+        ]
+      ],
+      "mountingCenter": [
+        194.5,
+        -6.0,
+        17.0
+      ]
+    }
+  }
+}

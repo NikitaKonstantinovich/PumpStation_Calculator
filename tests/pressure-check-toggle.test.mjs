@@ -16,6 +16,7 @@ const { withoutPressureChecks } = await loadTs(new URL('../app/pressure-check-po
 const { collectProjectIssues } = await loadTs(new URL('../app/diagnostics.ts', import.meta.url));
 const { visibleSpecificationItems, specificationItemPresentation } = await loadTs(new URL('../app/specification-presentation.ts', import.meta.url));
 const { specificationExportRows } = await loadTs(new URL('../app/specification-export.ts', import.meta.url));
+const { assessSpecification } = await loadTs(new URL('../app/specification-readiness.ts', import.meta.url));
 const toggleUrl = new URL('../app/pressure-check-toggle.tsx', import.meta.url);
 const toggleCode = ts.transpileModule(await readFile(toggleUrl, 'utf8'), { fileName: 'toggle.tsx', compilerOptions: { module: ts.ModuleKind.ESNext, jsx: ts.JsxEmit.ReactJSX, target: ts.ScriptTarget.ES2022 } }).outputText.replaceAll('"react/jsx-runtime"', JSON.stringify(import.meta.resolve('react/jsx-runtime')));
 const { PressureCheckToggle } = await loadTs(toggleUrl, { [toggleUrl.href]: toggleCode });
@@ -95,8 +96,11 @@ test('diagnostics and specification/export suppress cached pressure issues even 
   assert.ok(!messages.some(i => /давление неизвестно|превышает PN|проверка.*давления/.test(i.message)));
   const visible = visibleSpecificationItems(p.entities['station-spec'], p.entities['station-settings']);
   assert.equal(specificationItemPresentation(visible[0]).hasWarning, false);
-  const exported = specificationExportRows(visible, [{ title: 'Насосы', sections: [{ id: 'pump' }] }]);
+  const readiness = assessSpecification(p, [item], messages);
+  assert.ok(!readiness.findings.some(f => f.id === 'spec/readiness/item/0' || f.id.startsWith('spec/readiness/pressure-')));
+  const exported = specificationExportRows(visible, [{ title: 'Насосы', sections: [{ id: 'pump' }] }], readiness);
   assert.equal(exported.find(r => r.kind === 'item').cells[7], '');
+  assert.ok(!exported.some(r => r.cells.some(cell => /проверки давления отключены|проверка давления не завершена|превышает PN/i.test(String(cell)))));
   assert.ok(item.inletPressureCheck, 'presentation must not mutate the saved source');
 });
 

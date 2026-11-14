@@ -4,7 +4,7 @@ import { readFile } from "node:fs/promises";
 import { loadTs } from "./load-ts.mjs";
 import * as THREE from "three";
 const root=new URL("../",import.meta.url),replacements={};
-for(const path of ["collector-mesh","collector-renderer","insertion-renderer"]){const u=new URL(`app/model-editor/${path}.ts`,root);replacements[u.href]=(await readFile(u,"utf8")).replace('from "three"',`from ${JSON.stringify(new URL("node_modules/three/build/three.module.js",root).href)}`);}
+for(const path of ["collector-mesh","collector-renderer","insertion-renderer"]){const u=new URL(`app/model-editor/${path}.ts`,root);replacements[u.href]=(await readFile(u,"utf8")).replace('from "three"',`from ${JSON.stringify(import.meta.resolve("three"))}`);}
 const {collectorMetal}=await loadTs(new URL("app/model-editor/collector-mesh.ts",root),replacements);
 const {saddleRings}=await loadTs(new URL("app/model-editor/collector-intersection.ts",root));
 const {buildCollectorTemplate,applyCollectorTemplate}=await loadTs(new URL("app/model-editor/collector-template.ts",root));
@@ -223,6 +223,151 @@ test("real DN20 row builds a 60 mm hollow threaded membrane-tank nipple and an o
   assert.equal(JSON.stringify(row),snapshot);assert.ok(parseCollectorBinding({template:t,hiddenPieceIds:[]}));
   const unthreaded=structuredClone(t);delete unthreaded.branches.find(p=>p.id===b.id).thread;
   const cache=new CollectorRenderCache();collectorObject({collector:{template:t,hiddenPieceIds:[]},opacity:1},cache);collectorObject({collector:{template:unthreaded,hiddenPieceIds:[]},opacity:1},cache);assert.equal(cache.builds,2);
+});
+
+const steelDn15 = "сгоны-резьба-001-r0005", steelDn20 = "сгоны-резьба-001-r0006";
+const steelNipples = [
+  ["instrument-kip-1-0", steelDn15, 21.3, "1/2″"],
+  ["instrument-kip-2-0", steelDn15, 21.3, "1/2″"],
+  ["instrument-tank-0", steelDn20, 26.8, "3/4″"],
+];
+async function steelNippleFixture() {
+  const { makeInsertCatalog } = await loadTs(new URL("app/component-insert-catalog.ts", root));
+  const { lineGeometry } = await loadTs(new URL("app/line-geometry-catalog.ts", root));
+  const readJson = async path => JSON.parse(await readFile(new URL(path, root), "utf8"));
+  const [source, collectorCatalog] = await Promise.all([readJson("public/component-insert-source.json"), readJson("public/collector-catalog.json")]);
+  const catalog = makeInsertCatalog(source), c = fixture().c;
+  c.material = "st20";
+  c.instrumentPorts = [{ id: "kip-1", dn: 15, state: "occupied", threaded: true }, { id: "kip-2", dn: 15, state: "occupied", threaded: true }, { id: "tank", dn: 20, state: "capped", threaded: true }];
+  const calculation = calculateCollector(c, collectorCatalog);
+  const byId = new Map(source.items.map(item => [item.id, item]));
+  const items = Object.fromEntries(calculation.bom.flatMap(({ componentId }) => {
+    const item = byId.get(componentId);
+    return item ? [[componentId, lineGeometry(item, catalog, { catalog, flanges: {}, models: {} })]] : [];
+  }));
+  return { data: { version: 1, revision: "test", items, issues: [] }, card: { configuration: c, calculation, status: "complete" }, collectorCatalog };
+}
+
+test("selected steel DN15 and DN20 nipples build 60 mm hollow threaded branches with saddle cuts", async () => {
+  const { cadContents } = await loadTs(new URL("app/cad-export.ts", root));
+  const { card, data, collectorCatalog } = await steelNippleFixture();
+  assert.equal(data.items[steelDn15].wall, undefined);
+  assert.equal(data.items[steelDn20].wall, undefined);
+  const build = (source = data) => buildCollectorTemplate(card, source, [], "discharge");
+  const t = build(), metal = collectorMetal(t);
+  const component = applyCollectorTemplate({ id: "collector-discharge", kind: "collector", name: "Test collector", position: [0, 0, 0], rotation: [0, 0, 0], parameters: {}, opacity: 1 }, t);
+  const exported = cadContents({ components: [component] }).instances;
+  assert.deepEqual(metal.issues, []);
+  manifold(metal.main);
+  for (const [id, componentId, outerMm, thread] of steelNipples) {
+    const branch = t.branches.find(branch => branch.id === id), port = t.ports.find(port => port.id === id);
+    assert.equal(branch?.componentId, componentId);
+    close(branch.outerMm, outerMm);
+    close((branch.outerMm - branch.innerMm) / 2, 2.8);
+    close(saddleRings(t.main, branch).cutLengthMm, 60);
+    assert.equal(branch.blankLengthMm, 60);
+    assert.equal(branch.thread.designation, thread);
+    close(branch.thread.pitchMm, 25.4 / 14);
+    close(port.boreMm, branch.innerMm);
+    assert(!t.pieces.some(piece => piece.id === id));
+    const above = [port.point[0], 0, port.point[2] + 10];
+    manifold(metal.branches[id]);
+    assert.equal(rayHits(metal.branches[id], above, [0, 0, -1]).length, 0);
+    close(rayHits(metal.main, above, [0, 0, -1])[0].point.z, -t.main.innerMm / 2, 1e-4);
+    assert.equal(exported.find(instance => instance.pieceId === id)?.geometry.kind, "collector-branch");
+  }
+  assert.ok(parseCollectorBinding({ template: t, hiddenPieceIds: [] }));
+
+  const noLineGeometry = { ...data, items: { ...data.items } };
+  delete noLineGeometry.items[steelDn15];
+  delete noLineGeometry.items[steelDn20];
+  const uncached = build(noLineGeometry);
+  for (const [id, componentId, outerMm] of steelNipples) {
+    const branch = uncached.branches.find(branch => branch.id === id);
+    assert.equal(branch?.componentId, componentId);
+    close(branch.outerMm, outerMm);
+    close((branch.outerMm - branch.innerMm) / 2, 2.8);
+  }
+
+  const noSupplier = structuredClone(card);
+  const sourceRow = noSupplier.calculation.bom.find(row => row.role === "instrument-kip-1");
+  Object.assign(sourceRow, { componentId: null, unitPrice: null, cost: null });
+  const layout = buildCollectorTemplate(noSupplier, data, [], "discharge");
+  const unsourced = layout.branches.find(branch => branch.id === "instrument-kip-1-0");
+  assert.equal(unsourced?.componentId, "instrument-kip-1-0");
+  close(unsourced.outerMm, 21.3);
+  close((unsourced.outerMm - unsourced.innerMm) / 2, 2.8);
+  assert.ok(collectorMetal(layout).branches[unsourced.id]);
+  assert.equal(sourceRow.componentId, null);
+  assert.equal(sourceRow.cost, null);
+
+  const measured = { ...data, items: { ...data.items, [steelDn20]: { ...data.items[steelDn20], outerDiameter: 26.9, wall: 2.6 } } };
+  const measuredTank = build(measured).branches.find(branch => branch.id === "instrument-tank-0");
+  close(measuredTank.outerMm, 26.9);
+  close((measuredTank.outerMm - measuredTank.innerMm) / 2, 2.6);
+
+  const mismatched = { ...data, items: { ...data.items, [steelDn20]: { ...data.items[steelDn20], outerDiameter: 28.4 } } };
+  assert.deepEqual(build(mismatched).pieces.find(piece => piece.id === "instrument-tank-0")?.shape, { kind: "tube", lengthMm: 60, outerMm: 28.4 });
+
+  const requestedThreadMm = 11.5;
+  const shortConfiguration = { ...card.configuration, instrumentPorts: card.configuration.instrumentPorts.map(port =>
+    port.id === "tank" ? { ...port, lengthMm: 12, threadLengthMm: requestedThreadMm } : port) };
+  const short = buildCollectorTemplate({ ...card, configuration: shortConfiguration, calculation: calculateCollector(shortConfiguration, collectorCatalog) }, data, [], "discharge");
+  const shortTank = short.branches.find(branch => branch.id === "instrument-tank-0");
+  assert.ok(shortTank);
+  close(saddleRings(short.main, shortTank).cutLengthMm, 12);
+  assert.ok(shortTank.thread.lengthMm > 2 && shortTank.thread.lengthMm < requestedThreadMm);
+  assert.ok(collectorMetal(short).branches[shortTank.id]);
+});
+
+test("unmatched nipples without wall dimensions retain visible 60 mm outlines and their original mounting ports", async () => {
+  const { cadContents } = await loadTs(new URL("app/cad-export.ts", root));
+  const { card, data } = await steelNippleFixture();
+  for (const row of card.calculation.bom) {
+    if (row.componentId !== steelDn15 && row.componentId !== steelDn20) continue;
+    const item = data.items[row.componentId];
+    row.componentId = `unmatched:${row.componentId}`;
+    data.items[row.componentId] = { ...item, equipmentId: row.componentId };
+  }
+  const t = buildCollectorTemplate(card, data, [], "discharge"), metal = collectorMetal(t);
+  assert.ok(t.main);
+  const component = applyCollectorTemplate({ id: "collector-discharge", kind: "collector", name: "Test collector", position: [0, 0, 0], rotation: [0, 0, 0], parameters: {}, opacity: 1 }, t);
+  const rendered = collectorObject(component), exported = cadContents({ components: [component] }).instances;
+  const expected = [
+    ["instrument-kip-1-0", `unmatched:${steelDn15}`, 21.3],
+    ["instrument-kip-2-0", `unmatched:${steelDn15}`, 21.3],
+    ["instrument-tank-0", `unmatched:${steelDn20}`, 26.9],
+  ];
+  const withoutDimensions = { ...data, items: Object.fromEntries(Object.entries(data.items).map(([id, item]) => [id, item.kind === "nipple" ? { ...item, outerDiameter: undefined } : item])) };
+  const markers = buildCollectorTemplate(card, withoutDimensions, [], "discharge");
+  const savedCollector = applyCollectorTemplate({ ...component, locked: false, position: [17, 25, 83], rotation: [0, 0, 90] }, markers);
+  const saved = { version: 1, sourceFingerprint: "saved", components: [savedCollector], lineJoints: [] };
+  const merged = model.mergeAssembly(saved, { ...saved, sourceFingerprint: "generated", components: [component] });
+  assert.deepEqual(merged.components[0].position, savedCollector.position);
+  assert.deepEqual(merged.components[0].rotation, savedCollector.rotation);
+  for (const [id, equipmentId, outerMm] of expected) {
+    assert.equal(data.items[equipmentId].wall, undefined);
+    const outline = t.pieces.find(piece => piece.id === id), port = t.ports.find(port => port.id === id);
+    assert.equal(outline?.componentId, equipmentId);
+    assert.equal(outline.fidelity, "outline");
+    assert.deepEqual(outline.shape, { kind: "tube", lengthMm: 60, outerMm });
+    assert.equal(markers.pieces.find(piece => piece.id === id)?.shape.kind, "marker");
+    assert.deepEqual(port.point, markers.ports.find(port => port.id === id).point);
+    assert.deepEqual(merged.components[0].collector.template.pieces.find(piece => piece.id === id), outline);
+    const portRef = { componentId: component.id, portId: id };
+    assert.deepEqual(model.portPoint(merged, portRef), model.portPoint(saved, portRef));
+    assert.equal(port.provisional, true);
+    assert.equal(port.boreMm, undefined);
+    assert.deepEqual(outline.position, port.point.map((value, i) => value - 60 * port.axis[i]));
+    const bounds = new THREE.Box3().setFromObject(rendered.children.find(child => child.userData.pieceId === id));
+    close(bounds.max.z - bounds.min.z, 60, 1e-4);
+    close(bounds.max.z, port.point[2], 1e-4);
+    assert.equal(metal.branches[id], undefined);
+    const hits = rayHits(metal.main, [port.point[0], 0, port.point[2] + 10], [0, 0, -1]);
+    close(hits[0].point.z, t.main.outerMm / 2, 1e-4);
+    assert.equal(exported.find(instance => instance.pieceId === id)?.geometry.kind, "unavailable");
+  }
+  assert.ok(parseCollectorBinding({ template: t, hiddenPieceIds: [] }));
 });
 
 test("old automatic 115 mm defaults migrate to 60 mm on rebuild while explicit individual dimensions survive",()=>{

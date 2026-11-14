@@ -4,6 +4,7 @@ import {loadTs} from './load-ts.mjs';
 
 const {ProjectSession}=await loadTs(new URL('../app/project-session.ts',import.meta.url));
 const {mergeProjectChanges,sameProject}=await loadTs(new URL('../app/project-merge.ts',import.meta.url));
+const {noteCameraMotion}=await loadTs(new URL('../app/project-autosave.ts',import.meta.url));
 const base=()=>({schemaVersion:1,project:{id:'station',name:'Станция',createdAt:'2026-11-05',updatedAt:'2026-11-05'},entities:{input:{flow:10,head:20,enabled:false},model:{zoom:1},spec:{items:[{name:'Насос',quantity:2}]}},workspace:{zoom:100,windows:[{id:'input',x:0}]}});
 const edit=(config,change)=>{const next=structuredClone(config);change(next);return next;};
 
@@ -60,6 +61,32 @@ test('loading an unchanged saved project does not write a new version',async t=>
   const api=server(t),{session}=api.session();
   session.update(structuredClone(session.latest));
   assert.equal(session.dirty,false);assert.equal(await session.flush(),true);assert.equal(api.writes.length,0);
+});
+
+test('autosave waits for a pause in camera motion, up to the existing save deadline',t=>{
+  t.mock.timers.enable({apis:['Date','setTimeout'],now:1000});
+  const api=server(t);
+  const first=api.session().session;
+  const flush=t.mock.method(first,'flush',()=>Promise.resolve(true));
+  first.update(edit(first.latest,c=>{c.entities.input.flow=25;}));
+  t.mock.timers.tick(2900);
+  noteCameraMotion();
+  t.mock.timers.tick(100);
+  assert.equal(flush.mock.callCount(),0);
+  t.mock.timers.tick(200);
+  assert.equal(flush.mock.callCount(),1);
+
+  const second=api.session().session;
+  const capped=t.mock.method(second,'flush',()=>Promise.resolve(true));
+  second.update(edit(second.latest,c=>{c.entities.input.flow=35;}));
+  for(let i=0;i<149;i++) {
+    noteCameraMotion();
+    t.mock.timers.tick(200);
+  }
+  assert.equal(capped.mock.callCount(),0);
+  noteCameraMotion();
+  t.mock.timers.tick(200);
+  assert.equal(capped.mock.callCount(),1);
 });
 
 test('main and detached windows save independent edits concurrently without losing either',async t=>{

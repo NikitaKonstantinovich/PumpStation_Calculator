@@ -1,5 +1,6 @@
 import { spacingEvidenceReader } from "./node-spacing.mjs";
 import { catalogDrawings, readDrawingFile } from "./node-drawings.mjs";
+import { catalogMounting } from "./node-mountings.mjs";
 import { DatabaseSync } from "node:sqlite";
 import { createHash } from "node:crypto";
 import { resolve } from "node:path";
@@ -19,10 +20,66 @@ const documentName = value => typeof value === "string" ? value.split(/[\\/]/).a
 // Keep the original type record in provenance; never infer types from series names.
 const pumpType = value => value === "vertical_single_stage_inline" ? "inline" : ["vertical_multistage", "horizontal_multistage", "end_suction", "inline", "submersible"].includes(value) ? value : "unknown";
 
+// These source statuses describe provenance, not a prohibition on selection.
+// selection_enabled remains mandatory; unknown, draft and retired states stay closed.
+const activeModelStatuses = new Set([
+  "source_active", "active", "approved", "source_record",
+  "historical_source_record_with_official_technical_evidence",
+  "official_selector_visible", "source_active; current_PDF_match_is_separate_evidence",
+]);
+
+// Owner decision, 2026-11-10: use the exact preferred factory Q/H rows for these
+// three executions; leave missing motor Hz/rpm unknown. This does not authorize
+// a different curve, another execution, or an explicit motor/curve conflict.
+const curvesWithUnknownMotor = new Map([
+  ["HM:WELLMIX:CUC:22fa6be6ffd1ce41:11019926", "HM:WELLMIX:CUC:22fa6be6ffd1ce41:curve-set:0"],
+  ["HM:WELLMIX:CUC:1da35824cb0232d7:11019924", "HM:WELLMIX:CUC:1da35824cb0232d7:curve-set:0"],
+  ["HM:WELLMIX:CUC:50c07a99bab45d5b:11019923", "HM:WELLMIX:CUC:50c07a99bab45d5b:curve-set:0"],
+]);
+
+function curveSetReader(optional, sets) {
+  const preferred = grouped(optional("preferred_curve_sets"), "model_id");
+  return (variant, model, motor, issues) => {
+    const candidates = sets.get(model.id) ?? [], frequency = number(motor?.frequency_hz);
+    const preferences = preferred.get(model.id);
+    if (preferences) {
+      const binding = preferences.length === 1 ? preferences[0] : null;
+      const selected = binding && candidates.find(set => set.id === binding.curve_set_id);
+      if (!selected) {
+        issues.push("Основной набор характеристик не имеет однозначной привязки к модели");
+        return { set: null };
+      }
+      const curveFrequency = number(selected.frequency_hz), speed = number(motor?.speed_rpm);
+      const frequencyMatch = frequency > 0 && curveFrequency === frequency;
+      // A literal catalogue curve may omit Hz but supply the actual shaft speed.
+      // Use that explicit match only for the preferred curve, without inventing Hz
+      // or rescaling points. An explicit frequency conflict cannot be bypassed.
+      const speedMatch = curveFrequency == null && speed > 0 && number(selected.reference_speed_rpm) === speed;
+      const approvedUnknownMotor = frequency == null && speed == null &&
+        curvesWithUnknownMotor.get(variant.id) === selected.id;
+      if (!frequencyMatch && !speedMatch && !approvedUnknownMotor) {
+        issues.push("Основной набор характеристик не соответствует подтверждённой частоте или частоте вращения двигателя");
+        return { set: null };
+      }
+      if (speedMatch) issues.push("Частота Q/H-характеристики не указана; основной набор применён по совпадению частоты вращения двигателя");
+      if (approvedUnknownMotor) issues.push("Подбор по основной заводской Q/H-характеристике разрешён пользователем; частота и обороты двигателя не указаны");
+      return { set: selected, selection: {
+        ...binding, matchedBy: frequencyMatch ? "frequency_hz" : speedMatch ? "speed_rpm" : "owner_approved_exact_curve",
+        ...(approvedUnknownMotor ? { decisionDate: "2026-11-10", motorFrequencyKnown: false, motorSpeedKnown: false } : {}),
+      } };
+    }
+    const eligible = candidates.filter(set => frequency > 0 && number(set.frequency_hz) === frequency);
+    const set = eligible.length === 1 ? eligible[0] : null;
+    if (!set) issues.push(eligible.length > 1 ? "Не выбран однозначный набор характеристик исполнения" : "Отсутствует набор характеристик для подтверждённой частоты двигателя");
+    return { set };
+  };
+}
+
 function dimensionReader(optional) {
   const sets = indexed(optional("dimension_sets")), byModel = grouped([...sets.values()], "model_id");
   const values = grouped(optional("dimension_values"), "dimension_set_id"), definitions = indexed(optional("dimension_definitions"), "code");
   const preferred = grouped(optional("preferred_dimension_sets"), "variant_id"), inline = grouped(optional("inline_dimension_selections"), "model_id");
+  const mountings = grouped(optional("mounting_patterns"), "dimension_set_id");
   const geometryBindings = grouped(optional("variant_geometry_bindings"), "variant_id"), geometryProfiles = indexed(optional("catalogue_geometry_profiles")), geometryValues = grouped(optional("catalogue_geometry_values"), "profile_id");
   const semanticValues = (rows, valueKey, issues) => {
     const candidates = grouped(rows.filter(row => row.dimension_code && definitions.has(row.dimension_code) && number(row[valueKey]) != null && row[valueKey] >= 0), "dimension_code"), result = {};
@@ -71,7 +128,17 @@ function dimensionReader(optional) {
         evidence = {...evidence,baseGeometry:{profileId:profile.id,scope:baseGeometry.scope,sourceId:profile.source_id,applicability:profile.applicability,bindingApplicability:binding.applicability,axisDefinition:profile.axis_definition,page:number(profile.pdf_page),printedPage:number(profile.printed_page)}};
       }
     }
-    return {dimensions,evidence,sourceIds:[selected?.source_id,binding?.source_id,evidence?.baseGeometry?.sourceId].filter(Boolean)};
+    let frameV1;
+    const patterns=mountings.get(selected?.id)??[],pattern=patterns.length===1?patterns[0]:null;
+    if(pattern?.assessment_status==="manufacturer_catalog"&&pattern.hole_count===4&&pattern.hole_diameter_mm>0&&pattern.grid_x_mm>0&&pattern.grid_y_mm>0&&dimensions?.overall_length>0&&dimensions?.overall_width>0){
+      let axes;try{axes=JSON.parse(pattern.axis_definition_json);}catch{axes=null;}
+      if(axes&&/Вдоль оси входного/.test(axes.x)&&/Попер[её]к потока/.test(axes.y)){
+        frameV1={verified:false,source:`${selected.source_document_name}, стр. ${selected.document_page}; сетка ${pattern.code}. Центрирование корпуса относительно сетки и привязка исполнения требуют проверки`,
+          holes:[[-1,-1],[-1,1],[1,-1],[1,1]].map(([x,y],i)=>({id:String(i),owner:"pump",x:x*pattern.grid_y_mm/2,y:y*pattern.grid_x_mm/2,diameterMm:pattern.hole_diameter_mm})),
+          bounds:{minX:-dimensions.overall_width/2,maxX:dimensions.overall_width/2,minY:-dimensions.overall_length/2,maxY:dimensions.overall_length/2},footThicknessMm:null,boltDiameterMm:null};
+      }
+    }
+    return {dimensions,evidence,frameV1,sourceIds:[selected?.source_id,binding?.source_id,evidence?.baseGeometry?.sourceId].filter(Boolean)};
   };
 }
 
@@ -98,16 +165,18 @@ export function readCatalogSnapshot(path) {
     const cad = grouped(optional("cad_bindings"), "model_id"), variantPressure = indexed(optional("variant_pressure_limits"), "variant_id");
     const pressureRatings = grouped(optional("pressure_ratings"), "variant_id");
     const operatingLimits = indexed(optional("variant_operating_limits"), "variant_id"), seriesEnvelopes = indexed(optional("series_operating_envelopes"), "series_id");
+    const onisPassports = grouped(tables.has("variant_parameters") ? db.prepare(
+      "SELECT * FROM variant_parameters WHERE namespace='ONIS_MV_official_passport_2026_11_12' ORDER BY parameter_id"
+    ).all() : [], "variant_id");
     const rawViews = indexed(optional("v_catalog"), "variant_id"), archives = optional("source_archives").sort((a,b) => a.path.localeCompare(b.path));
-    const dimensionsFor = dimensionReader(optional), spacingFor = spacingEvidenceReader(optional);
+    const dimensionsFor = dimensionReader(optional), spacingFor = spacingEvidenceReader(optional), curvesFor = curveSetReader(optional, sets);
     const items = variants.map(variant => {
       const model = models.get(variant.model_id);
       if (!model) throw Error("Исполнение каталога ссылается на отсутствующую модель");
       const familySeries = series.get(model.series_id), manufacturer = manufacturers.get(familySeries?.manufacturer_id), motor = motors.get(variant.id);
       if (!familySeries || !manufacturer) throw Error("Нарушена связь модели с серией или производителем");
-      const issues = [], frequencyHz = number(motor?.frequency_hz), eligibleSets = (sets.get(model.id) ?? []).filter(set => frequencyHz != null && number(set.frequency_hz) === frequencyHz);
-      const set = eligibleSets.length === 1 ? eligibleSets[0] : null;
-      if (!set) issues.push(eligibleSets.length > 1 ? "Не выбран однозначный набор характеристик исполнения" : "Отсутствует набор характеристик для подтверждённой частоты двигателя");
+      const issues = [], frequencyHz = number(motor?.frequency_hz);
+      const { set, selection: curveSelection } = curvesFor(variant, model, motor, issues);
       const characteristics = {};
       for (const curve of set ? curves.get(set.id) ?? [] : []) {
         const raw = (curvePoints.get(curve.id) ?? []).map(point => [number(point.flow_m3h), number(point.value)]);
@@ -122,7 +191,7 @@ export function readCatalogSnapshot(path) {
       if (!qh.length) issues.push("Нет корректной Q/H-характеристики для гидравлического подбора");
       const knownMedium = ["water","wastewater"].includes(model.medium);
       if (!knownMedium) issues.push("Перекачиваемая среда модели не подтверждена");
-      const modelActive = ["source_active","active","approved"].includes(model.lifecycle_status);
+      const modelActive = activeModelStatuses.has(model.lifecycle_status);
       if (!modelActive || model.selection_enabled !== 1) issues.push("Модель не разрешена для подбора в источнике");
       const modelReviews = [...(reviewsByModel.get(model.id) ?? []).filter(row => !row.variant_id), ...(reviewsByVariant.get(variant.id) ?? [])];
       for (const row of modelReviews) issues.push(String(row.category ?? "Данные") + " · " + String(row.message ?? "Требуется уточнение"));
@@ -140,6 +209,13 @@ export function readCatalogSnapshot(path) {
       // A scalar rating exists only when the source supplies one unambiguous mode.
       const rating = electricalRatings.length === 1 ? electricalRatings[0] : null;
       const dimension = dimensionsFor(variant, model, issues);
+      const passport = onisPassports.get(variant.id) ?? [];
+      const poleCount = number(passport.find(row => row.parameter_id === "poleCount")?.numeric_value);
+      const technicalSheet = passport.filter(row => !["speedRpm","poleCount","liquidTemperatureRangeC"].includes(row.parameter_id)).map(row => ({
+        key:row.parameter_id,label:row.name,group:row.group_name,unit:row.unit,value:number(row.numeric_value) ?? row.source_value,
+        page:row.parameter_id.startsWith("dimension.") || row.parameter_id.startsWith("flange.") ?
+          row.source_id.endsWith(":110176") ? 41 : 2 : 1,
+      }));
       const pump = {
         spacingEvidence:spacingFor(variant, model, motor, electricalRatings, {manufacturer:String(manufacturer.name),series:String(familySeries.code),dimensions:dimension.dimensions,evidence:dimension.evidence}),
         id:String(variant.id), manufacturer:String(manufacturer.name), series:String(familySeries.code), group:String(familySeries.code), model:String(model.designation),
@@ -155,15 +231,17 @@ export function readCatalogSnapshot(path) {
         frequencyHz, speedRpm:number(motor?.speed_rpm), weightKg:number(variant.mass_kg), inletDn:number(inlet?.dn), outletDn:number(outlet?.dn),
         description:material?.description ?? null, availability:availability.get(model.id)?.confirmed_availability ?? null, catalogSource:SOURCE,
         ...(dimension.dimensions ? {dimensions:dimension.dimensions} : {}),
-        electric:{powerKw:number(motor?.power_kw),voltageV:rating?.voltageV ?? null,currentA:rating?.currentA ?? null,phaseCount:number(motor?.phase_count),frequencyHz,speedRpm:number(motor?.speed_rpm),protectionClass:motor?.protection_class ?? null,insulationClass:motor?.insulation_class ?? null,efficiencyClass:motor?.efficiency_class ?? null,ratings:electricalRatings},
+        electric:{powerKw:number(motor?.power_kw),voltageV:rating?.voltageV ?? null,currentA:rating?.currentA ?? null,phaseCount:number(motor?.phase_count),frequencyHz,speedRpm:number(motor?.speed_rpm),...(poleCount != null ? {poleCount} : {}),protectionClass:motor?.protection_class ?? null,insulationClass:motor?.insulation_class ?? null,efficiencyClass:motor?.efficiency_class ?? null,ratings:electricalRatings},
+        ...(technicalSheet.length ? {technicalSheet} : {}),
         materials:material ? {profileId:material.id,scope:material.scope,description:material.description,sealDescription:material.default_seal_description ?? null,sealCode:variant.seal_code ?? null,components:(materialComponents.get(material.id) ?? []).map(row=>({component:row.component,material:row.material,state:row.state}))} : {},
         inlet:inlet ? {...inlet} : {}, outlet:outlet ? {...outlet} : {},
-        mounting:{hasSensors:variant.has_sensors===1 ? true : variant.has_sensors===0 ? false : null,sensorStatus:variant.sensor_status ?? "unknown"},
+        mounting:{...(dimension.frameV1?{frameV1:dimension.frameV1}:{}),...catalogMounting({variant,model,motor,manufacturer:manufacturer.name,series:familySeries.code}),hasSensors:variant.has_sensors===1 ? true : variant.has_sensors===0 ? false : null,sensorStatus:variant.sensor_status ?? "unknown"},
         fluid:{medium:model.medium ?? null,operatingLimits:operatingLimits.get(variant.id) ?? null,seriesEnvelope:seriesEnvelopes.get(model.series_id) ?? null,nominalNpshrM:number(model.nominal_npshr_m),maxWorkingPressureBar:variantPressure.get(variant.id)?.max_working_pressure_bar ?? null,pressureTemperatureCondition:variantPressure.get(variant.id)?.temperature_condition ?? null,pressureRatings:(pressureRatings.get(variant.id) ?? []).map(row=>({temperatureC:number(row.temperature_c),maxWorkingPressureBar:number(row.max_working_pressure_bar)}))},
       };
-      const sourceIds = [...new Set([model.source_id,variant.source_id,motor?.source_id,set?.source_id,inlet?.source_id,outlet?.source_id,best?.source_id,...dimension.sourceIds].filter(Boolean))];
+      const sourceIds = [...new Set([model.source_id,variant.source_id,motor?.source_id,set?.source_id,curveSelection?.source_id,inlet?.source_id,outlet?.source_id,best?.source_id,...dimension.sourceIds,...passport.map(row=>row.source_id)].filter(Boolean))];
       return {modelId:String(model.id),variantId:String(variant.id),curveSetId:set?.id ?? null,frequencyHz,pump,issues:[...new Set(issues)],provenance:{
         curveSet:set ? {...set} : null,priceSnapshot:price ? {...best} : null,pricePolicy:"latest unambiguous net snapshot; no repeated discount; unknown dates/prices remain explicit",
+        ...(curveSelection ? {curveSelection} : {}),
         availability:availability.get(model.id) ?? null,sensorStatus:variant.sensor_status ?? "unknown",internalNumber:variant.internal_number ?? null,materialScope:material?.scope ?? "unknown",articleKind:view?.article_kind ?? "unknown",
         curveRecords:set ? (curves.get(set.id) ?? []).map(row=>({id:row.id,kind:row.kind,xUnit:row.x_unit,yUnit:row.y_unit})) : [],
         sources:sourceIds.map(id=>sourceRecords.get(id)).filter(Boolean).map(row=>({id:row.id,archivePath:row.archive_path,jsonPointer:row.json_pointer,sha256:row.record_sha256})),pumpType:types.get(model.pump_type_id) ?? null,

@@ -1,6 +1,9 @@
 import type { Pump, PumpSpatialData } from "../pump-catalog";
 import type { Bounds, Port, PumpProfile, Vec3 } from "./model";
 import { applyMvFlowReview } from "./onis-flow";
+import echMounts from "../../data/ech-threaded-mounts.json";
+import { horizontalPumpDrawing } from "./horizontal-pump-drawings";
+import { applyHorizontalPumpCadPorts } from "./horizontal-pump-cad";
 
 export type PumpGeometryInfo = {
   version: 1;
@@ -14,6 +17,8 @@ const finite = (v: unknown): v is number => typeof v === "number" && Number.isFi
 const positive = (v: unknown): v is number => finite(v) && v > 0;
 const vector = (v: unknown): v is Vec3 => Array.isArray(v) && v.length === 3 && v.every(finite);
 const validBounds = (v: unknown): v is Bounds => Array.isArray(v) && v.length === 6 && v.every(finite) && [0, 1, 2].every(i => v[i + 3] > v[i]);
+type ThreadedPumpMount = { point: number[]; dn: number; thread: string; depthMm: number };
+const echThreadedMounts: Record<string, { model: string; mounts: { inlet?: ThreadedPumpMount; outlet?: ThreadedPumpMount } }> = echMounts;
 export function parseCatalogPumpSpatial(raw: unknown): PumpSpatialData | undefined {
   if (!raw || typeof raw !== "object") return;
   const v = raw as PumpSpatialData, b = v.boundsMm;
@@ -43,10 +48,13 @@ export function parsePumpGeometry(raw: unknown): PumpGeometryInfo | undefined {
  * DN, packing dimensions and extra instrument connections are not coordinates. */
 export function resolvePumpSpatial(pump: Pump, profile?: PumpProfile): { bounds: Bounds; ports: Port[]; info: PumpGeometryInfo; note: string } {
   profile = applyMvFlowReview(pump.id, profile);
+  if (profile && pump.type === "horizontal_multistage") profile = applyHorizontalPumpCadPorts(profile);
   const dimensions = pump.dimensions ?? {}, issues: string[] = [];
   const sizes = ["length", "width", "height"].map(key => positive(dimensions[`overall_${key}`]) ? dimensions[`overall_${key}`] : null) as PumpGeometryInfo["dimensionsMm"];
   const measured = validBounds(profile?.bounds);
-  const catalog = parseCatalogPumpSpatial(pump.spatialData);
+  const catalogSpatial = parseCatalogPumpSpatial(pump.spatialData);
+  const drawing = !catalogSpatial && pump.type === "horizontal_multistage" ? horizontalPumpDrawing(pump.id) : undefined;
+  const catalog = catalogSpatial ?? parseCatalogPumpSpatial(drawing);
   const info: PumpGeometryInfo = { version: 1, envelope: measured ? "cad" : sizes.every(positive) ? "catalog" : "incomplete", dimensionsMm: sizes, coordinateSystem: measured ? "cad" : "envelope-base", issues };
   // 100 mm on an unknown axis is only the selectable diagnostic marker size.
   // It is never published as a pump dimension or used as a nozzle coordinate.
@@ -61,8 +69,14 @@ export function resolvePumpSpatial(pump: Pump, profile?: PumpProfile): { bounds:
       info.coordinateSystem = "inlet";
       info.dimensionsMm = [0, 1, 2].map(i => catalog.boundsMm[i] === null || catalog.boundsMm[i + 3] === null ? null : catalog.boundsMm[i + 3]! - catalog.boundsMm[i]!) as PumpGeometryInfo["dimensionsMm"];
       info.envelope = info.dimensionsMm.every(positive) ? "catalog" : "incomplete";
-      bounds = catalog.boundsMm.map((v, i, b) => v ?? (b[(i + 3) % 6] !== null ? b[(i + 3) % 6]! + (i < 3 ? -100 : 100) : [0, -50, 0, 100, 50, 100][i])) as Bounds;
-      ports = structuredClone(catalog.ports);
+      bounds = catalog.boundsMm.map((value, index, all) => {
+        if (value !== null) return value;
+        const opposite = all[(index + 3) % 6];
+        const fallback = opposite !== null ? opposite + (index < 3 ? -100 : 100) : [0, -50, 0, 100, 50, 100][index];
+        const portPositions = catalog.ports.map(port => port.point[index % 3]);
+        return index < 3 ? Math.min(fallback, ...portPositions) : Math.max(fallback, ...portPositions);
+      }) as Bounds;
+      ports = drawing ? catalog.ports.map(port => ({ ...port, provisional: true })) : catalog.ports;
       issues.push(...catalog.issues);
     } else if (pump.spatialData) issues.push("Некорректная размерная схема каталога; её координаты не использованы.");
     // The imported CNP CDM table explicitly places equal-height inline faces
@@ -80,6 +94,18 @@ export function resolvePumpSpatial(pump: Pump, profile?: PumpProfile): { bounds:
   }
   const horizontal = pump.type === "horizontal_multistage" || pump.type === "end_suction";
   ports = ports.map(p => p.id === "outlet" && !p.axis && horizontal ? { ...p, axis: [0, 0, 1], source: [p.source, "Решение пользователя 30.10.2026: напор горизонтального насоса вверх (+Z)"].filter(Boolean).join("; ") } : p);
+  const sourceHash = profile?.sourceHash;
+  const measuredThreads = sourceHash ? echThreadedMounts[sourceHash] : undefined;
+  if (measuredThreads) ports = ports.map(port => {
+    if (port.id !== "inlet" && port.id !== "outlet") return port;
+    const mount = measuredThreads.mounts[port.id];
+    const expectedAxis = port.id === "inlet" ? [-1, 0, 0] : [0, 0, 1];
+    if (!mount || !port.axis?.every((value, index) => Math.abs(value - expectedAxis[index]) < 1e-5)
+      || !port.point.every((value, index) => Math.abs(value - mount.point[index]) < 1e-4)) return port;
+    return { ...port, dn: mount.dn, connection: "threaded", plane: "thread-reference", gender: "female", thread: mount.thread,
+      threadDepthMm: mount.depthMm, provisional: true,
+      source: `${measuredThreads.model}, измерение осевых поверхностей по STEP ${sourceHash}. Геометрический предел захода ${mount.depthMm} мм.` };
+  });
   for (const [id, label] of [["inlet", "всасывающего"], ["outlet", "напорного"]] as const) {
     if (id === "inlet" && pump.type === "submersible") continue;
     const port = ports.find(p => p.id === id);
@@ -96,8 +122,9 @@ export function resolvePumpSpatial(pump: Pump, profile?: PumpProfile): { bounds:
 
 /** Display-only convention approved 31.10.2026. Never enrich catalog dimensions
  * or audited nozzle coordinates with these schematic mounting points. */
-export function resolvePumpLayout(pump: Pump, profile?: PumpProfile): ReturnType<typeof resolvePumpSpatial> {
+export function resolvePumpLayout(pump: Pump, profile?: PumpProfile, allowSchematicPorts = true): ReturnType<typeof resolvePumpSpatial> {
   const r = resolvePumpSpatial(pump, profile);
+  if (!allowSchematicPorts) return r;
   const required = pump.type === "submersible" ? ["outlet"] : ["inlet", "outlet"];
   const usable = (id: string) => r.ports.some(p => p.id === id && vector(p.axis) && Math.abs(Math.hypot(...p.axis) - 1) < 1e-6);
   // Unassigned CAD port roles still require direction review, not remapping.

@@ -7,5 +7,6 @@ export async function loadCatalog(snapshotId?: string, signal?: AbortSignal): Pr
   const body = await response.json();
   if (!response.ok) throw Error(body.error || "Новый каталог насосов недоступен");
   validateCatalogSnapshot(body.snapshot);
+  if (snapshotId && body.snapshot.id !== snapshotId) throw Error("Источник вернул другой снимок каталога насосов");
   return body.snapshot;
 }

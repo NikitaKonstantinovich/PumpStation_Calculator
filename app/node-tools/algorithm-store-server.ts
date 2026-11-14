@@ -3,9 +3,11 @@ import { compileTools } from "./compiler";
 import { ToolError } from "./errors";
 import { DEFAULT_ALGORITHM, emptyAlgorithm, type Algorithm, type AlgorithmVersion } from "./algorithm-schema";
 import type { ToolDocument, ToolProgram } from "./schema";
+import { PROGRAM_STORAGE_SCHEMA, prepareProgramStorage, readStoredProgram } from "./program-storage-server";
 
 // Documents own all their type/diagram IDs. No mutable definition is resolved outside a snapshot.
 export const ALGORITHM_SCHEMA = [
+  ...PROGRAM_STORAGE_SCHEMA,
   `CREATE TABLE IF NOT EXISTS node_algorithms (
     id TEXT PRIMARY KEY, name TEXT NOT NULL, name_key TEXT NOT NULL UNIQUE,
     connected INTEGER NOT NULL DEFAULT 0 CHECK(connected IN (0,1)),
@@ -54,25 +56,40 @@ export async function algorithmRow(id = DEFAULT_ALGORITHM): Promise<Row> {
   if (!row) throw new ToolError("Алгоритм не найден", 404);
   return row;
 }
+export async function algorithmInfo(id = DEFAULT_ALGORITHM): Promise<Pick<Row, "name" | "active" | "connected">> {
+  const row = await db().prepare("SELECT name,active,connected FROM node_algorithms WHERE id=?").bind(id).first<Pick<Row, "name" | "active" | "connected">>();
+  if (!row) throw new ToolError("Алгоритм не найден", 404);
+  return row;
+}
 export async function listAlgorithms(connectedOnly = false): Promise<Algorithm[]> {
-  const rows = await db().prepare(`SELECT a.*,v.number,s.created AS saved FROM node_algorithms a
+  const rows = await db().prepare(`SELECT a.id,a.name,a.connected,a.revision,a.active,a.created,a.updated,a.draft_dirty,v.number,s.created AS saved FROM node_algorithms a
     JOIN node_algorithm_versions v ON v.id=a.active JOIN node_tool_versions s ON s.id=v.id
-    ${connectedOnly ? "WHERE a.connected=1" : ""} ORDER BY a.created,a.rowid`).all<Row & {number:number;saved:string}>();
+    ${connectedOnly ? "WHERE a.connected=1" : ""} ORDER BY a.created,a.rowid`).all<Omit<Row, "name_key" | "next_number" | "draft"> & {number:number;saved:string}>();
   return (rows.results ?? []).map(row => ({ id:row.id, name:row.name, connected:!!row.connected, revision:row.revision,
     active:row.active, number:row.number, created:row.created, updated:row.updated, saved:row.saved, hasDraft:!!row.draft_dirty }));
 }
 export async function algorithmHistory(id: string): Promise<AlgorithmVersion[]> {
-  await algorithmRow(id);
+  await algorithmInfo(id);
   const rows = await db().prepare(`SELECT v.id,v.algorithm_id AS algorithmId,v.number,v.reason,
     v.source_algorithm AS sourceAlgorithm,v.source_version AS sourceVersion,s.author,s.created
     FROM node_algorithm_versions v JOIN node_tool_versions s ON s.id=v.id WHERE v.algorithm_id=? ORDER BY v.number DESC LIMIT 5`).bind(id).all<AlgorithmVersion>();
   return rows.results ?? [];
 }
 export async function algorithmSnapshot(id: string, version: string) {
-  const row = await db().prepare(`SELECT s.document,s.program FROM node_tool_versions s JOIN node_algorithm_versions v ON v.id=s.id
-    WHERE v.algorithm_id=? AND s.id=?`).bind(id,version).first<{document:string;program:string}>();
+  const archived = await db().prepare(`SELECT a.document,a.header FROM node_program_archives a JOIN node_algorithm_versions v ON v.id=a.version
+    WHERE v.algorithm_id=? AND a.version=?`).bind(id,version).first<{document:string;header:string}>();
+  if (archived) return {document:archived.document,program:await readStoredProgram(version,archived.header,archived.header.length)};
+  const row = await db().prepare(`SELECT s.document,substr(s.program,1,60000) AS program,length(s.program) AS characters FROM node_tool_versions s JOIN node_algorithm_versions v ON v.id=s.id
+    WHERE v.algorithm_id=? AND s.id=?`).bind(id,version).first<{document:string;program:string;characters:number}>();
   if (!row) throw new ToolError("Версия не принадлежит выбранному алгоритму или отсутствует", 404);
-  return row;
+  return {document:row.document,program:await readStoredProgram(version,row.program,row.characters)};
+}
+export async function algorithmDocument(id: string, version: string) {
+  const row = await db().prepare(`SELECT COALESCE(a.document,s.document) AS document FROM node_algorithm_versions v
+    JOIN node_tool_versions s ON s.id=v.id LEFT JOIN node_program_archives a ON a.version=v.id
+    WHERE v.algorithm_id=? AND v.id=?`).bind(id,version).first<{document:string}>();
+  if (!row) throw new ToolError("Версия не принадлежит выбранному алгоритму или отсутствует", 404);
+  return row.document;
 }
 export function checkRevision(row: Row, revision: number) {
   if (!Number.isSafeInteger(revision) || row.revision !== revision) throw new ToolError("Алгоритм изменён в другом окне. Загрузите актуальную ревизию.",409);
@@ -85,8 +102,10 @@ export async function saveAlgorithmDraft(id: string, revision: number, document:
 function versionStatements(id: string, revision: number, document: ToolDocument, program: ToolProgram, author: string,
   reason: AlgorithmVersion["reason"] = "save", sourceVersion: string | null = null, expectedActive: string | null = null) {
   const version = crypto.randomUUID(), json = JSON.stringify(document), compiled = JSON.stringify({...program,version,algorithmId:id});
+  const stored = prepareProgramStorage(version,compiled);
   const statements = [
-    db().prepare(`INSERT INTO node_tool_versions(id,document,program,author) SELECT ?,?,?,? FROM node_algorithms WHERE id=? AND revision=? AND (? IS NULL OR active=?)`).bind(version,json,compiled,author,id,revision,expectedActive,expectedActive),
+    db().prepare(`INSERT INTO node_tool_versions(id,document,program,author) SELECT ?,?,?,? FROM node_algorithms WHERE id=? AND revision=? AND (? IS NULL OR active=?)`).bind(version,json,stored.header,author,id,revision,expectedActive,expectedActive),
+    ...stored.statements,
     db().prepare(`INSERT INTO node_algorithm_versions(id,algorithm_id,number,reason,source_algorithm,source_version)
       SELECT ?,id,next_number,?,?,? FROM node_algorithms WHERE id=? AND revision=? AND EXISTS(SELECT 1 FROM node_tool_versions WHERE id=?) AND (? IS NULL OR active=?)`).bind(version,reason,sourceVersion ? id : null,sourceVersion,id,revision,version,expectedActive,expectedActive),
     db().prepare(`INSERT INTO node_algorithm_draft_backups(id,algorithm_id,revision,document)
@@ -129,13 +148,15 @@ export async function createAlgorithm(name: string, author: string, source?: {al
   let document = emptyAlgorithm();
   if (source) {
     if (!(await algorithmHistory(source.algorithmId)).some(v => v.id === source.version)) throw new ToolError("Выберите доступную сохранённую версию",404);
-    document = JSON.parse((await algorithmSnapshot(source.algorithmId,source.version)).document);
+    document = JSON.parse(await algorithmDocument(source.algorithmId,source.version));
   }
   const id = "algorithm-"+crypto.randomUUID(), version = crypto.randomUUID(), program = compileTools(document,version);
   const json = JSON.stringify(document);
+  const stored = prepareProgramStorage(version,JSON.stringify({...program,algorithmId:id}));
   try {
     await db().batch([
-      db().prepare("INSERT INTO node_tool_versions(id,document,program,author) VALUES(?,?,?,?)").bind(version,json,JSON.stringify({...program,algorithmId:id}),author),
+      db().prepare("INSERT INTO node_tool_versions(id,document,program,author) VALUES(?,?,?,?)").bind(version,json,stored.header,author),
+      ...stored.statements,
       db().prepare("INSERT INTO node_algorithms(id,name,name_key,active,next_number,draft) VALUES(?,?,?,?,2,?)").bind(id,name,key,version,json),
       db().prepare("INSERT INTO node_algorithm_versions(id,algorithm_id,number,reason,source_algorithm,source_version) VALUES(?,?,1,?,?,?)").bind(version,id,source?"copy":"create",source?.algorithmId??null,source?.version??null)
     ]);

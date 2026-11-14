@@ -42,8 +42,15 @@ export function insertionPrice(snapshot: CalculatedInsertion): number | null {
 export type InstalledInsertion = { snapshot: CalculatedInsertion; sensorConnection?: "fire-pressure-switch" };
 /** Keep the purchased insertion snapshot intact. An occupied station port
  * replaces its reserve cap; the removed cap is neither bought nor drawn. */
-export function installedInsertionBom(assembly: InstalledInsertion) {
-  return assembly.snapshot.calculation.bom.filter(row => assembly.sensorConnection !== "fire-pressure-switch" || row.role !== "sensor-plug");
+export function installedInsertionBom(assembly: InstalledInsertion, checkPressure = true) {
+  const calculation = assembly.snapshot.calculation;
+  const parts = calculation.bom.filter(row => assembly.sensorConnection !== "fire-pressure-switch" || row.role !== "sensor-plug");
+  const assumption = !checkPressure && calculation.assumptions?.find(item => item.code === "sensor-pn25-pressure");
+  if (!assumption) return parts;
+  const warning = `; ${assumption.message} ${assumption.source}`;
+  return parts.map(part => part.role === "sensor-nipple" && part.source?.endsWith(warning)
+    ? { ...part, source: part.source.slice(0, -warning.length) }
+    : part);
 }
 export function installedInsertionPrice(assembly: InstalledInsertion): number | null {
   const price = insertionPrice(assembly.snapshot);

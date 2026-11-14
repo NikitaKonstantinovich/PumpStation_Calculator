@@ -4,8 +4,8 @@ import { dischargeInstrumentPressure } from "./instrument-pressure";
 import { selectDischargeInstruments } from "./suction-instruments";
 import { price } from "./line-spec-parts";
 import { normalizeSpecificationItems } from "./specification-items";
-import { withoutPressureChecks } from "./pressure-check-policy";
-import type { ProjectConfig, SpecEntity, SpecItem } from "./project-config";
+import { pressureChecksEnabled, withoutPressureChecks } from "./pressure-check-policy";
+import type { ProjectConfig, SettingsEntity, SpecEntity, SpecItem } from "./project-config";
 
 const transducerRow=(row:SpecItem)=>row.generatedBy==="hydraulic-options"&&
   (row.assemblyRole==="discharge:transducer"||row.hydraulicPart?.location==="discharge:transducer");
@@ -17,6 +17,7 @@ const partRole=(row:SpecItem)=>row.hydraulicPart?.role??(row.assemblyRole==="dis
 export function repairSavedInstrumentSpecification(project:ProjectConfig,resources:Parameters<typeof buildHydraulicOptions>[1]):ProjectConfig {
   const spec=project.entities["station-spec"] as SpecEntity;
   if(!resources.pumps?.length)return project;
+  const checkPressure = pressureChecksEnabled(project.entities["station-settings"] as SettingsEntity);
   const old=spec.items.filter(transducerRow),main=old.find(row=>row.assemblyRole==="discharge:transducer");
   let replacement:SpecItem[]=[];
   if(main){
@@ -37,17 +38,29 @@ export function repairSavedInstrumentSpecification(project:ProjectConfig,resourc
     }
   }
   let inserted=false;
-  const items=spec.items.flatMap(row=>{
+  const items=spec.items.flatMap<SpecItem>(row=>{
     if(replacement.length&&transducerRow(row)){
       if(inserted)return [];
       inserted=true;return replacement;
     }
+    if (!checkPressure && row.generatedBy === "discharge-line" && row.assemblyRole === "gauge") {
+      const rating = dischargeInstrumentPressure(project,resources.pumps);
+      const gauge = selectDischargeInstruments(resources.items,rating.headM,rating,false).find(part => part.role === "gauge")!;
+      const amount = price(gauge.item);
+      return [{...withoutPressureChecks(row),name:gauge.name,equipmentId:gauge.item?.id,price:amount,
+        details:gauge.details,description:gauge.description,status:amount===null?"clarify":"selected",
+        technicalStatus:gauge.item?"ready":"unverified",technicalNotes:row.technicalNotes ? [] : undefined}];
+    }
     const relay=row.generatedBy==="discharge-line"&&row.assemblyRole?.match(/^(primary|secondary)-sensor-relay$/);
     if(relay){
       const rating=dischargeInstrumentPressure(project,resources.pumps,relay[1] as "primary"|"secondary");
-      const selected=selectDischargeInstruments(resources.items,rating.headM,rating).find(part=>part.role==="pressure-switch");
+      const selected=selectDischargeInstruments(resources.items,rating.headM,rating,checkPressure).find(part=>part.role==="pressure-switch");
       if(selected?.item)return [{...withoutPressureChecks(row),equipmentId:selected.item.id,price:price(selected.item),details:selected.details,
         description:selected.description,status:"selected" as const,technicalStatus:"ready" as const,technicalNotes:[]}];
+      if (!checkPressure && selected && rating.headM === null) {
+        return [{ ...withoutPressureChecks(row), name: "Реле давления · напорная вставка", equipmentId: undefined, price: null,
+          details: selected.details, description: selected.description, status: "clarify", technicalStatus: "unverified", technicalNotes: [] }];
+      }
     }
     return [acceptInstrumentFitting(row)];
   });

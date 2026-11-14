@@ -187,6 +187,16 @@ test("API authorization and tool resource integration retain the exact station p
     const absent = f.client.executeStationCatalog({ id: "catalog", operation: "engineering.catalog" }, {}, { values: {}, defaults: {}, role: "admin" });
     assert.equal(absent.resources, null); assert.equal(absent.issues.length, 1); assert(absent.issues[0].message.includes("не загружены"));
     assert.equal(f.client.executeStationCatalog({ id: "catalog", operation: "other" }, {}, {}), undefined);
+
+    const withPumps = { plans: { ...program.plans, pumps: { steps: [{ operation: "pump.catalog" }] } } };
+    const pumpPin = "a".repeat(64);
+    const pins = { pump_catalog_v2: pumpPin, station_catalog: current.id };
+    const chunkReads = f.state.chunkReads, collectorReads = f.state.calls.collector;
+    assert.deepEqual(await storage.toolSourceVersions(withPumps, pins, current.baseSettings.versions), pins);
+    assert.equal(counts(f.state), before);
+    assert.equal(f.state.chunkReads, chunkReads);
+    assert.deepEqual(await storage.toolSourceVersions(withPumps, { pump_catalog_v2: pumpPin }, current.baseSettings.versions), pins);
+    assert.equal(f.state.calls.collector, collectorReads + 1);
   } finally { f.close(); }
 });
 

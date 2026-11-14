@@ -1,5 +1,7 @@
 import { evaluatePlan, evaluateProduct } from "./runtime";
 import { applyParameterWrites } from "./form-actions";
+import { productSlice, type ProductPlan } from "./product";
+import { planSourceDependencies, type CatalogSource } from "./workspace-sources";
 import type { Evaluation, ParameterBinding, ProductControls, ToolContext, ToolProgram, WorkspaceData } from "./schema";
 export const controlInfo = {
   geometry: { label: "Расчёт геометрии", hint: "Управляет построением 3D-модели. DN, межосевые расстояния и спецификация рассчитываются независимо." },
@@ -25,15 +27,22 @@ export function writeControl(data:WorkspaceData, control:WorkspaceControl, enabl
   const values=applyParameterWrites(Object.fromEntries(Object.entries(data.tools).map(([id,t])=>[id,t.values])),control.bindings,[{binding:control.binding,value:enabled}],control.toolId);
   return {...data,tools:Object.fromEntries(Object.entries(data.tools).map(([id,t])=>[id,values[id]===t.values?t:{...t,values:values[id]}]))};
 }
-/** Menu availability evaluates only guard predicates, never pump tables or geometry. */
-export function toolAvailable(program:ToolProgram,id:string,contexts:Record<string,ToolContext>):boolean {
+/** Menu availability evaluates guard predicates without running the tool's other outputs. */
+export function toolAvailable(program:ToolProgram,id:string,contexts:Record<string,ToolContext>,availableSources?:ReadonlySet<CatalogSource>):boolean {
   const plan=program.plans[id];
   if(!plan)return false;
   const guards=plan.steps.filter(s=>s.id.startsWith(id+"/") && s.operation==="circuit.guard");
+  if(!guards.length)return true;
+  const root=(plan as Partial<ProductPlan>).productRoot;
+  const hasUnloadedSource=availableSources && planSourceDependencies(program,plan).some(source=>!availableSources.has(source));
   for(const guard of guards) {
     const edge=guard.links.find(e=>e.input==="active"), input=guard.fields.find(f=>f.key==="active")!;
     if(!edge) { if((guard.values.active ?? input.initial)!==true)return false; continue; }
     const probe={...plan,steps:[...plan.steps.filter(s=>s.id!=="result"),{id:"result",type:"availability",name:"Доступность",fields:[{...input,key:"value"}],values:{},expressions:{},links:[{...edge,to:"result",input:"value"}]}]};
+    if(root && availableSources && hasUnloadedSource) {
+      const predicate=productSlice(probe,{result:["value"]},root,id);
+      if(planSourceDependencies(program,predicate).some(source=>!availableSources.has(source)))continue;
+    }
     if(evaluatePlan(probe,contexts[id],{},contexts).value!==true)return false;
   }
   return true;

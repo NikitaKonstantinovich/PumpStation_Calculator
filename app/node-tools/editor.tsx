@@ -1,11 +1,13 @@
 "use client";
+import { addFrameCalculation } from "./frame-upgrade";
 import { useAppNavigationGuard } from "../app-navigation";
+import { stableBaseJson } from "../base-values";
 
 import { addSecondaryTools } from "./secondary-tools";
 import { invalidateInactiveContexts } from "./product-state";
 import { CARD_SECTIONS, CARD_MAIN_FIELDS, cardPresentation } from "./pump-card-presentation";
 
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { Canvas, type Focus } from "../engineering/canvas";
 import { layout, type Address } from "../engineering/canvas-layout";
 import { usesInStation } from "../engineering/uses";
@@ -28,10 +30,8 @@ import { addStationTool, stationToolSources, type StationToolKind } from "./stat
 import { deriveTools, productConnectionProblem } from "./product";
 import { prepareDocument, addProductTool, updateToolMetadata } from "./authoring";
 import { loadCatalog } from "./catalog-client";
-import { loadStationCatalog, type StationCatalogResources } from "./station-catalog";
+import { loadStationCatalog } from "./station-catalog";
 import { unpackTrace } from "./trace-transport";
-import type { CatalogSnapshot } from "./catalog-schema";
-import { loadTools } from "./workspace";
 import { API, ROOT, safeId, diagnosticKey, type ToolDocument, type ToolTest, type TestResult, type Values, type Evaluation } from "./schema";
 import type { ProjectConfig } from "../project-config";
 import "../engineering/editor.css";
@@ -77,6 +77,41 @@ async function request(body?: unknown, algorithmId = DEFAULT_ALGORITHM): Promise
   if (!response.ok) throw new ToolRequestError(value.error ?? "Ошибка редактора", value.location);
   return value;
 }
+type EditorDefaults = {defaults: Values; baseVersions: Record<string, string>; role: UserRole};
+async function loadEditorDefaults(algorithmId: string, signal: AbortSignal, base?: string): Promise<EditorDefaults> {
+  const query = new URLSearchParams({algorithm: algorithmId, editor: "1", defaults: "1"});
+  if (base) query.set("base", base);
+  const response = await fetch("/api/workspace2?" + query, {cache: "no-store", signal});
+  const body = await response.json();
+  if (!response.ok) throw Error(body.error ?? "Не удалось загрузить базовые значения");
+  return body;
+}
+const emptyDefaults: Values = {};
+function useEditorCatalog<T>(key: string | undefined, required: boolean, load: (signal: AbortSignal) => Promise<T>) {
+  const [requested, setRequested] = useState(false);
+  const [revision, setRevision] = useState(0);
+  const [result, setResult] = useState<{key: string; revision: number; snapshot?: T; error?: string} | null>(null);
+  const active = key !== undefined && (required || requested);
+  useEffect(() => {
+    if (!active || key === undefined) return;
+    const abort = new AbortController();
+    // Keep a source active once a dependent tool has opened or the user has requested it.
+    queueMicrotask(() => { if (!abort.signal.aborted) setRequested(true); });
+    load(abort.signal).then(snapshot => {
+      if (!abort.signal.aborted) setResult({key, revision, snapshot});
+    }).catch(error => {
+      if (!abort.signal.aborted) setResult(previous => ({key, revision, snapshot: previous?.key === key ? previous.snapshot : undefined, error: (error as Error).message}));
+    });
+    return () => abort.abort();
+  }, [active, key, revision, load]);
+  const current = result?.key === key ? result : null;
+  return {
+    snapshot: current?.snapshot ?? null,
+    error: current?.error ?? "",
+    loading: active && current?.revision !== revision,
+    refresh: () => { setRequested(true); setRevision(value => value + 1); }
+  };
+}
 const uuid = () => crypto.randomUUID().replaceAll("-", "").slice(0, 12);
 export function ToolEditor({
   project,
@@ -91,7 +126,8 @@ export function ToolEditor({
 }) {
   const [remote, setRemote] = useState<Remote | null>(null),
     [doc, setDoc] = useState<ToolDocument | null>(null),
-    [defaults, setDefaults] = useState<Values>({});
+    [publishedDefaults, setPublishedDefaults] = useState<EditorDefaults | null>(null);
+  const [defaultsFailed, setDefaultsFailed] = useState(false);
   const [toolId, setToolId] = useState("settings"),
     [at, setAt] = useState<Address>({
       graph: ROOT,
@@ -145,10 +181,8 @@ export function ToolEditor({
   const [restoreVersion,setRestoreVersion]=useState<string|null>(null);
   const [template, setTemplate] = useState<null | {kind:"hydraulic"|"card"|"secondary"|StationToolKind;selectionId:string;settingsId:string;secondarySelectionId?:string;dnId?:string;collectorsId?:string}>(null);
   const [dataset, setDataset] = useState<"preview" | "saved" | "test">("preview");
-  const [role, setRole] = useState<UserRole>("pro"),
-    [sessionRole, setSessionRole] = useState<UserRole>("admin");
-  const [baseVersions, setBaseVersions] = useState<Record<string, string>>({}),
-    [savedDefaults, setSavedDefaults] = useState<Values | null>(null);
+  const [role, setRole] = useState<UserRole>("pro");
+  const [savedDefaultsData, setSavedDefaultsData] = useState<{key: string; defaults: Values} | null>(null);
   const [lastTest, setLastTest] = useState<{
     result: Evaluation;
     document: ToolDocument;
@@ -162,17 +196,57 @@ export function ToolEditor({
     };
   } | null>(null);
   const tools = useMemo(() => doc ? deriveTools(doc) : [], [doc]);
+  const compilation = useMemo(() => {
+    try {
+      return {program: doc ? compileTools(doc, "preview") : null, error: ""};
+    } catch (error) {
+      return {program: null, error: (error as Error).message};
+    }
+  }, [doc]);
   const tool = tools.find(t => t.id === toolId),
     root = doc?.product?.root ?? tool?.diagram ?? ROOT;
   const [toolValues, setToolValues] = useState<Record<string, Values>>({});
-  const [catalog, setCatalog] = useState<CatalogSnapshot | null>(null),
-    [catalogError, setCatalogError] = useState(""),
-    [catalogLoading, setCatalogLoading] = useState(false);
-  const catalogNeeded = !!doc?.diagrams.some(g => g.nodes.some(n => doc.types.find(t => t.id === n.type)?.operation === "pump.catalog"));
-  const stationCatalogNeeded = !!doc?.diagrams.some(g => g.nodes.some(n => doc.types.find(t => t.id === n.type)?.operation === "engineering.catalog"));
-  const [stationCatalog, setStationCatalog] = useState<StationCatalogResources | null>(null), [stationCatalogError, setStationCatalogError] = useState(""), [stationCatalogLoading, setStationCatalogLoading] = useState(false);
-  const stationBaseKey = JSON.stringify(dataset === "saved" ? project.workspace2?.product?.baseVersions ?? baseVersions : baseVersions);
-  const stationSnapshotId = dataset === "saved" ? project.workspace2?.product?.sourceVersions?.station_catalog : undefined;
+  const catalogOperations = useMemo(() => {
+    const operations = new Map(doc?.types.map(type => [type.id, type.operation]));
+    return new Set(doc?.diagrams.flatMap(graph => graph.nodes.map(node => operations.get(node.type))));
+  }, [doc]);
+  const catalogNeeded = catalogOperations.has("pump.catalog");
+  const stationCatalogNeeded = catalogOperations.has("engineering.catalog");
+  const previewDefaults = publishedDefaults?.defaults ?? (defaultsFailed ? emptyDefaults : undefined);
+  const defaults = previewDefaults ?? emptyDefaults;
+  const sessionRole = publishedDefaults?.role ?? "admin";
+  const baseVersions = publishedDefaults?.baseVersions;
+  const savedWorkspace = algorithmForProject(project.workspace2) === algorithmId ? project.workspace2 : undefined;
+  const stored = savedWorkspace?.tools[toolId];
+  const savedBaseVersions = savedWorkspace?.product?.baseVersions ?? stored?.baseVersions;
+  const savedSources = dataset === "saved" ? savedWorkspace?.product?.sourceVersions ?? stored?.sourceVersions : undefined;
+  const baseKey = baseVersions && stableBaseJson(baseVersions);
+  const savedBaseKey = savedBaseVersions && stableBaseJson(savedBaseVersions);
+  const requestedSavedBaseKey = dataset === "saved" && previewDefaults && savedBaseKey !== baseKey ? savedBaseKey : undefined;
+  const pinnedDefaults = savedDefaultsData?.key === requestedSavedBaseKey ? savedDefaultsData?.defaults : undefined;
+  const savedDefaults = requestedSavedBaseKey ? pinnedDefaults : previewDefaults;
+  const stationBaseKey = dataset === "saved" ? savedBaseKey ?? baseKey : baseKey;
+  const stationSnapshotId = savedSources?.station_catalog;
+  const pumpSnapshotId = savedSources?.pump_catalog_v2;
+  const selectedSteps = compilation.program?.plans[toolId]?.steps;
+  const fetchPumpCatalog = useCallback((signal: AbortSignal) => loadCatalog(pumpSnapshotId, signal), [pumpSnapshotId]);
+  const fetchStationCatalog = useCallback((signal: AbortSignal) => loadStationCatalog(stationSnapshotId, stationBaseKey ? JSON.parse(stationBaseKey) : undefined, signal), [stationSnapshotId, stationBaseKey]);
+  const {snapshot: catalog, error: catalogError, loading: catalogLoading, refresh: refreshPumpCatalog} = useEditorCatalog(
+    catalogNeeded ? pumpSnapshotId ?? "" : undefined,
+    !!selectedSteps?.some(step => step.operation === "pump.catalog"),
+    fetchPumpCatalog
+  );
+  const {snapshot: stationCatalog, error: stationCatalogError, loading: stationCatalogLoading, refresh: refreshStationCatalog} = useEditorCatalog(
+    stationCatalogNeeded && stationBaseKey ? JSON.stringify([stationSnapshotId, stationBaseKey]) : undefined,
+    !!selectedSteps?.some(step => step.operation === "engineering.catalog"),
+    fetchStationCatalog
+  );
+  const pumpSourceVersion = catalog?.id ?? pumpSnapshotId;
+  const stationSourceVersion = stationCatalog?.id ?? stationSnapshotId;
+  const selectedSourceVersions = {
+    ...(pumpSourceVersion ? {pump_catalog_v2: pumpSourceVersion} : {}),
+    ...(stationSourceVersion ? {station_catalog: stationSourceVersion} : {})
+  };
   const graph = doc?.diagrams.find(g => g.id === at.graph),
     node = graph?.nodes.find(n => n.id === at.node),
     type = doc?.types.find(t => t.id === node?.type);
@@ -205,35 +279,42 @@ export function ToolEditor({
   });
   function requestLeave(action:()=>void) { if(dirty||pendingSave.current)setLeave(()=>action);else action(); }
 
-  function accept(next: Remote) {
+  function accept(next: Remote, preferredTool?: string | null) {
     const draft = prepareDocument(next.draft);
     setRemote({
       ...next,
       draft
     });
     setDoc(draft);
-    const available=deriveTools(draft);setToolId(id=>available.some(t=>t.id===id)?id:available[0]?.id??"");setAt(previous=>draft.diagrams.some(g=>g.id===previous.graph&&(!previous.node||g.nodes.some(n=>n.id===previous.node)))?previous:{graph:draft.product!.root,path:[],node:available[0]?.id??""});
+    const available = deriveTools(draft);
+    const fallback = available[0]?.id ?? "";
+    if (preferredTool !== undefined) {
+      const selected = preferredTool && available.some(tool => tool.id === preferredTool) ? preferredTool : fallback;
+      setToolId(selected);
+      setAt({graph: draft.product!.root, path: [], node: selected});
+    } else {
+      setToolId(id => available.some(tool => tool.id === id) ? id : fallback);
+      setAt(previous => draft.diagrams.some(g => g.id === previous.graph && (!previous.node || g.nodes.some(n => n.id === previous.node))) ? previous : {graph: draft.product!.root, path: [], node: fallback});
+    }
     setHistory([]);
   }
   useEffect(() => {
-    let live = true;
+    const abort = new AbortController();
     let documentFailed=false;
     request(undefined,algorithmId).then(state=>{
-      if(!live)return;
-      accept(state);
-      const ready=prepareDocument(state.draft),first=deriveTools(ready)[0];
-      let selected=first?.id??"";try{const saved=localStorage.getItem("algorithm.selected."+algorithmId);if(deriveTools(ready).some(t=>t.id===saved))selected=saved!;}catch{/* Optional preference. */}
-      setToolId(selected);
-      setAt({graph:ready.product!.root,path:[],node:selected});
-    }).catch(e=>{if(live){documentFailed=true;setError(e.message);}});
-    loadTools(undefined,undefined,undefined,algorithmId,true).then(data=>{
-      if(!live)return;
-      setDefaults(data.defaults);setSessionRole(data.role);setBaseVersions(data.baseVersions);
-      const sourceErrors=Object.values(data.sourceErrors??{});if(sourceErrors.length&&!documentFailed)setError(sourceErrors.join(" · "));
-    }).catch(e=>{if(live&&!documentFailed)setError("Данные предпросмотра недоступны: "+e.message);});
-    return () => {
-      live = false;
-    };
+      if(abort.signal.aborted)return;
+      let preferredTool = null;
+      try { preferredTool = localStorage.getItem("algorithm.selected." + algorithmId); } catch { /* Optional preference. */ }
+      accept(state, preferredTool);
+    }).catch(e=>{if(!abort.signal.aborted){documentFailed=true;setError(e.message);}});
+    loadEditorDefaults(algorithmId, abort.signal).then(data=>{
+      if(!abort.signal.aborted)setPublishedDefaults(data);
+    }).catch(e=>{
+      if (abort.signal.aborted) return;
+      setDefaultsFailed(true);
+      if (!documentFailed) setError("Данные предпросмотра недоступны: " + e.message);
+    });
+    return () => abort.abort();
   }, [algorithmId]);
   useEffect(() => {
     if (!dirty) return;
@@ -261,72 +342,43 @@ export function ToolEditor({
     return () => window.removeEventListener("keydown", escape);
   }, []);
   function changePreview(next: Record<string, Values>) {
-    if (!doc) return;
-    const program = compileTools(doc, "preview");
+    const {program} = compilation;
+    if (!program) return;
     const contexts = Object.fromEntries(program.tools.map(t => [t.id, { values: next[t.id] ?? {}, defaults, role, resources: { ...(catalog ? { pump_catalog_v2: catalog } : {}), ...(stationCatalog ? { station_catalog: stationCatalog } : {}) } }]));
     const normalized = invalidateInactiveContexts(program, contexts);
     const data = Object.fromEntries(Object.entries(normalized).map(([id, c]) => [id, c.values]));
     setToolValues(data); setValues(data[toolId] ?? {});
   }
   useEffect(()=>{if(remote&&toolId)try{localStorage.setItem("algorithm.selected."+algorithmId,toolId);}catch{/* Optional editor preference. */}},[algorithmId,toolId,remote]);
-  const stored = algorithmForProject(project.workspace2) === algorithmId ? project.workspace2?.tools[toolId] : undefined;
   useEffect(() => {
-    let active = true;
-    queueMicrotask(()=>{if(active)setSavedDefaults(null);});
-    loadTools(undefined, stored?.baseVersions,undefined,algorithmId,true).then(data => {
-      if (active) setSavedDefaults(data.defaults);
-    }).catch(e => {
-      if (active) setError(e.message);
-    });
-    return () => {
-      active = false;
-    };
-  }, [stored?.baseVersions,algorithmId]);
-  useEffect(() => {
-    if (!catalogNeeded) return;
-    let live = true;
+    if (!requestedSavedBaseKey || savedDefaultsData?.key === requestedSavedBaseKey) return;
     const abort = new AbortController();
-    queueMicrotask(()=>{if(live){setCatalogLoading(true);setCatalog(null);}});
-    loadCatalog(dataset === "saved" ? project.workspace2?.product?.sourceVersions?.pump_catalog_v2 : undefined, abort.signal).then(snapshot => {
-      if (live) {
-        setCatalog(snapshot);
-        setCatalogError("");
-      }
+    loadEditorDefaults(algorithmId, abort.signal, requestedSavedBaseKey).then(data => {
+      if (!abort.signal.aborted) setSavedDefaultsData({key: requestedSavedBaseKey, defaults: data.defaults});
     }).catch(e => {
-      if (live) setCatalogError(e.message);
-    }).finally(() => {
-      if (live) setCatalogLoading(false);
+      if (!abort.signal.aborted) setError(e.message);
     });
-    return () => {
-      live = false;
-      abort.abort();
-    };
-  }, [catalogNeeded, dataset, project.workspace2?.product?.sourceVersions?.pump_catalog_v2]);
-  useEffect(() => {
-    if (!stationCatalogNeeded || stationBaseKey === "{}") return;
-    const abort = new AbortController();
-    queueMicrotask(()=>{if(!abort.signal.aborted){setStationCatalog(null);setStationCatalogLoading(true);setStationCatalogError("");}});
-    loadStationCatalog(stationSnapshotId, JSON.parse(stationBaseKey), abort.signal).then(snapshot => { if (!abort.signal.aborted) setStationCatalog(snapshot); }).catch(error => { if (!abort.signal.aborted) setStationCatalogError(error.message); }).finally(() => { if (!abort.signal.aborted) setStationCatalogLoading(false); });
     return () => abort.abort();
-  }, [stationCatalogNeeded, stationBaseKey, stationSnapshotId]);
+  }, [requestedSavedBaseKey, savedDefaultsData?.key, algorithmId]);
+  const activeDefaults = dataset === "saved" ? savedDefaults : previewDefaults;
   const trial = useMemo(() => {
-    if (!doc || !tool) return {
+    const {program, error} = compilation;
+    if (!tool || !program || !activeDefaults) return {
       result: null,
-      error: ""
+      error
     };
     try {
-      const program = compileTools(doc, "preview");
       return {
         result: program.product ? evaluateProduct(program, tool.id, Object.fromEntries(tools.map(t => [t.id, {
-          values: dataset === "saved" ? project.workspace2?.tools[t.id]?.values ?? {} : t.id === toolId ? values : toolValues[t.id] ?? {},
-          stored: dataset === "saved" ? project.workspace2?.tools[t.id]?.values : undefined,
-          defaults: dataset === "saved" ? savedDefaults ?? defaults : defaults,
+          values: dataset === "saved" ? savedWorkspace?.tools[t.id]?.values ?? {} : t.id === toolId ? values : toolValues[t.id] ?? {},
+          stored: dataset === "saved" ? savedWorkspace?.tools[t.id]?.values : undefined,
+          defaults: activeDefaults,
           role: dataset === "saved" ? sessionRole : role,
           resources: { ...(catalog ? { pump_catalog_v2: catalog } : {}), ...(stationCatalog ? { station_catalog: stationCatalog } : {}) }
         }]))) : evaluatePlan(program.plans[tool.id], {
           values: dataset === "saved" ? stored?.values ?? {} : values,
           stored: dataset === "saved" ? stored?.values : undefined,
-          defaults: dataset === "saved" ? savedDefaults ?? defaults : defaults,
+          defaults: activeDefaults,
           role: dataset === "saved" ? sessionRole : role
         }),
         error: ""
@@ -337,7 +389,7 @@ export function ToolEditor({
         error: (e as Error).message
       };
     }
-  }, [doc, tool, values, defaults, dataset, stored, savedDefaults, sessionRole, role, tools, toolValues, toolId, project.workspace2, catalog, stationCatalog]);
+  }, [compilation, tool, values, activeDefaults, dataset, stored, sessionRole, role, tools, toolValues, toolId, savedWorkspace, catalog, stationCatalog]);
   const viewed = dataset === "test" ? lastTest?.tool === toolId ? lastTest.result : null : trial.result;
   const stale = dataset === "test" && (JSON.stringify(lastTest?.document) !== JSON.stringify(doc) || !!catalog && !!lastTest?.dataset.sourceVersions.pump_catalog_v2 && lastTest.dataset.sourceVersions.pump_catalog_v2 !== catalog.id || !!stationCatalog && !!lastTest?.dataset.sourceVersions.station_catalog && lastTest.dataset.sourceVersions.station_catalog !== stationCatalog.id);
   const dataStatus = dataset === "test" ? lastTest ? stale ? "Устаревший результат · повторите проверку" : "Последняя серверная проба" : "Проба ещё не выполнена" : dataset === "saved" ? savedDefaults ? "Черновик на сохранённых входах проекта" : "Загрузка сохранённых источников…" : "Предпросмотр на тестовых значениях";
@@ -648,7 +700,7 @@ export function ToolEditor({
         tool: toolId,
         values,
         contexts: Object.fromEntries(tools.map(t => [t.id, t.id === toolId ? values : toolValues[t.id] ?? {}])),
-        sourceVersions: { ...(catalog ? {pump_catalog_v2:catalog.id} : {}), ...(stationCatalog ? {station_catalog:stationCatalog.id} : {}) }
+        sourceVersions: selectedSourceVersions
       },algorithmId));
       window.dispatchEvent(new Event("algorithms-changed"));
       setMessage("Сохранена новая версия алгоритма");
@@ -682,7 +734,7 @@ export function ToolEditor({
             values,
             role,
             contexts: Object.fromEntries(tools.map(t => [t.id, t.id === toolId ? values : toolValues[t.id] ?? {}])),
-            sourceVersions: { ...(catalog ? {pump_catalog_v2:catalog.id} : {}), ...(stationCatalog ? {station_catalog:stationCatalog.id} : {}) }
+            sourceVersions: selectedSourceVersions
           })
         }),
         data = await response.json();
@@ -857,7 +909,7 @@ export function ToolEditor({
           graph: type.instrument!,
           path: [...at.path, node.id],
           node: ""
-        })}>Раскрыть Instrument</button>}{type.instrument && <button onClick={() => setEditing(type)}>Входы и выходы инструмента</button>}{at.graph === root && type.instrument && <ToolProperties node={node} update={updateNode} />}{type.parameter ? <ParameterProperties key={type.id + at.path.join("/")} doc={doc} root={root} at={at} type={type} result={viewed} values={dataset === "test" ? lastTest?.dataset.values ?? {} : dataset === "saved" ? stored?.values ?? {} : values} defaults={dataset === "test" ? (lastTest?.result.trace.source?.outputs.context as {
+        })}>Раскрыть Instrument</button>}{type.instrument && <button onClick={() => setEditing(type)}>Входы и выходы инструмента</button>}{at.graph === root && type.instrument && <ToolProperties node={node} update={updateNode} />}{at.graph===root && type.instrument && doc.diagrams.find(g=>g.id===type.instrument)?.nodes.some(n=>doc.types.find(t=>t.id===n.type)?.operation==="spec.finalize") && <button onClick={()=>{try{const added=addFrameCalculation(doc,node.id);change(added.document);setMessage("Расчёт рамы подключён. Сохраните версию алгоритма.");}catch(e){setError((e as Error).message);}}}>Подключить скрытый расчёт рамы</button>}{type.parameter ? <ParameterProperties key={type.id + at.path.join("/")} doc={doc} root={root} at={at} type={type} result={viewed} values={dataset === "test" ? lastTest?.dataset.values ?? {} : dataset === "saved" ? stored?.values ?? {} : values} defaults={dataset === "test" ? (lastTest?.result.trace.source?.outputs.context as {
           defaults?: Values;
         })?.defaults ?? defaults : dataset === "saved" ? savedDefaults ?? defaults : defaults} change={change} go={(address, base) => {
           if (base && base !== root) {
@@ -881,16 +933,9 @@ export function ToolEditor({
     {preview && <aside className="nt-preview" style={{
         width
       }}><header><strong>Предпросмотр · {tool?.name}</strong><input aria-label="Ширина предпросмотра" type="range" min="280" max="800" value={width} onChange={e => setWidth(Number(e.target.value))} /><button onClick={() => setPreview(false)}>×</button></header>
-      {catalogNeeded && <section><strong>Новый каталог насосов</strong><p role="status">{catalogLoading ? catalog ? "Обновляем каталог · используется снимок " + catalog.id.slice(0, 12) : "Загрузка…" : catalogError ? (catalog ? "Не удалось обновить каталог · используется снимок " + catalog.id.slice(0, 12) + ". " : "Ошибка · ") + catalogError : catalog ? catalog.status === "empty" ? "Каталог пуст" : "Загружен снимок " + catalog.id.slice(0, 12) : "Не загружен"}</p><button disabled={catalogLoading} onClick={() => {
-            setCatalogLoading(true);
-            setCatalogError("");
-            loadCatalog(undefined).then(s => {
-              setCatalog(s);
-              setCatalogError("");
-            }).catch(e => setCatalogError(e.message)).finally(() => setCatalogLoading(false));
-          }}>Обновить снимок каталога</button>{catalog && <small>{catalog.items.length} исполнений · {catalog.schemaVersion}</small>}</section>}
-      {stationCatalogNeeded && <section><strong>Справочники комплектации</strong><p role="status">{stationCatalogLoading ? "Загрузка справочников…" : stationCatalogError ? (stationCatalog ? "Используется предыдущий снимок. " : "") + stationCatalogError : stationCatalog ? "Закреплён снимок " + stationCatalog.id.slice(0, 12) : "Не загружены"}</p><button type="button" disabled={stationCatalogLoading || dataset === "saved"} onClick={() => { setStationCatalogLoading(true); setStationCatalogError(""); loadStationCatalog(undefined, baseVersions).then(setStationCatalog).catch(e => setStationCatalogError(e.message)).finally(() => setStationCatalogLoading(false)); }}>Обновить справочники комплектации</button></section>}
-      <label>Данные для просмотра<select aria-label="Данные для просмотра" value={dataset} onChange={e => setDataset(e.target.value as typeof dataset)}><option value="preview">Предпросмотр на тестовых значениях</option><option value="saved">Черновик на сохранённых входах проекта</option><option value="test">Результат последней тестовой пробы</option></select></label><p role="status">{dataStatus}</p><small>Граф · {dataset === "test" ? lastTest?.dataset.version + " / " + lastTest?.dataset.revision : "черновик " + remote.revision + (dirty ? " (изменён)" : "")} · роль {dataset === "test" ? lastTest?.dataset.role : dataset === "saved" ? sessionRole : role}{dataset !== "saved" ? " (симуляция)" : " (сессия)"}</small><details><summary>Версии источников</summary><DataTree value={dataset === "test" ? lastTest?.dataset.sourceVersions : {...(dataset === "saved" ? stored?.baseVersions ?? baseVersions : baseVersions), ...(catalog ? {pump_catalog_v2:catalog.id} : {}), ...(stationCatalog ? {station_catalog:stationCatalog.id} : {})}} label="Используемые версии источников" /></details>
+      {catalogNeeded && <section><strong>Новый каталог насосов</strong><p role="status">{catalogLoading ? catalog ? "Обновляем каталог · используется снимок " + catalog.id.slice(0, 12) : "Загрузка…" : catalogError ? (catalog ? "Не удалось обновить каталог · используется снимок " + catalog.id.slice(0, 12) + ". " : "Ошибка · ") + catalogError : catalog ? catalog.status === "empty" ? "Каталог пуст" : "Загружен снимок " + catalog.id.slice(0, 12) : "Не загружен"}</p><button disabled={catalogLoading || !!pumpSnapshotId} onClick={refreshPumpCatalog}>Обновить снимок каталога</button>{catalog && <small>{catalog.items.length} исполнений · {catalog.schemaVersion}</small>}</section>}
+      {stationCatalogNeeded && <section><strong>Справочники комплектации</strong><p role="status">{stationCatalogLoading ? "Загрузка справочников…" : stationCatalogError ? (stationCatalog ? "Используется предыдущий снимок. " : "") + stationCatalogError : stationCatalog ? "Закреплён снимок " + stationCatalog.id.slice(0, 12) : "Не загружены"}</p><button type="button" disabled={stationCatalogLoading || dataset === "saved" || !stationBaseKey} onClick={refreshStationCatalog}>Обновить справочники комплектации</button></section>}
+      <label>Данные для просмотра<select aria-label="Данные для просмотра" value={dataset} onChange={e => setDataset(e.target.value as typeof dataset)}><option value="preview">Предпросмотр на тестовых значениях</option><option value="saved">Черновик на сохранённых входах проекта</option><option value="test">Результат последней тестовой пробы</option></select></label><p role="status">{dataStatus}</p><small>Граф · {dataset === "test" ? lastTest?.dataset.version + " / " + lastTest?.dataset.revision : "черновик " + remote.revision + (dirty ? " (изменён)" : "")} · роль {dataset === "test" ? lastTest?.dataset.role : dataset === "saved" ? sessionRole : role}{dataset !== "saved" ? " (симуляция)" : " (сессия)"}</small><details><summary>Версии источников</summary><DataTree value={dataset === "test" ? lastTest?.dataset.sourceVersions : {...(dataset === "saved" ? savedBaseVersions ?? baseVersions : baseVersions), ...selectedSourceVersions}} label="Используемые версии источников" /></details>
       {dataset !== "saved" && <label>Роль тестовой симуляции<select aria-label="Роль тестовой симуляции" value={role} onChange={e => setRole(e.target.value as UserRole)}>{["base", "plus", "pro", "admin"].map(r => <option key={r}>{r}</option>)}</select></label>}{dataset === "test" && <button onClick={run}>Повторить пробу</button>}
       {dataset !== "test" && trial.error ? <p role="alert">{trial.error}</p> : viewed ? <ToolForm view={viewed.view} issues={viewed.issues} readOnly={dataset !== "preview"} change={(key, value, clearKeys = []) => changePreview({ ...toolValues, [toolId]: { ...values, ...Object.fromEntries(clearKeys.map(key => [key, null])), [key]: value } })} writes={writes => {
           if (dataset !== "preview" || !viewed) return;
@@ -1138,5 +1183,5 @@ function ToolProperties({
         order: Number(e.target.value)
       })} /></label><label><input type="checkbox" checked={node.tool?.enabled !== false} onChange={e => set({
         enabled: e.target.checked
-      })} />Доступен в продукте</label></fieldset>;
+      })} />Доступен в продукте</label><label><input type="checkbox" checked={node.tool?.workspaceVisible !== false} onChange={e => set({workspaceVisible:e.target.checked})} />Показывать в рабочем пространстве</label><small>Скрытый инструмент продолжает вычисляться и передавать данные.</small></fieldset>;
 }

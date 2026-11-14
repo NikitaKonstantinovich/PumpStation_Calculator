@@ -32,6 +32,35 @@ def payload():
         instances=[dict(id="part", name="Fixture", hidden=False, transform=[1,0,0,0,1,0,0,0,1,1,.2,.3,1,0,0,0], geometry={"kind":"tube","outerMm":60,"innerMm":54,"lengthMm":100})]))
 
 
+class FrameRegistryTests(unittest.TestCase):
+    def test_native_frame_uses_verified_registry_and_rechecks_source_hash(self):
+        assets = Mock(load_library=Mock(return_value={}), file_hash=lambda path: hashlib.sha256(path.read_bytes()).hexdigest())
+        with tempfile.TemporaryDirectory() as temp, patch.object(prepare, "model_assets", return_value=assets):
+            root = Path(temp)
+            frame_dir = root / "Equipment/Frames/Generated/bent-410-v1"
+            frame_dir.mkdir(parents=True)
+            rows = []
+            for name, verified in [("frame-410-900-5-red.SLDPRT", True), ("unverified.SLDPRT", False), ("changed.SLDPRT", True)]:
+                part_file = frame_dir / name
+                part_file.write_bytes(name.encode())
+                rows.append(dict(native=name, nativeHash=assets.file_hash(part_file), verified=verified))
+            (frame_dir / "manifest.json").write_text(json.dumps(rows), encoding="utf8")
+            (frame_dir / "changed.SLDPRT").write_bytes(b"different source version")
+            job = root / "job"
+            job.mkdir()
+            instance = payload()["manifest"]["instances"][0]
+            request = {"manifest": {"instances": [dict(instance, id=str(i), geometry={"kind": "native", "hash": row["nativeHash"],
+                "source": str(frame_dir / row["native"])}) for i, row in enumerate(rows)]}}
+            (job / "request.json").write_text(json.dumps(request), encoding="utf8")
+            prepare.prepare(root, job)
+            result = json.loads((job / "resolved.json").read_bytes())
+            part, = result["instances"]
+            self.assertEqual(part["sourceFile"], "Equipment/Frames/Generated/bent-410-v1/frame-410-900-5-red.SLDPRT")
+            self.assertEqual(part["sourceHash"], rows[0]["nativeHash"])
+            self.assertEqual(part["transform"], instance["transform"])
+            self.assertEqual([(item["id"], item["code"]) for item in result["omissions"]], [("1", "source_missing"), ("2", "source_changed")])
+
+
 class ContractTests(unittest.TestCase):
     def test_prepare_runs_from_staged_worker_using_only_configured_root(self):
         root = HERE.parents[2]
@@ -333,6 +362,33 @@ class GeometryTests(unittest.TestCase):
         from OCP.GProp import GProp_GProps
         props = GProp_GProps(); BRepGProp.VolumeProperties_s(shape, props)
         return props.Mass()
+
+    def test_profile_has_rounded_section_and_drilled_web_in_the_editor_axes(self):
+        import math
+        from OCP.Bnd import Bnd_Box
+        from OCP.BRepBndLib import BRepBndLib
+        from OCP.TopAbs import TopAbs_SOLID
+        from OCP.TopExp import TopExp_Explorer
+
+        section_area = 2 * (32 + 2 * 12 + 2 * 6) + 4 * math.pi * (4**2 - 2**2) / 4
+        for length in (600, 800):
+            slots = [[20, 55], [75, 75], [length - 20, length - 5.51]]
+            shape = prepare.generate(dict(kind="frame-profile", lengthMm=length, slots=slots))
+            solids = TopExp_Explorer(shape, TopAbs_SOLID)
+            self.assertTrue(solids.More())
+            solids.Next()
+            self.assertFalse(solids.More())
+            bounds = Bnd_Box()
+            BRepBndLib.AddOptimal_s(shape, bounds)
+            for actual, expected in zip((*bounds.CornerMin().Coord(), *bounds.CornerMax().Coord()), (0, -20, 0, 20, 20, length)):
+                self.assertAlmostEqual(actual, expected, places=5)
+            removed = sum(2 * (11 * (hi - lo) + math.pi * 5.5**2) for lo, hi in slots)
+            self.assertAlmostEqual(self.volume(shape), section_area * length - removed, places=4)
+
+    def test_profile_rejects_overlapping_slots_and_invalid_lengths(self):
+        for length, slots in ((700, []), (600, [[5.5, 60]]), (800, [[20, 60], [65, 85]])):
+            with self.assertRaises(ValueError):
+                prepare.generate(dict(kind="frame-profile", lengthMm=length, slots=slots))
 
     def test_exact_tube_volume_and_flange_holes(self):
         import math

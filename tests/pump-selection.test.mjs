@@ -29,6 +29,13 @@ test("exact match has zero distance and records station flow and head reserve se
   assert.equal(result.selectedPumpId, "exact");
 });
 
+test("legacy selection retains threaded and unknown ports and rejects explicit oval flanges", () => {
+  const oval = pump("oval", { outlet: { connection_type: "oval_flange", thread_designation: "G1" } });
+  const threaded = pump("threaded", { outlet: { connection_type: "threaded", thread_designation: "G1" } });
+  const unknown = pump("unknown");
+  assert.deepEqual(ids(select([oval, threaded, unknown])).sort(), ["threaded", "unknown"]);
+});
+
 test("actual point distance reverses a head-reserve-only ranking on different curve slopes", () => {
   const result = select([
     pump("A", { curve: [[0, 61], [100, 51], [200, 41]] }),

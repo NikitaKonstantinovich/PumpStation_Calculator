@@ -102,3 +102,58 @@ test('a reviewed library-only pump keeps measured ports without borrowing a cata
   assert.deepEqual(assembly.components[0].ports.map(p=>p.id),['inlet','outlet']);
   assert.equal(assembly.components[0].equipmentId,undefined);
 });
+
+test('canonical ONIS MV variants resolve their exact STEP and only reviewed ports gain flow roles', async () => {
+  const { onisMvCadProfile } = await loadTs(new URL('app/model-editor/onis-mv-cad.ts', root));
+  const { models } = await json('data/onis-mv-cad-models.json');
+  let flowReviewed = 0;
+  for (const [id, record] of Object.entries(models)) {
+    const pump = { id, manufacturer: 'ONIS', series: 'MV', model: record.designation, article: record.article };
+    const profile = onisMvCadProfile(pump);
+    assert.deepEqual(profile, record.profile);
+    assert.equal(profile.meshUrl, `/model-assets/model-${profile.sourceHash}-v1.stl`);
+    assert.equal(onisMvCadProfile({...pump, article: 'invalid'}), undefined);
+    assert.equal(onisMvCadProfile({...pump, model: 'MV 5-999'}), undefined);
+    const spatial = resolvePumpLayout(pump, profile);
+    assert.deepEqual(spatial.bounds, profile.bounds);
+    assert.equal(spatial.info.envelope, 'cad');
+    assert.equal(spatial.info.schematic, undefined);
+    const flow = mvFlow[profile.sourceHash];
+    if (spatial.ports.some(port => port.id === 'inlet')) {
+      flowReviewed++;
+      assert.equal(flow.method, 'casing_arrows');
+      assert.deepEqual(spatial.ports.find(p => p.id === 'inlet').point, flow.originalPorts[flow.inlet].point);
+      assert.ok(spatial.ports.some(p => p.id === 'outlet'));
+    } else {
+      assert.deepEqual(spatial.ports.map(p => p.id), ['port-a', 'port-b']);
+    }
+  }
+  assert.equal(Object.keys(models).length, 185);
+  assert.equal(flowReviewed, 9);
+  assert.equal(onisMvCadProfile({id: 'ONIS:MV:110176', manufacturer: 'ONIS', series: 'MV', model: 'MV 45-9-2', article: '110176'}), undefined);
+});
+
+test('three node-selected MV 5-8 instances carry the measured STEP into SolidWorks', async () => {
+  const { createProject } = await loadTs(new URL('app/project-config.ts', root));
+  const { buildAssembly } = await loadTs(new URL('app/model-editor/model.ts', root));
+  const { cadContents } = await loadTs(new URL('app/cad-export.ts', root));
+  const { models } = await json('data/onis-mv-cad-models.json');
+  const id = 'ONIS:MV:110061';
+  const { profile } = models[id];
+  const legacy = pumps.find(p => p.id === 'nu-7a97f5b430b82833');
+  const pump = { ...legacy, id, article: '110061' };
+  const project = createProject();
+  Object.assign(project.entities['system-input'], { selectedPumpId: id, workingPumpCount: 2, reservePumpCount: 1 });
+  const assembly = buildAssembly(project, [pump], {version: 1, profiles: {}});
+  const instances = assembly.components.filter(c => c.kind === 'pump');
+  assert.equal(instances.length, 3);
+  for (const instance of instances) {
+    assert.equal(instance.equipmentId, id);
+    assert.equal(instance.meshUrl, profile.meshUrl);
+    assert.deepEqual(instance.cadSource, {path: profile.source, hash: profile.sourceHash});
+    assert.deepEqual(instance.ports.map(p => p.id), ['port-a', 'port-b']);
+  }
+  const exported = cadContents(assembly);
+  assert.equal(exported.instances.filter(p => p.equipmentId === id && p.geometry.kind === 'native' && p.geometry.hash === profile.sourceHash).length, 3);
+  assert.ok(exported.warnings.some(warning => warning.includes('монтажный допуск требуют сверки')));
+});

@@ -1,3 +1,4 @@
+import { FRAME_OPERATIONS, executeFrameOperation } from "./frame-nodes";
 import { GEOMETRY_OPERATION, executeGeometry } from "./geometry-nodes";
 import { CIRCUIT_OPERATIONS, executeCircuitOperation, inactiveCircuitView } from "./circuit-nodes";
 import { SPACING_OPERATIONS, executeSpacingOperation } from "./spacing-nodes";
@@ -19,7 +20,7 @@ import { executeCollectorOperation } from "./collector-runtime";
 import { SPECIFICATION_OPERATIONS } from "./specification-nodes";
 import { executeSpecificationOperation } from "./specification-runtime";
 import { canEditAllSettings, canEditProjectOptions, canUseGeometry } from "../user-types";
-export const OPERATIONS = [GEOMETRY_OPERATION, "source", "parameter", "object", "merge", "form", "section", "grid", "field", "condition", "message", "check", "save", "engineering.catalog", ...PUMP_OPERATIONS, ...HYDRAULIC_OPERATIONS, ...DETAIL_OPERATIONS, ...DN_OPERATIONS, ...COLLECTOR_OPERATIONS, ...SPECIFICATION_OPERATIONS, ...SPACING_OPERATIONS, ...CIRCUIT_OPERATIONS] as const;
+export const OPERATIONS = [...FRAME_OPERATIONS, GEOMETRY_OPERATION, "source", "parameter", "object", "merge", "form", "section", "grid", "field", "condition", "message", "check", "save", "engineering.catalog", ...PUMP_OPERATIONS, ...HYDRAULIC_OPERATIONS, ...DETAIL_OPERATIONS, ...DN_OPERATIONS, ...COLLECTOR_OPERATIONS, ...SPECIFICATION_OPERATIONS, ...SPACING_OPERATIONS, ...CIRCUIT_OPERATIONS] as const;
 const list = (v: Values) => Object.keys(v).filter(k => /^child\d+$/.test(k)).sort((a, b) => Number(a.slice(5)) - Number(b.slice(5))).map(k => v[k]).filter(Boolean) as View[];
 export const canEditParameter = (role: ToolContext["role"], permission: ParameterBinding["permission"]) => permission === "input" || permission === "options" && canEditProjectOptions(role) || canEditAllSettings(role);
 /** Explicit modes evaluate only their real dependencies; old publications retain their contract. */
@@ -85,7 +86,11 @@ function execute(step: Step, v: Values, context: ToolContext): Values {
         }
         const diagnostics: Diagnostic[] = [];
         if (active && source?.registry === "workspace2" && source.attribute === key) diagnostics.push(issue(key, step.id, field.name + " · источник Workspace 2 должен ссылаться на другой вводимый параметр"));
-        if (active && !accepts(field, value)) diagnostics.push(issue(key, step.id, value == null ? field.name + " · обязательное значение" : field.name + " · проверьте тип, диапазон или варианты"));
+        if (active && !accepts(field, value)) {
+          const problem = issue(key, step.id, value == null ? field.name + " · обязательное значение" : field.name + " · проверьте тип, диапазон или варианты");
+          if (value == null && mode === "user") problem.code = "calculation-input";
+          diagnostics.push(problem);
+        }
         const binding: ParameterBinding = {
           key,
           field,
@@ -185,7 +190,7 @@ function execute(step: Step, v: Values, context: ToolContext): Values {
       };
     default:
       {
-        const result = executeGeometry(step, v, context) ?? executeCircuitOperation(step, v) ?? executeSpacingOperation(step, v) ?? executePumpOperation(step, v, context) ?? executeHydraulicOperation(step, v, context) ?? executeDetailOperation(step, v, context) ?? executeDnOperation(step, v, context) ?? executeStationCatalog(step, v, context) ?? executeCollectorOperation(step, v, context) ?? executeSpecificationOperation(step, v, context);
+        const result = executeFrameOperation(step, v) ?? executeGeometry(step, v, context) ?? executeCircuitOperation(step, v) ?? executeSpacingOperation(step, v) ?? executePumpOperation(step, v, context) ?? executeHydraulicOperation(step, v, context) ?? executeDetailOperation(step, v, context) ?? executeDnOperation(step, v, context) ?? executeStationCatalog(step, v, context) ?? executeCollectorOperation(step, v, context) ?? executeSpecificationOperation(step, v, context);
         if (result) return result;
         throw Error(`Неизвестная операция ноды «${step.operation ?? "не задана"}» · ${step.id}`);
       }

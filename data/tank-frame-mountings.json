@@ -1,0 +1,131 @@
+{
+  "schema": 1,
+  "rows": [
+    {
+      "equipmentId": "мембранный-бак-001-r0005",
+      "name": "Расширительный мембранный бак (гидроаккумулятор) WAV 50, Wester",
+      "volumeL": 50,
+      "sourcePath": "database/component-refactor/2026-11-07/remaining-components/membrane-tanks/WAV_050_10bar_3D.stp",
+      "sha256": "9e8d9e6dce5f82a3976b7af3c9542a02b9eaef3fa33315c9015686b479db683d",
+      "mounting": {
+        "verified": true,
+        "source": "WAV_050_10bar_3D.stp; SHA256 9e8d9e6dce5f82a3976b7af3c9542a02b9eaef3fa33315c9015686b479db683d; 3 сквозных отверстия Ø12, две ножки к концу рамы. Только компоновка по STEP.",
+        "holes": [
+          {
+            "id": "0",
+            "owner": "tank",
+            "x": 87.5,
+            "y": 151.5544,
+            "diameterMm": 12.0
+          },
+          {
+            "id": "1",
+            "owner": "tank",
+            "x": 87.5,
+            "y": -151.5544,
+            "diameterMm": 12.0
+          },
+          {
+            "id": "2",
+            "owner": "tank",
+            "x": -175.0,
+            "y": -0.0,
+            "diameterMm": 12.0
+          }
+        ],
+        "bounds": {
+          "minX": -210.0318,
+          "maxX": 182.0,
+          "minY": -198.1304,
+          "maxY": 198.1346
+        },
+        "footThicknessMm": 1.5,
+        "boltDiameterMm": 10
+      }
+    },
+    {
+      "equipmentId": "мембранный-бак-001-r0006",
+      "name": "Расширительный мембранный бак (гидроаккумулятор) WAV 80, Wester",
+      "volumeL": 80,
+      "sourcePath": "database/component-refactor/2026-11-07/remaining-components/membrane-tanks/WAV_080_10bar_3D.stp",
+      "sha256": "c5a9bb06c6c11a7963db295d776e1591e3985de553203e25fbe2b96b42643af9",
+      "mounting": {
+        "verified": true,
+        "source": "WAV_080_10bar_3D.stp; SHA256 c5a9bb06c6c11a7963db295d776e1591e3985de553203e25fbe2b96b42643af9; 3 сквозных отверстия Ø12, две ножки к концу рамы. Только компоновка по STEP.",
+        "holes": [
+          {
+            "id": "0",
+            "owner": "tank",
+            "x": 87.5011,
+            "y": -151.5563,
+            "diameterMm": 12.0
+          },
+          {
+            "id": "1",
+            "owner": "tank",
+            "x": -175.0021,
+            "y": 0.0,
+            "diameterMm": 12.0
+          },
+          {
+            "id": "2",
+            "owner": "tank",
+            "x": 87.5011,
+            "y": 151.5563,
+            "diameterMm": 12.0
+          }
+        ],
+        "bounds": {
+          "minX": -209.992,
+          "maxX": 205.0,
+          "minY": -205.0,
+          "maxY": 205.0
+        },
+        "footThicknessMm": 1.5,
+        "boltDiameterMm": 10
+      }
+    },
+    {
+      "equipmentId": "мембранный-бак-001-r0007",
+      "name": "Расширительный мембранный бак (гидроаккумулятор) WAV 100, Wester",
+      "volumeL": 100,
+      "sourcePath": "database/component-refactor/2026-11-07/remaining-components/membrane-tanks/WAV_100_10bar_3D.stp",
+      "sha256": "b17587fc5e3452e2fd2daea0b6a7389ed09e96f87bf202ba1241e756af6a81d0",
+      "mounting": {
+        "verified": true,
+        "source": "WAV_100_10bar_3D.stp; SHA256 b17587fc5e3452e2fd2daea0b6a7389ed09e96f87bf202ba1241e756af6a81d0; 3 сквозных отверстия Ø12, две ножки к концу рамы. Только компоновка по STEP.",
+        "holes": [
+          {
+            "id": "0",
+            "owner": "tank",
+            "x": 117.5,
+            "y": -203.516,
+            "diameterMm": 12.0
+          },
+          {
+            "id": "1",
+            "owner": "tank",
+            "x": 117.5,
+            "y": 203.516,
+            "diameterMm": 12.0
+          },
+          {
+            "id": "2",
+            "owner": "tank",
+            "x": -235.0,
+            "y": 0.0,
+            "diameterMm": 12.0
+          }
+        ],
+        "bounds": {
+          "minX": -270.0552,
+          "maxX": 247.5,
+          "minY": -250.0798,
+          "maxY": 250.073
+        },
+        "footThicknessMm": 1.5,
+        "boltDiameterMm": 10
+      }
+    }
+  ]
+}

@@ -171,7 +171,7 @@ test("technical status is independent of price and old status remains conservati
   p.entities["station-settings"].pressureChecksEnabled = false;
   const assessment = assessSpecification(sync(p));
   assert.equal(assessment.technicalReady, false);
-  assert.ok(assessment.findings.some(f => f.id === "spec/readiness/pressure-disabled"));
+  assert.ok(!assessment.findings.some(f => f.id.startsWith("spec/readiness/pressure-")));
 });
 
 test("existing engineering and currency diagnostics affect readiness and exported reasons", async () => {
@@ -246,7 +246,7 @@ test("a stale raw model/count mismatch is diagnosed before any recalculation", (
   assert.ok(result.findings.some(f => f.id.endsWith("synchronization")));
 });
 
-test("draft status, absent nodes and disabled checks survive both CSV and readable XLSX export", async () => {
+test("CSV and XLSX preserve draft status and absent nodes without pressure warnings when checks are disabled", async () => {
   const url = new URL("../app/specification-export.ts", import.meta.url);
   const source = (await readFile(url, "utf8")).replace('import("exceljs")', `import(${JSON.stringify(import.meta.resolve("exceljs"))})`);
   const { specificationExportRows, specificationCsv, specificationExportBlob } = await loadTs(url, { [url.href]: source });
@@ -256,12 +256,12 @@ test("draft status, absent nodes and disabled checks survive both CSV and readab
   const exported = specificationExportRows(rows(current), groups, assessment), csv = specificationCsv(exported);
   assert.match(csv, /Черновик — спецификация не завершена/);
   assert.match(csv, /Внешняя электрика станции/);
-  assert.match(csv, /Проверки давления отключены/);
+  assert.doesNotMatch(csv, /Проверки давления отключены|превышает PN/i);
   assert.match(csv, /Известная часть стоимости/);
   const blob = await specificationExportBlob(exported, "xlsx"), book = new ExcelJS.Workbook();
   await book.xlsx.load(await blob.arrayBuffer());
   const text = JSON.stringify(book.getWorksheet("Спецификация").getSheetValues());
   assert.match(text, /Черновик — спецификация не завершена/);
   assert.match(text, /Внешняя электрика станции/);
-  assert.match(text, /Проверки давления отключены/);
+  assert.doesNotMatch(text, /Проверки давления отключены|превышает PN/i);
 });

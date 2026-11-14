@@ -4,7 +4,8 @@ import {createHash} from 'node:crypto';
 import {mkdtemp,mkdir,writeFile,readFile,rm} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
 import {dirname,resolve,join} from 'node:path';
-import {runtimeModelAssets,syncRuntimeModelAssets} from '../scripts/local-runtime-models.mjs';
+import {fileURLToPath} from 'node:url';
+import {loadRuntimeModelAssets,runtimeModelAssets,syncRuntimeModelAssets} from '../scripts/local-runtime-models.mjs';
 import {localModelAssets} from '../scripts/local-model-assets.mjs';
 const hash=bytes=>createHash('sha256').update(bytes).digest('hex');
 const asset=bytes=>({sourceHash:'a'.repeat(64),meshHash:hash(bytes),meshUrl:`/model-assets/model-${'a'.repeat(64)}-v1.stl`});
@@ -36,4 +37,37 @@ test('checksum failures reject startup without overwriting existing published ge
   await writeFile(join(f.source,name),'original');await writeFile(join(f.library,name),'existing geometry');
   await assert.rejects(syncRuntimeModelAssets({...f,documents:[a]}),/Existing runtime CAD checksum/);
   assert.equal(await readFile(join(f.library,name),'utf8'),'existing geometry');
+});
+
+test('threaded mounting models are checksum-pinned in the selected release and stream unchanged',async t=>{
+  const mounts=JSON.parse(await readFile(new URL('../data/threaded-line-mounts.json',import.meta.url),'utf8'));
+  const mounted=mounts.filter(row=>row.meshHash);
+  const names=new Set(mounted.map(row=>`model-${row.meshHash}-v1.stl`));
+  assert.ok(names.size>0);
+  const earlier=await loadRuntimeModelAssets({includeThreaded:false});
+  const assets=JSON.parse(JSON.stringify(await loadRuntimeModelAssets()));
+  assert.equal(assets.filter(row=>names.has(row.name)).length,names.size);
+  assert.ok(earlier.every(row=>!names.has(row.name)));
+  for(const row of mounted){
+    const name=`model-${row.meshHash}-v1.stl`;
+    assert.equal(assets.find(asset=>asset.name===name)?.meshHash,row.stlSha256);
+    assert.notEqual(row.stlSha256,row.meshHash);
+  }
+  const {library}=await fixture(t),source=fileURLToPath(new URL('../public/model-assets',import.meta.url));
+  assert.deepEqual(await syncRuntimeModelAssets({library,source,assets}),{checked:assets.length,copied:assets.length});
+  const serve=localModelAssets(library,()=>new Response('fallback'));
+  for(const row of mounted){
+    const response=await serve(new Request(`http://local/model-assets/model-${row.meshHash}-v1.stl`));
+    assert.equal(response.status,200);
+    assert.equal(hash(Buffer.from(await response.arrayBuffer())),row.stlSha256);
+  }
+  assert.deepEqual(await syncRuntimeModelAssets({library,source,assets}),{checked:assets.length,copied:0});
+});
+
+test('threaded mounting models require STL checksums and build manifests cannot publish arbitrary paths',async t=>{
+  const meshHash='a'.repeat(64);
+  assert.throws(()=>runtimeModelAssets([],[{meshHash}]),/Invalid runtime CAD metadata/);
+  assert.throws(()=>runtimeModelAssets([],[{meshHash:'../private',stlSha256:meshHash}]),/Invalid runtime CAD metadata/);
+  const f=await fixture(t);
+  await assert.rejects(syncRuntimeModelAssets({...f,assets:[{name:'../private.stl',meshHash}]}),/Invalid runtime CAD manifest/);
 });

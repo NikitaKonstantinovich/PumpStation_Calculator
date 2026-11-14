@@ -12,8 +12,8 @@ export function parseRuntimeOperations(header: string | null): string[] | undefi
 
 export function missingRuntimeOperations(program: ToolProgram, supported?: readonly string[]): string[] {
   const required = [...new Set(Object.values(program.plans).flatMap(plan => plan.steps.flatMap(step => step.operation ? [step.operation] : [])))];
-  // Tabs opened before capability negotiation cannot execute the newly added width node.
-  if (!supported) return required.filter(operation => ["spacing.standardWidth","ui.stationGeometry"].includes(operation));
+  // Tabs opened before capability negotiation cannot execute newer operations.
+  if (!supported) return required.filter(operation => ["spacing.standardWidth","ui.stationGeometry","spec.linesAutomatic"].includes(operation));
   const available = new Set(supported);
   return required.filter(operation => !available.has(operation));
 }

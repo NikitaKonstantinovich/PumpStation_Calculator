@@ -37,7 +37,11 @@ const st20Reducers = JSON.parse(await readFile(new URL("../data/st20-concentric-
 const vibrations = JSON.parse(await readFile(new URL("../data/vibration-dimensions.json", import.meta.url), "utf8"));
 const standardStainlessFlanges = JSON.parse(await readFile(new URL("../data/standard-stainless-flanges.json", import.meta.url), "utf8"));
 const isoStainlessFlanges = JSON.parse(await readFile(new URL("../data/iso-stainless-flanges.json", import.meta.url), "utf8"));
-const withSupplierFlanges = mergeSt20ConcentricReducers(mergeIsoStainlessFlanges(mergeStandardStainlessFlanges(mergeSupplierFlanges(mergeSupplierFlanges(JSON.parse(original), supplierFlanges), newkeyFlanges), standardStainlessFlanges), isoStainlessFlanges), st20Reducers, standards);
+const st20ReadyBoreFlanges = JSON.parse(await readFile(new URL("../data/st20-ready-bore-flanges.json", import.meta.url), "utf8"));
+const withSupplierFlanges = mergeSupplierFlanges(
+  mergeSt20ConcentricReducers(mergeIsoStainlessFlanges(mergeStandardStainlessFlanges(mergeSupplierFlanges(mergeSupplierFlanges(JSON.parse(original), supplierFlanges), newkeyFlanges), standardStainlessFlanges), isoStainlessFlanges), st20Reducers, standards),
+  st20ReadyBoreFlanges,
+);
 const data = mergeCadDimensions(mergePipePainting(mergeSensorNipples(mergeFlangeDimensions(mergeCollarDimensions(mergeReducerDimensions(mergeInstrumentValve(mergeSealingSupplement(mergeBindingSupplement(withSupplierFlanges, supplier), seals), valve), standards), collars), flanges), sensorNipples), painting), cad);
 Object.assign(data, mergeInsertAnalogs(data, insertAnalogs));
 Object.assign(data, mergeVibrationDimensions(data, vibrations));

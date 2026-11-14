@@ -6,8 +6,9 @@ import { Readable } from 'node:stream';
 /** Internal ASSETS binding for a local preview. The application Worker must
  * authorize the request before calling it. This does not open an HTTP listener.
  * Large CAD meshes stay outside Cloudflare's 25 MiB static-asset manifest. */
-export function localModelAssets(directory, fallback) {
+export function localModelAssets(directory, fallback, preparedDirectory) {
   const root = realpath(resolve(directory));
+  let preparedRoot;
   return async request => {
     const pathname = new URL(request.url).pathname;
     if (!pathname.startsWith('/model-assets/')) return fallback(request);
@@ -19,8 +20,20 @@ export function localModelAssets(directory, fallback) {
       const version=new URL(request.url).searchParams.get("version");
       if(version && !/^[0-9a-f]{64}$/.test(version))return new Response(null,{status:400});
       const file=name.endsWith(".json") && version ? name.replace(".json","-"+version+".json") : name;
-      const path=await realpath(resolve(folder,file));
-      if (dirname(path) !== folder) return new Response(null, { status: 404 });
+      let assetFolder = folder;
+      let path;
+      try {
+        path = await realpath(resolve(folder, file));
+      } catch (error) {
+        if (error?.code !== 'ENOENT' || !preparedDirectory || !/^model-[a-f0-9]{64}-v1\.stl$/.test(file)) throw error;
+        preparedRoot ??= realpath(resolve(preparedDirectory)).catch(error => {
+          preparedRoot = undefined;
+          throw error;
+        });
+        assetFolder = await preparedRoot;
+        path = await realpath(resolve(assetFolder, file));
+      }
+      if (dirname(path) !== assetFolder) return new Response(null, { status: 404 });
       const info = await stat(path);
       if (!info.isFile()) return new Response(null, { status: 404 });
       const headers = { 'Content-Type': name.endsWith('.json') ? 'application/json; charset=utf-8' : 'model/stl',

@@ -11,7 +11,7 @@ const { buildDischargeSpec, selectDischargeInsertion, commonDischargeHead } = aw
 const { suctionCatalogItems } = await loadTs(new URL("../app/suction-catalog.ts", import.meta.url));
 const { makeCollectorCatalog } = await loadTs(new URL("../app/collector-catalog.ts", import.meta.url));
 const binding = JSON.parse(await readFile(new URL("../public/binding-components.json", import.meta.url), "utf8"));
-const catalog = makeCollectorCatalog(binding), database = { ...binding, collectorCatalog: catalog };
+const catalog = makeCollectorCatalog(binding), database = { ...binding, items: [...binding.items, ...suctionCatalogItems], collectorCatalog: catalog };
 const {refreshSuctionSpecification:refresh,buildValveSpecItems}=await loadTs(new URL("../app/station-hydraulic-calculation.ts",import.meta.url));
 
 function fixture({ pumpDn = 80, valveDn = 80, pumpConnection = "flanged", connection = "flanged", pn = 16, material = "st20", type = "utility", count = 3 } = {}) {
@@ -119,15 +119,17 @@ test("pump outlet and valve DN select the reducer independently of the inlet", (
   assert.match(role(build(fixture({ pumpDn: 100 })), "primary-error").details, /больше DN арматуры/);
 });
 
-test("threaded branches use union, nipple and five sealed joints, with no FF spacer", () => {
+test("threaded pump uses a union and two nipples with six sealed joints and no FF spacer", () => {
   const p = fixture({ pumpDn: 25, valveDn: 50, connection: "threaded", pumpConnection: "threaded" });
   const rows = build(p), h = dischargeHydraulics(p.entities["station-dn"], p.entities["system-input"], p.entities["station-settings"]);
   assert.equal(h.dn, 25); assert.equal(h.locked, true);
   assert.equal(p.entities["station-collectors"].discharge.configuration.primary.dn, 25);
-  assert.equal(role(rows, "primary-union").equipmentId, "suction-table:union-25");
+  assert.equal(role(rows, "primary-union").equipmentId, "suction-table:union-valtec-25");
+  assert.equal(role(rows, "primary-pump-nipple").equipmentId, "резьбовые-фитинги-001-r0218");
+  assert.equal(role(rows, "primary-pump-nipple").quantity, 3);
   assert.equal(role(rows, "primary-between-valves-nipple").price, 145.18);
   assert.equal(role(rows, "primary-between-valves-nipple").quantity, 3);
-  assert.equal(role(rows, "primary-flax").quantity, 1.5); assert.equal(role(rows, "primary-flax").price, 51.5);
+  assert.equal(role(rows, "primary-flax").quantity, 1.8); assert.equal(role(rows, "primary-flax").price, 51.5);
   assert.ok(!rows.some(row => /insertion|primary.*flange|primary.*gasket/.test(row.assemblyRole)));
   const filled = rowsOf(fill(p));
   assert.match(filled.find(row => row.option === "primaryCheckValve").details, /DN25/);
@@ -137,6 +139,8 @@ test("threaded branches use union, nipple and five sealed joints, with no FF spa
 test("mixed connections orient RF correctly and account for actual threaded joints", () => {
   const threaded = build(fixture({ pumpDn: 40, valveDn: 40, connection: "threaded" }));
   assert.equal(role(threaded, "primary-adapter").equipmentId, "suction-table:rf-40");
+  assert.equal(role(threaded, "primary-pump-nipple"), undefined);
+  assert.equal(role(threaded, "primary-between-valves-nipple").equipmentId, "резьбовые-фитинги-001-r0220");
   assert.equal(role(threaded, "primary-flax").quantity, 1.2);
   assert.equal(role(threaded, "primary-pump-gasket").quantity, 3);
   assert.equal(role(threaded, "primary-between-valves-insertion"), undefined);
@@ -181,7 +185,7 @@ test("second circuit has independent counts, DN, PN and connection; network part
     assert.equal(role(rows, "primary-between-valves-insertion").quantity, 3);
     assert.equal(role(rows, "secondary-between-valves-insertion"), undefined);
     assert.equal(role(rows, "secondary-between-valves-nipple").quantity, 2);
-    assert.equal(role(rows, "secondary-flax").quantity, 1);
+    assert.equal(role(rows, "secondary-flax").quantity, 1.2);
     rows = build(secondCircuit(p, { dn: 100, count: 4, pn: 25, connection: "flanged" }));
     const second = role(rows, "secondary-between-valves-insertion");
     assert.equal(second.quantity, 4); assert.equal(second.price, null); assert.match(second.details, /DN|PN25/);
@@ -387,6 +391,13 @@ test("gasket fallback warnings and prices survive discharge pressure changes and
   assert.equal(gasket.status, "confirmation"); assert.equal(gasket.price, 350);
   assert.match(gasket.description, /PN прокладки ниже требуемого/);
   assert.equal(gasket.dischargePressureCheck.checks[0].status, "within-limit");
+  p.entities["station-settings"].pressureChecksEnabled = false;
+  p = fill(p);
+  gasket = role(rowsOf(p), "primary-check-gaskets");
+  assert.equal(gasket.status, "confirmation"); assert.equal(gasket.price, 350);
+  assert.match(gasket.description, /присоединительные размеры/);
+  assert.doesNotMatch(gasket.description, /давлени|PN/i);
+  assert.equal(gasket.dischargePressureCheck, undefined);
 });
 
 test("automatic filling survives a temporarily uncalculated primary circuit and reload", () => {

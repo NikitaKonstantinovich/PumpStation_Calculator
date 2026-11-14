@@ -8,7 +8,7 @@ import { localModelAssets } from "./local-model-assets.mjs";
 import { pumpFileService } from "../services/local-storage/pump-files.mjs";
 import { equipmentAssetService } from "../services/local-storage/equipment-assets.mjs";
 import { nodeCatalogService } from "../services/local-storage/node-catalog.mjs";
-import { syncRuntimeModelAssets } from "./local-runtime-models.mjs";
+import { loadRuntimeModelAssets, syncRuntimeModelAssets } from "./local-runtime-models.mjs";
 import { loadLocalAIEnv } from "./local-ai-env.mjs";
 import { localAIProvider } from "./local-ai-provider.mjs";
 import { connectStore, numberSetting, projectService } from "../services/local-storage/store.mjs";
@@ -31,7 +31,14 @@ const bindings = { ...config.vars, APP_BASE_URL: `http://localhost:${port}`, PUB
 bindings.PROJECT_LIMIT_BYTES = String(numberSetting(process.env.PROJECT_LIMIT_BYTES, 10_000_000));
 const library = process.env.PROJECT_MODEL_LIBRARY;
 if (!library) throw new Error("Задайте PROJECT_MODEL_LIBRARY — постоянный каталог опубликованных моделей.");
-console.log('Runtime CAD assets:',await syncRuntimeModelAssets({library}));
+const equipmentRoot = process.env.EQUIPMENT_ROOT || resolve(root, "../Equipment");
+const preparedPumpMeshes = resolve(equipmentRoot, "Pumps/PreparedForAssembly/meshes");
+const runtimeModels = await readFile(resolve(built, "runtime-model-assets.json"), "utf8").then(JSON.parse).catch(error => {
+  if (error.code !== "ENOENT") throw error;
+  // Older full snapshots predate the threaded line models and have no lockfile.
+  return loadRuntimeModelAssets({ includeThreaded: false });
+});
+console.log('Runtime CAD assets:',await syncRuntimeModelAssets({library, assets: runtimeModels}));
 const projects = await connectStore();
 Object.assign(bindings, await loadLocalAIEnv());
 for (const name of ["MODEL_CONVERTER_URL", "MODEL_CONVERTER_TOKEN", "CAD_EXPORT_URL", "CAD_EXPORT_TOKEN", "RESEND_API_KEY", "EMAIL_FROM"]) if (process.env[name]) bindings[name] = process.env[name];
@@ -40,7 +47,7 @@ const worker = new Miniflare({
   modules: paths.map(path => ({ type: "ESModule", path: resolve(server, path) })), modulesRoot: server,
   compatibilityDate: config.compatibility_date, compatibilityFlags: config.compatibility_flags, bindings,
   d1Databases: Object.fromEntries(config.d1_databases.map(d => [d.binding, d.database_id])), d1Persist: resolve(state, "v3/d1"),
-  serviceBindings: { PROJECT_STORE: projectService(projects), NODE_CATALOG: nodeCatalogService(process.env.NODE_PUMP_CATALOG_PATH || resolve(root,"../database/catalog-v2/pumps.sqlite")), PUMP_FILES: pumpFileService(process.env.PUMP_FILES_DIR || resolve(dirname(state), "pump-files"), {allowReveal:true}), EQUIPMENT_ASSETS: equipmentAssetService({equipmentRoot:process.env.EQUIPMENT_ROOT || resolve(root,"../Equipment"),publicRoot:resolve(built,"client"),manifestPath:resolve(library,"manifest.json"),allowReveal:true}), AI_PROVIDER: localAIProvider, ASSETS: localModelAssets(resolve(library), async request => (await worker.getBindings()).BUNDLED_ASSETS.fetch(request)) },
+  serviceBindings: { PROJECT_STORE: projectService(projects), NODE_CATALOG: nodeCatalogService(process.env.NODE_PUMP_CATALOG_PATH || resolve(root,"../database/catalog-v2/pumps.sqlite")), PUMP_FILES: pumpFileService(process.env.PUMP_FILES_DIR || resolve(dirname(state), "pump-files"), {allowReveal:true}), EQUIPMENT_ASSETS: equipmentAssetService({equipmentRoot,publicRoot:resolve(built,"client"),manifestPath:resolve(library,"manifest.json"),allowReveal:true}), AI_PROVIDER: localAIProvider, ASSETS: localModelAssets(resolve(library), async request => (await worker.getBindings()).BUNDLED_ASSETS.fetch(request), preparedPumpMeshes) },
   assets: { directory: resolve(built, "client"), binding: "BUNDLED_ASSETS", routerConfig: { has_user_worker: true, invoke_user_worker_ahead_of_assets: true } },
 });
 console.log(`Full editor ready: ${await worker.ready}; build: ${built}; migrations unchanged`);

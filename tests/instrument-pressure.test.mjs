@@ -7,10 +7,11 @@ import ts from "typescript";
 import {loadTs} from "./load-ts.mjs";
 import { fixture, sync, choose, rows, resources, load, parseProjectConfig } from "./fixtures/station-specification.mjs";
 const {stationInstrumentPressure}=await load("instrument-pressure");
-const {selectSuctionInstruments,selectDischargeInstruments}=await load("suction-instruments");
+const {selectDischargeInstruments}=await load("suction-instruments");
 const {normalizeHydraulicOptions}=await load("hydraulic-option-config");
-const {transducerSelectionPressure,dischargeInstrumentPressure,instrumentMaximumHead}=await load("instrument-pressure");
+const {transducerSelectionPressure,dischargeInstrumentPressure}=await load("instrument-pressure");
 const {pressureTransducerCatalog,automaticTransducerId}=await load("pressure-transducers");
+const {repairSavedInstrumentSpecification}=await load("saved-instrument-specification");
 const sensor=p=>rows(p).find(r=>r.assemblyRole==="discharge:transducer");
 const close=(a,b)=>assert.ok(Math.abs(a-b)<1e-8,`${a} != ${b}`);
 const field=(label,value)=>({column:label,headerPath:[label],value});
@@ -62,9 +63,9 @@ test("enabled pressure calculation selects by duty head plus inlet with an inclu
   assert.equal(automaticTransducerId(null),"station-v11-oni-ppt10-16");
 });
 
-test("disabled pressure calculation uses maximum pump head, ignores inlet/duty head and reselects both directions",()=>{
+test("disabled pressure calculation uses the curve peak at positive flow and reselects both directions",()=>{
   let p=fixture();Object.assign(p.entities["station-settings"],{pressureChecksEnabled:false,inletHead:null});p.entities["system-input"].head=300;
-  const atHead=h=>dataAtBar((h+10)*.0980665);
+  const atHead=h=>({...resources,pumps:resources.pumps.map(pump=>pump.id==="318" ? {...pump,curve:[[1,h-5],[10,h],[20,h-10]]} : pump)});
   for(const h of [160,160.000001,250,80]){
     p=sync(p,atHead(h));assert.equal(sensor(p).equipmentId,h<=160?"station-v11-oni-ppt10-16":"station-v11-oni-ppt10-25");
     close(transducerSelectionPressure(p,atHead(h).pumps).headM,h);assert.match(sensor(p).hydraulicAssembly.requirement.pressureBasis,/без входного подпора/);
@@ -98,56 +99,69 @@ test("mode switch uses the maximum active circuit and a zero inlet default",()=>
   next.entities["station-settings"].pressureChecksEnabled=true;next=sync(next);assert.equal(sensor(next).equipmentId,"station-v11-oni-ppt10-16");assert.equal(sensor(next).price,3445.91);close(transducerSelectionPressure(next,resources.pumps).headM,151);
 });
 
-test("relay PN is checked against shutoff pressure separately from its inlet trip range and overload",()=>{
+test("enabled discharge relay selection prefers the smallest confirmed PN covering the calculated pressure",()=>{
   const source=resources.components.items.find(i=>i.id==="кипиа-002-r0014");
   const relay=(id,pn)=>({...source,id,fields:[...source.fields,field("PN",pn)]});
   const low=relay("low-pn",10),high=relay("high-pn",25),excess=relay("excess-pn",40),unknown={...source,id:"unknown-pn",fields:[...source.fields,field("Давление перегрузки, бар",100)]};
   const rating=stationInstrumentPressure(fixture(),dataAtBar(18).pumps);
   for(const items of [[low,unknown,excess,high],[high,excess,unknown,low]]){
-    const r=selectSuctionInstruments(items,10,rating)[1];assert.equal(r.item.id,"high-pn");assert.equal(r.warning,undefined);assert.match(r.details,/18 бар/);
+    const r=selectDischargeInstruments(items,10,rating)[1];assert.equal(r.item.id,"high-pn");assert.equal(r.warning,undefined);assert.match(r.details,/18 бар/);
   }
-  assert.equal(selectSuctionInstruments([low],10,rating)[1].item,undefined);
-  assert.match(selectSuctionInstruments([unknown],10,rating)[1].warning,/не подтверждено/);
-  const fire=relay("fire-pn25",25);fire.fields=fire.fields.map(f=>f.headerPath.at(-1)==="Давление, МПа"?field("Давление, МПа","0…2,5"):f);
-  assert.equal(selectDischargeInstruments([fire],rating.headM,rating)[1].item.id,fire.id);
 });
 
-test("station relay output carries H0 requirement and cannot certify a missing PN",()=>{
-  const p=sync(fixture(),dataAtBar(18)),r=rows(p).find(r=>r.assemblyRole==="pressure-switch");
-  assert.match(r.details,/P₀=/);assert.match(r.description,/PN.*не подтверждено/);assert.notEqual(r.technicalStatus,"ready");
-  const off=fixture();off.entities["station-settings"].pressureChecksEnabled=false;
-  const missing=sync(off,{...resources,pumps:resources.pumps.map(p=>p.id==="318"?{...p,curve:[[1,100],[20,80]]}:p)});
-  close(sensor(missing).hydraulicAssembly.requirement.pressureBar,100*.0980665);assert.equal(sensor(missing).technicalStatus,"ready");
-  assert.deepEqual(sensor(missing).technicalNotes,[]);
-});
-
-test("maximum pump head includes interior curve peaks and catalogue values without extrapolation",()=>{
+test("disabled discharge uses the greatest confirmed curve peak among active circuits and keeps branch ratings local",()=>{
   const base=resources.pumps.find(p=>p.id==="318");
-  assert.equal(instrumentMaximumHead({...base,maxHead:170,curve:[[.8,80],[20,165],[40,50]]}),170);
-  assert.equal(instrumentMaximumHead({...base,maxHead:70,curve:[[.8,80],[20,165],[40,50]]}),165);
-  assert.equal(instrumentMaximumHead({...base,maxHead:170,curve:[]}),170);
-  assert.equal(instrumentMaximumHead(undefined),null);
   const p=fixture();Object.assign(p.entities["station-settings"],{pressureChecksEnabled:false,stationType:"combined"});choose(p,"318",2,1,true);
   p.entities["system-input-2"].selectedPumpId="higher";
-  const pumps=[{...base,maxHead:90,curve:[[.8,80],[20,90],[40,50]]},{...base,id:"higher",maxHead:165,curve:[[.8,80],[20,165],[40,50]]}];
-  close(dischargeInstrumentPressure(p,pumps).headM,165);close(dischargeInstrumentPressure(p,pumps,"primary").headM,90);
+  const pumps=[{...base,maxHead:200,curve:[[0,90],[20,170],[40,50]]},{...base,id:"higher",maxHead:230,curve:[[0,165],[20,180],[40,50]]}];
+  close(dischargeInstrumentPressure(p,pumps).headM,180);close(dischargeInstrumentPressure(p,pumps,"primary").headM,170);
+  close(dischargeInstrumentPressure(p,pumps,"secondary").headM,180);
   assert.equal(sensor(sync(p,{...resources,pumps})).equipmentId,"station-v11-oni-ppt10-25");
+  const noSecondaryZero=[pumps[0],{...pumps[1],curve:[[1,190],[20,180],[40,50]]}];
+  close(dischargeInstrumentPressure(p,noSecondaryZero).headM,190);
+  close(dischargeInstrumentPressure(p,noSecondaryZero,"primary").headM,170);
+  const invalidSecondaryCurve=[pumps[0],{...pumps[1],curve:[[1,NaN],[20,180]]}];
+  assert.equal(dischargeInstrumentPressure(p,invalidSecondaryCurve).headM,null);
+  assert.match(dischargeInstrumentPressure(p,invalidSecondaryCurve).source,/Контур 2.*характеристики Q–H/);
+  p.entities["system-input-2"].calculated=false;
+  assert.equal(dischargeInstrumentPressure(p,pumps).headM,null);
+  assert.match(dischargeInstrumentPressure(p,pumps).source,/выбор не подтверждён/);
+  p.entities["station-settings"].stationType="utility";
+  close(dischargeInstrumentPressure(p,noSecondaryZero).headM,170);
 });
 
-test("real ONIS MBL with no Q=0 point produces priced ONI and fire-branch relay without confirmations",()=>{
+test("ONIS MBL without a Q=0 point selects priced discharge instruments from its 88.32 m peak",()=>{
   const p=fixture();Object.assign(p.entities["station-settings"],{stationType:"combined",pressureChecksEnabled:false});choose(p,"nu-34f0554f7dc091e4",3,1);choose(p,"nu-34f0554f7dc091e4",2,1,true);
   const next=sync(p),r=rows(next).find(r=>r.assemblyRole==="primary-sensor-relay"),s=sensor(next);
+  const gauge=rows(next).find(row=>row.generatedBy==="discharge-line" && row.assemblyRole==="gauge");
   close(transducerSelectionPressure(next,resources.pumps).headM,88.32);
-  assert.equal(s.equipmentId,"station-v11-oni-ppt10-16");assert.equal(s.price,3445.91);assert.equal(r.equipmentId,"кипиа-002-r0015");assert.equal(r.quantity,4);assert.equal(r.price,1777.54);
-  for(const row of rows(next).filter(r=>r.option==="pressureTransducer"||r.hydraulicPart?.option==="pressureTransducer"||/^primary-sensor-/.test(r.assemblyRole??""))){assert.equal(row.technicalStatus,"ready");assert.equal(row.status,"selected");assert.ok(!row.technicalNotes?.length);}
-  for(const [enabled,head,relayId] of [[true,20,"кипиа-002-r0013"],[true,120,"кипиа-002-r0016"],[false,120,"кипиа-002-r0015"]]){
-    p.entities["station-settings"].pressureChecksEnabled=enabled;p.entities["system-input"].head=head;
+  assert.equal(s.equipmentId,"station-v11-oni-ppt10-16");
+  assert.equal(r.quantity,4);
+  for(const row of [r,s,gauge]){
+    assert.ok(row.equipmentId);assert.ok(row.price>0);
+    assert.equal(row.status,"selected");
+    assert.doesNotMatch(`${row.details} ${row.description}`,/Q=0|нулевом расходе|Предупреждение|давление вне шкалы/i);
+  }
+  assert.match(gauge.details,/Пиковый напор 88,32 м/);
+  assert.match(s.hydraulicAssembly.requirement.pressureBasis,/Hпик=88,32 м/);
+
+  const saved=structuredClone(next);
+  const savedGauge=rows(saved).find(row=>row.generatedBy==="discharge-line" && row.assemblyRole==="gauge");
+  Object.assign(savedGauge,{equipmentId:undefined,price:null,status:"clarify",technicalStatus:"unverified",details:"На кривой выбранного насоса отсутствует точка Q=0"});
+  const repaired=repairSavedInstrumentSpecification(saved,{items:resources.components.items,collectorCatalog:resources.components.collectorCatalog,pumps:resources.pumps});
+  const repairedGauge=rows(repaired).find(row=>row.generatedBy==="discharge-line" && row.assemblyRole==="gauge");
+  assert.equal(repairedGauge.equipmentId,gauge.equipmentId);assert.equal(repairedGauge.price,gauge.price);
+  assert.equal(repairedGauge.position,savedGauge.position);assert.equal(repairedGauge.quantity,savedGauge.quantity);
+  assert.match(repairedGauge.details,/Пиковый напор 88,32 м/);
+  p.entities["station-settings"].pressureChecksEnabled=true;
+  for(const [head,relayId] of [[20,"кипиа-002-r0013"],[120,"кипиа-002-r0016"]]){
+    p.entities["system-input"].head=head;
     const branch=rows(sync(p)).find(r=>r.assemblyRole==="primary-sensor-relay");assert.equal(branch.equipmentId,relayId);assert.equal(branch.status,"selected");assert.equal(branch.technicalStatus,"ready");
-    assert.match(branch.details,enabled?/Hраб/:/Hmax/);
+    assert.match(branch.details,/Hраб/);
   }
 });
 
-test("actual hydraulic option UI shows cabinet supply and shutoff basis without a voltage confirmation input",async()=>{
+test("actual hydraulic option UI shows cabinet supply and operating basis without a voltage confirmation input",async()=>{
   const url=new URL("../app/specification-hydraulic-options.tsx",import.meta.url);
   const source=(await readFile(url,"utf8")).replace('import "./specification-insertions.css";',"");
   const compiled=ts.transpileModule(source,{compilerOptions:{module:ts.ModuleKind.ESNext,jsx:ts.JsxEmit.ReactJSX,target:ts.ScriptTarget.ES2022}}).outputText.replaceAll('"react/jsx-runtime"',JSON.stringify(import.meta.resolve("react/jsx-runtime")));

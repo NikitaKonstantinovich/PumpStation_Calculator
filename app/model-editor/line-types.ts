@@ -1,4 +1,4 @@
-import type { Bounds, Port, Vec3 } from "./model";
+import type { Bounds, Component, Port, Vec3 } from "./model";
 import type { InsertionShape, InsertionTemplate } from "./insertion-types";
 import { validShapeThread } from "./insertion-types";
 import type { FastenerCatalog } from "./fastener-types";
@@ -6,7 +6,7 @@ import type { FastenerCatalog } from "./fastener-types";
 /** Geometry evidence is separate from catalogue selection and from a component's pose. */
 export type LineGeometry = {
   equipmentId: string; source: string; revision: string;
-  length: number | null; shape?: InsertionShape; bounds?: Bounds;
+  length: number | null; shape?: InsertionShape; bounds?: Bounds; cadSource?: Component["cadSource"];
   ports: Port[]; template?: InsertionTemplate;
   fidelity: "parametric" | "cad" | "outline" | "missing";
   issues: string[]; wall?: number; dn?: number; pn?: number;
@@ -34,7 +34,13 @@ export type LineBinding = {
 export type LineJoint = {
   id: string; a: { componentId: string; portId: string }; b: { componentId: string; portId: string };
   provisional: boolean; kind: "face" | "thread" | "seat"; overlap: number;
+  axialThreadFit?: true;
 };
+
+export function pipeThreadDesignation(thread?: string): string | undefined {
+  const designation = thread?.trim().toUpperCase().replace(/¼/g, " 1/4").replace(/½/g, " 1/2").replace(/¾/g, " 3/4").replace(/\s*\/\s*/g, "/").replace(/\s+/g, " ").replace(/\s*["″”]$/, "").replace(/^G\s+/, "G");
+  return designation && /^G(?:[1-9]\d*(?: [1-9]\d*\/[1-9]\d*)?|[1-9]\d*\/[1-9]\d*)$/.test(designation) ? designation : undefined;
+}
 
 const obj = (v: unknown): Record<string, unknown> => v && typeof v === "object" && !Array.isArray(v) ? v as Record<string, unknown> : {};
 const text = (v: unknown, n = 1000): v is string => typeof v === "string" && v.length <= n;
@@ -66,6 +72,7 @@ export function parseLineJoints(value: unknown): LineJoint[] | undefined {
   return value.flatMap(raw => {
     const j = obj(raw), a = obj(j.a), b = obj(j.b);
     if (![j.id, a.componentId, a.portId, b.componentId, b.portId].every(v => text(v, 240)) || !["face", "thread", "seat"].includes(String(j.kind)) || !finite(j.overlap) || j.overlap < 0) return [];
-    return [{ id: j.id, a, b, provisional: j.provisional !== false, kind: j.kind, overlap: j.overlap } as LineJoint];
+    return [{ id: j.id, a, b, provisional: j.provisional !== false, kind: j.kind, overlap: j.overlap,
+      ...(j.kind === "thread" && j.overlap > 0 && j.axialThreadFit === true ? { axialThreadFit: true } : {}) } as LineJoint];
   });
 }

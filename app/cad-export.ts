@@ -1,6 +1,11 @@
 import {engineeringOperation, registerOperation} from "./engineering/runtime";
 import type { Assembly, Component, Vec3 } from "./model-editor/model";
 import { stampMissing, stampedPart } from "./model-editor/stamped-flanges";
+import { frameBoltSeat, frameProfileSlots } from "./model-editor/frame-hardware";
+import { onisMvCadSource } from "./model-editor/onis-mv-cad";
+import { CDM15_6_CAD_NOTE, cdm15_6CadSource } from "./model-editor/cdm15-6-cad";
+import { preparedPumpCadExportNote, preparedPumpCadIsNonRoundVariant } from "./model-editor/prepared-pump-cad";
+import { PUMP_ROUND_FLANGE_REQUIRED } from "./pump-catalog";
 import type { InsertionPiece, InsertionShape } from "./model-editor/insertion-types";
 import type { DnEntity, ModelEntity, ProjectConfig, SettingsEntity, SpecItem, SpecEntity } from "./project-config";
 
@@ -101,7 +106,7 @@ export function cadContents(assembly?: Assembly | null, spec: SpecItem[] = [], s
     if(s.kind==="flange" && s.stampedHash) {
       const stock=stampedPart(s);
       add(c,p.id,stock ? {...s} : {kind:"unavailable",reason:stampMissing},[p],hidden,stock?.name??p.name,p.componentId===c.id?c.equipmentId:p.componentId);
-    } else if (s.kind === "mesh" && s.modelHash) {
+    } else if (s.kind === "mesh" && s.modelHash && p.fidelity !== "outline" && p.fidelity !== "missing") {
       add(c, p.id, { kind: "native", hash: s.modelHash }, [p, { position: s.modelPosition ?? zero, rotation: s.modelRotation ?? zero }], hidden, p.name, p.componentId===c.id?c.equipmentId:p.componentId);
     } else if (["marker", "reducer-outline"].includes(s.kind) || p.fidelity === "missing" || p.fidelity === "outline") {
       add(c, p.id, { kind: "unavailable", shape: s, reason: "Для детали задана только условная геометрия." }, [p], hidden, p.name,p.componentId===c.id?c.equipmentId:p.componentId);
@@ -113,8 +118,36 @@ export function cadContents(assembly?: Assembly | null, spec: SpecItem[] = [], s
   for (const c of assembly.components) {
     if (/fasteners-(bolts|studs|nuts|washers)$/.test(c.line?.role ?? "")) continue; // BOM rows, not physical instances.
     if (c.orphaned) warnings.add(`${c.name}: элемент оставлен в компоновке после изменения спецификации.`);
+    if ((c.kind === "pump" || c.sourceKey?.startsWith("pump:")) && preparedPumpCadIsNonRoundVariant(c.equipmentId)) {
+      warnings.add(`${c.name}: ${PUMP_ROUND_FLANGE_REQUIRED}`);
+      add(c, "", { kind: "unavailable", reason: PUMP_ROUND_FLANGE_REQUIRED });
+      continue;
+    }
+    if(c.frameDrilling?.holes.length)warnings.add(`${c.name}: в CAD передаётся исходная заготовка без монтажных отверстий; отверстия показаны в 3D-редакторе и сохранены в расчёте рамы.`);
+    if(c.frameProfile){
+      add(c, "", { kind: "frame-profile", lengthMm: c.frameProfile.length, slots: frameProfileSlots(c.frameProfile) });
+      continue;
+    }
+    if(c.frameHardware){
+      const b=c.frameHardware,seat=frameBoltSeat(b);
+      const dims=({6:[10,4,6.4,12],8:[13,5.3,8.4,16],10:[17,6.4,10.5,20],12:[19,7.5,13,24]} as Record<number,number[]>)[b.diameter];
+      if(!dims){add(c,"",{kind:"unavailable",reason:"Не определена форма головки крепежа рамы."});continue;}
+      b.centers.forEach((p,i)=>{
+        const emit=(id:string,x:number,geometry:CadGeometry,rotation:Vec3=zero)=>add(c,`${i}/${id}`,geometry,[{position:[p[0]+x,p[1],p[2]],rotation}],false,`${c.name} · ${id}`);
+        emit("bolt",seat,{kind:"rod",lengthMm:b.length,outerMm:b.diameter,headMm:dims[1],flatsMm:dims[0],hardware:"bolt",nominalMm:b.diameter},[0,0,180]);
+        if(b.washer)emit("washer",seat-b.washer,{kind:"tube",lengthMm:b.washer,outerMm:dims[3],innerMm:dims[2],hardware:"washer",nominalMm:b.diameter});
+        emit("rivet-head",0,{kind:"tube",lengthMm:b.head,outerMm:b.headDiameter,innerMm:b.diameter});
+        emit("rivet-body",-b.sheet-b.tail,{kind:"tube",lengthMm:b.sheet+b.tail,outerMm:b.hole,innerMm:b.diameter});
+      });
+      warnings.add("Крепёж рамы: резьба и деформированная часть гаек-заклёпок показаны условно.");continue;
+    }
     const hash = c.cadSource?.hash ?? meshHash(c.meshUrl);
     if (hash) {
+      if (c.kind === "pump" && onisMvCadSource(c.equipmentId, hash)) warnings.add(`${c.name}: ${c.sourceNote}`);
+      if (c.kind === "pump" && cdm15_6CadSource(c.equipmentId, hash)) warnings.add(`${c.name}: ${CDM15_6_CAD_NOTE}`);
+      const manual = c.sourceKey === "manual";
+      const preparedNote = c.kind === "pump" || c.sourceKey?.startsWith("pump:") || manual ? preparedPumpCadExportNote(c.equipmentId, hash, manual) : undefined;
+      if (preparedNote) warnings.add(`${c.name}: ${preparedNote}`);
       const mesh=c.shape?.kind==="mesh" && c.shape.modelHash===hash ? c.shape : undefined;
       add(c, "", { kind: "native", hash, ...(c.cadSource ? { source: c.cadSource.path } : {}) },mesh?[{position:mesh.modelPosition??zero,rotation:mesh.modelRotation??zero}]:[]); continue;
     }

@@ -6,9 +6,10 @@ import { coreFlowVelocity, coreRecommendedDn, defaultCollectorMaterial, dnVeloci
 import { coreGetCircuitDnConfig } from "../station-hydraulic-calculation";
 import { isCalculated } from "../calculated-input";
 import { normalizeHydraulicOptions } from "../hydraulic-option-config";
-import type { DnEntity, InputEntity, ProjectConfig, SettingsEntity } from "../project-config";
+import type { DnEntity, InputEntity, ProjectConfig, SettingsEntity, ValveConnection } from "../project-config";
 import type { Pump } from "../pump-catalog";
 import { pumpPortField, type PumpPortData, type PumpPortOverride } from "../pump-ports";
+import { pumpThreadDn } from "../pump-thread-size";
 import type { CatalogItem } from "./catalog-schema";
 import type { ParameterBinding, ToolContext, Values, View } from "./schema";
 import type { DnCircuit, DnContext, DnResult } from "./dn-nodes";
@@ -48,13 +49,17 @@ export function dnSelectedPump(value: unknown, selection: unknown, context: Tool
   if (!snapshot || !canonical || snapshot.id !== state.snapshotId || !state.requestKey || item.variantId !== item.pump?.id || state.variantId !== item.variantId || state.modelId !== item.modelId || state.curveSetId !== item.curveSetId || canonical.modelId !== item.modelId || canonical.curveSetId !== item.curveSetId || canonical.frequencyHz !== item.frequencyHz || JSON.stringify(canonical.pump) !== JSON.stringify(item.pump)) return { message: "Исполнение или снимок каталога не соответствует подтверждённому выбору. Подтвердите насос заново." };
   return { pump: { ...canonical.pump, spacingSnapshotId: snapshot.id } };
 }
-/** Source data only. Unknown connections remain unknown; no legacy nozzle index is read. */
-export function dnSourcePort(pump: Pump | undefined, side: "inlet" | "outlet"): PumpPortData | null {
+/** Read the pinned source. Thread sizes supply a nominal DN only for threaded ports. */
+export function dnSourcePort(pump: Pump | undefined, side: "inlet" | "outlet", selectedConnection?: ValveConnection | null): PumpPortData | null {
   if (!pump) return null;
   const p = record(pump[side]), connectionType = String(p.type ?? p.connection_type ?? p.connection ?? "").toLowerCase();
   const pressure = positive(p.maxPressure) ? p.maxPressure : positive(p.pn_nominal_bar) ? p.pn_nominal_bar : Number(String(p.pressure_class ?? "").replace(/^PN\s*/i, ""));
   const inletPressure = p.maxInletPressure ?? p.max_inlet_pressure_bar;
-  return { dn: positive(p.dn) ? p.dn : positive(pump[side === "inlet" ? "inletDn" : "outletDn"]) ? pump[side === "inlet" ? "inletDn" : "outletDn"]! : null, connection: ["flange", "flanged"].includes(connectionType) ? "flanged" : ["thread", "threaded"].includes(connectionType) ? "threaded" : null, maxPressure: positive(pressure) ? pressure : null, maxInletPressure: positive(inletPressure) ? inletPressure : null, source: typeof p.source === "string" ? p.source : pump.source || "Закреплённый каталог насосов" };
+  const connection = selectedConnection !== undefined ? selectedConnection : ["flange", "flanged"].includes(connectionType) ? "flanged" : ["thread", "threaded"].includes(connectionType) ? "threaded" : null;
+  const explicitDn = positive(p.dn) ? p.dn : positive(pump[side === "inlet" ? "inletDn" : "outletDn"]) ? pump[side === "inlet" ? "inletDn" : "outletDn"]! : null;
+  const thread = [p.thread_designation, p.connection_designation].find(value => typeof value === "string" && value.trim()) as string | undefined;
+  const derivedDn = connection === "threaded" ? pumpThreadDn(thread) : null;
+  return { dn: explicitDn ?? derivedDn, connection, maxPressure: positive(pressure) ? pressure : null, maxInletPressure: positive(inletPressure) ? inletPressure : null, source: typeof p.source === "string" ? p.source : typeof p.source_id === "string" ? p.source_id : pump.source || "Закреплённый каталог насосов", ...(connection === "threaded" && thread ? { thread, dnFromThread: explicitDn === null && derivedDn !== null } : {}) };
 }
 function settingsFrom(value: unknown, base: unknown, warnings: string[]): SettingsEntity {
   const s = record(value), applied = record(base), baseValues = applied.values && applied.versions ? applied as unknown as AppliedBaseValues : undefined;
@@ -84,7 +89,11 @@ export function buildDnContext(values: Values, context: ToolContext): DnContext 
   const effectiveEntity = { ...entity };
   for (const secondary of [false, true]) for (const side of ["inlet", "outlet"] as const) {
     const pump = secondary ? second.pump : main.pump, key = pumpPortField(secondary, side), manual = entity[key];
-    effectiveEntity[key] = pump ? manual?.pumpId === pump.id ? manual : { pumpId: pump.id, ...ports[secondary ? "secondary" : "primary"][side]! } : null;
+    if (pump && manual?.pumpId === pump.id) {
+      const fallback = dnSourcePort(pump, side, manual.connection);
+      effectiveEntity[key] = { ...manual, dn: manual.dn ?? fallback?.dn ?? null,
+        ...(manual.dn === null && fallback?.dnFromThread ? { thread: fallback.thread, dnFromThread: true } : {}) };
+    } else effectiveEntity[key] = pump ? { pumpId: pump.id, ...ports[secondary ? "secondary" : "primary"][side]! } : null;
   }
   const validSettings = ["utility", "fire", "combined", "smart"].includes(String(rawSettings.stationType));
   if (!validSettings) warnings.push("Подключите действующие настройки типа насосной установки.");

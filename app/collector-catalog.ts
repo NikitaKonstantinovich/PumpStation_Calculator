@@ -12,7 +12,7 @@ export function makeCollectorCatalog(data: BindingCatalog): CollectorCatalog {
   const components: CollectorComponent[] = [];
   for (const item of data.items) {
     // Compact insertion ends are purchased one-thread stubs, not the existing collector sgons.
-    if (field(item, /^Назначение$/i) === "Резьбовой конец вставки") continue;
+    if (["Резьбовой конец вставки", "Фланец вставки"].includes(String(field(item, /^Назначение$/i)))) continue;
     const material = /AISI\s*304/i.test(item.family) ? "aisi304" : /(?:сталь|ст[.\s]*)\s*20/i.test(item.family) ? "st20" : /латун/i.test(item.family) ? "brass" : null;
     if (!material) continue;
     let kind: ComponentKind | null = null;

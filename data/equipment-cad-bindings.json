@@ -169,6 +169,105 @@
           "note": "Исходник библиотеки: совпадают DN, PN, тип 01, ряд, поверхность B, группа IV и материал Ст20. Геометрия файла не изменена."
         }
       ]
+    },
+    {
+      "key": "equipment:st20-ready-bore:32-10",
+      "name": "Фланец плоский 32-10-01-2-B-Ст.20-IV ГОСТ 33259-2015",
+      "models": [
+        {
+          "path": "Equipment/Piping/3D/Project-St20-Insertion-Flanges/PSC-project-flange-GOST33259-01-2-B-DN32.step",
+          "hash": "2038a82b698c11395eb96774a99b9df63afe4528fe6b6dacafd8fb01f26a5aaa",
+          "note": "Проектная геометрия по ГОСТ 33259-2015; тип 01, ряд 2, B. Размеры одинаковы для PN10, PN16 и PN25 этого DN."
+        }
+      ]
+    },
+    {
+      "key": "equipment:st20-ready-bore:32-16",
+      "name": "Фланец плоский 32-16-01-2-B-Ст.20-IV ГОСТ 33259-2015",
+      "models": [
+        {
+          "path": "Equipment/Piping/3D/Project-St20-Insertion-Flanges/PSC-project-flange-GOST33259-01-2-B-DN32.step",
+          "hash": "2038a82b698c11395eb96774a99b9df63afe4528fe6b6dacafd8fb01f26a5aaa",
+          "note": "Проектная геометрия по ГОСТ 33259-2015; тип 01, ряд 2, B. Размеры одинаковы для PN10, PN16 и PN25 этого DN."
+        }
+      ]
+    },
+    {
+      "key": "equipment:st20-ready-bore:32-25",
+      "name": "Фланец плоский 32-25-01-2-B-Ст.20-IV ГОСТ 33259-2015",
+      "models": [
+        {
+          "path": "Equipment/Piping/3D/Project-St20-Insertion-Flanges/PSC-project-flange-GOST33259-01-2-B-DN32.step",
+          "hash": "2038a82b698c11395eb96774a99b9df63afe4528fe6b6dacafd8fb01f26a5aaa",
+          "note": "Проектная геометрия по ГОСТ 33259-2015; тип 01, ряд 2, B. Размеры одинаковы для PN10, PN16 и PN25 этого DN."
+        }
+      ]
+    },
+    {
+      "key": "equipment:st20-ready-bore:40-10",
+      "name": "Фланец плоский 40-10-01-2-B-Ст.20-IV ГОСТ 33259-2015",
+      "models": [
+        {
+          "path": "Equipment/Piping/3D/Project-St20-Insertion-Flanges/PSC-project-flange-GOST33259-01-2-B-DN40.step",
+          "hash": "9b6bedbd95af78dda925d62bbf631acd085eefcb61d4aa15c51d590bb206e5b7",
+          "note": "Проектная геометрия по ГОСТ 33259-2015; тип 01, ряд 2, B. Размеры одинаковы для PN10, PN16 и PN25 этого DN."
+        }
+      ]
+    },
+    {
+      "key": "equipment:st20-ready-bore:40-16",
+      "name": "Фланец плоский 40-16-01-2-B-Ст.20-IV ГОСТ 33259-2015",
+      "models": [
+        {
+          "path": "Equipment/Piping/3D/Project-St20-Insertion-Flanges/PSC-project-flange-GOST33259-01-2-B-DN40.step",
+          "hash": "9b6bedbd95af78dda925d62bbf631acd085eefcb61d4aa15c51d590bb206e5b7",
+          "note": "Проектная геометрия по ГОСТ 33259-2015; тип 01, ряд 2, B. Размеры одинаковы для PN10, PN16 и PN25 этого DN."
+        }
+      ]
+    },
+    {
+      "key": "equipment:st20-ready-bore:40-25",
+      "name": "Фланец плоский 40-25-01-2-B-Ст.20-IV ГОСТ 33259-2015",
+      "models": [
+        {
+          "path": "Equipment/Piping/3D/Project-St20-Insertion-Flanges/PSC-project-flange-GOST33259-01-2-B-DN40.step",
+          "hash": "9b6bedbd95af78dda925d62bbf631acd085eefcb61d4aa15c51d590bb206e5b7",
+          "note": "Проектная геометрия по ГОСТ 33259-2015; тип 01, ряд 2, B. Размеры одинаковы для PN10, PN16 и PN25 этого DN."
+        }
+      ]
+    },
+    {
+      "key": "equipment:st20-ready-bore:50-10",
+      "name": "Фланец плоский 50-10-01-2-B-Ст.20-IV ГОСТ 33259-2015",
+      "models": [
+        {
+          "path": "Equipment/Piping/3D/Project-St20-Insertion-Flanges/PSC-project-flange-GOST33259-01-2-B-DN50.step",
+          "hash": "b175617bf6331abbb605d6ed0d40314fe876f5801b906160c669957321c5ce90",
+          "note": "Проектная геометрия по ГОСТ 33259-2015; тип 01, ряд 2, B. Размеры одинаковы для PN10, PN16 и PN25 этого DN."
+        }
+      ]
+    },
+    {
+      "key": "equipment:st20-ready-bore:50-16",
+      "name": "Фланец плоский 50-16-01-2-B-Ст.20-IV ГОСТ 33259-2015",
+      "models": [
+        {
+          "path": "Equipment/Piping/3D/Project-St20-Insertion-Flanges/PSC-project-flange-GOST33259-01-2-B-DN50.step",
+          "hash": "b175617bf6331abbb605d6ed0d40314fe876f5801b906160c669957321c5ce90",
+          "note": "Проектная геометрия по ГОСТ 33259-2015; тип 01, ряд 2, B. Размеры одинаковы для PN10, PN16 и PN25 этого DN."
+        }
+      ]
+    },
+    {
+      "key": "equipment:st20-ready-bore:50-25",
+      "name": "Фланец плоский 50-25-01-2-B-Ст.20-IV ГОСТ 33259-2015",
+      "models": [
+        {
+          "path": "Equipment/Piping/3D/Project-St20-Insertion-Flanges/PSC-project-flange-GOST33259-01-2-B-DN50.step",
+          "hash": "b175617bf6331abbb605d6ed0d40314fe876f5801b906160c669957321c5ce90",
+          "note": "Проектная геометрия по ГОСТ 33259-2015; тип 01, ряд 2, B. Размеры одинаковы для PN10, PN16 и PN25 этого DN."
+        }
+      ]
     }
   ]
 }

@@ -13,6 +13,13 @@
 .cad-export__menu{position:relative}
 @media(max-width:600px){.cad-export{flex-wrap:wrap;gap:5px}.cad-export__status{flex-basis:100%;max-width:none}.cad-export__options{right:0;width:260px}}
 .cad-export__options a{display:block;padding:8px}
+.cad-export--compact{flex:0 0 auto;max-width:none;gap:6px;padding:5px 6px;border-left:0;border-bottom:1px solid var(--theme-border,#cbd5e1);flex-wrap:wrap;z-index:3}
+.cad-export--compact .cad-export__action{font-size:11px;line-height:1.3;padding:5px 8px}
+.cad-export--compact .cad-export__status{flex-basis:100%;max-width:100%;font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cad-export--compact .cad-export__status:empty{display:none}
+.cad-export--compact .cad-export__status small,.cad-export--compact .cad-export__status p{display:none}
+.cad-export--compact .cad-export__menu{position:static}
+.cad-export--compact .cad-export__options{left:6px;right:auto;width:290px;max-width:calc(100% - 12px);max-height:300px;overflow:auto}
 .cad-export button:disabled{opacity:.55;cursor:default}
 .cad-warnings{min-height:0;overflow:auto;padding:12px;overflow-wrap:anywhere}
 .cad-warnings p{margin:6px 0}

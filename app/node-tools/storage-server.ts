@@ -18,21 +18,21 @@ import { isUserRole, type UserRole } from "../user-types";
 import { ToolError } from "./errors";
 export { ToolError } from "./errors";
 import { DEFAULT_ALGORITHM, algorithmForProject } from "./algorithm-schema";
-import { ensureAlgorithmLibrary, algorithmRow, algorithmHistory, algorithmSnapshot, checkRevision, saveAlgorithmDraft, saveAlgorithmVersion, restoreAlgorithm } from "./algorithm-store-server";
+import { ensureAlgorithmLibrary, algorithmRow, algorithmInfo, algorithmHistory, algorithmSnapshot, algorithmDocument, checkRevision, saveAlgorithmDraft, saveAlgorithmVersion, restoreAlgorithm } from "./algorithm-store-server";
 const FACTORY = "node-tools-v1";
-const compiledCache = new Map<string, ToolProgram>();
+const compiledCaches = new WeakMap<ReturnType<typeof db>, Map<string, ToolProgram>>();
 async function stateRow() {
-  const row = await db().prepare("SELECT revision,active,draft FROM node_tool_state WHERE id=1").first<{
+  const row = await db().prepare("SELECT revision,active,draft IS NOT NULL AS has_draft FROM node_tool_state WHERE id=1").first<{
     revision: number;
     active: string | null;
-    draft: string | null;
+    has_draft: number;
   }>();
   if (!row) throw new ToolError("Примените миграцию 0017_node_tools.sql", 503);
   return row;
 }
 async function seed() {
   const row = await stateRow();
-  if (row.revision === 0 && !row.active && !row.draft) {
+  if (row.revision === 0 && !row.active && !row.has_draft) {
     const base = await currentBasePublication();
     const doc = initialTools(Object.keys(base.values.financial.discounts).filter(k => /^[a-zA-Z_][a-zA-Z0-9_-]*$/.test(k))),
       program = compileTools(doc, FACTORY);
@@ -43,18 +43,24 @@ export async function initializeAlgorithms() { await seed(); await ensureAlgorit
 export async function toolState(algorithmId = DEFAULT_ALGORITHM) {
   await initializeAlgorithms();
   const row = await algorithmRow(algorithmId), versions = await algorithmHistory(algorithmId);
-  const saved = row.draft ? row.draft : (await algorithmSnapshot(algorithmId,row.active)).document;
+  const saved = row.draft ?? await algorithmDocument(algorithmId,row.active);
   return { revision:row.revision, active:row.active, draft:JSON.parse(saved) as ToolDocument, versions,
     algorithmId, name:row.name, connected:!!row.connected, hasDraft:!!row.draft_dirty };
 }
 export async function toolProgram(version?: string | null, algorithmId = DEFAULT_ALGORITHM, allowDisconnected = true): Promise<ToolProgram> {
   await initializeAlgorithms();
-  const state = await algorithmRow(algorithmId);
+  const state = await algorithmInfo(algorithmId);
   if (!allowDisconnected && !state.connected) throw new ToolError("Продукт отключён администратором. Проекты и введённые данные сохранены.",403);
   const id = version || state.active;
-  const saved = await algorithmSnapshot(algorithmId,id);
-  const key = algorithmId + "/" + id, cached = compiledCache.get(key);
+  const database = db();
+  let compiledCache = compiledCaches.get(database);
+  if (!compiledCache) {
+    compiledCache = new Map();
+    compiledCaches.set(database, compiledCache);
+  }
+  const key = JSON.stringify([algorithmId,id]), cached = compiledCache.get(key);
   if (cached) return cached;
+  const saved = await algorithmSnapshot(algorithmId,id);
   const program = {...JSON.parse(saved.program), algorithmId} as ToolProgram;
   if (compiledCache.size >= 20) compiledCache.delete(compiledCache.keys().next().value!);
   compiledCache.set(key, program);
@@ -172,10 +178,24 @@ export async function toolResources(program: ToolProgram, versions?: Record<stri
   if (usesStationCatalog(program)) { const snapshot = await stationCatalogSnapshot(versions?.station_catalog, baseVersions); resources.station_catalog = snapshot; sourceVersions.station_catalog = snapshot.id; }
   return { resources, sourceVersions };
 }
+
+/** Resolve missing pins without reading pinned snapshots or returning their contents. */
+export async function toolSourceVersions(program: ToolProgram, versions: Record<string, string>, baseVersions: Record<string, string>): Promise<Record<string, string>> {
+  const [pump, station] = await Promise.all([
+    !versions.pump_catalog_v2 && usesCatalog(program) ? catalogSnapshot().then(snapshot => snapshot.id) : undefined,
+    !versions.station_catalog && usesStationCatalog(program) ? stationCatalogSnapshot(undefined, baseVersions).then(snapshot => snapshot.id) : undefined
+  ]);
+  return {
+    ...versions,
+    ...(pump ? {pump_catalog_v2:pump} : {}),
+    ...(station ? {station_catalog:station} : {})
+  };
+}
 async function checkValues(id: string, saved: import("./schema").SavedTool, result: import("./schema").Evaluation, defaults: Values, prior: WorkspaceData | undefined, role: UserRole, plan: ToolProgram["plans"][string]) {
   const bindings = ownBindings(result, id),
     previous = prior?.tools[id]?.values;
-  const errors = result.issues.filter(i => i.severity === "error");
+  // A project may be saved before all calculation inputs have been entered.
+  const errors = result.issues.filter(i => i.severity === "error" && i.code !== "calculation-input");
   if (errors.length) throw new ToolError(errors.map(i => i.message).join("; "));
   const selectionProblems = invalidSelections(result, id, saved.values, previous, plan);
   if (selectionProblems.length) throw new ToolError(selectionProblems.join("; "), 403);

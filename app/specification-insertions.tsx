@@ -4,13 +4,14 @@ import { insertionDesign, insertionOrientations, latestInsertionFirst } from "./
 import { insertionPhysicalKey, installedInsertionBom } from "./calculated-insertion";
 import "./specification-insertions.css";
 
-export function SpecificationInsertion({ item, database, designs, onChange }: {
+export function SpecificationInsertion({ item, database, designs, onChange, automatic = false }: {
   item: SpecItem; database?: { items: AssemblyComponent[] }; designs?: DnEntity["insertionDesigns"];
   onChange?: (patch: Partial<DnEntity>) => void;
+  automatic?: boolean;
 }) {
   const requirement = item.insertionRequirement;
   if (!requirement) return null;
-  const candidates = (database?.items ?? []).filter(candidate => insertionOrientations(candidate, requirement).length && insertionDesign(candidate.calculatedInsertion!.calculation))
+  const candidates = (automatic ? [] : database?.items ?? []).filter(candidate => insertionOrientations(candidate, requirement).length && insertionDesign(candidate.calculatedInsertion!.calculation))
     .sort(latestInsertionFirst);
   const design = designs?.[requirement.location];
   const current = candidates.find(candidate => design && candidate.calculatedInsertion!.calculation.totalLengthMm === design.totalLengthMm && insertionPhysicalKey(candidate.calculatedInsertion!.calculation.configuration) === insertionPhysicalKey(design.configuration));
@@ -18,9 +19,11 @@ export function SpecificationInsertion({ item, database, designs, onChange }: {
   const location = `${requirement.location.startsWith("suction:") ? "Всас" : "Напор"} · ${requirement.location.includes(":secondary-") ? "Контур 2" : "Контур 1"} · ${{"between-valves":"между арматурой","pump-transition":"у насоса","after-vibration":"после компенсатора"}[requirement.purpose]}`;
   return <details className="spec-insertion" data-insertion-location={requirement.location}>
     <summary>Исполнение и состав вставки</summary>
-    <p>Подтвердите монтажную длину и исполнение для этого участка. Направление концов — от насоса к коллектору. Совместимость проверяется при каждом пересчёте.</p>
+    {automatic
+      ? <p>{location}{assembly ? ` · монтажная длина ${assembly.snapshot.calculation.totalLengthMm} мм` : ""}</p>
+      : <p>Подтвердите монтажную длину и исполнение для этого участка. Направление концов — от насоса к коллектору. Совместимость проверяется при каждом пересчёте.</p>}
     <p>Требуется: {{straight:"прямая вставка",concentric:"концентрический переход",eccentric:"эксцентрический переход"}[requirement.geometry]}{requirement.withSensorNipple === undefined ? "" : requirement.withSensorNipple ? ", со сгоном DN15 под реле давления" : ", без сгона"}.</p>
-    <label>{location}
+    {!automatic && <><label>{location}
       <select aria-label={`Исполнение вставки: ${location}`} value={current?.id ?? ""} disabled={!onChange} onChange={event => {
         const next = { ...designs };
         const candidate = candidates.find(c => c.id === event.target.value);
@@ -34,11 +37,12 @@ export function SpecificationInsertion({ item, database, designs, onChange }: {
         </option>; })}
       </select>
     </label>
-    {!candidates.length && <p>В загруженном каталоге нет расчётных вставок с подходящими DN, PN, материалом, соединениями, геометрией и исполнением сгона.</p>}
+    {!candidates.length && <p>В загруженном каталоге нет расчётных вставок с подходящими DN, PN, материалом, соединениями, геометрией и исполнением сгона.</p>}</>}
+    {automatic && !assembly && <p>{item.technicalNotes?.[0] ?? item.description}</p>}
     {assembly && <>
       <p>Источник: {assembly.snapshot.id}; ревизия {assembly.snapshot.revision}; дата цены {assembly.snapshot.pricedAt}. Учёт: одно готовое изделие. Состав ниже указан на одну вставку и повторно не суммируется.</p>
       {assembly.sensorConnection && <p>Сгон занят узлом «кран → футорка → реле». Покупная заглушка исключена из установленного состава и цены. Исходный расчёт изделия сохранён.</p>}
-      <ul>{installedInsertionBom(assembly).map((part, index) => <li key={`${part.role}-${index}`}>{part.name} — {part.quantity?.toLocaleString("ru-RU",{maximumFractionDigits:3}) ?? "?"} {part.unit}; {part.cost === null ? "цена не подтверждена" : `${part.cost.toLocaleString("ru-RU",{maximumFractionDigits:2})} ₽`} · {part.source ?? "источник не указан"}</li>)}</ul>
+      <ul>{installedInsertionBom(assembly, requirement.checkPressure).map((part, index) => <li key={`${part.role}-${index}`}>{part.name} — {part.quantity?.toLocaleString("ru-RU",{maximumFractionDigits:3}) ?? "?"} {part.unit}; {part.cost === null ? "цена не подтверждена" : `${part.cost.toLocaleString("ru-RU",{maximumFractionDigits:2})} ₽`} · {part.source ?? "источник не указан"}</li>)}</ul>
     </>}
   </details>;
 }

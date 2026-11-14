@@ -32683,7 +32683,7 @@
         "power_kw": 0.37,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -32710,7 +32710,7 @@
         "power_kw": 0.37,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -32737,7 +32737,7 @@
         "power_kw": 0.37,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -32764,7 +32764,7 @@
         "power_kw": 0.37,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -32791,7 +32791,7 @@
         "power_kw": 0.37,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -32818,7 +32818,7 @@
         "power_kw": 0.37,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -32845,7 +32845,7 @@
         "power_kw": 0.55,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -32872,7 +32872,7 @@
         "power_kw": 0.55,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -32899,7 +32899,7 @@
         "power_kw": 0.55,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -32926,7 +32926,7 @@
         "power_kw": 0.55,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -32953,7 +32953,7 @@
         "power_kw": 0.75,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -32980,7 +32980,7 @@
         "power_kw": 0.75,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -33007,7 +33007,7 @@
         "power_kw": 0.75,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -33034,7 +33034,7 @@
         "power_kw": 1.1,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -33061,7 +33061,7 @@
         "power_kw": 1.1,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -33088,7 +33088,7 @@
         "power_kw": 1.1,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -33115,7 +33115,7 @@
         "power_kw": 1.1,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -33142,7 +33142,7 @@
         "power_kw": 1.5,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -33169,7 +33169,7 @@
         "power_kw": 1.5,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -33196,7 +33196,7 @@
         "power_kw": 1.5,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -33223,7 +33223,7 @@
         "power_kw": 1.5,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -33250,7 +33250,7 @@
         "power_kw": 2.2,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -33277,7 +33277,7 @@
         "power_kw": 2.2,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -33304,7 +33304,7 @@
         "power_kw": 2.2,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -33331,7 +33331,7 @@
         "power_kw": 2.2,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -33358,7 +33358,7 @@
         "power_kw": 2.2,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -33385,7 +33385,7 @@
         "power_kw": 2.2,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -33412,7 +33412,7 @@
         "power_kw": 0.37,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -33439,7 +33439,7 @@
         "power_kw": 0.37,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -33466,7 +33466,7 @@
         "power_kw": 0.37,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -33493,7 +33493,7 @@
         "power_kw": 0.55,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -33520,7 +33520,7 @@
         "power_kw": 0.55,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -33547,7 +33547,7 @@
         "power_kw": 0.75,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -33574,7 +33574,7 @@
         "power_kw": 0.75,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -33601,7 +33601,7 @@
         "power_kw": 1.1,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -33628,7 +33628,7 @@
         "power_kw": 1.1,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -33655,7 +33655,7 @@
         "power_kw": 1.1,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -33682,7 +33682,7 @@
         "power_kw": 1.1,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -33709,7 +33709,7 @@
         "power_kw": 1.5,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -33736,7 +33736,7 @@
         "power_kw": 1.5,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -33763,7 +33763,7 @@
         "power_kw": 1.5,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -33790,7 +33790,7 @@
         "power_kw": 1.5,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -33817,7 +33817,7 @@
         "power_kw": 2.2,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -33844,7 +33844,7 @@
         "power_kw": 2.2,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -33871,7 +33871,7 @@
         "power_kw": 2.2,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -33898,7 +33898,7 @@
         "power_kw": 2.2,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -33925,7 +33925,7 @@
         "power_kw": 2.2,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -33952,7 +33952,7 @@
         "power_kw": 2.2,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -33979,7 +33979,7 @@
         "power_kw": 2.2,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -34006,7 +34006,7 @@
         "power_kw": 3.0,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -34033,7 +34033,7 @@
         "power_kw": 3.0,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -34060,7 +34060,7 @@
         "power_kw": 3.0,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -34087,7 +34087,7 @@
         "power_kw": 3.0,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -34114,7 +34114,7 @@
         "power_kw": 3.0,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -34141,7 +34141,7 @@
         "power_kw": 0.37,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -34168,7 +34168,7 @@
         "power_kw": 0.55,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -34195,7 +34195,7 @@
         "power_kw": 0.55,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -34222,7 +34222,7 @@
         "power_kw": 0.75,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -34249,7 +34249,7 @@
         "power_kw": 1.1,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -34276,7 +34276,7 @@
         "power_kw": 1.1,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -34303,7 +34303,7 @@
         "power_kw": 1.1,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -34330,7 +34330,7 @@
         "power_kw": 1.5,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -34357,7 +34357,7 @@
         "power_kw": 1.5,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -34384,7 +34384,7 @@
         "power_kw": 1.5,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -34411,7 +34411,7 @@
         "power_kw": 2.2,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -34438,7 +34438,7 @@
         "power_kw": 2.2,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -34465,7 +34465,7 @@
         "power_kw": 2.2,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -34492,7 +34492,7 @@
         "power_kw": 2.2,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -34519,7 +34519,7 @@
         "power_kw": 2.2,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -34546,7 +34546,7 @@
         "power_kw": 3.0,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -34573,7 +34573,7 @@
         "power_kw": 3.0,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -34600,7 +34600,7 @@
         "power_kw": 3.0,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -34627,7 +34627,7 @@
         "power_kw": 3.0,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -34654,7 +34654,7 @@
         "power_kw": 4.0,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -34681,7 +34681,7 @@
         "power_kw": 4.0,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -34708,7 +34708,7 @@
         "power_kw": 4.0,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -34735,7 +34735,7 @@
         "power_kw": 4.0,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -34762,7 +34762,7 @@
         "power_kw": 4.0,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -34789,7 +34789,7 @@
         "power_kw": 5.5,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -34816,7 +34816,7 @@
         "power_kw": 5.5,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -34843,7 +34843,7 @@
         "power_kw": 5.5,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -34870,7 +34870,7 @@
         "power_kw": 0.75,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -34897,7 +34897,7 @@
         "power_kw": 0.75,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -34924,7 +34924,7 @@
         "power_kw": 1.1,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -34951,7 +34951,7 @@
         "power_kw": 1.5,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -34978,7 +34978,7 @@
         "power_kw": 2.2,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -35005,7 +35005,7 @@
         "power_kw": 2.2,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -35032,7 +35032,7 @@
         "power_kw": 3.0,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -35059,7 +35059,7 @@
         "power_kw": 3.0,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -35086,7 +35086,7 @@
         "power_kw": 4.0,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -35113,7 +35113,7 @@
         "power_kw": 4.0,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -35140,7 +35140,7 @@
         "power_kw": 4.0,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -35167,7 +35167,7 @@
         "power_kw": 5.5,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -35194,7 +35194,7 @@
         "power_kw": 5.5,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -35221,7 +35221,7 @@
         "power_kw": 5.5,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -35248,7 +35248,7 @@
         "power_kw": 5.5,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -35275,7 +35275,7 @@
         "power_kw": 7.5,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -35302,7 +35302,7 @@
         "power_kw": 7.5,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -35329,7 +35329,7 @@
         "power_kw": 7.5,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -35356,7 +35356,7 @@
         "power_kw": 7.5,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -35383,7 +35383,7 @@
         "power_kw": 7.5,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -35410,7 +35410,7 @@
         "power_kw": 7.5,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -35437,7 +35437,7 @@
         "power_kw": 11.0,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -35464,7 +35464,7 @@
         "power_kw": 1.1,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -35491,7 +35491,7 @@
         "power_kw": 2.2,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -35518,7 +35518,7 @@
         "power_kw": 3.0,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -35545,7 +35545,7 @@
         "power_kw": 4.0,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -35572,7 +35572,7 @@
         "power_kw": 4.0,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -35599,7 +35599,7 @@
         "power_kw": 5.5,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -35626,7 +35626,7 @@
         "power_kw": 5.5,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -35653,7 +35653,7 @@
         "power_kw": 7.5,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -35680,7 +35680,7 @@
         "power_kw": 7.5,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -35707,7 +35707,7 @@
         "power_kw": 11.0,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -35734,7 +35734,7 @@
         "power_kw": 11.0,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -35761,7 +35761,7 @@
         "power_kw": 11.0,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -35788,7 +35788,7 @@
         "power_kw": 11.0,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -35815,7 +35815,7 @@
         "power_kw": 11.0,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -35842,7 +35842,7 @@
         "power_kw": 15.0,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -35869,7 +35869,7 @@
         "power_kw": 15.0,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -35896,7 +35896,7 @@
         "power_kw": 15.0,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -35923,7 +35923,7 @@
         "power_kw": 15.0,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -35950,7 +35950,7 @@
         "power_kw": 2.2,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -35977,7 +35977,7 @@
         "power_kw": 4.0,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -36004,7 +36004,7 @@
         "power_kw": 5.5,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -36031,7 +36031,7 @@
         "power_kw": 5.5,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -36058,7 +36058,7 @@
         "power_kw": 7.5,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -36085,7 +36085,7 @@
         "power_kw": 7.5,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -36112,7 +36112,7 @@
         "power_kw": 11.0,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -36139,7 +36139,7 @@
         "power_kw": 11.0,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -36166,7 +36166,7 @@
         "power_kw": 15.0,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -36193,7 +36193,7 @@
         "power_kw": 15.0,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -36220,7 +36220,7 @@
         "power_kw": 18.5,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -36247,7 +36247,7 @@
         "power_kw": 4.0,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -36274,7 +36274,7 @@
         "power_kw": 3.0,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -36301,7 +36301,7 @@
         "power_kw": 5.5,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -36328,7 +36328,7 @@
         "power_kw": 5.5,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -36355,7 +36355,7 @@
         "power_kw": 7.5,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -36382,7 +36382,7 @@
         "power_kw": 7.5,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -36409,7 +36409,7 @@
         "power_kw": 11.0,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -36436,7 +36436,7 @@
         "power_kw": 11.0,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -36463,7 +36463,7 @@
         "power_kw": 11.0,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -36490,7 +36490,7 @@
         "power_kw": 11.0,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -36517,7 +36517,7 @@
         "power_kw": 15.0,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -36544,7 +36544,7 @@
         "power_kw": 15.0,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -36571,7 +36571,7 @@
         "power_kw": 15.0,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -36598,7 +36598,7 @@
         "power_kw": 15.0,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -36625,7 +36625,7 @@
         "power_kw": 18.5,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -36652,7 +36652,7 @@
         "power_kw": 18.5,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -36679,7 +36679,7 @@
         "power_kw": 18.5,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -36706,7 +36706,7 @@
         "power_kw": 18.5,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -36733,7 +36733,7 @@
         "power_kw": 22.0,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -36760,7 +36760,7 @@
         "power_kw": 22.0,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -36814,7 +36814,7 @@
         "power_kw": 22.0,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -36841,7 +36841,7 @@
         "power_kw": 30.0,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -36868,7 +36868,7 @@
         "power_kw": 30.0,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -36895,7 +36895,7 @@
         "power_kw": 30.0,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -36922,7 +36922,7 @@
         "power_kw": 30.0,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -36949,7 +36949,7 @@
         "power_kw": 30.0,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -36976,7 +36976,7 @@
         "power_kw": 30.0,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -37003,7 +37003,7 @@
         "power_kw": 7.5,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -37030,7 +37030,7 @@
         "power_kw": 5.5,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -37057,7 +37057,7 @@
         "power_kw": 11.0,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -37084,7 +37084,7 @@
         "power_kw": 11.0,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -37111,7 +37111,7 @@
         "power_kw": 15.0,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -37138,7 +37138,7 @@
         "power_kw": 15.0,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -37165,7 +37165,7 @@
         "power_kw": 18.5,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -37192,7 +37192,7 @@
         "power_kw": 18.5,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -37219,7 +37219,7 @@
         "power_kw": 22.0,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -37246,7 +37246,7 @@
         "power_kw": 22.0,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -37273,7 +37273,7 @@
         "power_kw": 30.0,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -37300,7 +37300,7 @@
         "power_kw": 30.0,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -37327,7 +37327,7 @@
         "power_kw": 30.0,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -37354,7 +37354,7 @@
         "power_kw": 30.0,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -37381,7 +37381,7 @@
         "power_kw": 37.0,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -37408,7 +37408,7 @@
         "power_kw": 37.0,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -37435,7 +37435,7 @@
         "power_kw": 37.0,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -37462,7 +37462,7 @@
         "power_kw": 45.0,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -37489,7 +37489,7 @@
         "power_kw": 45.0,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -37516,7 +37516,7 @@
         "power_kw": 45.0,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -37543,7 +37543,7 @@
         "power_kw": 45.0,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -37570,7 +37570,7 @@
         "power_kw": 45.0,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -37597,7 +37597,7 @@
         "power_kw": 11.0,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -37624,7 +37624,7 @@
         "power_kw": 11.0,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -37651,7 +37651,7 @@
         "power_kw": 7.5,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -37678,7 +37678,7 @@
         "power_kw": 18.5,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -37705,7 +37705,7 @@
         "power_kw": 15.0,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -37732,7 +37732,7 @@
         "power_kw": 15.0,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -37759,7 +37759,7 @@
         "power_kw": 22.0,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -37786,7 +37786,7 @@
         "power_kw": 22.0,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -37813,7 +37813,7 @@
         "power_kw": 18.5,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -37840,7 +37840,7 @@
         "power_kw": 30.0,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -37867,7 +37867,7 @@
         "power_kw": 30.0,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -37894,7 +37894,7 @@
         "power_kw": 30.0,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -37921,7 +37921,7 @@
         "power_kw": 37.0,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -37948,7 +37948,7 @@
         "power_kw": 37.0,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -37975,7 +37975,7 @@
         "power_kw": 30.0,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -38002,7 +38002,7 @@
         "power_kw": 45.0,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -38029,7 +38029,7 @@
         "power_kw": 37.0,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -38056,7 +38056,7 @@
         "power_kw": 37.0,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -38083,7 +38083,7 @@
         "power_kw": 45.0,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -38110,7 +38110,7 @@
         "power_kw": 45.0,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -38137,7 +38137,7 @@
         "power_kw": 45.0,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -38164,7 +38164,7 @@
         "power_kw": 15.0,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -38191,7 +38191,7 @@
         "power_kw": 11.0,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -38218,7 +38218,7 @@
         "power_kw": 22.0,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -38245,7 +38245,7 @@
         "power_kw": 18.5,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -38272,7 +38272,7 @@
         "power_kw": 30.0,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -38299,7 +38299,7 @@
         "power_kw": 30.0,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -38326,7 +38326,7 @@
         "power_kw": 37.0,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -38353,7 +38353,7 @@
         "power_kw": 37.0,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -38380,7 +38380,7 @@
         "power_kw": 45.0,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -38407,7 +38407,7 @@
         "power_kw": 45.0,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -38434,7 +38434,7 @@
         "power_kw": 11.0,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -38461,7 +38461,7 @@
         "power_kw": 15.0,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -38488,7 +38488,7 @@
         "power_kw": 18.5,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -38515,7 +38515,7 @@
         "power_kw": 22.0,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -38542,7 +38542,7 @@
         "power_kw": 30.0,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -38569,7 +38569,7 @@
         "power_kw": 30.0,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -38596,7 +38596,7 @@
         "power_kw": 30.0,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -38623,7 +38623,7 @@
         "power_kw": 37.0,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -38650,7 +38650,7 @@
         "power_kw": 37.0,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -38677,7 +38677,7 @@
         "power_kw": 45.0,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -38704,7 +38704,7 @@
         "power_kw": 45.0,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -38731,7 +38731,7 @@
         "power_kw": 45.0,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -38758,7 +38758,7 @@
         "power_kw": 55.0,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -38785,7 +38785,7 @@
         "power_kw": 55.0,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -38812,7 +38812,7 @@
         "power_kw": 55.0,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -38839,7 +38839,7 @@
         "power_kw": 75.0,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -38866,7 +38866,7 @@
         "power_kw": 75.0,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -38893,7 +38893,7 @@
         "power_kw": 75.0,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -38920,7 +38920,7 @@
         "power_kw": 75.0,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -38947,7 +38947,7 @@
         "power_kw": 90.0,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -38974,7 +38974,7 @@
         "power_kw": 11.0,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -39001,7 +39001,7 @@
         "power_kw": 15.0,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -39028,7 +39028,7 @@
         "power_kw": 18.5,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -39055,7 +39055,7 @@
         "power_kw": 22.0,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -39082,7 +39082,7 @@
         "power_kw": 30.0,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -39109,7 +39109,7 @@
         "power_kw": 30.0,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -39136,7 +39136,7 @@
         "power_kw": 37.0,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -39163,7 +39163,7 @@
         "power_kw": 37.0,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -39190,7 +39190,7 @@
         "power_kw": 45.0,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -39217,7 +39217,7 @@
         "power_kw": 45.0,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -39244,7 +39244,7 @@
         "power_kw": 55.0,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -39271,7 +39271,7 @@
         "power_kw": 55.0,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -39298,7 +39298,7 @@
         "power_kw": 75.0,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -39325,7 +39325,7 @@
         "power_kw": 75.0,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -39352,7 +39352,7 @@
         "power_kw": 75.0,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -39379,7 +39379,7 @@
         "power_kw": 75.0,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -39406,7 +39406,7 @@
         "power_kw": 75.0,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -39433,7 +39433,7 @@
         "power_kw": 90.0,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -39460,7 +39460,7 @@
         "power_kw": 18.5,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -39487,7 +39487,7 @@
         "power_kw": 22.0,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -39514,7 +39514,7 @@
         "power_kw": 30.0,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -39541,7 +39541,7 @@
         "power_kw": 37.0,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -39568,7 +39568,7 @@
         "power_kw": 45.0,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -39595,7 +39595,7 @@
         "power_kw": 55.0,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -39622,7 +39622,7 @@
         "power_kw": 55.0,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -39649,7 +39649,7 @@
         "power_kw": 75.0,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -39676,7 +39676,7 @@
         "power_kw": 75.0,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -39703,7 +39703,7 @@
         "power_kw": 75.0,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -39730,7 +39730,7 @@
         "power_kw": 75.0,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -39757,7 +39757,7 @@
         "power_kw": 75.0,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -39784,7 +39784,7 @@
         "power_kw": 90.0,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -39811,7 +39811,7 @@
         "power_kw": 90.0,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -39838,7 +39838,7 @@
         "power_kw": 110.0,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -39865,7 +39865,7 @@
         "power_kw": 110.0,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -39892,7 +39892,7 @@
         "power_kw": 110.0,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -39919,7 +39919,7 @@
         "power_kw": 132.0,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },
@@ -39946,7 +39946,7 @@
         "power_kw": 132.0,
         "phase_count": 3,
         "frequency_hz": 50.0,
-        "speed_rpm": null,
+        "speed_rpm": 2900.0,
         "efficiency_class": null,
         "protection_class": "IP55"
       },

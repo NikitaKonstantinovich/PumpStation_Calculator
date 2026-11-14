@@ -1,0 +1,146 @@
+{
+  "schema": 1,
+  "manufacturer": "CNP",
+  "series": "TD",
+  "source": {
+    "kind": "factory_catalogue",
+    "scope": "optional_foundation_plate_ordering_reference",
+    "path": "database/cnp_catalog_sources/TD_LLT_TDi_10082026.pdf",
+    "sha256": "4474dbd6fb707879d16cdea9a41c5b7f2be7e7abb6a4eb70da49ddb5e3444469",
+    "page": 70,
+    "url": "https://www.cnprussia.ru/catalog/cnp/tsirkulyatsionnye-nasosy/td/"
+  },
+  "plates": {
+    "A": {
+      "includedAsStandard": false,
+      "thicknessMm": 35,
+      "widthMm": 235,
+      "lengthMm": 235,
+      "anchorHoles": {
+        "count": 4,
+        "diameterMm": 14,
+        "pitchXMm": 195,
+        "pitchYMm": 195
+      },
+      "pumpMountingHolePairs": [
+        {
+          "axis": "horizontal",
+          "pitchMm": 144,
+          "diameterMm": 18
+        },
+        {
+          "axis": "vertical",
+          "pitchMm": 120,
+          "diameterMm": 18
+        },
+        {
+          "axis": "vertical",
+          "pitchMm": 160,
+          "diameterMm": 18
+        }
+      ]
+    },
+    "B": {
+      "includedAsStandard": false,
+      "thicknessMm": 35,
+      "widthMm": 340,
+      "lengthMm": 340,
+      "anchorHoles": {
+        "count": 4,
+        "diameterMm": 19,
+        "pitchXMm": 290,
+        "pitchYMm": 290
+      },
+      "pumpMountingHolePairs": [
+        {
+          "axis": "horizontal",
+          "pitchMm": 230,
+          "diameterMm": 18
+        }
+      ]
+    }
+  },
+  "models": {
+    "TD100-15/2": "A",
+    "TD100-17G/2": "A",
+    "TD100-22G/2": "A",
+    "TD100-27/2": "A",
+    "TD100-33/2": "A",
+    "TD100-35G/2": "B",
+    "TD100-40G/2": "B",
+    "TD100-48G/2": "B",
+    "TD100-52G/2": "B",
+    "TD100-9/2": "A",
+    "TD125-11G/4": "B",
+    "TD125-14G/4": "B",
+    "TD125-19G/4": "B",
+    "TD125-22G/4": "B",
+    "TD125-28G/4": "B",
+    "TD125-32G/4": "B",
+    "TD125-40G/4": "B",
+    "TD125-48G/4": "B",
+    "TD150-12.5G/4": "B",
+    "TD150-18G/4": "B",
+    "TD150-22G/4": "B",
+    "TD150-27/4": "B",
+    "TD150-33/4": "B",
+    "TD150-35/4": "B",
+    "TD150-42/4": "B",
+    "TD150-50/4": "B",
+    "TD32-14G/2": "A",
+    "TD32-18G/2": "A",
+    "TD32-21G/2": "A",
+    "TD32-26G/2": "A",
+    "TD32-33G/2": "A",
+    "TD32-40G/2": "A",
+    "TD32-50G/2": "A",
+    "TD40-14G/2": "A",
+    "TD40-16G/2": "A",
+    "TD40-20G/2": "A",
+    "TD40-21G/2": "A",
+    "TD40-26G/2": "A",
+    "TD40-30G/2": "A",
+    "TD40-36G/2": "A",
+    "TD40-48G/2": "A",
+    "TD50-12G/2": "A",
+    "TD50-15G/2": "A",
+    "TD50-18G/2": "A",
+    "TD50-24G/2": "A",
+    "TD50-28G/2": "A",
+    "TD50-32G/2": "A",
+    "TD50-35G/2": "A",
+    "TD50-39G/2": "A",
+    "TD50-40G/2": "A",
+    "TD50-49G/2": "A",
+    "TD50-50G/2": "A",
+    "TD50-59G/2": "A",
+    "TD50-60G/2": "A",
+    "TD50-70G/2": "A",
+    "TD50-80G/2": "A",
+    "TD50-81G/2": "A",
+    "TD65-15G/2": "A",
+    "TD65-20G/2": "A",
+    "TD65-22G/2": "A",
+    "TD65-30G/2": "A",
+    "TD65-34G/2": "A",
+    "TD65-37G/2": "A",
+    "TD65-41G/2": "A",
+    "TD65-48G/2": "A",
+    "TD65-51G/2": "A",
+    "TD65-61G/2": "A",
+    "TD65-68G/2": "A",
+    "TD65-85G/2": "A",
+    "TD80-13G/2": "A",
+    "TD80-18G/2": "A",
+    "TD80-23G/2": "A",
+    "TD80-29G/2": "A",
+    "TD80-32G/2": "A",
+    "TD80-38G/2": "A",
+    "TD80-41G/2": "A",
+    "TD80-47G/2": "A",
+    "TD80-48G/2": "A",
+    "TD80-54G/2": "A",
+    "TD80-60G/2": "A",
+    "TD80-67G/2": "A"
+  }
+}

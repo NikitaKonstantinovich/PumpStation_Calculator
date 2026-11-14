@@ -4,9 +4,10 @@ import type { AssemblyComponent } from "./suction-catalog";
 import fastenerReference from "./suction-fasteners.json";
 import { jointFlangeThickness } from "./joint-flange-dimensions";
 import { selectGasket, selectFlax, gasketPressures, sealingName, sealingPrice } from "./sealing-selection";
-import { selectStationInsertion, type InsertionRequirement } from "./station-insertion-selection";
+import { selectAutomaticStationInsertion, selectStationInsertion, type InsertionRequirement } from "./station-insertion-selection";
 import { insertionPrice } from "./calculated-insertion";
 import { jointFastenerLength } from "./joint-fastener-length";
+import { insertionEndThickness, pumpFlangeReference } from "./line-joint-stack";
 
 export const field = (item: AssemblyComponent, pattern: RegExp) => item.fields.find(f=>pattern.test(f.headerPath.at(-1)??""))?.value;
 export const number = (v:unknown) => Number(String(v??"").replace(",",".").match(/\d+(?:\.\d+)?/)?.[0]) || null;
@@ -42,7 +43,7 @@ export function selectJointFasteners(database: { items: AssemblyComponent[] }, m
     warnings: legacySteel || stack.flangeThickness !== undefined ? [] : flange?.warnings ?? [], flangeDimensions: flange?.dimensions ?? [],
     source: [stack.source ?? reference.source, flange?.source].filter(Boolean).join("; ") };
 }
-export function lineSpecParts(rows: SpecItem[], section: "suction" | "discharge", fingerprint: string, collector: CollectorConfiguration, database: { items: AssemblyComponent[] }, catalog: CollectorCatalog, designs: DnEntity["insertionDesigns"] = {}, firstSensorCircuits: readonly string[] = []) {
+export function lineSpecParts(rows: SpecItem[], section: "suction" | "discharge", fingerprint: string, collector: CollectorConfiguration, database: { items: AssemblyComponent[] }, catalog: CollectorCatalog, designs: DnEntity["insertionDesigns"] = {}, firstSensorCircuits: readonly string[] = [], automaticInsertions = false, checkPressure = true) {
   const reducerGeometry: "concentric" | "eccentric" = section === "discharge" ? "concentric" : "eccentric";
   const sensorPending = new Set(section === "discharge" ? firstSensorCircuits : []);
   const add=(role:string,name:string,quantity:number,details:string,item?:AssemblyComponent,unit="шт.",fixedPrice?:number,description="",status?:SpecItem["status"])=>{
@@ -54,7 +55,9 @@ export function lineSpecParts(rows: SpecItem[], section: "suction" | "discharge"
   const gasket=(role:string,size:number,pn:number,count:number)=>{
     const item=selectGasket(database.items,size,pn);
     const pressures=item?gasketPressures(item):[],fallback=Boolean(item&&!pressures.includes(pn));
-    const warning=fallback?`Предупреждение: для DN${size} требуется PN${pn}, выбрана прокладка PN${pressures.join("/")}. ${Math.max(...pressures)<pn?"PN прокладки ниже требуемого. ":""}Проверьте размеры и допустимое давление перед применением.`:"";
+    const warning = !fallback ? "" : checkPressure
+      ? `Предупреждение: для DN${size} требуется PN${pn}, выбрана прокладка PN${pressures.join("/")}. ${Math.max(...pressures) < pn ? "PN прокладки ниже требуемого. " : ""}Проверьте размеры и допустимое давление перед применением.`
+      : "Предупреждение: проверьте присоединительные размеры прокладки для выбранного фланцевого соединения.";
     add(role,`Прокладка паронитовая DN${size}`,count,`DN${size} · соединение PN${pn}${item?` · ${sealingName(item)} · PN прокладки ${pressures.join("/")}`:" · исполнения этого DN в базе нет"}${warning?` · ⚠ ${warning}`:""}`,item,"шт.",item?sealingPrice(item)??undefined:undefined,warning,fallback?"confirmation":undefined);
   };
   const flaxItem=selectFlax(database.items);
@@ -94,9 +97,9 @@ export function lineSpecParts(rows: SpecItem[], section: "suction" | "discharge"
     const withSensorNipple = sensorPending.delete(prefix);
     const requirement:InsertionRequirement={location,purpose:need.purpose,material:collector.material,pn:need.pn,
       from:{dn:need.fromDn,connection:connection(need.fromDn,need.fromConnection)},to:{dn:need.toDn,connection:connection(need.toDn,need.toConnection)},
-      geometry:need.fromDn===need.toDn?"straight":reducerGeometry,withSensorNipple,design:designs[location]};
-    const selected=selectStationInsertion(database.items,requirement);
-    const item=selected.item??fallback;
+      geometry:need.fromDn===need.toDn?"straight":reducerGeometry,withSensorNipple,checkPressure,design:automaticInsertions?undefined:designs[location]};
+    const selected=automaticInsertions ? selectAutomaticStationInsertion(database.items,requirement) : selectStationInsertion(database.items,requirement);
+    const item=selected.item??(automaticInsertions?undefined:fallback);
     const row=add(role,selected.item?.family??name,count,`${details} · ${requirement.geometry === "straight" ? "прямая" : requirement.geometry === "concentric" ? "концентрическая" : "эксцентрическая"} вставка · ${withSensorNipple ? "со сгоном DN15 под реле давления" : "без сгона"}`,item,"шт.",undefined,selected.explanation,"clarify");
     row.insertionRequirement=requirement;
     row.technicalStatus=selected.technicalStatus;
@@ -108,10 +111,18 @@ export function lineSpecParts(rows: SpecItem[], section: "suction" | "discharge"
       row.details += " · расчётная сборка; вложенный состав учитывается внутри изделия";
     }else{
       row.technicalStatus="unverified";
-      row.description += fallback ? ` Предварительный вариант: ${fallback.id}. Источник: ${String(field(fallback,/^Источник$/i)??"база комплектующих")}. Цена тела; материал, PN, длина, концы и комплектность требуют проверки; фланцы отдельно.` : " Предварительный узел: изделие не найдено.";
-      row.technicalNotes.push(row.description!);
+      if (!automaticInsertions) {
+        row.description += fallback ? ` Предварительный вариант: ${fallback.id}. Источник: ${String(field(fallback,/^Источник$/i)??"база комплектующих")}. Цена тела; материал, PN, длина, концы и комплектность требуют проверки; фланцы отдельно.` : " Предварительный узел: изделие не найдено.";
+        row.technicalNotes.push(row.description!);
+      }
     }
     return row;
   };
-  return { add, gasket, flax, flanges, fasteners, insertion, reducerGeometry };
+  return {
+    add, gasket, flax, flanges, fasteners, insertion, reducerGeometry,
+    insertionEndThickness: (row: SpecItem, end: "from" | "to", useStampedSeat = false) =>
+      insertionEndThickness(row, end, database, { useStampedSeat, revalidateParts: automaticInsertions }),
+    pumpFlangeReference: (dn: number, pn: number, insertion?: SpecItem) =>
+      pumpFlangeReference(database, collector.material, dn, pn, insertion, automaticInsertions),
+  };
 }

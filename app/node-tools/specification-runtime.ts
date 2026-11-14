@@ -3,6 +3,7 @@ import { withEvaluationProgram } from "../engineering/runtime";
 import type { ProjectConfig, SettingsEntity, SpecEntity, SpecItem, SpecSection } from "../project-config";
 import { normalizeHydraulicOptions } from "../hydraulic-option-config";
 import { corePreparePumpRows, coreStationCabinetRows, coreStationFrameRows, coreStationLines, coreStationOptions, coreFinalizeStation, type StationWork, type StationSpecificationResources } from "../station-specification";
+import { coreRefreshSuctionSpecification } from "../station-hydraulic-calculation";
 import { coreVisibleSpecificationItems } from "../specification-presentation";
 import { coreAssessSpecification } from "../specification-readiness";
 import { normalizeSpecificationItems } from "../specification-items";
@@ -86,6 +87,13 @@ export function executeSpecificationOperation(step: Step, values: Values, _conte
       case "spec.cabinet": { const b = values.batch as Batch | null; return { value: b ? { ...coreStationCabinetRows(b), nodeIssues: b.nodeIssues, manualRows: b.manualRows } : null }; }
       case "spec.frame": { const b = values.batch as CabinetBatch | null; return { work: b ? { ...coreStationFrameRows(b), nodeIssues: b.nodeIssues, manualRows: b.manualRows } : null }; }
       case "spec.lines": { const work = values.work as Work | null; return { value: work ? coreStationLines(work) : null }; }
+      case "spec.linesAutomatic": {
+        const work = values.work as Work | null;
+        if (!work) return { value: null };
+        const { components, pumps } = work.resources;
+        if (!components) return { value: coreStationLines(work) };
+        return { value: { ...work, next: coreRefreshSuctionSpecification(work.next, components, true, pumps, true) } };
+      }
       case "spec.options": { const work = values.work as Work | null; return { value: work ? coreStationOptions(work) : null }; }
       case "spec.finalize": { const work = values.work as Work | null; return { result: work ? { project: coreFinalizeStation(work), pumps: work.resources.pumps ?? [], resources: work.resources, issues: work.nodeIssues, manualRows: work.manualRows } satisfies Result : null }; }
       case "spec.readiness": {

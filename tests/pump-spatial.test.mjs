@@ -83,6 +83,25 @@ test("ONIS MBL uses explicit schematic scene ports without changing missing cata
     assert.deepEqual(model.normalizeEditor({ ...model.emptyEditor(), assembly: a }).assembly.components.find(item => item.id === c.id).pumpGeometry, c.pumpGeometry);
   }
 });
+
+test("size drawings expose both provisional port frames and keep unknown envelope dimensions unknown", async () => {
+  for (const file of ["cmi-spatial-profiles", "horizontal-pump-cuc-drawings", "horizontal-pump-edh-drawings",
+    "horizontal-pump-mh-drawings", "horizontal-pump-vcm-drawings"]) {
+    const data = JSON.parse(await readFile(new URL(`data/${file}.json`, root), "utf8"));
+    for (const [id, drawing] of Object.entries(data.variants)) {
+      const spatial = resolvePumpSpatial({ ...mbl, id, type: "horizontal_multistage" });
+      assert.equal(spatial.info.coordinateSystem, "inlet", id);
+      assert.equal(spatial.info.dimensionsMm[1], null, id);
+      assert.deepEqual(spatial.ports.map(({ id, point, axis }) => ({ id, point, axis })), [
+        { id: "inlet", point: [0, 0, 0], axis: [-1, 0, 0] },
+        { id: "outlet", point: drawing.outletMm, axis: [0, 0, 1] },
+      ]);
+      assert.ok(spatial.ports.every(port => port.provisional && port.point.every((value, axis) =>
+        value >= spatial.bounds[axis] && value <= spatial.bounds[axis + 3])), id);
+      assert.match(spatial.note, /#page=/);
+    }
+  }
+});
 test("refresh replaces legacy ports with labelled schematic ports while preserving manual pose", () => {
   const fresh = assembly(mbl.id, none), previous = structuredClone(fresh);
   const p = previous.components.find(c => c.kind === "pump");

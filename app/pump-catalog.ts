@@ -31,6 +31,7 @@ export type Pump = {
   speedRpm?: number | null; weightKg?: number | null; inletDn?: number | null; outletDn?: number | null;
   description?: string | null; availability?: string | null; catalogSource?: string;
   electric?: PumpProperties; materials?: PumpProperties; dimensions?: PumpProperties;
+  technicalSheet?: { key: string; label: string; group: string; unit: string | null; value: string | number; page: number }[];
   fluid?: PumpProperties; mounting?: PumpProperties;
   inlet?: PumpProperties; outlet?: PumpProperties; connectionSourceValue?: PumpProperties;
   physicalDataSources?: PumpProperties; physicalNote?: string;
@@ -39,8 +40,20 @@ export type Pump = {
   manualEntry?: boolean;
 };
 
+const nonRoundFlangeTypes = new Set(["oval_flange", "elliptical_flange", "square_flange", "rectangular_flange", "triangular_flange"]);
+const nonRoundFlangeShapes = new Set(["oval", "elliptical", "square", "rectangular", "triangular"]);
+export const PUMP_ROUND_FLANGE_REQUIRED = "Для установки предусмотрены стандартные круглые фланцы. Выберите другое исполнение насоса.";
+
+export function pumpHasNonRoundFlange(pump: Pick<Pump, "inlet" | "outlet">) {
+  return [pump.inlet, pump.outlet].some(port => {
+    const type = String(port?.connection_type ?? port?.type ?? "").trim().toLowerCase();
+    const shape = String(port?.flange_shape ?? port?.shape ?? "").trim().toLowerCase();
+    return nonRoundFlangeTypes.has(type) || (type === "flanged" || type === "flange") && nonRoundFlangeShapes.has(shape);
+  });
+}
+
 export function coreUsablePump(pump: Pump, medium: "water" | "wastewater" = "water") {
-  return pump.selectable !== false && pump.active !== false && (pump.medium ?? "water") === medium &&
+  return pump.selectable !== false && pump.active !== false && (pump.medium ?? "water") === medium && !pumpHasNonRoundFlange(pump) &&
     pump.curve.length >= 2 && pump.curve.every(([q, h], i, points) =>
       Number.isFinite(q) && Number.isFinite(h) && q >= 0 && h >= 0 && (i === 0 || q > points[i - 1][0]));
 }

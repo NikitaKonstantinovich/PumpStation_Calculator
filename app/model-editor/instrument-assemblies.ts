@@ -1,6 +1,7 @@
 import mounts from "../../data/instrument-mounts.json";
 import { INSTRUMENT_SIDE_FITTINGS } from "../instrument-connection";
-import type { ProjectConfig, SpecEntity, SpecItem } from "../project-config";
+import type { ProjectConfig, SettingsEntity, SpecEntity, SpecItem } from "../project-config";
+import { pressureChecksEnabled } from "../pressure-check-policy";
 import type { Assembly, Bounds, Port, Vec3 } from "./model";
 import { composeValvePose, relativePose } from "./valve-controls";
 import { FIRE_INSERTION_INSTRUMENTS_REVISION } from "../fire-insertion-instruments";
@@ -47,6 +48,7 @@ type Part = { role: Role; row: SpecItem; quantity: number };
  * The DIN connector is geometry belonging to the transducer, not another SKU. */
 export function addInstrumentAssemblies(assembly: Assembly, project: ProjectConfig): Assembly {
   const rows = (project.entities["station-spec"] as SpecEntity).items;
+  const checkPressure = pressureChecksEnabled(project.entities["station-settings"] as SettingsEntity);
   const components = assembly.components.filter(c => !c.instrumentMount), joints = (assembly.lineJoints ?? []).filter(j => !j.id.startsWith("kip-joint-"));
   const adopted = new Map<string, number>();
   const consume = (row: SpecItem, index: number) => adopted.set(`${row.section}:${row.position}:${row.equipmentId}`, Math.max(index + 1, adopted.get(`${row.section}:${row.position}:${row.equipmentId}`) ?? 0));
@@ -80,10 +82,11 @@ export function addInstrumentAssemblies(assembly: Assembly, project: ProjectConf
         continue;
       }
       const parts: Part[] = [{ role: "valve", row: valve, quantity: valve.quantity }];
-      if (gauge && i < gauge.quantity && (gauge.equipmentId ? /^кипиа-001-r000[5-8]$/.test(gauge.equipmentId) : gauge.status === "clarify")) {
+      const showGaugeLayout = side === "suction" || checkPressure;
+      if (gauge && i < gauge.quantity && (gauge.equipmentId ? /^кипиа-001-r000[5-8]$/.test(gauge.equipmentId) : showGaugeLayout && gauge.status === "clarify")) {
         parts.push({ role: "gauge", row: gauge, quantity: gauge.quantity });
         if (!gauge.equipmentId) warn(`комплект №${i + 1}: показана компоновочная модель манометра ТМ-510Р; диапазон и артикул не выбраны.`);
-      } else if (gauge && i < gauge.quantity) warn(`комплект №${i + 1}: выбранный манометр не имеет CAD-профиля; требуется уточнение.`);
+      } else if (gauge && i < gauge.quantity && (gauge.equipmentId || showGaugeLayout)) warn(`комплект №${i + 1}: выбранный манометр не имеет CAD-профиля; требуется уточнение.`);
       const adapter = fitting("adapter"), bush = fitting("bush");
       const quantity = (r: SpecItem | undefined) => (r?.quantity ?? 0) * (nested ? sensor?.quantity ?? 0 : 1);
       if (adapter?.equipmentId === INSTRUMENT_SIDE_FITTINGS.adapter && i < quantity(adapter)) {
@@ -144,7 +147,9 @@ export function addInstrumentAssemblies(assembly: Assembly, project: ProjectConf
       const part = rows.find(r => r.section === "discharge" && r.assemblyRole === `${prefix}-sensor-${role}` && r.quantity >= row.quantity);
       const compatible = role === "valve" ? part?.equipmentId === "шаровые-краны-002-r0203" : role === "bush" ? part?.equipmentId === INSTRUMENT_SIDE_FITTINGS.bush : /^кипиа-002-r001[3-6]$/.test(part?.equipmentId ?? "");
       if (!part || !compatible) {
-        parent.line.issues.push(`Узел реле на вставке: ${role === "valve" ? "кран" : role === "bush" ? "футорка" : "реле"} не подобран или не имеет CAD-профиля.`);
+        if (role !== "relay" || checkPressure || part?.equipmentId) {
+          parent.line.issues.push(`Узел реле на вставке: ${role === "valve" ? "кран" : role === "bush" ? "футорка" : "реле"} не подобран или не имеет CAD-профиля.`);
+        }
         break;
       }
       const asset = mounts.assets[role], bounds = asset.bounds as Bounds, componentId = `${parent.id}-sensor-${role}`;

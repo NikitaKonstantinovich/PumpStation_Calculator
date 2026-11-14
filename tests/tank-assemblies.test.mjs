@@ -18,21 +18,60 @@ function prepare({volume=8,on=true,count=3,material="aisi304"}={}){
 const tankRow=p=>rows(p).find(r=>r.assemblyRole==="discharge:tank");
 const active=a=>a.components.filter(c=>c.tankMount);
 const tankJoints=a=>model.connectionIssues(a).filter(i=>(i.id.startsWith("tank-")||i.id==="collector-discharge")&&/соединение нарушено|оси стыка|разные DN|несовместим|точка подключения стыка не найдена/.test(i.message));
-const {finishCollectorTemplate}=await load("model-editor/collector-template");
+const {finishCollectorTemplate,moveCollectorBranchX,collectorTankX}=await load("model-editor/collector-template");
 const {composeValvePose,relativePose}=await load("model-editor/valve-controls");
 
-test("tank takeoff stays 200 mm from last-pump end flange, including changes in collector length and 1/3/5 pumps",()=>{
+test("tank takeoff bisects the last branch-to-flange interval for 1/3/5 pumps and either collector end",()=>{
   for(const count of [1,3,5]){
     const {assembly:a}=prepare({count,on:false}),c=a.components.find(c=>c.id==="collector-discharge"),end=c.ports.find(p=>p.id==="network-right"),port=c.ports.find(p=>p.id==="instrument-tank-0");
-    close(end.point[0]-port.point[0],200);assert.ok(c.collector.template.pieces.some(p=>p.id==="instrument-tank-0-plug"));assert.equal(active(a).length,0);
+    const pumpPorts=t=>t.ports.filter(p=>!p.id.startsWith("network-")&&!p.id.startsWith("instrument"));
+    const last=pumpPorts(c.collector.template).at(-1);
+    close(end.point[0]-port.point[0],port.point[0]-last.point[0]);
+    close(c.collector.template.branches.find(b=>b.id===port.id).origin[0],port.point[0]);
+    close(c.collector.template.pieces.find(p=>p.id==="instrument-tank-0-plug").position[0],port.point[0]);assert.equal(active(a).length,0);
     const b=model.editComponent(a,{id:c.id,patch:{parameters:{length:c.parameters.length+300}}}),updated=b.components.find(p=>p.id===c.id);
-    close(updated.ports.find(p=>p.id==="network-right").point[0]-updated.ports.find(p=>p.id==="instrument-tank-0").point[0],200);
+    const nextPort=updated.ports.find(p=>p.id===port.id),nextEnd=updated.ports.find(p=>p.id===end.id);
+    close(nextEnd.point[0]-nextPort.point[0],nextPort.point[0]-last.point[0]);
+    close(nextPort.point[0]-port.point[0],75);
+    close(updated.collector.template.pieces.find(p=>p.id==="instrument-tank-0-plug").position[0],nextPort.point[0]);
+    const moved=moveCollectorBranchX(c.collector.template,last.id,last.point[0]+40),movedTank=moved.ports.find(p=>p.id===port.id);
+    close(movedTank.point[0]-port.point[0],20);
+    close(moved.branches.find(b=>b.id===port.id).origin[0],movedTank.point[0]);
+    close(moved.pieces.find(p=>p.id==="instrument-tank-0-plug").position[0],movedTank.point[0]);
+    assert.deepEqual(moved.branches.filter(b=>b.role==="instrument"&&b.id!==port.id),c.collector.template.branches.filter(b=>b.role==="instrument"&&b.id!==port.id));
     if(count>1){
-      const reversed=structuredClone(c.collector.template),pumps=reversed.ports.filter(p=>!p.id.startsWith("network-")&&!p.id.startsWith("instrument"));
+      const reversed=structuredClone(c.collector.template),pumps=pumpPorts(reversed);
       reversed.ports=[...reversed.ports.filter(p=>!pumps.includes(p)),...pumps.reverse()];
       finishCollectorTemplate(reversed);
-      close(reversed.ports.find(p=>p.id==="instrument-tank-0").point[0]-reversed.ports.find(p=>p.id==="network-left").point[0],200);
+      const x=reversed.ports.find(p=>p.id===port.id).point[0],left=reversed.ports.find(p=>p.id==="network-left").point[0];
+      close(x-left,pumpPorts(reversed).at(-1).point[0]-x);
     }
+    const noBranches={...c.collector.template,ports:c.ports.filter(p=>!pumpPorts(c.collector.template).includes(p))};
+    assert.equal(collectorTankX(noBranches),undefined,"no invented axis when pump ports are missing");
+  }
+});
+
+test("legacy 200 mm tank takeoff moves with its cap and attached 8 L assembly on refresh or JSON normalization",async()=>{
+  const {followTankConnections}=await load("model-editor/tank-assemblies");
+  for(const on of [false,true]){
+    const {assembly:fresh}=prepare({on}),legacy=structuredClone(fresh),collector=legacy.components.find(c=>c.id==="collector-discharge"),t=collector.collector.template;
+    const port=t.ports.find(p=>p.id==="instrument-tank-0"),expected=port.point[0],oldX=t.ports.find(p=>p.id==="network-right").point[0]-200,dx=oldX-expected;
+    assert.ok(Math.abs(dx)>1);
+    port.point[0]=oldX;t.branches.find(b=>b.id===port.id).origin[0]=oldX;
+    for(const p of t.pieces)if(p.id===port.id||p.id.startsWith(port.id+"-"))p.position[0]+=dx;
+    t.assumptions=t.assumptions.filter(note=>!note.startsWith("Сгон бака:"));
+    t.assumptions.push("Сгон бака: ось на расстоянии 200 мм от привалочной плоскости торцевого фланца со стороны последнего насоса, по решению пользователя 01.11.2026.");
+    const saved=followTankConnections(legacy),before=JSON.stringify(saved);
+    for(const updated of [model.mergeAssembly(saved,fresh),model.normalizeEditor(JSON.parse(JSON.stringify({...model.emptyEditor(),assembly:saved}))).assembly]){
+      const c=updated.components.find(c=>c.id===collector.id);
+      close(c.ports.find(p=>p.id===port.id).point[0],expected);
+      assert.ok(!c.collector.template.assumptions.some(note=>note.startsWith("Сгон бака:")&&note.includes("200 мм")));
+      if(on){
+        for(const body of active(fresh))vec(updated.components.find(c=>c.id===body.id).position,body.position);
+        assert.deepEqual(tankJoints(updated),[]);
+      }else close(c.collector.template.pieces.find(p=>p.id===port.id+"-plug").position[0],expected);
+    }
+    assert.equal(JSON.stringify(saved),before,"saved snapshot remains immutable");
   }
 });
 
@@ -60,6 +99,9 @@ test("8 L tank sits on the actual DN20 valve with both threaded connections and 
   const collector=a.components.find(c=>c.id==="collector-discharge");close(tank.position[2]-model.portPoint(a,{componentId:collector.id,portId:"instrument-tank-0"})[2],33.5);
   const c=a.components.find(c=>c.id==="collector-discharge"),moved=model.editComponent(a,{id:c.id,patch:{position:[123,456,789],rotation:[29,-37,51]}});
   assert.deepEqual(tankJoints(moved),[]);assert.ok(!active(moved).some(c=>c.orphaned));
+  const longer=model.editComponent(a,{id:c.id,patch:{parameters:{length:c.parameters.length+300}}});
+  assert.deepEqual(tankJoints(longer),[]);
+  for(const body of [tank,valve])close(model.distance(body.position,longer.components.find(c=>c.id===body.id).position),75);
 });
 
 test("50/80/100 L retain 200 mm envelope gap and frame support, with transition and hose in specification only",()=>{
@@ -144,7 +186,7 @@ test("updating a locked old DN25 tank takeoff changes only its section to DN20 a
 test("published tank CAD assets match sources and remain unscaled; nominal 8 L dimensions match passport metadata",async()=>{
   const data=await json("data/tank-models.json");
   for(const asset of Object.values(data.assets)){
-    const source=await readFile(new URL(`../../${asset.source}`,import.meta.url)),mesh=await readFile(new URL(`../public${asset.meshUrl}`,import.meta.url));
+    const source=await readFile(new URL(asset.source,process.env.PSC_CAD_ROOT_URL??new URL("../../",import.meta.url))),mesh=await readFile(new URL(`../public${asset.meshUrl}`,import.meta.url));
     assert.equal(createHash("sha256").update(source).digest("hex"),asset.sourceHash);assert.equal(createHash("sha256").update(mesh).digest("hex"),asset.meshHash);assert.equal(mesh.length,84+50*mesh.readUInt32LE(80));
   }
   assert.equal(data.tank8.diameterMm,200);assert.equal(data.tank8.heightMm,311);

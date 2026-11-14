@@ -1,7 +1,7 @@
 import type { Step } from "../engineering/engine";
 import { withEvaluationProgram } from "../engineering/runtime";
 import { coreFilterSelectionCatalog, coreReserveCandidates, coreMeasureCandidates, comparePumpCandidates, type PumpSelectionInput } from "../pump-selection";
-import { coreUsablePump } from "../pump-catalog";
+import { coreUsablePump, pumpHasNonRoundFlange, PUMP_ROUND_FLANGE_REQUIRED } from "../pump-catalog";
 import { pumpTypeLabel } from "../pump-filters";
 import { MAX_WORKING_PUMPS } from "../pump-counts";
 import type { CatalogItem, CatalogSnapshot } from "./catalog-schema";
@@ -25,6 +25,10 @@ function diagnostic(step: Step, message: string, severity: Diagnostic["severity"
     severity
   };
 }
+const invalidRequest = (step: Step, message: string): Diagnostic => ({
+  ...diagnostic(step, message),
+  code: "calculation-input"
+});
 function canonical(value: unknown): string {
   if (value === undefined) return "null";
   if (Array.isArray(value)) return "[" + value.map(canonical).join(",") + "]";
@@ -71,7 +75,9 @@ function output(dataset: PumpDataset, step: Step): Values {
     value: dataset,
     items: dataset.rows,
     count: dataset.rows.length,
-    issues: dataset.issues.map(message => diagnostic(step, message, dataset.request ? "warning" : dataset.stage === "catalog" ? "warning" : "error"))
+    issues: dataset.issues.map(message => dataset.request || dataset.stage === "catalog"
+      ? diagnostic(step, message, "warning")
+      : invalidRequest(step, message))
   };
 }
 function rowFor(item: CatalogItem): PumpRow {
@@ -101,13 +107,14 @@ function selectionProof(value: unknown): SelectionProof | null {
   const proof = record(value);
   return ["variantId", "snapshotId", "requestKey"].every(key => typeof proof[key] === "string" && (proof[key] as string).length > 0) ? proof as SelectionProof : null;
 }
-export function validatePumpSelection(data: PumpDataset, value: unknown, bindingKey = "", node = ""): SelectionState {
+export function validatePumpSelection(data: PumpDataset, value: unknown, bindingKey = "", node = "", catalogue?: CatalogSnapshot): SelectionState {
   const proof = selectionProof(value),
     id = proof?.variantId ?? null;
   let message = "Исполнение не выбрано",
     valid = false;
   const row = data.rows.find(row => row.variantId === id);
-  if (value != null && !proof) message = "Подтверждение выбора повреждено. Выберите исполнение заново";else if (proof?.snapshotId !== data.snapshotId && proof) message = "Выбор относится к другому снимку каталога. Требуется повторное подтверждение";else if (proof?.requestKey !== data.requestKey && proof) message = "Условия или алгоритм изменились. Требуется повторная проверка выбранного насоса";else if (proof && !row) message = "Выбранное исполнение отсутствует в текущих результатах";else if (proof && (!row?.measured || !row.selectable || !row.candidate?.point)) message = "Для выбранного исполнения нет подтверждённой допустимой рабочей точки";else if (proof && row) {
+  const pump = row?.item.pump ?? (id && catalogue?.id === data.snapshotId ? catalogue.items.find(item => item.variantId === id)?.pump : undefined);
+  if (value != null && !proof) message = "Подтверждение выбора повреждено. Выберите исполнение заново";else if (proof?.snapshotId !== data.snapshotId && proof) message = "Выбор относится к другому снимку каталога. Требуется повторное подтверждение";else if (proof && pump && pumpHasNonRoundFlange(pump)) message = PUMP_ROUND_FLANGE_REQUIRED;else if (proof?.requestKey !== data.requestKey && proof) message = "Условия или алгоритм изменились. Требуется повторная проверка выбранного насоса";else if (proof && !row) message = "Выбранное исполнение отсутствует в текущих результатах";else if (proof && (!row?.measured || !row.selectable || !row.candidate?.point)) message = "Для выбранного исполнения нет подтверждённой допустимой рабочей точки";else if (proof && row) {
     valid = true;
     message = "Гидравлический выбор подтверждён для текущих условий и снимка каталога";
   }
@@ -154,8 +161,8 @@ function options(items: Values[], key: string, labelKey = ""): {
     numeric: true
   }));
 }
-function selectedView(data: PumpDataset, b: ParameterBinding, step: Step): SelectionState {
-  return validatePumpSelection(data, b.value, b.key, step.id);
+function selectedView(data: PumpDataset, b: ParameterBinding, step: Step, context: ToolContext): SelectionState {
+  return validatePumpSelection(data, b.value, b.key, step.id, context.resources?.pump_catalog_v2);
 }
 function tableColumns(v: Values) {
   const presets: Record<string, string[]> = {
@@ -216,7 +223,7 @@ export function executePumpOperation(step: Step, v: Values, context: ToolContext
           value: issues.length ? null : value,
           valid: !issues.length,
           flowPerPump: issues.length ? null : (value.flowRate as number) / (value.workingPumpCount as number),
-          issues: issues.map(message => diagnostic(step, message))
+          issues: issues.map(message => invalidRequest(step, message))
         };
       }
     case "pump.filter":
@@ -257,7 +264,7 @@ export function executePumpOperation(step: Step, v: Values, context: ToolContext
         next.rows = source.rows.filter(row => allowed.has(row.variantId) && (!search || [row.model, row.execution, row.article, row.manufacturer, row.series].some(value => text(value).toLocaleLowerCase().includes(search))));
         next.total = next.rows.length;
         const unusable = source.rows.filter(row => !pure(() => coreUsablePump(row.item.pump, request.medium))).length;
-        if (unusable) next.issues.push("Записей, исключённых по активности, среде или некорректной Q/H-кривой: " + unusable);
+        if (unusable) next.issues.push("Записей, исключённых по активности, среде, геометрии фланца или некорректной Q/H-кривой: " + unusable);
         return output(next, step);
       }
     case "pump.reserve":
@@ -431,7 +438,7 @@ export function executePumpOperation(step: Step, v: Values, context: ToolContext
       {
         const data = dataset(v.candidates),
           b = realBinding(v.binding, true),
-          selection = selectedView(data, b, step),
+          selection = selectedView(data, b, step, context),
           row = selection.valid ? data.rows.find(row => row.variantId === selection.variantId) : undefined;
         return {
           value: row?.item ?? null,
@@ -444,7 +451,7 @@ export function executePumpOperation(step: Step, v: Values, context: ToolContext
       {
         const data = dataset(v.candidates),
           b = realBinding(v.binding, true),
-          selection = selectedView(data, b, step),
+          selection = selectedView(data, b, step, context),
           issues = selection.stale ? [diagnostic(step, selection.message, "warning", b.key)] : [];
         return {
           value: {

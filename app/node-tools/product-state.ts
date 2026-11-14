@@ -4,6 +4,7 @@ import { accepts } from "../engineering/schema";
 import { evaluateProduct } from "./runtime";
 import type { Evaluation, ProductControls, ToolContext, ToolProgram, Values, WorkspaceData } from "./schema";
 import type { UserRole } from "../user-types";
+import type { CatalogSource } from "./workspace-sources";
 export const usesCatalog = (program: ToolProgram) => Object.values(program.plans).some(plan => plan.steps.some(step => step.operation === "pump.catalog"));
 export const ownBindings = (result: Evaluation, id: string) => result.bindings.filter(b => !b.toolId || b.toolId === id);
 export function productContexts(program: ToolProgram, data: WorkspaceData | undefined, defaults: Values, role: UserRole, resources?: ToolContext["resources"]): Record<string, ToolContext> {
@@ -36,10 +37,9 @@ export function migrateProduct(program: ToolProgram, previous: WorkspaceData | u
   const oldVersions = new Set(Object.values(previous?.tools ?? {}).map(t => t.version));
   if (oldVersions.size > 1) messages.push("Прежние инструменты использовали разные версии. Явно применяется единая выбранная публикация продукта; предыдущие версии остаются в истории.");
   for (const t of program.tools.filter(t => t.enabled !== false)) {
-    const result = evaluateProduct(program, t.id, contexts),
-      values: Values = {},
+    const values: Values = {},
       before = contexts[t.id].values,
-      bindings = ownBindings(result, t.id);
+      bindings = previous || Object.keys(before).length ? ownBindings(evaluateProduct(program, t.id, contexts), t.id) : [];
     for (const b of bindings) {
       if (!Object.hasOwn(before, b.key)) continue;
       if ((b.mode ?? "user") !== "user") {
@@ -62,19 +62,17 @@ export function migrateProduct(program: ToolProgram, previous: WorkspaceData | u
   }
   const inactive = Object.keys(previous?.tools ?? {}).filter(id => !program.tools.some(t => t.id === id && t.enabled !== false));
   if (inactive.length) messages.push("Состояние отключённых или удалённых инструментов сохранено в архиве проекта · " + inactive.join(", "));
-  return {
-    data: invalidateInactiveSelections(program, {
-      schema: 1 as const,
-      algorithmId: program.algorithmId,
-      tools,
-      product: {
-        version: program.version, algorithmId: program.algorithmId,
-        baseVersions,
-        sourceVersions
-      }
-    }, defaults, role, resources),
-    messages
+  const data: WorkspaceData = {
+    schema: 1,
+    algorithmId: program.algorithmId,
+    tools,
+    product: {
+      version: program.version, algorithmId: program.algorithmId,
+      baseVersions,
+      sourceVersions
+    }
   };
+  return {data: previous ? invalidateInactiveSelections(program, data, defaults, role, resources) : data, messages};
 }
 
 /** A retained old proof may remain visible as stale; a newly forged choice cannot be saved. */
@@ -107,13 +105,13 @@ export function suspendedProof(value: unknown): unknown {
   const proof = value as Values;
   return typeof proof.requestKey === "string" && !proof.requestKey.startsWith("inactive:") ? { ...proof, requestKey: "inactive:" + proof.requestKey } : value;
 }
-export function invalidateInactiveContexts(program: ToolProgram, contexts: Record<string, ToolContext>): Record<string, ToolContext> {
+export function invalidateInactiveContexts(program: ToolProgram, contexts: Record<string, ToolContext>, availableSources?: ReadonlySet<CatalogSource>): Record<string, ToolContext> {
   let next = contexts;
   for (const tool of program.tools) {
     const plan = program.plans[tool.id];
     if (!plan?.steps.some(s => s.id.startsWith(tool.id + "/") && s.operation === "circuit.guard")) continue;
     let result: Evaluation;
-    try { if(toolAvailable(program,tool.id,contexts))continue; result = evaluateProduct(program, tool.id, contexts); } catch { continue; }
+    try { if(toolAvailable(program,tool.id,contexts,availableSources))continue; result = evaluateProduct(program, tool.id, contexts); } catch { continue; }
     if (!plan.steps.some(s => s.id.startsWith(tool.id + "/") && s.operation === "circuit.guard" && result.trace[s.id]?.inputs.active === false)) continue;
     for (const b of ownBindings(result, tool.id)) {
       if (b.field.meaning !== "pumpSelectionProof") continue;
@@ -123,8 +121,8 @@ export function invalidateInactiveContexts(program: ToolProgram, contexts: Recor
   }
   return next;
 }
-export function invalidateInactiveSelections(program: ToolProgram, data: WorkspaceData, defaults: Values, role: UserRole, resources?: ToolContext["resources"]): WorkspaceData {
-  const before = productContexts(program, data, defaults, role, resources), after = invalidateInactiveContexts(program, before);
+export function invalidateInactiveSelections(program: ToolProgram, data: WorkspaceData, defaults: Values, role: UserRole, resources?: ToolContext["resources"], availableSources?: ReadonlySet<CatalogSource>): WorkspaceData {
+  const before = productContexts(program, data, defaults, role, resources), after = invalidateInactiveContexts(program, before, availableSources);
   if (after === before) return data;
   return { ...data, tools: Object.fromEntries(Object.entries(data.tools).map(([id, saved]) => [id, after[id] && after[id] !== before[id] ? { ...saved, values: after[id].values } : saved])) };
 }

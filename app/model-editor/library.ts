@@ -1,10 +1,12 @@
 import { assemblyBounds, type Assembly, type Bounds, type Component, type Port } from "./model";
 import { reviewedOnisLibraryPorts } from "./onis-flow";
+import { preparedPumpCadEntries, preparedPumpCadNote } from "./prepared-pump-cad";
 
 export type LibraryModel = {
   id: string; name: string; source: string; sources: string[]; categories: string[];
   sourceHash: string; units: "mm"; status: "ready" | "pending" | "error";
   bounds?: Bounds; meshUrl?: string; bytes?: number; ports: Port[]; warnings: string[]; error?: string;
+  searchTerms?: string[];
 };
 export type ModelLibrary = { version: 1; models: LibraryModel[] };
 const object = (value: unknown): Record<string, unknown> => value && typeof value === "object" && !Array.isArray(value) ? value as Record<string, unknown> : {};
@@ -35,7 +37,34 @@ export function parseModelLibrary(raw: unknown): ModelLibrary {
 export function filterLibrary(models: LibraryModel[], search: string, category: string, status: string) {
   const words = search.toLocaleLowerCase("ru").trim().split(/\s+/).filter(Boolean);
   return models.filter(model => (!category || model.categories.includes(category)) && (!status || model.status === status)
-    && words.every(word => `${model.name} ${model.sources.join(" ")} ${model.categories.join(" ")}`.toLocaleLowerCase("ru").includes(word)));
+    && words.every(word => `${model.name} ${model.sources.join(" ")} ${model.categories.join(" ")} ${model.searchTerms?.join(" ") ?? ""}`.toLocaleLowerCase("ru").includes(word)));
+}
+
+export function mergePreparedPumpLibrary(library: ModelLibrary): ModelLibrary {
+  const models = new Map(library.models.map(model => [model.sourceHash, model]));
+  const pinned = new Set(library.models.filter(model => model.status === "ready").map(model => model.sourceHash));
+  const unique = (values: string[]) => [...new Set(values)];
+  for (const entry of preparedPumpCadEntries()) {
+    const profile = entry.profile;
+    if (!validBounds(profile.bounds) || !profile.meshUrl) continue;
+    const existing = models.get(profile.sourceHash);
+    const name = `${entry.manufacturer} ${entry.model}`;
+    const searchTerms = unique([...(existing?.searchTerms ?? []), ...[name, entry.execution, entry.displayArticle, entry.article].filter((value): value is string => !!value)]);
+    const categories = unique([...(existing?.categories ?? []), "Насосы", `${entry.manufacturer} ${entry.series}`]);
+    const sources = unique([...(existing?.sources ?? []), profile.source]);
+    const warnings = unique([...(existing?.warnings ?? []), preparedPumpCadNote(entry.scope), ...profile.warnings]);
+    if (existing?.status === "ready") {
+      // A source shared by multiple executions exposes only ports common to all of them.
+      const ports = pinned.has(profile.sourceHash) ? existing.ports : existing.ports.filter(port => profile.ports.some(candidate =>
+        port.id === candidate.id && JSON.stringify([port.point, port.axis, port.provisional]) === JSON.stringify([candidate.point, candidate.axis, candidate.provisional])));
+      models.set(profile.sourceHash, { ...existing, searchTerms, categories, sources, warnings, ports });
+      continue;
+    }
+    models.set(profile.sourceHash, { id: profile.sourceHash, sourceHash: profile.sourceHash, name: existing?.name ?? name,
+      source: profile.source, sources, categories, searchTerms, units: "mm", status: "ready", bounds: profile.bounds,
+      meshUrl: profile.meshUrl, ports: profile.ports, warnings });
+  }
+  return { version: 1, models: [...models.values()] };
 }
 
 export function addLibraryModel(assembly: Assembly, model: LibraryModel, id: string): Assembly {
@@ -48,7 +77,7 @@ export function addLibraryModel(assembly: Assembly, model: LibraryModel, id: str
     sourceNote: `Геометрия CAD, мм. Исходная ориентация сохранена. ${model.warnings.join(". ")}. Ручная компоновка; спецификация не изменяется`,
     cadSource: { path: model.source, hash: model.sourceHash }, bounds, meshUrl: model.meshUrl,
     position: [(occupied ? occupied[3] + 100 : 0) - bounds[0], -bounds[1], -bounds[2]], rotation: [0, 0, 0],
-    hidden: false, opacity: 1, locked: false, ports: reviewedOnisLibraryPorts(model.sourceHash,model.source,bounds),
+    hidden: false, opacity: 1, locked: false, ports: structuredClone(model.ports),
     parameters: { length: bounds[3] - bounds[0], width: bounds[4] - bounds[1], height: bounds[5] - bounds[2], diameter: 50, routeOffset: 0 },
   };
   return { ...assembly, components: [...assembly.components, component] };

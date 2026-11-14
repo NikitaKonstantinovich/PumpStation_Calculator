@@ -19,6 +19,7 @@ export type InsertPart = {
   thicknessMm: number | null; thread: string | null; threadGender: "male" | "female" | null;
   boreDiameterMm?: number | null;
   requiredPipeOuterDiameterMm?: number;
+  supportedPipeOuterDiametersMm?: number[];
   lipOuterDiameterMm?: number | null;
   cylindricalLengthLargeMm?: number | null; cylindricalLengthSmallMm?: number | null;
   standard: string | null; price: number | null; source: string; dimensionSources: Record<string, string>;
@@ -199,7 +200,7 @@ export function deduplicateInsertParts(parts: InsertPart[]): InsertPart[] {
 }
 
 type End = { connection: InsertConnection; part?: InsertPart; looseFlange?: InsertPart; warnings: string[] };
-function endsFor(dn: number | null, pn: number | null, material: InsertMaterial, catalog: InsertCatalog): End[] {
+function endsFor(dn: number | null, pn: number | null, material: InsertMaterial, catalog: InsertCatalog, pipeOuter: number | null): End[] {
   const parts = catalog.parts.filter(part => part.dn === dn && (part.pn === pn || (pn !== null && part.compatiblePns?.includes(pn)) || (catalog.engineering.compactThreaded && part.kind === "threadEnd" && positive(pn) && positive(part.pn) && part.pn >= pn)) && part.material === material);
   // Intentional scope exclusions must not become fabricated incomplete flange ends.
   // Evaluate each DN independently so a reducer can keep an eligible mixed pair.
@@ -209,7 +210,9 @@ function endsFor(dn: number | null, pn: number | null, material: InsertMaterial,
   // Apply the same material/DN/PN rule as collectors and line specifications,
   // independently at each end. Catalogue availability is not an execution rule.
   const connection: InsertConnection = dn !== null && pn !== null && flangeKinds(material, dn, pn).includes("collar") ? "collar" : "flanged";
-  const ends: End[] = parts.filter(part => connection === "flanged" && part.kind === "weldFlange").map(part => ({ connection: "flanged", part, warnings: [] }));
+  const ends: End[] = parts.filter(part => connection === "flanged" && part.kind === "weldFlange"
+    && (!part.supportedPipeOuterDiametersMm || (positive(pipeOuter) && part.supportedPipeOuterDiametersMm.some(diameter => Math.abs(diameter - pipeOuter) < .001))))
+    .map(part => ({ connection: "flanged", part, warnings: [] }));
   const selection = connection === "collar" ? catalog.engineering.collarSelections?.find(rule => rule.dn === dn && rule.material === material && pn !== null && rule.insertPns.includes(pn)) : undefined;
   const collars = selection ? catalog.parts.filter(part => part.kind === "collar" && part.id === selection.componentId
     && part.dn === dn && part.material === material && part.pn === selection.partPn && part.pn >= pn!
@@ -332,7 +335,9 @@ function calculateVariant(base: InsertPart, left: End, right: End, input: Insert
     if (compact && role === "left") return 0;
     const thickness = role === "left" || base.kind === "pipe" || compact ? base.wallThickness : base.wallThicknessSmall;
     const eligibleRules = engineering.endRules.filter(rule => rule.connection === end.connection && rule.material === material && rule.dn === dn && rule.pn === pn && hasSource(rule.source) && (!rule.partIdentity || (end.part && rule.partIdentity === insertPartIdentity(end.part))) && (rule.baseOuterDiameter === undefined || rule.baseOuterDiameter === diameter) && (rule.baseWallThickness === undefined || rule.baseWallThickness === thickness));
-    const physicalEnds = new Set(endsFor(dn, pn, material, catalog).filter(candidate => candidate.connection === end.connection).map(candidate => candidate.part && insertPartIdentity(candidate.part)));
+    const physicalEnds = new Set(endsFor(dn, pn, material, catalog, diameter)
+      .filter(candidate => candidate.connection === end.connection && (!candidate.part?.supportedPipeOuterDiametersMm || candidate.part === end.part))
+      .map(candidate => candidate.part && insertPartIdentity(candidate.part)));
     const compactRule: InsertEndRule | undefined = compact && end.connection === "threaded" && positive(end.part?.lengthMm) && hasSource(end.part?.dimensionSources.lengthMm) && engineering.compactThreaded && dn !== null && pn !== null
       ? { connection: "threaded", material, dn, pn, axialAdditionMm: end.part.lengthMm, weldFactor: engineering.compactThreaded.weldFactor, source: `${engineering.compactThreaded.source}; ${end.part.dimensionSources.lengthMm}` } : undefined;
     const rule = compact && end.connection === "threaded" ? compactRule : eligibleRules.find(rule => rule.partIdentity) ?? (physicalEnds.size <= 1 ? eligibleRules[0] : undefined);
@@ -595,7 +600,8 @@ export function coreGenerateInsertCandidates(request: InsertRequest, originalCat
   const rows = new Map<string, InsertCalculation>();
   for (const base of bases) {
     const dnSmall = base.kind === "pipe" ? base.dn : base.dnSmall;
-    const leftEnds = endsFor(base.dn, base.pn, base.material, catalog), rightEnds = endsFor(dnSmall, base.pn, base.material, catalog);
+    const leftEnds = endsFor(base.dn, base.pn, base.material, catalog, base.outerDiameter);
+    const rightEnds = endsFor(dnSmall, base.pn, base.material, catalog, base.kind === "pipe" ? base.outerDiameter : base.outerDiameterSmall);
     for (const left of leftEnds) for (const right of rightEnds) {
       // Project decision: a threaded end is only allowed on an equal-DN straight insert.
       if ((base.kind !== "pipe" || catalog.engineering.compactThreaded) && (left.connection === "threaded" || right.connection === "threaded")) continue;
@@ -613,7 +619,7 @@ export function coreGenerateInsertCandidates(request: InsertRequest, originalCat
     for (const base of stubs) for (const pn of [10, 16, 25]) {
       if (!positive(base.pn) || base.pn < pn) continue;
       const left: End = { connection: "threaded", part: base, warnings: [] };
-      for (const right of endsFor(base.dn, pn, base.material, catalog)) {
+      for (const right of endsFor(base.dn, pn, base.material, catalog, base.outerDiameter)) {
         if (right.connection === "threaded" && right.part && insertPartIdentity(base).localeCompare(insertPartIdentity(right.part)) > 0) continue;
         if (catalog.engineering.connectionPairs?.length && !catalog.engineering.connectionPairs.some(pair => pair.left === "threaded" && pair.right === right.connection)) continue;
         const result = calculateVariant(base, left, right, input, catalog, pn);

@@ -7,7 +7,7 @@ import * as THREE from "three";
 import { STLLoader } from "three/addons/loaders/STLLoader.js";
 const { rebuildFasteners }=await loadTs(new URL("../app/model-editor/flange-fasteners.ts",import.meta.url));
 const replacements={};
-for(const name of ["fastener-renderer","insertion-renderer"]){const url=new URL(`../app/model-editor/${name}.ts`,import.meta.url);replacements[url.href]=(await readFile(url,"utf8")).replace('from "three"',`from ${JSON.stringify(new URL("../node_modules/three/build/three.module.js",import.meta.url).href)}`);}
+for(const name of ["fastener-renderer","insertion-renderer"]){const url=new URL(`../app/model-editor/${name}.ts`,import.meta.url);replacements[url.href]=(await readFile(url,"utf8")).replace('from "three"',`from ${JSON.stringify(import.meta.resolve("three"))}`);}
 const { fastenerObject }=await loadTs(new URL("../app/model-editor/fastener-renderer.ts",import.meta.url),replacements);
 const { disposeInsertionObject:disposeObject }=await loadTs(new URL("../app/model-editor/insertion-renderer.ts",import.meta.url),replacements);
 
@@ -194,7 +194,7 @@ test("CDM42 fasteners clear pump, wafer and KMS STL bodies, including head and s
     for(const component of assembly.components.filter(c=>b.members.includes(c.id))) {
       const url=component.meshUrl??(component.shape?.kind==="mesh"?component.shape.meshUrl:null);
       if(!url)continue;
-      if(!cache.has(url)){const bytes=await readFile(new URL(`../public${url}`,import.meta.url));cache.set(url,new STLLoader().parse(bytes.buffer.slice(bytes.byteOffset,bytes.byteOffset+bytes.byteLength)));}
+      if(!cache.has(url)){const bytes=await readFile(process.env.PSC_CAD_ROOT_URL?new URL(`frontend/public${url}`,process.env.PSC_CAD_ROOT_URL):new URL(`../public${url}`,import.meta.url));cache.set(url,new STLLoader().parse(bytes.buffer.slice(bytes.byteOffset,bytes.byteOffset+bytes.byteLength)));}
       const mesh=new THREE.Mesh(cache.get(url),new THREE.MeshBasicMaterial({side:THREE.DoubleSide}));
       const local=new THREE.Group();local.add(mesh);local.position.fromArray(component.position);local.rotation.set(...component.rotation.map(x=>x*Math.PI/180));
       if(component.shape?.kind==="mesh"){mesh.position.fromArray(component.shape.modelPosition??[0,0,0]);mesh.rotation.set(...(component.shape.modelRotation??[0,0,0]).map(x=>x*Math.PI/180));}

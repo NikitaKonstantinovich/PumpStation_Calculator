@@ -54,9 +54,35 @@ test("symbolic instances carry an actionable diagnosis and leave usable geometry
   const m=createCadManifest(project([component({kind:"frame",cadSource:undefined,equipmentId:"frame-1"})]));
   assert.equal(m.instances[0].geometry.kind,"catalogue");
 });
+test("threaded fitting exports a reviewed STEP but omits a dimension-only mesh", () => {
+  const hash = "a".repeat(64);
+  const local = pose([5, 2, 3], [0, 0, -90]);
+  const shape = { kind: "mesh", modelHash: hash, modelPosition: local.position, modelRotation: local.rotation };
+  const exact = component({ id: "exact", kind: "equipment", name: "Ниппель LD Pride", line: { fidelity: "cad", role: "primary-pump-nipple" }, shape });
+  const outline = component({ id: "outline", kind: "equipment", name: "Ниппель LD Pride", line: { fidelity: "outline", role: "primary-between-valves-nipple" }, cadSource: undefined, shape });
+  const { instances } = createCadManifest(project([exact, outline]));
+  assert.deepEqual(instances[0].geometry, { kind: "native", hash, source: "Equipment/fixture.step" });
+  close(instances[0].transform, cadTransform(exact, local));
+  assert.equal(instances[1].geometry.kind, "unavailable");
+  assert.match(instances[1].geometry.reason, /геометри|контур|оболоч/i);
+});
 test("BOM hardware rows do not duplicate physical fasteners", () => {
   const m=createCadManifest(project([component(),component({id:"bom",line:{role:"fasteners-bolts"}})]));
   assert.equal(m.instances.length,1);
+});
+test("cabinet profiles retain their cut length, slot coordinates and pose in the CAD snapshot", async () => {
+  for (const length of [600, 800]) {
+    const c = component({id:"frame-profile-upper",kind:"equipment",cadSource:undefined,
+      frameProfile:{version:1,length,holes:[56,72,length-5.5]}});
+    const [part] = createCadManifest(project([c])).instances;
+    assert.equal(part.geometry.kind, "frame-profile");
+    assert.equal(part.geometry.lengthMm, length);
+    assert.deepEqual(part.geometry.slots.slice(0, 2), [[20,56],[72,72]]);
+    assert.equal(part.geometry.slots.at(-1)[1], length-5.51);
+    close(part.transform, cadTransform(c));
+    c.frameProfile.holes[0] = 58;
+    assert.notEqual(await snapshotKey([part]), await snapshotKey(createCadManifest(project([c])).instances));
+  }
 });
 test("availability follows the exact built snapshot, including a restored partial job", async () => {
   const p=project([component()]), model=p.entities["station-model"], c=model.editor.assembly.components[0];

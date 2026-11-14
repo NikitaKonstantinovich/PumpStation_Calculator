@@ -43,6 +43,7 @@ export function deriveTools(doc: ToolDocument): ToolDefinition[] {
       category: node.tool?.category ?? type.category ?? "Инструменты",
       order: node.tool?.order ?? index,
       enabled: node.tool?.enabled !== false,
+      workspaceVisible: node.tool?.workspaceVisible !== false,
       tests: node.tool?.tests ?? []
     }];
   }).sort((a, b) => (a.order ?? 0) - (b.order ?? 0) || a.id.localeCompare(b.id));
@@ -141,6 +142,7 @@ export function upgradeDocument(original: ToolDocument): ToolDocument {
       category: tool.category,
       order: tool.order ?? index,
       enabled: tool.enabled !== false,
+      workspaceVisible: tool.workspaceVisible !== false,
       tests: tool.tests
     };
   }
@@ -340,7 +342,7 @@ export function assertProductMetadata(doc: ToolDocument) {
     if (!type?.instrument) continue;
     const context=type.fields.find(f=>f.key==="context"&&f.direction==="input"),ui=type.fields.find(f=>f.key==="ui"&&f.direction==="output");
     if(context?.kind!=="object"||context.meaning!=="toolContext"||context.unit!==""||ui?.kind!=="object"||ui.meaning!=="view"||ui.unit!=="")throw new DiagramError("Инструменту продукта нужны вход context (toolContext) и выход ui (view)",root.id,node.id);
-    if (!safeId(node.id) || !node.name.trim() || node.tool?.order != null && !Number.isFinite(node.tool.order) || node.tool?.enabled != null && typeof node.tool.enabled !== "boolean" || node.tool?.tests != null && (!Array.isArray(node.tool.tests) || node.tool.tests.length > 100)) throw new DiagramError("Некорректные свойства инструмента продукта", root.id, node.id);
+    if (!safeId(node.id) || !node.name.trim() || node.tool?.order != null && !Number.isFinite(node.tool.order) || node.tool?.enabled != null && typeof node.tool.enabled !== "boolean" || node.tool?.workspaceVisible != null && typeof node.tool.workspaceVisible !== "boolean" || node.tool?.tests != null && (!Array.isArray(node.tool.tests) || node.tool.tests.length > 100)) throw new DiagramError("Некорректные свойства инструмента продукта", root.id, node.id);
   }
 }
 export function validateProductPorts(plan: Plan, root: string) {

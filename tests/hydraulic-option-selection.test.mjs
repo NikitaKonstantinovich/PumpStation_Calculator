@@ -68,6 +68,19 @@ test("missing or invalid requirements cannot certify a product", () => {
   for (const pressureBar of [null, NaN, -1]) assert.equal(selectHydraulicProduct([tank()], { ...tankNeed, pressureBar }).selected?.technicalStatus, "unverified");
   assert.equal(selectHydraulicProduct([transducer()], { ...sensorNeed, range: undefined }).selected.technicalStatus, "unverified");
 });
+test("disabling operating pressure checks retains tank volume, thread and nominal flange compatibility", () => {
+  const noRating = tank();
+  noRating.fields = noRating.fields.filter(f => f.column !== "Допустимое рабочее давление, бар");
+  const requirement = { ...tankNeed, pressureBar: null, checkPressure: false, thread: "G3/4", threadGender: "male" };
+  const result = selectHydraulicProduct([noRating], requirement);
+  assert.equal(result.selected.technicalStatus, "ready");
+  assert.deepEqual(result.selected.missing, []);
+  assert.equal(selectHydraulicProduct([noRating], { ...requirement, thread: "R3/4" }).selected, undefined);
+  const plug = component("plug", "Заглушка фланцевая Ст20", "заглушки", { DN: 50, PN: 16 });
+  const plugNeed = { kind: "flange-plug", dn: 50, pn: 16, material: "st20", pressureBar: 20, checkPressure: false };
+  assert.equal(selectHydraulicProduct([plug], plugNeed).selected.technicalStatus, "ready");
+  assert.equal(selectHydraulicProduct([plug], { ...plugNeed, pn: 10 }).selected, undefined);
+});
 test("valve variant prices are independent and missing handle price is not replaced by bare stem price", () => {
   const valve = binding.items.find(i => i.id === "затворы-001-r0012");
   assert.equal(hydraulicProductPrice(valve, { kind: "isolating-valve", actuator: "handle" }), 4300);

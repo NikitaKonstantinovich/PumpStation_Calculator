@@ -3,6 +3,7 @@ import { readInsertPaintingRates } from "./component-painting";
 import flangeBoringPolicy from "../data/flange-boring-policy.json";
 import { readFlangeBoringRates } from "./component-flange-boring";
 import { supplierFlangeFor } from "./component-supplier-flanges";
+import st20ReadyBoreFlanges from "../data/st20-ready-bore-flanges.json";
 import { positive } from "./collector-calculations";
 import valveReference from "../data/insert-valve-reference.json";
 import standards from "../data/component-insert-standards.json";
@@ -138,7 +139,9 @@ export function makeInsertCatalog(data: BindingCatalog, engineering: InsertEngin
       if ("requiredPipeOuterDiameterMm" in supplierFlange && typeof supplierFlange.requiredPipeOuterDiameterMm === "number") part.requiredPipeOuterDiameterMm = supplierFlange.requiredPipeOuterDiameterMm;
       part.origin = "supplement";
       part.compatiblePns = supplierFlange.compatiblePns;
-      part.source = `${supplierFlange.url}; ${price?.label ?? "Цена не задана"}: ${price?.amount ?? "не задана"} ₽/шт., дата источника ${String(findField(item, /^Дата цены$/i)?.value ?? "не задана")}; ${supplierFlange.vat}`;
+      part.source = price
+        ? `${supplierFlange.url}; ${price.label}: ${price.amount} ₽/шт., дата источника ${String(findField(item, /^Дата цены$/i)?.value ?? "не задана")}; ${supplierFlange.vat}`
+        : `${supplierFlange.url}; ${supplierFlange.vat}`;
     } else if (item.fields.some(field => field.column === "compatiblePns")) warnings.push(`Подтверждённые PN фланца не соответствуют записи поставщика: ${item.id}`);
     if (kind === "nipple") {
       const reviewed = sensorNippleReferenceFor(item, data.source.sha256, sensorNipples);
@@ -188,6 +191,21 @@ export function makeInsertCatalog(data: BindingCatalog, engineering: InsertEngin
     }
     if (kind === "weldFlange" || kind === "looseFlange") {
       const measured = readFlangeDimensions(item, pn, flangeDimensions, data.source.sha256);
+      if (item.tableId === st20ReadyBoreFlanges.id || item.id.startsWith("st20-ready-bore:")) {
+        const reviewed = st20ReadyBoreFlanges.rows.find(row => row.id === item.id);
+        const baseline = reviewed && data.items.find(row => row.id === reviewed.baselineId);
+        if (!reviewed || !baseline || !supplierFlange || kind !== "weldFlange" || material !== "st20"
+          || findField(item, /^Назначение$/i)?.value !== "Фланец вставки" || measured.standard !== "ГОСТ33259-2015:01:2:B") continue;
+        const mate = readFlangeDimensions(baseline, pn, flangeDimensions, data.source.sha256);
+        const signature = ["boltCircleMm", "boltHoleDiameterMm", "holes", "faceHeightMm", "faceDiameterMm"] as const;
+        const bore = measured.dimensions.boreDiameterMm;
+        if (measured.warnings.length || mate.warnings.length || !positive(bore)
+          || !signature.every(key => positive(measured.dimensions[key]) && measured.dimensions[key] === mate.dimensions[key])
+          || !reviewed.supportedPipeOuterDiametersMm.every(diameter => bore - diameter >= 0.5 && bore - diameter <= 2)) continue;
+        part.supportedPipeOuterDiametersMm = reviewed.supportedPipeOuterDiametersMm;
+        // A nominal drawing cannot establish the tolerances of the delivered parts or gasket fit.
+        warnings.push("Для фланца ряда 2 подтвердите фактический посадочный зазор на всей глубине и пригодность прокладки по чертежу или обмеру.");
+      }
       if (measured.standard) part.standard = measured.standard;
       // Persisted dimensions take precedence, including invalidation of a managed field.
       if (item.fields.some(field => field.column.startsWith("CALC_FLANGE_") && field.column !== "CALC_FLANGE_REVIEW")) {

@@ -22,8 +22,8 @@
   },
   "statistics": {
     "catalogs": 25,
-    "tables": 86,
-    "componentRows": 2029,
+    "tables": 87,
+    "componentRows": 2038,
     "pricedComponentRows": 1999,
     "priceEntries": 4460,
     "formulaRules": 4785,
@@ -3259,6 +3259,101 @@
           "recordIds": [
             "fginox-iso-pn16:2PAS16400",
             "fginox-iso-pn16:2PAS16500"
+          ]
+        },
+        {
+          "id": "st20-ready-bore-flanges",
+          "title": "Фланцы плоские Сталь 20 — ГОСТ 33259-2015, ряд 2",
+          "sourceRange": "Проверка позиций, цена по запросу 2026-11-12",
+          "sourceUrls": [
+            "https://detalllidersnab.ru/page145856686.html",
+            "https://signal-teplo.ru/upload/iblock/203/vq3htl65l1axjlrwvdsrcwpcfenf7afx.pdf"
+          ],
+          "headerRows": [],
+          "columns": [
+            {
+              "column": "name",
+              "headerPath": [
+                "Наименование"
+              ]
+            },
+            {
+              "column": "dn",
+              "headerPath": [
+                "DN"
+              ]
+            },
+            {
+              "column": "pn",
+              "headerPath": [
+                "PN"
+              ]
+            },
+            {
+              "column": "supplier",
+              "headerPath": [
+                "Поставщик"
+              ]
+            },
+            {
+              "column": "supplierId",
+              "headerPath": [
+                "ID товара поставщика"
+              ]
+            },
+            {
+              "column": "material",
+              "headerPath": [
+                "Материал"
+              ]
+            },
+            {
+              "column": "compatiblePns",
+              "headerPath": [
+                "Подтверждённые PN исполнения"
+              ]
+            },
+            {
+              "column": "checkedAt",
+              "headerPath": [
+                "Дата проверки позиции"
+              ]
+            },
+            {
+              "column": "vat",
+              "headerPath": [
+                "Условия цены"
+              ]
+            },
+            {
+              "column": "sourceUrl",
+              "headerPath": [
+                "Источник URL"
+              ]
+            },
+            {
+              "column": "geometryBasis",
+              "headerPath": [
+                "Основание геометрии"
+              ]
+            },
+            {
+              "column": "purpose",
+              "headerPath": [
+                "Назначение"
+              ]
+            }
+          ],
+          "recordIds": [
+            "st20-ready-bore:32-10",
+            "st20-ready-bore:32-16",
+            "st20-ready-bore:32-25",
+            "st20-ready-bore:40-10",
+            "st20-ready-bore:40-16",
+            "st20-ready-bore:40-25",
+            "st20-ready-bore:50-10",
+            "st20-ready-bore:50-16",
+            "st20-ready-bore:50-25"
           ]
         }
       ]
@@ -50331,6 +50426,48 @@
           "value": 2
         },
         {
+          "column": "CALC_FLANGE_OD",
+          "headerPath": [
+            "Наружный диаметр фланца, мм"
+          ],
+          "value": 95
+        },
+        {
+          "column": "CALC_FLANGE_PCD",
+          "headerPath": [
+            "Диаметр окружности отверстий фланца, мм"
+          ],
+          "value": 65
+        },
+        {
+          "column": "CALC_FLANGE_HOLE",
+          "headerPath": [
+            "Диаметр отверстия фланца, мм"
+          ],
+          "value": 14
+        },
+        {
+          "column": "CALC_FLANGE_HOLES",
+          "headerPath": [
+            "Количество отверстий фланца"
+          ],
+          "value": 4
+        },
+        {
+          "column": "CALC_FLANGE_FACE_HEIGHT",
+          "headerPath": [
+            "Высота соединительного выступа фланца, мм"
+          ],
+          "value": 4
+        },
+        {
+          "column": "CALC_FLANGE_FACE_OD",
+          "headerPath": [
+            "Диаметр соединительного выступа фланца, мм"
+          ],
+          "value": 47
+        },
+        {
           "column": "CALC_FLANGE_SOURCE",
           "headerPath": [
             "Источник размеров фланца"
@@ -50417,6 +50554,48 @@
             "Радиальная фаска фланца, мм"
           ],
           "value": 2
+        },
+        {
+          "column": "CALC_FLANGE_OD",
+          "headerPath": [
+            "Наружный диаметр фланца, мм"
+          ],
+          "value": 105
+        },
+        {
+          "column": "CALC_FLANGE_PCD",
+          "headerPath": [
+            "Диаметр окружности отверстий фланца, мм"
+          ],
+          "value": 75
+        },
+        {
+          "column": "CALC_FLANGE_HOLE",
+          "headerPath": [
+            "Диаметр отверстия фланца, мм"
+          ],
+          "value": 14
+        },
+        {
+          "column": "CALC_FLANGE_HOLES",
+          "headerPath": [
+            "Количество отверстий фланца"
+          ],
+          "value": 4
+        },
+        {
+          "column": "CALC_FLANGE_FACE_HEIGHT",
+          "headerPath": [
+            "Высота соединительного выступа фланца, мм"
+          ],
+          "value": 4
+        },
+        {
+          "column": "CALC_FLANGE_FACE_OD",
+          "headerPath": [
+            "Диаметр соединительного выступа фланца, мм"
+          ],
+          "value": 58
         },
         {
           "column": "CALC_FLANGE_SOURCE",
@@ -50507,6 +50686,48 @@
           "value": 3
         },
         {
+          "column": "CALC_FLANGE_OD",
+          "headerPath": [
+            "Наружный диаметр фланца, мм"
+          ],
+          "value": 115
+        },
+        {
+          "column": "CALC_FLANGE_PCD",
+          "headerPath": [
+            "Диаметр окружности отверстий фланца, мм"
+          ],
+          "value": 85
+        },
+        {
+          "column": "CALC_FLANGE_HOLE",
+          "headerPath": [
+            "Диаметр отверстия фланца, мм"
+          ],
+          "value": 14
+        },
+        {
+          "column": "CALC_FLANGE_HOLES",
+          "headerPath": [
+            "Количество отверстий фланца"
+          ],
+          "value": 4
+        },
+        {
+          "column": "CALC_FLANGE_FACE_HEIGHT",
+          "headerPath": [
+            "Высота соединительного выступа фланца, мм"
+          ],
+          "value": 4
+        },
+        {
+          "column": "CALC_FLANGE_FACE_OD",
+          "headerPath": [
+            "Диаметр соединительного выступа фланца, мм"
+          ],
+          "value": 68
+        },
+        {
           "column": "CALC_FLANGE_SOURCE",
           "headerPath": [
             "Источник размеров фланца"
@@ -50593,6 +50814,48 @@
             "Радиальная фаска фланца, мм"
           ],
           "value": 3
+        },
+        {
+          "column": "CALC_FLANGE_OD",
+          "headerPath": [
+            "Наружный диаметр фланца, мм"
+          ],
+          "value": 135
+        },
+        {
+          "column": "CALC_FLANGE_PCD",
+          "headerPath": [
+            "Диаметр окружности отверстий фланца, мм"
+          ],
+          "value": 100
+        },
+        {
+          "column": "CALC_FLANGE_HOLE",
+          "headerPath": [
+            "Диаметр отверстия фланца, мм"
+          ],
+          "value": 18
+        },
+        {
+          "column": "CALC_FLANGE_HOLES",
+          "headerPath": [
+            "Количество отверстий фланца"
+          ],
+          "value": 4
+        },
+        {
+          "column": "CALC_FLANGE_FACE_HEIGHT",
+          "headerPath": [
+            "Высота соединительного выступа фланца, мм"
+          ],
+          "value": 2
+        },
+        {
+          "column": "CALC_FLANGE_FACE_OD",
+          "headerPath": [
+            "Диаметр соединительного выступа фланца, мм"
+          ],
+          "value": 78
         },
         {
           "column": "CALC_FLANGE_SOURCE",
@@ -50683,6 +50946,48 @@
           "value": 3
         },
         {
+          "column": "CALC_FLANGE_OD",
+          "headerPath": [
+            "Наружный диаметр фланца, мм"
+          ],
+          "value": 145
+        },
+        {
+          "column": "CALC_FLANGE_PCD",
+          "headerPath": [
+            "Диаметр окружности отверстий фланца, мм"
+          ],
+          "value": 110
+        },
+        {
+          "column": "CALC_FLANGE_HOLE",
+          "headerPath": [
+            "Диаметр отверстия фланца, мм"
+          ],
+          "value": 18
+        },
+        {
+          "column": "CALC_FLANGE_HOLES",
+          "headerPath": [
+            "Количество отверстий фланца"
+          ],
+          "value": 4
+        },
+        {
+          "column": "CALC_FLANGE_FACE_HEIGHT",
+          "headerPath": [
+            "Высота соединительного выступа фланца, мм"
+          ],
+          "value": 3
+        },
+        {
+          "column": "CALC_FLANGE_FACE_OD",
+          "headerPath": [
+            "Диаметр соединительного выступа фланца, мм"
+          ],
+          "value": 88
+        },
+        {
           "column": "CALC_FLANGE_SOURCE",
           "headerPath": [
             "Источник размеров фланца"
@@ -50769,6 +51074,48 @@
             "Радиальная фаска фланца, мм"
           ],
           "value": 3
+        },
+        {
+          "column": "CALC_FLANGE_OD",
+          "headerPath": [
+            "Наружный диаметр фланца, мм"
+          ],
+          "value": 160
+        },
+        {
+          "column": "CALC_FLANGE_PCD",
+          "headerPath": [
+            "Диаметр окружности отверстий фланца, мм"
+          ],
+          "value": 125
+        },
+        {
+          "column": "CALC_FLANGE_HOLE",
+          "headerPath": [
+            "Диаметр отверстия фланца, мм"
+          ],
+          "value": 18
+        },
+        {
+          "column": "CALC_FLANGE_HOLES",
+          "headerPath": [
+            "Количество отверстий фланца"
+          ],
+          "value": 4
+        },
+        {
+          "column": "CALC_FLANGE_FACE_HEIGHT",
+          "headerPath": [
+            "Высота соединительного выступа фланца, мм"
+          ],
+          "value": 3
+        },
+        {
+          "column": "CALC_FLANGE_FACE_OD",
+          "headerPath": [
+            "Диаметр соединительного выступа фланца, мм"
+          ],
+          "value": 102
         },
         {
           "column": "CALC_FLANGE_SOURCE",
@@ -50859,6 +51206,48 @@
           "value": 4
         },
         {
+          "column": "CALC_FLANGE_OD",
+          "headerPath": [
+            "Наружный диаметр фланца, мм"
+          ],
+          "value": 180
+        },
+        {
+          "column": "CALC_FLANGE_PCD",
+          "headerPath": [
+            "Диаметр окружности отверстий фланца, мм"
+          ],
+          "value": 145
+        },
+        {
+          "column": "CALC_FLANGE_HOLE",
+          "headerPath": [
+            "Диаметр отверстия фланца, мм"
+          ],
+          "value": 18
+        },
+        {
+          "column": "CALC_FLANGE_HOLES",
+          "headerPath": [
+            "Количество отверстий фланца"
+          ],
+          "value": 4
+        },
+        {
+          "column": "CALC_FLANGE_FACE_HEIGHT",
+          "headerPath": [
+            "Высота соединительного выступа фланца, мм"
+          ],
+          "value": 4
+        },
+        {
+          "column": "CALC_FLANGE_FACE_OD",
+          "headerPath": [
+            "Диаметр соединительного выступа фланца, мм"
+          ],
+          "value": 122
+        },
+        {
           "column": "CALC_FLANGE_SOURCE",
           "headerPath": [
             "Источник размеров фланца"
@@ -50945,6 +51334,48 @@
             "Радиальная фаска фланца, мм"
           ],
           "value": 4
+        },
+        {
+          "column": "CALC_FLANGE_OD",
+          "headerPath": [
+            "Наружный диаметр фланца, мм"
+          ],
+          "value": 195
+        },
+        {
+          "column": "CALC_FLANGE_PCD",
+          "headerPath": [
+            "Диаметр окружности отверстий фланца, мм"
+          ],
+          "value": 160
+        },
+        {
+          "column": "CALC_FLANGE_HOLE",
+          "headerPath": [
+            "Диаметр отверстия фланца, мм"
+          ],
+          "value": 18
+        },
+        {
+          "column": "CALC_FLANGE_HOLES",
+          "headerPath": [
+            "Количество отверстий фланца"
+          ],
+          "value": 4
+        },
+        {
+          "column": "CALC_FLANGE_FACE_HEIGHT",
+          "headerPath": [
+            "Высота соединительного выступа фланца, мм"
+          ],
+          "value": 4
+        },
+        {
+          "column": "CALC_FLANGE_FACE_OD",
+          "headerPath": [
+            "Диаметр соединительного выступа фланца, мм"
+          ],
+          "value": 133
         },
         {
           "column": "CALC_FLANGE_SOURCE",
@@ -51035,6 +51466,48 @@
           "value": 4
         },
         {
+          "column": "CALC_FLANGE_OD",
+          "headerPath": [
+            "Наружный диаметр фланца, мм"
+          ],
+          "value": 215
+        },
+        {
+          "column": "CALC_FLANGE_PCD",
+          "headerPath": [
+            "Диаметр окружности отверстий фланца, мм"
+          ],
+          "value": 180
+        },
+        {
+          "column": "CALC_FLANGE_HOLE",
+          "headerPath": [
+            "Диаметр отверстия фланца, мм"
+          ],
+          "value": 18
+        },
+        {
+          "column": "CALC_FLANGE_HOLES",
+          "headerPath": [
+            "Количество отверстий фланца"
+          ],
+          "value": 8
+        },
+        {
+          "column": "CALC_FLANGE_FACE_HEIGHT",
+          "headerPath": [
+            "Высота соединительного выступа фланца, мм"
+          ],
+          "value": 4
+        },
+        {
+          "column": "CALC_FLANGE_FACE_OD",
+          "headerPath": [
+            "Диаметр соединительного выступа фланца, мм"
+          ],
+          "value": 158
+        },
+        {
           "column": "CALC_FLANGE_SOURCE",
           "headerPath": [
             "Источник размеров фланца"
@@ -51121,6 +51594,48 @@
             "Радиальная фаска фланца, мм"
           ],
           "value": 4
+        },
+        {
+          "column": "CALC_FLANGE_OD",
+          "headerPath": [
+            "Наружный диаметр фланца, мм"
+          ],
+          "value": 245
+        },
+        {
+          "column": "CALC_FLANGE_PCD",
+          "headerPath": [
+            "Диаметр окружности отверстий фланца, мм"
+          ],
+          "value": 210
+        },
+        {
+          "column": "CALC_FLANGE_HOLE",
+          "headerPath": [
+            "Диаметр отверстия фланца, мм"
+          ],
+          "value": 18
+        },
+        {
+          "column": "CALC_FLANGE_HOLES",
+          "headerPath": [
+            "Количество отверстий фланца"
+          ],
+          "value": 8
+        },
+        {
+          "column": "CALC_FLANGE_FACE_HEIGHT",
+          "headerPath": [
+            "Высота соединительного выступа фланца, мм"
+          ],
+          "value": 4
+        },
+        {
+          "column": "CALC_FLANGE_FACE_OD",
+          "headerPath": [
+            "Диаметр соединительного выступа фланца, мм"
+          ],
+          "value": 184
         },
         {
           "column": "CALC_FLANGE_SOURCE",
@@ -51211,6 +51726,48 @@
           "value": 4
         },
         {
+          "column": "CALC_FLANGE_OD",
+          "headerPath": [
+            "Наружный диаметр фланца, мм"
+          ],
+          "value": 280
+        },
+        {
+          "column": "CALC_FLANGE_PCD",
+          "headerPath": [
+            "Диаметр окружности отверстий фланца, мм"
+          ],
+          "value": 240
+        },
+        {
+          "column": "CALC_FLANGE_HOLE",
+          "headerPath": [
+            "Диаметр отверстия фланца, мм"
+          ],
+          "value": 22
+        },
+        {
+          "column": "CALC_FLANGE_HOLES",
+          "headerPath": [
+            "Количество отверстий фланца"
+          ],
+          "value": 8
+        },
+        {
+          "column": "CALC_FLANGE_FACE_HEIGHT",
+          "headerPath": [
+            "Высота соединительного выступа фланца, мм"
+          ],
+          "value": 4
+        },
+        {
+          "column": "CALC_FLANGE_FACE_OD",
+          "headerPath": [
+            "Диаметр соединительного выступа фланца, мм"
+          ],
+          "value": 212
+        },
+        {
           "column": "CALC_FLANGE_SOURCE",
           "headerPath": [
             "Источник размеров фланца"
@@ -51297,6 +51854,48 @@
             "Радиальная фаска фланца, мм"
           ],
           "value": 4
+        },
+        {
+          "column": "CALC_FLANGE_OD",
+          "headerPath": [
+            "Наружный диаметр фланца, мм"
+          ],
+          "value": 335
+        },
+        {
+          "column": "CALC_FLANGE_PCD",
+          "headerPath": [
+            "Диаметр окружности отверстий фланца, мм"
+          ],
+          "value": 295
+        },
+        {
+          "column": "CALC_FLANGE_HOLE",
+          "headerPath": [
+            "Диаметр отверстия фланца, мм"
+          ],
+          "value": 22
+        },
+        {
+          "column": "CALC_FLANGE_HOLES",
+          "headerPath": [
+            "Количество отверстий фланца"
+          ],
+          "value": 8
+        },
+        {
+          "column": "CALC_FLANGE_FACE_HEIGHT",
+          "headerPath": [
+            "Высота соединительного выступа фланца, мм"
+          ],
+          "value": 4
+        },
+        {
+          "column": "CALC_FLANGE_FACE_OD",
+          "headerPath": [
+            "Диаметр соединительного выступа фланца, мм"
+          ],
+          "value": 268
         },
         {
           "column": "CALC_FLANGE_SOURCE",
@@ -51387,6 +51986,48 @@
           "value": 6
         },
         {
+          "column": "CALC_FLANGE_OD",
+          "headerPath": [
+            "Наружный диаметр фланца, мм"
+          ],
+          "value": 390
+        },
+        {
+          "column": "CALC_FLANGE_PCD",
+          "headerPath": [
+            "Диаметр окружности отверстий фланца, мм"
+          ],
+          "value": 350
+        },
+        {
+          "column": "CALC_FLANGE_HOLE",
+          "headerPath": [
+            "Диаметр отверстия фланца, мм"
+          ],
+          "value": 22
+        },
+        {
+          "column": "CALC_FLANGE_HOLES",
+          "headerPath": [
+            "Количество отверстий фланца"
+          ],
+          "value": 12
+        },
+        {
+          "column": "CALC_FLANGE_FACE_HEIGHT",
+          "headerPath": [
+            "Высота соединительного выступа фланца, мм"
+          ],
+          "value": 4
+        },
+        {
+          "column": "CALC_FLANGE_FACE_OD",
+          "headerPath": [
+            "Диаметр соединительного выступа фланца, мм"
+          ],
+          "value": 320
+        },
+        {
           "column": "CALC_FLANGE_SOURCE",
           "headerPath": [
             "Источник размеров фланца"
@@ -51473,6 +52114,48 @@
             "Радиальная фаска фланца, мм"
           ],
           "value": 6
+        },
+        {
+          "column": "CALC_FLANGE_OD",
+          "headerPath": [
+            "Наружный диаметр фланца, мм"
+          ],
+          "value": 440
+        },
+        {
+          "column": "CALC_FLANGE_PCD",
+          "headerPath": [
+            "Диаметр окружности отверстий фланца, мм"
+          ],
+          "value": 400
+        },
+        {
+          "column": "CALC_FLANGE_HOLE",
+          "headerPath": [
+            "Диаметр отверстия фланца, мм"
+          ],
+          "value": 22
+        },
+        {
+          "column": "CALC_FLANGE_HOLES",
+          "headerPath": [
+            "Количество отверстий фланца"
+          ],
+          "value": 12
+        },
+        {
+          "column": "CALC_FLANGE_FACE_HEIGHT",
+          "headerPath": [
+            "Высота соединительного выступа фланца, мм"
+          ],
+          "value": 5
+        },
+        {
+          "column": "CALC_FLANGE_FACE_OD",
+          "headerPath": [
+            "Диаметр соединительного выступа фланца, мм"
+          ],
+          "value": 370
         },
         {
           "column": "CALC_FLANGE_SOURCE",
@@ -51563,6 +52246,48 @@
           "value": 7
         },
         {
+          "column": "CALC_FLANGE_OD",
+          "headerPath": [
+            "Наружный диаметр фланца, мм"
+          ],
+          "value": 500
+        },
+        {
+          "column": "CALC_FLANGE_PCD",
+          "headerPath": [
+            "Диаметр окружности отверстий фланца, мм"
+          ],
+          "value": 460
+        },
+        {
+          "column": "CALC_FLANGE_HOLE",
+          "headerPath": [
+            "Диаметр отверстия фланца, мм"
+          ],
+          "value": 22
+        },
+        {
+          "column": "CALC_FLANGE_HOLES",
+          "headerPath": [
+            "Количество отверстий фланца"
+          ],
+          "value": 16
+        },
+        {
+          "column": "CALC_FLANGE_FACE_HEIGHT",
+          "headerPath": [
+            "Высота соединительного выступа фланца, мм"
+          ],
+          "value": 5
+        },
+        {
+          "column": "CALC_FLANGE_FACE_OD",
+          "headerPath": [
+            "Диаметр соединительного выступа фланца, мм"
+          ],
+          "value": 430
+        },
+        {
           "column": "CALC_FLANGE_SOURCE",
           "headerPath": [
             "Источник размеров фланца"
@@ -51649,6 +52374,48 @@
             "Радиальная фаска фланца, мм"
           ],
           "value": 7
+        },
+        {
+          "column": "CALC_FLANGE_OD",
+          "headerPath": [
+            "Наружный диаметр фланца, мм"
+          ],
+          "value": 565
+        },
+        {
+          "column": "CALC_FLANGE_PCD",
+          "headerPath": [
+            "Диаметр окружности отверстий фланца, мм"
+          ],
+          "value": 515
+        },
+        {
+          "column": "CALC_FLANGE_HOLE",
+          "headerPath": [
+            "Диаметр отверстия фланца, мм"
+          ],
+          "value": 26
+        },
+        {
+          "column": "CALC_FLANGE_HOLES",
+          "headerPath": [
+            "Количество отверстий фланца"
+          ],
+          "value": 16
+        },
+        {
+          "column": "CALC_FLANGE_FACE_HEIGHT",
+          "headerPath": [
+            "Высота соединительного выступа фланца, мм"
+          ],
+          "value": 5
+        },
+        {
+          "column": "CALC_FLANGE_FACE_OD",
+          "headerPath": [
+            "Диаметр соединительного выступа фланца, мм"
+          ],
+          "value": 482
         },
         {
           "column": "CALC_FLANGE_SOURCE",
@@ -51739,6 +52506,48 @@
           "value": 7
         },
         {
+          "column": "CALC_FLANGE_OD",
+          "headerPath": [
+            "Наружный диаметр фланца, мм"
+          ],
+          "value": 670
+        },
+        {
+          "column": "CALC_FLANGE_PCD",
+          "headerPath": [
+            "Диаметр окружности отверстий фланца, мм"
+          ],
+          "value": 620
+        },
+        {
+          "column": "CALC_FLANGE_HOLE",
+          "headerPath": [
+            "Диаметр отверстия фланца, мм"
+          ],
+          "value": 26
+        },
+        {
+          "column": "CALC_FLANGE_HOLES",
+          "headerPath": [
+            "Количество отверстий фланца"
+          ],
+          "value": 20
+        },
+        {
+          "column": "CALC_FLANGE_FACE_HEIGHT",
+          "headerPath": [
+            "Высота соединительного выступа фланца, мм"
+          ],
+          "value": 5
+        },
+        {
+          "column": "CALC_FLANGE_FACE_OD",
+          "headerPath": [
+            "Диаметр соединительного выступа фланца, мм"
+          ],
+          "value": 585
+        },
+        {
           "column": "CALC_FLANGE_SOURCE",
           "headerPath": [
             "Источник размеров фланца"
@@ -51825,6 +52634,48 @@
             "Радиальная фаска фланца, мм"
           ],
           "value": 7
+        },
+        {
+          "column": "CALC_FLANGE_OD",
+          "headerPath": [
+            "Наружный диаметр фланца, мм"
+          ],
+          "value": 780
+        },
+        {
+          "column": "CALC_FLANGE_PCD",
+          "headerPath": [
+            "Диаметр окружности отверстий фланца, мм"
+          ],
+          "value": 725
+        },
+        {
+          "column": "CALC_FLANGE_HOLE",
+          "headerPath": [
+            "Диаметр отверстия фланца, мм"
+          ],
+          "value": 30
+        },
+        {
+          "column": "CALC_FLANGE_HOLES",
+          "headerPath": [
+            "Количество отверстий фланца"
+          ],
+          "value": 20
+        },
+        {
+          "column": "CALC_FLANGE_FACE_HEIGHT",
+          "headerPath": [
+            "Высота соединительного выступа фланца, мм"
+          ],
+          "value": 6
+        },
+        {
+          "column": "CALC_FLANGE_FACE_OD",
+          "headerPath": [
+            "Диаметр соединительного выступа фланца, мм"
+          ],
+          "value": 685
         },
         {
           "column": "CALC_FLANGE_SOURCE",
@@ -51915,6 +52766,48 @@
           "value": 9
         },
         {
+          "column": "CALC_FLANGE_OD",
+          "headerPath": [
+            "Наружный диаметр фланца, мм"
+          ],
+          "value": 895
+        },
+        {
+          "column": "CALC_FLANGE_PCD",
+          "headerPath": [
+            "Диаметр окружности отверстий фланца, мм"
+          ],
+          "value": 840
+        },
+        {
+          "column": "CALC_FLANGE_HOLE",
+          "headerPath": [
+            "Диаметр отверстия фланца, мм"
+          ],
+          "value": 30
+        },
+        {
+          "column": "CALC_FLANGE_HOLES",
+          "headerPath": [
+            "Количество отверстий фланца"
+          ],
+          "value": 24
+        },
+        {
+          "column": "CALC_FLANGE_FACE_HEIGHT",
+          "headerPath": [
+            "Высота соединительного выступа фланца, мм"
+          ],
+          "value": 6
+        },
+        {
+          "column": "CALC_FLANGE_FACE_OD",
+          "headerPath": [
+            "Диаметр соединительного выступа фланца, мм"
+          ],
+          "value": 800
+        },
+        {
           "column": "CALC_FLANGE_SOURCE",
           "headerPath": [
             "Источник размеров фланца"
@@ -52001,6 +52894,48 @@
             "Радиальная фаска фланца, мм"
           ],
           "value": 9
+        },
+        {
+          "column": "CALC_FLANGE_OD",
+          "headerPath": [
+            "Наружный диаметр фланца, мм"
+          ],
+          "value": 1010
+        },
+        {
+          "column": "CALC_FLANGE_PCD",
+          "headerPath": [
+            "Диаметр окружности отверстий фланца, мм"
+          ],
+          "value": 950
+        },
+        {
+          "column": "CALC_FLANGE_HOLE",
+          "headerPath": [
+            "Диаметр отверстия фланца, мм"
+          ],
+          "value": 33
+        },
+        {
+          "column": "CALC_FLANGE_HOLES",
+          "headerPath": [
+            "Количество отверстий фланца"
+          ],
+          "value": 24
+        },
+        {
+          "column": "CALC_FLANGE_FACE_HEIGHT",
+          "headerPath": [
+            "Высота соединительного выступа фланца, мм"
+          ],
+          "value": 6
+        },
+        {
+          "column": "CALC_FLANGE_FACE_OD",
+          "headerPath": [
+            "Диаметр соединительного выступа фланца, мм"
+          ],
+          "value": 905
         },
         {
           "column": "CALC_FLANGE_SOURCE",
@@ -52108,6 +53043,48 @@
           "value": 2
         },
         {
+          "column": "CALC_FLANGE_OD",
+          "headerPath": [
+            "Наружный диаметр фланца, мм"
+          ],
+          "value": 95
+        },
+        {
+          "column": "CALC_FLANGE_PCD",
+          "headerPath": [
+            "Диаметр окружности отверстий фланца, мм"
+          ],
+          "value": 65
+        },
+        {
+          "column": "CALC_FLANGE_HOLE",
+          "headerPath": [
+            "Диаметр отверстия фланца, мм"
+          ],
+          "value": 14
+        },
+        {
+          "column": "CALC_FLANGE_HOLES",
+          "headerPath": [
+            "Количество отверстий фланца"
+          ],
+          "value": 4
+        },
+        {
+          "column": "CALC_FLANGE_FACE_HEIGHT",
+          "headerPath": [
+            "Высота соединительного выступа фланца, мм"
+          ],
+          "value": 4
+        },
+        {
+          "column": "CALC_FLANGE_FACE_OD",
+          "headerPath": [
+            "Диаметр соединительного выступа фланца, мм"
+          ],
+          "value": 47
+        },
+        {
           "column": "CALC_FLANGE_SOURCE",
           "headerPath": [
             "Источник размеров фланца"
@@ -52194,6 +53171,48 @@
             "Радиальная фаска фланца, мм"
           ],
           "value": 2
+        },
+        {
+          "column": "CALC_FLANGE_OD",
+          "headerPath": [
+            "Наружный диаметр фланца, мм"
+          ],
+          "value": 105
+        },
+        {
+          "column": "CALC_FLANGE_PCD",
+          "headerPath": [
+            "Диаметр окружности отверстий фланца, мм"
+          ],
+          "value": 75
+        },
+        {
+          "column": "CALC_FLANGE_HOLE",
+          "headerPath": [
+            "Диаметр отверстия фланца, мм"
+          ],
+          "value": 14
+        },
+        {
+          "column": "CALC_FLANGE_HOLES",
+          "headerPath": [
+            "Количество отверстий фланца"
+          ],
+          "value": 4
+        },
+        {
+          "column": "CALC_FLANGE_FACE_HEIGHT",
+          "headerPath": [
+            "Высота соединительного выступа фланца, мм"
+          ],
+          "value": 4
+        },
+        {
+          "column": "CALC_FLANGE_FACE_OD",
+          "headerPath": [
+            "Диаметр соединительного выступа фланца, мм"
+          ],
+          "value": 58
         },
         {
           "column": "CALC_FLANGE_SOURCE",
@@ -52284,6 +53303,48 @@
           "value": 3
         },
         {
+          "column": "CALC_FLANGE_OD",
+          "headerPath": [
+            "Наружный диаметр фланца, мм"
+          ],
+          "value": 115
+        },
+        {
+          "column": "CALC_FLANGE_PCD",
+          "headerPath": [
+            "Диаметр окружности отверстий фланца, мм"
+          ],
+          "value": 85
+        },
+        {
+          "column": "CALC_FLANGE_HOLE",
+          "headerPath": [
+            "Диаметр отверстия фланца, мм"
+          ],
+          "value": 14
+        },
+        {
+          "column": "CALC_FLANGE_HOLES",
+          "headerPath": [
+            "Количество отверстий фланца"
+          ],
+          "value": 4
+        },
+        {
+          "column": "CALC_FLANGE_FACE_HEIGHT",
+          "headerPath": [
+            "Высота соединительного выступа фланца, мм"
+          ],
+          "value": 4
+        },
+        {
+          "column": "CALC_FLANGE_FACE_OD",
+          "headerPath": [
+            "Диаметр соединительного выступа фланца, мм"
+          ],
+          "value": 68
+        },
+        {
           "column": "CALC_FLANGE_SOURCE",
           "headerPath": [
             "Источник размеров фланца"
@@ -52370,6 +53431,48 @@
             "Радиальная фаска фланца, мм"
           ],
           "value": 3
+        },
+        {
+          "column": "CALC_FLANGE_OD",
+          "headerPath": [
+            "Наружный диаметр фланца, мм"
+          ],
+          "value": 135
+        },
+        {
+          "column": "CALC_FLANGE_PCD",
+          "headerPath": [
+            "Диаметр окружности отверстий фланца, мм"
+          ],
+          "value": 100
+        },
+        {
+          "column": "CALC_FLANGE_HOLE",
+          "headerPath": [
+            "Диаметр отверстия фланца, мм"
+          ],
+          "value": 18
+        },
+        {
+          "column": "CALC_FLANGE_HOLES",
+          "headerPath": [
+            "Количество отверстий фланца"
+          ],
+          "value": 4
+        },
+        {
+          "column": "CALC_FLANGE_FACE_HEIGHT",
+          "headerPath": [
+            "Высота соединительного выступа фланца, мм"
+          ],
+          "value": 2
+        },
+        {
+          "column": "CALC_FLANGE_FACE_OD",
+          "headerPath": [
+            "Диаметр соединительного выступа фланца, мм"
+          ],
+          "value": 78
         },
         {
           "column": "CALC_FLANGE_SOURCE",
@@ -52460,6 +53563,48 @@
           "value": 3
         },
         {
+          "column": "CALC_FLANGE_OD",
+          "headerPath": [
+            "Наружный диаметр фланца, мм"
+          ],
+          "value": 145
+        },
+        {
+          "column": "CALC_FLANGE_PCD",
+          "headerPath": [
+            "Диаметр окружности отверстий фланца, мм"
+          ],
+          "value": 110
+        },
+        {
+          "column": "CALC_FLANGE_HOLE",
+          "headerPath": [
+            "Диаметр отверстия фланца, мм"
+          ],
+          "value": 18
+        },
+        {
+          "column": "CALC_FLANGE_HOLES",
+          "headerPath": [
+            "Количество отверстий фланца"
+          ],
+          "value": 4
+        },
+        {
+          "column": "CALC_FLANGE_FACE_HEIGHT",
+          "headerPath": [
+            "Высота соединительного выступа фланца, мм"
+          ],
+          "value": 3
+        },
+        {
+          "column": "CALC_FLANGE_FACE_OD",
+          "headerPath": [
+            "Диаметр соединительного выступа фланца, мм"
+          ],
+          "value": 88
+        },
+        {
           "column": "CALC_FLANGE_SOURCE",
           "headerPath": [
             "Источник размеров фланца"
@@ -52546,6 +53691,48 @@
             "Радиальная фаска фланца, мм"
           ],
           "value": 3
+        },
+        {
+          "column": "CALC_FLANGE_OD",
+          "headerPath": [
+            "Наружный диаметр фланца, мм"
+          ],
+          "value": 160
+        },
+        {
+          "column": "CALC_FLANGE_PCD",
+          "headerPath": [
+            "Диаметр окружности отверстий фланца, мм"
+          ],
+          "value": 125
+        },
+        {
+          "column": "CALC_FLANGE_HOLE",
+          "headerPath": [
+            "Диаметр отверстия фланца, мм"
+          ],
+          "value": 18
+        },
+        {
+          "column": "CALC_FLANGE_HOLES",
+          "headerPath": [
+            "Количество отверстий фланца"
+          ],
+          "value": 4
+        },
+        {
+          "column": "CALC_FLANGE_FACE_HEIGHT",
+          "headerPath": [
+            "Высота соединительного выступа фланца, мм"
+          ],
+          "value": 3
+        },
+        {
+          "column": "CALC_FLANGE_FACE_OD",
+          "headerPath": [
+            "Диаметр соединительного выступа фланца, мм"
+          ],
+          "value": 102
         },
         {
           "column": "CALC_FLANGE_SOURCE",
@@ -52636,6 +53823,48 @@
           "value": 4
         },
         {
+          "column": "CALC_FLANGE_OD",
+          "headerPath": [
+            "Наружный диаметр фланца, мм"
+          ],
+          "value": 180
+        },
+        {
+          "column": "CALC_FLANGE_PCD",
+          "headerPath": [
+            "Диаметр окружности отверстий фланца, мм"
+          ],
+          "value": 145
+        },
+        {
+          "column": "CALC_FLANGE_HOLE",
+          "headerPath": [
+            "Диаметр отверстия фланца, мм"
+          ],
+          "value": 18
+        },
+        {
+          "column": "CALC_FLANGE_HOLES",
+          "headerPath": [
+            "Количество отверстий фланца"
+          ],
+          "value": 4
+        },
+        {
+          "column": "CALC_FLANGE_FACE_HEIGHT",
+          "headerPath": [
+            "Высота соединительного выступа фланца, мм"
+          ],
+          "value": 4
+        },
+        {
+          "column": "CALC_FLANGE_FACE_OD",
+          "headerPath": [
+            "Диаметр соединительного выступа фланца, мм"
+          ],
+          "value": 122
+        },
+        {
           "column": "CALC_FLANGE_SOURCE",
           "headerPath": [
             "Источник размеров фланца"
@@ -52722,6 +53951,48 @@
             "Радиальная фаска фланца, мм"
           ],
           "value": 4
+        },
+        {
+          "column": "CALC_FLANGE_OD",
+          "headerPath": [
+            "Наружный диаметр фланца, мм"
+          ],
+          "value": 195
+        },
+        {
+          "column": "CALC_FLANGE_PCD",
+          "headerPath": [
+            "Диаметр окружности отверстий фланца, мм"
+          ],
+          "value": 160
+        },
+        {
+          "column": "CALC_FLANGE_HOLE",
+          "headerPath": [
+            "Диаметр отверстия фланца, мм"
+          ],
+          "value": 18
+        },
+        {
+          "column": "CALC_FLANGE_HOLES",
+          "headerPath": [
+            "Количество отверстий фланца"
+          ],
+          "value": 4
+        },
+        {
+          "column": "CALC_FLANGE_FACE_HEIGHT",
+          "headerPath": [
+            "Высота соединительного выступа фланца, мм"
+          ],
+          "value": 4
+        },
+        {
+          "column": "CALC_FLANGE_FACE_OD",
+          "headerPath": [
+            "Диаметр соединительного выступа фланца, мм"
+          ],
+          "value": 133
         },
         {
           "column": "CALC_FLANGE_SOURCE",
@@ -52812,6 +54083,48 @@
           "value": 4
         },
         {
+          "column": "CALC_FLANGE_OD",
+          "headerPath": [
+            "Наружный диаметр фланца, мм"
+          ],
+          "value": 215
+        },
+        {
+          "column": "CALC_FLANGE_PCD",
+          "headerPath": [
+            "Диаметр окружности отверстий фланца, мм"
+          ],
+          "value": 180
+        },
+        {
+          "column": "CALC_FLANGE_HOLE",
+          "headerPath": [
+            "Диаметр отверстия фланца, мм"
+          ],
+          "value": 18
+        },
+        {
+          "column": "CALC_FLANGE_HOLES",
+          "headerPath": [
+            "Количество отверстий фланца"
+          ],
+          "value": 8
+        },
+        {
+          "column": "CALC_FLANGE_FACE_HEIGHT",
+          "headerPath": [
+            "Высота соединительного выступа фланца, мм"
+          ],
+          "value": 4
+        },
+        {
+          "column": "CALC_FLANGE_FACE_OD",
+          "headerPath": [
+            "Диаметр соединительного выступа фланца, мм"
+          ],
+          "value": 158
+        },
+        {
           "column": "CALC_FLANGE_SOURCE",
           "headerPath": [
             "Источник размеров фланца"
@@ -52898,6 +54211,48 @@
             "Радиальная фаска фланца, мм"
           ],
           "value": 4
+        },
+        {
+          "column": "CALC_FLANGE_OD",
+          "headerPath": [
+            "Наружный диаметр фланца, мм"
+          ],
+          "value": 245
+        },
+        {
+          "column": "CALC_FLANGE_PCD",
+          "headerPath": [
+            "Диаметр окружности отверстий фланца, мм"
+          ],
+          "value": 210
+        },
+        {
+          "column": "CALC_FLANGE_HOLE",
+          "headerPath": [
+            "Диаметр отверстия фланца, мм"
+          ],
+          "value": 18
+        },
+        {
+          "column": "CALC_FLANGE_HOLES",
+          "headerPath": [
+            "Количество отверстий фланца"
+          ],
+          "value": 8
+        },
+        {
+          "column": "CALC_FLANGE_FACE_HEIGHT",
+          "headerPath": [
+            "Высота соединительного выступа фланца, мм"
+          ],
+          "value": 4
+        },
+        {
+          "column": "CALC_FLANGE_FACE_OD",
+          "headerPath": [
+            "Диаметр соединительного выступа фланца, мм"
+          ],
+          "value": 184
         },
         {
           "column": "CALC_FLANGE_SOURCE",
@@ -52988,6 +54343,48 @@
           "value": 4
         },
         {
+          "column": "CALC_FLANGE_OD",
+          "headerPath": [
+            "Наружный диаметр фланца, мм"
+          ],
+          "value": 280
+        },
+        {
+          "column": "CALC_FLANGE_PCD",
+          "headerPath": [
+            "Диаметр окружности отверстий фланца, мм"
+          ],
+          "value": 240
+        },
+        {
+          "column": "CALC_FLANGE_HOLE",
+          "headerPath": [
+            "Диаметр отверстия фланца, мм"
+          ],
+          "value": 22
+        },
+        {
+          "column": "CALC_FLANGE_HOLES",
+          "headerPath": [
+            "Количество отверстий фланца"
+          ],
+          "value": 8
+        },
+        {
+          "column": "CALC_FLANGE_FACE_HEIGHT",
+          "headerPath": [
+            "Высота соединительного выступа фланца, мм"
+          ],
+          "value": 4
+        },
+        {
+          "column": "CALC_FLANGE_FACE_OD",
+          "headerPath": [
+            "Диаметр соединительного выступа фланца, мм"
+          ],
+          "value": 212
+        },
+        {
           "column": "CALC_FLANGE_SOURCE",
           "headerPath": [
             "Источник размеров фланца"
@@ -53074,6 +54471,48 @@
             "Радиальная фаска фланца, мм"
           ],
           "value": 4
+        },
+        {
+          "column": "CALC_FLANGE_OD",
+          "headerPath": [
+            "Наружный диаметр фланца, мм"
+          ],
+          "value": 335
+        },
+        {
+          "column": "CALC_FLANGE_PCD",
+          "headerPath": [
+            "Диаметр окружности отверстий фланца, мм"
+          ],
+          "value": 295
+        },
+        {
+          "column": "CALC_FLANGE_HOLE",
+          "headerPath": [
+            "Диаметр отверстия фланца, мм"
+          ],
+          "value": 22
+        },
+        {
+          "column": "CALC_FLANGE_HOLES",
+          "headerPath": [
+            "Количество отверстий фланца"
+          ],
+          "value": 12
+        },
+        {
+          "column": "CALC_FLANGE_FACE_HEIGHT",
+          "headerPath": [
+            "Высота соединительного выступа фланца, мм"
+          ],
+          "value": 4
+        },
+        {
+          "column": "CALC_FLANGE_FACE_OD",
+          "headerPath": [
+            "Диаметр соединительного выступа фланца, мм"
+          ],
+          "value": 268
         },
         {
           "column": "CALC_FLANGE_SOURCE",
@@ -53164,6 +54603,48 @@
           "value": 6
         },
         {
+          "column": "CALC_FLANGE_OD",
+          "headerPath": [
+            "Наружный диаметр фланца, мм"
+          ],
+          "value": 405
+        },
+        {
+          "column": "CALC_FLANGE_PCD",
+          "headerPath": [
+            "Диаметр окружности отверстий фланца, мм"
+          ],
+          "value": 355
+        },
+        {
+          "column": "CALC_FLANGE_HOLE",
+          "headerPath": [
+            "Диаметр отверстия фланца, мм"
+          ],
+          "value": 26
+        },
+        {
+          "column": "CALC_FLANGE_HOLES",
+          "headerPath": [
+            "Количество отверстий фланца"
+          ],
+          "value": 12
+        },
+        {
+          "column": "CALC_FLANGE_FACE_HEIGHT",
+          "headerPath": [
+            "Высота соединительного выступа фланца, мм"
+          ],
+          "value": 4
+        },
+        {
+          "column": "CALC_FLANGE_FACE_OD",
+          "headerPath": [
+            "Диаметр соединительного выступа фланца, мм"
+          ],
+          "value": 320
+        },
+        {
           "column": "CALC_FLANGE_SOURCE",
           "headerPath": [
             "Источник размеров фланца"
@@ -53250,6 +54731,48 @@
             "Радиальная фаска фланца, мм"
           ],
           "value": 6
+        },
+        {
+          "column": "CALC_FLANGE_OD",
+          "headerPath": [
+            "Наружный диаметр фланца, мм"
+          ],
+          "value": 460
+        },
+        {
+          "column": "CALC_FLANGE_PCD",
+          "headerPath": [
+            "Диаметр окружности отверстий фланца, мм"
+          ],
+          "value": 410
+        },
+        {
+          "column": "CALC_FLANGE_HOLE",
+          "headerPath": [
+            "Диаметр отверстия фланца, мм"
+          ],
+          "value": 26
+        },
+        {
+          "column": "CALC_FLANGE_HOLES",
+          "headerPath": [
+            "Количество отверстий фланца"
+          ],
+          "value": 12
+        },
+        {
+          "column": "CALC_FLANGE_FACE_HEIGHT",
+          "headerPath": [
+            "Высота соединительного выступа фланца, мм"
+          ],
+          "value": 5
+        },
+        {
+          "column": "CALC_FLANGE_FACE_OD",
+          "headerPath": [
+            "Диаметр соединительного выступа фланца, мм"
+          ],
+          "value": 370
         },
         {
           "column": "CALC_FLANGE_SOURCE",
@@ -53340,6 +54863,48 @@
           "value": 7
         },
         {
+          "column": "CALC_FLANGE_OD",
+          "headerPath": [
+            "Наружный диаметр фланца, мм"
+          ],
+          "value": 520
+        },
+        {
+          "column": "CALC_FLANGE_PCD",
+          "headerPath": [
+            "Диаметр окружности отверстий фланца, мм"
+          ],
+          "value": 470
+        },
+        {
+          "column": "CALC_FLANGE_HOLE",
+          "headerPath": [
+            "Диаметр отверстия фланца, мм"
+          ],
+          "value": 26
+        },
+        {
+          "column": "CALC_FLANGE_HOLES",
+          "headerPath": [
+            "Количество отверстий фланца"
+          ],
+          "value": 16
+        },
+        {
+          "column": "CALC_FLANGE_FACE_HEIGHT",
+          "headerPath": [
+            "Высота соединительного выступа фланца, мм"
+          ],
+          "value": 5
+        },
+        {
+          "column": "CALC_FLANGE_FACE_OD",
+          "headerPath": [
+            "Диаметр соединительного выступа фланца, мм"
+          ],
+          "value": 430
+        },
+        {
           "column": "CALC_FLANGE_SOURCE",
           "headerPath": [
             "Источник размеров фланца"
@@ -53426,6 +54991,48 @@
             "Радиальная фаска фланца, мм"
           ],
           "value": 7
+        },
+        {
+          "column": "CALC_FLANGE_OD",
+          "headerPath": [
+            "Наружный диаметр фланца, мм"
+          ],
+          "value": 580
+        },
+        {
+          "column": "CALC_FLANGE_PCD",
+          "headerPath": [
+            "Диаметр окружности отверстий фланца, мм"
+          ],
+          "value": 525
+        },
+        {
+          "column": "CALC_FLANGE_HOLE",
+          "headerPath": [
+            "Диаметр отверстия фланца, мм"
+          ],
+          "value": 30
+        },
+        {
+          "column": "CALC_FLANGE_HOLES",
+          "headerPath": [
+            "Количество отверстий фланца"
+          ],
+          "value": 16
+        },
+        {
+          "column": "CALC_FLANGE_FACE_HEIGHT",
+          "headerPath": [
+            "Высота соединительного выступа фланца, мм"
+          ],
+          "value": 5
+        },
+        {
+          "column": "CALC_FLANGE_FACE_OD",
+          "headerPath": [
+            "Диаметр соединительного выступа фланца, мм"
+          ],
+          "value": 482
         },
         {
           "column": "CALC_FLANGE_SOURCE",
@@ -53516,6 +55123,48 @@
           "value": 7
         },
         {
+          "column": "CALC_FLANGE_OD",
+          "headerPath": [
+            "Наружный диаметр фланца, мм"
+          ],
+          "value": 710
+        },
+        {
+          "column": "CALC_FLANGE_PCD",
+          "headerPath": [
+            "Диаметр окружности отверстий фланца, мм"
+          ],
+          "value": 650
+        },
+        {
+          "column": "CALC_FLANGE_HOLE",
+          "headerPath": [
+            "Диаметр отверстия фланца, мм"
+          ],
+          "value": 33
+        },
+        {
+          "column": "CALC_FLANGE_HOLES",
+          "headerPath": [
+            "Количество отверстий фланца"
+          ],
+          "value": 20
+        },
+        {
+          "column": "CALC_FLANGE_FACE_HEIGHT",
+          "headerPath": [
+            "Высота соединительного выступа фланца, мм"
+          ],
+          "value": 5
+        },
+        {
+          "column": "CALC_FLANGE_FACE_OD",
+          "headerPath": [
+            "Диаметр соединительного выступа фланца, мм"
+          ],
+          "value": 585
+        },
+        {
           "column": "CALC_FLANGE_SOURCE",
           "headerPath": [
             "Источник размеров фланца"
@@ -53602,6 +55251,48 @@
             "Радиальная фаска фланца, мм"
           ],
           "value": 7
+        },
+        {
+          "column": "CALC_FLANGE_OD",
+          "headerPath": [
+            "Наружный диаметр фланца, мм"
+          ],
+          "value": 840
+        },
+        {
+          "column": "CALC_FLANGE_PCD",
+          "headerPath": [
+            "Диаметр окружности отверстий фланца, мм"
+          ],
+          "value": 770
+        },
+        {
+          "column": "CALC_FLANGE_HOLE",
+          "headerPath": [
+            "Диаметр отверстия фланца, мм"
+          ],
+          "value": 39
+        },
+        {
+          "column": "CALC_FLANGE_HOLES",
+          "headerPath": [
+            "Количество отверстий фланца"
+          ],
+          "value": 20
+        },
+        {
+          "column": "CALC_FLANGE_FACE_HEIGHT",
+          "headerPath": [
+            "Высота соединительного выступа фланца, мм"
+          ],
+          "value": 6
+        },
+        {
+          "column": "CALC_FLANGE_FACE_OD",
+          "headerPath": [
+            "Диаметр соединительного выступа фланца, мм"
+          ],
+          "value": 685
         },
         {
           "column": "CALC_FLANGE_SOURCE",
@@ -53692,6 +55383,48 @@
           "value": 9
         },
         {
+          "column": "CALC_FLANGE_OD",
+          "headerPath": [
+            "Наружный диаметр фланца, мм"
+          ],
+          "value": 910
+        },
+        {
+          "column": "CALC_FLANGE_PCD",
+          "headerPath": [
+            "Диаметр окружности отверстий фланца, мм"
+          ],
+          "value": 840
+        },
+        {
+          "column": "CALC_FLANGE_HOLE",
+          "headerPath": [
+            "Диаметр отверстия фланца, мм"
+          ],
+          "value": 39
+        },
+        {
+          "column": "CALC_FLANGE_HOLES",
+          "headerPath": [
+            "Количество отверстий фланца"
+          ],
+          "value": 24
+        },
+        {
+          "column": "CALC_FLANGE_FACE_HEIGHT",
+          "headerPath": [
+            "Высота соединительного выступа фланца, мм"
+          ],
+          "value": 6
+        },
+        {
+          "column": "CALC_FLANGE_FACE_OD",
+          "headerPath": [
+            "Диаметр соединительного выступа фланца, мм"
+          ],
+          "value": 800
+        },
+        {
           "column": "CALC_FLANGE_SOURCE",
           "headerPath": [
             "Источник размеров фланца"
@@ -53778,6 +55511,48 @@
             "Радиальная фаска фланца, мм"
           ],
           "value": 9
+        },
+        {
+          "column": "CALC_FLANGE_OD",
+          "headerPath": [
+            "Наружный диаметр фланца, мм"
+          ],
+          "value": 1020
+        },
+        {
+          "column": "CALC_FLANGE_PCD",
+          "headerPath": [
+            "Диаметр окружности отверстий фланца, мм"
+          ],
+          "value": 950
+        },
+        {
+          "column": "CALC_FLANGE_HOLE",
+          "headerPath": [
+            "Диаметр отверстия фланца, мм"
+          ],
+          "value": 39
+        },
+        {
+          "column": "CALC_FLANGE_HOLES",
+          "headerPath": [
+            "Количество отверстий фланца"
+          ],
+          "value": 24
+        },
+        {
+          "column": "CALC_FLANGE_FACE_HEIGHT",
+          "headerPath": [
+            "Высота соединительного выступа фланца, мм"
+          ],
+          "value": 6
+        },
+        {
+          "column": "CALC_FLANGE_FACE_OD",
+          "headerPath": [
+            "Диаметр соединительного выступа фланца, мм"
+          ],
+          "value": 905
         },
         {
           "column": "CALC_FLANGE_SOURCE",
@@ -53885,6 +55660,48 @@
           "value": 2
         },
         {
+          "column": "CALC_FLANGE_OD",
+          "headerPath": [
+            "Наружный диаметр фланца, мм"
+          ],
+          "value": 95
+        },
+        {
+          "column": "CALC_FLANGE_PCD",
+          "headerPath": [
+            "Диаметр окружности отверстий фланца, мм"
+          ],
+          "value": 65
+        },
+        {
+          "column": "CALC_FLANGE_HOLE",
+          "headerPath": [
+            "Диаметр отверстия фланца, мм"
+          ],
+          "value": 14
+        },
+        {
+          "column": "CALC_FLANGE_HOLES",
+          "headerPath": [
+            "Количество отверстий фланца"
+          ],
+          "value": 4
+        },
+        {
+          "column": "CALC_FLANGE_FACE_HEIGHT",
+          "headerPath": [
+            "Высота соединительного выступа фланца, мм"
+          ],
+          "value": 4
+        },
+        {
+          "column": "CALC_FLANGE_FACE_OD",
+          "headerPath": [
+            "Диаметр соединительного выступа фланца, мм"
+          ],
+          "value": 47
+        },
+        {
           "column": "CALC_FLANGE_SOURCE",
           "headerPath": [
             "Источник размеров фланца"
@@ -53974,6 +55791,48 @@
             "Радиальная фаска фланца, мм"
           ],
           "value": 2
+        },
+        {
+          "column": "CALC_FLANGE_OD",
+          "headerPath": [
+            "Наружный диаметр фланца, мм"
+          ],
+          "value": 105
+        },
+        {
+          "column": "CALC_FLANGE_PCD",
+          "headerPath": [
+            "Диаметр окружности отверстий фланца, мм"
+          ],
+          "value": 75
+        },
+        {
+          "column": "CALC_FLANGE_HOLE",
+          "headerPath": [
+            "Диаметр отверстия фланца, мм"
+          ],
+          "value": 14
+        },
+        {
+          "column": "CALC_FLANGE_HOLES",
+          "headerPath": [
+            "Количество отверстий фланца"
+          ],
+          "value": 4
+        },
+        {
+          "column": "CALC_FLANGE_FACE_HEIGHT",
+          "headerPath": [
+            "Высота соединительного выступа фланца, мм"
+          ],
+          "value": 4
+        },
+        {
+          "column": "CALC_FLANGE_FACE_OD",
+          "headerPath": [
+            "Диаметр соединительного выступа фланца, мм"
+          ],
+          "value": 58
         },
         {
           "column": "CALC_FLANGE_SOURCE",
@@ -54067,6 +55926,48 @@
           "value": 3
         },
         {
+          "column": "CALC_FLANGE_OD",
+          "headerPath": [
+            "Наружный диаметр фланца, мм"
+          ],
+          "value": 115
+        },
+        {
+          "column": "CALC_FLANGE_PCD",
+          "headerPath": [
+            "Диаметр окружности отверстий фланца, мм"
+          ],
+          "value": 85
+        },
+        {
+          "column": "CALC_FLANGE_HOLE",
+          "headerPath": [
+            "Диаметр отверстия фланца, мм"
+          ],
+          "value": 14
+        },
+        {
+          "column": "CALC_FLANGE_HOLES",
+          "headerPath": [
+            "Количество отверстий фланца"
+          ],
+          "value": 4
+        },
+        {
+          "column": "CALC_FLANGE_FACE_HEIGHT",
+          "headerPath": [
+            "Высота соединительного выступа фланца, мм"
+          ],
+          "value": 4
+        },
+        {
+          "column": "CALC_FLANGE_FACE_OD",
+          "headerPath": [
+            "Диаметр соединительного выступа фланца, мм"
+          ],
+          "value": 68
+        },
+        {
           "column": "CALC_FLANGE_SOURCE",
           "headerPath": [
             "Источник размеров фланца"
@@ -54156,6 +56057,48 @@
             "Радиальная фаска фланца, мм"
           ],
           "value": 3
+        },
+        {
+          "column": "CALC_FLANGE_OD",
+          "headerPath": [
+            "Наружный диаметр фланца, мм"
+          ],
+          "value": 135
+        },
+        {
+          "column": "CALC_FLANGE_PCD",
+          "headerPath": [
+            "Диаметр окружности отверстий фланца, мм"
+          ],
+          "value": 100
+        },
+        {
+          "column": "CALC_FLANGE_HOLE",
+          "headerPath": [
+            "Диаметр отверстия фланца, мм"
+          ],
+          "value": 18
+        },
+        {
+          "column": "CALC_FLANGE_HOLES",
+          "headerPath": [
+            "Количество отверстий фланца"
+          ],
+          "value": 4
+        },
+        {
+          "column": "CALC_FLANGE_FACE_HEIGHT",
+          "headerPath": [
+            "Высота соединительного выступа фланца, мм"
+          ],
+          "value": 2
+        },
+        {
+          "column": "CALC_FLANGE_FACE_OD",
+          "headerPath": [
+            "Диаметр соединительного выступа фланца, мм"
+          ],
+          "value": 78
         },
         {
           "column": "CALC_FLANGE_SOURCE",
@@ -54249,6 +56192,48 @@
           "value": 3
         },
         {
+          "column": "CALC_FLANGE_OD",
+          "headerPath": [
+            "Наружный диаметр фланца, мм"
+          ],
+          "value": 145
+        },
+        {
+          "column": "CALC_FLANGE_PCD",
+          "headerPath": [
+            "Диаметр окружности отверстий фланца, мм"
+          ],
+          "value": 110
+        },
+        {
+          "column": "CALC_FLANGE_HOLE",
+          "headerPath": [
+            "Диаметр отверстия фланца, мм"
+          ],
+          "value": 18
+        },
+        {
+          "column": "CALC_FLANGE_HOLES",
+          "headerPath": [
+            "Количество отверстий фланца"
+          ],
+          "value": 4
+        },
+        {
+          "column": "CALC_FLANGE_FACE_HEIGHT",
+          "headerPath": [
+            "Высота соединительного выступа фланца, мм"
+          ],
+          "value": 3
+        },
+        {
+          "column": "CALC_FLANGE_FACE_OD",
+          "headerPath": [
+            "Диаметр соединительного выступа фланца, мм"
+          ],
+          "value": 88
+        },
+        {
           "column": "CALC_FLANGE_SOURCE",
           "headerPath": [
             "Источник размеров фланца"
@@ -54338,6 +56323,48 @@
             "Радиальная фаска фланца, мм"
           ],
           "value": 3
+        },
+        {
+          "column": "CALC_FLANGE_OD",
+          "headerPath": [
+            "Наружный диаметр фланца, мм"
+          ],
+          "value": 160
+        },
+        {
+          "column": "CALC_FLANGE_PCD",
+          "headerPath": [
+            "Диаметр окружности отверстий фланца, мм"
+          ],
+          "value": 125
+        },
+        {
+          "column": "CALC_FLANGE_HOLE",
+          "headerPath": [
+            "Диаметр отверстия фланца, мм"
+          ],
+          "value": 18
+        },
+        {
+          "column": "CALC_FLANGE_HOLES",
+          "headerPath": [
+            "Количество отверстий фланца"
+          ],
+          "value": 4
+        },
+        {
+          "column": "CALC_FLANGE_FACE_HEIGHT",
+          "headerPath": [
+            "Высота соединительного выступа фланца, мм"
+          ],
+          "value": 3
+        },
+        {
+          "column": "CALC_FLANGE_FACE_OD",
+          "headerPath": [
+            "Диаметр соединительного выступа фланца, мм"
+          ],
+          "value": 102
         },
         {
           "column": "CALC_FLANGE_SOURCE",
@@ -54431,6 +56458,48 @@
           "value": 4
         },
         {
+          "column": "CALC_FLANGE_OD",
+          "headerPath": [
+            "Наружный диаметр фланца, мм"
+          ],
+          "value": 180
+        },
+        {
+          "column": "CALC_FLANGE_PCD",
+          "headerPath": [
+            "Диаметр окружности отверстий фланца, мм"
+          ],
+          "value": 145
+        },
+        {
+          "column": "CALC_FLANGE_HOLE",
+          "headerPath": [
+            "Диаметр отверстия фланца, мм"
+          ],
+          "value": 18
+        },
+        {
+          "column": "CALC_FLANGE_HOLES",
+          "headerPath": [
+            "Количество отверстий фланца"
+          ],
+          "value": 8
+        },
+        {
+          "column": "CALC_FLANGE_FACE_HEIGHT",
+          "headerPath": [
+            "Высота соединительного выступа фланца, мм"
+          ],
+          "value": 4
+        },
+        {
+          "column": "CALC_FLANGE_FACE_OD",
+          "headerPath": [
+            "Диаметр соединительного выступа фланца, мм"
+          ],
+          "value": 122
+        },
+        {
           "column": "CALC_FLANGE_SOURCE",
           "headerPath": [
             "Источник размеров фланца"
@@ -54520,6 +56589,48 @@
             "Радиальная фаска фланца, мм"
           ],
           "value": 4
+        },
+        {
+          "column": "CALC_FLANGE_OD",
+          "headerPath": [
+            "Наружный диаметр фланца, мм"
+          ],
+          "value": 195
+        },
+        {
+          "column": "CALC_FLANGE_PCD",
+          "headerPath": [
+            "Диаметр окружности отверстий фланца, мм"
+          ],
+          "value": 160
+        },
+        {
+          "column": "CALC_FLANGE_HOLE",
+          "headerPath": [
+            "Диаметр отверстия фланца, мм"
+          ],
+          "value": 18
+        },
+        {
+          "column": "CALC_FLANGE_HOLES",
+          "headerPath": [
+            "Количество отверстий фланца"
+          ],
+          "value": 8
+        },
+        {
+          "column": "CALC_FLANGE_FACE_HEIGHT",
+          "headerPath": [
+            "Высота соединительного выступа фланца, мм"
+          ],
+          "value": 4
+        },
+        {
+          "column": "CALC_FLANGE_FACE_OD",
+          "headerPath": [
+            "Диаметр соединительного выступа фланца, мм"
+          ],
+          "value": 133
         },
         {
           "column": "CALC_FLANGE_SOURCE",
@@ -54613,6 +56724,48 @@
           "value": 4
         },
         {
+          "column": "CALC_FLANGE_OD",
+          "headerPath": [
+            "Наружный диаметр фланца, мм"
+          ],
+          "value": 230
+        },
+        {
+          "column": "CALC_FLANGE_PCD",
+          "headerPath": [
+            "Диаметр окружности отверстий фланца, мм"
+          ],
+          "value": 190
+        },
+        {
+          "column": "CALC_FLANGE_HOLE",
+          "headerPath": [
+            "Диаметр отверстия фланца, мм"
+          ],
+          "value": 22
+        },
+        {
+          "column": "CALC_FLANGE_HOLES",
+          "headerPath": [
+            "Количество отверстий фланца"
+          ],
+          "value": 8
+        },
+        {
+          "column": "CALC_FLANGE_FACE_HEIGHT",
+          "headerPath": [
+            "Высота соединительного выступа фланца, мм"
+          ],
+          "value": 4
+        },
+        {
+          "column": "CALC_FLANGE_FACE_OD",
+          "headerPath": [
+            "Диаметр соединительного выступа фланца, мм"
+          ],
+          "value": 158
+        },
+        {
           "column": "CALC_FLANGE_SOURCE",
           "headerPath": [
             "Источник размеров фланца"
@@ -54702,6 +56855,48 @@
             "Радиальная фаска фланца, мм"
           ],
           "value": 4
+        },
+        {
+          "column": "CALC_FLANGE_OD",
+          "headerPath": [
+            "Наружный диаметр фланца, мм"
+          ],
+          "value": 270
+        },
+        {
+          "column": "CALC_FLANGE_PCD",
+          "headerPath": [
+            "Диаметр окружности отверстий фланца, мм"
+          ],
+          "value": 220
+        },
+        {
+          "column": "CALC_FLANGE_HOLE",
+          "headerPath": [
+            "Диаметр отверстия фланца, мм"
+          ],
+          "value": 26
+        },
+        {
+          "column": "CALC_FLANGE_HOLES",
+          "headerPath": [
+            "Количество отверстий фланца"
+          ],
+          "value": 8
+        },
+        {
+          "column": "CALC_FLANGE_FACE_HEIGHT",
+          "headerPath": [
+            "Высота соединительного выступа фланца, мм"
+          ],
+          "value": 4
+        },
+        {
+          "column": "CALC_FLANGE_FACE_OD",
+          "headerPath": [
+            "Диаметр соединительного выступа фланца, мм"
+          ],
+          "value": 184
         },
         {
           "column": "CALC_FLANGE_SOURCE",
@@ -54795,6 +56990,48 @@
           "value": 4
         },
         {
+          "column": "CALC_FLANGE_OD",
+          "headerPath": [
+            "Наружный диаметр фланца, мм"
+          ],
+          "value": 300
+        },
+        {
+          "column": "CALC_FLANGE_PCD",
+          "headerPath": [
+            "Диаметр окружности отверстий фланца, мм"
+          ],
+          "value": 250
+        },
+        {
+          "column": "CALC_FLANGE_HOLE",
+          "headerPath": [
+            "Диаметр отверстия фланца, мм"
+          ],
+          "value": 26
+        },
+        {
+          "column": "CALC_FLANGE_HOLES",
+          "headerPath": [
+            "Количество отверстий фланца"
+          ],
+          "value": 8
+        },
+        {
+          "column": "CALC_FLANGE_FACE_HEIGHT",
+          "headerPath": [
+            "Высота соединительного выступа фланца, мм"
+          ],
+          "value": 4
+        },
+        {
+          "column": "CALC_FLANGE_FACE_OD",
+          "headerPath": [
+            "Диаметр соединительного выступа фланца, мм"
+          ],
+          "value": 212
+        },
+        {
           "column": "CALC_FLANGE_SOURCE",
           "headerPath": [
             "Источник размеров фланца"
@@ -54884,6 +57121,48 @@
             "Радиальная фаска фланца, мм"
           ],
           "value": 4
+        },
+        {
+          "column": "CALC_FLANGE_OD",
+          "headerPath": [
+            "Наружный диаметр фланца, мм"
+          ],
+          "value": 360
+        },
+        {
+          "column": "CALC_FLANGE_PCD",
+          "headerPath": [
+            "Диаметр окружности отверстий фланца, мм"
+          ],
+          "value": 310
+        },
+        {
+          "column": "CALC_FLANGE_HOLE",
+          "headerPath": [
+            "Диаметр отверстия фланца, мм"
+          ],
+          "value": 26
+        },
+        {
+          "column": "CALC_FLANGE_HOLES",
+          "headerPath": [
+            "Количество отверстий фланца"
+          ],
+          "value": 12
+        },
+        {
+          "column": "CALC_FLANGE_FACE_HEIGHT",
+          "headerPath": [
+            "Высота соединительного выступа фланца, мм"
+          ],
+          "value": 4
+        },
+        {
+          "column": "CALC_FLANGE_FACE_OD",
+          "headerPath": [
+            "Диаметр соединительного выступа фланца, мм"
+          ],
+          "value": 278
         },
         {
           "column": "CALC_FLANGE_SOURCE",
@@ -54977,6 +57256,48 @@
           "value": 6
         },
         {
+          "column": "CALC_FLANGE_OD",
+          "headerPath": [
+            "Наружный диаметр фланца, мм"
+          ],
+          "value": 425
+        },
+        {
+          "column": "CALC_FLANGE_PCD",
+          "headerPath": [
+            "Диаметр окружности отверстий фланца, мм"
+          ],
+          "value": 370
+        },
+        {
+          "column": "CALC_FLANGE_HOLE",
+          "headerPath": [
+            "Диаметр отверстия фланца, мм"
+          ],
+          "value": 30
+        },
+        {
+          "column": "CALC_FLANGE_HOLES",
+          "headerPath": [
+            "Количество отверстий фланца"
+          ],
+          "value": 12
+        },
+        {
+          "column": "CALC_FLANGE_FACE_HEIGHT",
+          "headerPath": [
+            "Высота соединительного выступа фланца, мм"
+          ],
+          "value": 4
+        },
+        {
+          "column": "CALC_FLANGE_FACE_OD",
+          "headerPath": [
+            "Диаметр соединительного выступа фланца, мм"
+          ],
+          "value": 335
+        },
+        {
           "column": "CALC_FLANGE_SOURCE",
           "headerPath": [
             "Источник размеров фланца"
@@ -55066,6 +57387,48 @@
             "Радиальная фаска фланца, мм"
           ],
           "value": 6
+        },
+        {
+          "column": "CALC_FLANGE_OD",
+          "headerPath": [
+            "Наружный диаметр фланца, мм"
+          ],
+          "value": 485
+        },
+        {
+          "column": "CALC_FLANGE_PCD",
+          "headerPath": [
+            "Диаметр окружности отверстий фланца, мм"
+          ],
+          "value": 430
+        },
+        {
+          "column": "CALC_FLANGE_HOLE",
+          "headerPath": [
+            "Диаметр отверстия фланца, мм"
+          ],
+          "value": 30
+        },
+        {
+          "column": "CALC_FLANGE_HOLES",
+          "headerPath": [
+            "Количество отверстий фланца"
+          ],
+          "value": 16
+        },
+        {
+          "column": "CALC_FLANGE_FACE_HEIGHT",
+          "headerPath": [
+            "Высота соединительного выступа фланца, мм"
+          ],
+          "value": 5
+        },
+        {
+          "column": "CALC_FLANGE_FACE_OD",
+          "headerPath": [
+            "Диаметр соединительного выступа фланца, мм"
+          ],
+          "value": 390
         },
         {
           "column": "CALC_FLANGE_SOURCE",
@@ -55168,6 +57531,48 @@
           "value": 7
         },
         {
+          "column": "CALC_FLANGE_OD",
+          "headerPath": [
+            "Наружный диаметр фланца, мм"
+          ],
+          "value": 550
+        },
+        {
+          "column": "CALC_FLANGE_PCD",
+          "headerPath": [
+            "Диаметр окружности отверстий фланца, мм"
+          ],
+          "value": 490
+        },
+        {
+          "column": "CALC_FLANGE_HOLE",
+          "headerPath": [
+            "Диаметр отверстия фланца, мм"
+          ],
+          "value": 33
+        },
+        {
+          "column": "CALC_FLANGE_HOLES",
+          "headerPath": [
+            "Количество отверстий фланца"
+          ],
+          "value": 16
+        },
+        {
+          "column": "CALC_FLANGE_FACE_HEIGHT",
+          "headerPath": [
+            "Высота соединительного выступа фланца, мм"
+          ],
+          "value": 5
+        },
+        {
+          "column": "CALC_FLANGE_FACE_OD",
+          "headerPath": [
+            "Диаметр соединительного выступа фланца, мм"
+          ],
+          "value": 450
+        },
+        {
           "column": "CALC_FLANGE_SOURCE",
           "headerPath": [
             "Источник размеров фланца"
@@ -55268,6 +57673,48 @@
           "value": 7
         },
         {
+          "column": "CALC_FLANGE_OD",
+          "headerPath": [
+            "Наружный диаметр фланца, мм"
+          ],
+          "value": 610
+        },
+        {
+          "column": "CALC_FLANGE_PCD",
+          "headerPath": [
+            "Диаметр окружности отверстий фланца, мм"
+          ],
+          "value": 550
+        },
+        {
+          "column": "CALC_FLANGE_HOLE",
+          "headerPath": [
+            "Диаметр отверстия фланца, мм"
+          ],
+          "value": 33
+        },
+        {
+          "column": "CALC_FLANGE_HOLES",
+          "headerPath": [
+            "Количество отверстий фланца"
+          ],
+          "value": 16
+        },
+        {
+          "column": "CALC_FLANGE_FACE_HEIGHT",
+          "headerPath": [
+            "Высота соединительного выступа фланца, мм"
+          ],
+          "value": 5
+        },
+        {
+          "column": "CALC_FLANGE_FACE_OD",
+          "headerPath": [
+            "Диаметр соединительного выступа фланца, мм"
+          ],
+          "value": 505
+        },
+        {
           "column": "CALC_FLANGE_SOURCE",
           "headerPath": [
             "Источник размеров фланца"
@@ -55357,6 +57804,48 @@
             "Радиальная фаска фланца, мм"
           ],
           "value": 7
+        },
+        {
+          "column": "CALC_FLANGE_OD",
+          "headerPath": [
+            "Наружный диаметр фланца, мм"
+          ],
+          "value": 730
+        },
+        {
+          "column": "CALC_FLANGE_PCD",
+          "headerPath": [
+            "Диаметр окружности отверстий фланца, мм"
+          ],
+          "value": 660
+        },
+        {
+          "column": "CALC_FLANGE_HOLE",
+          "headerPath": [
+            "Диаметр отверстия фланца, мм"
+          ],
+          "value": 39
+        },
+        {
+          "column": "CALC_FLANGE_HOLES",
+          "headerPath": [
+            "Количество отверстий фланца"
+          ],
+          "value": 20
+        },
+        {
+          "column": "CALC_FLANGE_FACE_HEIGHT",
+          "headerPath": [
+            "Высота соединительного выступа фланца, мм"
+          ],
+          "value": 5
+        },
+        {
+          "column": "CALC_FLANGE_FACE_OD",
+          "headerPath": [
+            "Диаметр соединительного выступа фланца, мм"
+          ],
+          "value": 615
         },
         {
           "column": "CALC_FLANGE_SOURCE",
@@ -55450,6 +57939,48 @@
           "value": 7
         },
         {
+          "column": "CALC_FLANGE_OD",
+          "headerPath": [
+            "Наружный диаметр фланца, мм"
+          ],
+          "value": 840
+        },
+        {
+          "column": "CALC_FLANGE_PCD",
+          "headerPath": [
+            "Диаметр окружности отверстий фланца, мм"
+          ],
+          "value": 770
+        },
+        {
+          "column": "CALC_FLANGE_HOLE",
+          "headerPath": [
+            "Диаметр отверстия фланца, мм"
+          ],
+          "value": 39
+        },
+        {
+          "column": "CALC_FLANGE_HOLES",
+          "headerPath": [
+            "Количество отверстий фланца"
+          ],
+          "value": 20
+        },
+        {
+          "column": "CALC_FLANGE_FACE_HEIGHT",
+          "headerPath": [
+            "Высота соединительного выступа фланца, мм"
+          ],
+          "value": 6
+        },
+        {
+          "column": "CALC_FLANGE_FACE_OD",
+          "headerPath": [
+            "Диаметр соединительного выступа фланца, мм"
+          ],
+          "value": 720
+        },
+        {
           "column": "CALC_FLANGE_SOURCE",
           "headerPath": [
             "Источник размеров фланца"
@@ -55541,6 +58072,48 @@
           "value": 9
         },
         {
+          "column": "CALC_FLANGE_OD",
+          "headerPath": [
+            "Наружный диаметр фланца, мм"
+          ],
+          "value": 960
+        },
+        {
+          "column": "CALC_FLANGE_PCD",
+          "headerPath": [
+            "Диаметр окружности отверстий фланца, мм"
+          ],
+          "value": 875
+        },
+        {
+          "column": "CALC_FLANGE_HOLE",
+          "headerPath": [
+            "Диаметр отверстия фланца, мм"
+          ],
+          "value": 45
+        },
+        {
+          "column": "CALC_FLANGE_HOLES",
+          "headerPath": [
+            "Количество отверстий фланца"
+          ],
+          "value": 24
+        },
+        {
+          "column": "CALC_FLANGE_FACE_HEIGHT",
+          "headerPath": [
+            "Высота соединительного выступа фланца, мм"
+          ],
+          "value": 6
+        },
+        {
+          "column": "CALC_FLANGE_FACE_OD",
+          "headerPath": [
+            "Диаметр соединительного выступа фланца, мм"
+          ],
+          "value": 820
+        },
+        {
           "column": "CALC_FLANGE_SOURCE",
           "headerPath": [
             "Источник размеров фланца"
@@ -55630,6 +58203,48 @@
             "Радиальная фаска фланца, мм"
           ],
           "value": 9
+        },
+        {
+          "column": "CALC_FLANGE_OD",
+          "headerPath": [
+            "Наружный диаметр фланца, мм"
+          ],
+          "value": 1075
+        },
+        {
+          "column": "CALC_FLANGE_PCD",
+          "headerPath": [
+            "Диаметр окружности отверстий фланца, мм"
+          ],
+          "value": 990
+        },
+        {
+          "column": "CALC_FLANGE_HOLE",
+          "headerPath": [
+            "Диаметр отверстия фланца, мм"
+          ],
+          "value": 45
+        },
+        {
+          "column": "CALC_FLANGE_HOLES",
+          "headerPath": [
+            "Количество отверстий фланца"
+          ],
+          "value": 24
+        },
+        {
+          "column": "CALC_FLANGE_FACE_HEIGHT",
+          "headerPath": [
+            "Высота соединительного выступа фланца, мм"
+          ],
+          "value": 6
+        },
+        {
+          "column": "CALC_FLANGE_FACE_OD",
+          "headerPath": [
+            "Диаметр соединительного выступа фланца, мм"
+          ],
+          "value": 930
         },
         {
           "column": "CALC_FLANGE_SOURCE",
@@ -250930,6 +253545,1644 @@
       ]
     },
     {
+      "id": "st20-ready-bore:32-10",
+      "catalogId": "фланцы",
+      "tableId": "st20-ready-bore-flanges",
+      "family": "Фланцы плоские Сталь 20 — ГОСТ 33259-2015, ряд 2",
+      "sourceSheet": "ДетальЛидерСнаб",
+      "sourceRow": 1,
+      "fields": [
+        {
+          "column": "name",
+          "headerPath": [
+            "Наименование"
+          ],
+          "value": "Фланец плоский 32-10-01-2-B-Ст.20-IV ГОСТ 33259-2015"
+        },
+        {
+          "column": "dn",
+          "headerPath": [
+            "DN"
+          ],
+          "value": 32
+        },
+        {
+          "column": "pn",
+          "headerPath": [
+            "PN"
+          ],
+          "value": 10
+        },
+        {
+          "column": "supplier",
+          "headerPath": [
+            "Поставщик"
+          ],
+          "value": "ДетальЛидерСнаб"
+        },
+        {
+          "column": "supplierId",
+          "headerPath": [
+            "ID товара поставщика"
+          ],
+          "value": "32-10-01-2-B-Ст.20-IV"
+        },
+        {
+          "column": "material",
+          "headerPath": [
+            "Материал"
+          ],
+          "value": "Ст20"
+        },
+        {
+          "column": "compatiblePns",
+          "headerPath": [
+            "Подтверждённые PN исполнения"
+          ],
+          "value": "10"
+        },
+        {
+          "column": "checkedAt",
+          "headerPath": [
+            "Дата проверки позиции"
+          ],
+          "value": "2026-11-12"
+        },
+        {
+          "column": "vat",
+          "headerPath": [
+            "Условия цены"
+          ],
+          "value": "Цена и НДС по запросу"
+        },
+        {
+          "column": "sourceUrl",
+          "headerPath": [
+            "Источник URL"
+          ],
+          "value": "https://detalllidersnab.ru/page145856686.html"
+        },
+        {
+          "column": "geometryBasis",
+          "headerPath": [
+            "Основание геометрии"
+          ],
+          "value": "ГОСТ 33259-2015: номинальные размеры; фактическую посадку подтверждают чертежом или обмером"
+        },
+        {
+          "column": "purpose",
+          "headerPath": [
+            "Назначение"
+          ],
+          "value": "Фланец вставки"
+        },
+        {
+          "column": "CALC_FLANGE_B",
+          "headerPath": [
+            "Толщина фланца, мм"
+          ],
+          "value": 18
+        },
+        {
+          "column": "CALC_FLANGE_BORE",
+          "headerPath": [
+            "Посадочный диаметр фланца, мм"
+          ],
+          "value": 43.5
+        },
+        {
+          "column": "CALC_FLANGE_CHAMFER",
+          "headerPath": [
+            "Радиальная фаска фланца, мм"
+          ],
+          "value": 3
+        },
+        {
+          "column": "CALC_FLANGE_OD",
+          "headerPath": [
+            "Наружный диаметр фланца, мм"
+          ],
+          "value": 140
+        },
+        {
+          "column": "CALC_FLANGE_PCD",
+          "headerPath": [
+            "Диаметр окружности отверстий фланца, мм"
+          ],
+          "value": 100
+        },
+        {
+          "column": "CALC_FLANGE_HOLE",
+          "headerPath": [
+            "Диаметр отверстия фланца, мм"
+          ],
+          "value": 18
+        },
+        {
+          "column": "CALC_FLANGE_HOLES",
+          "headerPath": [
+            "Количество отверстий фланца"
+          ],
+          "value": 4
+        },
+        {
+          "column": "CALC_FLANGE_FACE_HEIGHT",
+          "headerPath": [
+            "Высота соединительного выступа фланца, мм"
+          ],
+          "value": 2
+        },
+        {
+          "column": "CALC_FLANGE_FACE_OD",
+          "headerPath": [
+            "Диаметр соединительного выступа фланца, мм"
+          ],
+          "value": 78
+        },
+        {
+          "column": "CALC_FLANGE_SOURCE",
+          "headerPath": [
+            "Источник размеров фланца"
+          ],
+          "value": "ГОСТ 33259-2015, таблицы 2 и 3, рисунки 3 и 4; тип 01, ряд 2, поверхность B; https://files.stroyinf.ru/Data2/1/4293762/4293762130.pdf"
+        },
+        {
+          "column": "CALC_FLANGE_STANDARD",
+          "headerPath": [
+            "Принятое исполнение фланца"
+          ],
+          "value": "ГОСТ33259-2015:01:2:B"
+        },
+        {
+          "column": "CALC_FLANGE_REVIEW",
+          "headerPath": [
+            "Проверка размеров фланца"
+          ],
+          "value": "Подтверждены номинальные размеры. Сверловка и уплотнительный выступ совпадают с фланцы-001-r0007. Цена по запросу. Требуется проверка проходного отверстия на всей глубине посадки и совместимости прокладки."
+        }
+      ],
+      "prices": [],
+      "sourceUrls": [
+        "https://detalllidersnab.ru/page145856686.html"
+      ]
+    },
+    {
+      "id": "st20-ready-bore:32-16",
+      "catalogId": "фланцы",
+      "tableId": "st20-ready-bore-flanges",
+      "family": "Фланцы плоские Сталь 20 — ГОСТ 33259-2015, ряд 2",
+      "sourceSheet": "ДетальЛидерСнаб",
+      "sourceRow": 2,
+      "fields": [
+        {
+          "column": "name",
+          "headerPath": [
+            "Наименование"
+          ],
+          "value": "Фланец плоский 32-16-01-2-B-Ст.20-IV ГОСТ 33259-2015"
+        },
+        {
+          "column": "dn",
+          "headerPath": [
+            "DN"
+          ],
+          "value": 32
+        },
+        {
+          "column": "pn",
+          "headerPath": [
+            "PN"
+          ],
+          "value": 16
+        },
+        {
+          "column": "supplier",
+          "headerPath": [
+            "Поставщик"
+          ],
+          "value": "ДетальЛидерСнаб"
+        },
+        {
+          "column": "supplierId",
+          "headerPath": [
+            "ID товара поставщика"
+          ],
+          "value": "32-16-01-2-B-Ст.20-IV"
+        },
+        {
+          "column": "material",
+          "headerPath": [
+            "Материал"
+          ],
+          "value": "Ст20"
+        },
+        {
+          "column": "compatiblePns",
+          "headerPath": [
+            "Подтверждённые PN исполнения"
+          ],
+          "value": "16"
+        },
+        {
+          "column": "checkedAt",
+          "headerPath": [
+            "Дата проверки позиции"
+          ],
+          "value": "2026-11-12"
+        },
+        {
+          "column": "vat",
+          "headerPath": [
+            "Условия цены"
+          ],
+          "value": "Цена и НДС по запросу"
+        },
+        {
+          "column": "sourceUrl",
+          "headerPath": [
+            "Источник URL"
+          ],
+          "value": "https://detalllidersnab.ru/page145856686.html"
+        },
+        {
+          "column": "geometryBasis",
+          "headerPath": [
+            "Основание геометрии"
+          ],
+          "value": "ГОСТ 33259-2015: номинальные размеры; фактическую посадку подтверждают чертежом или обмером"
+        },
+        {
+          "column": "purpose",
+          "headerPath": [
+            "Назначение"
+          ],
+          "value": "Фланец вставки"
+        },
+        {
+          "column": "CALC_FLANGE_B",
+          "headerPath": [
+            "Толщина фланца, мм"
+          ],
+          "value": 18
+        },
+        {
+          "column": "CALC_FLANGE_BORE",
+          "headerPath": [
+            "Посадочный диаметр фланца, мм"
+          ],
+          "value": 43.5
+        },
+        {
+          "column": "CALC_FLANGE_CHAMFER",
+          "headerPath": [
+            "Радиальная фаска фланца, мм"
+          ],
+          "value": 3
+        },
+        {
+          "column": "CALC_FLANGE_OD",
+          "headerPath": [
+            "Наружный диаметр фланца, мм"
+          ],
+          "value": 140
+        },
+        {
+          "column": "CALC_FLANGE_PCD",
+          "headerPath": [
+            "Диаметр окружности отверстий фланца, мм"
+          ],
+          "value": 100
+        },
+        {
+          "column": "CALC_FLANGE_HOLE",
+          "headerPath": [
+            "Диаметр отверстия фланца, мм"
+          ],
+          "value": 18
+        },
+        {
+          "column": "CALC_FLANGE_HOLES",
+          "headerPath": [
+            "Количество отверстий фланца"
+          ],
+          "value": 4
+        },
+        {
+          "column": "CALC_FLANGE_FACE_HEIGHT",
+          "headerPath": [
+            "Высота соединительного выступа фланца, мм"
+          ],
+          "value": 2
+        },
+        {
+          "column": "CALC_FLANGE_FACE_OD",
+          "headerPath": [
+            "Диаметр соединительного выступа фланца, мм"
+          ],
+          "value": 78
+        },
+        {
+          "column": "CALC_FLANGE_SOURCE",
+          "headerPath": [
+            "Источник размеров фланца"
+          ],
+          "value": "ГОСТ 33259-2015, таблицы 2 и 3, рисунки 3 и 4; тип 01, ряд 2, поверхность B; https://files.stroyinf.ru/Data2/1/4293762/4293762130.pdf"
+        },
+        {
+          "column": "CALC_FLANGE_STANDARD",
+          "headerPath": [
+            "Принятое исполнение фланца"
+          ],
+          "value": "ГОСТ33259-2015:01:2:B"
+        },
+        {
+          "column": "CALC_FLANGE_REVIEW",
+          "headerPath": [
+            "Проверка размеров фланца"
+          ],
+          "value": "Подтверждены номинальные размеры. Сверловка и уплотнительный выступ совпадают с фланцы-002-r0030. Цена по запросу. Требуется проверка проходного отверстия на всей глубине посадки и совместимости прокладки."
+        }
+      ],
+      "prices": [],
+      "sourceUrls": [
+        "https://detalllidersnab.ru/page145856686.html"
+      ]
+    },
+    {
+      "id": "st20-ready-bore:32-25",
+      "catalogId": "фланцы",
+      "tableId": "st20-ready-bore-flanges",
+      "family": "Фланцы плоские Сталь 20 — ГОСТ 33259-2015, ряд 2",
+      "sourceSheet": "ДетальЛидерСнаб",
+      "sourceRow": 3,
+      "fields": [
+        {
+          "column": "name",
+          "headerPath": [
+            "Наименование"
+          ],
+          "value": "Фланец плоский 32-25-01-2-B-Ст.20-IV ГОСТ 33259-2015"
+        },
+        {
+          "column": "dn",
+          "headerPath": [
+            "DN"
+          ],
+          "value": 32
+        },
+        {
+          "column": "pn",
+          "headerPath": [
+            "PN"
+          ],
+          "value": 25
+        },
+        {
+          "column": "supplier",
+          "headerPath": [
+            "Поставщик"
+          ],
+          "value": "ДетальЛидерСнаб"
+        },
+        {
+          "column": "supplierId",
+          "headerPath": [
+            "ID товара поставщика"
+          ],
+          "value": "32-25-01-2-B-Ст.20-IV"
+        },
+        {
+          "column": "material",
+          "headerPath": [
+            "Материал"
+          ],
+          "value": "Ст20"
+        },
+        {
+          "column": "compatiblePns",
+          "headerPath": [
+            "Подтверждённые PN исполнения"
+          ],
+          "value": "25"
+        },
+        {
+          "column": "checkedAt",
+          "headerPath": [
+            "Дата проверки позиции"
+          ],
+          "value": "2026-11-12"
+        },
+        {
+          "column": "vat",
+          "headerPath": [
+            "Условия цены"
+          ],
+          "value": "Цена и НДС по запросу"
+        },
+        {
+          "column": "sourceUrl",
+          "headerPath": [
+            "Источник URL"
+          ],
+          "value": "https://detalllidersnab.ru/page145856686.html"
+        },
+        {
+          "column": "geometryBasis",
+          "headerPath": [
+            "Основание геометрии"
+          ],
+          "value": "ГОСТ 33259-2015: номинальные размеры; фактическую посадку подтверждают чертежом или обмером"
+        },
+        {
+          "column": "purpose",
+          "headerPath": [
+            "Назначение"
+          ],
+          "value": "Фланец вставки"
+        },
+        {
+          "column": "CALC_FLANGE_B",
+          "headerPath": [
+            "Толщина фланца, мм"
+          ],
+          "value": 18
+        },
+        {
+          "column": "CALC_FLANGE_BORE",
+          "headerPath": [
+            "Посадочный диаметр фланца, мм"
+          ],
+          "value": 43.5
+        },
+        {
+          "column": "CALC_FLANGE_CHAMFER",
+          "headerPath": [
+            "Радиальная фаска фланца, мм"
+          ],
+          "value": 3
+        },
+        {
+          "column": "CALC_FLANGE_OD",
+          "headerPath": [
+            "Наружный диаметр фланца, мм"
+          ],
+          "value": 140
+        },
+        {
+          "column": "CALC_FLANGE_PCD",
+          "headerPath": [
+            "Диаметр окружности отверстий фланца, мм"
+          ],
+          "value": 100
+        },
+        {
+          "column": "CALC_FLANGE_HOLE",
+          "headerPath": [
+            "Диаметр отверстия фланца, мм"
+          ],
+          "value": 18
+        },
+        {
+          "column": "CALC_FLANGE_HOLES",
+          "headerPath": [
+            "Количество отверстий фланца"
+          ],
+          "value": 4
+        },
+        {
+          "column": "CALC_FLANGE_FACE_HEIGHT",
+          "headerPath": [
+            "Высота соединительного выступа фланца, мм"
+          ],
+          "value": 2
+        },
+        {
+          "column": "CALC_FLANGE_FACE_OD",
+          "headerPath": [
+            "Диаметр соединительного выступа фланца, мм"
+          ],
+          "value": 78
+        },
+        {
+          "column": "CALC_FLANGE_SOURCE",
+          "headerPath": [
+            "Источник размеров фланца"
+          ],
+          "value": "ГОСТ 33259-2015, таблицы 2 и 3, рисунки 3 и 4; тип 01, ряд 2, поверхность B; https://files.stroyinf.ru/Data2/1/4293762/4293762130.pdf"
+        },
+        {
+          "column": "CALC_FLANGE_STANDARD",
+          "headerPath": [
+            "Принятое исполнение фланца"
+          ],
+          "value": "ГОСТ33259-2015:01:2:B"
+        },
+        {
+          "column": "CALC_FLANGE_REVIEW",
+          "headerPath": [
+            "Проверка размеров фланца"
+          ],
+          "value": "Подтверждены номинальные размеры. Сверловка и уплотнительный выступ совпадают с фланцы-003-r0053. Цена по запросу. Требуется проверка проходного отверстия на всей глубине посадки и совместимости прокладки."
+        }
+      ],
+      "prices": [],
+      "sourceUrls": [
+        "https://detalllidersnab.ru/page145856686.html"
+      ]
+    },
+    {
+      "id": "st20-ready-bore:40-10",
+      "catalogId": "фланцы",
+      "tableId": "st20-ready-bore-flanges",
+      "family": "Фланцы плоские Сталь 20 — ГОСТ 33259-2015, ряд 2",
+      "sourceSheet": "ДетальЛидерСнаб",
+      "sourceRow": 4,
+      "fields": [
+        {
+          "column": "name",
+          "headerPath": [
+            "Наименование"
+          ],
+          "value": "Фланец плоский 40-10-01-2-B-Ст.20-IV ГОСТ 33259-2015"
+        },
+        {
+          "column": "dn",
+          "headerPath": [
+            "DN"
+          ],
+          "value": 40
+        },
+        {
+          "column": "pn",
+          "headerPath": [
+            "PN"
+          ],
+          "value": 10
+        },
+        {
+          "column": "supplier",
+          "headerPath": [
+            "Поставщик"
+          ],
+          "value": "ДетальЛидерСнаб"
+        },
+        {
+          "column": "supplierId",
+          "headerPath": [
+            "ID товара поставщика"
+          ],
+          "value": "40-10-01-2-B-Ст.20-IV"
+        },
+        {
+          "column": "material",
+          "headerPath": [
+            "Материал"
+          ],
+          "value": "Ст20"
+        },
+        {
+          "column": "compatiblePns",
+          "headerPath": [
+            "Подтверждённые PN исполнения"
+          ],
+          "value": "10"
+        },
+        {
+          "column": "checkedAt",
+          "headerPath": [
+            "Дата проверки позиции"
+          ],
+          "value": "2026-11-12"
+        },
+        {
+          "column": "vat",
+          "headerPath": [
+            "Условия цены"
+          ],
+          "value": "Цена и НДС по запросу"
+        },
+        {
+          "column": "sourceUrl",
+          "headerPath": [
+            "Источник URL"
+          ],
+          "value": "https://detalllidersnab.ru/page145856686.html"
+        },
+        {
+          "column": "geometryBasis",
+          "headerPath": [
+            "Основание геометрии"
+          ],
+          "value": "ГОСТ 33259-2015: номинальные размеры; фактическую посадку подтверждают чертежом или обмером"
+        },
+        {
+          "column": "purpose",
+          "headerPath": [
+            "Назначение"
+          ],
+          "value": "Фланец вставки"
+        },
+        {
+          "column": "CALC_FLANGE_B",
+          "headerPath": [
+            "Толщина фланца, мм"
+          ],
+          "value": 18
+        },
+        {
+          "column": "CALC_FLANGE_BORE",
+          "headerPath": [
+            "Посадочный диаметр фланца, мм"
+          ],
+          "value": 49.5
+        },
+        {
+          "column": "CALC_FLANGE_CHAMFER",
+          "headerPath": [
+            "Радиальная фаска фланца, мм"
+          ],
+          "value": 3
+        },
+        {
+          "column": "CALC_FLANGE_OD",
+          "headerPath": [
+            "Наружный диаметр фланца, мм"
+          ],
+          "value": 150
+        },
+        {
+          "column": "CALC_FLANGE_PCD",
+          "headerPath": [
+            "Диаметр окружности отверстий фланца, мм"
+          ],
+          "value": 110
+        },
+        {
+          "column": "CALC_FLANGE_HOLE",
+          "headerPath": [
+            "Диаметр отверстия фланца, мм"
+          ],
+          "value": 18
+        },
+        {
+          "column": "CALC_FLANGE_HOLES",
+          "headerPath": [
+            "Количество отверстий фланца"
+          ],
+          "value": 4
+        },
+        {
+          "column": "CALC_FLANGE_FACE_HEIGHT",
+          "headerPath": [
+            "Высота соединительного выступа фланца, мм"
+          ],
+          "value": 3
+        },
+        {
+          "column": "CALC_FLANGE_FACE_OD",
+          "headerPath": [
+            "Диаметр соединительного выступа фланца, мм"
+          ],
+          "value": 88
+        },
+        {
+          "column": "CALC_FLANGE_SOURCE",
+          "headerPath": [
+            "Источник размеров фланца"
+          ],
+          "value": "ГОСТ 33259-2015, таблицы 2 и 3, рисунки 3 и 4; тип 01, ряд 2, поверхность B; https://files.stroyinf.ru/Data2/1/4293762/4293762130.pdf"
+        },
+        {
+          "column": "CALC_FLANGE_STANDARD",
+          "headerPath": [
+            "Принятое исполнение фланца"
+          ],
+          "value": "ГОСТ33259-2015:01:2:B"
+        },
+        {
+          "column": "CALC_FLANGE_REVIEW",
+          "headerPath": [
+            "Проверка размеров фланца"
+          ],
+          "value": "Подтверждены номинальные размеры. Сверловка и уплотнительный выступ совпадают с фланцы-001-r0008. Цена по запросу. Требуется проверка проходного отверстия на всей глубине посадки и совместимости прокладки."
+        }
+      ],
+      "prices": [],
+      "sourceUrls": [
+        "https://detalllidersnab.ru/page145856686.html"
+      ]
+    },
+    {
+      "id": "st20-ready-bore:40-16",
+      "catalogId": "фланцы",
+      "tableId": "st20-ready-bore-flanges",
+      "family": "Фланцы плоские Сталь 20 — ГОСТ 33259-2015, ряд 2",
+      "sourceSheet": "ДетальЛидерСнаб",
+      "sourceRow": 5,
+      "fields": [
+        {
+          "column": "name",
+          "headerPath": [
+            "Наименование"
+          ],
+          "value": "Фланец плоский 40-16-01-2-B-Ст.20-IV ГОСТ 33259-2015"
+        },
+        {
+          "column": "dn",
+          "headerPath": [
+            "DN"
+          ],
+          "value": 40
+        },
+        {
+          "column": "pn",
+          "headerPath": [
+            "PN"
+          ],
+          "value": 16
+        },
+        {
+          "column": "supplier",
+          "headerPath": [
+            "Поставщик"
+          ],
+          "value": "ДетальЛидерСнаб"
+        },
+        {
+          "column": "supplierId",
+          "headerPath": [
+            "ID товара поставщика"
+          ],
+          "value": "40-16-01-2-B-Ст.20-IV"
+        },
+        {
+          "column": "material",
+          "headerPath": [
+            "Материал"
+          ],
+          "value": "Ст20"
+        },
+        {
+          "column": "compatiblePns",
+          "headerPath": [
+            "Подтверждённые PN исполнения"
+          ],
+          "value": "16"
+        },
+        {
+          "column": "checkedAt",
+          "headerPath": [
+            "Дата проверки позиции"
+          ],
+          "value": "2026-11-12"
+        },
+        {
+          "column": "vat",
+          "headerPath": [
+            "Условия цены"
+          ],
+          "value": "Цена и НДС по запросу"
+        },
+        {
+          "column": "sourceUrl",
+          "headerPath": [
+            "Источник URL"
+          ],
+          "value": "https://detalllidersnab.ru/page145856686.html"
+        },
+        {
+          "column": "geometryBasis",
+          "headerPath": [
+            "Основание геометрии"
+          ],
+          "value": "ГОСТ 33259-2015: номинальные размеры; фактическую посадку подтверждают чертежом или обмером"
+        },
+        {
+          "column": "purpose",
+          "headerPath": [
+            "Назначение"
+          ],
+          "value": "Фланец вставки"
+        },
+        {
+          "column": "CALC_FLANGE_B",
+          "headerPath": [
+            "Толщина фланца, мм"
+          ],
+          "value": 18
+        },
+        {
+          "column": "CALC_FLANGE_BORE",
+          "headerPath": [
+            "Посадочный диаметр фланца, мм"
+          ],
+          "value": 49.5
+        },
+        {
+          "column": "CALC_FLANGE_CHAMFER",
+          "headerPath": [
+            "Радиальная фаска фланца, мм"
+          ],
+          "value": 3
+        },
+        {
+          "column": "CALC_FLANGE_OD",
+          "headerPath": [
+            "Наружный диаметр фланца, мм"
+          ],
+          "value": 150
+        },
+        {
+          "column": "CALC_FLANGE_PCD",
+          "headerPath": [
+            "Диаметр окружности отверстий фланца, мм"
+          ],
+          "value": 110
+        },
+        {
+          "column": "CALC_FLANGE_HOLE",
+          "headerPath": [
+            "Диаметр отверстия фланца, мм"
+          ],
+          "value": 18
+        },
+        {
+          "column": "CALC_FLANGE_HOLES",
+          "headerPath": [
+            "Количество отверстий фланца"
+          ],
+          "value": 4
+        },
+        {
+          "column": "CALC_FLANGE_FACE_HEIGHT",
+          "headerPath": [
+            "Высота соединительного выступа фланца, мм"
+          ],
+          "value": 3
+        },
+        {
+          "column": "CALC_FLANGE_FACE_OD",
+          "headerPath": [
+            "Диаметр соединительного выступа фланца, мм"
+          ],
+          "value": 88
+        },
+        {
+          "column": "CALC_FLANGE_SOURCE",
+          "headerPath": [
+            "Источник размеров фланца"
+          ],
+          "value": "ГОСТ 33259-2015, таблицы 2 и 3, рисунки 3 и 4; тип 01, ряд 2, поверхность B; https://files.stroyinf.ru/Data2/1/4293762/4293762130.pdf"
+        },
+        {
+          "column": "CALC_FLANGE_STANDARD",
+          "headerPath": [
+            "Принятое исполнение фланца"
+          ],
+          "value": "ГОСТ33259-2015:01:2:B"
+        },
+        {
+          "column": "CALC_FLANGE_REVIEW",
+          "headerPath": [
+            "Проверка размеров фланца"
+          ],
+          "value": "Подтверждены номинальные размеры. Сверловка и уплотнительный выступ совпадают с фланцы-002-r0031. Цена по запросу. Требуется проверка проходного отверстия на всей глубине посадки и совместимости прокладки."
+        }
+      ],
+      "prices": [],
+      "sourceUrls": [
+        "https://detalllidersnab.ru/page145856686.html"
+      ]
+    },
+    {
+      "id": "st20-ready-bore:40-25",
+      "catalogId": "фланцы",
+      "tableId": "st20-ready-bore-flanges",
+      "family": "Фланцы плоские Сталь 20 — ГОСТ 33259-2015, ряд 2",
+      "sourceSheet": "ДетальЛидерСнаб",
+      "sourceRow": 6,
+      "fields": [
+        {
+          "column": "name",
+          "headerPath": [
+            "Наименование"
+          ],
+          "value": "Фланец плоский 40-25-01-2-B-Ст.20-IV ГОСТ 33259-2015"
+        },
+        {
+          "column": "dn",
+          "headerPath": [
+            "DN"
+          ],
+          "value": 40
+        },
+        {
+          "column": "pn",
+          "headerPath": [
+            "PN"
+          ],
+          "value": 25
+        },
+        {
+          "column": "supplier",
+          "headerPath": [
+            "Поставщик"
+          ],
+          "value": "ДетальЛидерСнаб"
+        },
+        {
+          "column": "supplierId",
+          "headerPath": [
+            "ID товара поставщика"
+          ],
+          "value": "40-25-01-2-B-Ст.20-IV"
+        },
+        {
+          "column": "material",
+          "headerPath": [
+            "Материал"
+          ],
+          "value": "Ст20"
+        },
+        {
+          "column": "compatiblePns",
+          "headerPath": [
+            "Подтверждённые PN исполнения"
+          ],
+          "value": "25"
+        },
+        {
+          "column": "checkedAt",
+          "headerPath": [
+            "Дата проверки позиции"
+          ],
+          "value": "2026-11-12"
+        },
+        {
+          "column": "vat",
+          "headerPath": [
+            "Условия цены"
+          ],
+          "value": "Цена и НДС по запросу"
+        },
+        {
+          "column": "sourceUrl",
+          "headerPath": [
+            "Источник URL"
+          ],
+          "value": "https://detalllidersnab.ru/page145856686.html"
+        },
+        {
+          "column": "geometryBasis",
+          "headerPath": [
+            "Основание геометрии"
+          ],
+          "value": "ГОСТ 33259-2015: номинальные размеры; фактическую посадку подтверждают чертежом или обмером"
+        },
+        {
+          "column": "purpose",
+          "headerPath": [
+            "Назначение"
+          ],
+          "value": "Фланец вставки"
+        },
+        {
+          "column": "CALC_FLANGE_B",
+          "headerPath": [
+            "Толщина фланца, мм"
+          ],
+          "value": 18
+        },
+        {
+          "column": "CALC_FLANGE_BORE",
+          "headerPath": [
+            "Посадочный диаметр фланца, мм"
+          ],
+          "value": 49.5
+        },
+        {
+          "column": "CALC_FLANGE_CHAMFER",
+          "headerPath": [
+            "Радиальная фаска фланца, мм"
+          ],
+          "value": 3
+        },
+        {
+          "column": "CALC_FLANGE_OD",
+          "headerPath": [
+            "Наружный диаметр фланца, мм"
+          ],
+          "value": 150
+        },
+        {
+          "column": "CALC_FLANGE_PCD",
+          "headerPath": [
+            "Диаметр окружности отверстий фланца, мм"
+          ],
+          "value": 110
+        },
+        {
+          "column": "CALC_FLANGE_HOLE",
+          "headerPath": [
+            "Диаметр отверстия фланца, мм"
+          ],
+          "value": 18
+        },
+        {
+          "column": "CALC_FLANGE_HOLES",
+          "headerPath": [
+            "Количество отверстий фланца"
+          ],
+          "value": 4
+        },
+        {
+          "column": "CALC_FLANGE_FACE_HEIGHT",
+          "headerPath": [
+            "Высота соединительного выступа фланца, мм"
+          ],
+          "value": 3
+        },
+        {
+          "column": "CALC_FLANGE_FACE_OD",
+          "headerPath": [
+            "Диаметр соединительного выступа фланца, мм"
+          ],
+          "value": 88
+        },
+        {
+          "column": "CALC_FLANGE_SOURCE",
+          "headerPath": [
+            "Источник размеров фланца"
+          ],
+          "value": "ГОСТ 33259-2015, таблицы 2 и 3, рисунки 3 и 4; тип 01, ряд 2, поверхность B; https://files.stroyinf.ru/Data2/1/4293762/4293762130.pdf"
+        },
+        {
+          "column": "CALC_FLANGE_STANDARD",
+          "headerPath": [
+            "Принятое исполнение фланца"
+          ],
+          "value": "ГОСТ33259-2015:01:2:B"
+        },
+        {
+          "column": "CALC_FLANGE_REVIEW",
+          "headerPath": [
+            "Проверка размеров фланца"
+          ],
+          "value": "Подтверждены номинальные размеры. Сверловка и уплотнительный выступ совпадают с фланцы-003-r0054. Цена по запросу. Требуется проверка проходного отверстия на всей глубине посадки и совместимости прокладки."
+        }
+      ],
+      "prices": [],
+      "sourceUrls": [
+        "https://detalllidersnab.ru/page145856686.html"
+      ]
+    },
+    {
+      "id": "st20-ready-bore:50-10",
+      "catalogId": "фланцы",
+      "tableId": "st20-ready-bore-flanges",
+      "family": "Фланцы плоские Сталь 20 — ГОСТ 33259-2015, ряд 2",
+      "sourceSheet": "Изготовление по ГОСТ",
+      "sourceRow": 7,
+      "fields": [
+        {
+          "column": "name",
+          "headerPath": [
+            "Наименование"
+          ],
+          "value": "Фланец плоский 50-10-01-2-B-Ст.20-IV ГОСТ 33259-2015"
+        },
+        {
+          "column": "dn",
+          "headerPath": [
+            "DN"
+          ],
+          "value": 50
+        },
+        {
+          "column": "pn",
+          "headerPath": [
+            "PN"
+          ],
+          "value": 10
+        },
+        {
+          "column": "supplier",
+          "headerPath": [
+            "Поставщик"
+          ],
+          "value": "Изготовление по ГОСТ"
+        },
+        {
+          "column": "supplierId",
+          "headerPath": [
+            "ID товара поставщика"
+          ],
+          "value": "50-10-01-2-B-Ст.20-IV"
+        },
+        {
+          "column": "material",
+          "headerPath": [
+            "Материал"
+          ],
+          "value": "Ст20"
+        },
+        {
+          "column": "compatiblePns",
+          "headerPath": [
+            "Подтверждённые PN исполнения"
+          ],
+          "value": "10"
+        },
+        {
+          "column": "checkedAt",
+          "headerPath": [
+            "Дата проверки позиции"
+          ],
+          "value": "2026-11-12"
+        },
+        {
+          "column": "vat",
+          "headerPath": [
+            "Условия цены"
+          ],
+          "value": "Цена и НДС по запросу"
+        },
+        {
+          "column": "sourceUrl",
+          "headerPath": [
+            "Источник URL"
+          ],
+          "value": "https://signal-teplo.ru/upload/iblock/203/vq3htl65l1axjlrwvdsrcwpcfenf7afx.pdf"
+        },
+        {
+          "column": "geometryBasis",
+          "headerPath": [
+            "Основание геометрии"
+          ],
+          "value": "ГОСТ 33259-2015: номинальные размеры; фактическую посадку подтверждают чертежом или обмером"
+        },
+        {
+          "column": "purpose",
+          "headerPath": [
+            "Назначение"
+          ],
+          "value": "Фланец вставки"
+        },
+        {
+          "column": "CALC_FLANGE_B",
+          "headerPath": [
+            "Толщина фланца, мм"
+          ],
+          "value": 20
+        },
+        {
+          "column": "CALC_FLANGE_BORE",
+          "headerPath": [
+            "Посадочный диаметр фланца, мм"
+          ],
+          "value": 61.5
+        },
+        {
+          "column": "CALC_FLANGE_CHAMFER",
+          "headerPath": [
+            "Радиальная фаска фланца, мм"
+          ],
+          "value": 3
+        },
+        {
+          "column": "CALC_FLANGE_OD",
+          "headerPath": [
+            "Наружный диаметр фланца, мм"
+          ],
+          "value": 165
+        },
+        {
+          "column": "CALC_FLANGE_PCD",
+          "headerPath": [
+            "Диаметр окружности отверстий фланца, мм"
+          ],
+          "value": 125
+        },
+        {
+          "column": "CALC_FLANGE_HOLE",
+          "headerPath": [
+            "Диаметр отверстия фланца, мм"
+          ],
+          "value": 18
+        },
+        {
+          "column": "CALC_FLANGE_HOLES",
+          "headerPath": [
+            "Количество отверстий фланца"
+          ],
+          "value": 4
+        },
+        {
+          "column": "CALC_FLANGE_FACE_HEIGHT",
+          "headerPath": [
+            "Высота соединительного выступа фланца, мм"
+          ],
+          "value": 3
+        },
+        {
+          "column": "CALC_FLANGE_FACE_OD",
+          "headerPath": [
+            "Диаметр соединительного выступа фланца, мм"
+          ],
+          "value": 102
+        },
+        {
+          "column": "CALC_FLANGE_SOURCE",
+          "headerPath": [
+            "Источник размеров фланца"
+          ],
+          "value": "ГОСТ 33259-2015, таблицы 2 и 3, рисунки 3 и 4; тип 01, ряд 2, поверхность B; https://files.stroyinf.ru/Data2/1/4293762/4293762130.pdf"
+        },
+        {
+          "column": "CALC_FLANGE_STANDARD",
+          "headerPath": [
+            "Принятое исполнение фланца"
+          ],
+          "value": "ГОСТ33259-2015:01:2:B"
+        },
+        {
+          "column": "CALC_FLANGE_REVIEW",
+          "headerPath": [
+            "Проверка размеров фланца"
+          ],
+          "value": "Подтверждены номинальные размеры. Сверловка и уплотнительный выступ совпадают с фланцы-001-r0009. Цена по запросу. Требуется проверка проходного отверстия на всей глубине посадки и совместимости прокладки."
+        }
+      ],
+      "prices": [],
+      "sourceUrls": [
+        "https://signal-teplo.ru/upload/iblock/203/vq3htl65l1axjlrwvdsrcwpcfenf7afx.pdf"
+      ]
+    },
+    {
+      "id": "st20-ready-bore:50-16",
+      "catalogId": "фланцы",
+      "tableId": "st20-ready-bore-flanges",
+      "family": "Фланцы плоские Сталь 20 — ГОСТ 33259-2015, ряд 2",
+      "sourceSheet": "ДетальЛидерСнаб",
+      "sourceRow": 8,
+      "fields": [
+        {
+          "column": "name",
+          "headerPath": [
+            "Наименование"
+          ],
+          "value": "Фланец плоский 50-16-01-2-B-Ст.20-IV ГОСТ 33259-2015"
+        },
+        {
+          "column": "dn",
+          "headerPath": [
+            "DN"
+          ],
+          "value": 50
+        },
+        {
+          "column": "pn",
+          "headerPath": [
+            "PN"
+          ],
+          "value": 16
+        },
+        {
+          "column": "supplier",
+          "headerPath": [
+            "Поставщик"
+          ],
+          "value": "ДетальЛидерСнаб"
+        },
+        {
+          "column": "supplierId",
+          "headerPath": [
+            "ID товара поставщика"
+          ],
+          "value": "50-16-01-2-B-Ст.20-IV"
+        },
+        {
+          "column": "material",
+          "headerPath": [
+            "Материал"
+          ],
+          "value": "Ст20"
+        },
+        {
+          "column": "compatiblePns",
+          "headerPath": [
+            "Подтверждённые PN исполнения"
+          ],
+          "value": "16"
+        },
+        {
+          "column": "checkedAt",
+          "headerPath": [
+            "Дата проверки позиции"
+          ],
+          "value": "2026-11-12"
+        },
+        {
+          "column": "vat",
+          "headerPath": [
+            "Условия цены"
+          ],
+          "value": "Цена и НДС по запросу"
+        },
+        {
+          "column": "sourceUrl",
+          "headerPath": [
+            "Источник URL"
+          ],
+          "value": "https://detalllidersnab.ru/page145856686.html"
+        },
+        {
+          "column": "geometryBasis",
+          "headerPath": [
+            "Основание геометрии"
+          ],
+          "value": "ГОСТ 33259-2015: номинальные размеры; фактическую посадку подтверждают чертежом или обмером"
+        },
+        {
+          "column": "purpose",
+          "headerPath": [
+            "Назначение"
+          ],
+          "value": "Фланец вставки"
+        },
+        {
+          "column": "CALC_FLANGE_B",
+          "headerPath": [
+            "Толщина фланца, мм"
+          ],
+          "value": 20
+        },
+        {
+          "column": "CALC_FLANGE_BORE",
+          "headerPath": [
+            "Посадочный диаметр фланца, мм"
+          ],
+          "value": 61.5
+        },
+        {
+          "column": "CALC_FLANGE_CHAMFER",
+          "headerPath": [
+            "Радиальная фаска фланца, мм"
+          ],
+          "value": 3
+        },
+        {
+          "column": "CALC_FLANGE_OD",
+          "headerPath": [
+            "Наружный диаметр фланца, мм"
+          ],
+          "value": 165
+        },
+        {
+          "column": "CALC_FLANGE_PCD",
+          "headerPath": [
+            "Диаметр окружности отверстий фланца, мм"
+          ],
+          "value": 125
+        },
+        {
+          "column": "CALC_FLANGE_HOLE",
+          "headerPath": [
+            "Диаметр отверстия фланца, мм"
+          ],
+          "value": 18
+        },
+        {
+          "column": "CALC_FLANGE_HOLES",
+          "headerPath": [
+            "Количество отверстий фланца"
+          ],
+          "value": 4
+        },
+        {
+          "column": "CALC_FLANGE_FACE_HEIGHT",
+          "headerPath": [
+            "Высота соединительного выступа фланца, мм"
+          ],
+          "value": 3
+        },
+        {
+          "column": "CALC_FLANGE_FACE_OD",
+          "headerPath": [
+            "Диаметр соединительного выступа фланца, мм"
+          ],
+          "value": 102
+        },
+        {
+          "column": "CALC_FLANGE_SOURCE",
+          "headerPath": [
+            "Источник размеров фланца"
+          ],
+          "value": "ГОСТ 33259-2015, таблицы 2 и 3, рисунки 3 и 4; тип 01, ряд 2, поверхность B; https://files.stroyinf.ru/Data2/1/4293762/4293762130.pdf"
+        },
+        {
+          "column": "CALC_FLANGE_STANDARD",
+          "headerPath": [
+            "Принятое исполнение фланца"
+          ],
+          "value": "ГОСТ33259-2015:01:2:B"
+        },
+        {
+          "column": "CALC_FLANGE_REVIEW",
+          "headerPath": [
+            "Проверка размеров фланца"
+          ],
+          "value": "Подтверждены номинальные размеры. Сверловка и уплотнительный выступ совпадают с фланцы-002-r0032. Цена по запросу. Требуется проверка проходного отверстия на всей глубине посадки и совместимости прокладки."
+        }
+      ],
+      "prices": [],
+      "sourceUrls": [
+        "https://detalllidersnab.ru/page145856686.html"
+      ]
+    },
+    {
+      "id": "st20-ready-bore:50-25",
+      "catalogId": "фланцы",
+      "tableId": "st20-ready-bore-flanges",
+      "family": "Фланцы плоские Сталь 20 — ГОСТ 33259-2015, ряд 2",
+      "sourceSheet": "ДетальЛидерСнаб",
+      "sourceRow": 9,
+      "fields": [
+        {
+          "column": "name",
+          "headerPath": [
+            "Наименование"
+          ],
+          "value": "Фланец плоский 50-25-01-2-B-Ст.20-IV ГОСТ 33259-2015"
+        },
+        {
+          "column": "dn",
+          "headerPath": [
+            "DN"
+          ],
+          "value": 50
+        },
+        {
+          "column": "pn",
+          "headerPath": [
+            "PN"
+          ],
+          "value": 25
+        },
+        {
+          "column": "supplier",
+          "headerPath": [
+            "Поставщик"
+          ],
+          "value": "ДетальЛидерСнаб"
+        },
+        {
+          "column": "supplierId",
+          "headerPath": [
+            "ID товара поставщика"
+          ],
+          "value": "50-25-01-2-B-Ст.20-IV"
+        },
+        {
+          "column": "material",
+          "headerPath": [
+            "Материал"
+          ],
+          "value": "Ст20"
+        },
+        {
+          "column": "compatiblePns",
+          "headerPath": [
+            "Подтверждённые PN исполнения"
+          ],
+          "value": "25"
+        },
+        {
+          "column": "checkedAt",
+          "headerPath": [
+            "Дата проверки позиции"
+          ],
+          "value": "2026-11-12"
+        },
+        {
+          "column": "vat",
+          "headerPath": [
+            "Условия цены"
+          ],
+          "value": "Цена и НДС по запросу"
+        },
+        {
+          "column": "sourceUrl",
+          "headerPath": [
+            "Источник URL"
+          ],
+          "value": "https://detalllidersnab.ru/page145856686.html"
+        },
+        {
+          "column": "geometryBasis",
+          "headerPath": [
+            "Основание геометрии"
+          ],
+          "value": "ГОСТ 33259-2015: номинальные размеры; фактическую посадку подтверждают чертежом или обмером"
+        },
+        {
+          "column": "purpose",
+          "headerPath": [
+            "Назначение"
+          ],
+          "value": "Фланец вставки"
+        },
+        {
+          "column": "CALC_FLANGE_B",
+          "headerPath": [
+            "Толщина фланца, мм"
+          ],
+          "value": 20
+        },
+        {
+          "column": "CALC_FLANGE_BORE",
+          "headerPath": [
+            "Посадочный диаметр фланца, мм"
+          ],
+          "value": 61.5
+        },
+        {
+          "column": "CALC_FLANGE_CHAMFER",
+          "headerPath": [
+            "Радиальная фаска фланца, мм"
+          ],
+          "value": 3
+        },
+        {
+          "column": "CALC_FLANGE_OD",
+          "headerPath": [
+            "Наружный диаметр фланца, мм"
+          ],
+          "value": 165
+        },
+        {
+          "column": "CALC_FLANGE_PCD",
+          "headerPath": [
+            "Диаметр окружности отверстий фланца, мм"
+          ],
+          "value": 125
+        },
+        {
+          "column": "CALC_FLANGE_HOLE",
+          "headerPath": [
+            "Диаметр отверстия фланца, мм"
+          ],
+          "value": 18
+        },
+        {
+          "column": "CALC_FLANGE_HOLES",
+          "headerPath": [
+            "Количество отверстий фланца"
+          ],
+          "value": 4
+        },
+        {
+          "column": "CALC_FLANGE_FACE_HEIGHT",
+          "headerPath": [
+            "Высота соединительного выступа фланца, мм"
+          ],
+          "value": 3
+        },
+        {
+          "column": "CALC_FLANGE_FACE_OD",
+          "headerPath": [
+            "Диаметр соединительного выступа фланца, мм"
+          ],
+          "value": 102
+        },
+        {
+          "column": "CALC_FLANGE_SOURCE",
+          "headerPath": [
+            "Источник размеров фланца"
+          ],
+          "value": "ГОСТ 33259-2015, таблицы 2 и 3, рисунки 3 и 4; тип 01, ряд 2, поверхность B; https://files.stroyinf.ru/Data2/1/4293762/4293762130.pdf"
+        },
+        {
+          "column": "CALC_FLANGE_STANDARD",
+          "headerPath": [
+            "Принятое исполнение фланца"
+          ],
+          "value": "ГОСТ33259-2015:01:2:B"
+        },
+        {
+          "column": "CALC_FLANGE_REVIEW",
+          "headerPath": [
+            "Проверка размеров фланца"
+          ],
+          "value": "Подтверждены номинальные размеры. Сверловка и уплотнительный выступ совпадают с фланцы-003-r0055. Цена по запросу. Требуется проверка проходного отверстия на всей глубине посадки и совместимости прокладки."
+        }
+      ],
+      "prices": [],
+      "sourceUrls": [
+        "https://detalllidersnab.ru/page145856686.html"
+      ]
+    },
+    {
       "id": "lunda-ld-67-504:LD.67.504.15",
       "catalogId": "заглушки",
       "tableId": "lunda-ld-67-504",
@@ -387474,7 +391727,7 @@
       "сгоны-резьба": 29,
       "трубы": 120,
       "металл": 29,
-      "фланцы": 158,
+      "фланцы": 167,
       "воротники": 40,
       "отводы": 120,
       "переходы": 653,
@@ -387921,6 +392174,14 @@
       "urls": [
         "https://www.dkmtools.nl/specs/723140912",
         "https://www.dkmtools.nl/specs/723140913"
+      ]
+    },
+    {
+      "id": "st20-ready-bore-flanges",
+      "checkedAt": "2026-11-12",
+      "urls": [
+        "https://detalllidersnab.ru/page145856686.html",
+        "https://signal-teplo.ru/upload/iblock/203/vq3htl65l1axjlrwvdsrcwpcfenf7afx.pdf"
       ]
     },
     {

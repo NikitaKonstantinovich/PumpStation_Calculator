@@ -6,23 +6,36 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { build } from "esbuild";
 import { loadTs } from "./load-ts.mjs";
 import { fixture, resources, sync, role } from "./fixtures/station-specification.mjs";
+import { calculations, catalog as insertionCatalog, component, insertionDesign } from "./fixtures/station-insertions.mjs";
 
 const { specificationNodeTypes, SPECIFICATION_OPERATIONS, SPECIFICATION_GROUPS } = await loadTs(new URL("../app/node-tools/specification-nodes.ts", import.meta.url));
 const { executeSpecificationOperation, normalizeSpecificationManualRows, manualSpecificationItems } = await loadTs(new URL("../app/node-tools/specification-runtime.ts", import.meta.url));
 const { synchronizeCollectors } = await loadTs(new URL("../app/collector-project.ts", import.meta.url));
 const { specificationExportRows } = await loadTs(new URL("../app/specification-export.ts", import.meta.url));
+const { markLegacyNomenclature } = await loadTs(new URL("../app/component-nomenclature.ts", import.meta.url));
+const { insertPartIdentity } = await loadTs(new URL("../app/component-insert-calculations.ts", import.meta.url));
 const types = specificationNodeTypes();
+const insertionLocation = "discharge:primary-between-valves-insertion";
+const insertionRow = data => data.items.find(row => row.insertionRequirement?.location === insertionLocation);
+function matchingCalculation() {
+  const calculation = calculations.find(row => row.complete && row.geometry === "straight" && row.material === "aisi304" && row.pn === 16 &&
+    row.dnLarge === 65 && row.leftConnection === "collar" && row.rightConnection === "collar");
+  assert.ok(calculation, "The fixture needs an AISI 304 PN16 DN65 insert with collars on both sides");
+  return calculation;
+}
+const withInsertions = (...items) => ({ ...resources, components: { ...resources.components, items: [...resources.components.items, ...items] } });
 function run(operation, values) {
   const type = types.find(t => t.operation === operation);
   return executeSpecificationOperation({ id: "spec/" + operation, operation, fields: type.fields, values: {}, links: [], expressions: {} }, values, { values: {}, defaults: {}, role: "pro" });
 }
-function pipeline(project, catalog = resources, manualRows = [], hydraulicOptions) {
-  const collectors = { project: synchronizeCollectors(project, catalog?.components?.collectorCatalog, resources.pumps), pumps: resources.pumps.filter(p => [project.entities["system-input"].selectedPumpId, project.entities["system-input-2"].selectedPumpId].includes(p.id)), issues: [] };
+function pipeline(project, catalog = resources, manualRows = [], linesOperation = "spec.lines") {
+  const pumps = catalog?.pumps ?? resources.pumps;
+  const collectors = { project: synchronizeCollectors(project, catalog?.components?.collectorCatalog, pumps), pumps: pumps.filter(p => [project.entities["system-input"].selectedPumpId, project.entities["system-input-2"].selectedPumpId].includes(p.id)), issues: [] };
   const before = JSON.stringify(collectors);
-  const batch = run("spec.pumps", { collectors, resources: catalog, manualRows, hydraulicOptions }).batch;
+  const batch = run("spec.pumps", { collectors, resources: catalog, manualRows }).batch;
   const cabinet = run("spec.cabinet", { batch }).value;
   const frame = run("spec.frame", { batch: cabinet }).work;
-  const lines = run("spec.lines", { work: frame }).value;
+  const lines = run(linesOperation, { work: frame }).value;
   const options = run("spec.options", { work: lines }).value;
   const result = run("spec.finalize", { work: options }).result;
   const data = run("spec.readiness", { result }).data;
@@ -42,6 +55,143 @@ test("specification graph phases match the first workspace calculation and prese
   assert(exported.some(row => row.cells.some(cell => typeof cell === "string" && cell.includes(pump.name))));
   assert(exported.some(row => row.kind === "status"));
 });
+test("automatic station lines exclude archived inserts and select a compatible calculation without a saved design", () => {
+  const project = fixture(), calculation = matchingCalculation();
+  const archived = markLegacyNomenclature(component(calculation, "archived", { pricedAt: "2026-11-10" }));
+  const incomplete = component({ ...calculation, complete: false }, "incomplete", { pricedAt: "2026-11-09" });
+  const available = component(calculation, "available");
+  const automatic = (source, ...items) => insertionRow(pipeline(source, withInsertions(...items), [], "spec.linesAutomatic").data);
+
+  assert.equal(insertionRow(pipeline(project).data).equipmentId, "suction-table:ff-65");
+  const missing = automatic(project, archived, incomplete);
+  assert.ok(missing);
+  assert.equal(missing.equipmentId, undefined);
+  assert.equal(missing.insertionAssembly, undefined);
+  assert.equal(missing.price, null);
+  assert.notEqual(missing.technicalStatus, "ready");
+
+  const selected = automatic(project, archived, incomplete, available);
+  assert.equal(selected.equipmentId, available.id);
+  assert.equal(selected.technicalStatus, "ready");
+  assert.equal(selected.price, calculation.price);
+  assert.equal(selected.insertionAssembly.snapshot.id, "available");
+  assert.equal(selected.quantity, 3);
+
+  const saved = structuredClone(project);
+  const design = insertionDesign(calculation);
+  saved.entities["station-dn"].insertionDesigns = { [insertionLocation]: { ...design, totalLengthMm: design.totalLengthMm + 10 } };
+  const recalculated = automatic(saved, available, archived, incomplete);
+  assert.deepEqual(recalculated.insertionAssembly, selected.insertionAssembly);
+  assert.equal(recalculated.price, selected.price);
+});
+
+test("automatic insertion fasteners use confirmed current dimensions across catalogue revisions", () => {
+  const calculation = matchingCalculation();
+  const current = component(calculation, "current");
+  const published = component(calculation, "published", { currentCatalogVersion: "updated-station-catalogue" });
+  const roles = ["primary-check-fasteners-studs", "primary-valve-fasteners-bolts"];
+  function fasteners(item, catalog = withInsertions(item)) {
+    const { data } = pipeline(fixture(), catalog, [], "spec.linesAutomatic");
+    assert.equal(insertionRow(data).equipmentId, item.id);
+    return roles.map(role => {
+      const row = data.items.find(row => row.section === "discharge" && row.assemblyRole === role);
+      assert.ok(row, role);
+      return { equipmentId: row.equipmentId, price: row.price, details: row.details };
+    });
+  }
+  function assertUnconfirmed(row) {
+    assert.equal(row.equipmentId, undefined);
+    assert.equal(row.price, null);
+    assert.doesNotMatch(row.details, /длина не менее/);
+  }
+
+  assert.notEqual(published.calculatedInsertion.catalogVersion, published.calculatedInsertion.currentCatalogVersion);
+  const expected = fasteners(current);
+  for (const row of expected) {
+    assert.ok(row.equipmentId);
+    assert.ok(row.price > 0);
+    assert.match(row.details, /длина не менее \d+ мм/);
+  }
+  assert.deepEqual(fasteners(published), expected);
+  fasteners(component(calculation, "unverified-catalogue", { currentCatalogVersion: null })).forEach(assertUnconfirmed);
+
+  const withoutExactCollar = structuredClone(published);
+  const leftCollar = withoutExactCollar.calculatedInsertion.calculation.bom.find(part => part.role === "left-collar");
+  const collarId = leftCollar.componentId;
+  assert.ok(resources.components.items.some(item => item.id === collarId));
+  leftCollar.componentId = "missing-published-collar";
+  const [unverifiedStuds, verifiedBolts] = fasteners(withoutExactCollar);
+  assertUnconfirmed(unverifiedStuds);
+  assert.deepEqual(verifiedBolts, expected[1]);
+
+  const publishedCollar = insertionCatalog.parts.find(part => part.id === collarId && insertPartIdentity(part) === calculation.configuration.left.part);
+  assert.ok(publishedCollar?.thicknessMm > 0);
+  const differentThickness = structuredClone(published);
+  differentThickness.calculatedInsertion.calculation.configuration.left.part = insertPartIdentity({ ...publishedCollar, thicknessMm: publishedCollar.thicknessMm + 1 });
+  const [mismatchedStuds, unchangedBolts] = fasteners(differentThickness);
+  assertUnconfirmed(mismatchedStuds);
+  assert.deepEqual(unchangedBolts, expected[1]);
+
+  const withoutCollarThickness = withInsertions(published);
+  withoutCollarThickness.components.items = withoutCollarThickness.components.items.map(item => item.id === collarId
+    ? { ...item, fields: item.fields.filter(field => field.headerPath.at(-1) !== "Толщина борта, мм") }
+    : item);
+  fasteners(published, withoutCollarThickness).forEach(assertUnconfirmed);
+});
+
+test("station instruments use minimum suction ranges and the configured discharge pressure basis", () => {
+  const project = fixture(), settings = project.entities["station-settings"];
+  Object.assign(settings, { stationType: "fire", inletHead: 80 });
+  project.entities["system-input"].head = 85;
+  const selected = resources.pumps.find(pump => pump.id === project.entities["system-input"].selectedPumpId);
+  const catalog = { ...resources, pumps: [{ ...selected, maxHead: 190, curve: [[0, 50], [20, 65], [40, 15]] }] };
+  const evaluate = (source = catalog) => pipeline(project, source, [], "spec.linesAutomatic").data;
+  const row = (data, section, role) => {
+    const selected = data.items.find(item => item.section === section && item.assemblyRole === role);
+    assert.ok(selected, `${section} ${role}`);
+    return selected;
+  };
+  const suction = data => [row(data, "suction", "gauge"), row(data, "suction", "pressure-switch")];
+  const discharge = data => [row(data, "discharge", "gauge"), row(data, "discharge", "primary-sensor-relay"), row(data, "discharge", "discharge:transducer")];
+  const ids = items => items.map(item => item.equipmentId);
+
+  const enabled = evaluate();
+  assert.deepEqual(ids(suction(enabled)), ["кипиа-001-r0005", "кипиа-002-r0013"]);
+  const running = discharge(enabled);
+  assert.deepEqual(ids(running), ["кипиа-001-r0008", "кипиа-002-r0016", "station-v11-oni-ppt10-25"]);
+  assert.equal(running[2].hydraulicAssembly.requirement.pressureBar, 165 * .0980665);
+
+  settings.pressureChecksEnabled = false;
+  const disabled = evaluate();
+  assert.deepEqual(ids(suction(disabled)), ids(suction(enabled)));
+  const peak = discharge(disabled);
+  assert.deepEqual(ids(peak), ["кипиа-001-r0006", "кипиа-002-r0015", "station-v11-oni-ppt10-16"]);
+  assert.equal(peak[2].hydraulicAssembly.requirement.pressureBar, 65 * .0980665);
+  assert.match(peak[2].hydraulicAssembly.requirement.pressureBasis, /Hпик=65/);
+  assert(disabled.items.every(item => !item.inletPressureCheck && !item.dischargePressureCheck));
+  assert(!disabled.readiness.findings.some(finding => /pressure-(?:disabled|input)/.test(finding.id)));
+  for (const instrument of [...suction(disabled), ...peak]) {
+    assert.equal(instrument.status, "selected");
+    assert.doesNotMatch(`${instrument.details} ${instrument.description}`, /Предупреждение|давление вне шкалы|требуется проверка применимости|PN.*не подтвержд/i);
+  }
+
+  const noZero = evaluate({ ...catalog, pumps: [{ ...catalog.pumps[0], curve: [[1, 90], [20, 65], [40, 15]] }] });
+  assert.deepEqual(ids(suction(noZero)), ids(suction(enabled)));
+  const noZeroInstruments = discharge(noZero);
+  assert.equal(noZeroInstruments[2].hydraulicAssembly.requirement.pressureBar, 90 * .0980665);
+  for (const instrument of noZeroInstruments) {
+    assert.ok(instrument.equipmentId);
+    assert.ok(instrument.price > 0);
+  }
+
+  const noCurve = evaluate({ ...catalog, pumps: [{ ...catalog.pumps[0], curve: [] }] });
+  for (const instrument of discharge(noCurve)) {
+    assert.equal(instrument.equipmentId, undefined);
+    assert.equal(instrument.price, null);
+    assert.match(`${instrument.details} ${instrument.description}`, /пиковый напор/i);
+  }
+});
+
 test("missing catalog and changed pump selection keep unverified costs out of confirmed totals", () => {
   const project = fixture(), { result, data } = pipeline(project, null);
   assert.equal(role(result.project, "primaryPump").quantity, 3);
@@ -101,13 +251,24 @@ test("specification keeps the table, assembly editors and export UI; unavailable
   const { NodeSpecificationView } = await import("data:text/javascript;base64," + Buffer.from(outputFiles[0].text).toString("base64"));
   const { data } = pipeline(fixture());
   const binding = { key: "manual", node: "spec/manual", toolId: "spec", mode: "user", editable: true, active: true, value: [], field: { name: "Ручные позиции", kind: "array" } };
-  const render = (changed = {}, extra = {}) => renderToStaticMarkup(createElement(NodeSpecificationView, { view: { kind: "specification", node: "spec/table", label: "Спецификация", specification: data, specificationBindings: { manual: { ...binding, ...changed } } }, change() {}, writes() {}, ...extra }));
+  const render = (changed = {}, extra = {}, specification = data, dn) => renderToStaticMarkup(createElement(NodeSpecificationView, { view: { kind: "specification", node: "spec/table", label: "Спецификация", specification, specificationBindings: { manual: { ...binding, ...changed }, dn } }, change() {}, writes() {}, ...extra }));
   const html = render();
   for (const label of ["Спецификация насосной установки", "Всасывающая линия", "Напорная линия", "Сборочный комплект электрики", "CSV", "XLSX", "Причины незавершённости", "Добавить ручную позицию", "Состав:", "Техническая проверка:"]) assert(html.includes(label), label);
   assert(!html.includes('disabled="" aria-label="Редактирование ручных позиций"'));
   for (const changed of [{ editable: false }, { active: false }, { mode: "fixed" }]) assert(render(changed).includes('disabled="" aria-label="Редактирование ручных позиций"'));
   assert(render({}, { disabled: true }).includes('disabled="" aria-label="Редактирование ручных позиций"'));
   assert(render({}, { writes: undefined }).includes('disabled="" aria-label="Редактирование ручных позиций"'), "Cross-owner edits require the atomic write callback");
+  const legacy = render({}, {}, data, { ...binding, key: "dnOverrides", value: {} });
+  assert.match(legacy, /aria-label="Исполнение вставки:/);
+
+  const calculation = matchingCalculation(), available = component(calculation, "available");
+  const automatic = pipeline(fixture(), withInsertions(available), [], "spec.linesAutomatic").data;
+  const readOnly = render({}, {}, automatic);
+  assert.match(readOnly, /Исполнение и состав вставки/);
+  assert.match(readOnly, /Источник: available/);
+  assert.doesNotMatch(readOnly, /aria-label="Исполнение вставки:|Подтвердите монтажную длину/);
+  const exported = specificationExportRows(automatic.items, SPECIFICATION_GROUPS, automatic.readiness);
+  assert(exported.some(row => row.kind === "item" && row.cells.includes(calculation.name)));
 });
 
 test("authoritative workspace validation saves an unfinished specification draft while retaining readiness errors and permissions", async () => {

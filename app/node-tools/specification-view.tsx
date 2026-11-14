@@ -59,7 +59,7 @@ export function NodeSpecificationView({ view, disabled = false, change, writes }
       <span className={`spec-table__cell spec-table__cell--price ${hasPrice ? "" : "spec-table__cell--empty"}`}>{hasPrice ? money(item.price!) : ""}</span>
       <span className={`spec-table__cell spec-table__cell--sum ${hasPrice ? "" : "spec-table__cell--empty"}`}>{hasPrice && item.quantity > 0 ? money(lineTotal(item)) : ""}</span>
       <span className="spec-table__cell spec-table__cell--description">{presentation.description || "—"}</span>
-      <SpecificationHydraulicOption item={item} settings={settings} onChange={onSettingsChange}/><SpecificationInsertion item={item} database={data.database} designs={dn.insertionDesigns} onChange={onDnChange}/>
+      <SpecificationHydraulicOption item={item} settings={settings} onChange={onSettingsChange}/><SpecificationInsertion item={item} automatic={!bindings.dn} database={data.database} designs={dn.insertionDesigns} onChange={onDnChange}/>
     </div>;
   };
   const manualRows = data.manualRows;

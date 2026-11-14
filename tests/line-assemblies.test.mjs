@@ -4,7 +4,7 @@ import { readFile } from "node:fs/promises";
 import { loadTs } from "./load-ts.mjs";
 const json = async p => JSON.parse(await readFile(new URL(p, import.meta.url), "utf8"));
 const model = await loadTs(new URL("../app/model-editor/model.ts", import.meta.url));
-const { mountingRotation } = await loadTs(new URL("../app/model-editor/line-assembly.ts", import.meta.url));
+const { addLineAssemblies, mountingRotation } = await loadTs(new URL("../app/model-editor/line-assembly.ts", import.meta.url));
 const { createProject, parseProjectConfig } = await loadTs(new URL("../app/project-config.ts", import.meta.url));
 const { synchronizeCollectors } = await loadTs(new URL("../app/collector-project.ts", import.meta.url));
 const { makeCollectorCatalog } = await loadTs(new URL("../app/collector-catalog.ts", import.meta.url));
@@ -12,8 +12,9 @@ const { calculateCollector } = await loadTs(new URL("../app/collector-calculatio
 const { lineGeometryIds } = await loadTs(new URL("../app/model-editor/specification-models.ts", import.meta.url));
 const { makeInsertCatalog } = await loadTs(new URL("../app/component-insert-catalog.ts", import.meta.url));
 const { lineGeometry } = await loadTs(new URL("../app/line-geometry-catalog.ts", import.meta.url));
+const { suctionCatalogItems } = await loadTs(new URL("../app/suction-catalog.ts", import.meta.url));
 const pumps = await json("../public/pumps.json"), profiles = await json("../public/model-assets/manifest.json"), binding = await json("../public/binding-components.json");
-const db = { ...binding, collectorCatalog: makeCollectorCatalog(binding) };
+const db = { ...binding, items: [...binding.items, ...suctionCatalogItems], collectorCatalog: makeCollectorCatalog(binding) };
 const {refreshSuctionSpecification:refresh}=await loadTs(new URL("../app/station-hydraulic-calculation.ts",import.meta.url));
 
 const empty = { version: 1, revision: "test", items: {}, issues: [] };
@@ -33,7 +34,6 @@ async function realLineCatalog(p) {
   const { insertionGeometryContext } = await loadTs(new URL("../app/component-insert-3d-server.ts", import.meta.url), {
     [new URL("../app/auth-server.ts", import.meta.url).href]: "export const sha256 = async () => 'unused';",
   });
-  const { suctionCatalogItems } = await loadTs(new URL("../app/suction-catalog.ts", import.meta.url));
   const context = insertionGeometryContext(source, catalog), items = new Map([...binding.items, ...source.items, ...suctionCatalogItems].map(i=>[i.id,i]));
   return {...empty, items:Object.fromEntries(lineGeometryIds(p).filter(id=>items.has(id)).map(id=>[id,lineGeometry(items.get(id),catalog,context)]))};
 }
@@ -94,14 +94,16 @@ test("welded-flange insertion uses the calculator's 5 mm face offsets and full p
   close(Math.hypot(...model.subtract(wp(ends[1]),wp(ends[0]))),202);
 });
 
-test("real ECH threaded specification becomes three distinct inlet/outlet branches without flanged substitutions", () => {
+test("real ECH threaded branches mount the union and nipple before the selected valves on each pump", () => {
   const p = station(), a = build(p), ps = a.components.filter(c => c.kind === "pump");
   assert.equal(ps.length, 3); assert.equal(a.components.filter(c => c.routing).length, 0);
   for (const pump of ps) {
     const inlet = a.components.filter(c => c.line?.pumpId === pump.id && c.line.side === "suction" && !c.line.auxiliary);
     const outlet = a.components.filter(c => c.line?.pumpId === pump.id && c.line.side === "discharge" && !c.line.auxiliary);
-    assert.deepEqual(inlet.map(c => c.line.role), ["primary-union", "primarySuctionValve"]);
-    assert.deepEqual(outlet.map(c => c.line.role), ["primary-union", "primaryCheckValve", "primary-between-valves-nipple", "primaryDischargeValve"]);
+    assert.deepEqual(inlet.map(c => c.line.role), ["primary-union", "primary-pump-nipple", "primarySuctionValve"]);
+    assert.deepEqual(inlet.map(c => c.equipmentId), ["suction-table:union-valtec-40", "резьбовые-фитинги-001-r0220", "шаровые-краны-001-r0197"]);
+    assert.deepEqual(outlet.map(c => c.line.role), ["primary-union", "primary-pump-nipple", "primaryCheckValve", "primary-between-valves-nipple", "primaryDischargeValve"]);
+    assert.deepEqual(outlet.map(c => c.equipmentId), ["suction-table:union-valtec-32", "резьбовые-фитинги-001-r0219", "suction-table:check-valtec-32", "резьбовые-фитинги-001-r0219", "шаровые-краны-001-r0196"]);
     assert.ok(inlet.some(c => /DN40/.test(c.name))); assert.ok(outlet.some(c => /DN32/.test(c.name)));
     assert.ok([...inlet, ...outlet].every(c => !/затвор|фланец/i.test(c.name)));
   }
@@ -109,11 +111,120 @@ test("real ECH threaded specification becomes three distinct inlet/outlet branch
   assert.ok(model.connectionIssues(a).some(i => /монтажн|геометри/.test(i.message)));
 });
 
+test("a matching saved threaded scene upgrades automatic placeholders when exact CAD arrives", async () => {
+  const project = station(), original = build(project);
+  const available = build(project, await realLineCatalog(project));
+  const valves = original.components.filter(component => component.line?.role === "primarySuctionValve");
+  const edited = model.editComponent(original, { id: valves[1].id, patch: { position: [117, 25, 49], hidden: true, locked: true } });
+  const saved = model.normalizeEditor(JSON.parse(JSON.stringify({ ...model.emptyEditor(), assembly: model.addManualPipe(edited, "keep-manual") })), false).assembly;
+  const updated = model.recoverThreadedLineGeometry(saved, available);
+  const exact = updated.components.find(c => c.id === valves[0].id);
+  assert.equal(saved.components.find(c => c.id === exact.id).line.fidelity, "missing");
+  assert.equal(exact.line.fidelity, "cad");
+  assert.equal(exact.shape.kind, "mesh");
+  assert.deepEqual(updated.lineJoints, available.lineJoints);
+  const manual = updated.components.find(c => c.id === valves[1].id);
+  assert.deepEqual(manual.position, [117, 25, 49]);
+  assert.equal(manual.hidden, true);
+  assert.equal(manual.locked, true);
+  assert.ok(updated.components.some(c => c.id === "keep-manual"));
+  assert.equal(model.recoverThreadedLineGeometry(updated, available), updated);
+
+  const stale = { ...saved, sourceFingerprint: "prior specification" };
+  assert.equal(model.recoverThreadedLineGeometry(stale, available), stale);
+  const missingOldMesh = structuredClone(available);
+  const represented = available.components.find(c => c.id === valves[2].id);
+  const partial = { ...saved, components: saved.components.map(c => c.id === represented.id ? represented : c) };
+  missingOldMesh.components.find(c => c.id === represented.id).line.fidelity = "missing";
+  assert.equal(model.recoverThreadedLineGeometry(partial, missingOldMesh), partial);
+});
+
+test("editor applies an explicit size refresh only after the matching request and keeps it undoable", async () => {
+  const toolUrl = new URL("../app/model-editor/tool.tsx", import.meta.url);
+  const tool = await readFile(toolUrl, "utf8");
+  const requestEffectEnd = tool.indexOf("}, [lineIds, lineRequestKey");
+  const start = tool.indexOf("  useEffect(() => {", requestEffectEnd);
+  const end = tool.indexOf("  useEffect(() => {", start + 1);
+  assert.ok(requestEffectEnd >= 0 && start > requestEffectEnd && end > start);
+  const { apply } = await loadTs(toolUrl, { [toolUrl.href]: `
+    import {execute, mergeAssembly, recoverLostInsertions, recoverThreadedLineGeometry} from "./model";
+    export function apply({current, requestedLineRefresh, lineRecoveryKey, lineRequestKey, generated, lineData, spec}) {
+      const {editor} = current, profiles = {}, catalogue = [{}], latest = {current};
+      const setHistory = () => {}, useEffect = effect => effect();
+      ${tool.slice(start, end)}
+      return latest.current;
+    }
+  ` });
+  const p = station(), generated = build(p, await realLineCatalog(p));
+  const original = { ...build(p), sourceFingerprint: "older saved composition" };
+  const manual = model.addManualPipe(original, "editor-manual");
+  const editor = { ...model.emptyEditor(), assembly: manual, camera: { position: [10, 12, 13], target: [0, 0, 0] } };
+  const entity = { ...p.entities["station-model"], editor };
+  const changed = [];
+  const current = { editor, entity, assembly: manual, currentHistory: model.createHistory(manual), onChange: next => changed.push(next) };
+  const pending = { key: "current", fingerprint: generated.sourceFingerprint };
+  const run = (key, fingerprint, ready) => apply({ current, requestedLineRefresh: { current: { ...pending, fingerprint } }, lineRecoveryKey: {}, lineRequestKey: key, generated,
+    lineData: ready ? {} : undefined, spec: p.entities["station-spec"] });
+  assert.equal(run("current", pending.fingerprint, false), current);
+  assert.equal(run("obsolete response", pending.fingerprint, true), current);
+  assert.equal(run("current", "obsolete specification", true), current);
+  assert.deepEqual(changed, []);
+  const refreshed = run("current", pending.fingerprint, true);
+  assert.deepEqual(changed, [refreshed.entity]);
+  assert.equal(model.undo(refreshed.currentHistory).present, manual);
+  assert.equal(refreshed.editor.camera, editor.camera);
+  assert.ok(refreshed.assembly.components.some(component => component.id === "editor-manual"));
+  assert.ok(refreshed.assembly.components.some(component => component.line?.role === "primary-union" && component.shape?.kind === "mesh"));
+});
+
+test("flanged pump with threaded valves mounts a flange-to-thread adapter on each side", async () => {
+  let p = station("1604", 40, 40, "flanged");
+  Object.assign(p.entities["station-dn"], { connectionType: "threaded", suctionValveType: "ball", dischargeValveType: "ball" });
+  p = refresh(synchronizeCollectors(p), db, true);
+  const a = build(p, await realLineCatalog(p)), ps = a.components.filter(c => c.kind === "pump");
+  assert.equal(ps.length, 3);
+  for (const pump of ps) {
+    const chain = side => a.components.filter(c => c.line?.pumpId === pump.id && c.line.side === side && !c.line.auxiliary && !/gasket|adapter-flange/.test(c.line.role));
+    assert.deepEqual(chain("suction").map(c => c.equipmentId), ["suction-table:rf-40", "шаровые-краны-001-r0197"]);
+    assert.deepEqual(chain("discharge").map(c => c.equipmentId), ["suction-table:rf-40", "suction-table:check-valtec-40", "резьбовые-фитинги-001-r0220", "шаровые-краны-001-r0197"]);
+    for (const side of ["suction", "discharge"]) {
+      const [adapter] = chain(side);
+      assert.deepEqual(adapter.ports.map(port => port.connection), ["weld", "threaded"]);
+      assert.equal(adapter.ports[1].gender, "male");
+    }
+  }
+  assert.ok(!model.connectionIssues(a).some(i=>/типы соединения стыка не совпадают|резьбы стыка несовместимы/.test(i.message)));
+});
+
+test("a threaded pump with flanged valves mounts the RF thread toward the pump", async () => {
+  let p = station();
+  Object.assign(p.entities["station-dn"], { connectionType: "flanged", suctionValveType: "butterfly", dischargeValveType: "butterfly" });
+  p = refresh(synchronizeCollectors(p), db, true);
+  const a = build(p, await realLineCatalog(p));
+  const adapters = a.components.filter(c => c.line?.role === "primary-adapter");
+  assert.equal(adapters.length, 6);
+  for (const adapter of adapters) {
+    const [near, far] = adapter.line.ports.map(id => adapter.ports.find(port => port.id === id));
+    assert.equal(near.connection, "threaded");
+    assert.equal(far.connection, "weld");
+    const upstream = a.lineJoints.find(joint => joint.b.componentId === adapter.id);
+    assert.equal(upstream.a.componentId, adapter.line.pumpId);
+  }
+});
+
 test("ECH threaded discharge follows +Z, suction stays horizontal, and explicit CAD axes keep priority",async()=>{
   const p=station(),data=await realLineCatalog(p),a=build(p,data);
   for(const pump of a.components.filter(c=>c.kind==="pump"))for(const side of ["suction","discharge"]){
     const axis=side==="discharge"?[0,0,1]:[-1,0,0];
-    vecClose(pump.ports.find(p=>p.id===(side==="discharge"?"outlet":"inlet")).axis,axis);
+    const nozzle = pump.ports.find(p => p.id === (side === "discharge" ? "outlet" : "inlet"));
+    vecClose(nozzle.axis, axis);
+    const depth = side === "discharge" ? 25 : 30;
+    assert.equal(nozzle.threadDepthMm, depth);
+    assert.equal(nozzle.gender, "female");
+    const joint = a.lineJoints.find(j => j.a.componentId === pump.id && j.a.portId === nozzle.id);
+    assert.equal(joint.overlap, depth);
+    assert.equal(joint.provisional, true);
+    vecClose(model.subtract(model.portPoint(a, joint.b), model.portPoint(a, joint.a)), axis.map(n => -n * depth));
     for(const c of a.components.filter(c=>c.line?.pumpId===pump.id&&c.line.side===side&&!c.line.auxiliary)){
       const first=c.ports.find(p=>p.id===c.line.ports[0]),last=c.ports.find(p=>p.id===c.line.ports[1]);
       vecClose(model.rotate(last.axis,c.rotation),axis);
@@ -123,8 +234,133 @@ test("ECH threaded discharge follows +Z, suction stays horizontal, and explicit 
   }
   const pr=structuredClone(profiles),id=p.entities["system-input"].selectedPumpId;
   pr.profiles[id].ports.find(p=>p.id==="outlet").axis=[1,0,0];
-  const explicit=build(p,data,pr);assert.ok(explicit.components.filter(c=>c.kind==="pump").every(c=>JSON.stringify(c.ports.find(p=>p.id==="outlet").axis)==="[1,0,0]"));
-  assert.ok(!model.connectionIssues(a).some(i=>/соединение нарушено/.test(i.message)));
+  const explicit=build(p,data,pr);
+  for (const pump of explicit.components.filter(c => c.kind === "pump")) {
+    const outlet = pump.ports.find(port => port.id === "outlet");
+    vecClose(outlet.axis, [1, 0, 0]);
+    assert.equal(outlet.threadDepthMm, undefined);
+  }
+  const override = structuredClone(p);
+  Object.assign(override.entities["station-dn"].pumpSuctionPort, { dn: 32 });
+  Object.assign(override.entities["station-dn"].pumpDischargePort, { connection: "flanged" });
+  for (const pump of build(override, data).components.filter(c => c.kind === "pump")) {
+    assert.equal(pump.ports.find(port => port.id === "inlet").dn, 32);
+    assert.equal(pump.ports.find(port => port.id === "outlet").connection, "flanged");
+    assert.ok(pump.ports.every(port => [port.thread, port.plane, port.gender, port.threadDepthMm].every(value => value === undefined)));
+  }
+  for (const [role, count, genders] of [
+    ["primary-union", 6, ["male", "female"]],
+    ["primary-pump-nipple", 6, ["male", "male"]],
+    ["primaryCheckValve", 3, ["female", "female"]],
+  ]) {
+    const parts = a.components.filter(c => c.line?.role === role);
+    assert.equal(parts.length, count);
+    for (const part of parts) {
+      assert.deepEqual(part.ports.map(port => port.connection), ["threaded", "threaded"]);
+      assert.deepEqual(part.ports.map(port => port.gender), genders);
+    }
+  }
+  assert.ok(!model.connectionIssues(a).some(i=>/соединение нарушено|типы соединения стыка не совпадают|резьбы стыка несовместимы/.test(i.message)));
+});
+
+test("real DN25 fittings use measured shoulders at the valve joints and flag the unresolved union bore", async () => {
+  const p = station("nu-8276ee534778dc49", 25, 25);
+  const a = build(p, await realLineCatalog(p));
+  for (const pump of a.components.filter(c => c.kind === "pump")) {
+    const joints = side => a.components.filter(c => c.line?.pumpId === pump.id && c.line.side === side && !c.line.auxiliary)
+      .map(c => a.lineJoints.find(j => j.b.componentId === c.id));
+    const suction = joints("suction"), discharge = joints("discharge");
+    assert.deepEqual(suction.map(j => j.overlap), [27, 0, 14]);
+    assert.deepEqual(discharge.map(j => j.overlap), [20.37, 0, 14, 14, 14]);
+    assert.ok([...suction, ...discharge].every(j => j.provisional));
+  }
+  assert.ok(!model.connectionIssues(a).some(i => /соединение нарушено|резьбы стыка несовместимы/.test(i.message)));
+});
+
+test("threaded chains subtract only compatible measured overlap, including at the collector", () => {
+  const p = station(), base = model.buildAssembly(p, pumps, profiles);
+  const data = { ...empty, items: {} };
+  const threads = { suction: "G1½", discharge: "G1¼" };
+  const threadPort = (thread, gender, threadDepthMm) => ({ connection: "threaded", plane: "thread-reference", thread, gender, threadDepthMm, provisional: false });
+  for (const c of base.components) {
+    if (c.kind === "pump") c.ports = c.ports.map(port => ({ ...port, ...(port.id === "inlet" ? threadPort("G 1 1/2", "female", 16) : threadPort(threads.discharge, "female", 16)) }));
+    if (c.kind === "collector") c.ports = c.ports.map(port => ({ ...port, ...threadPort(threads[c.id.slice("collector-".length)], "male", 8) }));
+  }
+  for (const row of p.entities["station-spec"].items) {
+    const role = row.assemblyRole ?? row.option;
+    const thread = threads[row.section];
+    if (!thread || !row.equipmentId || !/(?:-union|-nipple|Valve)$/.test(role ?? "")) continue;
+    const ports = role.endsWith("-union") ? [["male", 14], ["female", 12]]
+      : role.endsWith("-nipple") ? [["male", 10], ["male", 10]]
+      : role.endsWith("CheckValve") ? [["female", 13], ["female", 11]] : [["female", 9], ["female", 9]];
+    data.items[row.equipmentId] = { equipmentId: row.equipmentId, source: "Контрольные измерения", revision: "1", length: 50, fidelity: "parametric", issues: [],
+      ports: ports.map(([gender, depth], i) => ({ ...threadPort(thread, gender, depth), id: i ? "right" : "left", point: [i * 50, 0, 0], axis: [i ? 1 : -1, 0, 0] })) };
+  }
+  const a = addLineAssemblies(base, p, profiles, data);
+  for (const pump of a.components.filter(c => c.kind === "pump")) for (const side of ["suction", "discharge"]) {
+    const chain = a.components.filter(c => c.line?.pumpId === pump.id && c.line.side === side && !c.line.auxiliary);
+    const joints = [...chain.map(c => a.lineJoints.find(j => j.b.componentId === c.id)), a.lineJoints.find(j => j.id === `line-end-collector-${side}-${pump.id}`)];
+    assert.deepEqual(joints.map(j => j.overlap), side === "suction" ? [14, 10, 9, 8] : [14, 10, 10, 10, 9, 8]);
+    for (const j of joints) {
+      assert.equal(j.kind, "thread");
+      assert.equal(j.provisional, false);
+      const axis = model.portAxis(a, j.a);
+      vecClose(model.subtract(model.portPoint(a, j.b), model.portPoint(a, j.a)), axis.map(n => -n * j.overlap));
+    }
+    const start = joints[0].a, end = joints.at(-1).b;
+    close(model.distance(model.portPoint(a, start), model.portPoint(a, end)), chain.reduce((sum, c) => sum + c.line.length, 0) - joints.reduce((sum, j) => sum + j.overlap, 0));
+  }
+  assert.ok(!model.connectionIssues(a).some(i => /соединение нарушено|резьбы стыка несовместимы/.test(i.message)));
+  const reopened = model.normalizeEditor(JSON.parse(JSON.stringify({ ...model.emptyEditor(), assembly: a }))).assembly;
+  assert.deepEqual(reopened.lineJoints, a.lineJoints);
+  const joint = reopened.lineJoints.find(j => j.a.componentId.startsWith("pump-") && j.a.portId === "inlet");
+  const moving = reopened.components.find(c => c.id === joint.b.componentId);
+  assert.equal(moving.ports[0].threadDepthMm, 14);
+  const axis = model.portAxis(reopened, joint.a);
+  for (const shift of [axis.map(n => n * joint.overlap * 2), model.add(axis.map(n => n * joint.overlap), [0, joint.overlap, 0])]) {
+    const moved = model.editComponent(reopened, { id: moving.id, patch: { position: model.add(moving.position, shift) } });
+    assert.ok(model.connectionIssues(moved).some(i => i.id === joint.a.componentId && /отклонение от осевой посадки/.test(i.message)));
+  }
+  const pump = base.components.find(c => c.kind === "pump");
+  delete pump.ports.find(port => port.id === "inlet").threadDepthMm;
+  pump.ports.find(port => port.id === "outlet").thread = "R1 1/4";
+  const withoutDepth = addLineAssemblies(base, p, profiles, data);
+  const provisional = withoutDepth.lineJoints.filter(j => j.a.componentId === pump.id);
+  assert.deepEqual(provisional.map(j => [j.kind, j.overlap, j.provisional]), [["thread", 0, true], ["thread", 0, true]]);
+  const outlet = pump.ports.find(port => port.id === "outlet");
+  Object.assign(outlet, { thread: threads.discharge, provisional: true });
+  const nominal = addLineAssemblies(base, p, profiles, data).lineJoints.find(j => j.a.componentId === pump.id && j.a.portId === "outlet");
+  assert.equal(nominal.overlap, 14);
+  assert.equal(nominal.provisional, true);
+});
+
+test("canonical ECH10-30 restores both measured ports and attaches new branches to a saved manual pump pose", () => {
+  const id = "HM:AQUASTRONG:ECH:8f1d5c686e498a55:ECH10-30", legacyId = "nu-b1879e1e3807d907";
+  const p = station(), pump = { ...pumps.find(row => row.id === legacyId), id, execution: "ECH10-30" };
+  p.entities["system-input"].selectedPumpId = id;
+  for (const field of ["pumpSuctionPort", "pumpDischargePort"]) p.entities["station-dn"][field].pumpId = id;
+
+  const generated = model.buildAssembly(p, [pump], { version: 1, profiles: {} }, empty);
+  const placed = generated.components.filter(component => component.kind === "pump");
+  assert.equal(placed.length, 3);
+  for (const component of placed) {
+    assert.equal(component.cadSource.hash, profiles.profiles[legacyId].sourceHash);
+    assert.deepEqual(component.ports.map(({ id, point, axis, dn, provisional }) => ({ id, point, axis, dn, provisional })), [
+      { id: "inlet", point: [0, 0, 0], axis: [-1, 0, 0], dn: 40, provisional: true },
+      { id: "outlet", point: [154.5, 0, 110], axis: [0, 0, 1], dn: 32, provisional: true },
+    ]);
+  }
+  const unreviewed = { ...placed[0], position: [100, 200, 300], rotation: [10, 0, 30],
+    ports: [{ ...placed[0].ports[0], id: "port-a" }] };
+  const merged = model.mergeAssembly({ ...generated, components: [unreviewed] }, generated);
+  const updated = merged.components.find(component => component.id === unreviewed.id);
+  assert.deepEqual([updated.position, updated.rotation], [unreviewed.position, unreviewed.rotation]);
+  const joints = merged.lineJoints.filter(joint => joint.a.componentId === updated.id);
+  assert.deepEqual(joints.map(joint => joint.a.portId), ["inlet", "outlet"]);
+  for (const joint of joints) {
+    vecClose(model.portPoint(merged, joint.a), model.portPoint(merged, joint.b));
+    vecClose(model.portAxis(merged, joint.a), model.portAxis(merged, joint.b).map(value => -value));
+  }
 });
 
 test("flanged parts, individual gaskets and fastener quantities match the real aggregated specification", () => {
@@ -253,7 +489,7 @@ test("gasket CAD is matched by execution, catalogue identity, thickness and requ
 
 test("pipe wall geometry has an open bore and actual annular end faces", async () => {
   const url = new URL("../app/model-editor/insertion-renderer.ts", import.meta.url);
-  const renderer = await loadTs(url, { [url.href]: (await readFile(url,"utf8")).replace('from "three"', `from ${JSON.stringify(new URL("../node_modules/three/build/three.module.js",import.meta.url).href)}`) });
+  const renderer = await loadTs(url, { [url.href]: (await readFile(url,"utf8")).replace('from "three"', `from ${JSON.stringify(import.meta.resolve("three"))}`) });
   const THREE = await import("three");
   const geometry = renderer.ringGeometry({ kind:"tube", outerMm:114.3, innerMm:108.3, lengthMm:137 });
   geometry.computeBoundingBox(); close(geometry.boundingBox.max.x,137); close(geometry.boundingBox.min.x,0);

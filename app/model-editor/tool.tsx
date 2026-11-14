@@ -7,7 +7,7 @@ import type { Pump } from "../pump-catalog";
 import { useRuntimeDiagnostic } from "../diagnostics-ui";
 import {
   addManualPipe, assemblyBounds, buildAssembly, componentBounds, connectionIssues, createHistory, dimensions,
-  distance, worldPoint, editComponent, emptyEditor, execute, mergeAssembly, recoverEmptyCollectors, recoverLostInsertions, pipePoints, redo, routeLength, setAutomaticRoute,
+  distance, worldPoint, editComponent, emptyEditor, execute, mergeAssembly, recoverCollectorNipples, recoverEmptyCollectors, recoverLostInsertions, recoverThreadedLineGeometry, pipePoints, redo, routeLength, setAutomaticRoute,
   sourceFingerprint, undo, combineProfiles, refreshModelAssets, type Assembly, type Component, type Edit, type EditorState, type ProfileCatalog, type Vec3,
 } from "./model";
 import type { ViewportHandle, EditorMode } from "./viewport";
@@ -19,7 +19,7 @@ import { addLibraryModel, type LibraryModel } from "./library";
 import { defaultSnaps } from "./snap-settings";
 import { localPoint, snapGeometry, workingPlane, type SnapLine } from "./snap-geometry";
 import { moveByPoints, type SnapPick } from "./snap-engine";
-import { specificationModels, lineGeometryIds } from "./specification-models";
+import { availableSpecificationPumpKeys, specificationModels, lineGeometryIds, specificationPreparationItems } from "./specification-models";
 import { PreparationProgress, useModelPreparation } from "./preparation";
 import type { LineCatalog } from "./line-types";
 import { CollectorDetails } from "./collector-properties";
@@ -47,19 +47,24 @@ function NumberField({ label, value, disabled = false, min, onCommit }: { label:
   return <label className="model-editor__number"><span>{label}</span><input aria-label={label} type="text" inputMode="decimal" disabled={disabled} value={draft ?? String(Number(value.toFixed(2)))} onChange={e => setDraft(e.target.value)} onBlur={() => { if (cancelBlur.current) { cancelBlur.current = false; return; } commit(); }} onKeyDown={e => { if (e.key === "Enter") e.currentTarget.blur(); if (e.key === "Escape") { cancelBlur.current = true; setDraft(null); e.currentTarget.blur(); } }}/></label>;
 }
 
-export function ModelTool({ project, catalogue, entity, onChange }: {
-  project: ProjectConfig; catalogue: Pump[]; entity: ModelEntity; onChange: (next: ModelEntity) => void;
+export function ModelTool({ project, catalogue, entity, onChange, cameraScope = "station-model" }: {
+  project: ProjectConfig; catalogue: Pump[]; entity: ModelEntity; onChange: (next: ModelEntity) => void; cameraScope?: string;
 }) {
+  const cameraKey = "psc-3d-camera-v1:" + JSON.stringify([project.project.id, cameraScope]);
   const [profiles, setProfiles] = useState<ProfileCatalog | null>(null), [catalogError, setCatalogError] = useState("");
   const [assetError, setAssetError] = useState("");
   const [warningsOpen, setWarningsOpen] = useState(false);
   const [moreTools, setMoreTools] = useState(false);
   const [treeOpen, setTreeOpen] = useState(true), [propertiesOpen, setPropertiesOpen] = useState(false);
   const [compactPanels, setCompactPanels] = useState(false);
-  const [lineData, setLineData] = useState<LineCatalog>();
+  const [lineResponse, setLineResponse] = useState<{ key: string; data: LineCatalog }>();
   const [lineError, setLineError] = useState("");
   const [lineReload, setLineReload] = useState(0);
   const lineIds = JSON.stringify(lineGeometryIds(project));
+  const lineRequestKey = JSON.stringify([project.project.id, lineIds, lineReload]);
+  const lineData = lineResponse?.key === lineRequestKey ? lineResponse.data : undefined;
+  const requestedLineRefresh = useRef<{ key: string; fingerprint: string }>(undefined);
+  const lineRecoveryKey = useRef<string>(undefined);
   const [mode, setMode] = useState<EditorMode>("translate");
   const [measurement, setMeasurement] = useState<SnapPick[]>([]);
   const [snapOpen, setSnapOpen] = useState(false);
@@ -82,22 +87,18 @@ export function ModelTool({ project, catalogue, entity, onChange }: {
   }, []);
   const showTree = treeOpen && !(compactPanels && propertiesOpen);
   // Project loading already validates saved geometry. Rebuilding it here made
-  // the next selection/camera event persist a different set of physical fasteners.
+  // the next selection event persist a different set of physical fasteners.
   const [initial] = useState(emptyEditor);
   const editor = entity.editor ?? initial;
   const snaps = editor.objectSnaps ?? defaultSnaps();
   const generated = useMemo(() => buildAssembly(project, catalogue, profiles ?? EMPTY_PROFILES, lineData ?? EMPTY_LINES), [project, catalogue, profiles, lineData]);
   const spec = project.entities["station-spec"] as SpecEntity | undefined;
-  useEffect(()=>{
-    if(!editor.assembly || !profiles || !catalogue.length || !lineData || !spec?.items) return;
-    const repaired=recoverLostInsertions(editor.assembly,generated,spec.items);
-    if(repaired!==editor.assembly) onChange({...entity,editor:{...editor,assembly:repaired}});
-  },[editor,profiles,catalogue.length,lineData,spec,generated,onChange,entity]);
-  const assembly = useMemo(() => editor.assembly ? recoverEmptyCollectors(editor.assembly, generated) : generated, [editor.assembly, generated]);
+  const recovered = useMemo(() => editor.assembly ? recoverCollectorNipples(editor.assembly, generated) : undefined, [editor.assembly, generated]);
+  const assembly = useMemo(() => recovered ? recoverEmptyCollectors(recovered, generated) : generated, [recovered, generated]);
   const missingPlane = useMemo(() => snaps.plane === "face" && !workingPlane(snaps, snapGeometry(assembly)), [snaps, assembly]);
   const displayAssembly = useMemo(() => {
     const placed = move?.source && move.target ? moveByPoints(assembly, move.id, move.source.point, move.target.point) : assembly;
-    return editor.showFasteners === false ? { ...placed, components: placed.components.map(c => c.fastener ? { ...c, hidden: true } : c) } : placed;
+    return editor.showFasteners === false ? { ...placed, components: placed.components.map(c => c.fastener || c.frameHardware ? { ...c, hidden: true } : c) } : placed;
   }, [assembly, move, editor.showFasteners]);
   const [history, setHistory] = useState(() => createHistory(assembly));
   const currentHistory = history.present === assembly ? history : createHistory(assembly);
@@ -105,7 +106,10 @@ export function ModelTool({ project, catalogue, entity, onChange }: {
   const mounted = useRef(true);
   useEffect(() => { latest.current = { project, catalogue, assembly, entity, editor, currentHistory, onChange, lineData, profiles }; });
   useEffect(() => { mounted.current = true; return () => { mounted.current = false; }; }, []);
-  const preparation = useModelPreparation(project.project.id, specificationModels(project), !!profiles && !!catalogue.length, async job => {
+  const specification = specificationModels(project), availablePumpKeys = availableSpecificationPumpKeys(generated);
+  const pendingPreparation = specificationPreparationItems(specification, catalogue, availablePumpKeys);
+  const specificationPrepared = specification.length > 0 && specification.every(item => availablePumpKeys.has(item.key));
+  const preparation = useModelPreparation(project.project.id, pendingPreparation, !!profiles && !!catalogue.length, async job => {
     if (job.projectId !== latest.current.project.project.id || !mounted.current) return;
     const before = latest.current;
     const planned = refreshModelAssets(before.assembly, before.project, before.catalogue, combineProfiles(before.profiles ?? EMPTY_PROFILES, job.profiles), before.lineData);
@@ -126,22 +130,48 @@ export function ModelTool({ project, catalogue, entity, onChange }: {
   });
   const selected = assembly.components.find(c => c.id === editor.selectedId);
   const stale = Boolean(editor.assembly && (editor.assembly.sourceFingerprint !== sourceFingerprint(project) || lineData && editor.assembly.lineDataRevision !== lineData.revision));
-  const unassigned = assembly.components.filter(c => c.kind === "pump" && c.ports.some(p => p.id === "port-a"));
+  const unassigned = assembly.components.filter(c => c.kind === "pump" && c.ports.some(p => p.id === "port-a" || p.id === "port-b"));
   const recoveredPumps = unassigned.filter(c => c.cadSource && generated.components.some(fresh =>
     fresh.id===c.id && fresh.cadSource?.hash===c.cadSource?.hash && fresh.ports.some(p=>p.id==="inlet") && fresh.ports.some(p=>p.id==="outlet")
-  ) && generated.components.some(part => part.line?.pumpId === c.id));
+  ));
   const issues = useMemo(() => connectionIssues(assembly), [assembly]);
   const sourceWarnings = assembly.components.filter(c => !isHardwareRow(c) && (c.kind === "pump" || c.kind === "equipment")).map(c => c.sourceNote);
   const diagnostic = [...(stale ? ["Состав установки изменён. Обновите состав в 3D-редакторе; ручная компоновка сохранена."] : []), ...issues.map(i => i.message), catalogError, assetError, lineError, ...(lineData?.issues ?? [])].filter(Boolean).join("\n");
   useRuntimeDiagnostic("model", "assembly", diagnostic, "warning");
   useEffect(() => {
     const controller = new AbortController();
-    void sharedToolRequest("/api/model-line-data", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ids: JSON.parse(lineIds) }), signal: controller.signal })
+    const load = lineReload ? fetch : sharedToolRequest;
+    void load("/api/model-line-data", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ids: JSON.parse(lineIds) }), signal: controller.signal })
       .then(async response => { const data = await response.json(); if (!response.ok || data.version !== 1) throw new Error(data.error ?? "Некорректные данные обвязки"); return data as LineCatalog; })
-      .then(data => { if (!controller.signal.aborted) { setLineData(data); setLineError(""); } })
+      .then(data => { if (!controller.signal.aborted) { setLineResponse({ key: lineRequestKey, data }); setLineError(""); } })
       .catch(error => { if (!controller.signal.aborted) setLineError(`Геометрия обвязки: ${error.message}. Сохранённая сборка остаётся доступной.`); });
     return () => controller.abort();
-  }, [lineIds, project.project.id, lineReload]);
+  }, [lineIds, lineRequestKey, lineReload]);
+  useEffect(() => {
+    if (!profiles || !catalogue.length || !lineData || !spec?.items) return;
+    const current = latest.current;
+    const request = requestedLineRefresh.current;
+    if (request?.key === lineRequestKey) requestedLineRefresh.current = undefined;
+    const saved = current.editor.assembly;
+    if (!saved) return;
+    const explicit = request?.key === lineRequestKey && request.fingerprint === generated.sourceFingerprint;
+    const recover = !explicit && lineRecoveryKey.current !== lineRequestKey;
+    lineRecoveryKey.current = lineRequestKey;
+    const repair = (value: Assembly) => {
+      const restored = recoverLostInsertions(value, generated, spec.items);
+      return recover ? recoverThreadedLineGeometry(restored, generated) : restored;
+    };
+    const next = explicit ? mergeAssembly(current.assembly, generated) : repair(saved);
+    if (next === saved) return;
+    const history = explicit ? execute(current.currentHistory, next) : {
+      past: current.currentHistory.past.map(repair), present: next, future: current.currentHistory.future.map(repair),
+    };
+    const updatedEditor = { ...current.editor, assembly: next };
+    const updatedEntity = { ...current.entity, editor: updatedEditor };
+    latest.current = { ...current, currentHistory: history, assembly: next, editor: updatedEditor, entity: updatedEntity };
+    setHistory(history);
+    current.onChange(updatedEntity);
+  }, [editor.assembly, profiles, catalogue.length, lineData, lineRequestKey, spec, generated]);
   useEffect(() => {
     const controller = new AbortController();
     void sharedToolRequest("/model-assets/manifest.json"+(project.project.modelLibraryVersion?"?version="+encodeURIComponent(project.project.modelLibraryVersion):""), { signal: controller.signal }).then(r => { if (!r.ok) throw new Error(); return r.json(); }).then((data: ProfileCatalog) => {
@@ -167,11 +197,11 @@ export function ModelTool({ project, catalogue, entity, onChange }: {
   }, [mode]);
 
   const update = (patch: Partial<EditorState>) => {
-    // Camera events can arrive between an asynchronous library insertion and
-    // the viewport receiving its new props. Merge into the latest committed
-    // editor so fitting the camera cannot restore the previous assembly.
     const current = latest.current;
-    const nextEditor = { ...current.editor, ...patch };
+    // Remember the current view in real editor snapshots for project export
+    // and older clients. Navigation alone only updates the local viewport.
+    const camera = viewport.current?.cameraView();
+    const nextEditor = { ...current.editor, ...(camera ? { camera } : {}), ...patch };
     const nextEntity = { ...current.entity, editor: nextEditor };
     latest.current = { ...current, entity: nextEntity, editor: nextEditor, assembly: nextEditor.assembly ?? current.assembly };
     current.onChange(nextEntity);
@@ -182,6 +212,11 @@ export function ModelTool({ project, catalogue, entity, onChange }: {
     update({ assembly: nextHistory.present });
   };
   const edit = (id: string, patch: Edit["patch"]) => commit(editComponent(assembly, { id, patch }));
+  const reloadLineGeometry = () => {
+    const revision = lineReload + 1;
+    requestedLineRefresh.current = { key: JSON.stringify([project.project.id, lineIds, revision]), fingerprint: generated.sourceFingerprint };
+    setLineReload(revision);
+  };
   const addFromLibrary = async (model: LibraryModel, signal: AbortSignal) => {
     const projectId = project.project.id;
     if (!viewport.current || !model.meshUrl) throw new Error("3D-сцена ещё не готова");
@@ -240,7 +275,7 @@ export function ModelTool({ project, catalogue, entity, onChange }: {
   return <div className="model-tool" ref={toolRoot}>
     <div className="model-tool__mode">{tabs}<label><select aria-label="Режим 3D модели" value={entity.mode ?? "preview"} disabled={!profiles || !lineData} onChange={event => changeMode(event.target.value)}><option value="preview">Эскиз установки</option><option value="editor">3D редактор</option></select></label><span>{profiles ? "мм · Z вверх" : "Загрузка библиотеки…"}</span></div>
     {entity.mode !== "editor" ? <div className="model-view"><div className="model-view__stage"><span className="model-view__pipe model-view__pipe--one"/><span className="model-view__pipe model-view__pipe--two"/><span className="model-view__pump model-view__pump--one"/><span className="model-view__pump model-view__pump--two"/><span className="model-view__pump model-view__pump--three"/><b>3D</b></div><p className="model-tool__preview-note">Условный эскиз. Для работы с составом проекта выберите «3D редактор».</p></div> : <div className="model-editor" aria-label="3D редактор установки">
-      {editor.assembly && recoveredPumps.length > 0 ? <div className="model-editor__migration" role="status">Для {recoveredPumps.map(c=>c.name).join(", ")} подтверждено направление потока. Теперь можно подключить арматуру к патрубкам. <button type="button" disabled={!catalogue.length || !profiles || !lineData} onClick={() => commit(mergeAssembly(assembly, generated))}>Добавить обвязку</button></div>
+      {editor.assembly && recoveredPumps.length > 0 ? <div className="model-editor__migration" role="status">Для {recoveredPumps.map(c=>c.name).join(", ")} доступны координаты всасывающего и напорного патрубков. <button type="button" disabled={!catalogue.length || !profiles || !lineData} onClick={() => commit(mergeAssembly(assembly, generated))}>Обновить патрубки и обвязку</button></div>
         : unassigned.length > 0 && profiles && lineData ? <div className="model-editor__notice" role="status">Для {unassigned.map(c=>c.name).join(", ")} в CAD-профиле не определены всасывающий и напорный патрубки. До проверки направления арматура показана отдельно.</div>
         : editor.assembly && !editor.assembly.lineJoints && <div className="model-editor__migration" role="status">Сохранена старая сборка без обвязки. Обновите состав, чтобы добавить арматуру из спецификации. Ручные положения сохранятся. <button type="button" disabled={!profiles || !lineData} onClick={() => commit(mergeAssembly(assembly, generated))}>Добавить обвязку</button></div>}
       <div className="model-editor__toolbar" role="toolbar" aria-label="Инструменты 3D редактора">
@@ -263,15 +298,15 @@ export function ModelTool({ project, catalogue, entity, onChange }: {
         <label><input type="checkbox" checked={editor.grid} onChange={e => update({ grid: e.target.checked })}/>Сетка</label><label><input type="checkbox" checked={editor.snap} onChange={e => update({ snap: e.target.checked })}/>К сетке</label><label>Шаг <select aria-label="Шаг привязки, мм" value={editor.snapStep} onChange={e => update({ snapStep: Number(e.target.value) })}>{[1, 5, 10, 25, 50, 100, 250, 500, ...(![1, 5, 10, 25, 50, 100, 250, 500].includes(editor.snapStep) ? [editor.snapStep] : [])].sort((a, b) => a - b).map(v => <option key={v} value={v}>{v} мм</option>)}</select></label>
         <label><input type="checkbox" checked={editor.showFasteners !== false} onChange={e => update({ showFasteners: e.target.checked })}/>Показывать крепёж</label>
         <button type="button" disabled={!catalogue.length || !profiles || !lineData} onClick={() => commit(mergeAssembly(assembly, generated))}>Обновить состав</button>
-        <button type="button" onClick={() => setLineReload(value => value + 1)}>Обновить размеры из базы</button>
-        <button type="button" disabled={preparation.busy || !profiles || !catalogue.length} onClick={() => void preparation.start()}>{preparation.busy && !preparation.connecting ? "Подготовка…" : "Подготовить 3D-модели спецификации"}</button>
+        <button type="button" onClick={reloadLineGeometry}>Обновить размеры из базы</button>
+        <button type="button" disabled={preparation.busy || !profiles || !catalogue.length || !pendingPreparation.length} onClick={() => void preparation.start()}>{preparation.busy && !preparation.connecting ? "Подготовка…" : specificationPrepared ? "3D-модели спецификации готовы" : "Подготовить 3D-модели спецификации"}</button>
         <button type="button" disabled={!catalogue.length || !profiles || !lineData} onClick={() => setResetOpen(true)}>Автокомпоновка</button>
         <button type="button" disabled={assembly.components.length >= 500} onClick={() => commit(addManualPipe(assembly, `manual-pipe-${crypto.randomUUID()}`))}>＋ Труба</button>
         <button type="button" onClick={() => setLibraryOpen(true)}>＋ Из библиотеки</button>
         <button type="button" disabled={assembly.components.length >= 500} onClick={() => setInsertDialog({})}>＋ Вставка из базы</button>
         </div>
       </div>}
-      <PreparationProgress preparation={preparation} compact/>
+      <PreparationProgress preparation={preparation} availablePumpKeys={availablePumpKeys} compact/>
       {assembly.components.some(c => c.pumpGeometry?.schematic) && <p className="model-editor__notice" role="status" title="Габариты и/или точки подключения насосов неточны. Размеры и координаты условных насосов нельзя использовать для монтажа.">Условная компоновка · размеры насосов не подтверждены для монтажа.</p>}
       {missingPlane && <p className="model-editor__notice" role="status">Рабочая грань недоступна: компонент скрыт, удалён или геометрия изменилась. Выберите другую грань либо XY/XZ/YZ в настройках. Проекционный выбор приостановлен.</p>}
       {(operationNote || !["translate", "rotate", "measure"].includes(mode)) && <div className="model-editor__operation" role="status">
@@ -284,15 +319,16 @@ export function ModelTool({ project, catalogue, entity, onChange }: {
       <div className={`model-editor__layout ${showTree ? "has-tree" : ""} ${propertiesOpen ? "has-properties" : ""}`}>
         <aside hidden={!showTree} className="model-editor__tree" aria-label="Дерево сборки"><h3>Сборка <small>{assembly.components.filter(c=>!isHardwareRow(c)).length}</small><button type="button" aria-label="Скрыть дерево сборки" onClick={()=>setTreeOpen(false)}>×</button></h3>
           {!assembly.components.length && <p>Выберите насос в подборе, затем нажмите «Обновить состав».</p>}
-          {assembly.components.filter(c => !c.line && !c.fastener && c.kind !== "pump").map(treeRow)}
+          {assembly.components.filter(c => !c.line && !c.fastener && !c.frameHardware && c.kind !== "pump").map(treeRow)}
+          <details open className="model-editor__tree-group"><summary>Крепёж рамы и ШУ ({assembly.components.filter(c=>c.frameHardware).length})</summary>{assembly.components.filter(c=>c.frameHardware).map(treeRow)}</details>
           <details open className="model-editor__tree-group"><summary>Крепёж соединений ({assembly.components.filter(c=>c.fastener).length})</summary>{assembly.components.filter(c=>c.fastener).map(treeRow)}</details>
           {[1, 2].map(circuit => <details key={circuit} open className="model-editor__tree-group"><summary>Контур {circuit}</summary>{assembly.components.filter(c => c.kind === "pump" && c.id.startsWith(`pump-${circuit}-`)).map(pump => <details open key={pump.id}><summary>{pump.name}</summary>{treeRow(pump)}{(["suction", "discharge"] as const).map(side => <details open key={side}><summary>{side === "suction" ? "Всасывающая линия" : "Напорная линия"}</summary>{assembly.components.filter(c => c.line?.pumpId === pump.id && c.line.side === side).map(treeRow)}</details>)}</details>)}</details>)}
           <p className="model-editor__tree-key">Флажки: видимость / фиксация</p>
         </aside>
         <div className="model-editor__stage">
           <Suspense fallback={<div className="model-editor__loading">Загрузка 3D-сцены…</div>}>
-            <Viewport ref={viewport} assembly={displayAssembly} selectedId={editor.selectedId} selectedPieceId={editor.selectedPieceId}
-              grid={editor.grid} snapStep={editor.snap ? editor.snapStep : null} mode={mode} camera={editor.camera}
+            <Viewport key={cameraKey} ref={viewport} assembly={displayAssembly} selectedId={editor.selectedId} selectedPieceId={editor.selectedPieceId}
+              grid={editor.grid} snapStep={editor.snap ? editor.snapStep : null} mode={mode} camera={editor.camera} cameraStorageKey={cameraKey}
               measurement={measurement.map(p => p.point)} snaps={snaps} referencePoints={editor.referencePoints ?? []}
               reference={constructionReference?.point} referenceApproximate={constructionReference?.approximate}
               secondReference={references[1]?.point} secondReferenceApproximate={references[1]?.approximate}
@@ -302,7 +338,7 @@ export function ModelTool({ project, catalogue, entity, onChange }: {
               onPlane={face => { setMeasurement([]); update({ objectSnaps: { ...snaps, plane: "face", face: { componentId: face.componentId, featureId: face.id } } }); setMode("measure"); setOperationNote("Рабочая плоскость выбрана. Для проекции включите соответствующий флажок."); }}
               onSelect={(selectedId, selectedPieceId) => { cancelOperation(); if(selectedId)setPropertiesOpen(true); update({ selectedId, selectedPieceId }); }}
               onTransform={(id, position, rotation) => edit(id, { position, rotation })}
-              onCamera={camera => update({ camera })} onAssetError={message => setAssetError(message)}/>
+              onAssetError={message => setAssetError(message)}/>
           </Suspense>
           <div className="model-editor__axes" aria-hidden="true"><span>X</span><span>Y</span><span>Z ↑</span></div>
           <p className="model-editor__hint">{mode === "measure" || mode === "move" ? "Точка: щелчок · Tab: следующая привязка · Escape: отмена · перетаскивание: камера" : "ЛКМ — вращение · ПКМ — панорама · колесо — масштаб"}</p>

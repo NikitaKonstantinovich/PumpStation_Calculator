@@ -32,13 +32,26 @@ def records(value):
 
 def library(root):
     entries = list(model_assets(root).load_library(root).values())
+    service = Path(__file__).resolve()
     paths = [root / "frontend/public/model-assets/library.json", root / "frontend/data/instrument-mounts.json",
              root / "frontend/data/tank-models.json", root / "frontend/data/valve-control-mounts.json",
              root / "frontend/data/line-valve-models.json", root / "frontend/data/line-gasket-models.json",
-             root / "frontend/data/collar-cad-models.json"]
+             root / "frontend/data/collar-cad-models.json", root / "frontend/data/frame-cabinet-models.json",
+             service.parents[2] / "data/frame-cabinet-models.json", service.with_name("frame-cabinet-models.json"),
+             root / "Equipment/Pumps/PreparedForAssembly/export-library.json"]
+    frame_directory = Path("Equipment/Frames/Generated/bent-410-v1")
+    frame_manifest = root / frame_directory / "manifest.json"
+    if frame_manifest.is_file():
+        for frame in json.loads(frame_manifest.read_text(encoding="utf-8-sig")):
+            if frame.get("verified") is not True:
+                continue
+            native = Path(frame["native"])
+            if native.name != frame["native"] or native.suffix.lower() != ".sldprt":
+                continue
+            entries.append({"source": (frame_directory / native).as_posix(), "sourceHash": frame["nativeHash"]})
     if os.environ.get("CAD_EXPORT_LIBRARY"):
         paths.append(Path(os.environ["CAD_EXPORT_LIBRARY"]))
-    for path in paths:
+    for path in dict.fromkeys(paths):
         if path.is_file(): entries.extend(records(json.loads(path.read_text(encoding="utf-8-sig"))))
     return entries
 
@@ -50,6 +63,8 @@ class SourceProblem(ValueError):
 
 
 def source(root, entry):
+    if entry.get("importError"):
+        raise SourceProblem("import_error", entry["importError"])
     relative = Path(entry["source"])
     path = (root / relative).resolve()
     if relative.is_absolute() or not path.is_relative_to((root / "Equipment").resolve()) or path.suffix.lower() not in (".step", ".stp", ".sldprt", ".sldasm"):
@@ -65,6 +80,71 @@ def number(value, name, zero=False):
     if type(value) not in (float, int) or not math.isfinite(value) or value > 100000 or value < 0 or not zero and value == 0:
         raise ValueError(f"Некорректный размер {name}")
     return value
+
+
+def frame_profile(g):
+    from OCP.BRepAlgoAPI import BRepAlgoAPI_Cut
+    from OCP.BRepBuilderAPI import BRepBuilderAPI_MakeEdge, BRepBuilderAPI_MakeFace, BRepBuilderAPI_MakeWire
+    from OCP.BRepPrimAPI import BRepPrimAPI_MakePrism
+    from OCP.GC import GC_MakeArcOfCircle
+    from OCP.gp import gp_Pnt, gp_Vec
+
+    length = number(g.get("lengthMm"), "длина С-профиля")
+    slots = g.get("slots")
+    radius = 5.5
+    if length not in (600, 800) or not isinstance(slots, list) or len(slots) > 32:
+        raise ValueError("Некорректная длина или число пазов С-профиля")
+
+    def extrude(start, segments, direction):
+        wire = BRepBuilderAPI_MakeWire()
+        current = gp_Pnt(*start)
+        for end, *via in segments:
+            target = gp_Pnt(*end)
+            if via:
+                curve = GC_MakeArcOfCircle(current, gp_Pnt(*via[0]), target).Value()
+                edge = BRepBuilderAPI_MakeEdge(curve)
+            else:
+                edge = BRepBuilderAPI_MakeEdge(current, target)
+            wire.Add(edge.Edge())
+            current = target
+        face = BRepBuilderAPI_MakeFace(wire.Wire()).Face()
+        return BRepPrimAPI_MakePrism(face, gp_Vec(*direction)).Shape()
+
+    # The editor uses local X for depth, Y for the section width, Z along the rail.
+    # The folded sheet is 2 mm thick, with outer R4 and inner R2 bends.
+    outer = 4 / math.sqrt(2)
+    inner = 2 / math.sqrt(2)
+    section = [
+        [(0, 16)], [(4, 20), (4 - outer, 16 + outer)], [(16, 20)],
+        [(20, 16), (16 + outer, 16 + outer)], [(20, 10)], [(18, 10)],
+        [(18, 16)], [(16, 18), (16 + inner, 16 + inner)], [(4, 18)],
+        [(2, 16), (4 - inner, 16 + inner)], [(2, -16)],
+        [(4, -18), (4 - inner, -16 - inner)], [(16, -18)],
+        [(18, -16), (16 + inner, -16 - inner)], [(18, -10)], [(20, -10)],
+        [(20, -16)], [(16, -20), (16 + outer, -16 - outer)], [(4, -20)],
+        [(0, -16), (4 - outer, -16 - outer)],
+    ]
+    body = extrude((0, -16, 0), [[(*point, 0) for point in segment] for segment in section], (0, 0, length))
+    previous_end = -radius
+    for slot in slots:
+        if not isinstance(slot, list) or len(slot) != 2:
+            raise ValueError("Некорректный паз С-профиля")
+        lo, hi = (number(value, "координата паза С-профиля") for value in slot)
+        if not radius < lo <= hi < length - radius or lo - previous_end <= 2 * radius:
+            raise ValueError("Пазы С-профиля пересекаются или выходят на кромку")
+        previous_end = hi
+        segments = [[(-1, radius, lo), (-1, 0, lo - radius)]]
+        if hi > lo:
+            segments.append([(-1, radius, hi)])
+        segments.append([(-1, -radius, hi), (-1, 0, hi + radius)])
+        if hi > lo:
+            segments.append([(-1, -radius, lo)])
+        cutter = extrude((-1, -radius, lo), segments, (4, 0, 0))
+        result = BRepAlgoAPI_Cut(body, cutter)
+        if not result.IsDone():
+            raise ValueError("Не удалось построить паз С-профиля")
+        body = result.Shape()
+    return body
 
 
 def generate(g):
@@ -137,6 +217,8 @@ def generate(g):
         body = cylinder(g["outerMm"], g["lengthMm"])
         if g.get("headMm"): body = fuse(body, hexagon(g["flatsMm"], g["headMm"], -g["headMm"]))
     elif kind == "hex": body = hexagon(g["flatsMm"], g["lengthMm"], inner=g["innerMm"])
+    elif kind == "frame-profile":
+        body = frame_profile(g)
     elif kind in ("collector-main", "collector-branch"):
         m = g if kind == "collector-main" else g["main"]
         length = number(m["lengthMm"], "длина магистрали")
@@ -274,7 +356,7 @@ def prepare(root, folder):
                     path = source(root, entry)
                     sources[str(path)] = entry["sourceHash"]
                 else:
-                    if kind not in {"tube", "flange", "collar", "hex-cap", "rod", "hex", "collector-main", "collector-branch"}:
+                    if kind not in {"tube", "flange", "collar", "hex-cap", "rod", "hex", "collector-main", "collector-branch", "frame-profile"}:
                         raise SourceProblem("unsupported_geometry", f"Нет генератора геометрии {kind}.")
                     from OCP.STEPControl import STEPControl_Writer, STEPControl_AsIs
                     from OCP.IFSelect import IFSelect_RetDone

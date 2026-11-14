@@ -8,7 +8,7 @@ import { mountingRotation } from "./line-assembly";
 type Volume = SettingsEntity["membraneTankVolume"];
 export type TankMount = {
   version: 1; revision: string; parentId: string; portId: string; role: "valve" | "tank" | "hose";
-  mode: "port" | "floor"; volume: Volume; specPosition: string; position: Vec3; rotation: Vec3; manual?: boolean;
+  mode: "port" | "floor"; volume: Volume; specPosition: string; position: Vec3; rotation: Vec3; manual?: boolean; frameAnchor?: Vec3;
 };
 const vec = (v: unknown): v is Vec3 => Array.isArray(v) && v.length === 3 && v.every(n => typeof n === "number" && Number.isFinite(n) && Math.abs(n) < 1e7);
 const id = (v: unknown): v is string => typeof v === "string" && v.length > 0 && v.length <= 240;
@@ -18,7 +18,7 @@ export function parseTankMount(value: unknown): TankMount | undefined {
   if(v.version!==1||!id(v.revision)||!id(v.parentId)||!id(v.portId)||!id(v.specPosition)||![8,50,80,100].includes(v.volume)
     ||!["valve","tank","hose"].includes(v.role)||!["port","floor"].includes(v.mode)||!vec(v.position)||!vec(v.rotation))return;
   return {version:1,revision:v.revision,parentId:v.parentId,portId:v.portId,specPosition:v.specPosition,role:v.role,mode:v.mode,volume:v.volume,
-    position:[...v.position],rotation:[...v.rotation],...(v.manual===true?{manual:true}:{})};
+    position:[...v.position],rotation:[...v.rotation],...(vec(v.frameAnchor)?{frameAnchor:[...v.frameAnchor] as Vec3}:{}),...(v.manual===true?{manual:true}:{})};
 }
 export function retainedTankMount(old: TankMount | undefined, next: TankMount): TankMount {
   if(old?.manual&&old.role===next.role&&old.volume===next.volume&&old.mode===next.mode&&["tank-dn20-body-only-v2","tank-end200-pump-gap200-v1"].includes(old.revision)){
@@ -47,6 +47,12 @@ export function floorTankAnchor(assembly:Assembly,pump:Component,tank:Component)
   const axis:Vec3=length>1e-6?delta.map(v=>v/length) as Vec3:[0,1,0];
   const volume=tank.tankMount!.volume as 50|80|100,rotation=models.assets[`tank${volume}`].rotation as Vec3;
   const native=corners({...tank,position:[0,0,0],rotation}),body=corners(pump);
+  const calculatedFrame=assembly.components.find(c=>c.kind==="frame"&&c.meshUrl);
+  if(calculatedFrame&&tank.tankMount?.frameAnchor){
+    const anchor=world(calculatedFrame,tank.tankMount.frameAnchor);
+    const position:Vec3=[anchor[0]-(Math.min(...native.map(p=>p[0]))+Math.max(...native.map(p=>p[0])))/2,anchor[1]-(Math.min(...native.map(p=>p[1]))+Math.max(...native.map(p=>p[1])))/2,anchor[2]-Math.min(...native.map(p=>p[2]))];
+    return {position,rotation};
+  }
   const center=body.reduce((s,p)=>add(s,p),[0,0,0] as Vec3).map(v=>v/8) as Vec3;
   const target=Math.max(...body.map(p=>dot(p,axis)))+TANK_PUMP_GAP_MM-Math.min(...native.map(p=>dot(p,axis)));
   const position=add(center,axis.map(v=>v*(target-dot(center,axis))) as Vec3);
@@ -130,6 +136,11 @@ export function addTankConnections(assembly:Assembly,project:ProjectConfig):Asse
     const last=base.components.filter(c=>c.kind==="pump").at(-1);if(!last)return base;
     const asset=models.assets[`tank${volume}`],tank=make(`Мембранный бак WAV ${volume} · у последнего насоса`,asset.bounds as Bounds,
       binding(last.id,"floor","floor",[0,0,0],[0,0,0]),structuredClone(asset.ports) as Port[],`Исходная CAD-сетка Wester без масштабирования. Зазор между габаритами последнего насоса и бака 200 мм; опорная плоскость — верх рамы. Отличия габаритов CAD от паспорта требуют проверки. ${omitted}`);
+    const frameResult=(project.entities["station-spec"] as SpecEntity).frameCalculation;
+    if(frameResult?.variant&&frameResult.layout?.tank&&frameResult.variant.boundsMm){
+      tank.tankMount={...tank.tankMount!,revision:frameResult.version,frameAnchor:[0,frameResult.variant.boundsMm[4],frameResult.variant.lengthMm/2-frameResult.layout.tank.x]};
+      tank.sourceNote="Положение бака из расчёта рамы; зазор 40 мм проверен по исходным габаритам. CAD-привязка ножек требует проверки. "+omitted;
+    }
     tank.meshUrl=asset.meshUrl;tank.cadSource={path:asset.source,hash:asset.sourceHash};base.components.push(tank);
   }
   base.components=base.components.filter(c=>!(c.id.startsWith(`spec-${row.position}-equipment:${row.equipmentId}-`)&&!c.tankMount));

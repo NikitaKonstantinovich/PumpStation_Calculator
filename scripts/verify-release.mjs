@@ -1,5 +1,6 @@
 import { cp, readFile, readdir, rm, writeFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
+import { loadRuntimeModelAssets } from "./local-runtime-models.mjs";
 const profile = process.env.PSC_RELEASE_PROFILE ?? "beta";
 if (!["beta", "full"].includes(profile)) throw new Error("Unknown release profile");
 const config = JSON.parse(await readFile("dist/server/wrangler.json", "utf8"));
@@ -9,6 +10,8 @@ if (profile === "full") {
   for (const name of await readdir("public")) {
     if (name !== "model-assets") await cp(resolve("public",name),resolve("dist/client",name),{recursive:true});
   }
+  const runtimeModels = await loadRuntimeModelAssets();
+  await writeFile("dist/runtime-model-assets.json", JSON.stringify(runtimeModels, null, 2) + "\n");
 }
 if (profile === "beta") {
   // Full-only CAD copies can exceed the Worker static-asset limit. The beta

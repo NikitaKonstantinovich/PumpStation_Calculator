@@ -4,8 +4,8 @@ import type {Pump} from "./pump-catalog";
 import {componentFieldLabel,type ComponentItem,type ComponentPrice,type ComponentsDatabase} from "./component-database-types";
 import {isCalculated} from "./calculated-input";
 import {recommendedDn,defaultCollectorMaterial,resolveDnConnection,suctionHydraulics,dischargeHydraulics} from "./dn-defaults";
-import {buildSuctionSpec,replaceSuctionSpec,checkSuctionSpecPressure} from "./suction-spec";
-import {buildDischargeSpec,replaceDischargeSpec,checkDischargeSpecPressure} from "./discharge-spec";
+import {buildSuctionSpec,coreBuildSuctionSpec,replaceSuctionSpec,checkSuctionSpecPressure} from "./suction-spec";
+import {buildDischargeSpec,coreBuildDischargeSpec,replaceDischargeSpec,checkDischargeSpecPressure} from "./discharge-spec";
 import {normalizeSpecificationItems,specificationOption} from "./specification-items";
 import type {CollectorsEntity} from "./collector-project";
 import {bindProjectComponents} from "./base-values-components";
@@ -49,17 +49,34 @@ export const coreGetCircuitDnConfig=(entity:DnEntity,input:InputEntity,settings:
 const componentDn=(item:ComponentItem)=>{for(const field of item.fields){const label=componentFieldLabel(field),match=String(field.value??"").match(/(?:DN|Ду)\s*(\d+)/i);if(/^DN$|условн|диаметр/i.test(label)&&match)return Number(match[1]);}return null;};
 const componentText=(item:ComponentItem)=>`${item.family} ${item.fields.flatMap(field=>[...field.headerPath,String(field.value??"")]).join(" ")}`;
 const componentPns=(item:ComponentItem)=>[...componentText(item).matchAll(/PN\s*(10|16|25)(?:\s*\/\s*(10|16|25))?/gi)].flatMap(match=>[Number(match[1]),match[2]?Number(match[2]):null]).filter((value):value is number=>value!==null);
-const checkValvePns=(item:ComponentItem):ValvePn[]=>{
-  const explicit=componentPns(item) as ValvePn[];if(explicit.length)return explicit;
+const componentRatedPn=(item:ComponentItem)=>{
+  const raw=String(item.fields.find(field=>/^PN$/i.test(componentFieldLabel(field)))?.value??"");
+  const values=[...raw.matchAll(/\b(?:PN\s*)?(\d+(?:[.,]\d+)?)\b/gi)].map(match=>Number(match[1].replace(",",".")));
+  return values.length ? Math.max(...values) : undefined;
+};
+// The existing binding catalogue table is the LD Pride 47 female/female lever series.
+// Keep its source IDs and prices; the legacy family names omit the manufacturer.
+const isLdPride47Ball=(item:ComponentItem,dn:number)=>{
+  const article=item.fields.find(field=>componentFieldLabel(field)==="Артикул")?.value;
+  return article ? new RegExp(`^(?:LD Pride\\s+)?47\\.${dn}\\.[ВB]-[ВB]\\.[РP]$`,"i").test(String(article).trim())
+    : /^шаровые-краны-001-r019[3-8]$/.test(item.id)&&/латун/i.test(item.family)&&/ручка[\s—–-]*рычаг/i.test(item.family);
+};
+const isBrassCoreCheck=(item:ComponentItem)=>/латунн[а-яё]*\s+сердечник/i.test(item.family)&&!/фланц/i.test(item.family);
+const checkValvePns=(item:ComponentItem):number[]=>{
+  const rated=componentRatedPn(item);
+  if(rated!==undefined&&isBrassCoreCheck(item))return [rated];
+  const explicit=componentPns(item);if(explicit.length)return explicit;
   const text=componentText(item);
-  if(/латунн.*сердечник/i.test(text)||/010C\.Y.*красн/i.test(text))return [16];
+  // Original price table: AquaHit CV.720, nominal PN10 in the passport.
+  if(/^обратные-клапаны-004-r018[3-8]$/.test(item.id))return [10];
+  if(/010C\.Y.*красн/i.test(text))return [16];
   if(/\b(?:010C(?:\.Y)?|012F(?:\.[ZM])?)\b/i.test(text))return [10,16];
   return [];
 };
 const checkValveMaterial=(material:CollectorMaterial,connection:ValveConnection)=>connection==="threaded"?"Латунь":material==="aisi304"?"Нержавеющая сталь":"Чугун";
 const componentColor=(item:ComponentItem):"red"|"blue"|"neutral"=>/красн/i.test(componentText(item))?"red":/син/i.test(componentText(item))?"blue":"neutral";
 type ValveSelectionKind="butterfly"|"ball"|"check";
-type ValveSelection={item:ComponentItem;price:ComponentPrice|null;execution:string;material:string|null};
+type ValveSelection={item:ComponentItem;price:ComponentPrice|null;execution:string;material:string|null;rating?:number};
 export const coreSelectValveComponent=(items:ComponentItem[],kind:ValveSelectionKind,dn:number,connection:ValveConnection,pn:ValvePn,color:"red"|"blue",collectorMaterial:CollectorMaterial):ValveSelection|null=>{
   const catalogId=kind==="butterfly"?"затворы":kind==="ball"?"шаровые-краны":"обратные-клапаны";
   return rankValve(valvesByDn(items,catalogId,dn),kind,dn,connection,pn,color,collectorMaterial);
@@ -67,33 +84,50 @@ export const coreSelectValveComponent=(items:ComponentItem[],kind:ValveSelection
 export function coreValvesByDn(items:ComponentItem[],category:string,dn:number){return items.filter(item=>item.catalogId===category&&componentDn(item)===dn);}
 export const coreRankValve=(candidates:ComponentItem[],kind:ValveSelectionKind,dn:number,connection:ValveConnection,pn:ValvePn,color:"red"|"blue",collectorMaterial:CollectorMaterial):ValveSelection|null=>{
   if(kind==="ball"){
-    // Ball valves are always the brass lever-handle catalogue series. Colour
-    // and collector material do not apply; DN, PN and connection still do.
     if(connection!=="threaded")return null;
-    const ranked=candidates.filter(item=>/латун/i.test(item.family)&&/ручка[\s—–-]*рычаг/i.test(item.family))
-      .filter(item=>{const pns=componentPns(item);return !pns.length||pns.includes(pn);})
-      .map(item=>({item,price:item.prices.find(price=>Number.isFinite(price.amount)&&price.amount>0)??null}))
-      .filter(candidate=>candidate.price)
-      .sort((a,b)=>a.price!.amount-b.price!.amount||a.item.id.localeCompare(b.item.id));
+    const seriesRating=dn<=25?40:25;
+    const ranked=candidates.filter(item=>isLdPride47Ball(item,dn))
+      .flatMap(item=>{
+        const declared=componentPns(item);
+        const rating=Math.min(seriesRating,componentRatedPn(item)??(declared.length?Math.max(...declared):seriesRating));
+        const price=item.prices.find(price=>price.currency==="RUB"&&Number.isFinite(price.amount)&&price.amount>0);
+        return rating>=pn&&price?[{item,price,rating}]:[];
+      })
+      .sort((a,b)=>a.price.amount-b.price.amount||a.item.id.localeCompare(b.item.id));
     const best=ranked[0];
     return best?{...best,execution:"резьбовое · ручка-рычаг",material:"Латунь"}:null;
   }
-  candidates=candidates.filter(item=>connection==="threaded"?(kind==="check"&&/латун/i.test(componentText(item))):(kind==="butterfly"||kind==="check"&&/фланц/i.test(componentText(item))));
+  if(connection==="threaded"){
+    if(kind!=="check")return null;
+    const best=candidates.filter(isBrassCoreCheck).flatMap(item=>{
+      const rating=Math.max(...checkValvePns(item));
+      const price=item.prices.find(entry=>entry.currency==="RUB"&&/латун/i.test(entry.label)&&Number.isFinite(entry.amount)&&entry.amount>0);
+      return rating>=pn&&price?[{item,price,rating}]:[];
+    }).sort((a,b)=>a.rating-b.rating||a.price.amount-b.price.amount||a.item.id.localeCompare(b.item.id))[0];
+    return best?{...best,execution:"резьбовое ВР/ВР",material:"Латунь"}:null;
+  }
+  candidates=candidates.filter(item=>kind==="butterfly"||kind==="check"&&/фланц/i.test(componentText(item)));
   candidates=candidates.filter(item=>{const pns=kind==="check"?checkValvePns(item):componentPns(item);return !pns.length||pns.includes(pn);});
   const actuation=kind==="butterfly"?(dn<=150?/рукоятк/i:/редуктор/i):null;
   const material=kind==="check"?checkValveMaterial(collectorMaterial,connection):null;
   const ranked=candidates.map(item=>{const price=actuation?item.prices.find(entry=>actuation.test(entry.label))??null:material?item.prices.find(entry=>entry.label.toLocaleLowerCase("ru-RU").includes(material.toLocaleLowerCase("ru-RU")))??null:item.prices[0]??null,colorRank=color==="red"?(componentColor(item)==="red"?0:1):(componentColor(item)==="blue"?0:componentColor(item)==="neutral"?1:2),pnRank=(kind==="check"?checkValvePns(item):componentPns(item)).includes(pn)?0:1;return {item,price,colorRank,pnRank};}).filter(candidate=>(kind!=="butterfly"&&kind!=="check")||candidate.price).sort((a,b)=>a.colorRank-b.colorRank||a.pnRank-b.pnRank||(a.price?.amount??Number.MAX_VALUE)-(b.price?.amount??Number.MAX_VALUE));
   const best=ranked[0];if(!best)return null;
-  return {item:best.item,price:best.price,execution:kind==="butterfly"?(dn<=150?"с рукояткой":"с редуктором"):connection==="threaded"?"резьбовое":"фланцевое",material};
+  return {item:best.item,price:best.price,execution:kind==="butterfly"?(dn<=150?"с рукояткой":"с редуктором"):"фланцевое",material};
 };
 
 const HYDRAULIC_SPEC_OPTIONS:SpecOption[]=["primarySuctionValve","primaryDischargeValve","primaryCheckValve","secondarySuctionValve","secondaryDischargeValve","secondaryCheckValve"];
 export const valveSpecItem=(selection:ValveSelection|null,kind:ValveSelectionKind,circuit:CircuitDnConfig,dn:number,section:SpecSection,position:string,option:SpecOption,collectorMaterial:CollectorMaterial):SpecItem=>{
   if(kind==="ball")return {
-    position,name:selection?.item.family??"Кран шаровой латунный · ручка-рычаг",
-    details:`DN${dn} · PN${circuit.pn} · ${circuit.connection==="threaded"?"Резьбовое до 2″":"Требуется фланцевое соединение"} · Материал: Латунь · Ручка-рычаг`,
-    quantity:circuit.totalPumpCount,unit:"шт.",price:selection?.price?.amount??null,equipmentId:selection?.item.id,
-    description:selection?`${circuit.title} · латунный кран с ручкой-рычагом; цвет и материал коллектора не учитываются`:`${circuit.title} · латунный кран с ручкой-рычагом по DN, PN и соединению не найден в базе`,
+    position,name:selection?`Кран шаровой LD Pride 47.${dn}.В-В.Р`:`Кран шаровой LD Pride 47 · ВР/ВР`,
+    details:`DN${dn} · PN${circuit.pn} · ${circuit.connection==="threaded"?"Резьбовое ВР/ВР":"Требуется фланцевое соединение"} · Материал: Латунь · Ручка-рычаг`,
+    quantity:circuit.totalPumpCount,unit:"шт.",price:selection?.price?.amount??null,equipmentId:selection?.item.id,selectedPn:selection?.rating,
+    description:selection?`${circuit.title} · LD Pride 47, латунный кран с ручкой-рычагом`:`${circuit.title} · LD Pride 47 ВР/ВР с ручкой-рычагом по DN, PN и соединению не найден в базе`,
+    section,option,technicalStatus:selection?"ready":"unverified",status:selection?.price?"selected":"clarify",
+  };
+  if(kind==="check"&&circuit.connection==="threaded")return {
+    position,name:selection?.item.family??"Обратный клапан с латунным сердечником",
+    details:`DN${dn} · PN${circuit.pn} · Резьбовое ВР/ВР`,quantity:circuit.totalPumpCount,unit:"шт.",price:selection?.price?.amount??null,equipmentId:selection?.item.id,selectedPn:selection?.rating,
+    description:selection?`${circuit.title} · резьбовой обратный клапан с латунным сердечником`:`${circuit.title} · обратный клапан с латунным сердечником по DN и PN не найден в базе`,
     section,option,technicalStatus:selection?"ready":"unverified",status:selection?.price?"selected":"clarify",
   };
   const connectionLabel=circuit.connection==="threaded"?"Резьбовое до 2″":"Фланцевое",colorLabel=selection&&componentColor(selection.item)!==circuit.color?`Подобрано совместимое исполнение другого цвета`:(circuit.color==="red"?"Красное исполнение":"Синее исполнение в приоритете"),typeLabel=kind==="butterfly"?"Затвор дисковый":"Клапан обратный",execution=kind==="butterfly"?(dn<=150?"рукоятка":"редуктор"):circuit.connection==="threaded"?"резьбовой":"фланцевый";
@@ -112,7 +146,7 @@ export const coreBuildValveSpecItems=(database:ComponentsDatabase,entity:DnEntit
   });
 };
 
-export function coreRefreshSuctionSpecification(project:ProjectConfig,database?:ComponentsDatabase,force=false,pumps?:readonly Pump[]|null):ProjectConfig {
+export function coreRefreshSuctionSpecification(project:ProjectConfig,database?:ComponentsDatabase,force=false,pumps?:readonly Pump[]|null,automaticInsertions=false):ProjectConfig {
   if(database)database=bindProjectComponents(project,database);
   const spec=project.entities["station-spec"] as SpecEntity;
   const primary=project.entities["system-input"] as InputEntity;
@@ -128,8 +162,14 @@ export function coreRefreshSuctionSpecification(project:ProjectConfig,database?:
   const dn=project.entities["station-dn"] as DnEntity,settings=project.entities["station-settings"] as SettingsEntity,secondary=project.entities["system-input-2"] as InputEntity;
   const valves=buildValveSpecItems(database,dn,primary,secondary,settings,(project.entities["station-collectors"] as CollectorsEntity).discharge.configuration?.material,pumps);
   const base=spec.items.filter(item=>!HYDRAULIC_SPEC_OPTIONS.includes(specificationOption(item) as SpecOption));
-  const suction=replaceSuctionSpec(base,buildSuctionSpec(project,database,database.collectorCatalog,valves,pumps));
-  const discharge=replaceDischargeSpec(suction,buildDischargeSpec(project,database,database.collectorCatalog,valves,pumps));
+  const suctionRows = automaticInsertions
+    ? coreBuildSuctionSpec(project,database,database.collectorCatalog,valves,pumps,true)
+    : buildSuctionSpec(project,database,database.collectorCatalog,valves,pumps);
+  const dischargeRows = automaticInsertions
+    ? coreBuildDischargeSpec(project,database,database.collectorCatalog,valves,pumps,true)
+    : buildDischargeSpec(project,database,database.collectorCatalog,valves,pumps);
+  const suction=replaceSuctionSpec(base,suctionRows);
+  const discharge=replaceDischargeSpec(suction,dischargeRows);
   const items=checkDischargeSpecPressure(project,checkSuctionSpecPressure(project,normalizeSpecificationItems([...discharge,...valves]),database,database.collectorCatalog,pumps),database,database.collectorCatalog,pumps);
   // A current selection fingerprint does not guarantee current catalogue prices.
   if(spec.autoHydraulics&&JSON.stringify(items)===JSON.stringify(spec.items))return project;

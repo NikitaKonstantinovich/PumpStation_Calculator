@@ -104,15 +104,31 @@ function CandidateTable({ view: v, disabled, showOrigin, change }: { view: View;
   const group = useId(), b = v.binding, state = v.selection;
   if (!b || !state) return <p role="alert">Подключите результаты подбора и параметр выбранного насоса</p>;
   const blocked = disabled || !b.editable || !b.active;
+  const columns = v.columnsSpec ?? [];
+  const diagnosticColumn = columns.find(column => column.key === "pointIssue") ?? columns.find(column => column.key === "model") ?? columns[0];
   return <section className="nt-candidates" aria-label={v.label || "Результаты подбора"} data-parameter={b.key}>
     <header><h3>{v.label || "Результаты подбора"}</h3><small>Показано {v.rows?.length ?? 0} из {v.total ?? v.rows?.length ?? 0}</small></header>
     <p role="status" className={state.stale ? "nt-selection-stale" : "nt-selection-status"}>{state.message}{state.stale && state.variantId ? " · " + state.variantId : ""}</p>
     {b.value != null && <button type="button" disabled={blocked} onClick={() => change(b.key, null)}>Сбросить выбор</button>}
     {v.hint && <p>{v.hint}</p>}
-    {!!v.rows?.length && <div className="nt-candidate-scroll"><table><thead><tr><th scope="col">Выбор</th>{v.columnsSpec?.map(column => <th scope="col" key={column.key}>{column.label}{column.unit && <small>{column.unit}</small>}</th>)}</tr></thead><tbody>{v.rows.map(row => <tr key={String(row.variantId)} className={state.variantId === row.variantId ? state.stale ? "nt-candidate-stale" : "nt-candidate-selected" : ""}>
-      <td><input type="radio" name={group} aria-label={"Выбрать " + String(row.execution || row.model || row.variantId) + " · " + row.variantId} checked={state.valid && state.variantId === row.variantId} disabled={blocked || row.selectable !== true} onChange={() => change(b.key, { variantId: row.variantId, snapshotId: state.snapshotId, requestKey: state.requestKey })}/>{row.selectable !== true && <small>{String(row.pointIssue || "Нет подтверждённой рабочей точки")}</small>}</td>
-      {v.columnsSpec?.map(column => <td key={column.key}>{cellValue(row[column.key])}</td>)}
-    </tr>)}</tbody></table></div>}
+    {!!v.rows?.length && <div className="nt-candidate-scroll"><table>
+      <thead><tr><th scope="col" className="nt-candidate-choice">Выбор</th>{columns.map(column => <th scope="col" key={column.key} data-column={column.key}>{column.label}{column.unit && <small>{column.unit}</small>}</th>)}</tr></thead>
+      <tbody>{v.rows.map(row => {
+        const issue = row.selectable !== true ? String(row.pointIssue || "Нет подтверждённой рабочей точки") : undefined;
+        const issueId = issue && diagnosticColumn ? `${group}-issue-${row.variantId}` : undefined;
+        return <tr key={String(row.variantId)} className={state.variantId === row.variantId ? state.stale ? "nt-candidate-stale" : "nt-candidate-selected" : ""}>
+          <td className="nt-candidate-choice"><input type="radio" name={group} aria-label={"Выбрать " + String(row.execution || row.model || row.variantId) + " · " + row.variantId} aria-describedby={issueId} checked={state.valid && state.variantId === row.variantId} disabled={blocked || row.selectable !== true} onChange={() => change(b.key, { variantId: row.variantId, snapshotId: state.snapshotId, requestKey: state.requestKey })}/></td>
+          {columns.map(column => {
+            const displayedIssue = column === diagnosticColumn ? issue : undefined;
+            if (column.key === "pointIssue") return <td key={column.key}><div className="nt-candidate-issue" id={displayedIssue ? issueId : undefined}>{displayedIssue ?? cellValue(row.pointIssue)}</div></td>;
+            return <td key={column.key} data-column={column.key}>
+              {cellValue(row[column.key])}
+              {displayedIssue && <small className="nt-candidate-issue" id={issueId}>{displayedIssue}</small>}
+            </td>;
+          })}
+        </tr>;
+      })}</tbody>
+    </table></div>}
     {showOrigin && <small className="nt-origin">{b.origin}</small>}
   </section>;
 }

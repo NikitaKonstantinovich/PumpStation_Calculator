@@ -56,6 +56,25 @@ test("selection proof is scoped to effective conditions, catalogue and algorithm
   assert.equal(validatePumpSelection(data, proof).valid, true);
 });
 
+test("only explicitly non-round flanges exclude otherwise selectable executions", () => {
+  const oval = item("cdm-y", { manufacturer: "CNP", series: "CDM", execution: "CDM1-2YSWPC",
+    inlet: { connection_type: "oval_flange", connection_code: "Y", thread_designation: "G1" } });
+  const ovalOutlet = item("oval-outlet", { outlet: { connection_type: "flanged", shape: "oval" } });
+  const round = item("cdm-f", { manufacturer: "CNP", series: "CDM", execution: "CDM1-2FSWPC", inlet: { connection_type: "flanged", connection_code: "F" } });
+  const thread = item("threaded", { inlet: { connection_type: "threaded", connection_designation: "G1" } });
+  const unknown = item("legacy-unknown");
+  const ctx = { ...context, resources: { pump_catalog_v2: { ...snapshot, items: [oval, ovalOutlet, round, thread, unknown] } } };
+  const data = pipeline(ctx);
+  assert.deepEqual(data.rows.map(row => row.variantId).sort(), ["cdm-f", "legacy-unknown", "threaded"]);
+  const proof = { variantId: oval.variantId, snapshotId: data.snapshotId, requestKey: data.requestKey };
+  const selected = run("pump.select", { candidates: data, binding: binding(proof) }, ctx);
+  assert.equal(selected.value, null);
+  assert.equal(selected.selection.valid, false);
+  assert.equal(selected.selection.stale, true);
+  assert.equal(selected.selection.variantId, oval.variantId);
+  assert.match(selected.selection.message, /стандартные круглые фланцы/);
+});
+
 test("request extraction respects chosen contour and explicit static head; invalid conditions stay diagnostic", () => {
   const settings = { main: request, secondary: { ...request, flowRate: 5 }, inletHead: 17 };
   assert.equal(run("pump.request", { settings }).value.staticHead, 0);

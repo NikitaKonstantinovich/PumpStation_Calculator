@@ -10,3 +10,11 @@ export function collectorInstrumentDimensions(item: BindingCatalog["items"][numb
     && item.fields.every(f => !/^(?:Наружный )?Диаметр, мм$/i.test(f.headerPath.at(-1) ?? "") || Number(f.value) === row.outerDiameterMm)
     && item.fields.every(f => !/^Толщина(?: 1)?, мм$/i.test(f.headerPath.at(-1) ?? "") || Number(f.value) === row.wallThicknessMm));
 }
+
+/** Nominal layout only, including a calculated BOM row without a selected article. */
+export function steelCollectorNippleLayout(dn: number, componentId: string | null, outerDiameter?: number) {
+  const { sizes, wallThicknessMm, source } = reference.st20CollectorLayout;
+  const size = sizes.find(row => row.dn === dn && (componentId === null || row.componentId === componentId));
+  if (!size || (outerDiameter !== undefined && outerDiameter !== size.outerDiameterMm && outerDiameter !== size.legacyOuterDiameterMm)) return;
+  return { outerDiameterMm: size.outerDiameterMm, wallThicknessMm, source };
+}

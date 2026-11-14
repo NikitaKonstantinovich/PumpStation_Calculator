@@ -2,7 +2,7 @@ import type { BindingCatalog } from "./collector-catalog";
 
 type Item = Pick<BindingCatalog["items"][number], "id" | "catalogId" | "family" | "fields"> & Partial<Pick<BindingCatalog["items"][number], "tableId" | "sourceRow">>;
 export type FlangeDimensions = Partial<Record<"thicknessMm" | "boreDiameterMm" | "radialChamferMm" | "pipeOuterDiameterMm" | "outerDiameterMm" | "boltCircleMm" | "boltHoleDiameterMm" | "holes" | "faceHeightMm" | "faceDiameterMm", number>>;
-export type FlangeDimensionReference = { sourceSha256: string; rows: Array<{ componentId: string; tableId: string; family: string; name: string; dn: number; pn: number; standard?: string; materialAcceptance?: { materials: string; source: string }; dimensions: FlangeDimensions; source: string; reason: string }> };
+export type FlangeDimensionReference = { sourceSha256: string; rows: Array<{ componentId: string; tableId: string; family: string; name: string; dn: number; pn: number; standard?: string; materialAcceptance?: { materials: string; source: string }; dimensions: FlangeDimensions; source: string; reason: string; geometrySource?: string }> };
 export const FLANGE_FIELDS = {
   thicknessMm: ["CALC_FLANGE_B", "Толщина фланца, мм"],
   boreDiameterMm: ["CALC_FLANGE_BORE", "Посадочный диаметр фланца, мм"],
@@ -26,6 +26,7 @@ const value = (item: Item, label: string) => item.fields.find(field => field.hea
 const number = (value: unknown) => Number(String(value ?? "").replace(/^(?:DN|PN)\s*/i, "").replace(",", "."));
 const positive = (value: unknown): value is number => typeof value === "number" && Number.isFinite(value) && value > 0;
 const validDimension = (key: string, value: unknown): value is number => positive(value) || ((key === "faceHeightMm" || key === "faceDiameterMm") && value === 0);
+const profileKeys = ["outerDiameterMm", "boltCircleMm", "boltHoleDiameterMm", "holes", "faceHeightMm", "faceDiameterMm"] as const;
 
 export function catalogPressures(items: Item[]) {
   const result = new Map<string, number>(), tables = new Map<string, number>();
@@ -77,7 +78,18 @@ export function readFlangeDimensions(item: Item, pn: number | null, reference: F
     dimensions[key] = numeric;
   }
   if (!dimensions.thicknessMm) warnings.push(row?.reason ?? `Нет проверенной толщины фланца ${item.id}`);
-  return { dimensions, standard: row?.standard ?? null, source: row && item.fields.some(field => field.column === FLANGE_SOURCE) ? row.source : source, warnings };
+  // Older databases contain only b / bore / chamfer. Complete their drawing from
+  // the verified reference for this exact source row, never from DN alone. Do
+  // not resurrect an invalid managed field or override an explicit user size.
+  const supplement = row?.geometrySource && warnings.length === 0 &&
+    (["thicknessMm", "boreDiameterMm", "radialChamferMm"] as const).every(key => dimensions[key] === row.dimensions[key]) &&
+    profileKeys.every(key => {
+      const [column, label] = FLANGE_FIELDS[key];
+      return !item.fields.some(field => field.column === column || field.headerPath.at(-1) === label) || dimensions[key] === row.dimensions[key];
+    });
+  if (supplement) for (const key of profileKeys) dimensions[key] ??= row.dimensions[key];
+  const provenance = row && item.fields.some(field => field.column === FLANGE_SOURCE) ? row.source : source;
+  return { dimensions, standard: row?.standard ?? null, source: supplement ? `${provenance}; ${row.geometrySource}` : provenance, warnings };
 }
 
 export function mergeFlangeDimensions(input: BindingCatalog, reference: FlangeDimensionReference): BindingCatalog {

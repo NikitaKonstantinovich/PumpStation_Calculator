@@ -1,12 +1,18 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { artifactUrl, useCadBuild } from "./cad-build-state";
 import type { CadFormat } from "./cad-export";
 import "./cad-export.css";
 
-export function CadExportMenu() {
+export function CadExportMenu({ compact = false }: { compact?: boolean }) {
   const cad = useCadBuild();
   const [open, setOpen] = useState(false);
+  useEffect(() => {
+    if(!open)return;
+    const close = (event: KeyboardEvent) => { if(event.key === "Escape")setOpen(false); };
+    window.addEventListener("keydown",close);
+    return () => window.removeEventListener("keydown",close);
+  },[open]);
   const job = cad.job;
   const building = job?.status === "building" || job?.status === "queued";
   const canSave = cad.ready && !cad.busy;
@@ -15,23 +21,23 @@ export function CadExportMenu() {
     const label = <>{name} <small>{detail}</small></>;
     return job?.artifacts?.[format] === "ready"
       ? <a className="cad-export__file" href={artifactUrl(job, format)} download>{label}</a>
-      : <button className="cad-export__file" onClick={() => { setOpen(false); void cad.save(format); }}>{label}</button>;
+      : <button type="button" className="cad-export__file" onClick={() => { setOpen(false); void cad.save(format); }}>{label}</button>;
   };
-  return <div className="cad-export">
+  return <div className={`cad-export${compact ? " cad-export--compact" : ""}`} role="group" aria-label="Сборка и экспорт SOLIDWORKS">
     <button className="cad-export__action" type="button" disabled={!cad.canBuild} aria-busy={building}
       title={building ? "Сервер уже собирает этот проект" : "Собрать текущую компоновку"}
       onClick={() => { setOpen(false); void cad.build(); }}>{building ? "Идёт сборка в SOLIDWORKS…" : "Собрать в SOLIDWORKS"}</button>
     <div className="cad-export__menu" onBlur={e => { if (!e.currentTarget.contains(e.relatedTarget as Node | null)) setOpen(false); }}>
       <button className="cad-export__action" type="button" disabled={!canSave} aria-expanded={canSave && open} title={saveHint}
-        onClick={() => setOpen(!open)}>Сохранить 3D ⌄</button>
-      {canSave && open && <div className="cad-export__options">
+        onClick={() => setOpen(!open)}>{compact ? "Экспорт сборки" : "Сохранить 3D"} ⌄</button>
+      {canSave && open && <div className="cad-export__options" role="group" aria-label="Форматы экспорта сборки">
         {fileOption("solidworks", "Проект SOLIDWORKS", "ZIP · сборка и детали")}
         {fileOption("edrawings", "Сборка eDrawings", "EASM")}
         {fileOption("edrawings-exe", "Автономный eDrawings", "EXE · Windows x64, со встроенным просмотрщиком")}
         {job && <a href={artifactUrl(job, "report")} download>Скачать отчёт о составе</a>}
       </div>}
     </div>
-    <div className="cad-export__status" role="status">{cad.error || job?.error || job?.exportError || cad.stage}
+    <div className="cad-export__status" role="status" title={cad.error || job?.error || job?.exportError || cad.stage}>{cad.error || job?.error || job?.exportError || cad.stage}
       {building && <small>Повторный запуск заблокирован. Сохранение откроется после сборки.</small>}
       {job?.status === "failed" && !cad.error && <small>Исправьте причину ошибки и нажмите «Собрать в SOLIDWORKS» повторно.</small>}
       {job?.status === "partial" && !cad.stale && <p>Сборка неполная. Не включено элементов: {job.omissions?.length}. Подробнее — в предупреждениях SOLIDWORKS</p>}

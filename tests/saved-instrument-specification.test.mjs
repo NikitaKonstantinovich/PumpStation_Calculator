@@ -15,7 +15,7 @@ const converter=p=>rows(p).find(r=>r.assemblyRole==="discharge:transducer");
 const kip=r=>r.option==="pressureTransducer"||r.hydraulicPart?.option==="pressureTransducer"||/^(primary|secondary)-sensor-relay$/.test(r.assemblyRole??"")||/резьбовые-фитинги-00[23]-r02(?:25|35)/.test(r.equipmentId??"");
 function brokenSnapshot(){
   const p=fixture();Object.assign(p.entities["station-settings"],{stationType:"combined",pressureChecksEnabled:false});
-  choose(p,"nu-34f0554f7dc091e4",3,1);choose(p,"nu-34f0554f7dc091e4",2,1,true);
+  choose(p,"318",3,1);choose(p,"318",2,1,true);
   const selected=sync(p);
   for(const side of ["suction","discharge"]){const c=selected.entities["station-collectors"][side];c.calculation=calculateCollector(c.configuration,resources.components.collectorCatalog);}
   for(const row of rows(selected).filter(kip)){
@@ -43,7 +43,7 @@ test("opened frozen snapshot repairs priced KIP and relays without recalculating
   const opened=parseProjectConfig(JSON.parse(JSON.stringify(next)),true);assert.strictEqual(repair(opened,data),opened);
 });
 
-test("snapshot repair obeys calculated pressure or maximum pump head and preserves saved fitting prices",()=>{
+test("snapshot repair uses calculated pressure or the confirmed curve peak and preserves saved fitting prices",()=>{
   const p=brokenSnapshot();p.entities["station-settings"].pressureChecksEnabled=true;
   p.entities["system-input"].head=160;p.entities["system-input-2"].head=120;p.entities["station-settings"].inletHead=10;
   const adapter=rows(p).find(r=>r.hydraulicPart?.role==="резьбовые-фитинги-003-r0235");adapter.price=72.5;

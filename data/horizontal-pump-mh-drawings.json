@@ -1,0 +1,13 @@
+{
+  "source": {"url": "https://onis.ru/files/catalogs/%D0%9A%D0%B0%D1%82%D0%B0%D0%BB%D0%BE%D0%B3%20ONIS%20MH.pdf", "sha256": "b331add44359163ec64f45854f7f8ebbbcfc4ea73e37211ce056a9f2afc7b350"},
+  "variants": {
+    "HM:ONIS:MH:3523acc7cf04d134:112037": {"page": 14, "boundsMm": [0, null, -100, 377, null, 118], "outletMm": [93, 0, 118]},
+    "HM:ONIS:MH:f60d11d9cb358373:112039": {"page": 14, "boundsMm": [0, null, -100, 407, null, 126], "outletMm": [93, 0, 118]},
+    "HM:ONIS:MH:aebf2b7db2ea4812:112040": {"page": 14, "boundsMm": [0, null, -100, 483, null, 139], "outletMm": [138, 0, 118]},
+    "HM:ONIS:MH:641fe824bd18f7b7:112041": {"page": 14, "boundsMm": [0, null, -112, 572, null, 149], "outletMm": [298, 0, 118]},
+    "HM:ONIS:MH:1077dceb192fc831:112043": {"page": 14, "boundsMm": [0, null, -100, 407, null, 126], "outletMm": [93, 0, 118]},
+    "HM:ONIS:MH:ab6ab05dbd7ac7d6:112044": {"page": 14, "boundsMm": [0, null, -100, 438, null, 126], "outletMm": [93, 0, 118]},
+    "HM:ONIS:MH:94cb732a01f75a9c:112045": {"page": 14, "boundsMm": [0, null, -112, 527, null, 149], "outletMm": [138, 0, 118]},
+    "HM:ONIS:MH:051e79348800e481:112046": {"page": 14, "boundsMm": [0, null, -112, 572, null, 149], "outletMm": [298, 0, 118]}
+  }
+}

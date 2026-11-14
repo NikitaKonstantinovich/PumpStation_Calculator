@@ -16,6 +16,7 @@ const dn = (item: Database["items"][number]) => Number(String(field(item, "DN") 
 export function jointFlangeThickness(database: Database, material: "st20" | "aisi304", size: number, pn: number, collarComponentId?: string, weldFlangeComponentId?: string, looseFlangeComponentId?: string, useStampedSeat = false) {
   const pressures = catalogPressures(database.items), kinds = weldFlangeComponentId ? ["weldFlange" as const] : flangeKinds(material, size, pn);
   const sources: string[] = [], warnings: string[] = [], dimensions: Array<{ name: string; value: number; unit: "мм"; source: string }> = [];
+  const partThicknesses = new Map<string, number>();
   const adoptedHoleCounts: number[] = [];
   let oneSide = 0, found = false;
   const necks: Array<{ neck: number; lip: number }> = [];
@@ -27,6 +28,7 @@ export function jointFlangeThickness(database: Database, material: "st20" | "ais
       && (material === "aisi304" ? /AISI\s*304/i : /(?:сталь|ст[.\s]*)\s*20/i).test(item.family)
       && (kind === "collar" ? item.catalogId === "воротники" : item.catalogId === "фланцы" && (kind === "looseFlange" ? /свободн/i : /плоск/i).test(item.family)));
     if (kind === "weldFlange" && !weldFlangeComponentId) {
+      items = items.filter(item => field(item, "Назначение") !== "Фланец вставки" && !item.id.startsWith("st20-ready-bore:"));
       const pipeDiameters = new Set(database.items.filter(item => item.catalogId === "трубы" && dn(item) === size && pressures.get(item.id) === pn
         && (material === "aisi304" ? /AISI\s*304/i : /(?:сталь|ст[.\s]*)\s*20/i).test(item.family))
         .map(item => Number(String(field(item, "Диаметр, мм") ?? field(item, "Наружный диаметр, мм") ?? "").replace(",", "."))).filter(d => Number.isFinite(d) && d > 0));
@@ -51,12 +53,16 @@ export function jointFlangeThickness(database: Database, material: "st20" | "ais
         const policy = collarLipThickness(item, database.source?.sha256 ?? collars.sourceSha256, collars);
         const lip = Number(field(item, "Толщина борта, мм"));
         if (!policy || lip !== policy.valueMm) warnings.push(`Не подтверждена толщина борта воротника ${item.id} в крепёжном пакете`);
-        else { values.push(lip); sources.push(`${item.id}: ${policy.source}`); dimensions.push({ name: `Борт воротника ${item.id} (одна сторона)`, value: lip, unit: "мм", source: policy.source }); }
+        else {
+          partThicknesses.set(item.id, lip);
+          values.push(lip); sources.push(`${item.id}: ${policy.source}`); dimensions.push({ name: `Борт воротника ${item.id} (одна сторона)`, value: lip, unit: "мм", source: policy.source });
+        }
       } else {
         const result = readFlangeDimensions(item, pressures.get(item.id) ?? pn, flanges, database.source?.sha256);
         warnings.push(...result.warnings);
         if (result.standard && result.dimensions.holes) adoptedHoleCounts.push(result.dimensions.holes);
         const d = result.dimensions;
+        if (d.thicknessMm) partThicknesses.set(item.id, d.thicknessMm);
         let thickness = d.thicknessMm, source = result.source;
         if (useStampedSeat && kind === "looseFlange" && !result.warnings.length) {
           const ring = stampedShape(item.id, { kind: "flange", lengthMm: thickness, innerMm: d.boreDiameterMm, outerMm: d.outerDiameterMm, boltCircleMm: d.boltCircleMm, boltHoleMm: d.boltHoleDiameterMm, boltHoles: d.holes, faceHeightMm: d.faceHeightMm, faceDiameterMm: d.faceDiameterMm }, true);
@@ -78,5 +84,5 @@ export function jointFlangeThickness(database: Database, material: "st20" | "ais
   }
   const holeCounts = new Set(adoptedHoleCounts);
   if (holeCounts.size > 1) warnings.push(`Несколько вариантов сверловки фланцев DN${size} PN${pn}; требуется определённое исполнение`);
-  return { found, thicknessMm: Number.isFinite(oneSide) && oneSide > 0 ? 2 * oneSide : null, holes: holeCounts.size === 1 ? adoptedHoleCounts[0] : null, source: [...sources, `Проверка таблицы фланцев: ${flanges.verifiedAt}; исходные данные воротников: ${collars.providedAt}`].join("; "), warnings: [...new Set(warnings)], dimensions };
+  return { found, thicknessMm: Number.isFinite(oneSide) && oneSide > 0 ? 2 * oneSide : null, holes: holeCounts.size === 1 ? adoptedHoleCounts[0] : null, source: [...sources, `Проверка таблицы фланцев: ${flanges.verifiedAt}; исходные данные воротников: ${collars.providedAt}`].join("; "), warnings: [...new Set(warnings)], dimensions, partThicknesses };
 }

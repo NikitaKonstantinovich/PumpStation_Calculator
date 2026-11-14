@@ -1,6 +1,6 @@
 import type { Step } from "../engineering/engine";
 import { withEvaluationProgram } from "../engineering/runtime";
-import { coreInterpolateCurve, coreOperatingPoint, coreUsablePump } from "../pump-catalog";
+import { coreInterpolateCurve, coreOperatingPoint, coreUsablePump, pumpHasNonRoundFlange, PUMP_ROUND_FLANGE_REQUIRED } from "../pump-catalog";
 import { curveMaxHead, curveSegments, type CurveMethod } from "../curve-methods";
 import { coreFrequencyAdjustedPump, defaultPumpFrequencySettings, pumpFrequencyState, type PumpFrequencySettings } from "../pump-frequency";
 import { chartAxisScale, defaultChartGridSettings, type ChartGridSettings } from "../pump-chart-grid";
@@ -46,6 +46,7 @@ function chartModel(v: Values, context: ToolContext): HydraulicChartModel {
   const resource = context.resources?.pump_catalog_v2, actual = resource?.items.find(row => row.variantId === item.variantId);
   if (item.variantId !== item.pump.id || state.variantId !== item.variantId || state.modelId !== item.modelId || state.curveSetId !== item.curveSetId || resource && (resource.id !== state.snapshotId || !actual || actual.modelId !== item.modelId || actual.curveSetId !== item.curveSetId || actual.frequencyHz !== item.frequencyHz || JSON.stringify(actual.pump) !== JSON.stringify(item.pump))) return empty("Исполнение или снимок каталога не соответствует подтверждённому выбору. Выберите насос заново.", method);
   if (!finite(request.flowRate) || request.flowRate <= 0 || !finite(request.head) || request.head <= 0 || !finite(request.staticHead) || request.staticHead < 0 || request.staticHead > request.head || !finite(request.workingPumpCount) || !Number.isInteger(request.workingPumpCount) || request.workingPumpCount < 1 || request.workingPumpCount > MAX_WORKING_PUMPS || !["water", "wastewater"].includes(String(request.medium))) return empty("Подключите корректные условия расчёта из подбора насосов", method);
+  if (pumpHasNonRoundFlange(item.pump)) return empty(PUMP_ROUND_FLANGE_REQUIRED, method);
   if (!pure(() => coreUsablePump(item.pump, request.medium as "water" | "wastewater"))) return empty("Для выбранного исполнения нет подтверждённой рабочей характеристики", method);
   if (state.request && !samePumpRequest(state.request, request as PumpSelectionInput)) return empty("Условия графика отличаются от подтверждённого подбора", method);
   const settings = frequencySettings(v.frequency, item.variantId), frequency = pumpFrequencyState(item.pump, settings);

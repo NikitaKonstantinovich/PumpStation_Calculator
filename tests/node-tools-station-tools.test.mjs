@@ -174,6 +174,31 @@ test("specification options write the exact upstream DN parameter and update col
   assert.deepEqual(specification.value.project.entities["station-settings"].hydraulicOptions,options);
 });
 
+test("the station algorithm upgrade compiles automatic insertions and removes the specification DN editor binding", async () => {
+  const { enableAutomaticStationInsertions } = await loadTs(new URL("node-tools/specification-upgrade.ts", base));
+  const { dn, collectors, spec, program: priorProgram } = chain();
+  const original = structuredClone(spec.document);
+  const upgraded = enableAutomaticStationInsertions(spec.document);
+  assert.deepEqual(spec.document, original);
+  assert.deepEqual(enableAutomaticStationInsertions(upgraded), upgraded);
+
+  for (const id of [dn.diagram, collectors.diagram]) {
+    assert.deepEqual(upgraded.diagrams.find(graph => graph.id === id), original.diagrams.find(graph => graph.id === id));
+  }
+  const specification = upgraded.diagrams.find(graph => graph.id === spec.diagram);
+  assert.equal(specification.nodes.find(node => node.id === "lines").type, "spec.linesAutomatic");
+  assert(!specification.edges.some(edge => edge.to === "panel" && edge.input === "dnBinding"));
+
+  const program = compileTools(upgraded, "station-automatic-insertions"), context = selectedContexts(program);
+  const view = findView(evaluateProduct(program, spec.id, context).view, "specification");
+  assert.equal(view.specificationBindings.dn, undefined);
+  assert.equal(view.specificationBindings.hydraulic.toolId, dn.id);
+  assert.equal(view.specificationBindings.manual.toolId, spec.id);
+  assert.equal(findView(evaluateProduct(program, dn.id, context).view, "dn-calculator").binding.key, "dnOverrides");
+  const prior = findView(evaluateProduct(priorProgram, spec.id, selectedContexts(priorProgram)).view, "specification");
+  assert.equal(prior.specificationBindings.dn.key, "dnOverrides");
+});
+
 test("server rejects forged saved DN overrides for base role",async()=>{
   const {engineeringStore}=await import("./fixtures/engineering-store.mjs");
   const store=await engineeringStore({catalogService:{fetch:async()=>Response.json(snapshot)}});
@@ -193,4 +218,21 @@ test("server rejects forged saved DN overrides for base role",async()=>{
     const forged=structuredClone(data);forged.tools[added.id].values.dnOverrides={...defaultDnOverrides(),pn:25};
     await assert.rejects(()=>storage.verifyWorkspace(forged,data,"base"),error=>error.status===403&&/Редактирование параметра недоступно/.test(error.message));
   }finally{store.close();}
+});
+
+
+test("hidden frame Instrument evaluates in the specification dependency chain without a product cycle", async () => {
+  const { addFrameCalculation } = await loadTs(new URL("node-tools/frame-upgrade.ts",base));
+  const {spec} = chain(), before = JSON.stringify(spec.document);
+  const added = addFrameCalculation(spec.document,spec.id);
+  assert.equal(JSON.stringify(spec.document),before);
+  assert.equal(addFrameCalculation(added.document,spec.id).id,added.id);
+  const program = compileTools(added.document,"hidden-frame-v1");
+  const hidden = program.tools.find(t=>t.id===added.id);
+  assert.equal(hidden.enabled,true); assert.equal(hidden.workspaceVisible,false);
+  const result = evaluateProduct(program,spec.id,selectedContexts(program));
+  assert(result.value?.project, JSON.stringify(result.issues));
+  assert.equal(result.value.project.entities["station-spec"].frameCalculation.status,"incomplete");
+  assert(Object.keys(result.trace).some(k=>k.startsWith(added.id+"/")&&k.endsWith("stage7")));
+  assert(result.value.project.entities["station-spec"].items.some(i=>i.option==="primaryPump"));
 });

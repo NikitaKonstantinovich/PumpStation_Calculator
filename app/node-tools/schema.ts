@@ -7,6 +7,7 @@ export type Diagnostic = {
   node: string;
   message: string;
   severity: "error" | "warning";
+  code?: "calculation-input";
 };
 export const diagnosticKey = (issue: Diagnostic) => JSON.stringify([issue.node, issue.key, issue.severity, issue.message]);
 export type ParameterBinding = {
@@ -78,6 +79,7 @@ export type ToolDefinition = {
   diagram: string;
   order?:number;
   enabled?:boolean;
+  workspaceVisible?:boolean;
   tests: ToolTest[];
 };
 export type ToolDocument = Document & {

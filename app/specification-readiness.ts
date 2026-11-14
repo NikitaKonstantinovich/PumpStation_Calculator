@@ -6,6 +6,7 @@ import { visibleSpecificationItems } from "./specification-presentation";
 import { pressureCheckWarning } from "./dn-defaults";
 import { secondaryStationEnabled, specificationSourceFingerprint, validStationInput } from "./station-specification";
 import { installedInsertionPrice } from "./calculated-insertion";
+import { pressureChecksEnabled, withoutPressureChecks } from "./pressure-check-policy";
 
 export type SpecificationFinding = { id: string; category: "composition" | "technical" | "price"; severity: "error" | "warning"; message: string };
 export type RequiredSpecificationNode = { id: string; label: string; matches: (item: SpecItem) => boolean; quantity?: number; equipmentId?: string };
@@ -73,7 +74,8 @@ export function requiredSpecificationNodes(project: ProjectConfig): RequiredSpec
 
 export function coreAssessSpecification(project: ProjectConfig, displayedItems?: SpecItem[], existingIssues: ExistingIssue[] = []) {
   const spec = project.entities["station-spec"] as SpecEntity, settings = project.entities["station-settings"] as SettingsEntity;
-  const items = displayedItems ?? visibleSpecificationItems(spec, settings);
+  const checkPressure = pressureChecksEnabled(settings);
+  const items = displayedItems ? (checkPressure ? displayedItems : displayedItems.map(withoutPressureChecks)) : visibleSpecificationItems(spec, settings);
   const findings: SpecificationFinding[] = [];
   const add = (category: SpecificationFinding["category"], id: string, message: string, severity: SpecificationFinding["severity"] = "warning") => findings.push({ category, id: `spec/readiness/${id}`, message, severity });
   // Reuse established engineering diagnostics; drawings/3D are outside specification readiness.
@@ -100,8 +102,7 @@ export function coreAssessSpecification(project: ProjectConfig, displayedItems?:
     if (!validStationInput(input) || !input.selectedPumpId) add("technical", `input/${secondary ? 2 : 1}`, `Контур ${secondary ? 2 : 1}: исходные данные или выбор насоса не подтверждены.`);
   }
   if (settings.isolatingValves && !separationEnabled(settings)) add("technical", "separation-station-type", "Разделительные затворы доступны только пожарным и совмещённым станциям.", "error");
-  if (settings.pressureChecksEnabled === false) add("technical", "pressure-disabled", "Проверки давления отключены; пригодность по давлению не подтверждена.");
-  else if (settings.inletHead == null) add("technical", "pressure-input", "Напор на входе не указан; проверка давления не завершена.");
+  if (checkPressure && settings.inletHead == null) add("technical", "pressure-input", "Напор на входе не указан; проверка давления не завершена.");
   for (const [index, item] of items.entries()) {
     if(item.hydraulicAssembly?.accounting==="parts"){
       const a=item.hydraulicAssembly;

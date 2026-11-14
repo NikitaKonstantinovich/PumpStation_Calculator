@@ -1,6 +1,6 @@
 import type { ProjectConfig, SpecEntity, SpecItem, InputEntity } from "../project-config";
-import type { Assembly, Component, PortRef, ProfileCatalog, Vec3 } from "./model";
-import type { LineCatalog, LineGeometry, LineJoint } from "./line-types";
+import type { Assembly, Component, Port, PortRef, ProfileCatalog, Vec3 } from "./model";
+import { pipeThreadDesignation, type LineCatalog, type LineGeometry, type LineJoint } from "./line-types";
 import { applyCollectorTemplate, moveCollectorBranchX } from "./collector-template";
 import { occupyInsertionSensor } from "./insertion-template";
 
@@ -48,9 +48,11 @@ type Entry = { row: SpecItem; sequence: number; index: number; quantity: number;
 export function lineEntries(rows: SpecItem[], prefix: string, side: "suction" | "discharge", count: number, data?: LineCatalog): Entry[] {
   const entries: Entry[] = [];
   const order: Record<string, number> = { "pump-gasket": 1, "vibration-pump-gasket": 1, "vibration-compensator": 4, "vibration-insertion-gasket": 6,
-    "pump-flange": 9, "adapter-flange": 9, "after-vibration-insertion-flange": 9, "union": 12, "adapter": 12, "insertion": 12, "pump-insertion": 12, "after-vibration-insertion": 12,
+    "pump-flange": 9, "adapter-flange": 9, "after-vibration-insertion-flange": 9, "union": 12, "adapter": 12, "insertion": 12, "pump-insertion": 12, "after-vibration-insertion": 12, "pump-nipple": 15,
     "insertion-reducer-gasket": 17, "reducer-small-flange": 18, "reducer": 20, "reducer-large-flange": 22, "check-flange": 24, "valve-flange": side === "suction" ? 24 : 85,
     "between-valves-insertion": 55, "between-valves-nipple": 55 };
+  const threadedFirst = rows.some(row => row.section === side && row.assemblyRole?.startsWith(`${prefix}-`) &&
+    row.equipmentId?.startsWith("suction-table:rf-") && row.insertionRequirement?.from.connection === "threaded");
   for (const row of rows) {
     if (row.section !== side || row.quantity <= 0) continue;
     const option = row.option ?? "", role = row.assemblyRole?.replace(`${prefix}-`, "");
@@ -67,6 +69,7 @@ export function lineEntries(rows: SpecItem[], prefix: string, side: "suction" | 
       if (role === "valve-gaskets") sequence = index === 0 ? 70 : 80;
       if (role?.startsWith("between-valves-flanges")) sequence = index === 0 ? 50 : 60;
       if (role?.startsWith("after-vibration-insertion-flanges")) sequence = index === 0 ? 9 : 15;
+      if (threadedFirst && /^(?:adapter|after-vibration-insertion)-flange-/.test(role!)) sequence = 15;
       const loose = role?.endsWith("-looseFlange") === true;
       entries.push({ row, sequence: sequence ?? 95, index, quantity: 1, auxiliary: loose || sequence === undefined });
     }
@@ -87,9 +90,15 @@ export function lineEntries(rows: SpecItem[], prefix: string, side: "suction" | 
   return entries.filter(e => e.index >= (covered.get(e.row) ?? 0)).sort((a, b) => a.sequence - b.sequence || (a.row.assemblyRole ?? "").localeCompare(b.row.assemblyRole ?? "") || a.index - b.index);
 }
 
-function geometryFor(row: SpecItem, data: LineCatalog, profiles: ProfileCatalog): LineGeometry & { meshUrl?: string; cadSource?: Component["cadSource"] } {
+function geometryFor(row: SpecItem, data: LineCatalog, profiles: ProfileCatalog): LineGeometry & { meshUrl?: string } {
   const source = row.equipmentId && data.items[row.equipmentId];
   const g: LineGeometry = source ? structuredClone(source) : { equipmentId: row.equipmentId ?? "", revision: data.revision, source: row.description ?? "Спецификация", length: null, ports: [], fidelity: "missing", issues: ["Нет геометрии выбранной позиции"] };
+  const assumption = row.insertionRequirement?.checkPressure === false && row.insertionAssembly?.snapshot.calculation.assumptions?.find(item => item.code === "sensor-pn25-pressure");
+  if (assumption && g.template) {
+    const warning = `${assumption.message} ${assumption.source}`;
+    g.template.warnings = g.template.warnings.filter(message => message !== warning);
+    g.issues = g.issues.filter(message => message !== warning);
+  }
   const requestedPn = Number(row.details.match(/соединение PN(\d+)/)?.[1]) || row.selectedPn || Number(row.details.match(/PN(\d+)/)?.[1]);
   // Multi-pressure flange records have no scalar PN. Preserve the selected
   // execution from the specification instead of losing it in the 3D ports.
@@ -122,7 +131,7 @@ function geometryFor(row: SpecItem, data: LineCatalog, profiles: ProfileCatalog)
     g.issues = g.issues.filter(i => !/геометрии|диаметры|монтажная длина/.test(i));
   }
   const profile = row.equipmentId ? profiles.equipment?.[`equipment:${row.equipmentId}`] : undefined;
-  if (!g.valveModels?.length && profile?.meshUrl && profile.ports.length >= 2) {
+  if (!g.valveModels?.length && g.shape?.kind !== "mesh" && g.kind !== "threaded-catalog-fitting" && profile?.meshUrl && profile.ports.length >= 2) {
     const ends = profile.ports.filter(p => /^(left|right|inlet|outlet|large-end|small-end)$/.test(p.id));
     if (ends.length === 2 && ends.every(p => p.axis && !p.provisional)) {
       const measured = length(ends[0].point, ends[1].point);
@@ -146,6 +155,16 @@ function branchGeometry(entries: Entry[], data: LineCatalog, profiles: ProfileCa
   const isEnd = (entry: Entry) => ["collar", "weldFlange"].includes(geometries.get(entry)?.kind ?? "");
   for (const [index, entry] of chain.entries()) {
     const g = geometries.get(entry)!;
+    // The preliminary RF row represents the insert body. When its flange end
+    // is supplied by a separate specification row, it mates to that row's neck.
+    if (/^suction-table:rf-\d+$/.test(g.equipmentId)) {
+      const flangeEnd = chain[index + (entry.row.insertionRequirement?.from.connection === "threaded" ? 1 : -1)];
+      const neck = flangeEnd && isEnd(flangeEnd) ? geometries.get(flangeEnd)?.ports.find(p => p.id === "right") : undefined;
+      if (neck) {
+        Object.assign(neck, { connection: "weld", plane: "weld-end", provisional: true });
+        Object.assign(g.ports[0], { connection: "weld", plane: "weld-end" });
+      }
+    }
     if (!g.insertionBodies?.length || g.template) continue;
     // Never reach across a valve/gasket to borrow an unrelated end fitting.
     const left = chain[index - 1], right = chain[index + 1];
@@ -171,6 +190,7 @@ function branchGeometry(entries: Entry[], data: LineCatalog, profiles: ProfileCa
 function reverseEnd(entry: Entry, prefix: string) {
   const role = entry.row.assemblyRole?.replace(`${prefix}-`, "") ?? "";
   if (/^(between-valves-flanges|after-vibration-insertion-flanges)-/.test(role)) return entry.index === 1;
+  if (/^(adapter|after-vibration-insertion)-flange-/.test(role)) return entry.sequence === 15;
   return /^(check-flange|valve-flange|reducer-large-flange)-/.test(role);
 }
 
@@ -197,10 +217,20 @@ function seatLooseFlanges(branch: Component[], joints: LineJoint[]) {
   }
 }
 
+function threadedOverlap(a?: Port, b?: Port): number {
+  if (a?.connection !== "threaded" || b?.connection !== "threaded" || a.plane !== "thread-reference" || b.plane !== "thread-reference"
+    || !a.axis || !b.axis || !a.gender || !b.gender || a.gender === b.gender || (a.dn && b.dn && a.dn !== b.dn)) return 0;
+  const thread = pipeThreadDesignation(a.thread), from = a.threadDepthMm, to = b.threadDepthMm;
+  if (!thread || thread !== pipeThreadDesignation(b.thread) || !from || !to || !Number.isFinite(from) || !Number.isFinite(to) || from < 0 || to < 0) return 0;
+  // The shorter usable thread limits the nominal CAD fit. The port evidence
+  // still controls whether the fit is provisional.
+  return Math.min(from, to);
+}
+
 export function addLineAssemblies(base: Assembly, project: ProjectConfig, profiles: ProfileCatalog, data: LineCatalog, verticalPumpIds: ReadonlySet<string> = new Set()): Assembly {
   const rows = (project.entities["station-spec"] as SpecEntity).items;
   const components = base.components.filter(c => !c.routing && !c.id.startsWith("spec-")).map(c => structuredClone(c));
-  const joints: LineJoint[] = [], endpoints = new Map<string, Array<{ pumpId: string; point: Vec3; axis: Vec3; from: PortRef; provisional: boolean }>>();
+  const joints: LineJoint[] = [], endpoints = new Map<string, Array<{ pumpId: string; point: Vec3; axis: Vec3; from: PortRef; port: Port; provisional: boolean }>>();
   const represented = new Set<string>();
   for (const pump of components.filter(c => c.kind === "pump")) {
     const circuit = pump.id.startsWith("pump-2-") ? 2 : 1, prefix = circuit === 1 ? "primary" : "secondary";
@@ -213,7 +243,7 @@ export function addLineAssemblies(base: Assembly, project: ProjectConfig, profil
       const entries = lineEntries(rows, prefix, side, count, data);
       const geometries = branchGeometry(entries, data, profiles), branch: Component[] = [];
       let point = port ? world(pump, port.point) : pump.position, axis: Vec3 = port?.axis ? norm(rotate(port.axis, pump.rotation)) : [side === "suction" ? -1 : 1, 0, 0];
-      let previous: PortRef = { componentId: pump.id, portId: port?.id ?? "missing" }, provisional = !port || port.provisional === true || !port.axis;
+      let previous: PortRef = { componentId: pump.id, portId: port.id }, previousPort = port, provisional = port.provisional === true;
       for (const entry of entries) {
         const { row, index, quantity, auxiliary } = entry, role = row.assemblyRole ?? row.option ?? row.position;
         const g = geometries.get(entry)!;
@@ -228,6 +258,7 @@ export function addLineAssemblies(base: Assembly, project: ProjectConfig, profil
         let b = ports.find(p => p !== a && /^(right|outlet|small-end)$/.test(p.id)) ?? ports[1];
         // Reducers lead out from the pump's smaller end. Check valves follow actual flow.
         if (g.kind === "reducer" || /reducer$/.test(role) || ["collar", "weldFlange"].includes(g.kind ?? "") && reverseEnd(entry, prefix) || side === "suction" && /CheckValve/.test(role)) [a, b] = [b, a];
+        if (g.equipmentId.startsWith("suction-table:rf-") && row.insertionRequirement?.from.connection === "threaded") [a, b] = [b, a];
         const butterfly = row.option === `${prefix}${side === "discharge" ? "Discharge" : "Suction"}Valve` && /затвор/i.test(row.name);
         const upright = butterfly && verticalPumpIds.has(pump.equipmentId ?? "");
         const rollDischargeValve = butterfly && side === "discharge" && !upright;
@@ -237,7 +268,8 @@ export function addLineAssemblies(base: Assembly, project: ProjectConfig, profil
         const issues = [...g.issues, ...(row.status !== "selected" ? [row.description || row.details] : [])].filter(Boolean);
         if (auxiliary) issues.push("Положение вспомогательной детали/крепежа не подтверждено; показано отдельно от размерной цепи");
         if (quantity !== 1) issues.push(`Количество на ветвь: ${quantity}. Группа требует размещения отдельных элементов по сверловке`);
-        const start = auxiliary && !role.endsWith("-looseFlange") ? add(point, [0, 0, 100 + index * 20]) : point;
+        const overlap = auxiliary ? 0 : threadedOverlap(previousPort, a);
+        const start = auxiliary && !role.endsWith("-looseFlange") ? add(point, [0, 0, 100 + index * 20]) : sub(point, mul(axis, overlap));
         const c: Component = { id, name: row.name, kind: g.kind === "pipe" && g.shape?.kind === "tube" && !g.template ? "pipe" : "equipment", equipmentId: row.equipmentId, sourceKey: `equipment:${row.equipmentId ?? role}`,
           sourceNote: [g.source, ...(upright ? ["Затвор вертикального насоса установлен приводом вверх"] : rollDischargeValve ? ["Напорный затвор повёрнут на 90° вокруг оси трубы в сторону всасывающего патрубка; монтажные плоскости сохранены"] : []), ...issues].join(". "), position: sub(start, rotate(a.point, rotation)), rotation, hidden: false, locked: false, opacity: 1,
           parameters: { length: g.length ?? 1, width: 1, height: 1, diameter: g.shape?.outerMm ?? 1, routeOffset: 0, ...(g.wall ? { wallThickness: g.wall } : {}) }, ports,
@@ -256,25 +288,33 @@ export function addLineAssemblies(base: Assembly, project: ProjectConfig, profil
         components.push(c); branch.push(c); represented.add(`${row.section}:${row.position}`);
         if (!auxiliary) {
           provisional ||= !g.length || a.provisional === true || b.provisional === true;
-          const thread = a.connection === "threaded";
+          const thread = a.connection === "threaded" || previousPort.connection === "threaded";
           const seat = a.connection === "weld" || a.connection === "collar";
-          joints.push({ id: `${id}-in`, a: previous, b: { componentId: id, portId: a.id }, provisional, kind: thread ? "thread" : seat ? "seat" : "face", overlap: 0 });
+          joints.push({ id: `${id}-in`, a: previous, b: { componentId: id, portId: a.id }, provisional: provisional || thread && !overlap,
+            kind: thread ? "thread" : seat ? "seat" : "face", overlap, ...(overlap ? { axialThreadFit: true } : {}) });
           if (seat && !g.template && g.mountingDepth === undefined && !g.insertionBodies?.length) c.line!.issues.push("Посадка стыка со вставкой требует сохранённого расчёта; осевое перекрытие не назначено");
           point = world(c, b.point); axis = b.axis ? norm(rotate(b.axis, c.rotation)) : axis;
           // An unresolved mounting length stays provisional. It adds no invented
           // 40 mm spacing to the physical chain or the collector position.
           previous = { componentId: id, portId: b.id };
+          previousPort = b;
         }
       }
       seatLooseFlanges(branch, joints);
       if (!entries.length) continue;
       const key = `collector-${side}`;
-      endpoints.set(key, [...(endpoints.get(key) ?? []), { pumpId: pump.id, point, axis, from: previous, provisional }]);
+      endpoints.set(key, [...(endpoints.get(key) ?? []), { pumpId: pump.id, point, axis, from: previous, port: previousPort, provisional }]);
     }
   }
   for (const [id, ends] of endpoints) {
     let collector = components.find(c => c.id === id); if (!collector) continue;
-    const first = ends[0], local = collector.ports.find(p => p.id === first.pumpId);
+    const collectorPorts = collector.ports;
+    const jointsAtCollector = ends.map(end => {
+      const local = collectorPorts.find(p => p.id === end.pumpId);
+      const overlap = threadedOverlap(end.port, local);
+      return { ...end, local, overlap, point: sub(end.point, mul(end.axis, overlap)) };
+    });
+    const first = jointsAtCollector[0], local = first.local;
     if (local?.axis) {
       collector.rotation = mountingRotation(mul(local.axis, -1), first.axis, [1, 0, 0], [0, 1, 0]);
       // Keep the manifold longitudinal axis along the row of pumps (+Y).
@@ -283,13 +323,18 @@ export function addLineAssemblies(base: Assembly, project: ProjectConfig, profil
       collector.position = sub(first.point, rotate(local.point, collector.rotation));
       if (collector.collector) {
         let template = collector.collector.template;
-        for (const end of ends) template = moveCollectorBranchX(template, end.pumpId, local.point[0] + dot(sub(end.point, first.point), longitudinal));
+        for (const end of jointsAtCollector) template = moveCollectorBranchX(template, end.pumpId, local.point[0] + dot(sub(end.point, first.point), longitudinal));
         collector = applyCollectorTemplate(collector, template);
         components[components.findIndex(c => c.id === id)] = collector;
       }
     }
     collector.autoPose = { position: [...collector.position], rotation: [...collector.rotation], parametersKey: JSON.stringify(collector.parameters) };
-    for (const end of ends) joints.push({ id: `line-end-${id}-${end.pumpId}`, a: end.from, b: { componentId: id, portId: end.pumpId }, provisional: end.provisional || collector.ports.find(p => p.id === end.pumpId)?.provisional !== false, kind: "face", overlap: 0 });
+    for (const end of jointsAtCollector) {
+      const thread = end.port.connection === "threaded" || end.local?.connection === "threaded";
+      joints.push({ id: `line-end-${id}-${end.pumpId}`, a: end.from, b: { componentId: id, portId: end.pumpId },
+        provisional: end.provisional || end.local?.provisional !== false || thread && !end.overlap, kind: thread ? "thread" : "face", overlap: end.overlap,
+        ...(end.overlap ? { axialThreadFit: true } : {}) });
+    }
   }
   // Non-branch equipment keeps its existing manual staging location; branch models are not duplicated there.
   for (const c of base.components.filter(c => c.id.startsWith("spec-"))) {

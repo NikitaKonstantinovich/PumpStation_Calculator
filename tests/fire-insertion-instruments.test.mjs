@@ -22,10 +22,11 @@ const context=server.insertionGeometryContext(source,catalog);
 const close=(a,b)=>assert.ok(Math.abs(a-b)<1e-5,`${a} != ${b}`),vec=(a,b)=>a.forEach((x,i)=>close(x,b[i]));
 const sets=p=>rows(p).filter(r=>/^primary-sensor-/.test(r.assemblyRole??""));
 const mounted=a=>a.components.filter(c=>c.instrumentMount?.kind==="fire-insertion");
-function initial({type="fire",working=2,reserve=1,vibration=false,secondary=false,material,pumpId="318",pressureChecksEnabled=true}={}){
+function initial({type="fire",working=2,reserve=1,vibration=false,secondary=false,material,pumpId="318",pressureChecksEnabled=true,head}={}){
   let p=fixture();Object.assign(p.entities["station-settings"],{stationType:type,vibrationCompensators:vibration,jockeyPump:secondary&&type==="fire",pressureChecksEnabled});
   if(material)p.entities["station-dn"].collectorMaterial=material;
   choose(p,pumpId,working,reserve);if(secondary)choose(p,pumpId,2,1,true);
+  if(head!==undefined)p.entities["system-input"].head=head;
   return sync(p);
 }
 async function prepared(options={}){
@@ -115,8 +116,8 @@ test("insert transform, retained manual offset, saved scenes and count reduction
   assert.equal(mounted(model.mergeAssembly(reopened,rebuilt)).length,0);assert.equal(sets(next).length,0);
 });
 
-test("real ONIS maximum-head selection mounts priced transducers and a relay on every main fire branch",async()=>{
-  const {p,assembly:a}=await prepared({type:"combined",pumpId:"nu-34f0554f7dc091e4",working:3,reserve:1,secondary:true,material:"aisi304",pressureChecksEnabled:false});
+test("real ONIS calculated-pressure selection mounts priced transducers and a relay on every main fire branch",async()=>{
+  const {p,assembly:a}=await prepared({type:"combined",pumpId:"nu-34f0554f7dc091e4",working:3,reserve:1,secondary:true,material:"aisi304",head:60});
   const sensors=a.components.filter(c=>c.instrumentMount?.role==="transducer");
   assert.equal(sensors.length,2);assert.ok(sensors.every(c=>c.equipmentId==="station-v11-oni-ppt10-16"&&c.meshUrl&&!c.hidden));
   const relays=mounted(a).filter(c=>c.instrumentMount.role==="relay");assert.equal(relays.length,4);

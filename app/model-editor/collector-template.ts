@@ -7,7 +7,7 @@ import type { InsertionPiece } from "./insertion-types";
 import { collectorGeometryKey, defaultCollectorMount, resolveCollectorMount, type CollectorTemplate, type CollectorBranch } from "./collector-types";
 import { saddleRings } from "./collector-intersection";
 import tankModels from "../../data/tank-models.json";
-import { TANK_COLLECTOR_OFFSET_MM } from "../tank-connection";
+import { steelCollectorNippleLayout } from "../collector-instrument-dimensions";
 
 const positive=(v:unknown):v is number=>typeof v==="number"&&Number.isFinite(v)&&v>0;
 const add=(a:Vec3,b:Vec3):Vec3=>a.map((v,i)=>v+b[i]) as Vec3;
@@ -29,9 +29,9 @@ export function collectorTankX(t:CollectorTemplate):number|undefined {
   if(t.side!=="discharge")return;
   const pumps=t.ports.filter(p=>!p.id.startsWith("network-")&&!p.id.startsWith("instrument"));
   const last=pumps.at(-1),left=t.ports.find(p=>p.id==="network-left"),right=t.ports.find(p=>p.id==="network-right");
-  if(!left||!right)return;
-  const sign=last&&Math.abs(last.point[0]-left.point[0])+1e-6<Math.abs(last.point[0]-right.point[0])?-1:1;
-  return (sign===1?right:left).point[0]-sign*TANK_COLLECTOR_OFFSET_MM;
+  if(!last||!left||!right)return;
+  const end=Math.abs(last.point[0]-left.point[0])+1e-6<Math.abs(last.point[0]-right.point[0])?left:right;
+  return (last.point[0]+end.point[0])/2;
 }
 export function finishCollectorTemplate(t:CollectorTemplate):CollectorTemplate {
   const target=collectorTankX(t),tank=t.branches.find(b=>b.id==="instrument-tank-0"),port=t.ports.find(p=>p.id==="instrument-tank-0");
@@ -39,6 +39,7 @@ export function finishCollectorTemplate(t:CollectorTemplate):CollectorTemplate {
     const old=tank?.origin[0]??port!.point[0],dx=target-old;
     if(tank)tank.origin[0]=target;if(port)port.point[0]=target;
     for(const p of t.pieces)if(p.id==="instrument-tank-0"||p.id.startsWith("instrument-tank-0-"))p.position[0]+=dx;
+    t.assumptions=[...t.assumptions.filter(note=>!note.startsWith("Сгон бака:")),"Сгон бака: ось посередине участка между осью последнего насосного патрубка и привалочной плоскостью ближайшего концевого фланца, по решению пользователя 11.11.2026."];
   }
   const main=t.main, r=main?main.outerMm/2:1, l=main?main.lengthMm/2:1;
   const points:Vec3[]=[[-l,-r,-r],[l,r,r]];
@@ -123,7 +124,7 @@ export function coreBuildCollectorTemplate(card:CollectorCardState, data:LineCat
   const tankX=instruments.some(r=>r.role==="instrument-tank")?collectorTankX(t):undefined;
   let instrumentIndex=0;const count=instruments.reduce((sum,r)=>sum+(r.role==="instrument-tank"&&tankX!==undefined?0:r.quantity??0),0);
   const slots=[-calc.lengthMm/2,...t.ports.filter(p=>!p.id.startsWith("network-")).map(p=>p.point[0]),calc.lengthMm/2].sort((a,b)=>a-b);
-  if(tankX!==undefined){slots.push(tankX);slots.sort((a,b)=>a-b);t.assumptions.push("Сгон бака: ось на расстоянии 200 мм от привалочной плоскости торцевого фланца со стороны последнего насоса, по решению пользователя 01.11.2026.");}
+  if(tankX!==undefined){slots.push(tankX);slots.sort((a,b)=>a-b);}
   const gaps=slots.slice(1).map((right,i)=>({width:right-slots[i],x:(right+slots[i])/2})).filter(g=>g.width>0).sort((a,b)=>b.width-a.width||a.x-b.x);
   const instrumentXs=gaps.slice(0,count).map(g=>g.x);
   while(instrumentXs.length<count){const available=[...slots,...instrumentXs].sort((a,b)=>a-b);let gap=0;for(let j=1;j<available.length-1;j++)if(available[j+1]-available[j]>available[gap+1]-available[gap])gap=j;instrumentXs.push((available[gap]+available[gap+1])/2);}
@@ -132,18 +133,37 @@ export function coreBuildCollectorTemplate(card:CollectorCardState, data:LineCat
     const instrument=c.instrumentPorts?.find(p=>r.role===`instrument-${p.id}`);
     const id=`${r.role}-${j}`,g=geometry(r.role),override=mount.instrumentLengthsMm[id],length=override??instrument?.lengthMm??mount.instrumentDefaultLengthMm!,reference=override!==undefined?mount.instrumentLengthReference!:"blank-length",x=r.role==="instrument-tank"&&tankX!==undefined?tankX:instrumentXs[instrumentIndex++],origin:Vec3=[x,0,0],a:Vec3=[0,0,1];
     const dn=instrument?.dn??g?.dn??Number(r.role.match(/^instrument(\d+)$/)?.[1]),name=`Сгон DN${dn} · ${j+1}`;
+    const layout=c.material==="st20"&&g?.wall===undefined&&(g?.dn===undefined||g.dn===dn)
+      ?steelCollectorNippleLayout(dn,r.componentId,g?.outerDiameter):undefined;
+    const outer=layout?.outerDiameterMm??g?.outerDiameter,wall=layout?.wallThicknessMm??g?.wall;
     let end=(t.main?.outerMm??0)/2+length;
-    if(positive(length)&&positive(g?.outerDiameter)&&positive(g?.wall)&&g.wall*2<g.outerDiameter){
-      const b:CollectorBranch={id,componentId:g.equipmentId,name,role:"instrument",portId:id,circuit:0,origin,axis:a,outerMm:g.outerDiameter,innerMm:g.outerDiameter-2*g.wall,endMm:end,calculatedLengthMm:null,source:`${g.source}; ${override!==undefined?"Размер монтажного шаблона":"Решение пользователя 29.10.2026: длина сгонов"}: ${length} мм, ${reference==="blank-length"?"полная длина заготовки":"выступ от поверхности"}`,joint:mount.joint};
+    let outlineShown=false;
+    if(positive(length)&&positive(outer)&&positive(wall)&&wall*2<outer){
+      const dimensionSource=layout?.source??g?.source;
+      if(layout&&!t.assumptions.includes(layout.source))t.assumptions.push(layout.source);
+      const b:CollectorBranch={id,componentId:r.componentId??id,name,role:"instrument",portId:id,circuit:0,origin,axis:a,outerMm:outer,innerMm:outer-2*wall,endMm:end,calculatedLengthMm:null,source:`${dimensionSource}; ${override!==undefined?"Размер монтажного шаблона":"Решение пользователя 29.10.2026: длина сгонов"}: ${length} мм, ${reference==="blank-length"?"полная длина заготовки":"выступ от поверхности"}`,joint:mount.joint};
       if(reference==="blank-length"&&t.main)try{const rings=saddleRings(t.main,b);b.endMm=b.endMm-rings.cutLengthMm+length;b.blankLengthMm=length;end=b.endMm;}catch{/* addBranch reports the precise cut failure */}
       if(instrument?.threaded!==false&&[15,20,25,32,40,50].includes(dn)&&t.main)try{
         const rings=saddleRings(t.main,b),free=b.endMm-Math.max(...rings.outer.map(p=>p.reduce((s,v,i)=>s+(v-b.origin[i])*a[i],0)));
-        const threadLength=instrument?.threadLengthMm??Math.min(dn===15?18:20,free-1);
-        if(threadLength>2)b.thread={designation:({15:'1/2″',20:'3/4″',25:'1″',32:'1¼″',40:'1½″',50:'2″'} as Record<number,string>)[dn],pitchMm:instrument?.threadPitchMm??25.4/(dn<=20?14:11),lengthMm:threadLength,depthMm:Math.min(.9,g.wall*.45),source:"Наружная правая резьба. Условный винтовой профиль по параметрам сгона; глубина до 0,9 мм. Производственный профиль и допуски не подтверждены."};
+        const requestedThread=instrument?.threadLengthMm;
+        const threadLength=Math.min(requestedThread??(dn===15?18:20),free-1);
+        if(requestedThread!==undefined&&threadLength<requestedThread)t.issues.push(`${id}: длина резьбы ограничена прямым участком сгона.`);
+        if(threadLength>2)b.thread={designation:({15:'1/2″',20:'3/4″',25:'1″',32:'1¼″',40:'1½″',50:'2″'} as Record<number,string>)[dn],pitchMm:instrument?.threadPitchMm??25.4/(dn<=20?14:11),lengthMm:threadLength,depthMm:Math.min(.9,wall*.45),source:"Наружная правая резьба. Условный винтовой профиль по параметрам сгона; глубина до 0,9 мм. Производственный профиль и допуски не подтверждены."};
         if(b.thread)b.source+=`; ${b.thread.designation}; ${b.thread.source}`;
       }catch{/* addBranch reports the precise cut failure */}
       addBranch(b,true);
-    }else {t.pieces.push(piece(id,r.componentId??id,name,add(origin,mul(a,end)),a));t.issues.push(`${id}: длина ${length} мм задана; не подтверждены ${positive(g?.outerDiameter)?"толщина стенки":"наружный диаметр и толщина стенки"} выбранного сгона. Показан символ.`);}
+    }else if(t.main&&positive(length)&&positive(g?.outerDiameter)&&g.outerDiameter<=t.main.outerMm){
+      const outline=piece(id,g.equipmentId,name,add(origin,mul(a,end-length)),a);
+      outline.shape={kind:"tube",outerMm:g.outerDiameter,lengthMm:length};
+      outline.fidelity="outline";
+      outline.source=`${g.source}; компоновочный наружный контур от касательной к магистрали. Толщина стенки не подтверждена.`;
+      t.pieces.push(outline);
+      outlineShown=true;
+      t.issues.push(`${id}: толщина стенки сгона не подтверждена. Показан наружный контур без врезки.`);
+    }else {
+      t.pieces.push(piece(id,r.componentId??id,name,add(origin,mul(a,end)),a));
+      t.issues.push(`${id}: недостаточно подтверждённых размеров для построения сгона. Показан символ.`);
+    }
     const tip=add(origin,mul(a,end));
     const physical=t.branches.find(b=>b.id===id);
     if(positive(length)&&positive(dn))t.ports.push({id,point:tip,axis:a,provisional:true,dn,pn:c.pn,material:c.material,
@@ -151,7 +171,8 @@ export function coreBuildCollectorTemplate(card:CollectorCardState, data:LineCat
       ...(instrument?.threaded!==false?{thread:({15:"G1/2",20:"G3/4",25:"G1",32:"G1¼",40:"G1½",50:"G2"} as Record<number,string>)[dn],gender:"male" as const}:{}),
       ...(instrument?.state==="occupied"&&/^kip-\d+$/.test(instrument.id)?{occupiedBy:"kip"}:{}),
       ...(instrument?.state==="occupied"&&instrument.id==="tank"?{occupiedBy:"tank"}:{}),
-      boreMm:physical?.innerMm,source:physical?"Свободный торец сгона коллектора; номинальная база подключения КИП":"Расчётный торец сгона; геометрия стенки не подтверждена, показан символ"});
+      boreMm:physical?.innerMm,source:physical?"Свободный торец сгона коллектора; номинальная база подключения КИП":
+        outlineShown?"Расчётный торец наружного контура сгона; толщина стенки не подтверждена":"Расчётный торец сгона; геометрия не подтверждена, показан символ"});
     const plug=row(`${r.role}-plug`);if(plug){
       const p=piece(`${id}-plug`,plug.componentId??`${id}-plug`,`${r.role==="instrument-tank"?"Гайка-заглушка сгона бака":"Резьбовая заглушка"} · DN${dn}.${j+1}`,tip,a);
       if(r.role==="instrument-tank"&&dn===20){const cap=tankModels.assets.cap20;p.rotation=[0,0,0];p.shape={kind:"mesh",meshUrl:cap.meshUrl,modelHash:cap.sourceHash,meshBounds:cap.bounds as [number,number,number,number,number,number],modelPosition:cap.position as Vec3,modelRotation:cap.rotation as Vec3};p.fidelity="cad";p.source=`${cap.source}; сетка DN20, номинальное навинчивание 10 мм. Материал и PN — по выбранной позиции BOM.`;}

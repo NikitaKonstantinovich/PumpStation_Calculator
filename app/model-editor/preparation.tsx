@@ -82,9 +82,10 @@ export function useModelPreparation(projectId: string, items: ModelRequestItem[]
     refresh: () => poll.current() };
 }
 
-export function PreparationProgress({ preparation, compact = false }: { preparation: ReturnType<typeof useModelPreparation>; compact?: boolean }) {
+export function PreparationProgress({ preparation, availablePumpKeys, compact = false }: { preparation: ReturnType<typeof useModelPreparation>; availablePumpKeys?: ReadonlySet<string>; compact?: boolean }) {
   const { job, starting, applying, error, sceneError, busy, start, refresh } = preparation;
   if (!job && !starting && !error) return null;
+  const missing = job?.missing.filter(row => !job.items.some(item => item.name === row.name && item.position === row.position && availablePumpKeys?.has(item.key))) ?? [];
   const active = starting || preparationActive(job), searching = starting || job?.status === "searching" || job?.status === "queued";
   const phase = applying ? "Обновление сцены" : searching ? "Поиск моделей" : active ? "Конвертация" : !job && error ? "Подготовка недоступна" : job?.errors.length ? "Завершено с ошибками" : "Подготовка завершена";
   const heading = <span className="model-preparation__heading" role="status"><b>{phase}</b><span>{job && !searching ? `${Math.floor(job.progress ?? 0)}%` : ""}</span></span>;
@@ -95,11 +96,11 @@ export function PreparationProgress({ preparation, compact = false }: { preparat
     {error && <p role="alert">{error} <button onClick={refresh}>Проверить подключение</button></p>}
     {sceneError && <p role="alert">Модели подготовлены, но сцена обновлена не полностью: {sceneError} <button disabled={busy} onClick={refresh}>Повторить обновление сцены</button></p>}
     {job && !active && !applying && <>
-      <p><b>Подготовлено: {job.converted}. Уже готовы: {job.ready}. Нет исходной модели: {job.missing.length}. Ошибки: {job.errors.length}.</b></p>
-      {!job.total && !job.errors.length && <p>{job.ready ? "Все доступные копии уже готовы и актуальны." : !job.items.length ? "Спецификация пуста: добавьте оборудование в спецификацию." : "Подходящих исходных моделей для этой спецификации в библиотеке нет."}</p>}
+      <p><b>Подготовлено: {job.converted}. Уже готовы: {job.ready}. Нет исходной модели: {missing.length}. Ошибки: {job.errors.length}.</b></p>
+      {!job.total && !job.errors.length && <p>{job.ready || job.items.length && !missing.length ? "Все доступные копии уже готовы и актуальны." : !job.items.length ? "Спецификация пуста: добавьте оборудование в спецификацию." : "Подходящих исходных моделей для этой спецификации в библиотеке нет."}</p>}
       {job.retryOf && <p>Показан результат повторной попытки для неудачных моделей.</p>}
       {!!job.errors.length && <><ul>{job.errors.map((item, index) => <li key={index}><b>{item.name}</b>: {item.reason}</li>)}</ul><button disabled={busy} onClick={() => void start(true)}>Повторить неудачные конвертации</button></>}
-      {!!job.missing.length && <details><summary>Без исходных моделей: {job.missing.length}</summary><ul>{job.missing.map((item, index) => <li key={index}>{item.position} · {item.name}: {item.reason}</li>)}</ul></details>}
+      {!!missing.length && <details><summary>Без исходных моделей: {missing.length}</summary><ul>{missing.map((item, index) => <li key={index}>{item.position} · {item.name}: {item.reason}</li>)}</ul></details>}
     </>}
   </>;
   return compact ? <details className="model-preparation model-preparation--compact"><summary>{heading}</summary>{content}</details>

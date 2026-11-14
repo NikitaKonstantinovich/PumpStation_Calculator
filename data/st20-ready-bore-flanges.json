@@ -1,0 +1,225 @@
+{
+  "id": "st20-ready-bore-flanges",
+  "family": "Фланцы плоские Сталь 20 — ГОСТ 33259-2015, ряд 2",
+  "sourceSha256": "f68b4519e1e6786982e026472d49553d70159e87154417c02f53b9ced3a1464c",
+  "checkedAt": "2026-11-12",
+  "standardUrl": "https://files.stroyinf.ru/Data2/1/4293762/4293762130.pdf",
+  "rows": [
+    {
+      "id": "st20-ready-bore:32-10",
+      "name": "Фланец плоский 32-10-01-2-B-Ст.20-IV ГОСТ 33259-2015",
+      "dn": 32,
+      "pn": 10,
+      "material": "Ст20",
+      "compatiblePns": [
+        10
+      ],
+      "baselineId": "фланцы-001-r0007",
+      "supportedPipeOuterDiametersMm": [
+        42.3,
+        42.4
+      ],
+      "insertionOnly": true,
+      "geometryBasis": "ГОСТ 33259-2015: номинальные размеры; фактическую посадку подтверждают чертежом или обмером",
+      "supplier": "ДетальЛидерСнаб",
+      "supplierProductId": "32-10-01-2-B-Ст.20-IV",
+      "price": null,
+      "priceStatus": "on-request",
+      "priceLabel": "Цена, ₽/шт.",
+      "vat": "Цена и НДС по запросу",
+      "url": "https://detalllidersnab.ru/page145856686.html"
+    },
+    {
+      "id": "st20-ready-bore:32-16",
+      "name": "Фланец плоский 32-16-01-2-B-Ст.20-IV ГОСТ 33259-2015",
+      "dn": 32,
+      "pn": 16,
+      "material": "Ст20",
+      "compatiblePns": [
+        16
+      ],
+      "baselineId": "фланцы-002-r0030",
+      "supportedPipeOuterDiametersMm": [
+        42.3,
+        42.4
+      ],
+      "insertionOnly": true,
+      "geometryBasis": "ГОСТ 33259-2015: номинальные размеры; фактическую посадку подтверждают чертежом или обмером",
+      "supplier": "ДетальЛидерСнаб",
+      "supplierProductId": "32-16-01-2-B-Ст.20-IV",
+      "price": null,
+      "priceStatus": "on-request",
+      "priceLabel": "Цена, ₽/шт.",
+      "vat": "Цена и НДС по запросу",
+      "url": "https://detalllidersnab.ru/page145856686.html"
+    },
+    {
+      "id": "st20-ready-bore:32-25",
+      "name": "Фланец плоский 32-25-01-2-B-Ст.20-IV ГОСТ 33259-2015",
+      "dn": 32,
+      "pn": 25,
+      "material": "Ст20",
+      "compatiblePns": [
+        25
+      ],
+      "baselineId": "фланцы-003-r0053",
+      "supportedPipeOuterDiametersMm": [
+        42.3,
+        42.4
+      ],
+      "insertionOnly": true,
+      "geometryBasis": "ГОСТ 33259-2015: номинальные размеры; фактическую посадку подтверждают чертежом или обмером",
+      "supplier": "ДетальЛидерСнаб",
+      "supplierProductId": "32-25-01-2-B-Ст.20-IV",
+      "price": null,
+      "priceStatus": "on-request",
+      "priceLabel": "Цена, ₽/шт.",
+      "vat": "Цена и НДС по запросу",
+      "url": "https://detalllidersnab.ru/page145856686.html"
+    },
+    {
+      "id": "st20-ready-bore:40-10",
+      "name": "Фланец плоский 40-10-01-2-B-Ст.20-IV ГОСТ 33259-2015",
+      "dn": 40,
+      "pn": 10,
+      "material": "Ст20",
+      "compatiblePns": [
+        10
+      ],
+      "baselineId": "фланцы-001-r0008",
+      "supportedPipeOuterDiametersMm": [
+        48,
+        48.3
+      ],
+      "insertionOnly": true,
+      "geometryBasis": "ГОСТ 33259-2015: номинальные размеры; фактическую посадку подтверждают чертежом или обмером",
+      "supplier": "ДетальЛидерСнаб",
+      "supplierProductId": "40-10-01-2-B-Ст.20-IV",
+      "price": null,
+      "priceStatus": "on-request",
+      "priceLabel": "Цена, ₽/шт.",
+      "vat": "Цена и НДС по запросу",
+      "url": "https://detalllidersnab.ru/page145856686.html"
+    },
+    {
+      "id": "st20-ready-bore:40-16",
+      "name": "Фланец плоский 40-16-01-2-B-Ст.20-IV ГОСТ 33259-2015",
+      "dn": 40,
+      "pn": 16,
+      "material": "Ст20",
+      "compatiblePns": [
+        16
+      ],
+      "baselineId": "фланцы-002-r0031",
+      "supportedPipeOuterDiametersMm": [
+        48,
+        48.3
+      ],
+      "insertionOnly": true,
+      "geometryBasis": "ГОСТ 33259-2015: номинальные размеры; фактическую посадку подтверждают чертежом или обмером",
+      "supplier": "ДетальЛидерСнаб",
+      "supplierProductId": "40-16-01-2-B-Ст.20-IV",
+      "price": null,
+      "priceStatus": "on-request",
+      "priceLabel": "Цена, ₽/шт.",
+      "vat": "Цена и НДС по запросу",
+      "url": "https://detalllidersnab.ru/page145856686.html"
+    },
+    {
+      "id": "st20-ready-bore:40-25",
+      "name": "Фланец плоский 40-25-01-2-B-Ст.20-IV ГОСТ 33259-2015",
+      "dn": 40,
+      "pn": 25,
+      "material": "Ст20",
+      "compatiblePns": [
+        25
+      ],
+      "baselineId": "фланцы-003-r0054",
+      "supportedPipeOuterDiametersMm": [
+        48,
+        48.3
+      ],
+      "insertionOnly": true,
+      "geometryBasis": "ГОСТ 33259-2015: номинальные размеры; фактическую посадку подтверждают чертежом или обмером",
+      "supplier": "ДетальЛидерСнаб",
+      "supplierProductId": "40-25-01-2-B-Ст.20-IV",
+      "price": null,
+      "priceStatus": "on-request",
+      "priceLabel": "Цена, ₽/шт.",
+      "vat": "Цена и НДС по запросу",
+      "url": "https://detalllidersnab.ru/page145856686.html"
+    },
+    {
+      "id": "st20-ready-bore:50-10",
+      "name": "Фланец плоский 50-10-01-2-B-Ст.20-IV ГОСТ 33259-2015",
+      "dn": 50,
+      "pn": 10,
+      "material": "Ст20",
+      "compatiblePns": [
+        10
+      ],
+      "baselineId": "фланцы-001-r0009",
+      "supportedPipeOuterDiametersMm": [
+        60,
+        60.3
+      ],
+      "insertionOnly": true,
+      "geometryBasis": "ГОСТ 33259-2015: номинальные размеры; фактическую посадку подтверждают чертежом или обмером",
+      "supplier": "Изготовление по ГОСТ",
+      "supplierProductId": "50-10-01-2-B-Ст.20-IV",
+      "price": null,
+      "priceStatus": "on-request",
+      "priceLabel": "Цена, ₽/шт.",
+      "vat": "Цена и НДС по запросу",
+      "url": "https://signal-teplo.ru/upload/iblock/203/vq3htl65l1axjlrwvdsrcwpcfenf7afx.pdf"
+    },
+    {
+      "id": "st20-ready-bore:50-16",
+      "name": "Фланец плоский 50-16-01-2-B-Ст.20-IV ГОСТ 33259-2015",
+      "dn": 50,
+      "pn": 16,
+      "material": "Ст20",
+      "compatiblePns": [
+        16
+      ],
+      "baselineId": "фланцы-002-r0032",
+      "supportedPipeOuterDiametersMm": [
+        60,
+        60.3
+      ],
+      "insertionOnly": true,
+      "geometryBasis": "ГОСТ 33259-2015: номинальные размеры; фактическую посадку подтверждают чертежом или обмером",
+      "supplier": "ДетальЛидерСнаб",
+      "supplierProductId": "50-16-01-2-B-Ст.20-IV",
+      "price": null,
+      "priceStatus": "on-request",
+      "priceLabel": "Цена, ₽/шт.",
+      "vat": "Цена и НДС по запросу",
+      "url": "https://detalllidersnab.ru/page145856686.html"
+    },
+    {
+      "id": "st20-ready-bore:50-25",
+      "name": "Фланец плоский 50-25-01-2-B-Ст.20-IV ГОСТ 33259-2015",
+      "dn": 50,
+      "pn": 25,
+      "material": "Ст20",
+      "compatiblePns": [
+        25
+      ],
+      "baselineId": "фланцы-003-r0055",
+      "supportedPipeOuterDiametersMm": [
+        60,
+        60.3
+      ],
+      "insertionOnly": true,
+      "geometryBasis": "ГОСТ 33259-2015: номинальные размеры; фактическую посадку подтверждают чертежом или обмером",
+      "supplier": "ДетальЛидерСнаб",
+      "supplierProductId": "50-25-01-2-B-Ст.20-IV",
+      "price": null,
+      "priceStatus": "on-request",
+      "priceLabel": "Цена, ₽/шт.",
+      "vat": "Цена и НДС по запросу",
+      "url": "https://detalllidersnab.ru/page145856686.html"
+    }
+  ]
+}

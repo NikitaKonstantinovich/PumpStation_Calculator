@@ -9,6 +9,7 @@ export type HydraulicProductKind = "tank" | "transducer" | "flange-plug" | "isol
 export type HydraulicProductRequirement = {
   kind: HydraulicProductKind;
   pressureBar: number | null;
+  checkPressure?: boolean;
   volumeLitres?: number;
   dn?: number | null;
   pn?: number;
@@ -83,13 +84,13 @@ export function hydraulicProductFacts(item: AssemblyComponent) {
     overloadBar: scalar(field(item, /^(?:Допустимая перегрузка|Давление перегрузки),\s*бар$/i)),
   };
 }
-export function hydraulicProductSummary(item: AssemblyComponent): string {
+export function hydraulicProductSummary(item: AssemblyComponent, checkPressure = true): string {
   const facts = hydraulicProductFacts(item);
   return [
     facts.volumeLitres ? `${facts.volumeLitres} л` : "",
     facts.dn ? `DN${facts.dn}` : "",
     facts.pn.length ? `PN${facts.pn.join("/")}` : "",
-    facts.pressureBar !== null ? `допустимое рабочее давление ${facts.pressureBar} бар` : "допустимое рабочее давление не подтверждено",
+    facts.pressureBar !== null ? `допустимое рабочее давление ${facts.pressureBar} бар` : checkPressure ? "допустимое рабочее давление не подтверждено" : "",
     facts.thread ? `${facts.thread} ${facts.threadGender === "male" ? "НР" : facts.threadGender === "female" ? "ВР" : "(исполнение не подтверждено)"}` : "",
     facts.range ? `диапазон ${facts.range.min}…${facts.range.max} МПа` : "",
     facts.signal === "4-20ma" ? "4–20 мА" : facts.signal,
@@ -104,9 +105,11 @@ export function assessHydraulicProduct(item: AssemblyComponent, need: HydraulicP
     else if (actual !== required) incompatible.push(`${label}: требуется ${required}, у изделия ${actual}.`);
   };
   if (hydraulicProductKind(item) !== need.kind) incompatible.push("Изделие другого назначения.");
-  if (!(typeof need.pressureBar === "number" && Number.isFinite(need.pressureBar) && need.pressureBar >= 0)) missing.push("Не подтверждено требуемое рабочее давление.");
-  if (facts.pressureBar === null) missing.push("Не указано допустимое рабочее давление изделия; измерительный диапазон его не заменяет.");
-  else if (need.pressureBar !== null && facts.pressureBar + 1e-9 < need.pressureBar) incompatible.push(`Допустимое давление ${facts.pressureBar} бар ниже требуемого ${need.pressureBar} бар.`);
+  if (need.checkPressure !== false) {
+    if (!(typeof need.pressureBar === "number" && Number.isFinite(need.pressureBar) && need.pressureBar >= 0)) missing.push("Не подтверждено требуемое рабочее давление.");
+    if (facts.pressureBar === null) missing.push("Не указано допустимое рабочее давление изделия; измерительный диапазон его не заменяет.");
+    else if (need.pressureBar !== null && facts.pressureBar + 1e-9 < need.pressureBar) incompatible.push(`Допустимое давление ${facts.pressureBar} бар ниже требуемого ${need.pressureBar} бар.`);
+  }
   if (need.kind === "tank") equal("объём, л", facts.volumeLitres, need.volumeLitres);
   if (need.kind === "tank" || need.kind === "transducer") {
     if (need.thread) equal("резьба", facts.thread, hydraulicThread(need.thread));

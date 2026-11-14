@@ -12,7 +12,7 @@ export function isMultistagePump(pumpId?: string, pump?: Pump) {
 
 // maxInletPressure is an explicit inlet rating in bar, never inferred from maxPressure.
 export type PumpPort = { dn: number; connection: ValveConnection; maxPressure?: number | null; maxInletPressure?: number | null; source: string; shape?: "oval" | "round" };
-export type PumpPortOverride = { pumpId: string; dn: number | null; connection: ValveConnection | null; maxPressure?: number | null; maxInletPressure?: number | null; source: string };
+export type PumpPortOverride = { pumpId: string; dn: number | null; connection: ValveConnection | null; maxPressure?: number | null; maxInletPressure?: number | null; source: string; thread?: string; dnFromThread?: boolean };
 export type PumpPortData = Omit<PumpPortOverride, "pumpId">;
 export type PumpPortSide = "inlet" | "outlet";
 export const completePumpPort = (port: PumpPortData | null | undefined): port is PumpPort => Boolean(port && typeof port.dn === "number" && Number.isFinite(port.dn) && port.dn > 0 && (port.connection === "threaded" || port.connection === "flanged"));

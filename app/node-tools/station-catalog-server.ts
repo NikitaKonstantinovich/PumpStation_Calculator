@@ -1,3 +1,4 @@
+import { readFrameCatalog } from "../frame-calculation/catalog-store-server";
 import { db } from "../auth-server";
 import { applyBaseTariffs, baseSnapshot, stableBaseJson } from "../base-values";
 import { currentBasePublication, resolveBaseVersions } from "../base-values-server";
@@ -80,16 +81,16 @@ export async function stationCatalogSnapshot(id?: string, versions?: Record<stri
 async function capture(versions?: Record<string, string>): Promise<StationCatalogResources> {
   const baseSettings = versions ? await resolveBaseVersions(versions) : await currentBasePublication().then(p => baseSnapshot(p.id, p.values));
   const marker = async () => stableBaseJson(await db().prepare("SELECT revision,(SELECT source_sha256 FROM catalog_imports WHERE is_active=1 ORDER BY imported_at DESC,id DESC LIMIT 1) AS source FROM component_calculator_source_revision WHERE id=1").first());
-  let captured: { saved: Awaited<ReturnType<typeof readSavedInsertions>>; insert: Awaited<ReturnType<typeof currentInsertCatalog>>; collector: Awaited<ReturnType<typeof currentCollectorCatalog>> } | undefined;
+  let captured: { frames: Awaited<ReturnType<typeof readFrameCatalog>>; saved: Awaited<ReturnType<typeof readSavedInsertions>>; insert: Awaited<ReturnType<typeof currentInsertCatalog>>; collector: Awaited<ReturnType<typeof currentCollectorCatalog>> } | undefined;
   for (let attempt = 0; attempt < 3; attempt++) {
     const before = await marker();
-    const [saved, insert, collector] = await Promise.all([readSavedInsertions(), currentInsertCatalog(undefined, baseSettings), currentCollectorCatalog()]);
-    const after = await marker(), savedAfter = await readSavedInsertions();
-    if (before === after && stableBaseJson(saved) === stableBaseJson(savedAfter)) { captured = {saved, insert, collector}; break; }
+    const [saved, insert, collector, frames] = await Promise.all([readSavedInsertions(), currentInsertCatalog(undefined, baseSettings), currentCollectorCatalog(), readFrameCatalog()]);
+    const after = await marker(), savedAfter = await readSavedInsertions(), framesAfter = await readFrameCatalog();
+    if (before === after && stableBaseJson(saved) === stableBaseJson(savedAfter) && frames.revision === framesAfter.revision) { captured = {saved, insert, collector, frames}; break; }
   }
   if (!captured) throw new CatalogError("Справочники изменяются во время чтения. Повторите обновление.", 409);
-  const {saved, insert, collector} = captured;
-  const components = assembleComponentDatabase(binding as unknown as RawBindingDatabase, control as unknown as RawControlDatabase, saved.map(row => savedInsertionComponent(row, insert.version)));
+  const {saved, insert, collector, frames} = captured;
+  const components = assembleComponentDatabase(binding as unknown as RawBindingDatabase, control as unknown as RawControlDatabase, [...saved.map(row => savedInsertionComponent(row, insert.version)), ...frames.items]);
   const collectorCatalog = applyBaseTariffs(collector, baseSettings);
   components.collectorCatalog = collectorCatalog;
   // Match Workspace 1's sources; never substitute an unrelated pump catalogue.

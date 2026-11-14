@@ -2,22 +2,20 @@
 import "./engineering/native-server";
 import {getCircuitDnConfig,refreshSuctionSpecification} from "./station-hydraulic-calculation";
 import {NodeWorkspace,loadTools} from "./node-tools/workspace";
-import {AlgorithmLibrary} from "./node-tools/algorithm-library";
 import {DEFAULT_ALGORITHM,algorithmForProject} from "./node-tools/algorithm-schema";
 import {migrateProduct} from "./node-tools/product-state";
-import {ToolEditor} from "./node-tools/editor";
-import {EngineeringEditor} from "./engineering/editor";
+import {toolSourceDependencies} from "./node-tools/workspace-sources";
 import {loadProgram} from "./engineering/client";
 import {currentPublication,INITIAL_VERSION,setBrowserPublication} from "./engineering/runtime";
 import {calculationMethod} from "./project-config";
-import {ProjectSession,projectApi,type ProjectCard,type ProjectFile} from "./project-session";
+import {ProjectRequestError,ProjectSession,projectApi,type ProjectCard,type ProjectFile} from "./project-session";
 import {mergeProjectChanges} from "./project-merge";
 import {ProjectHistory} from "./project-history";
 import { SpecificationHydraulicOption } from "./specification-hydraulic-options";
 import { SpecificationInsertion } from "./specification-insertions";
 import { AllowedPumpPanel, downloadBlob, loadComponentsDatabase, loadedComponentsDatabase, resetComponentsDatabase } from "./allowed-pump-tools";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { FloatingPanel, GridWorkspace, Icon } from "./workspace-panels";
 import { ModelTool } from "./model-editor/tool";
 import { CadExportMenu } from "./cad-export-menu";
@@ -42,7 +40,6 @@ import { collectProjectIssues, openIssueInFirstPanel, type ToolIssue } from "./d
 import { DiagnosticSurface, DiagnosticsProvider, IssuesTool, IssueNotice, IssueMessages, IssueNavigationMessage, useDiagnosticRegistry } from "./diagnostics-ui";
 import { configurationFingerprint } from "./collector-calculations";
 import { STANDARD_DN, dnVelocityLimit, flowVelocity, recommendedDn, defaultCollectorMaterial } from "./dn-defaults";
-import { AccountScreen } from "./account-ui";
 import { BaseValuesPanel } from "./base-values-panel";
 import { ItemEntryPanel } from "./item-entry-panel";
 import { EquipmentAdminPanel } from "./equipment-admin-panel";
@@ -64,6 +61,10 @@ import { synchronizeStationSpecification, cabinetSourceFingerprint } from "./sta
 import { repairSavedInstrumentSpecification } from "./saved-instrument-specification";
 import { refreshSavedSpecificationInsertions } from "./saved-insertion-specification";
 import { assessSpecification, specificationHasPrice, specificationLineTotal } from "./specification-readiness";
+
+const AlgorithmLibrary = lazy(() => import("./node-tools/algorithm-library").then(module => ({default: module.AlgorithmLibrary})));
+const ToolEditor = lazy(() => import("./node-tools/editor").then(module => ({default: module.ToolEditor})));
+const EngineeringEditor = lazy(() => import("./engineering/editor").then(module => ({default: module.EngineeringEditor})));
 
 const isSecondaryEnabled = (settings: SettingsEntity) => settings.stationType === "combined" || (settings.stationType === "fire" && settings.jockeyPump);
 const SPEC_GROUPS: Array<{ title: string; sections: Array<{ id: SpecSection; title?: string }> }> = [
@@ -240,7 +241,7 @@ function DnCalculator({role,entity,input,secondaryInput,settings,onChange,onAddV
 
       <PumpNozzleFields pump={catalogue.find(p=>p.id===(circuit.id==="secondary"?secondaryInput:input).selectedPumpId)} entity={entity} input={circuit.id==="secondary"?secondaryInput:input} secondary={circuit.id==="secondary"} title={circuit.title} onChange={onChange}/>
       <p>Всас: {circuit.suction.connection==="threaded"?"резьбовая арматура":"фланцевая арматура"}. {circuit.suction.locked?"DN крана равен DN патрубка и изменяется вместе с ним.":circuit.suction.nozzleDefault?"Для многоступенчатого насоса DN арматуры по умолчанию равен DN впускного патрубка; доступно ручное изменение.":"DN арматуры и коллекторов рассчитываются отдельно от патрубков насоса."}</p>
-      <p>Напор: {circuit.discharge.connection==="threaded"?"резьбовая арматура":"фланцевая арматура"}. {circuit.discharge.locked?"DN крана и обратного клапана равен DN напорного патрубка.":circuit.discharge.nozzleDefault?"Для многоступенчатого насоса DN арматуры по умолчанию равен DN выпускного патрубка; доступно ручное изменение.":"Между обратным клапаном и затвором устанавливается отдельная вставка ФФ."}</p>
+      <p>Напор: {circuit.discharge.connection==="threaded"?"резьбовая арматура":"фланцевая арматура"}. {circuit.discharge.locked?"DN крана и обратного клапана равен DN напорного патрубка.":circuit.discharge.nozzleDefault?"Для многоступенчатого насоса DN арматуры по умолчанию равен DN выпускного патрубка; доступно ручное изменение.":circuit.discharge.connection==="threaded"?"Между обратным клапаном и шаровым краном устанавливается ниппель.":"Между обратным клапаном и затвором устанавливается отдельная вставка ФФ."}</p>
       {settings.vibrationCompensators
         ? <p>На каждой стороне насоса: насос → виброкомпенсатор → прямая или переходная вставка → арматура. При изменении DN переходная вставка заменяет прямую. Уплотнения и крепёж учитываются для каждого соединения.</p>
         : <p>Фланцевая арматура крепится прямо к насосу при одинаковых DN или непосредственно к переходу при изменении DN.</p>}
@@ -251,7 +252,7 @@ function DnCalculator({role,entity,input,secondaryInput,settings,onChange,onAddV
     </section>)}
     {isSecondaryEnabled(settings)&&!secondary&&<div className="dn-calculator__secondary-empty"><b>Контур 2 ожидает рабочую точку</b><span>Заполните «Подбор насосов 2» — DN и арматура появятся автоматически.</span></div>}
     </fieldset>
-    <footer className="dn-calculator__note"><span>i</span><p><b>Правила автоподбора</b>{settings.baseValues?.values.velocity.map(r=>`DN${r.fromDn}–${r.toDn??"∞"}: до ${r.limit} м/с`).join("; ")??"До DN250 — 2 м/с, выше — 3 м/с"}. Резьба до DN50 (2″) включительно — по умолчанию для первого контура хоз-пит и SMART и для второго контура. При необходимости можно выбрать фланцевое соединение. Затворы до DN125 подбираются с рукояткой, от DN150 — с редуктором. Обратный клапан подбирается по DN напорной арматуры, PN и материалу коллектора. Шаровой кран — всегда латунный с ручкой-рычагом, независимо от цвета и материала коллектора.</p></footer>
+    <footer className="dn-calculator__note"><span>i</span><p><b>Правила автоподбора</b>{settings.baseValues?.values.velocity.map(r=>`DN${r.fromDn}–${r.toDn??"∞"}: до ${r.limit} м/с`).join("; ")??"До DN250 — 2 м/с, выше — 3 м/с"}. Резьба до DN50 (2″) включительно — по умолчанию для первого контура хоз-пит и SMART и для второго контура. При необходимости можно выбрать фланцевое соединение. Затворы до DN125 подбираются с рукояткой, от DN150 — с редуктором. Для резьбового соединения по DN и PN подбираются шаровой кран LD Pride 47 и обратный клапан с латунным сердечником. Для фланцевого обратного клапана учитывается материал коллектора.</p></footer>
   </div>;
 }
 
@@ -278,7 +279,7 @@ function ProjectsPage({user,projects,onBack,onOpen,onCreate,onDelete,onLogout}:{
   return <div className="projects-page"><header className="projects-header"><button className="brand brand-button" onClick={onBack}><span className="brand__mark">PS</span><span><b>Pump Station</b><small>Calculator</small></span></button><div className="projects-header__actions"><span className="save-state">{user.email}</span><button className="avatar" title={user.name}>{initials(user.name)}</button><button className="button" onClick={onLogout}>Выйти</button></div></header><main className="projects-main"><div className="projects-main__title"><div><h1>Мои проекты</h1><p>Откройте сохранённый расчёт и продолжите работу с того же места.</p></div><button className="button button--primary" style={{width:"auto"}} onClick={onCreate}>＋ Новый проект</button></div>{projects.length?<div className="projects-grid">{projects.map(project=><article className="project-card" key={project.id}><span className="project-card__icon">▦</span><h2>{project.name}</h2><p>Изменён {new Date(project.updatedAt).toLocaleString("ru-RU",{dateStyle:"medium",timeStyle:"short"})}</p><p>{project.id}</p><div className="project-card__actions"><button onClick={()=>onOpen(project)}>Открыть проект</button><button onClick={()=>onDelete(project)} aria-label={`Удалить ${project.name}`}>Удалить</button></div></article>)}</div>:<div className="projects-empty"><span>▦</span><b>У вас пока нет сохранённых проектов</b><p>Создайте первый проект, чтобы начать расчёт насосной станции.</p></div>}</main></div>;
 }
 
-export default function Home() {
+export default function Home({account, onAccountChange}: {account: AccountUser; onAccountChange: (user: AccountUser | null) => void}) {
   const [sidebar, setSidebar] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [theme, setTheme, colorProfile, setColorProfile] = useTheme();
@@ -296,9 +297,8 @@ export default function Home() {
   };
   const [detached, setDetached] = useState<string | null>(null);
   const [saveMessage, setSaveMessage] = useState("Все изменения сохранены");
-  const [account,setAccount]=useState<AccountUser|null>(null);
-  const role = account?.role ?? "base";
-  const {latest:latestBaseValues,error:baseValuesError}=usePublishedBaseValues(Boolean(account));
+  const bootstrapAccount = useRef(account);
+  const role = account.role;
   const [bootError,setBootError]=useState("");
   const accessError = account ? projectAccessError(config, role) : null;
   const [accessNotice,setAccessNotice]=useState("");
@@ -344,9 +344,19 @@ export default function Home() {
   },[]);
   useEffect(()=>activeSession?.connect(),[activeSession]);
   const [view,setView]=useState<"workspace"|"projects"|"users"|"component-calculator"|"base-values"|"item-entry"|"equipment-admin"|"geometry-nodes"|"node-editor"|"workspace2"|"algorithm-library"|"help">(()=>{const requested=typeof window!=="undefined"?new URLSearchParams(window.location.search).get("view"):null;return requested==="projects"||requested==="users"||requested==="component-calculator"||requested==="base-values"||requested==="item-entry"||requested==="equipment-admin"||requested==="node-editor"||requested==="workspace2"||requested==="algorithm-library"||requested==="geometry-nodes"||requested==="help"?requested:"workspace";});
+  const legacySources = view !== "workspace2" && view !== "node-editor" && view !== "algorithm-library";
+  const {latest:latestBaseValues,error:baseValuesError}=usePublishedBaseValues(legacySources);
+  const legacyCatalogsRequested = useRef(false);
   const [algorithmId,setAlgorithmId]=useState(()=>typeof window!=="undefined"?new URLSearchParams(window.location.search).get("algorithm")??DEFAULT_ALGORITHM:DEFAULT_ALGORITHM);
   const [algorithmName,setAlgorithmName]=useState("Насосная установка");
+  const [initialRuntime,setInitialRuntime]=useState<{projectId:string; data:Awaited<ReturnType<typeof loadTools>>}|null>(null);
+  useEffect(()=>{
+    if(initialRuntime)queueMicrotask(()=>setInitialRuntime(current=>current===initialRuntime?null:current));
+  },[initialRuntime]);
   const rememberedProducts=useRef(new Map<string,string>());
+  const projectCreation=useRef<{running:boolean; request?:{owner:string; algorithm:string; config:ProjectConfig; operation:string}}>({running:false});
+  const [creatingProject,setCreatingProject]=useState(false);
+  const [projectCreationError,setProjectCreationError]=useState("");
   const [catalogue,setCatalogue] = useState<Pump[]>([]);
   const [controlCabinets,setControlCabinets] = useState<ControlCabinet[]>([]);
   const [smartCabinets,setSmartCabinets] = useState<SmartCabinet[]>([]);
@@ -372,11 +382,12 @@ export default function Home() {
   const inputEntity2 = config.entities["system-input-2"] as InputEntity;
   const settingsEntity = config.entities["station-settings"] as SettingsEntity;
   const secondaryEnabled = isSecondaryEnabled(settingsEntity);
-  const { catalog: collectorCatalog, catalogError: collectorCatalogError, setCatalog: setCollectorCatalog } = useCollectorDatabase(config, setConfig, Boolean(account) && !snapshot, catalogue);
-  const derivedIssues = useMemo(()=>collectProjectIssues(config,catalogue,collectorCatalog,smartCabinets,{...assetErrors,"collectors/catalog":collectorCatalogError}),[config,catalogue,collectorCatalog,smartCabinets,assetErrors,collectorCatalogError]);
+  const { catalog: collectorCatalog, catalogError: collectorCatalogError, setCatalog: setCollectorCatalog } = useCollectorDatabase(config, setConfig, legacySources && !accountLoading && !snapshot, catalogue);
+  const derivedIssues = useMemo(()=>legacySources ? collectProjectIssues(config,catalogue,collectorCatalog,smartCabinets,{...assetErrors,"collectors/catalog":collectorCatalogError}) : [],[legacySources,config,catalogue,collectorCatalog,smartCabinets,assetErrors,collectorCatalogError]);
   const diagnostics = useDiagnosticRegistry(config,derivedIssues);
   const suctionItems=(config.entities["station-spec"] as SpecEntity).items;
-  const suctionSource=JSON.stringify([config.project.id,suctionFingerprint(config),dischargeFingerprint(config),suctionItems.map(item=>[item.equipmentId,item.option,item.assemblyRole])]), suctionEnabled=Boolean(account)&&suctionItems.some(item=>item.section==="suction"||item.section==="discharge"||item.section==="pump");
+  const suctionEnabled=legacySources&&!accountLoading&&suctionItems.some(item=>item.section==="suction"||item.section==="discharge"||item.section==="pump");
+  const suctionSource=suctionEnabled?JSON.stringify([config.project.id,suctionFingerprint(config),dischargeFingerprint(config),suctionItems.map(item=>[item.equipmentId,item.option,item.assemblyRole])]):"";
   useEffect(()=>{
     if(!suctionEnabled)return;
     let active=true;
@@ -390,15 +401,14 @@ export default function Home() {
     const params=new URLSearchParams(window.location.search),panel=params.get("panel"),requestedProject=params.get("project");
     let active=true;
     void (async()=>{
-      const response=await fetch("/api/auth",{cache:"no-store"});
-      if(!response.ok)throw new Error("Не удалось загрузить учётную запись");
-      const {user}=await response.json() as {user:AccountUser};
+      const user=bootstrapAccount.current;
+      const [page, requestedFile]=await Promise.all([
+        projectApi<{projects:StoredProject[];next:number|null;modelLibraryVersion?:string}>(),
+        requestedProject ? projectApi<ProjectFile>("?id="+encodeURIComponent(requestedProject)) : undefined
+      ]);
       if(!active)return;
-      setAccount(user);
-      const page=await projectApi<{projects:StoredProject[];next:number|null;modelLibraryVersion?:string}>();
-      const id=requestedProject??page.projects[0]?.id;
-      let file:ProjectFile|undefined;
-      if(id) file=await projectApi<ProjectFile>("?id="+encodeURIComponent(id));
+      const recentProject=requestedProject===null?page.projects[0]?.id:undefined;
+      let file=requestedFile ?? (recentProject ? await projectApi<ProjectFile>("?id="+encodeURIComponent(recentProject)) : undefined);
       let loaded:ProjectConfig;
       try {
         loaded=file?parseAccessibleProject(file.config,user.role):createProject("Новая насосная станция",{baseValues:await fetchPublishedBaseValues()});
@@ -409,7 +419,7 @@ export default function Home() {
         file=undefined;
       }
       if(!active)return;
-      setProjects(page.projects);setNextPage(page.next);setAccount(user);
+      setProjects(page.projects);setNextPage(page.next);
       libraryVersion.current=page.modelLibraryVersion;
       const program=await loadProgram(file?(loaded.project.graphVersion??INITIAL_VERSION):undefined);
       if(!active)return;
@@ -418,43 +428,32 @@ export default function Home() {
       if(!params.has("view") && file){params.set("project",loaded.project.id);window.history.replaceState({},"","/?"+params.toString());}
       if(panel&&loaded.workspace.windows.some(item=>item.id===panel))setDetached(panel);
       hydrated.current=true;
-    })().catch(error=>{if(active)setBootError(error instanceof Error?error.message:"Не удалось загрузить проект");}).finally(()=>{if(active)setAccountLoading(false);});
+    })().catch(error=>{
+      if(!active)return;
+      if(error instanceof ProjectRequestError && error.status===401)onAccountChange(null);
+      else setBootError(error instanceof Error?error.message:"Не удалось загрузить проект");
+    }).finally(()=>{if(active)setAccountLoading(false);});
     return ()=>{active=false;};
-  }, [activate]);
-  useEffect(() => {
-    if (!account?.id) return;
-    const controller = new AbortController();
-    const heartbeat = async () => {
-      try {
-        const response = await fetch("/api/auth", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "heartbeat" }), signal: controller.signal });
-        if (controller.signal.aborted) return;
-        if (response.status === 401) { setAccount(null); return; }
-        if (!response.ok) return;
-        const { user } = await response.json() as { user: AccountUser };
-        if (!controller.signal.aborted) setAccount(current => current && JSON.stringify(current) === JSON.stringify(user) ? current : user);
-      } catch { /* A transient connection failure does not sign the user out. */ }
-    };
-    void heartbeat();
-    const timer = window.setInterval(() => void heartbeat(), 30_000);
-    const visible = () => { if (document.visibilityState === "visible") void heartbeat(); };
-    document.addEventListener("visibilitychange", visible);
-    return () => { controller.abort(); window.clearInterval(timer); document.removeEventListener("visibilitychange", visible); };
-  }, [account?.id]);
+  }, [activate, onAccountChange]);
   useEffect(() => {
     const navigate = () => { const params=new URLSearchParams(window.location.search);setAlgorithmId(params.get("algorithm")??DEFAULT_ALGORITHM);const requested = params.get("view"); setView(requested === "projects" || requested === "users" || requested === "component-calculator" || requested === "base-values" || requested === "item-entry" || requested === "equipment-admin" || requested === "node-editor" || requested === "workspace2" || requested === "algorithm-library" || requested === "geometry-nodes" || requested === "help" ? requested : "workspace"); setSidebar(false); };
     window.addEventListener("popstate", navigate);
     return () => window.removeEventListener("popstate", navigate);
   }, []);
-  useEffect(()=>{loadPumpCatalog().then((data:Pump[])=>{setCatalogue(data);setConfig(current=>{if(session.current?.revision)return current;const entities={...current.entities};for(const id of ["system-input","system-input-2"]){const input=entities[id] as InputEntity,pump=data.find(p=>p.id===input.selectedPumpId);if(pump)entities[id]={...input,selectedPumpModel:`${pump.manufacturer} ${pump.model}`};}return synchronizeCollectors({...current,entities},undefined,data);});}).catch(()=>{setSaveMessage("Не удалось загрузить каталог насосов");setAssetErrors(current=>({...current,"input/database":"Не удалось загрузить каталог насосов","input2/database":"Не удалось загрузить каталог насосов","spec/database/pumps":"Не удалось загрузить каталог насосов"}));});},[]);
-  useEffect(()=>{fetch("/control-cabinets.json",{cache:"no-store"}).then(response=>response.ok?response.json():Promise.reject()).then((data:ControlCabinet[])=>setControlCabinets(data)).catch(()=>{setSaveMessage("Не удалось загрузить каталог шкафов управления");setAssetErrors(current=>({...current,"spec/database/cabinets":"Не удалось загрузить каталог шкафов управления"}));});},[]);
-  useEffect(()=>{fetch("/control-cabinet-database.json",{cache:"no-store"}).then(response=>response.ok?response.json():Promise.reject()).then((data:{cabinets:SmartCabinet[]})=>setSmartCabinets(data.cabinets)).catch(()=>{setSaveMessage("Не удалось загрузить базу NS Smart");setAssetErrors(current=>({...current,"cabinet/database":"Не удалось загрузить базу NS Smart","spec/database/smart":"Не удалось загрузить базу NS Smart"}));});},[]);
+  useEffect(()=>{
+    if(!legacySources||legacyCatalogsRequested.current)return;
+    legacyCatalogsRequested.current=true;
+    loadPumpCatalog().then((data:Pump[])=>{setCatalogue(data);setConfig(current=>{if(session.current?.revision)return current;const entities={...current.entities};for(const id of ["system-input","system-input-2"]){const input=entities[id] as InputEntity,pump=data.find(p=>p.id===input.selectedPumpId);if(pump)entities[id]={...input,selectedPumpModel:`${pump.manufacturer} ${pump.model}`};}return synchronizeCollectors({...current,entities},undefined,data);});}).catch(()=>{setSaveMessage("Не удалось загрузить каталог насосов");setAssetErrors(current=>({...current,"input/database":"Не удалось загрузить каталог насосов","input2/database":"Не удалось загрузить каталог насосов","spec/database/pumps":"Не удалось загрузить каталог насосов"}));});
+    fetch("/control-cabinets.json",{cache:"no-store"}).then(response=>response.ok?response.json():Promise.reject()).then((data:ControlCabinet[])=>setControlCabinets(data)).catch(()=>{setSaveMessage("Не удалось загрузить каталог шкафов управления");setAssetErrors(current=>({...current,"spec/database/cabinets":"Не удалось загрузить каталог шкафов управления"}));});
+    fetch("/control-cabinet-database.json",{cache:"no-store"}).then(response=>response.ok?response.json():Promise.reject()).then((data:{cabinets:SmartCabinet[]})=>setSmartCabinets(data.cabinets)).catch(()=>{setSaveMessage("Не удалось загрузить базу NS Smart");setAssetErrors(current=>({...current,"cabinet/database":"Не удалось загрузить базу NS Smart","spec/database/smart":"Не удалось загрузить базу NS Smart"}));});
+  },[legacySources]);
   // A render-time transaction also covers imports, undo and asynchronous catalog/collector updates.
   // React retries this render before committing a mixed configuration to the UI.
   const stationInputs = [config.entities, config.station, synchronizeFullProject] as const;
-  const [previousStationInputs, setPreviousStationInputs] = useState(stationInputs);
-  if (stationInputs.some((value, index) => value !== previousStationInputs[index])) {
-    setPreviousStationInputs(stationInputs);
-    if(!snapshot)setConfig(current => synchronizeFullProject(current));
+  const [{previousStationInputs, previousLegacySources}, setPreviousStationInputs] = useState({previousStationInputs: stationInputs, previousLegacySources: legacySources});
+  if (legacySources !== previousLegacySources || stationInputs.some((value, index) => value !== previousStationInputs[index])) {
+    setPreviousStationInputs({previousStationInputs: stationInputs, previousLegacySources: legacySources});
+    if(legacySources&&!snapshot)setConfig(current => synchronizeFullProject(current));
   }
   useEffect(() => {
     if(hydrated.current && account && !accessError && session.current?.latest.project.id===config.project.id)session.current.update(config);
@@ -604,7 +603,6 @@ export default function Home() {
   };
   const diagnosticsValue={...diagnostics,onNavigate:navigateToIssue};
   if(accountLoading)return <main className="auth-page"><section className="auth-intro"><Link className="brand auth-brand" href="/"><span className="brand__mark">PS</span><span><b>Pump Station</b><small>Calculator</small></span></Link></section><section className="auth-panel"><div className="auth-card"><span className="auth-icon">PS</span><h2>Загрузка</h2><p>Подготавливаем рабочее пространство…</p></div></section></main>;
-  if(!account){const auth=new URLSearchParams(window.location.search).get("auth"),mode=auth==="verify"?"verify":auth==="reset"?"reset":"login";return <AccountScreen initialMode={mode}/>;}
   const header = <>
       <Link className="brand" href="/"><span className="brand__mark">PS</span><span><b>Pump Station</b><small>Calculator</small></span></Link>
       <div className="app-header__project"><small>ТЕКУЩИЙ ПРОЕКТ</small><button onClick={rename}>{config.project.name} <span>✎</span></button></div>
@@ -621,10 +619,20 @@ export default function Home() {
         try{remembered??=localStorage.getItem("product.last."+account.id+"."+id)??undefined;}catch{/* Optional shortcut to a server project. */}
         if(remembered){try{const file=await projectApi<ProjectFile>("?id="+encodeURIComponent(remembered));const candidate=parseAccessibleProject(file.config,role);if(algorithmForProject(candidate.workspace2)===id){target=candidate;revision=file.revision;persisted=true;}}catch{/* A deleted shortcut does not delete any product state. */}}
       }
-      const existing=target?.workspace2;
-      const remote=await loadTools(existing?.product?.version,existing?.product?.baseVersions,existing?.product?.sourceVersions,id);
-      if(!target)target=createProject(name,{baseValues:await fetchPublishedBaseValues()});
-      if(!target.workspace2){const settings=target.entities["station-settings"] as SettingsEntity;target={...target,workspace2:migrateProduct(remote.program,undefined,remote.defaults,remote.baseVersions,remote.role,remote.resources,remote.sourceVersions,{geometry:settings.geometryEnabled,pressure:settings.pressureChecksEnabled}).data};}
+      if(!target?.workspace2){
+        const [initial,baseValues]=await Promise.all([loadTools(undefined,undefined,undefined,id,"initialize"),target?undefined:fetchPublishedBaseValues()]);
+        target??=createProject(name,{baseValues});
+        const settings=target.entities["station-settings"] as SettingsEntity;
+        const projectControls={geometry:settings.geometryEnabled,pressure:settings.pressureChecksEnabled};
+        const needsCatalogs=Object.values(initial.program.product?.controls ?? {}).some(ref=>toolSourceDependencies(initial.program,ref.toolId).length);
+        const remote=needsCatalogs ? await loadTools(initial.program.version,initial.baseVersions,initial.sourceVersions,id) : initial;
+        if(remote.sourceErrors && Object.keys(remote.sourceErrors).length)throw Error(Object.values(remote.sourceErrors).join(" · "));
+        const workspace2=remote.program.product
+          ? migrateProduct(remote.program,undefined,remote.defaults,remote.baseVersions,remote.role,remote.resources,remote.sourceVersions,projectControls).data
+          : {schema:1 as const,algorithmId:id,tools:{}};
+        target={...target,workspace2};
+        setInitialRuntime({projectId:target.project.id,data:remote});
+      }
       if(target.project.id!==config.project.id)activate(account,target,revision,persisted);else updateConfig(()=>target!);
       rememberedProducts.current.set(id,target.project.id);try{localStorage.setItem("product.last."+account.id+"."+id,target.project.id);}catch{/* The project itself is stored on the server. */}
       setAlgorithmId(id);setAlgorithmName(name);setView("workspace2");setDetached(null);setSidebar(false);
@@ -642,15 +650,46 @@ export default function Home() {
     }).catch(()=>{child.close();setSaveMessage("Не удалось сохранить проект перед открытием отдельного окна.");});
   };
   const newAlgorithmProject=async()=>{
+    const creation=projectCreation.current, previous=session.current;
+    if(creation.running)return;
+    creation.running=true;
+    setCreatingProject(true);
+    setProjectCreationError("");
     try {
-      if(session.current && !await session.current.flush())throw Error("Сначала сохраните текущий проект или разрешите конфликт.");
-      const remote=await loadTools(undefined,undefined,undefined,algorithmId);
-      const next=createProject(algorithmName,{baseValues:await fetchPublishedBaseValues()});
-      next.workspace2=migrateProduct(remote.program,undefined,remote.defaults,remote.baseVersions,remote.role,remote.resources,remote.sourceVersions).data;
-      activate(account,next,0,true);setView("workspace2");
+      if(previous && !await previous.flush())throw Error("Сначала сохраните текущий проект или разрешите конфликт.");
+      let runtime: Awaited<ReturnType<typeof loadTools>> | undefined;
+      if(creation.request?.owner!==account.id || creation.request.algorithm!==algorithmId){
+        const [remote,baseValues]=await Promise.all([loadTools(undefined,undefined,undefined,algorithmId,"initialize"),fetchPublishedBaseValues()]);
+        runtime=remote;
+        if(remote.sourceErrors && Object.keys(remote.sourceErrors).length)throw Error(Object.values(remote.sourceErrors).join(" · "));
+        const next=createProject(remote.algorithm.name,{baseValues});
+        next.project.graphVersion=currentPublication().version;
+        next.project.modelLibraryVersion=libraryVersion.current;
+        next.workspace2=remote.program.product
+          ? migrateProduct(remote.program,undefined,remote.defaults,remote.baseVersions,remote.role,remote.resources,remote.sourceVersions).data
+          : {schema:1,algorithmId,tools:{}};
+        creation.request={owner:account.id,algorithm:algorithmId,config:next,operation:crypto.randomUUID()};
+      }
+      if(session.current!==previous)return;
+      const {config:next,operation}=creation.request;
+      let revision:number;
+      try {
+        ({revision}=await projectApi<{revision:number}>("",{config:next,operation,baseRevision:0}));
+      } catch(error) {
+        if(error instanceof ProjectRequestError && error.status>=400 && error.status<500)creation.request=undefined;
+        throw error;
+      }
+      creation.request=undefined;
+      setProjects(cards=>[{...next.project,revision},...cards.filter(card=>card.id!==next.project.id)]);
+      if(session.current!==previous)return;
+      if(previous?.dirty && !await previous.flush())throw Error("Новый проект сохранён в «Моих проектах». Сохраните изменения открытого проекта перед переходом.");
+      if(session.current!==previous)return;
+      if(runtime)setInitialRuntime({projectId:next.project.id,data:runtime});
+      activate(account,next,revision,true);setView("workspace2");setDetached(null);
       rememberedProducts.current.set(algorithmId,next.project.id);try{localStorage.setItem("product.last."+account.id+"."+algorithmId,next.project.id);}catch{/* Optional navigation shortcut. */}
-      window.history.pushState({},"","/?"+new URLSearchParams({view:"workspace2",algorithm:algorithmId,project:next.project.id}));
-    } catch(error){setSaveMessage((error as Error).message);}
+      window.history.replaceState({},"","/?"+new URLSearchParams({view:"workspace2",algorithm:algorithmId,project:next.project.id}));
+    } catch(error){setProjectCreationError(error instanceof Error?error.message:"Не удалось создать проект.");}
+    finally{creation.running=false;setCreatingProject(false);}
   };
   const navigateView = (next: AppView) => {
     setView(next); setDetached(null); setSidebar(false);
@@ -665,7 +704,7 @@ export default function Home() {
   if(view==="algorithm-library")return account.role==="admin"?<AlgorithmLibrary openEditor={openAlgorithmEditor}/>:<main><h1>Доступ только для администратора</h1></main>;
   if(view==="node-editor")return account.role==="admin"?<ToolEditor key={algorithmId} algorithmId={algorithmId} selectAlgorithm={openAlgorithmEditor} project={algorithmForProject(config.workspace2)===algorithmId?config:{...config,workspace2:undefined}} back={async()=>{if(session.current && !await session.current.flush())return;setView("workspace");window.history.pushState({},"","/?project="+encodeURIComponent(config.project.id));}}/>:<main><h1>Доступ только для администратора</h1></main>;
   if(view==="workspace2" && algorithmForProject(config.workspace2)!==algorithmId)return <main className="nt-workspace"><h1>Рабочее пространство продукта</h1><p>Текущий проект относится к другому алгоритму. Его данные сохранены отдельно.</p><button onClick={()=>void openAlgorithmProduct(algorithmId,algorithmName)}>Открыть проект выбранного продукта</button></main>;
-  if(view==="workspace2")return <NodeWorkspace key={config.project.id+"/"+algorithmId} algorithmId={algorithmId} name={algorithmName} userId={account.id} pendingSave={projectDirty} flush={()=>{setTimeout(()=>void session.current?.flush(),0);}} projectActions={<><button aria-label="Новый проект" onClick={()=>void newAlgorithmProject()}><b>＋</b><small>Новый</small></button><button aria-label="Переименовать проект" onClick={rename}><b>✎</b><small>Переименовать</small></button><button onClick={async()=>{if(!session.current || await session.current.flush())setView("projects");}}><b>▤</b><small>Мои проекты</small></button><button onClick={download}><b>↓</b><small>Экспорт JSON</small></button>{conflicted&&<><button onClick={reloadFromDatabase}><small>Открыть из базы</small></button><button onClick={saveConflictCopy}><small>Сохранить копию</small></button></>}</>} detach={openProductWindow} project={config} status={saveMessage} update={workspace2=>updateConfig(current=>({...current,workspace2}))} back={async()=>{if(session.current && !await session.current.flush())return;setView("workspace");window.history.pushState({},"","/?project="+encodeURIComponent(config.project.id));}}/>;
+  if(view==="workspace2")return <NodeWorkspace initialRuntime={initialRuntime?.projectId===config.project.id?initialRuntime.data:undefined} key={config.project.id+"/"+algorithmId} algorithmId={algorithmId} name={algorithmName} userId={account.id} pendingSave={projectDirty} projectError={projectCreationError} flush={()=>{setTimeout(()=>void session.current?.flush(),0);}} projectActions={<><button aria-label="Новый проект" disabled={creatingProject} onClick={()=>void newAlgorithmProject()}><b>＋</b><small>{creatingProject?"Создаём…":"Новый"}</small></button><button aria-label="Переименовать проект" onClick={rename}><b>✎</b><small>Переименовать</small></button><button onClick={async()=>{if(!session.current || await session.current.flush())setView("projects");}}><b>▤</b><small>Мои проекты</small></button><button onClick={download}><b>↓</b><small>Экспорт JSON</small></button>{conflicted&&<><button onClick={reloadFromDatabase}><small>Открыть из базы</small></button><button onClick={saveConflictCopy}><small>Сохранить копию</small></button></>}</>} detach={openProductWindow} project={config} status={saveMessage} update={workspace2=>updateConfig(current=>({...current,workspace2}))} back={async()=>{if(session.current && !await session.current.flush())return;setView("workspace");window.history.pushState({},"","/?project="+encodeURIComponent(config.project.id));}}/>;
   if(view==="geometry-nodes")return account.role==="admin"?<><EngineeringEditor project={config} pumps={catalogue} back={async()=>{if(session.current && !await session.current.flush())return;setView("workspace");window.history.pushState({},"","/?project="+encodeURIComponent(config.project.id));}}/></>:<main className="users-page"><h1>Доступ только для администратора</h1><button onClick={()=>{setView("workspace");window.history.replaceState({},"","/");}}>В рабочее пространство</button></main>;
   if(view==="equipment-admin")return <EquipmentAdminPanel actor={account} onBack={()=>{setView("workspace");window.history.pushState({},"","/");}}/>;
   if(view==="item-entry")return <ItemEntryPanel actor={account} onSaved={pump=>setCatalogue(current=>mergePumpCatalog(current.filter(item=>item.id!==pump.id),[pump]))} onBack={()=>{setView("workspace");window.history.pushState({},"","/");}}/>;
@@ -673,7 +712,7 @@ export default function Home() {
 
   if(view==="projects")return <><ProjectsPage user={account} projects={projects} onBack={()=>{setView("workspace");window.history.pushState({},"","/");}} onOpen={openStoredProject} onCreate={newProject} onDelete={deleteProject} onLogout={logout}/>{nextPage!==null&&<button onClick={()=>void projectApi<{projects:StoredProject[];next:number|null}>("?offset="+nextPage).then(page=>{setProjects(old=>[...old,...page.projects.filter(p=>!old.some(item=>item.id===p.id))]);setNextPage(page.next);}).catch(e=>window.alert(e.message))}>Загрузить ещё</button>}</>;
   if(view==="component-calculator")return <ComponentCalculator actor={account} onBack={()=>{setView("workspace");window.history.pushState({},"","/");}} onSaved={()=>{resetComponentsDatabase();addSelectedPumpToSpec();}}/>;
-  if(view==="users")return account.role==="admin"?<UsersPanel actor={account} onAccountChange={setAccount} onBack={()=>{setView("workspace");window.history.pushState({},"","/");}}/>:<main className="users-page"><div className="users-page__content"><h1>Доступ ограничен</h1><p>Список пользователей доступен только для admin.</p><button className="button" onClick={()=>{setView("workspace");window.history.replaceState({},"","/");}}>В рабочее пространство</button></div></main>;
+  if(view==="users")return account.role==="admin"?<UsersPanel actor={account} onAccountChange={onAccountChange} onBack={()=>{setView("workspace");window.history.pushState({},"","/");}}/>:<main className="users-page"><div className="users-page__content"><h1>Доступ ограничен</h1><p>Список пользователей доступен только для admin.</p><button className="button" onClick={()=>{setView("workspace");window.history.replaceState({},"","/");}}>В рабочее пространство</button></div></main>;
 
   if(accessError)return <main className="users-page"><section className="users-page__content"><h1>Настройки проекта недоступны</h1><p>{accessError}</p><p>Сохранённый проект не изменён.</p><button className="button" onClick={()=>setView("projects")}>Мои проекты</button><button className="button" onClick={newProject}>Новый стандартный проект</button></section></main>;
 
@@ -755,7 +794,7 @@ export default function Home() {
   </div></DiagnosticsProvider></CadProvider>;
   };
   return <AppNavigation account={account} view={view} open={sidebar} setOpen={setSidebar} buttonRef={menuButton} header={header} navigate={navigateView} navigateAlgorithm={(id,name)=>void openAlgorithmProduct(id,name)} activeAlgorithm={algorithmId} projectCount={projects.length} settings={()=>setSettingsOpen(true)} logout={logout}>
-    {renderPage()}
+    <Suspense fallback={<main className="beta-loading" role="status">Загружаем инструменты…</main>}>{renderPage()}</Suspense>
     {settingsOpen && <AppSettings theme={theme} onThemeChange={setTheme} profile={colorProfile} onProfileChange={setColorProfile} onClose={closeSettings}/>}
   </AppNavigation>;
 }

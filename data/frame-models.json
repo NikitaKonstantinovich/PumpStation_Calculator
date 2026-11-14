@@ -1,0 +1,1182 @@
+[
+  {
+    "sourceHash": "9bfa79b2ad02cdcde01a9caf907c1292aa7969129a6fae7b0f76531a027c4fd8",
+    "meshHash": "3a09f15c891ac63fb47e1921ba73ef1d446cc418dca9e5fd85d11c6637d0c5cc",
+    "meshUrl": "/model-assets/model-9bfa79b2ad02cdcde01a9caf907c1292aa7969129a6fae7b0f76531a027c4fd8-v1.stl",
+    "bounds": [
+      -237.00000000000014,
+      -46.99999999999998,
+      -300,
+      237.00000000000014,
+      2.9999999999999933,
+      300
+    ],
+    "source": "E:\\PumpStation_Calculator\\Equipment\\Frames\\Generated\\bent-410-v1\\frame-410-600-3.step",
+    "sourceMeshHash": "ffa3ce101192c6bab0894f0f9255de61da4ec512d6b0a53c518f7d4f47a0473d",
+    "translationMm": [
+      -237.00000000000014,
+      -46.99999999999998,
+      -300
+    ]
+  },
+  {
+    "sourceHash": "40525345ba963c418c64af24b3e2fe350eb298ee3b12671dc35b135a9ffe0805",
+    "meshHash": "440605f76baa7c433ced0ea8d3403653f941d6bee1c2adad5c038818540d6c06",
+    "meshUrl": "/model-assets/model-40525345ba963c418c64af24b3e2fe350eb298ee3b12671dc35b135a9ffe0805-v1.stl",
+    "bounds": [
+      -236.0000000000001,
+      -45.99999999999998,
+      -300,
+      236.0000000000001,
+      3.9999999999999933,
+      300
+    ],
+    "source": "E:\\PumpStation_Calculator\\Equipment\\Frames\\Generated\\bent-410-v1\\frame-410-600-4.step",
+    "sourceMeshHash": "1d6c3cb67078acb18cf62f53eed3714325a6d53767c2ee7f6a814c81e209d4e4",
+    "translationMm": [
+      -236.0000000000001,
+      -45.99999999999998,
+      -300
+    ]
+  },
+  {
+    "sourceHash": "c2d7d203fe0f4714a5eb2088758e64ea47690d87774b24321cc9ab4439db17da",
+    "meshHash": "e5a6a920fbaf171387d5005ee236c143598676905dd5d960b963508af2818916",
+    "meshUrl": "/model-assets/model-c2d7d203fe0f4714a5eb2088758e64ea47690d87774b24321cc9ab4439db17da-v1.stl",
+    "bounds": [
+      -235.0000000000001,
+      -44.99999999999997,
+      -300,
+      235.0000000000001,
+      4.999999999999992,
+      300
+    ],
+    "source": "E:\\PumpStation_Calculator\\Equipment\\Frames\\Generated\\bent-410-v1\\frame-410-600-5.step",
+    "sourceMeshHash": "3607693a6448e884caf0346034efeb7dc41017028824f146311ea410711ea157",
+    "translationMm": [
+      -235.0000000000001,
+      -44.99999999999997,
+      -300
+    ]
+  },
+  {
+    "sourceHash": "796dfca8f3b139ad1c847476b5149c047673e2333737ed9cb23ef81a074f9519",
+    "meshHash": "ddc6731982a4ab7a9b331edc068c456f3041d618762b4134d383b636b276b547",
+    "meshUrl": "/model-assets/model-796dfca8f3b139ad1c847476b5149c047673e2333737ed9cb23ef81a074f9519-v1.stl",
+    "bounds": [
+      -237.00000000000014,
+      -46.99999999999998,
+      -350,
+      237.00000000000014,
+      2.9999999999999933,
+      350
+    ],
+    "source": "E:\\PumpStation_Calculator\\Equipment\\Frames\\Generated\\bent-410-v1\\frame-410-700-3.step",
+    "sourceMeshHash": "a01db248f8e2b56434d437eeed5de4badc7526effe6f671e4465a1ed102e219b",
+    "translationMm": [
+      -237.00000000000014,
+      -46.99999999999998,
+      -350
+    ]
+  },
+  {
+    "sourceHash": "92d387daf05daf92fdbe2eb7e984d82e9f867eeaa23e6f01d3334dade8aab7ee",
+    "meshHash": "3829fa731a52ef4c39e7b913ba54c435682ad02683b4b1e7e5ee3756a7433b1d",
+    "meshUrl": "/model-assets/model-92d387daf05daf92fdbe2eb7e984d82e9f867eeaa23e6f01d3334dade8aab7ee-v1.stl",
+    "bounds": [
+      -236.0000000000001,
+      -45.99999999999997,
+      -350,
+      236.0000000000001,
+      3.9999999999999933,
+      350
+    ],
+    "source": "E:\\PumpStation_Calculator\\Equipment\\Frames\\Generated\\bent-410-v1\\frame-410-700-4.step",
+    "sourceMeshHash": "369b0b8a062c642e3ea89625de8e85161beb25dcb9c058550811f5ff005385cd",
+    "translationMm": [
+      -236.0000000000001,
+      -45.99999999999997,
+      -350
+    ]
+  },
+  {
+    "sourceHash": "50ce54eca81e34fb5ef0203820f5a6b2f40538d97cce348b0d72ce530f66dada",
+    "meshHash": "b6b2840a9ec5b20a121435287ef79ed3bdadb83543d9ab2c205abe139886e61d",
+    "meshUrl": "/model-assets/model-50ce54eca81e34fb5ef0203820f5a6b2f40538d97cce348b0d72ce530f66dada-v1.stl",
+    "bounds": [
+      -235.0000000000001,
+      -44.99999999999997,
+      -350,
+      235.0000000000001,
+      4.999999999999992,
+      350
+    ],
+    "source": "E:\\PumpStation_Calculator\\Equipment\\Frames\\Generated\\bent-410-v1\\frame-410-700-5.step",
+    "sourceMeshHash": "ee0e9a7f2950b443cad074088d464ec92afcb38663462113811e3b6da9869a8e",
+    "translationMm": [
+      -235.0000000000001,
+      -44.99999999999997,
+      -350
+    ]
+  },
+  {
+    "sourceHash": "1be1996a5555ca49e5c94298e253b60a7f51d951efcb93bbd24a08038a24fd94",
+    "meshHash": "92c650cde9fd729969aa05cdcddedb6bd8b49a2029bc3286f1b3ea578f4ed856",
+    "meshUrl": "/model-assets/model-1be1996a5555ca49e5c94298e253b60a7f51d951efcb93bbd24a08038a24fd94-v1.stl",
+    "bounds": [
+      -237.0000000000001,
+      -46.99999999999998,
+      -400.0000000000001,
+      237.00000000000017,
+      3.0000000000000497,
+      399.9999999999999
+    ],
+    "source": "E:\\PumpStation_Calculator\\Equipment\\Frames\\Generated\\bent-410-v1\\frame-410-800-3.step",
+    "sourceMeshHash": "62aa28954ac67706b712abdd984e2aef2a918a55e3fb701b8b629671f8c3bc4b",
+    "translationMm": [
+      -237.0000000000001,
+      -46.99999999999998,
+      -400.0000000000001
+    ]
+  },
+  {
+    "sourceHash": "bd83dece2c35a9aec1c1d3e4670595192566fc269e418d8e777067cab58628db",
+    "meshHash": "6bff33a2d9400cc8a9748036163efba63ef390f5956e96c196e58ff364c0dd3c",
+    "meshUrl": "/model-assets/model-bd83dece2c35a9aec1c1d3e4670595192566fc269e418d8e777067cab58628db-v1.stl",
+    "bounds": [
+      -236.00000000000009,
+      -45.99999999999998,
+      -400.0000000000001,
+      236.00000000000014,
+      4.000000000000007,
+      399.9999999999999
+    ],
+    "source": "E:\\PumpStation_Calculator\\Equipment\\Frames\\Generated\\bent-410-v1\\frame-410-800-4.step",
+    "sourceMeshHash": "c04afbd7fd9021b8564fac5e287c980e635fa389e0e9f48bf6c2b9693a07a529",
+    "translationMm": [
+      -236.00000000000009,
+      -45.99999999999998,
+      -400.0000000000001
+    ]
+  },
+  {
+    "sourceHash": "522be1c9b407848048b418587c604cde47d05000712b356e024878c9c598ce06",
+    "meshHash": "d3d8c8a54e6c485668b300e6797937dc3243bf405d616e2b80c56f87c3f93c06",
+    "meshUrl": "/model-assets/model-522be1c9b407848048b418587c604cde47d05000712b356e024878c9c598ce06-v1.stl",
+    "bounds": [
+      -235.00000000000009,
+      -44.99999999999997,
+      -400.0000000000001,
+      235.00000000000014,
+      5.000000000000006,
+      399.9999999999999
+    ],
+    "source": "E:\\PumpStation_Calculator\\Equipment\\Frames\\Generated\\bent-410-v1\\frame-410-800-5.step",
+    "sourceMeshHash": "353c54b72eb00159c5e2d81a9e944b8de2a4644f683f9cb499d9f63565013d53",
+    "translationMm": [
+      -235.00000000000009,
+      -44.99999999999997,
+      -400.0000000000001
+    ]
+  },
+  {
+    "sourceHash": "96b98b083fff31968647795a384175a5ddcce6cfe194bd2a8f4e45c3bb0529d2",
+    "meshHash": "bb3d160b1e998b632775c5188f1adf97cc68955074670e8eeec4d4d288bc7416",
+    "meshUrl": "/model-assets/model-96b98b083fff31968647795a384175a5ddcce6cfe194bd2a8f4e45c3bb0529d2-v1.stl",
+    "bounds": [
+      -237.00000000000014,
+      -46.99999999999998,
+      -450,
+      237.00000000000014,
+      2.999999999999979,
+      450
+    ],
+    "source": "E:\\PumpStation_Calculator\\Equipment\\Frames\\Generated\\bent-410-v1\\frame-410-900-3.step",
+    "sourceMeshHash": "b8343cd517e5f673059140465a0ca579ff554e4cc6f6487b450a244be8a44387",
+    "translationMm": [
+      -237.00000000000014,
+      -46.99999999999998,
+      -450
+    ]
+  },
+  {
+    "sourceHash": "7bdcb2006251c088c233c86c49e175b0edbecd1ca2db3430d925c122d360e99f",
+    "meshHash": "d0a483af4bc1d8efdcb509a851e20e7601d2f080c851e045f3c3e7314ede4ac5",
+    "meshUrl": "/model-assets/model-7bdcb2006251c088c233c86c49e175b0edbecd1ca2db3430d925c122d360e99f-v1.stl",
+    "bounds": [
+      -236.0000000000001,
+      -45.99999999999998,
+      -450,
+      236.0000000000001,
+      3.999999999999979,
+      450
+    ],
+    "source": "E:\\PumpStation_Calculator\\Equipment\\Frames\\Generated\\bent-410-v1\\frame-410-900-4.step",
+    "sourceMeshHash": "f026a0cdeba8ba8ab352e46a6d7466c309a2a815ed5907550f053bcfcb5c1f22",
+    "translationMm": [
+      -236.0000000000001,
+      -45.99999999999998,
+      -450
+    ]
+  },
+  {
+    "sourceHash": "71069fa1b1282a22eb736688f719616bab50fa5afe96f7106484a82d2483b98a",
+    "meshHash": "8598379327ee5aa0a86430f55515a8565ece9d29b588bfc74dd376b92fd6f1b0",
+    "meshUrl": "/model-assets/model-71069fa1b1282a22eb736688f719616bab50fa5afe96f7106484a82d2483b98a-v1.stl",
+    "bounds": [
+      -235.0000000000001,
+      -44.99999999999997,
+      -450,
+      235.0000000000001,
+      4.999999999999979,
+      450
+    ],
+    "source": "E:\\PumpStation_Calculator\\Equipment\\Frames\\Generated\\bent-410-v1\\frame-410-900-5.step",
+    "sourceMeshHash": "4d8d4640c3e1190838b97b34027ac841229d4ebb4d4b6ea875b82d45fb633e1c",
+    "translationMm": [
+      -235.0000000000001,
+      -44.99999999999997,
+      -450
+    ]
+  },
+  {
+    "sourceHash": "649166c7c32204203e826b35843b5e4dee1e9abaaca855f2b2ff9c7ed3e7d0e5",
+    "meshHash": "43a388d539e0077298ed400123da14ff433eee0c3cffb2328d1b860f84f4a95b",
+    "meshUrl": "/model-assets/model-649166c7c32204203e826b35843b5e4dee1e9abaaca855f2b2ff9c7ed3e7d0e5-v1.stl",
+    "bounds": [
+      -237.00000000000017,
+      -46.99999999999998,
+      -500,
+      237.0000000000001,
+      2.9999999999999933,
+      500
+    ],
+    "source": "E:\\PumpStation_Calculator\\Equipment\\Frames\\Generated\\bent-410-v1\\frame-410-1000-3.step",
+    "sourceMeshHash": "7043841ee2a6299dfac700700be1651ff75b0bad1a0827072bc1ab87212841bc",
+    "translationMm": [
+      -237.00000000000017,
+      -46.99999999999998,
+      -500
+    ]
+  },
+  {
+    "sourceHash": "f920d65aed2722a62a3b40668926d3374ef0c8c7d3f6ea48c3ddc6352bc12148",
+    "meshHash": "2f76766e2c1943ddf4773ef42f76cc9da98962df75b36c5298fd60fa9a543f25",
+    "meshUrl": "/model-assets/model-f920d65aed2722a62a3b40668926d3374ef0c8c7d3f6ea48c3ddc6352bc12148-v1.stl",
+    "bounds": [
+      -236.00000000000014,
+      -45.99999999999998,
+      -500,
+      236.00000000000009,
+      3.9999999999999933,
+      500
+    ],
+    "source": "E:\\PumpStation_Calculator\\Equipment\\Frames\\Generated\\bent-410-v1\\frame-410-1000-4.step",
+    "sourceMeshHash": "e5151ffc01309811fb78fa82c0070891171ea3d7b8e685f5b2f1921a9e3df21a",
+    "translationMm": [
+      -236.00000000000014,
+      -45.99999999999998,
+      -500
+    ]
+  },
+  {
+    "sourceHash": "16fa29e62569909e52463862ffea495d3a921786d6d45a290aa9b4010c5791be",
+    "meshHash": "599c39db670a305da30ecda3fe6c5c883fa8992a8ee965e87e96cc64cf8bd7ed",
+    "meshUrl": "/model-assets/model-16fa29e62569909e52463862ffea495d3a921786d6d45a290aa9b4010c5791be-v1.stl",
+    "bounds": [
+      -235.00000000000014,
+      -44.99999999999997,
+      -500,
+      235.00000000000009,
+      4.999999999999992,
+      500
+    ],
+    "source": "E:\\PumpStation_Calculator\\Equipment\\Frames\\Generated\\bent-410-v1\\frame-410-1000-5.step",
+    "sourceMeshHash": "ba68a463eba3082e36d5b37344f9a2f4232aab21af77d81528698b7ae74aba7e",
+    "translationMm": [
+      -235.00000000000014,
+      -44.99999999999997,
+      -500
+    ]
+  },
+  {
+    "sourceHash": "b3d28dc361ec6f9e249842ec13349c08748a819587346ad8cfdb61fce5954b23",
+    "meshHash": "7d7e041bc15eb618d8cf71c7ad386d4a34b0816a2465135ad3a2adba562f3a9c",
+    "meshUrl": "/model-assets/model-b3d28dc361ec6f9e249842ec13349c08748a819587346ad8cfdb61fce5954b23-v1.stl",
+    "bounds": [
+      -237.00000000000014,
+      -46.99999999999998,
+      -550,
+      237.00000000000014,
+      2.999999999999979,
+      550
+    ],
+    "source": "E:\\PumpStation_Calculator\\Equipment\\Frames\\Generated\\bent-410-v1\\frame-410-1100-3.step",
+    "sourceMeshHash": "73297b7ea3f73dba3073f0bfe27f75db71b4a0be1a5565a12a6911bf0d46406f",
+    "translationMm": [
+      -237.00000000000014,
+      -46.99999999999998,
+      -550
+    ]
+  },
+  {
+    "sourceHash": "de0c94ad4fd45061adb7df9cdedca6da1ded4a6946155c772bf2000028b355af",
+    "meshHash": "567c2c3b2357084d72238914cd95f13a31f4e9457ee514f04be02debb5d2d343",
+    "meshUrl": "/model-assets/model-de0c94ad4fd45061adb7df9cdedca6da1ded4a6946155c772bf2000028b355af-v1.stl",
+    "bounds": [
+      -236.0000000000001,
+      -45.99999999999997,
+      -550,
+      236.0000000000001,
+      3.999999999999979,
+      550
+    ],
+    "source": "E:\\PumpStation_Calculator\\Equipment\\Frames\\Generated\\bent-410-v1\\frame-410-1100-4.step",
+    "sourceMeshHash": "2a6a42b24c26c2d12fd6f5e641571c350f2315c40782d1f35009ee130195abae",
+    "translationMm": [
+      -236.0000000000001,
+      -45.99999999999997,
+      -550
+    ]
+  },
+  {
+    "sourceHash": "83b2377082dbffe933ed5f3c0ba4d2b8524ec921200278024d0e854f63ab5a50",
+    "meshHash": "363e847610a103c304f4380536751a49c736deee0bade5ee2ac6edf3833d2cb0",
+    "meshUrl": "/model-assets/model-83b2377082dbffe933ed5f3c0ba4d2b8524ec921200278024d0e854f63ab5a50-v1.stl",
+    "bounds": [
+      -235.0000000000001,
+      -44.99999999999997,
+      -550,
+      235.0000000000001,
+      4.999999999999979,
+      550
+    ],
+    "source": "E:\\PumpStation_Calculator\\Equipment\\Frames\\Generated\\bent-410-v1\\frame-410-1100-5.step",
+    "sourceMeshHash": "21086b27ec176f0897204d802d0fe23deeb4ecc3769033725873ba0baee3f527",
+    "translationMm": [
+      -235.0000000000001,
+      -44.99999999999997,
+      -550
+    ]
+  },
+  {
+    "sourceHash": "2832c1c6c7f40c61999a7368ae1053fee9453fc290ae968fbb8edbe0e0ada793",
+    "meshHash": "c01bff261ad6d39d4a6c4077d396b517aa70e1f5a97be61d9a1efe5d91d3ecb2",
+    "meshUrl": "/model-assets/model-2832c1c6c7f40c61999a7368ae1053fee9453fc290ae968fbb8edbe0e0ada793-v1.stl",
+    "bounds": [
+      -237.00000000000023,
+      -46.99999999999998,
+      -600.0000000000001,
+      237.00000000000009,
+      2.9999999999999005,
+      599.9999999999999
+    ],
+    "source": "E:\\PumpStation_Calculator\\Equipment\\Frames\\Generated\\bent-410-v1\\frame-410-1200-3.step",
+    "sourceMeshHash": "ddcc38e8b34fb8c02b2c4eb5636b83530291d779ac04afdbe99b82ea6041db6d",
+    "translationMm": [
+      -237.00000000000023,
+      -46.99999999999998,
+      -600.0000000000001
+    ]
+  },
+  {
+    "sourceHash": "b252224ae4087102a21abfecefbcb0cbc503ea9d6f89824bf916ca7c10dc34f6",
+    "meshHash": "1cc6489520da03d1843350aa8d364d04d113152364610dbdf045dddd728f8b5d",
+    "meshUrl": "/model-assets/model-b252224ae4087102a21abfecefbcb0cbc503ea9d6f89824bf916ca7c10dc34f6-v1.stl",
+    "bounds": [
+      -236.0000000000002,
+      -45.99999999999998,
+      -600.0000000000001,
+      236.00000000000006,
+      3.9999999999999005,
+      599.9999999999999
+    ],
+    "source": "E:\\PumpStation_Calculator\\Equipment\\Frames\\Generated\\bent-410-v1\\frame-410-1200-4.step",
+    "sourceMeshHash": "3554b0ed3c20a8003c30a531aa8f9db4f78805f158cf904f25c137b4b0bc2377",
+    "translationMm": [
+      -236.0000000000002,
+      -45.99999999999998,
+      -600.0000000000001
+    ]
+  },
+  {
+    "sourceHash": "70b5f39f0025c8cb541e4c3f1432407594d41868dee97098958514cea06560e0",
+    "meshHash": "5863535e44e4f2bb6d87c7a586e8adadaf658afebebc4cb3b10033f94b3a77f0",
+    "meshUrl": "/model-assets/model-70b5f39f0025c8cb541e4c3f1432407594d41868dee97098958514cea06560e0-v1.stl",
+    "bounds": [
+      -235.0000000000002,
+      -44.99999999999997,
+      -600.0000000000001,
+      235.00000000000003,
+      4.9999999999999645,
+      599.9999999999999
+    ],
+    "source": "E:\\PumpStation_Calculator\\Equipment\\Frames\\Generated\\bent-410-v1\\frame-410-1200-5.step",
+    "sourceMeshHash": "0c2295b5b6e45b49fffcda14efb42a5619807f816ff406ad2a47b02fd1305056",
+    "translationMm": [
+      -235.0000000000002,
+      -44.99999999999997,
+      -600.0000000000001
+    ]
+  },
+  {
+    "sourceHash": "df4a4522f85297b8d84f50f1cc41834f5ff2d317ca117cb5f66eff6fbd158776",
+    "meshHash": "86ac479af70cd3f227e7e84922113791388c18473189e0a05933f33fb09fc6e3",
+    "meshUrl": "/model-assets/model-df4a4522f85297b8d84f50f1cc41834f5ff2d317ca117cb5f66eff6fbd158776-v1.stl",
+    "bounds": [
+      -237.00000000000017,
+      -46.99999999999998,
+      -650.0000000000001,
+      237.0000000000001,
+      2.9999999999999933,
+      649.9999999999999
+    ],
+    "source": "E:\\PumpStation_Calculator\\Equipment\\Frames\\Generated\\bent-410-v1\\frame-410-1300-3.step",
+    "sourceMeshHash": "2cc0f698c484ebc3e7279b8844f407f9da2f45b5e48f2785149cf6756b0c3f96",
+    "translationMm": [
+      -237.00000000000017,
+      -46.99999999999998,
+      -650.0000000000001
+    ]
+  },
+  {
+    "sourceHash": "0aabe3cf7767ba2de786fdd2c3c5b4db2f941b9d361e0f5a349454da00af8be3",
+    "meshHash": "45c55df6f650e117a58066ad94d87ad54de3f28d027268a6a0b7bac233d1c6da",
+    "meshUrl": "/model-assets/model-0aabe3cf7767ba2de786fdd2c3c5b4db2f941b9d361e0f5a349454da00af8be3-v1.stl",
+    "bounds": [
+      -236.00000000000014,
+      -45.99999999999998,
+      -650.0000000000001,
+      236.00000000000009,
+      3.9999999999999933,
+      649.9999999999999
+    ],
+    "source": "E:\\PumpStation_Calculator\\Equipment\\Frames\\Generated\\bent-410-v1\\frame-410-1300-4.step",
+    "sourceMeshHash": "87fb69e1178d3a344244632afe6f7e05d4d5674ae716fe024c12ca79768d778d",
+    "translationMm": [
+      -236.00000000000014,
+      -45.99999999999998,
+      -650.0000000000001
+    ]
+  },
+  {
+    "sourceHash": "1ee59bfae5443e3e279f85d866650565ce1a34bf76a1f62e327daa934914e174",
+    "meshHash": "92eaa54c53744964c2ddcd8761e89b73d4c986156dc3972bdd83c705c6ee6629",
+    "meshUrl": "/model-assets/model-1ee59bfae5443e3e279f85d866650565ce1a34bf76a1f62e327daa934914e174-v1.stl",
+    "bounds": [
+      -235.00000000000014,
+      -44.99999999999997,
+      -650.0000000000001,
+      235.00000000000009,
+      4.999999999999992,
+      649.9999999999999
+    ],
+    "source": "E:\\PumpStation_Calculator\\Equipment\\Frames\\Generated\\bent-410-v1\\frame-410-1300-5.step",
+    "sourceMeshHash": "20d7c1c170f5322251a463c1b8252bc0b6516557cfb93dc34f184853aa303f63",
+    "translationMm": [
+      -235.00000000000014,
+      -44.99999999999997,
+      -650.0000000000001
+    ]
+  },
+  {
+    "sourceHash": "f8fc6483f7e188060108f2ec0581179cf56a7c9dc57a13740db669756683815c",
+    "meshHash": "923f7cf7706c2e5cefc09882c39f6643e0b51496a987bd201fd6489dbad7b015",
+    "meshUrl": "/model-assets/model-f8fc6483f7e188060108f2ec0581179cf56a7c9dc57a13740db669756683815c-v1.stl",
+    "bounds": [
+      -237.00000000000017,
+      -46.99999999999998,
+      -700.0000000000002,
+      237.0000000000001,
+      2.999999999999979,
+      699.9999999999998
+    ],
+    "source": "E:\\PumpStation_Calculator\\Equipment\\Frames\\Generated\\bent-410-v1\\frame-410-1400-3.step",
+    "sourceMeshHash": "3b06d2f58db89d6090231608eadf370e91dd8a529297e4385458ccaf410365d1",
+    "translationMm": [
+      -237.00000000000017,
+      -46.99999999999998,
+      -700.0000000000002
+    ]
+  },
+  {
+    "sourceHash": "8f264a877bb3435c96ac9ee4c61b34cd8d387604733a8e3c20138420a1379e78",
+    "meshHash": "6b43079b37ff3f8a58b68049ebc6bea9ee4d4b101f00b9ea1f0a00e138d60b67",
+    "meshUrl": "/model-assets/model-8f264a877bb3435c96ac9ee4c61b34cd8d387604733a8e3c20138420a1379e78-v1.stl",
+    "bounds": [
+      -236.00000000000014,
+      -45.99999999999997,
+      -700.0000000000002,
+      236.00000000000009,
+      3.999999999999979,
+      699.9999999999998
+    ],
+    "source": "E:\\PumpStation_Calculator\\Equipment\\Frames\\Generated\\bent-410-v1\\frame-410-1400-4.step",
+    "sourceMeshHash": "390cc628c72b023f24204260f73424b4bc2ab2d2bbf953c2a2c58dac990e7c4f",
+    "translationMm": [
+      -236.00000000000014,
+      -45.99999999999997,
+      -700.0000000000002
+    ]
+  },
+  {
+    "sourceHash": "200a9099e81e52857c40168d5a2703447d7b7b33ccd6a17982fae3ae2a3a5dd9",
+    "meshHash": "134a80429ce45d0eec6cafe4cdc7a1c0b31980203590321c57b415897743b769",
+    "meshUrl": "/model-assets/model-200a9099e81e52857c40168d5a2703447d7b7b33ccd6a17982fae3ae2a3a5dd9-v1.stl",
+    "bounds": [
+      -235.00000000000014,
+      -44.99999999999997,
+      -700.0000000000002,
+      235.00000000000009,
+      4.999999999999979,
+      699.9999999999998
+    ],
+    "source": "E:\\PumpStation_Calculator\\Equipment\\Frames\\Generated\\bent-410-v1\\frame-410-1400-5.step",
+    "sourceMeshHash": "1f8552f59c845bf8860dc85afe1884a87949e2cdc58cd80471a7c5ad3f9d37bf",
+    "translationMm": [
+      -235.00000000000014,
+      -44.99999999999997,
+      -700.0000000000002
+    ]
+  },
+  {
+    "sourceHash": "8cd03c2d167e77b53ee431905bee20aa2ae7420a6556f0ab75dec89f69b895ba",
+    "meshHash": "fadca7600489f8522d8b6806956baa5373871588bbb92a98819e75c11fc74397",
+    "meshUrl": "/model-assets/model-8cd03c2d167e77b53ee431905bee20aa2ae7420a6556f0ab75dec89f69b895ba-v1.stl",
+    "bounds": [
+      -237.00000000000014,
+      -46.99999999999998,
+      -750,
+      237.00000000000014,
+      2.999999999999979,
+      750
+    ],
+    "source": "E:\\PumpStation_Calculator\\Equipment\\Frames\\Generated\\bent-410-v1\\frame-410-1500-3.step",
+    "sourceMeshHash": "9fc76e0f8bbd0eb7179766db64c27c7b7e8ea089bb4730a631272a98d88dce48",
+    "translationMm": [
+      -237.00000000000014,
+      -46.99999999999998,
+      -750
+    ]
+  },
+  {
+    "sourceHash": "b2e207c4c221d090d32e541403d0b7574637736ebd5cdacbac0e0e8048cf1f92",
+    "meshHash": "1169aefec87d19ebec9f5348f4b0d597f9909ca893bbf7855e460f37079d7a8f",
+    "meshUrl": "/model-assets/model-b2e207c4c221d090d32e541403d0b7574637736ebd5cdacbac0e0e8048cf1f92-v1.stl",
+    "bounds": [
+      -236.0000000000001,
+      -45.99999999999998,
+      -750,
+      236.0000000000001,
+      3.999999999999979,
+      750
+    ],
+    "source": "E:\\PumpStation_Calculator\\Equipment\\Frames\\Generated\\bent-410-v1\\frame-410-1500-4.step",
+    "sourceMeshHash": "7064940b718c7eb314d897200f6e3f82e7b8b57cc7a6efac160f825b3e9fe1aa",
+    "translationMm": [
+      -236.0000000000001,
+      -45.99999999999998,
+      -750
+    ]
+  },
+  {
+    "sourceHash": "b82613a970c8deaa97902e2870096658b38ce2d2821e7dc03e392739cb80e7b1",
+    "meshHash": "cee93540d0d816850afa8fbdd2e4f4786099560605b1256de82e4aafb54a5654",
+    "meshUrl": "/model-assets/model-b82613a970c8deaa97902e2870096658b38ce2d2821e7dc03e392739cb80e7b1-v1.stl",
+    "bounds": [
+      -235.0000000000001,
+      -44.99999999999997,
+      -750,
+      235.0000000000001,
+      4.999999999999979,
+      750
+    ],
+    "source": "E:\\PumpStation_Calculator\\Equipment\\Frames\\Generated\\bent-410-v1\\frame-410-1500-5.step",
+    "sourceMeshHash": "c434b020baa9496f56ddac620e039b9ee502997833ac83ba32096a5425554486",
+    "translationMm": [
+      -235.0000000000001,
+      -44.99999999999997,
+      -750
+    ]
+  },
+  {
+    "sourceHash": "c6da19895a8c499b7b1fdd317081f2d3039f50d5a393552e45513f70999c8de9",
+    "meshHash": "25354c13b2a4a11ca31a7f58d99cfc3e8c6af41d28921c80ab6b64fdf02f0d99",
+    "meshUrl": "/model-assets/model-c6da19895a8c499b7b1fdd317081f2d3039f50d5a393552e45513f70999c8de9-v1.stl",
+    "bounds": [
+      -237.0000000000001,
+      -46.99999999999998,
+      -799.9999999999998,
+      237.0000000000002,
+      3.000000000000007,
+      800.0000000000002
+    ],
+    "source": "E:\\PumpStation_Calculator\\Equipment\\Frames\\Generated\\bent-410-v1\\frame-410-1600-3.step",
+    "sourceMeshHash": "b71522ffcca87ad8f9184f4438952def4a29c4b6b4c07ac9be3de62db216bc71",
+    "translationMm": [
+      -237.0000000000001,
+      -46.99999999999998,
+      -799.9999999999998
+    ]
+  },
+  {
+    "sourceHash": "9aa12f1871d11821385b1fd7bf2a64adf52961a889d661f3c4086bdff8317367",
+    "meshHash": "bd42c1f0c4612ed1f42150c761f9a4582b7f1801b3581fd64225efff8945bb5f",
+    "meshUrl": "/model-assets/model-9aa12f1871d11821385b1fd7bf2a64adf52961a889d661f3c4086bdff8317367-v1.stl",
+    "bounds": [
+      -236.00000000000006,
+      -45.99999999999997,
+      -799.9999999999998,
+      236.00000000000017,
+      4.000000000000007,
+      800.0000000000002
+    ],
+    "source": "E:\\PumpStation_Calculator\\Equipment\\Frames\\Generated\\bent-410-v1\\frame-410-1600-4.step",
+    "sourceMeshHash": "d4e35b70104d08a4e2d96fd0f1e04551db8c8638c40453ad113e437b26573246",
+    "translationMm": [
+      -236.00000000000006,
+      -45.99999999999997,
+      -799.9999999999998
+    ]
+  },
+  {
+    "sourceHash": "7166028f5fa5984c62fb8e75a294d6bd1cb84e1c4429416d211432bf19ad63fe",
+    "meshHash": "89a3cec3e34d082e9e6ef0f0e335af3a48e251d6e5abe3a29562992c0bb01773",
+    "meshUrl": "/model-assets/model-7166028f5fa5984c62fb8e75a294d6bd1cb84e1c4429416d211432bf19ad63fe-v1.stl",
+    "bounds": [
+      -235.00000000000006,
+      -44.99999999999997,
+      -799.9999999999998,
+      235.00000000000017,
+      5.000000000000006,
+      800.0000000000002
+    ],
+    "source": "E:\\PumpStation_Calculator\\Equipment\\Frames\\Generated\\bent-410-v1\\frame-410-1600-5.step",
+    "sourceMeshHash": "e8be74a4c7d79361b92b1d11605dd5abbf657c02a0467d09e6db4cf9949efe5c",
+    "translationMm": [
+      -235.00000000000006,
+      -44.99999999999997,
+      -799.9999999999998
+    ]
+  },
+  {
+    "sourceHash": "8ac58f7d1624cc54227be9688e1e52a2431ee1e797f8e78030c08dfe6d79a7a7",
+    "meshHash": "a45b2b60d5941afd219861cbb3b70dd98dd4fc7b962076c8f0e4149f4ee059da",
+    "meshUrl": "/model-assets/model-8ac58f7d1624cc54227be9688e1e52a2431ee1e797f8e78030c08dfe6d79a7a7-v1.stl",
+    "bounds": [
+      -237.00000000000014,
+      -46.99999999999998,
+      -849.9999999999999,
+      237.00000000000014,
+      2.999999999999979,
+      850.0000000000003
+    ],
+    "source": "E:\\PumpStation_Calculator\\Equipment\\Frames\\Generated\\bent-410-v1\\frame-410-1700-3.step",
+    "sourceMeshHash": "52922b47e5108f2bc46458bd873abec1c91af90c08dd11bda7330141ea5a4640",
+    "translationMm": [
+      -237.00000000000014,
+      -46.99999999999998,
+      -849.9999999999999
+    ]
+  },
+  {
+    "sourceHash": "5c523b3510a5bf3238705ba4043a39b30ec58a23b3ac94902e33870459ed8870",
+    "meshHash": "af63e200c049013915d083a2e6bc6d9ff2ae7f2b24d7a6ef2fd2c758785fdd45",
+    "meshUrl": "/model-assets/model-5c523b3510a5bf3238705ba4043a39b30ec58a23b3ac94902e33870459ed8870-v1.stl",
+    "bounds": [
+      -236.0000000000001,
+      -45.99999999999998,
+      -849.9999999999999,
+      236.0000000000001,
+      3.999999999999979,
+      850.0000000000003
+    ],
+    "source": "E:\\PumpStation_Calculator\\Equipment\\Frames\\Generated\\bent-410-v1\\frame-410-1700-4.step",
+    "sourceMeshHash": "57f011e5afb7811c62f4fdc51b609d88910dcee00ff94d657c5e8bb689e5d090",
+    "translationMm": [
+      -236.0000000000001,
+      -45.99999999999998,
+      -849.9999999999999
+    ]
+  },
+  {
+    "sourceHash": "524b4265417c02c73074a94980ecd95fa96874c4ca2aedaf2f3b421093aaff72",
+    "meshHash": "d57f1e30b5b5c3c479caa049282301b709033a50bab84406b9079355fb777e88",
+    "meshUrl": "/model-assets/model-524b4265417c02c73074a94980ecd95fa96874c4ca2aedaf2f3b421093aaff72-v1.stl",
+    "bounds": [
+      -235.0000000000001,
+      -44.99999999999997,
+      -849.9999999999999,
+      235.0000000000001,
+      4.999999999999979,
+      850.0000000000003
+    ],
+    "source": "E:\\PumpStation_Calculator\\Equipment\\Frames\\Generated\\bent-410-v1\\frame-410-1700-5.step",
+    "sourceMeshHash": "b03d309e3bd663fe019e5bb945b637ccbdf00ed12873249f2dc1a9cdc6904231",
+    "translationMm": [
+      -235.0000000000001,
+      -44.99999999999997,
+      -849.9999999999999
+    ]
+  },
+  {
+    "sourceHash": "a3967ef17711c2fe35a99c66ea34d5f445cd8f8987be48e94f53f61537c158f3",
+    "meshHash": "ea6474dbca35d152b73e06d33e916b98bb8f4e0f8ecc4e171a6cdd6f9e516199",
+    "meshUrl": "/model-assets/model-a3967ef17711c2fe35a99c66ea34d5f445cd8f8987be48e94f53f61537c158f3-v1.stl",
+    "bounds": [
+      -237.0000000000001,
+      -46.999999999999986,
+      -899.9999999999999,
+      237.00000000000017,
+      3.000000000000008,
+      900.0000000000001
+    ],
+    "source": "E:\\PumpStation_Calculator\\Equipment\\Frames\\Generated\\bent-410-v1\\frame-410-1800-3.step",
+    "sourceMeshHash": "1aed35b58e961c958aa99b56d7a998571acd24aa7a15109c52b6f2742f80c3dd",
+    "translationMm": [
+      -237.0000000000001,
+      -46.999999999999986,
+      -899.9999999999999
+    ]
+  },
+  {
+    "sourceHash": "676d398c816115fbc7007fa38beba5b5447e01cfef5c7b9c7bc97cbef66fbf85",
+    "meshHash": "90d21678436393ccb1d0f9776bb1b60dc55fb0237b42791ae1882237821d85b4",
+    "meshUrl": "/model-assets/model-676d398c816115fbc7007fa38beba5b5447e01cfef5c7b9c7bc97cbef66fbf85-v1.stl",
+    "bounds": [
+      -236.00000000000009,
+      -45.99999999999999,
+      -899.9999999999999,
+      236.00000000000017,
+      4.000000000000008,
+      900.0000000000001
+    ],
+    "source": "E:\\PumpStation_Calculator\\Equipment\\Frames\\Generated\\bent-410-v1\\frame-410-1800-4.step",
+    "sourceMeshHash": "07a0a6642128cd0252c2bc1f3ed44271a25cc5664cc9ddb4237c6e5e80aa8ddb",
+    "translationMm": [
+      -236.00000000000009,
+      -45.99999999999999,
+      -899.9999999999999
+    ]
+  },
+  {
+    "sourceHash": "15036c6eaef376c4d4f49fb3c69200f74808397e217692fe5e9c956e53492cbc",
+    "meshHash": "b589e4e0f957f50e98038363cdc0362cc863985084d2820909395e5d5722fab9",
+    "meshUrl": "/model-assets/model-15036c6eaef376c4d4f49fb3c69200f74808397e217692fe5e9c956e53492cbc-v1.stl",
+    "bounds": [
+      -235.00000000000009,
+      -44.999999999999986,
+      -899.9999999999999,
+      235.00000000000014,
+      5.000000000000008,
+      900.0000000000001
+    ],
+    "source": "E:\\PumpStation_Calculator\\Equipment\\Frames\\Generated\\bent-410-v1\\frame-410-1800-5.step",
+    "sourceMeshHash": "37b325e8ab36546848e98cc7356d755834e5b5f764967d802aaa10f8b994b387",
+    "translationMm": [
+      -235.00000000000009,
+      -44.999999999999986,
+      -899.9999999999999
+    ]
+  },
+  {
+    "sourceHash": "226f9aaddcf5e8d49845abc158b92816ef6fc67015304663f11052fd7edd4020",
+    "meshHash": "0ba5204b33bee2dbdcca627d0096efe5394aeb5121013476c49f6f442c3b19aa",
+    "meshUrl": "/model-assets/model-226f9aaddcf5e8d49845abc158b92816ef6fc67015304663f11052fd7edd4020-v1.stl",
+    "bounds": [
+      -237.00000000000017,
+      -46.99999999999998,
+      -950,
+      237.0000000000001,
+      2.9999999999999933,
+      949.9999999999995
+    ],
+    "source": "E:\\PumpStation_Calculator\\Equipment\\Frames\\Generated\\bent-410-v1\\frame-410-1900-3.step",
+    "sourceMeshHash": "ad41206c0dc804a1c1a0e12ea6dd2bfbaa1acefe62c499e92f94a4089d43a694",
+    "translationMm": [
+      -237.00000000000017,
+      -46.99999999999998,
+      -950
+    ]
+  },
+  {
+    "sourceHash": "67ef37c5389d40a9d31c45271f961a46c278e55667c44d42eba06fa6e977b802",
+    "meshHash": "3a6d669947cde2db7bd739915bdd3c5f04f426ac1b379353e202e12306494128",
+    "meshUrl": "/model-assets/model-67ef37c5389d40a9d31c45271f961a46c278e55667c44d42eba06fa6e977b802-v1.stl",
+    "bounds": [
+      -236.00000000000014,
+      -45.99999999999998,
+      -950,
+      236.00000000000009,
+      3.9999999999999933,
+      949.9999999999995
+    ],
+    "source": "E:\\PumpStation_Calculator\\Equipment\\Frames\\Generated\\bent-410-v1\\frame-410-1900-4.step",
+    "sourceMeshHash": "b7048e7d91512d8c3088857c93e7dc6c4b0107ea18c1b1f2313a3daf5a4002e0",
+    "translationMm": [
+      -236.00000000000014,
+      -45.99999999999998,
+      -950
+    ]
+  },
+  {
+    "sourceHash": "f2918ea9da68eb2e18634a0e9beaf941df6e66ebaa9b718a796e0ca97b252635",
+    "meshHash": "adc0ee351803356fc079560e5fa9bc63c7c6639c073919f657a77e381c04ed16",
+    "meshUrl": "/model-assets/model-f2918ea9da68eb2e18634a0e9beaf941df6e66ebaa9b718a796e0ca97b252635-v1.stl",
+    "bounds": [
+      -235.00000000000014,
+      -44.99999999999997,
+      -950,
+      235.00000000000009,
+      4.999999999999992,
+      949.9999999999995
+    ],
+    "source": "E:\\PumpStation_Calculator\\Equipment\\Frames\\Generated\\bent-410-v1\\frame-410-1900-5.step",
+    "sourceMeshHash": "bf9d70ae132546dcc26df41f974d606836a0021a107261be2e91a8a6bb74c646",
+    "translationMm": [
+      -235.00000000000014,
+      -44.99999999999997,
+      -950
+    ]
+  },
+  {
+    "sourceHash": "8b0db6e10ebd014c79a90651fdb384b2250be33332385e538042565a9709eee8",
+    "meshHash": "b24028b5d3606834d731dc0a010329c6d4e69e5b3459d8965c11b0cab0fb2315",
+    "meshUrl": "/model-assets/model-8b0db6e10ebd014c79a90651fdb384b2250be33332385e538042565a9709eee8-v1.stl",
+    "bounds": [
+      -237.00000000000017,
+      -46.99999999999998,
+      -1000.0000000000002,
+      237.0000000000001,
+      2.9999999999999933,
+      999.9999999999998
+    ],
+    "source": "E:\\PumpStation_Calculator\\Equipment\\Frames\\Generated\\bent-410-v1\\frame-410-2000-3.step",
+    "sourceMeshHash": "2fe5b3b5e2bb8161fb4f44d7e5207a89643bbf1bb5bba965b634aa9bc024953d",
+    "translationMm": [
+      -237.00000000000017,
+      -46.99999999999998,
+      -1000.0000000000002
+    ]
+  },
+  {
+    "sourceHash": "32bea032042d98442a433f16e192b09c64a5744c7001e09026fb8193544c0a36",
+    "meshHash": "69a0695f5b82791293fb49e55965d606bcbd629aff2ca04d76bb7d0e2e2077c2",
+    "meshUrl": "/model-assets/model-32bea032042d98442a433f16e192b09c64a5744c7001e09026fb8193544c0a36-v1.stl",
+    "bounds": [
+      -236.00000000000014,
+      -45.99999999999997,
+      -1000.0000000000002,
+      236.00000000000009,
+      3.9999999999999933,
+      999.9999999999998
+    ],
+    "source": "E:\\PumpStation_Calculator\\Equipment\\Frames\\Generated\\bent-410-v1\\frame-410-2000-4.step",
+    "sourceMeshHash": "d25b5b07a74a4e6f2d1ba83818ad4fe84999b147855d6b4d94b951b023fde873",
+    "translationMm": [
+      -236.00000000000014,
+      -45.99999999999997,
+      -1000.0000000000002
+    ]
+  },
+  {
+    "sourceHash": "76f5426780913798d3d266aff39742fe1de9a63a31eba53ea4297df415954202",
+    "meshHash": "d1584555b4259cdf0b9b965b5bed7595be91ea59d9c87095a7e4fc0cbf1390fe",
+    "meshUrl": "/model-assets/model-76f5426780913798d3d266aff39742fe1de9a63a31eba53ea4297df415954202-v1.stl",
+    "bounds": [
+      -235.00000000000014,
+      -44.99999999999997,
+      -1000.0000000000002,
+      235.00000000000009,
+      4.999999999999992,
+      999.9999999999998
+    ],
+    "source": "E:\\PumpStation_Calculator\\Equipment\\Frames\\Generated\\bent-410-v1\\frame-410-2000-5.step",
+    "sourceMeshHash": "7b4d9e8861f46c073ac6abc0a387aff6879b851a00ea68508fb0e2f9d086bef3",
+    "translationMm": [
+      -235.00000000000014,
+      -44.99999999999997,
+      -1000.0000000000002
+    ]
+  },
+  {
+    "source": "E:\\PumpStation_Calculator\\Equipment\\Fasteners\\3D\\Виброопоры\\Виброопора EC 100х75 А М16.SLDPRT",
+    "sourceHash": "61402362e1b7f7c753f61433761b89e2ad61cb34809ac3d783cca24e73adb111",
+    "meshHash": "c4688402d655e37ccd568659bba7aa30bb69510392c28da99fbeeaa27675f581",
+    "meshUrl": "/model-assets/model-61402362e1b7f7c753f61433761b89e2ad61cb34809ac3d783cca24e73adb111-v1.stl",
+    "bounds": [
+      -50,
+      -80.49999999999999,
+      -49.999999999999986,
+      49.99999999999997,
+      80.49999999999999,
+      49.999999999999986
+    ]
+  },
+  {
+    "source": "E:\\PumpStation_Calculator\\Equipment\\Fasteners\\3D\\Виброопоры\\Виброопора EC 30х20 А М8.SLDPRT",
+    "sourceHash": "db4dd1ff89fe4d0471467d09fec7aae9881cb2dfb78db63264b94d97d5c58618",
+    "meshHash": "b2c2b89900dab05f2786e35d3928ed612857f0e94caa2d117cd07a4cd51ada60",
+    "meshUrl": "/model-assets/model-db4dd1ff89fe4d0471467d09fec7aae9881cb2dfb78db63264b94d97d5c58618-v1.stl",
+    "bounds": [
+      -14.999999999999995,
+      -31.999999999999993,
+      -14.999999999999995,
+      14.999999999999995,
+      32,
+      14.999999999999995
+    ]
+  },
+  {
+    "source": "E:\\PumpStation_Calculator\\Equipment\\Fasteners\\3D\\Виброопоры\\Виброопора EC 40х30 А М8.SLDPRT",
+    "sourceHash": "27a187a7071210aba381c9091ed0f6153562a4c8858f2d9fefc6fddcc385d20a",
+    "meshHash": "bfc3eaa438d5d0f2d2352e1ba519713da6a26bd9ff9cf438616bd4983dac0e3c",
+    "meshUrl": "/model-assets/model-27a187a7071210aba381c9091ed0f6153562a4c8858f2d9fefc6fddcc385d20a-v1.stl",
+    "bounds": [
+      -19.999999999999993,
+      -37.00000000000002,
+      -19.999999999999993,
+      19.999999999999993,
+      37.00000000000001,
+      19.999999999999993
+    ]
+  },
+  {
+    "source": "E:\\PumpStation_Calculator\\Equipment\\Fasteners\\3D\\Виброопоры\\Виброопора EC 50х20 А М10.SLDPRT",
+    "sourceHash": "26d3efaaafc96606d5f9fa5fa57b75ad50fb95833e688f9083aa65b33f8a67ba",
+    "meshHash": "f4e3eafde3f6cd93814dda3c8f9341e0a6f0f0f694dfccea3da0dc97af9a92ba",
+    "meshUrl": "/model-assets/model-26d3efaaafc96606d5f9fa5fa57b75ad50fb95833e688f9083aa65b33f8a67ba-v1.stl",
+    "bounds": [
+      -25.000000000000004,
+      -37.5,
+      -25.000000000000004,
+      25.000000000000004,
+      37.5,
+      25.000000000000004
+    ]
+  },
+  {
+    "source": "E:\\PumpStation_Calculator\\Equipment\\Fasteners\\3D\\Виброопоры\\Виброопора EC 50х25 B М10.SLDPRT",
+    "sourceHash": "4a095d2c819eaa310f750603c4df70d502a4c7b15ceb6d26a33e31580a772e4f",
+    "meshHash": "64389f29f50fd2ae87210b6911954ccef9da173a9b82784ccd84de95425faeb7",
+    "meshUrl": "/model-assets/model-4a095d2c819eaa310f750603c4df70d502a4c7b15ceb6d26a33e31580a772e4f-v1.stl",
+    "bounds": [
+      -25,
+      -12.500000000000002,
+      -24.999999999999993,
+      24.999999999999986,
+      39.5,
+      24.999999999999993
+    ]
+  },
+  {
+    "source": "E:\\PumpStation_Calculator\\Equipment\\Fasteners\\3D\\Виброопоры\\Виброопора EC 70х60 А М10.SLDPRT",
+    "sourceHash": "4efdf95056ac0a34f55afa59f0bd55f382950cb759dae27fb67b143ac71e2d8b",
+    "meshHash": "f4c82da876cc0969c6793cfd5e5128334b06e9d65610eeb3f70b5eca45cb3d15",
+    "meshUrl": "/model-assets/model-4efdf95056ac0a34f55afa59f0bd55f382950cb759dae27fb67b143ac71e2d8b-v1.stl",
+    "bounds": [
+      -35,
+      -57.49999999999999,
+      -34.99999999999999,
+      34.99999999999998,
+      57.49999999999999,
+      34.99999999999999
+    ]
+  },
+  {
+    "source": "E:\\PumpStation_Calculator\\Equipment\\Fasteners\\3D\\Виброопоры\\Виброопора RF-V120P.SLDPRT",
+    "sourceHash": "0a824273aca1c6cd95d0113888dab6f290623cca82bc6bff5efad6b918ec9435",
+    "meshHash": "2ee7059558f569ccf727f5b5a0101b1f87b9f1ba7ad3d04b4e280269859dd795",
+    "meshUrl": "/model-assets/model-0a824273aca1c6cd95d0113888dab6f290623cca82bc6bff5efad6b918ec9435-v1.stl",
+    "bounds": [
+      -19.99999999999988,
+      -32.999999999999915,
+      -19.999999999999783,
+      20.000000000000156,
+      33.00000000000002,
+      20.000000000000227
+    ]
+  },
+  {
+    "source": "E:\\PumpStation_Calculator\\Equipment\\Fasteners\\3D\\Виброопоры\\Виброопора КИВ4.SLDPRT",
+    "sourceHash": "b03923d6e0319732266d4958a94738760d82f7cdf9a1483f11595d17e27f4d17",
+    "meshHash": "272889d3e7ea57d9854a68c1120e13b399d617229a8d610d48677217a5485a3c",
+    "meshUrl": "/model-assets/model-b03923d6e0319732266d4958a94738760d82f7cdf9a1483f11595d17e27f4d17-v1.stl",
+    "bounds": [
+      -17.5,
+      -6.123233995736766e-16,
+      -17.5,
+      17.5,
+      86,
+      17.5
+    ]
+  },
+  {
+    "source": "E:\\PumpStation_Calculator\\Equipment\\Fasteners\\3D\\Болты\\DIN580\\Рым-болт М8 DIN580.SLDPRT",
+    "sourceHash": "b37dc12fbe1007b4e59f326151d2a0bc3c18ddaa9dde36372272eb494e81d439",
+    "meshHash": "446f26781a0be57c44bf2964a15f6afd3d422ad96b27da59a4634dbab3b728e0",
+    "meshUrl": "/model-assets/model-b37dc12fbe1007b4e59f326151d2a0bc3c18ddaa9dde36372272eb494e81d439-v1.stl",
+    "bounds": [
+      -17.999997186433287,
+      -13,
+      -10,
+      17.999987132418,
+      35.99999169276802,
+      10
+    ]
+  },
+  {
+    "source": "E:\\PumpStation_Calculator\\Equipment\\Fasteners\\3D\\Болты\\DIN580\\Рым-болт М10 DIN580.SLDPRT",
+    "sourceHash": "3af7ab379f11e0c70c478ec8a74487333bc1f48092abc3904bdee76ec8ed0553",
+    "meshHash": "493ced80a6fd1ad5efaea7d7d7a9575eeb97851dc91bad80465b561e4ab33b54",
+    "meshUrl": "/model-assets/model-3af7ab379f11e0c70c478ec8a74487333bc1f48092abc3904bdee76ec8ed0553-v1.stl",
+    "bounds": [
+      -22.499995966805223,
+      -17,
+      -12.5,
+      22.499983036665963,
+      44.99998891577709,
+      12.5
+    ]
+  },
+  {
+    "source": "E:\\PumpStation_Calculator\\Equipment\\Fasteners\\3D\\Болты\\DIN580\\Рым-болт М12 DIN580.SLDPRT",
+    "sourceHash": "454017739acd421d37907f00a39db28e8b31797185c1a46064f3bf59695e71b8",
+    "meshHash": "5060c67bd0ad2c287bb1da005d5d0ea8790daac9930e3a32a230ec3a344bfa08",
+    "meshUrl": "/model-assets/model-454017739acd421d37907f00a39db28e8b31797185c1a46064f3bf59695e71b8-v1.stl",
+    "bounds": [
+      -26.504288026108156,
+      -20.5,
+      -15,
+      26.504284309832407,
+      52.99999713806896,
+      15
+    ]
+  },
+  {
+    "source": "E:\\PumpStation_Calculator\\Equipment\\Fasteners\\3D\\Болты\\DIN580\\Рым-болт М16 DIN580.SLDPRT",
+    "sourceHash": "6c52aa8edd7d50a8f4bb7b543a54464d88a58834ea4003383a4abbf150102c8a",
+    "meshHash": "55d225f76f630f7bb62a565ae46d1f6a539ca24b928a054e19de89b01ee0b786",
+    "meshUrl": "/model-assets/model-6c52aa8edd7d50a8f4bb7b543a54464d88a58834ea4003383a4abbf150102c8a-v1.stl",
+    "bounds": [
+      -31.00366271195444,
+      -27,
+      -17.5,
+      31.00366380695195,
+      61.99999443759568,
+      17.5
+    ]
+  },
+  {
+    "source": "E:\\PumpStation_Calculator\\Equipment\\Fasteners\\3D\\Болты\\DIN580\\Рым-болт М20 DIN580.SLDPRT",
+    "sourceHash": "55634fb533fd7ffb4cb6aaf995f5249388ba7f2752ff9b6823d2c6c173828095",
+    "meshHash": "14a1c333b2b663d61eeefa95d6360cd6cace4692e38adfe16c5da2b5c1406b11",
+    "meshUrl": "/model-assets/model-55634fb533fd7ffb4cb6aaf995f5249388ba7f2752ff9b6823d2c6c173828095-v1.stl",
+    "bounds": [
+      -35.503197186811725,
+      -30,
+      -20,
+      35.50320418900307,
+      70.99999181605502,
+      20
+    ]
+  },
+  {
+    "source": "E:\\PumpStation_Calculator\\Equipment\\Fasteners\\3D\\Болты\\DIN580\\Рым-болт М24 DIN580.SLDPRT",
+    "sourceHash": "d85664b4134b0e31bc302a8e986378029629e352316e84bf39d187835eaae556",
+    "meshHash": "a3d71698895548e39809c53a79cc9ebc9af856536e0fb59febadd87337f719f8",
+    "meshUrl": "/model-assets/model-d85664b4134b0e31bc302a8e986378029629e352316e84bf39d187835eaae556-v1.stl",
+    "bounds": [
+      -44.99999521102569,
+      -36,
+      -25,
+      44.999984351536604,
+      89.99999475118722,
+      25
+    ]
+  },
+  {
+    "source": "E:\\PumpStation_Calculator\\Equipment\\Fasteners\\3D\\Болты\\DIN580\\Рым-болт М30 DIN580.SLDPRT",
+    "sourceHash": "f09cbbbc89e9b6bf2e79212a6feb56d5a8865d08790c006947efdc9f91e5c6ef",
+    "meshHash": "a9275619932badcf5d27e70999f04fd468f5ad296331207432203c52939c3613",
+    "meshUrl": "/model-assets/model-f09cbbbc89e9b6bf2e79212a6feb56d5a8865d08790c006947efdc9f91e5c6ef-v1.stl",
+    "bounds": [
+      -54.50203983455859,
+      -45,
+      -32.5,
+      54.5020710419691,
+      108.9999718689327,
+      32.5
+    ]
+  },
+  {
+    "source": "E:\\PumpStation_Calculator\\Equipment\\Fasteners\\3D\\Болты\\DIN580\\Рым-болт М36 DIN580.SLDPRT",
+    "sourceHash": "711c5bf13828a8f6bc4f2189d385675e35f7ee7c26dc27e3f5f9056f6f33ca2a",
+    "meshHash": "74c6ddc52e4e94825ac2d9088b3cde65d28929a2b0c8824e6b224b7f3a00cf63",
+    "meshUrl": "/model-assets/model-711c5bf13828a8f6bc4f2189d385675e35f7ee7c26dc27e3f5f9056f6f33ca2a-v1.stl",
+    "bounds": [
+      -64.00706233587023,
+      -54,
+      -37.5,
+      64.0071052612272,
+      127.99998209241032,
+      37.5
+    ]
+  },
+  {
+    "source": "E:\\PumpStation_Calculator\\Equipment\\Fasteners\\3D\\Болты\\DIN580\\Рым-болт М42 DIN580.SLDPRT",
+    "sourceHash": "c8bbdb51e77ba5ecb809ba29bb2e90f7e0c77151c508554b4adbaaa24240bc48",
+    "meshHash": "622b7d11055b7e5ddda89284451f27646e16069c290de7583b11cb2904a9f689",
+    "meshUrl": "/model-assets/model-c8bbdb51e77ba5ecb809ba29bb2e90f7e0c77151c508554b4adbaaa24240bc48-v1.stl",
+    "bounds": [
+      -73.51388427673939,
+      -63,
+      -42.5,
+      73.51393639907836,
+      146.9999958320678,
+      42.5
+    ]
+  },
+  {
+    "source": "E:\\PumpStation_Calculator\\Equipment\\Fasteners\\3D\\Болты\\DIN580\\Рым-болт М48 DIN580.SLDPRT",
+    "sourceHash": "1aa35535fb00d3fa46e66aa8ffa553f14f3d84d1bd0f11f9eda1f0db979c39cc",
+    "meshHash": "01ccc5809423acaf9605b74dbd1175e2827a916982f28bc9cf9cfcf0c3a23dad",
+    "meshUrl": "/model-assets/model-1aa35535fb00d3fa46e66aa8ffa553f14f3d84d1bd0f11f9eda1f0db979c39cc-v1.stl",
+    "bounds": [
+      -84.0053485808196,
+      -68,
+      -50,
+      84.00538438876714,
+      167.99996151118032,
+      50
+    ]
+  },
+  {
+    "source": "E:\\PumpStation_Calculator\\Equipment\\Fasteners\\3D\\Болты\\DIN580\\Рым-болт М56 DIN580.SLDPRT",
+    "sourceHash": "7832745b225147b6028d4ae368f8874f1fc6db73740d89cd3305f9a7b43a7572",
+    "meshHash": "1cf1453d390bcc351626a8c48d96195cd90ec7f491d56c922ce40972b4561bcd",
+    "meshUrl": "/model-assets/model-7832745b225147b6028d4ae368f8874f1fc6db73740d89cd3305f9a7b43a7572-v1.stl",
+    "bounds": [
+      -93.5109276407028,
+      -78,
+      -55,
+      93.51092642079924,
+      186.9999900338885,
+      55
+    ]
+  },
+  {
+    "source": "E:\\PumpStation_Calculator\\Equipment\\Fasteners\\3D\\Болты\\DIN580\\Рым-болт М64 DIN580.SLDPRT",
+    "sourceHash": "1d0a71dea301c769a09e3390396d09cad2a9af6ddb280fab41d2d5aab31d6133",
+    "meshHash": "a14224c736a02947bbe5bcd7d599c4b8549920474e89bf7762ee55e70883a5b4",
+    "meshUrl": "/model-assets/model-1d0a71dea301c769a09e3390396d09cad2a9af6ddb280fab41d2d5aab31d6133-v1.stl",
+    "bounds": [
+      -104.00437739846753,
+      -90,
+      -60,
+      104.00431358461962,
+      207.9999872944321,
+      60
+    ]
+  }
+]

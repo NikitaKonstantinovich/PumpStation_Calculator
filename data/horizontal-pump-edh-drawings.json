@@ -1,0 +1,33 @@
+{
+  "source": {
+    "url": "https://www.aquastrongpump.ru/assets/images/products/26/edh%28m%29-aquastrong-user-manual.pdf",
+    "sha256": "1a2a5b737ea120c3bfe198bc5f92395b9786738a9248fa06e4f8fc5958dd5430"
+  },
+  "catalogue": {
+    "url": "https://www.aquastrongpump.ru/assets/dist/docs/1%20EDH-ECH-EBK-EMS.pdf",
+    "sha256": "1d12e652f46316f453ddcabb0eafd732a396071e726a1af4881c80c9c234e67b"
+  },
+  "variants": {
+    "HM:AQUASTRONG:EDH:a99143a1093f109b:EDH10-10": {"page": 5, "boundsMm": [0, null, -120, 568, null, null], "outletMm": [188, 0, 140], "legacyId": "711", "cataloguePage": 6, "catalogueMotorHeightMm": 245},
+    "HM:AQUASTRONG:EDH:a56100f97853fc98:EDH10-20": {"page": 5, "boundsMm": [0, null, -120, 568, null, null], "outletMm": [188, 0, 140], "legacyId": "712", "cataloguePage": 6, "catalogueMotorHeightMm": 245},
+    "HM:AQUASTRONG:EDH:ed3fa1b41488c860:EDH10-30": {"page": 5, "boundsMm": [0, null, -120, 568, null, null], "outletMm": [188, 0, 140], "legacyId": "713", "cataloguePage": 6, "catalogueMotorHeightMm": 245},
+    "HM:AQUASTRONG:EDH:5b756c20af022760:EDH10-40": {"page": 5, "boundsMm": [0, null, -120, 626, null, null], "outletMm": [188, 0, 140], "legacyId": "714", "cataloguePage": 6, "catalogueMotorHeightMm": 248},
+    "HM:AQUASTRONG:EDH:43e202fab8a1eb20:EDH10-50": {"page": 5, "boundsMm": [0, null, -120, 626, null, null], "outletMm": [188, 0, 140], "legacyId": "715", "cataloguePage": 6, "catalogueMotorHeightMm": 248},
+    "HM:AQUASTRONG:EDH:16f0541b2ca6d7e6:EDH15-10": {"page": 5, "boundsMm": [0, null, -120, 568, null, null], "outletMm": [188, 0, 140], "legacyId": "730", "cataloguePage": 7, "catalogueMotorHeightMm": 245},
+    "HM:AQUASTRONG:EDH:7f1224e2f226bbad:EDH15-20": {"page": 5, "boundsMm": [0, null, -120, 626, null, null], "outletMm": [188, 0, 140], "legacyId": "731", "cataloguePage": 7, "catalogueMotorHeightMm": 248},
+    "HM:AQUASTRONG:EDH:75d21cb727a7c7a3:EDH15-30": {"page": 5, "boundsMm": [0, null, -120, 626, null, null], "outletMm": [188, 0, 140], "legacyId": "732", "cataloguePage": 7, "catalogueMotorHeightMm": 248},
+    "HM:AQUASTRONG:EDH:8b75fce27ca1f177:EDH2-20": {"page": 5, "boundsMm": [0, null, -110, 427, null, 106], "outletMm": [120, 0, 103], "legacyId": "661", "cataloguePage": 4, "catalogueMotorHeightMm": 216},
+    "HM:AQUASTRONG:EDH:01d8b462f00479f4:EDH2-30": {"page": 5, "boundsMm": [0, null, -110, 427, null, 106], "outletMm": [120, 0, 103], "legacyId": "662", "cataloguePage": 4, "catalogueMotorHeightMm": 216},
+    "HM:AQUASTRONG:EDH:9894af1381c2ccf0:EDH2-40": {"page": 5, "boundsMm": [0, null, -110, 427, null, 106], "outletMm": [120, 0, 103], "legacyId": "663", "cataloguePage": 4, "catalogueMotorHeightMm": 216},
+    "HM:AQUASTRONG:EDH:e4c35ef09484cc3a:EDH2-50": {"page": 5, "boundsMm": [0, null, -110, 427, null, 106], "outletMm": [120, 0, 103], "legacyId": "664", "cataloguePage": 4, "catalogueMotorHeightMm": 216},
+    "HM:AQUASTRONG:EDH:10537a548d2653b3:EDH2-60": {"page": 5, "boundsMm": [0, null, -110, 427, null, 106], "outletMm": [120, 0, 103], "legacyId": "665", "cataloguePage": 4, "catalogueMotorHeightMm": 216},
+    "HM:AQUASTRONG:EDH:4de39364868cba3d:EDH20-10": {"page": 5, "boundsMm": [0, null, -120, 568, null, null], "outletMm": [188, 0, 140], "legacyId": "744", "cataloguePage": 8, "catalogueMotorHeightMm": 245},
+    "HM:AQUASTRONG:EDH:0362001aa5811fb8:EDH20-20": {"page": 5, "boundsMm": [0, null, -120, 626, null, null], "outletMm": [188, 0, 140], "legacyId": "745", "cataloguePage": 8, "catalogueMotorHeightMm": 248},
+    "HM:AQUASTRONG:EDH:3ed6144389fdd435:EDH20-30": {"page": 5, "boundsMm": [0, null, -120, 642, null, null], "outletMm": [188, 0, 140], "legacyId": "746", "cataloguePage": 8, "catalogueMotorHeightMm": 240},
+    "HM:AQUASTRONG:EDH:46e90467c57bcc65:EDH4-20": {"page": 5, "boundsMm": [0, null, -110, 427, null, 106], "outletMm": [120, 0, 103], "legacyId": "682", "cataloguePage": 5, "catalogueMotorHeightMm": 216},
+    "HM:AQUASTRONG:EDH:0034d02034d2f099:EDH4-30": {"page": 5, "boundsMm": [0, null, -110, 427, null, 106], "outletMm": [120, 0, 103], "legacyId": "683", "cataloguePage": 5, "catalogueMotorHeightMm": 216},
+    "HM:AQUASTRONG:EDH:bcc9212c05e1c7f9:EDH4-40": {"page": 5, "boundsMm": [0, null, -110, 427, null, 106], "outletMm": [120, 0, 103], "legacyId": "684", "cataloguePage": 5, "catalogueMotorHeightMm": 216},
+    "HM:AQUASTRONG:EDH:faaeda1430f10fde:EDH4-50": {"page": 5, "boundsMm": [0, null, -120, 480, null, 125], "outletMm": [120, 0, 103], "legacyId": "685", "cataloguePage": 5, "catalogueMotorHeightMm": 245},
+    "HM:AQUASTRONG:EDH:a74976ced45ec05f:EDH4-60": {"page": 5, "boundsMm": [0, null, -120, 480, null, 125], "outletMm": [120, 0, 103], "legacyId": "686", "cataloguePage": 5, "catalogueMotorHeightMm": 245}
+  }
+}

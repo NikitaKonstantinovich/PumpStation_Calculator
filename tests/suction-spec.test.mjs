@@ -44,8 +44,11 @@ test("threaded pump locks valve to actual nozzle DN, including reload and collec
     const h=suctionHydraulics(p.entities["station-dn"],p.entities["system-input"],p.entities["station-settings"]);
     assert.equal(h.dn,25);assert.equal(h.locked,true);
     assert.equal(p.entities["station-collectors"].suction.configuration.primary.dn,25);
-    const r=build(p);assert.equal(byRole(r,"primary-union").equipmentId,"suction-table:union-25");
-    assert.equal(byRole(r,"primary-union").quantity,3);assert.equal(byRole(r,"primary-flax").quantity,.9);
+    const r=build(p);assert.equal(byRole(r,"primary-union").equipmentId,"suction-table:union-valtec-25");
+    assert.equal(byRole(r,"primary-union").quantity,3);
+    assert.equal(byRole(r,"primary-pump-nipple").equipmentId,"резьбовые-фитинги-001-r0218");
+    assert.equal(byRole(r,"primary-pump-nipple").quantity,3);
+    assert.equal(byRole(r,"primary-flax").quantity,1.2);
     assert.equal(byRole(r,"network-gaskets").quantity,2);
     assert.ok(!byRole(r,"primary-pump-gasket"));
   }
@@ -53,6 +56,7 @@ test("threaded pump locks valve to actual nozzle DN, including reload and collec
 test("flanged pump and ball valve use RF plus one gasket and two threaded joints per pump",()=>{
   const rows=build(fixture({pumpConnection:"flanged"}));
   assert.equal(byRole(rows,"primary-adapter").equipmentId,"suction-table:rf-40");
+  assert.equal(byRole(rows,"primary-pump-nipple"),undefined);
   assert.equal(byRole(rows,"primary-pump-gasket").quantity,3);
   assert.equal(byRole(rows,"primary-flax").quantity,.6);
   assert.equal(byRole(rows,"primary-adapter-flange-weldFlange").quantity,3);
@@ -89,9 +93,9 @@ test("larger flanged valve chooses reducer by both diameters and material; small
   assert.match(byRole(invalid,"primary-error").details,/больше DN арматуры/);
   assert.ok(!byRole(invalid,"primary-reducer"));assert.ok(!byRole(invalid,"primary-insertion"));
 });
-test("network seals are per collector, and missing PN or exact mating sizes never use unrelated parts",()=>{
+test("network seals are per collector, and unions and adapters use their own catalogue limits",()=>{
   assert.equal(byRole(build(fixture({network:"threaded",count:5})),"network-flax").quantity,.2);
-  assert.equal(byRole(build(fixture({pn:25})),"primary-union").price,null);
+  assert.equal(byRole(build(fixture({pn:25})),"primary-union").price,2334);
   const rows=build(fixture({pumpDn:20,valveDn:20,pumpConnection:"flanged"}));
   assert.equal(byRole(rows,"primary-adapter").price,null,"table DN20 mates with 1/2 inch, not 3/4");
 });
@@ -134,7 +138,9 @@ test("secondary branches scale independently while common instruments do not dou
   Object.assign(p.entities["system-input-2"],{calculated:true,selectedPumpId:"secondary-test",flowRate:2,head:30,workingPumpCount:1,reservePumpCount:1});
   Object.assign(p.entities["station-dn"],{secondaryPumpSuctionPort:{pumpId:"secondary-test",dn:25,connection:"threaded",source:"test"}});
   p=synchronizeCollectors(p);const rows=build(p);
-  assert.equal(byRole(rows,"secondary-union").quantity,2);assert.equal(byRole(rows,"secondary-flax").quantity,.6);
+  assert.equal(byRole(rows,"secondary-union").quantity,2);
+  assert.equal(byRole(rows,"secondary-pump-nipple").quantity,2);
+  assert.equal(byRole(rows,"secondary-flax").quantity,.8);
   assert.equal(byRole(rows,"network-gaskets").quantity,2);assert.equal(byRole(rows,"gauge").quantity,2);
   assert.ok(!byRole(rows,"secondary-limit-switches"));
 });
@@ -223,13 +229,13 @@ test("PN25 common collector retains a warning on actual PN16 equipment in its fi
   assert.equal(valve.status,"confirmation");assert.ok(valve.price>0);
 });
 
-test("zero/negative inlet head retains vacuum instrument selection without PN excess warnings",()=>{
+test("zero and negative inlet head keep the smallest suction gauge without PN excess warnings",()=>{
   const db={items:binding.items,collectorCatalog:catalog};
   for(const head of [0,-3]) {
     let p=fixture();p.entities["station-settings"].inletHead=head;
     p=refresh(synchronizeCollectors(p),db,true);
     assert.ok(p.entities["station-spec"].items.every(i=>!i.inletPressureCheck?.checks.some(c=>c.status==="exceeded")));
-    assert.match(byRole(p.entities["station-spec"].items,"gauge").details,/учтено разрежение/);
+    assert.equal(byRole(p.entities["station-spec"].items,"gauge").equipmentId,"кипиа-001-r0005");
   }
 });
 test("common suction mode refreshes network parts and survives project reload without losing user items",()=>{
@@ -271,10 +277,15 @@ test("actual page fill uses corrected DN, auto-refreshes changed counts and is i
   assert.equal(rows.find(x=>x.option==="primarySuctionValve").inletPressureCheck.checks[0].status,"missing-head");
   assert.equal(rows.filter(x=>x.option==="primaryCheckValve").length,1);
   assert.deepEqual(refresh(once,db),once);
+  const legacy=structuredClone(once);
+  legacy.entities["station-spec"].items=rows.filter(row=>row.assemblyRole!=="primary-pump-nipple");
+  const reopened=refresh(parseProjectConfig(legacy),db);
+  assert.equal(byRole(reopened.entities["station-spec"].items,"primary-pump-nipple").quantity,3);
   once.entities["system-input"].reservePumpCount=3;
   const changed=refresh(synchronizeCollectors(once),db).entities["station-spec"].items;
   assert.equal(byRole(changed,"primary-union").quantity,5);
-  assert.equal(byRole(changed,"primary-flax").quantity,1.5);
+  assert.equal(byRole(changed,"primary-pump-nipple").quantity,5);
+  assert.equal(byRole(changed,"primary-flax").quantity,2);
   assert.equal(changed.find(x=>x.option==="primarySuctionValve").quantity,5);
   assert.equal(changed.filter(x=>x.section==="suction"&&x.assemblyRole==="gauge").length,1);
 });
@@ -287,7 +298,7 @@ test("partially entered nozzle never falls back to calculated DN or a catalogue 
   assert.ok(byRole(build(p),"primary-error"));
 });
 
-test("inlet head refreshes instruments and persists without affecting system static head",()=>{
+test("inlet head updates enabled pressure checks while the minimum-range suction instruments stay selected",()=>{
   const db={items:binding.items,collectorCatalog:catalog};
   let p=refresh(fixture(),db,true);
   assert.equal(byRole(p.entities["station-spec"].items,"gauge").name,"Манометр");
@@ -314,12 +325,13 @@ test("inlet head refreshes instruments and persists without affecting system sta
   assert.equal(byRole(rows,"gauge").name,"Манометр");
   assert.equal(byRole(rows,"gauge").price,511.79);
   assert.equal(byRole(rows,"gauge").status,"confirmation");
-  assert.match(byRole(rows,"gauge").details,/⚠ Предупреждение:/);
-  assert.match(byRole(rows,"gauge").description,/Требуется -0,1…0,15 МПа, выбран 0…0,6 МПа/);
+  assert.equal(byRole(rows,"gauge").equipmentId,gauge.equipmentId);
+  assert.match(byRole(rows,"gauge").details,/0…0,6 МПа/);
+  assert.doesNotMatch(byRole(rows,"gauge").description,/Предупреждение:/);
   assert.equal(rows.filter(x=>x.section==="suction"&&/^(Манометр|Мановакуумметр)$/.test(x.name)).length,1);
 });
 
-test("saved specifications using the previous gauge policy refresh to a priced fallback with warning",()=>{
+test("saved specifications using the previous gauge policy refresh to the priced minimum-range gauge",()=>{
   const db={items:binding.items,collectorCatalog:catalog};
   const p=refresh(fixture(),db,true);
   for(const row of p.entities["station-spec"].items.filter(x=>x.generatedBy==="suction-line"))row.sourceFingerprint=row.sourceFingerprint.replace("instruments-v2","instruments-v1");
@@ -328,7 +340,7 @@ test("saved specifications using the previous gauge policy refresh to a priced f
   const updated=refresh(p,db);
   const gauge=byRole(updated.entities["station-spec"].items,"gauge");
   assert.equal(gauge.name,"Манометр");assert.equal(gauge.price,511.79);
-  assert.equal(gauge.status,"confirmation");assert.match(gauge.description,/Предупреждение:/);
+  assert.equal(gauge.status,"confirmation");assert.doesNotMatch(gauge.description,/Предупреждение:/);
   assert.equal(updated.entities["station-spec"].items.filter(x=>x.section==="suction"&&x.assemblyRole==="gauge").length,1);
 });
 
@@ -364,8 +376,8 @@ test("flax is priced in metres for pump branches and common threaded network con
   for(const row of [branch,network]) {
     assert.equal(row.unit,"м");assert.equal(row.price,51.5);assert.equal(row.status,"selected");assert.ok(row.equipmentId);
   }
-  assert.equal(branch.quantity,.9);assert.equal(network.quantity,.2);
-  assert.equal(Number(((branch.quantity+network.quantity)*branch.price).toFixed(2)),56.65);
+  assert.equal(branch.quantity,1.2);assert.equal(network.quantity,.2);
+  assert.equal(Number(((branch.quantity+network.quantity)*branch.price).toFixed(2)),72.1);
   const db={items:binding.items,collectorCatalog:catalog};
   const saved=refresh(p,db,true);
   for(const row of saved.entities["station-spec"].items.filter(x=>x.generatedBy==="suction-line"))row.sourceFingerprint=row.sourceFingerprint.replace("seals-v2","seals-v1");

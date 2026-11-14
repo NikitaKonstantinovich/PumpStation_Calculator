@@ -10,7 +10,7 @@ const core = await loadTs(new URL("../app/model-editor/insertion-template.ts", i
 const model = await loadTs(new URL("../app/model-editor/model.ts", import.meta.url));
 const validation = await loadTs(new URL("../app/model-editor/insertion-types.ts", import.meta.url));
 const rendererUrl = new URL("../app/model-editor/insertion-renderer.ts", import.meta.url);
-const renderer = await loadTs(rendererUrl, { [rendererUrl.href]: (await readFile(rendererUrl, "utf8")).replace('from "three"', `from ${JSON.stringify(new URL("../node_modules/three/build/three.module.js", import.meta.url).href)}`) });
+const renderer = await loadTs(rendererUrl, { [rendererUrl.href]: (await readFile(rendererUrl, "utf8")).replace('from "three"', `from ${JSON.stringify(import.meta.resolve("three"))}`) });
 const build = (i, angle = 0, f = fixture) => server.insertion3d(f.rows[i], f.source, f.catalog, { id: "saved-insert-123", revision: 3 }, angle);
 const close = (a, b) => assert.ok(Math.abs(a - b) < 1e-6, `${a} != ${b}`);
 const closeVec = (a, b) => a.forEach((n, i) => close(n, b[i]));

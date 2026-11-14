@@ -53,6 +53,67 @@ test("source nozzle data stays incomplete without a legacy fallback and manual o
   assert.equal(previous.context.effectiveEntity.pumpSuctionPort.dn,40); assert.equal(previous.context.effectiveEntity.pumpSuctionPort.connection,null);
 });
 
+test("threaded nozzles use nominal DN from the exact thread designation while preserving source data", () => {
+  const p = structuredClone(item.pump);
+  p.inlet = { dn:null,connection_type:"threaded",thread_designation:'G2',pn_nominal_bar:10,source_id:"exact-inlet" };
+  p.outlet = { dn:null,connection_type:"threaded",thread_designation:'G 1 1/4"',source_id:"exact-outlet" };
+  const before = JSON.stringify(p), inlet = runtime.dnSourcePort(p,"inlet"), outlet = runtime.dnSourcePort(p,"outlet");
+  assert.equal(inlet.dn,50);assert.equal(outlet.dn,32);assert.equal(inlet.connection,"threaded");
+  assert.equal(inlet.thread,"G2");assert.equal(inlet.dnFromThread,true);assert.equal(inlet.source,"exact-inlet");
+  assert.equal(inlet.maxPressure,10);assert.equal(outlet.maxPressure,null);assert.equal(inlet.maxInletPressure,null);
+  assert.equal(JSON.stringify(p),before);
+  for (const [raw,dn] of [['G 1"',25],['G1¼',32],['1 1/2"',40],['G1½',40],['2″',50],['Rp 3/4',20],['R1/2',15]]) {
+    p.inlet.thread_designation=raw;assert.equal(runtime.dnSourcePort(p,"inlet").dn,dn,raw);
+  }
+  for (const raw of ['G1 / G2','NPT2','DN50','50 мм','G5','G2 неизвестно','']) {
+    p.inlet.thread_designation=raw;assert.equal(runtime.dnSourcePort(p,"inlet").dn,null,raw);
+  }
+  p.inlet = {connection_type:"threaded",connection_designation:'G2'};
+  assert.equal(runtime.dnSourcePort(p,"inlet").dn,50);
+  p.inlet.thread_designation='G1 / G2';assert.equal(runtime.dnSourcePort(p,"inlet").dn,null);
+  p.inlet = {dn:40,connection_type:"threaded",thread_designation:'G2'};
+  assert.equal(runtime.dnSourcePort(p,"inlet").dn,40);assert.equal(runtime.dnSourcePort(p,"inlet").dnFromThread,false);
+});
+
+test("a thread annotation on a flanged or unknown nozzle never supplies DN without selecting threaded", () => {
+  for(const connection_type of ["flanged","flange","",undefined]) {
+    const p={...item.pump,inlet:{connection_type,thread_designation:"G2"}};
+    assert.equal(runtime.dnSourcePort(p,"inlet").dn,null);
+    assert.equal(runtime.dnSourcePort(p,"inlet","threaded").dn,50);
+    assert.equal(runtime.dnSourcePort(p,"inlet","flanged").dn,null);
+    assert.equal(runtime.dnSourcePort(p,"inlet",null).dn,null);
+  }
+});
+
+test("both circuits propagate threaded DN to valve sizing; manual sizes, connection changes and resets remain independent", () => {
+  const horizontal = structuredClone(item);
+  horizontal.pump.type="horizontal_multistage";
+  horizontal.pump.inlet={connection_type:"threaded",thread_designation:"G2",pn_nominal_bar:16};
+  horizontal.pump.outlet={connection_type:"threaded",thread_designation:'1 1/4"',pn_nominal_bar:16};
+  const secondary=structuredClone(horizontal);secondary.variantId=secondary.pump.id="second";secondary.modelId="model2";
+  secondary.pump.inlet.thread_designation="G1";secondary.pump.outlet.thread_designation="G1½";
+  const ctx={...context,resources:{pump_catalog_v2:{...snapshot,items:[horizontal,secondary]}}};
+  const input={...values,item:horizontal,settings:{...settings,stationType:"combined",secondary:main},secondaryItem:secondary,secondaryRequest:request,secondarySelection:{...selection,variantId:"second",modelId:"model2"}};
+  const data=result(input,ctx);
+  assert.equal(data.primary.suction.port.dn,50);assert.equal(data.primary.discharge.port.dn,32);
+  assert.equal(data.primary.values.suctionValveDn,50);assert.equal(data.primary.values.dischargeValveDn,32);
+  assert.equal(data.secondary.values.secondarySuctionValveDn,25);assert.equal(data.secondary.values.secondaryDischargeValveDn,40);
+  assert(!data.primary.suction.errors.some(message=>message.includes("Укажите DN")));
+  const overrides={pumpSuctionPort:{pumpId:horizontal.variantId,dn:null,connection:"flanged",source:"user"}};
+  const flangedWithoutDn=result({...input,overrides},ctx);
+  assert.equal(flangedWithoutDn.context.effectiveEntity.pumpSuctionPort.dn,null);
+  assert.equal(flangedWithoutDn.primary.suction.port,null);
+  overrides.pumpSuctionPort.connection="threaded";
+  assert.equal(result({...input,overrides},ctx).primary.suction.port.dn,50);
+  overrides.pumpSuctionPort.dn=65;
+  assert.equal(result({...input,overrides},ctx).primary.suction.port.dn,65);
+  overrides.pumpSuctionPort.connection="flanged";
+  assert.equal(result({...input,overrides},ctx).primary.suction.port.dn,65);
+  assert.equal(result({...input,overrides:{pumpSuctionPort:null}},ctx).primary.suction.port.dn,50);
+  overrides.pumpSuctionPort.pumpId="another-pump";
+  assert.equal(result({...input,overrides},ctx).primary.suction.port.dn,50);
+});
+
 test("stale and tampered pump selections cannot supply station identities or source ports", () => {
   for(const extra of [{selection:{...selection,stale:true}},{selection:{...selection,modelId:"other"}},{selection:{...selection,snapshotId:"b".repeat(64)}},{item:{...item,pump:{...item.pump,inlet:{dn:1200,type:"flange"}}}}]) {
     const data=result(extra); assert.equal(data.pumps.length,0); assert.equal(data.project.station.selectedPumpId,undefined); assert.equal(data.context.effectiveEntity.pumpSuctionPort,null); assert(data.issues.length > 0);

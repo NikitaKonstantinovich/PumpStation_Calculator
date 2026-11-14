@@ -20,7 +20,7 @@ import { INSTRUMENT_CONNECTION_REVISION, addInstrumentSideConnection } from "./i
 import { addValveLimitSwitches } from "./valve-limit-switches";
 import { tankConnectionDn, tankValve20, TANK_VALVE_20_ID, TANK_ADAPTER_20_25_ID, TANK_LAYOUT_REVISION } from "./tank-connection";
 import type { Pump } from "./pump-catalog";
-import { INSTRUMENT_PRESSURE_REVISION, transducerSelectionPressure } from "./instrument-pressure";
+import { DISCHARGE_INSTRUMENT_PRESSURE_REVISION, transducerSelectionPressure } from "./instrument-pressure";
 import { automaticTransducerId, automaticTransducerSummary, selectAutomaticTransducer, pressureTransducerCatalog, TRANSDUCER_SELECTION_REVISION } from "./pressure-transducers";
 
 export type HydraulicAssembly = {
@@ -75,18 +75,20 @@ export function hydraulicOptionCatalog(items: AssemblyComponent[]): AssemblyComp
 const optionRoles = new Set<SpecOption>(["membraneTank", "pressureTransducer", "collectorPlugs", "isolatingValves"]);
 export function coreBuildHydraulicOptions(project: ProjectConfig, resources: { items: AssemblyComponent[]; collectorCatalog: CollectorCatalog; pumps?: readonly Pump[] | null }): SpecItem[] {
   const settings = project.entities["station-settings"] as SettingsEntity;
+  const checkPressure = settings.pressureChecksEnabled !== false;
   const config = normalizeHydraulicOptions({ ...settings.hydraulicOptions, hoseLengthMm: settings.hydraulicOptions?.hoseLengthMm ?? settings.baseValues?.values.preferences.hoseLengthMm }), database = { items: hydraulicOptionCatalog(resources.items) };
   const collectors = project.entities["station-collectors"] as CollectorsEntity;
   const rows: SpecItem[] = [];
   const instrumentPressure = transducerSelectionPressure(project,resources.pumps);
-  const fingerprint = JSON.stringify(["hydraulic-flat-lines-v1",TRANSDUCER_SELECTION_REVISION,INSTRUMENT_PRESSURE_REVISION,instrumentPressure,TANK_LAYOUT_REVISION,INSTRUMENT_CONNECTION_REVISION,"hydraulic-options-v1", baseSettingsIdentity(settings), collectors.suction.configuration&&baseConfigurationIdentity(collectors.suction.configuration), collectors.discharge.configuration&&baseConfigurationIdentity(collectors.discharge.configuration)], (_key, value) => value && typeof value === "object" && !Array.isArray(value) ? Object.fromEntries(Object.entries(value).sort(([a], [b]) => a.localeCompare(b))) : value);
+  const fingerprint = JSON.stringify(["hydraulic-flat-lines-v1",TRANSDUCER_SELECTION_REVISION,DISCHARGE_INSTRUMENT_PRESSURE_REVISION,instrumentPressure,TANK_LAYOUT_REVISION,INSTRUMENT_CONNECTION_REVISION,"hydraulic-options-v1", baseSettingsIdentity(settings), collectors.suction.configuration&&baseConfigurationIdentity(collectors.suction.configuration), collectors.discharge.configuration&&baseConfigurationIdentity(collectors.discharge.configuration)], (_key, value) => value && typeof value === "object" && !Array.isArray(value) ? Object.fromEntries(Object.entries(value).sort(([a], [b]) => a.localeCompare(b))) : value);
   for (const side of ["suction", "discharge"] as const) {
     const collector = collectors[side].configuration;
     if (!collector) continue;
-    const head = side === "suction" ? settings.inletHead ?? null : commonDischargeHead(project);
-    const pressureBar = settings.pressureChecksEnabled === false || head === null ? null : Math.max(0, head * .0980665);
+    const head = checkPressure ? side === "suction" ? settings.inletHead ?? null : commonDischargeHead(project) : null;
+    const pressureBar = head === null ? null : Math.max(0, head * .0980665);
     const locationLabel = side === "suction" ? "Всас" : "Напор";
-    const build = (role: string, option: SpecOption, label: string, quantity: number, requirement: HydraulicProductRequirement, ports: string[], populate: (parts: ReturnType<typeof lineSpecParts>, product: AssemblyComponent | undefined, findings: string[]) => void) => {
+    const build = (role: string, option: SpecOption, label: string, quantity: number, need: HydraulicProductRequirement, ports: string[], populate: (parts: ReturnType<typeof lineSpecParts>, product: AssemblyComponent | undefined, findings: string[]) => void) => {
+      const requirement = role === "transducer" || checkPressure ? need : { ...need, checkPressure: false };
       const location = `${side}:${role}`;
       const prior = (project.entities["station-spec"] as SpecEntity).items.find(item => item.generatedBy === "hydraulic-options" && item.assemblyRole === location)?.equipmentId;
       const preferences = settings.baseValues?.values.preferences;
@@ -97,13 +99,17 @@ export function coreBuildHydraulicOptions(project: ProjectConfig, resources: { i
       const requestedColor = requirement.kind === "isolating-valve" && requirement.color ? (requirement.color==="red" ? /красн/i : /син/i) : undefined;
       const sameColor = requestedColor && eligible.filter(c=>requestedColor.test(c.item.family));
       const automatic = sameColor?.length ? [prior,preferred,...sameColor.map(c=>c.item.id)].find(id=>sameColor.some(c=>c.item.id===id)) : prior ?? preferred;
-      const selectedId = role==="transducer" ? automaticTransducerId(instrumentPressure.headM) : config.products[location] ?? automatic;
+      const missingPeakHead = role === "transducer" && !checkPressure && instrumentPressure.headM === null;
+      const selectedId = role==="transducer" ? missingPeakHead ? undefined : automaticTransducerId(instrumentPressure.headM) : config.products[location] ?? automatic;
       const preferenceNote = role!=="transducer" && !config.products[location] && (!prior || prior === preferred || !preferred) && ordered.length && preferred !== ordered[0] ? "Предпочтительное изделие отсутствует или его совместимость не подтверждена. Использован другой совместимый вариант подбора." : "";
-      const selection = role==="transducer"?selectAutomaticTransducer(database.items,instrumentPressure.headM):selectHydraulicProduct(database.items, requirement, selectedId);
+      const selection = missingPeakHead
+        ? { selected: undefined, candidates: [], explanation: "Не определён пиковый напор выбранных насосов" }
+        : role === "transducer" ? selectAutomaticTransducer(database.items, instrumentPressure.headM)
+          : selectHydraulicProduct(database.items, requirement, selectedId);
       const product = selection.selected?.item, parts: SpecItem[] = [], findings = [...(selection.selected ? [...selection.selected.incompatible, ...selection.selected.missing] : [selection.explanation])];
       if(preferenceNote) findings.push(preferenceNote);
-      const builder = lineSpecParts(parts, side, fingerprint, collector, database, resources.collectorCatalog);
-      const body = builder.add("product", product ? hydraulicProductName(product) : label, 1, product ? `${role==="transducer"?automaticTransducerSummary(product):hydraulicProductSummary(product)}. ${selection.explanation}` : selection.explanation, product);
+      const builder = lineSpecParts(parts, side, fingerprint, collector, database, resources.collectorCatalog, undefined, [], false, checkPressure);
+      const body = builder.add("product", product ? hydraulicProductName(product) : label, 1, product ? `${role==="transducer"?automaticTransducerSummary(product):hydraulicProductSummary(product, checkPressure)}. ${selection.explanation}` : selection.explanation, product);
       body.price = product ? hydraulicProductPrice(product, requirement) : null;
       body.technicalStatus = selection.selected?.technicalStatus ?? "unverified";
       body.description = product ? `${product.sourceSheet}!строка ${product.sourceRow}; ${String(field(product, /^Источник проверки характеристик$/i) ?? "исходная база комплектующих")}` : selection.explanation;
@@ -152,12 +158,12 @@ export function coreBuildHydraulicOptions(project: ProjectConfig, resources: { i
         const adapter=database.items.find(item=>item.id===TANK_ADAPTER_20_25_ID);
         const transition=parts.add("tank-diameter-transition","Переход DN20 → DN25 · G3/4 ВР × G1 НР",1,"Сгон DN20 → футорка DN25 с внутренней резьбой 3/4 → кран DN25 → шланг → бак",adapter);
         transition.technicalStatus="unverified";
-        transition.description="Футорка латунная НР–ВР LD Pride 1×3/4 из базы. Схема принята пользователем; PN фитинга и потери давления в подводке требуют проверки. В 3D соединительные детали не показываются.";
+        transition.description = `Футорка латунная НР–ВР LD Pride 1×3/4 из базы. Схема принята пользователем. ${checkPressure ? "PN фитинга и потери давления в подводке требуют проверки. " : ""}В 3D соединительные детали не показываются.`;
       }
       const valve = database.items.find(item => item.id === (size === 20 ? TANK_VALVE_20_ID : "шаровые-краны-001-r0195"));
       const row = parts.add("tank-valve", `Отсечной шаровой кран DN${size} ВР/ВР`, 1, `Коллектор → кран → ${volume === 8 ? "бак" : "шланг → бак"}`, valve);
       if(size===20){row.name="Кран LD Pride DN20 PN40 с дренажем и воздухоотводчиком";row.technicalStatus="unverified";row.description="Модель подключения по изображениям пользователя; точный артикул и цена крана DN20 требуют подтверждения. Цена другого крана не подставляется.";}
-      if (!componentPressureLimit(valve)) { row.technicalStatus = "unverified"; row.description = "Исходная книга: кран бака. Не подтверждены PN, стандарт резьбы и точный артикул."; }
+      if (!componentPressureLimit(valve)) { row.technicalStatus = "unverified"; row.description = `Исходная книга: кран бака. Не подтверждены ${checkPressure ? "PN, " : ""}стандарт резьбы и точный артикул.`; }
       parts.flax("tank-thread-seals", volume===8?.2:.3, volume===8?"Сгон → кран → бак: два резьбовых стыка × 0,1 м.":"Сгон → переход DN20/DN25 → кран → шланг: три резьбовых стыка × 0,1 м; накидная гайка у бака уплотняется прокладкой.");
       if (volume !== 8) {
         const hose = database.items.find(item => item.id === "мембранный-бак-002-r0012");

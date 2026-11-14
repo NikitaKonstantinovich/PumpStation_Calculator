@@ -90,7 +90,7 @@ export type SpecItem = {
   option?: SpecOption;
   status: "selected" | "clarify" | "confirmation";
 };
-export type SpecEntity = { kind: "spec"; hydraulicPorts?: ReturnType<typeof import("./station-hydraulic-ports").stationHydraulicPortLedger>; items: SpecItem[]; autoHydraulics?: boolean; identityVersion?: 1; synchronization?: { fingerprint: string; reasons: string[] } };
+export type SpecEntity = { kind: "spec"; frameCalculation?: import("./frame-calculation/project").FrameResult; hydraulicPorts?: ReturnType<typeof import("./station-hydraulic-ports").stationHydraulicPortLedger>; items: SpecItem[]; autoHydraulics?: boolean; identityVersion?: 1; synchronization?: { fingerprint: string; reasons: string[] } };
 export type ModelEntity = { kind: "model"; view: { rotation: number; zoom: number }; mode?: "preview" | "editor"; editor?: EditorState };
 export type ComponentsEntity = { kind:"components" };
 export type CabinetEntity = { kind:"cabinet" };

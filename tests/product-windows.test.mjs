@@ -11,6 +11,7 @@ const {connectWorkspaceControls}=await loadTs(new URL("node-tools/workspace-upgr
 const {compileTools}=await loadTs(new URL("node-tools/compiler.ts",app));
 const {evaluateProduct}=await loadTs(new URL("node-tools/runtime.ts",app));
 const {productEvaluator,workspaceControls,writeControl,toolAvailable}=await loadTs(new URL("node-tools/workspace-controls.ts",app));
+const {toolSourceDependencies}=await loadTs(new URL("node-tools/workspace-sources.ts",app));
 const {migrateProduct,productContexts}=await loadTs(new URL("node-tools/product-state.ts",app));
 const defaults={usdRate:85,cnyRate:13};
 const values={stationType:"utility","main.flowRate":20,"main.head":30,"main.workingPumpCount":1,"main.reservePumpCount":1};
@@ -98,6 +99,37 @@ test("availability menu reads only circuit guards, never downstream calculations
   const plan={productRoot:"root",toolId:"secondary",steps:[{id:"secondary/guard",operation:"circuit.guard",fields:[active],values:{active:false},expressions:{},links:[]}]};
   const program={version:"pinned",tools:[],plans:{secondary:plan}},context={secondary:{values:{},defaults:{},role:"admin"}};
   assert.equal(toolAvailable(program,"secondary",context),false);plan.steps[0].values.active=true;assert.equal(toolAvailable(program,"secondary",context),true);
+});
+test("only registered catalog sources are dependencies, including direct context consumers",()=>{
+  const plan=(...operations)=>({steps:operations.map(operation=>({operation}))});
+  const program={plans:{settings:plan("parameter"),selection:plan("pump.catalog"),chart:plan("pump.chartModel"),dn:plan("station.dnContext","engineering.catalog"),card:plan("pump.detailData")}};
+  assert.deepEqual(toolSourceDependencies(program,"settings"),[]);
+  assert.deepEqual(toolSourceDependencies(program,"selection"),["pump_catalog_v2"]);
+  assert.deepEqual(toolSourceDependencies(program,"chart"),["pump_catalog_v2"]);
+  assert.deepEqual(toolSourceDependencies(program,"dn"),["pump_catalog_v2","station_catalog"]);
+  assert.deepEqual(toolSourceDependencies(program,"card"),["pump_catalog_v2"]);
+  assert.deepEqual(toolSourceDependencies({plans:{chart:program.plans.chart}},"chart"),[]);
+});
+test("only a missing source in the guard predicate defers tool availability",()=>{
+  const field=(key,kind,direction)=>({key,name:key,kind,direction,meaning:kind,unit:""});
+  const step=(id,operation,fields,links=[],values={},expressions={})=>({id,operation,fields,links,values,expressions});
+  const catalog=step("secondary/catalog","engineering.catalog",[field("resources","object","output")]);
+  const predicate=step("secondary/predicate",undefined,[field("catalog","object","input"),field("value","boolean","output")],
+    [{from:catalog.id,out:"resources",input:"catalog"}],{},
+    {value:{op:"==",args:[{op:"get",args:[{input:"catalog"},{literal:"available"}]},{literal:true}]}});
+  const active=field("active","boolean","input");
+  const guard=step("secondary/guard","circuit.guard",[active],[{from:predicate.id,out:"value",input:"active"}]);
+  const pumps=step("secondary/pumps","pump.catalog",[]);
+  const program={plans:{secondary:{id:"root",productRoot:"root",toolId:"secondary",steps:[catalog,predicate,guard,pumps]}}};
+  const context={secondary:{values:{},defaults:{},role:"admin"}};
+  assert.equal(toolAvailable(program,"secondary",context),false,"eager callers retain their behavior");
+  assert.equal(toolAvailable(program,"secondary",context,new Set()),true,"a missing predicate source is pending");
+  context.secondary.resources={station_catalog:{available:false}};
+  assert.equal(toolAvailable(program,"secondary",context,new Set(["station_catalog"])),false,"an unrelated unloaded catalog cannot defer the predicate");
+  context.secondary.resources.station_catalog.available=true;
+  assert.equal(toolAvailable(program,"secondary",context,new Set(["station_catalog"])),true);
+  program.plans.secondary.steps.push(step("secondary/other-guard","circuit.guard",[active],[],{active:false}));
+  assert.equal(toolAvailable(program,"secondary",context,new Set()),false,"a resolved false guard still disables the tool");
 });
 test("server enforces flags through the same parameter bindings and rejects forged permissions",async()=>{
   const f=await engineeringStore();try{

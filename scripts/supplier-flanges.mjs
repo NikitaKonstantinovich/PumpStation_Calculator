@@ -15,7 +15,8 @@ export function mergeSupplierFlanges(input, reference) {
       fields: [field("name", "Наименование", row.name), field("dn", "DN", row.dn), field("pn", "PN", row.pn),
         field("supplier", "Поставщик", row.supplier), field("supplierId", "ID товара поставщика", row.supplierProductId),
         field("material", "Материал", row.material ?? "AISI304"), field("compatiblePns", "Подтверждённые PN исполнения", row.compatiblePns.join("/")),
-        field("priceDate", "Дата цены", row.priceDate ?? reference.checkedAt), field("vat", "Условия цены", row.vat),
+        unquoted ? field("checkedAt", "Дата проверки позиции", reference.checkedAt) : field("priceDate", "Дата цены", row.priceDate ?? reference.checkedAt),
+        field("vat", "Условия цены", row.vat),
         field("sourceUrl", "Источник URL", row.url)],
       prices: unquoted ? [] : [{ amount: row.price, currency: "RUB", sourceColumn: "price", label: row.priceLabel }],
       sourceUrls: [row.url],
@@ -25,10 +26,12 @@ export function mergeSupplierFlanges(input, reference) {
     const row = reference.rows.find(row => row.id === item.id);
     if (row.geometryBasis) item.fields.push(field("geometryBasis", "Основание геометрии", row.geometryBasis));
     if (row.pressureSource) item.fields.push(field("pressureSource", "Основание применения PN", row.pressureSource));
+    if (row.insertionOnly) item.fields.push(field("purpose", "Назначение", "Фланец вставки"));
   }
   data.items = [...data.items.filter(item => item.tableId !== reference.id), ...items];
   catalog.tables = [...catalog.tables.filter(table => table.id !== reference.id), {
-    id: reference.id, title: reference.family, sourceRange: `Проверенный прайс ${reference.checkedAt}`,
+    id: reference.id, title: reference.family,
+    sourceRange: `${reference.rows.every(row => row.priceStatus === "on-request") ? "Проверка позиций, цена по запросу" : "Проверенный прайс"} ${reference.checkedAt}`,
     sourceUrls: [...new Set(reference.rows.map(row => row.url))], headerRows: [],
     columns: items[0].fields.map(({ column, headerPath }) => ({ column, headerPath })), recordIds: items.map(item => item.id),
   }];

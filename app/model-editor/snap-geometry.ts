@@ -36,7 +36,12 @@ export function snapGeometry(assembly: Assembly, references: EditorState["refere
     for (const p of c.ports.filter(p => !c.collector?.hiddenPieceIds.includes(`branch-${p.id}`))) g.points.push({ ...feature(`port/${p.id}`), point: worldPoint(c, p.point), kinds: ["port"], axis: p.axis && rotate(p.axis, c.rotation), approximate: p.provisional,
       note: p.provisional ? "предварительные данные патрубка" : "метаданные патрубка; монтажная пригодность требует проверки" });
     for (const p of references.filter(p => p.componentId === c.id)) g.points.push({ ...feature(`reference/${p.id}`), point: worldPoint(c, p.point), kinds: ["reference"], approximate: p.approximate, note: p.approximate ? "опора сохранена по полигональной сетке" : undefined });
-    if (c.kind === "frame") frameBoxes(c.parameters).forEach((box, bi) => {
+    for(const hole of c.frameDrilling?.holes??[]){
+      const origin=worldPoint(c,hole.point),u=rotate([1,0,0],c.rotation),v=rotate([0,0,1],c.rotation),radius=hole.diameter/2;
+      g.circles.push({...feature(`hole/${hole.id}`),origin,u,v,radius});point(`hole/${hole.id}/center`,origin,["center","faceCenter"]);
+      for(let i=0;i<4;i++)point(`hole/${hole.id}/q${i}`,add(origin,scale([u,v,scale(u,-1),scale(v,-1)][i],radius)),["quadrant"]);
+    }
+    if (c.kind === "frame"&&!c.meshUrl) frameBoxes(c.parameters).forEach((box, bi) => {
       const vertices: Vec3[] = [];
       for (let bits = 0; bits < 8; bits++) vertices.push(worldPoint(c, add(box.center, box.size.map((s, a) => (bits & (1 << a) ? 1 : -1) * s / 2) as Vec3)));
       vertices.forEach((p, vi) => point(`beam${bi}/vertex${vi}`, p, ["vertex", "end"]));

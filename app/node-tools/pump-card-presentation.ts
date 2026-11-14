@@ -3,7 +3,7 @@ import type { Values } from "./schema";
 
 export type PumpDetailRow = { key: string; label: string; value: string; origin?: string };
 export type PumpDetailSection = { id: string; title: string; rows: PumpDetailRow[]; note?: string; additional?: boolean; table?: { headings: string[]; rows: string[][] } };
-export const CARD_SECTIONS: Record<string, string> = { electric: "Двигатель и электрика", connections: "Присоединения", dimensions: "Габариты и масса", materials: "Материалы", fluid: "Условия эксплуатации", price: "Цена за один насос", passport: "Паспортные характеристики модели", additional: "Дополнительные характеристики", curves: "Исходные точки характеристик", files: "Чертёж и документы", dimensionSymbols: "Обозначения размеров на чертеже", sources: "Источники и применимость", diagnostics: "Замечания к данным" };
+export const CARD_SECTIONS: Record<string, string> = { electric: "Двигатель и электрика", connections: "Присоединения", dimensions: "Габариты и масса", materials: "Материалы", fluid: "Условия эксплуатации", price: "Цена за один насос", passport: "Паспортные характеристики модели", technicalSheet: "Заводской техлист ONIS", additional: "Дополнительные характеристики", curves: "Исходные точки характеристик", files: "Чертёж и документы", dimensionSymbols: "Обозначения размеров на чертеже", sources: "Источники и применимость", diagnostics: "Замечания к данным" };
 export const CARD_MAIN_FIELDS: Record<string, string> = { power: "Мощность двигателя", voltage: "Напряжение", frequency: "Частота питания", rpm: "Частота вращения", mass: "Масса" };
 export type CardPresentation = { sectionOrder: string[]; hiddenSections: string[]; mainFields: string[]; showPassport: boolean; showPrice: boolean; expandedDetails: boolean };
 const object = (v: unknown): Values => v && typeof v === "object" && !Array.isArray(v) ? v as Values : {};
@@ -50,14 +50,28 @@ export function engineeringSections(item: CatalogItem): PumpDetailSection[] {
   if (present(material.sealCode)) materialRows.push(row("sealCode", "Обозначение уплотнения", material.sealCode));
   if (materialRows.length) section("materials", materialRows, { note: present(material.scope) ? pumpDetailValue(material.scope) : undefined });
   const fluidRows = [row("medium", "Среда", f.medium ?? p.medium), ...[["temperatureMinC", "Минимальная температура", "°C"], ["temperatureMaxC", "Максимальная температура", "°C"], ["maxWorkingPressureBar", "Максимальное рабочее давление", "бар"]].flatMap(([key, label, unit]) => present(f[key]) ? [row(key, label, f[key], unit)] : [])];
-  const limits = object(f.operatingLimits), envelope = object(f.seriesEnvelope), temperatures = Object.keys(limits).length ? limits : envelope;
+  const limits = object(f.operatingLimits), envelope = object(f.seriesEnvelope);
+  const seriesOrigin = "Справочные условия серии; применимость к материалу уплотнения не подтверждена";
   const limitOrigin = Object.keys(limits).length ? "Условия выбранного исполнения" : "Справочные условия серии; применимость к материалу уплотнения не подтверждена";
-  for (const [key, label] of [["liquid_min_c", "Минимальная температура жидкости"], ["liquid_standard_max_c", "Максимальная температура жидкости — стандартное исполнение"], ["ambient_max_c", "Максимальная температура воздуха"]]) if (present(temperatures[key])) fluidRows.push(row(key, label, temperatures[key], "°C", limitOrigin));
+  for (const [key, label] of [["liquid_min_c", "Минимальная температура жидкости"], ["liquid_standard_max_c", "Максимальная температура жидкости — стандартное исполнение"], ["ambient_max_c", "Максимальная температура воздуха"]]) if (present(limits[key] ?? envelope[key])) fluidRows.push(row(key, label, limits[key] ?? envelope[key], "°C", present(limits[key]) ? limitOrigin : seriesOrigin));
   if (present(limits.liquid_high_temperature_option_max_c)) fluidRows.push(row("temperatureOption", "Температура для специального высокотемпературного исполнения", limits.liquid_high_temperature_option_max_c, "°C", "Дополнительное исполнение; наличие у выбранного насоса не подтверждено"));
   section("fluid", fluidRows, { note: [present(f.pressureTemperatureCondition) ? "Условие давления: " + pumpDetailValue(f.pressureTemperatureCondition) : "", !Object.keys(limits).length && Object.keys(envelope).length ? limitOrigin : "", present(limits.liquid_high_temperature_option_max_c) ? "Повышенная температура допустима только для специального исполнения, которое требует отдельного подтверждения." : ""].filter(Boolean).join(". "), ...(Array.isArray(f.pressureRatings) && f.pressureRatings.length ? { table: { headings: ["Температура, °C", "Рабочее давление, бар"], rows: f.pressureRatings.map(object).map(r => [pumpDetailValue(r.temperatureC), pumpDetailValue(r.maxWorkingPressureBar)]) } } : {}) });
   section("price", [row("price", p.priceKind === "net" ? "Закупочная цена из каталога" : p.priceKind === "list" ? "Прайсовая цена из каталога" : "Цена из каталога", p.price, p.priceCurrency ?? ""), ...(present(p.availability) ? [row("availability", "Наличие по источнику", p.availability)] : [])], { note: p.priceKind === "net" ? "Цена за один насос. Скидка уже учтена; повторно не применяется. В подборе цена может быть пересчитана в рубли по курсу проекта." : "Цена за один насос в валюте источника. Закупочная цена в подборе учитывает настройки скидки и курс проекта. Налоговые условия — только по документу поставщика." });
   section("passport", [row("nominalQ", "Номинальный расход", p.nominalFlow, "м³/ч", "Справочные данные модели"), row("nominalH", "Номинальный напор", p.ratedHead, "м", "Справочные данные модели"), ...(present(p.efficiency) ? [row("nominalEta", "КПД модели", p.efficiency, "%", "Справочные данные модели")] : []), ...(present(f.nominalNpshrM) ? [row("nominalNpshr", "Номинальный NPSHr насоса", f.nominalNpshrM, "м", "Справочные данные модели")] : [])], { additional: true, note: "Паспортные значения модели не являются рабочей точкой установки. NPSHr — требование насоса, а не располагаемый кавитационный запас системы." });
-  const extras = [["protectionClass", "Степень защиты"], ["insulationClass", "Класс изоляции"], ["efficiencyClass", "Класс энергоэффективности"]].flatMap(([key, label]) => present(e[key]) ? [row(key, label, e[key])] : []);
+  if (p.technicalSheet?.length) {
+    const units: Record<string,string> = {mm:"мм",kg:"кг",bar:"бар",month:"мес.","kg/m³":"кг/м³"};
+    const format = (key: string, value: string | number) => {
+      if (typeof value !== "string" || !["packagingDimensionsMm","flange.pnOptions"].includes(key)) return value;
+      try {
+        const values: unknown = JSON.parse(value);
+        return Array.isArray(values) && values.every(finite) ? values.join(key === "packagingDimensionsMm" ? " × " : " / ") : value;
+      } catch { return value; }
+    };
+    section("technicalSheet", p.technicalSheet.map(p => row(p.key,p.label,format(p.key,p.value),units[p.unit ?? ""] ?? p.unit ?? "",
+      p.page === 41 ? "Каталог ONIS, страница PDF 41" : "Техлист ONIS, стр. " + p.page)),
+    {additional:true,note:"Масса и размеры приведены по заводскому документу. При расхождении источников значения для расчёта показаны отдельно в разделе «Габариты и масса»."});
+  }
+  const extras = [["protectionClass", "Степень защиты"], ["insulationClass", "Класс изоляции"], ["efficiencyClass", "Класс энергоэффективности"], ["poleCount","Число полюсов"]].flatMap(([key, label]) => present(e[key]) ? [row(key, label, e[key])] : []);
   if (!ratings.length && present(e.currentA)) extras.push(row("current", "Ток при указанном напряжении", e.currentA, "А"));
   if (present(p.mounting?.hasSensors)) extras.push(row("sensors", "Наличие датчиков", p.mounting!.hasSensors));
   if (extras.length) section("additional", extras, { additional: true });

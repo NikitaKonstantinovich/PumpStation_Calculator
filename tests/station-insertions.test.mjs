@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { calculations, component, requirement, insertionDesign, selectStationInsertion } from "./fixtures/station-insertions.mjs";
+import { calculations, catalog, component, generateInsertCalculations, requirement, insertionDesign, selectStationInsertion } from "./fixtures/station-insertions.mjs";
 import { load, resources, fixture, sync, rows, choose, parseProjectConfig } from "./fixtures/station-specification.mjs";
 const { lineSpecParts, selectJointFasteners } = await load("line-spec-parts");
 const { insertionPrice } = await load("calculated-insertion");
@@ -51,6 +51,27 @@ test("missing BOM roles, partial costs and engineering assumptions remain incomp
   }
   const item = component(c); item.calculatedInsertion.calculation.assumptions = [{ code: "sensor-pn25-pressure", message: "TEST pressure decision", source: "TEST" }];
   assert.equal(selectStationInsertion([item], req).technicalStatus, "incomplete");
+});
+test("disabled station pressure checks omit only the reviewed PN25 sensor pressure assumption", () => {
+  const calculated = generateInsertCalculations({ dnFrom: 80, dnTo: 80, materials: ["st20"], withSensorNipple: true, includeEccentric: false }, catalog)
+    .find(c => c.complete && c.pn === 25 && c.geometry === "straight" && c.leftConnection === "flanged" && c.rightConnection === "flanged");
+  const item = component(calculated);
+  const assumption = calculated.assumptions.find(a => a.code === "sensor-pn25-pressure");
+  const generate = (checkPressure, pn = 25) => {
+    const rows = [];
+    const parts = lineSpecParts(rows, "discharge", "test", { material: "st20" }, { items: [item] }, resources.components.collectorCatalog, {}, ["primary"], true, checkPressure);
+    return parts.insertion("primary-between-valves-insertion", "Вставка", 1, "DN80", { fromDn: 80, toDn: 80, fromConnection: "flanged", toConnection: "flanged", pn, purpose: "between-valves" });
+  };
+  assert.ok(generate(true).technicalNotes.some(note => note.includes(assumption.message)));
+  const selected = generate(false);
+  assert.equal(selected.equipmentId, item.id);
+  assert.equal(selected.technicalStatus, "ready");
+  assert.equal(generate(false, 16).equipmentId, undefined);
+  const exported = specificationExportRows([selected], [{ title: "Обвязка", sections: [{ id: "discharge" }] }]);
+  assert.ok(!exported.some(row => row.cells.some(cell => String(cell).includes(assumption.message))));
+  assert.ok(item.calculatedInsertion.calculation.bom.find(part => part.role === "sensor-nipple").source.includes(assumption.message));
+  item.calculatedInsertion.calculation.assumptions.push({ code: "flange-nominal-fit", message: "Проверить посадку фланца", source: "TEST" });
+  assert.ok(generate(false).technicalNotes.some(note => note.includes("Проверить посадку фланца")));
 });
 test("reopening a saved project restores the latest published unit price and counts three inserts once", async () => {
   const { refreshSavedSpecificationInsertions } = await load("saved-insertion-specification");

@@ -87,6 +87,170 @@ test("source inline type reaches the type, manufacturer and series filters witho
   } finally { await f.close(); }
 });
 
+test("horizontal source statuses reach selection without admitting disabled, draft or unknown records", async () => {
+  const f = await fixture();
+  try {
+    const db = new DatabaseSync(f.path);
+    db.exec("UPDATE models SET pump_type_id='horizontal_multistage' WHERE id='a'");
+    const { executePumpOperation } = await loadTs(new URL("../app/node-tools/pump-runtime.ts", import.meta.url));
+    for (const status of ["source_record", "historical_source_record_with_official_technical_evidence", "official_selector_visible", "source_active; current_PDF_match_is_separate_evidence", "draft", "retired", "unrecognized"]) {
+      db.prepare("UPDATE models SET lifecycle_status=?,selection_enabled=1 WHERE id='a'").run(status);
+      const snapshot = readCatalogSnapshot(f.path);
+      const context = { values: {}, defaults: {}, role: "admin", resources: { pump_catalog_v2: snapshot } };
+      const run = (operation, values) => executePumpOperation({ id: operation, operation, fields: [], values: {}, links: [], expressions: {} }, values, context);
+      const catalog = run("pump.catalog", { source: "pump_catalog_v2" }).value;
+      const filtered = run("pump.filter", { catalog, type: "horizontal_multistage", request: { flowRate: 10, head: 30, staticHead: 0, workingPumpCount: 1, medium: "water" } }).value;
+      const allowed = !["draft", "retired", "unrecognized"].includes(status);
+      assert.equal(filtered.rows.length, allowed ? 2 : 0, status);
+      db.exec("UPDATE models SET selection_enabled=0 WHERE id='a'");
+      assert(readCatalogSnapshot(f.path).items.filter(i => i.modelId === "a").every(i => !i.pump.selectable), status);
+    }
+    db.close();
+  } finally { await f.close(); }
+});
+
+test("preferred curve uses the source-approved set and preserves alternative curves and snapshot identity", async () => {
+  const f = await fixture();
+  try {
+    const db = new DatabaseSync(f.path);
+    db.exec(`
+      CREATE TABLE preferred_curve_sets(model_id TEXT,curve_set_id TEXT,applicability TEXT,source_id TEXT);
+      INSERT INTO curve_sets VALUES('preferred','a',50,'preferred-source');
+      INSERT INTO curves VALUES('qh-preferred','preferred','qh','m3/h','m');
+      INSERT INTO curve_points VALUES('qh-preferred',0,0,50),('qh-preferred',1,10,35),('qh-preferred',2,20,5);
+      INSERT INTO preferred_curve_sets VALUES('a','preferred','Exact manufacturer table','preference-source');
+    `);
+    const before = await hash(f.path), first = readCatalogSnapshot(f.path), item = first.items.find(i => i.variantId === "variant-one");
+    assert.equal(await hash(f.path), before);
+    assert.equal(item.curveSetId, "preferred");
+    assert.deepEqual(item.pump.curve, [[0,50],[10,35],[20,5]]);
+    assert.equal(item.pump.selectable, true);
+    assert.equal(item.provenance.curveSelection.matchedBy, "frequency_hz");
+    assert.equal(item.provenance.curveSelection.source_id, "preference-source");
+    db.exec("UPDATE preferred_curve_sets SET curve_set_id='set-a'");
+    const second = readCatalogSnapshot(f.path);
+    assert.notEqual(second.id, first.id);
+    assert.deepEqual(second.items.find(i => i.variantId === "variant-one").pump.curve, [[0,45],[10,30],[20,0]]);
+    assert.deepEqual(item.pump.curve, [[0,50],[10,35],[20,5]]);
+    db.close();
+  } finally { await f.close(); }
+});
+
+test("invalid, foreign, duplicated and frequency-conflicting curve preferences never silently fall back", async () => {
+  const f = await fixture();
+  try {
+    const db = new DatabaseSync(f.path);
+    db.exec(`
+      CREATE TABLE preferred_curve_sets(model_id TEXT,curve_set_id TEXT,applicability TEXT,source_id TEXT);
+      INSERT INTO curve_sets VALUES('foreign','b',50,'foreign-source'),('wrong-frequency','a',60,'other-source');
+      INSERT INTO preferred_curve_sets VALUES('a','missing','Exact','source');
+    `);
+    for (const id of ["missing", "foreign", "wrong-frequency"]) {
+      db.prepare("UPDATE preferred_curve_sets SET curve_set_id=?").run(id);
+      const item = readCatalogSnapshot(f.path).items.find(i => i.variantId === "variant-one");
+      assert.equal(item.curveSetId, null, id);assert.equal(item.pump.selectable, false, id);
+    }
+    db.exec("UPDATE preferred_curve_sets SET curve_set_id='set-a'; INSERT INTO preferred_curve_sets SELECT * FROM preferred_curve_sets");
+    assert.equal(readCatalogSnapshot(f.path).items.find(i => i.variantId === "variant-one").pump.selectable, false);
+    db.close();
+  } finally { await f.close(); }
+});
+
+test("preferred curves without Hz require a confirmed matching motor speed and retain unknown Hz", async () => {
+  const f = await fixture();
+  try {
+    const db = new DatabaseSync(f.path);
+    db.exec(`
+      ALTER TABLE curve_sets ADD COLUMN reference_speed_rpm REAL;
+      UPDATE curve_sets SET frequency_hz=NULL,reference_speed_rpm=2900;
+      CREATE TABLE preferred_curve_sets(model_id TEXT,curve_set_id TEXT,applicability TEXT,source_id TEXT);
+      INSERT INTO preferred_curve_sets VALUES('a','set-a','Exact manufacturer table','source');
+    `);
+    const item = () => readCatalogSnapshot(f.path).items.find(i => i.variantId === "variant-one");
+    assert.equal(item().pump.selectable, true);
+    assert.equal(item().provenance.curveSet.frequency_hz, null);
+    assert.equal(item().provenance.curveSelection.matchedBy, "speed_rpm");
+    assert.equal(item().pump.frequencyHz, 50);
+    db.exec("UPDATE motor_configurations SET speed_rpm=1450 WHERE variant_id='variant-one'");
+    assert.equal(item().pump.selectable, false);
+    db.exec("UPDATE motor_configurations SET speed_rpm=NULL,frequency_hz=NULL WHERE variant_id='variant-one'");
+    assert.equal(item().pump.selectable, false);
+    db.exec("UPDATE motor_configurations SET speed_rpm=2900,frequency_hz=60 WHERE variant_id='variant-one';UPDATE curve_sets SET frequency_hz=50");
+    assert.equal(item().pump.selectable, false);
+    db.close();
+  } finally { await f.close(); }
+});
+
+test("preferred invalid Q/H points cannot be replaced by a valid alternative", async () => {
+  const f = await fixture();
+  try {
+    const db = new DatabaseSync(f.path);
+    db.exec(`
+      CREATE TABLE preferred_curve_sets(model_id TEXT,curve_set_id TEXT,applicability TEXT,source_id TEXT);
+      INSERT INTO curve_sets VALUES('invalid','a',50,'source');
+      INSERT INTO curves VALUES('qh-invalid','invalid','qh','m3/h','m');
+      INSERT INTO curve_points VALUES('qh-invalid',0,0,30),('qh-invalid',1,0,20);
+      INSERT INTO preferred_curve_sets VALUES('a','invalid','Exact','source');
+    `);
+    db.close();
+    const item = readCatalogSnapshot(f.path).items.find(i => i.variantId === "variant-one");
+    assert.equal(item.curveSetId, "invalid");assert.equal(item.pump.selectable, false);assert.deepEqual(item.pump.curve, []);
+  } finally { await f.close(); }
+});
+
+test("owner-approved CUC executions enter selection with null motor Hz/rpm and no blanket exception", async () => {
+  const f = await fixture();
+  try {
+    const db = new DatabaseSync(f.path);
+    db.exec(`CREATE TABLE preferred_curve_sets(model_id TEXT,curve_set_id TEXT,applicability TEXT,source_id TEXT);
+      ALTER TABLE curve_sets ADD COLUMN reference_speed_rpm REAL;`);
+    const executions = [
+      ["HM:WELLMIX:CUC:22fa6be6ffd1ce41", "11019926", "CUC 20-10T"],
+      ["HM:WELLMIX:CUC:1da35824cb0232d7", "11019924", "CUC 20-20T"],
+      ["HM:WELLMIX:CUC:50c07a99bab45d5b", "11019923", "CUC 20-30T"],
+    ];
+    for (const [model, article, name] of executions) {
+      const variant = model + ":" + article, set = model + ":curve-set:0", curve = set + ":qh";
+      db.prepare("INSERT INTO models VALUES(?, 's', 'horizontal_multistage', ?, 'water', 'historical_source_record_with_official_technical_evidence', 1, 'source', 10)").run(model, name);
+      db.prepare("INSERT INTO variants VALUES(?,?,?,?, 'source',NULL,'unknown')").run(variant, model, name, article);
+      db.prepare("INSERT INTO motor_configurations VALUES(?,NULL,NULL,NULL,'source')").run(variant);
+      db.prepare("INSERT INTO curve_sets VALUES(?,?,NULL,'source',2900)").run(set, model);
+      db.prepare("INSERT INTO curves VALUES(?,?,'qh','m3/h','m')").run(curve, set);
+      db.prepare("INSERT INTO curve_points SELECT ?,ordinal,flow_m3h,value FROM curve_points WHERE curve_id='qh-a'").run(curve);
+      db.prepare("INSERT INTO preferred_curve_sets VALUES(?,?,'Exact factory article','source')").run(model, set);
+    }
+    const snapshot = readCatalogSnapshot(f.path);
+    for (const [model, article] of executions) {
+      const item = snapshot.items.find(i => i.variantId === model + ":" + article);
+      assert.equal(item.pump.selectable, true);
+      assert.deepEqual(item.pump.curve, [[0,45],[10,30],[20,0]]);
+      for (const value of [item.frequencyHz, item.pump.frequencyHz, item.pump.speedRpm, item.pump.electric.frequencyHz, item.pump.electric.speedRpm]) assert.equal(value, null);
+      assert.equal(item.provenance.curveSelection.matchedBy, "owner_approved_exact_curve");
+      assert.equal(item.provenance.curveSet.reference_speed_rpm, 2900); // Curve provenance is not a motor rating.
+    }
+    const { executePumpOperation } = await loadTs(new URL("../app/node-tools/pump-runtime.ts", import.meta.url));
+    const context = { values: {}, defaults: {}, role: "admin", resources: { pump_catalog_v2: snapshot } };
+    const run = (operation, values) => executePumpOperation({ id: operation, operation, fields: [], values: {}, links: [], expressions: {} }, values, context);
+    const catalog = run("pump.catalog", { source: "pump_catalog_v2" }).value;
+    const filtered = run("pump.filter", { catalog, type: "horizontal_multistage", request: { flowRate: 10, head: 30, staticHead: 0, workingPumpCount: 1, medium: "water" } }).value;
+    assert.equal(filtered.rows.length, 3);
+    const reserved = run("pump.reserve", { candidates: filtered, minimum: -5 }).value;
+    assert.equal(run("pump.measure", { candidates: reserved, pricing: {} }).value.rows.filter(row => row.selectable).length, 3);
+
+    const [model, article] = executions[0], variant = model + ":" + article, set = model + ":curve-set:0";
+    db.prepare("INSERT INTO variants SELECT 'unapproved',model_id,designation,manufacturer_article,source_id,has_sensors,sensor_status FROM variants WHERE id=?").run(variant);
+    db.exec("INSERT INTO motor_configurations VALUES('unapproved',NULL,NULL,NULL,'source')");
+    assert.equal(readCatalogSnapshot(f.path).items.find(i => i.variantId === "unapproved").pump.selectable, false);
+    db.prepare("UPDATE motor_configurations SET frequency_hz=60 WHERE variant_id=?").run(variant);
+    db.prepare("UPDATE curve_sets SET frequency_hz=50 WHERE id=?").run(set);
+    assert.equal(readCatalogSnapshot(f.path).items.find(i => i.variantId === variant).pump.selectable, false);
+    db.prepare("UPDATE motor_configurations SET frequency_hz=NULL WHERE variant_id=?").run(variant);
+    db.prepare("UPDATE preferred_curve_sets SET curve_set_id='set-a' WHERE model_id=?").run(model);
+    assert.equal(readCatalogSnapshot(f.path).items.find(i => i.variantId === variant).pump.selectable, false);
+    db.close();
+  } finally { await f.close(); }
+});
+
 test("source rejects unregistered queries and distinguishes an empty catalogue from a missing or invalid source",async()=>{
   const f=await fixture();
   try {

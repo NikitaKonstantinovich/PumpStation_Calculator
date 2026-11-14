@@ -4,7 +4,7 @@ import type { SpecItem, ValveConnection } from "./project-config";
 import { matingParts, suctionCatalogItems, type AssemblyComponent } from "./suction-catalog";
 import { componentPressureLimit } from "./suction-pressure";
 import { itemDn, price, lineSpecParts } from "./line-spec-parts";
-import { flangeStack, insertionEndThickness, pumpFlangeReference } from "./line-joint-stack";
+import { flangeStack } from "./line-joint-stack";
 import { vibrationBoltSeat } from "./vibration-fasteners";
 import { jointFlangeThickness } from "./joint-flange-dimensions";
 import { selectLineInsertion, selectLineReducer } from "./line-insertion";
@@ -22,6 +22,11 @@ export function selectVibrationCompensator(items: AssemblyComponent[], dn: numbe
       if (selectedPrice == null || !Number.isFinite(selectedPrice) || selectedPrice <= 0 || (!pnPrices.length && (!rating || rating < pn))) return [];
       return [{ item, price: selectedPrice, pn: pnPrices.length ? pn : rating! }];
     }).sort((a, b) => a.pn - b.pn || a.price - b.price || a.item.id.localeCompare(b.item.id))[0];
+}
+
+export function selectStraightThreadedNipple(items: AssemblyComponent[], dn: number, pn: number) {
+  return items.find(item => item.catalogId === "резьбовые-фитинги" && /Ниппель (?:прямой )?латунный НР\/НР/i.test(item.family) &&
+    itemDn(item) === dn && (componentPressureLimit(item)?.bar ?? Infinity) >= pn);
 }
 
 type Assembly = {
@@ -60,10 +65,10 @@ export function addPumpVibrationAssembly({ parts, database, catalog, collector, 
       gasket(`${prefix}-vibration-pump-gasket`, p.dn, pn, count);
       gasket(`${prefix}-vibration-insertion-gasket`, p.dn, pn, count);
     } else row.description += ` ${mounting?.sealingSource}`;
-    const pump = pumpFlangeReference(database, collector.material, p.dn, pn, insertion);
+    const pump = parts.pumpFlangeReference(p.dn, pn, insertion);
     const pumpSide = vibrationBoltSeat(selected?.item, mounting, p.dn, pn, "left");
     const insertionSide = vibrationBoltSeat(selected?.item, mounting, p.dn, pn, "right");
-    let end = insertionEndThickness(insertion, "from", database, true);
+    let end = parts.insertionEndThickness(insertion, "from", true);
     if (!insertion.insertionAssembly && !insertion.insertionRequirement?.design) {
       const stock = jointFlangeThickness(database, collector.material, p.dn, pn, undefined, undefined, undefined, true);
       if (!stock.warnings.length && stock.thicknessMm !== null) end = stock.thicknessMm / 2;
@@ -126,7 +131,7 @@ export function addPumpConnectionAssembly(args: Assembly & { vibration: boolean;
   const { add, gasket, flanges, fasteners } = parts;
   const need={fromDn:p.dn,toDn:v,fromConnection:p.connection,toConnection:connection,pn,purpose:"pump-transition" as const};
   const pumpInsertionJoint = (insertion: SpecItem) => {
-    const pump = pumpFlangeReference(database, collector.material, p.dn, pn, insertion);
+    const pump = parts.pumpFlangeReference(p.dn, pn, insertion);
     gasket(`${prefix}-pump-gasket`, p.dn, pn, count);
     fasteners(`${prefix}-pump-fasteners`, p.dn, pn, count, {
       gaskets: 1, thickness: 0, flangeThickness: flangeStack(pump.thickness, insertion.equipmentId ? pump.thickness : null),
@@ -134,9 +139,13 @@ export function addPumpConnectionAssembly(args: Assembly & { vibration: boolean;
     });
   };
   if (p.connection === "threaded" && connection === "threaded") {
-    const part = pn <= 16 ? suctionCatalogItems.find(item => item.id === `suction-table:union-${v}`) : undefined;
-    add(`${prefix}-union`, part?.family ?? `Американка НР-НР DN${v}`, count, `${title} · DN${v} · PN${pn} · ответные резьбы`, part);
-    return 3;
+    const part = suctionCatalogItems.find(item => item.id === `suction-table:union-valtec-${v}` && (componentPressureLimit(item)?.bar ?? 0) >= pn);
+    add(`${prefix}-union`, part?.family ?? `Сгон разъёмный (американка) НР/ВР DN${v}`, count,
+      `${title} · DN${v} · PN${pn} · НР к патрубку насоса, ВР к ниппелю`, part);
+    const nipple = selectStraightThreadedNipple(database.items, v, pn);
+    add(`${prefix}-pump-nipple`, `Ниппель прямой латунный НР/НР DN${v}`, count, `${title} · американка → ниппель → ${terminal === "check" ? "обратный клапан" : "шаровой кран"} · PN${pn}`, nipple);
+    // The union seals internally with its own ring. Count external thread joints only.
+    return 4;
   }
   if (p.connection !== connection) {
     const flangeDn = p.connection === "flanged" ? p.dn : v, threadDn = p.connection === "threaded" ? p.dn : v;

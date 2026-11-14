@@ -1,6 +1,7 @@
 import {currentPublication} from "./engineering/runtime";
 import type {ProjectConfig} from "./project-config";
 import {mergeProjectChanges,sameProject} from "./project-merge";
+import {delayAutosaveForCamera} from "./project-autosave";
 
 export type ProjectCard = {id:string; name:string; revision:number; createdAt:string; updatedAt:string};
 export type ProjectFile = ProjectCard & {config:ProjectConfig};
@@ -128,7 +129,17 @@ export class ProjectSession {
     this.notify("Есть изменения");
     this.since ||= Date.now();
     clearTimeout(this.timer);
-    this.timer=setTimeout(()=>void this.flush(),Math.max(0,Math.min(3000,30000-(Date.now()-this.since))));
+    const deadline = this.since + 30000;
+    this.scheduleAutosave(deadline, Math.max(0, Math.min(3000, deadline - Date.now())));
+  }
+  private scheduleAutosave(deadline: number, delay: number) {
+    this.timer = setTimeout(() => {
+      // Serializing a large project can block frames. Keep the original
+      // deadline and let explicit saves and page exits call flush directly.
+      const remaining = delayAutosaveForCamera(deadline);
+      if (remaining > 0) this.scheduleAutosave(deadline, remaining);
+      else void this.flush();
+    }, delay);
   }
   flush():Promise<boolean> {
     clearTimeout(this.timer);

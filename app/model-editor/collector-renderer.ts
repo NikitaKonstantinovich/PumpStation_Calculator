@@ -30,6 +30,7 @@ export function collectorObject(c:Component,cache?:CollectorRenderCache):THREE.G
   if(metal.main)body("main",metal.main);
   for(const b of t.branches)if(metal.branches[b.id])body(b.id,metal.branches[b.id]);else {
     const marker=pieceObject({id:b.id,componentId:b.componentId,name:b.name,role:b.id,auxiliary:false,position:b.origin.map((v,i)=>v+b.axis[i]*b.endMm) as [number,number,number],rotation:[0,0,0],shape:{kind:"marker"},ports:[],source:b.source,fidelity:"missing"});
+    marker.userData.fixedOpacity = true;
     marker.visible=!binding.hiddenPieceIds.includes(b.id);group.add(marker);
   }
   for(const p of t.pieces){const object=pieceObject(p);object.visible=!binding.hiddenPieceIds.includes(p.id);object.traverse(o=>{if(o instanceof THREE.Mesh||o instanceof THREE.LineSegments)for(const m of Array.isArray(o.material)?o.material:[o.material]){m.opacity*=c.opacity*(binding.pieceOpacities?.[p.id]??1);m.transparent||=m.opacity<1;if(p.id===binding.selectedPieceId&&m instanceof THREE.MeshStandardMaterial)m.emissive.setHex(0x5b3200);}});group.add(object);}

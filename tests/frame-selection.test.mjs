@@ -114,3 +114,14 @@ test("3D refresh updates untouched automatic poses and preserves manual/legacy f
   assert.equal(saved.name, frame.name);
   assert.match(saved.sourceNote, /Сохранена ручная или прежняя геометрия/);
 });
+
+
+test("calculated catalogue frame uses native mesh, color and exact pump row without changing CAD dimensions",()=>{
+ const p=fixture(),old=model.buildAssembly(p,catalogWithMass(40),profiles);
+ p.entities["station-spec"].frameCalculation={version:"test",status:"incomplete",variant:{id:"bent-frame-test",cad:"Equipment/Frames/test.SLDPRT",hash:"a".repeat(64),stl:"/model-assets/frame-test.stl",boundsMm:[-235,-45,-350,235,5,350],lengthMm:700,thicknessMm:5,color:"red"},layout:{lengthMm:700,pumps:[{id:"pump-1-0",x:175,y:0}]},issues:[],parts:[]};
+ const a=model.buildAssembly(p,catalogWithMass(40),profiles),frame=a.components.find(c=>c.kind==="frame"),pump=a.components.find(c=>c.kind==="pump");
+ assert.equal(frame.meshUrl,"/model-assets/frame-test.stl");assert.equal(frame.frameColor,"red");assert.equal(frame.position[2],45);assert.deepEqual(frame.rotation,[90,0,0]);
+ assert.equal(pump.position[1],175);assert.deepEqual(pump.bounds,old.components.find(c=>c.kind==="pump").bounds);
+ assert.notEqual(a.sourceFingerprint,old.sourceFingerprint);
+ const normalized=model.normalizeEditor({assembly:a,version:1});assert.equal(normalized.assembly.components.find(c=>c.kind==="frame").frameColor,"red");
+});
