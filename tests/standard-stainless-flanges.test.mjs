@@ -15,7 +15,7 @@ const { insertionGeometryContext } = await loadTs(new URL("../app/component-inse
 });
 const { lineGeometry } = await loadTs(new URL("../app/line-geometry-catalog.ts", import.meta.url));
 const rendererUrl = new URL("../app/model-editor/insertion-renderer.ts", import.meta.url);
-const { pieceObject } = await loadTs(rendererUrl, { [rendererUrl.href]: (await readFile(rendererUrl,"utf8")).replace('from "three"', `from ${JSON.stringify(new URL("../node_modules/three/build/three.module.js",import.meta.url).href)}`) });
+const { pieceObject } = await loadTs(rendererUrl, { [rendererUrl.href]: (await readFile(rendererUrl,"utf8")).replace('from "three"', `from ${JSON.stringify(import.meta.resolve("three"))}`) });
 
 test("one priced PN16 SKU per DN through 900; retired series cannot return on generation", () => {
   const once = mergeStandardStainlessFlanges(source, ref);

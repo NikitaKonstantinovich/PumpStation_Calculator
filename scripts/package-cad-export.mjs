@@ -7,7 +7,7 @@ const destination=process.argv[2]&&resolve(process.argv[2]);
 if(!destination||process.argv.length!==3)throw Error('Usage: node scripts/package-cad-export.mjs <new-release-directory>');
 const service=resolve(destination,'cad-service'),runner=resolve(destination,'cad-runner');
 for(const path of [service,runner]){
-  let exists=false;try{await access(path);exists=true;}catch{}
+  let exists=false;try{await access(path);exists=true;}catch(error){if(error.code!=="ENOENT")throw error;}
   if(exists)throw Error('CAD release destination already exists: '+path);
 }
 const compiled=resolve(root,'services/solidworks-export/runner/bin/Release/net9.0-windows');

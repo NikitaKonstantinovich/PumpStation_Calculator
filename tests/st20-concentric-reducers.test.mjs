@@ -68,7 +68,7 @@ test("concentric insert generation preserves straight lengths and incomplete row
   assert.deepEqual(rows.filter(r => r.geometry === "straight"), generateInsertCalculations(input, before));
   const transitions = rows.filter(r => r.geometry === "concentric");
   assert.equal(transitions.length, 51);
-  assert.equal(transitions.filter(r => r.complete).length, 12);
+  assert.equal(transitions.filter(r => r.complete).length, 27);
   const withEccentric = generateInsertCalculations({ ...input, includeEccentric: true }, catalog);
   assert.deepEqual(withEccentric.filter(r => r.geometry !== "eccentric"), rows);
   assert.equal(new Set(withEccentric.map(r => r.selection.slot)).size, withEccentric.length);

@@ -22,7 +22,7 @@
     "app/control-cabinet-selection.ts": "362d1d6d97c864bf65a845e89320f314346fec25d372cc3cd13c1e0ff22a3a31",
     "app/curve-methods.ts": "306b78e269c75ad2cd7ac62bf269b5ee41dae298733197ffc4c3910948a4107a",
     "app/dn-defaults.ts": "ff00519a0dbda173673840328c821e356271de709d52a93315aa879fd5068f2f",
-    "app/equipment-cad-sources.ts": "e59a7f780a3b73aa823155aeb289a3fd276e6eb0cd4c7bd25507254ae3644808",
+    "app/equipment-cad-sources.ts": "ea5791e9cc436c0a37a90d2640f75613d60a81908ebc9b986bf8dcdd5898f987",
     "app/frame-calculation/specification-mass-estimates.ts": "2533f410b3d924240c457823d07fd6a63902ce830502625abe111939dd9ce305",
     "app/frame-selection.ts": "1cc084a254c4a150762ecaff5ba4c479579591f09af78752d29f56a9bac00a1d",
     "app/full-workspace.tsx": "e19f1d3feb0d92e70ceb36bf9488824bb1b0636fb31952e93c4d5a41ed5608ac",

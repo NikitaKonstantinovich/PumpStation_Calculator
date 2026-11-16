@@ -78,7 +78,7 @@ export function cadContents(assembly?: Assembly | null, spec: SpecItem[] = [], s
       // Ports identify the welded branches/sgons and their flange ends; caps
       // and other removable accessories remain in the station assembly.
       const t = c.collector.template;
-      const roots = t.ports.map(p => p.id.startsWith("network-") ? `end-${p.id.slice(8)}`
+      const roots = (t.ports ?? []).map(p => p.id.startsWith("network-") ? `end-${p.id.slice(8)}`
         : p.id.startsWith("instrument") ? p.id : `branch-${p.id}`);
       return part === "main" || t.branches.some(b => b.id === part) || roots.some(root =>
         part === root || ["collar", "looseFlange", "weldFlange"].some(kind => part === `${root}-${kind}`)) ? c : undefined;

@@ -1,3 +1,4 @@
+import { readLocalCad } from "./local-cad-assets.mjs";
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
 import { readFile } from "node:fs/promises";
@@ -6,7 +7,7 @@ import { loadTs } from "./load-ts.mjs";
 
 const { parseModelLibrary, filterLibrary, addLibraryModel } = await loadTs(new URL("../app/model-editor/library.ts", import.meta.url));
 const { normalizeEditor, mergeAssembly } = await loadTs(new URL("../app/model-editor/model.ts", import.meta.url));
-const raw = JSON.parse(await readFile(new URL("../public/model-assets/library.json", import.meta.url), "utf8"));
+const raw = JSON.parse(await readLocalCad("public/model-assets/library.json", "utf8"));
 const library = parseModelLibrary(raw);
 const bracket = library.models.find(m => m.source.endsWith("Кронштейн концевых выключателей для Dendor 017W Dn50-80.SLDPRT"));
 const sensor = filterLibrary(library.models, "TZ-8111", "КИПиА", "ready")[0];
@@ -15,9 +16,9 @@ test("bracket and exact EKF TZ-8111 have real hash-bound geometry in millimetres
   for (const model of [bracket, sensor]) {
     assert.ok(model, "Both requested models must be searchable and ready");
     assert.equal(model.status, "ready");
-    const source = await readFile(new URL(`../../${model.source}`, import.meta.url));
+    const source = await readLocalCad(model.source);
     assert.equal(createHash("sha256").update(source).digest("hex"), model.sourceHash);
-    const mesh = await readFile(new URL(`../public${model.meshUrl}`, import.meta.url));
+    const mesh = await readLocalCad(`public${model.meshUrl}`);
     const triangles = mesh.readUInt32LE(80);
     assert.ok(triangles > 100);
     assert.equal(mesh.length, 84 + 50 * triangles);

@@ -1,3 +1,4 @@
+import { readLocalCad } from "./local-cad-assets.mjs";
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
@@ -29,17 +30,17 @@ test('all imported ONIS originals remain accounted for; unsupported DWG never ma
 
 test('local original files match the archived hashes', localCad, async () => {
   for (const row of report.files) {
-    const original = await readFile(new URL('../'+row.archivedSource, root));
+    const original = await readLocalCad(row.archivedSource);
     assert.equal(sha(original), row.originalHash ?? row.sourceHash, row.name);
   }
 });
 
 test('every ready mesh has a matching source, bounds and valid binary STL; library search finds MV and MH', localCad, async () => {
-  const library = await json('public/model-assets/library.json');
+  const library = JSON.parse(await readLocalCad('public/model-assets/library.json','utf8'));
   const parsed = parseModelLibrary(library);
   for (const row of report.files.filter(r=>r.status==='ready')) {
-    const source = await readFile(new URL('../'+row.source, root));
-    const mesh = await readFile(new URL('public'+row.meshUrl, root));
+    const source = await readLocalCad(row.source);
+    const mesh = await readLocalCad('public'+row.meshUrl);
     assert.equal(sha(source), row.sourceHash, row.name);
     assert.equal(sha(mesh), row.meshHash, row.name);
     assert.ok(mesh.readUInt32LE(80)>0);
@@ -96,7 +97,7 @@ test('ONIS MV20-3 uses the actual mounting holes and rejects altered or re-posit
 test('a reviewed library-only pump keeps measured ports without borrowing a catalogue SKU',async()=>{
   const source=report.files.find(f=>f.model==='MV20-14');
   assert.ok(source && !source.pumpId);
-  const library=await json('public/model-assets/library.json');
+  const library=JSON.parse(await readLocalCad('public/model-assets/library.json','utf8'));
   const pump=parseModelLibrary({version:1,models:library.models.filter(m=>m.sourceHash===source.sourceHash)}).models[0];
   const assembly=addLibraryModel({components:[]},pump,'manual-onsite');
   assert.deepEqual(assembly.components[0].ports.map(p=>p.id),['inlet','outlet']);

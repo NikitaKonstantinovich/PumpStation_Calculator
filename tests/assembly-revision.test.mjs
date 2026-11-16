@@ -41,7 +41,10 @@ test("collectors and insertions own their loose flanges; gauge names follow the 
   for(const owner of assembly.components.filter(c=>c.collector||c.insertion)){
     const parts=manifest.instances.filter(p=>p.componentId===owner.id);
     assert.ok(parts.length);
-    assert.ok(parts.every(p=>p.subassembly?.id===owner.id));
+    const fabricated=parts.filter(p=>!owner.collector || !p.pieceId?.endsWith("-plug"));
+    assert.ok(fabricated.length);
+    assert.ok(fabricated.every(p=>p.subassembly?.id===owner.id));
+    for(const cap of parts.filter(p=>owner.collector && p.pieceId?.endsWith("-plug")))assert.equal(cap.subassembly,undefined);
     const flanges=parts.filter(p=>/фланец/i.test(p.name));
     assert.ok(flanges.length,owner.name);
   }

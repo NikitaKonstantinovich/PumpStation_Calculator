@@ -165,7 +165,9 @@ test("six small PN16 collars adopt approved image/model dimensions at wall 3 wit
     assert.equal(row.welds.length,2);
     assert.ok(Math.abs(row.weldLengthMm-2*Math.PI*(76.1+60.3))<1e-8);
     assert.equal(row.price,row.bom.reduce((sum,item)=>sum+item.cost,0));
-    assert.ok(row.bom.every(item=>item.kind!=="looseFlange"));
+    const rings=row.bom.filter(item=>item.kind==="looseFlange");
+    assert.equal(rings.reduce((sum,item)=>sum+item.quantity,0),2);
+    assert.ok(rings.every(item=>item.componentId && item.unitPrice>0 && item.cost===item.quantity*item.unitPrice));
   }
 });
 

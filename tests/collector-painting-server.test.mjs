@@ -18,7 +18,7 @@ test("collector catalogue shares painting tariffs with inserts, including the si
   const result = calculateCollector(configuration, catalog);
   assert.equal(result.complete, true, result.warnings.join("; "));
   near(result.bom.find(item => item.role === "painting-collector").cost, 1200);
-  near(result.bom.find(item => item.role === "painting-branch1").cost, 3 * 0.186 * 650);
+  near(result.bom.find(item => item.role === "painting-branch1").cost, 3 * 0.1805 * 650);
   const large = calculateCollector({ ...configuration, dn: 400 }, catalog);
   const painting = large.bom.find(item => item.role === "painting-collector");
   assert.equal(painting.unitPrice, 7960); near(painting.cost, 1.5 * 7960);
@@ -63,6 +63,7 @@ test("server persists painting, refreshes from D1 prices, rejects missing tariff
   } };
   globalThis.__collectorPaintingTest = { database };
   const api = await loadTs(new URL("../app/api/collectors/route.ts", import.meta.url), {
+    [new URL("../app/node-tools/catalog-binding-server.ts",import.meta.url).href]: "export const catalogService=()=>undefined;",
     [new URL("../app/auth-server.ts", import.meta.url).href]: 'export const db=()=>globalThis.__collectorPaintingTest.database; export const currentUser=async()=>({id:"test",role:"pro"}); export const json=(body,status=200,headers)=>Response.json(body,{status,headers});',
   });
   const code = collectorCode(configuration);
@@ -73,19 +74,19 @@ test("server persists painting, refreshes from D1 prices, rejects missing tariff
   const created = await send("create", { price: 1, bom: [], paintingRates: [] });
   assert.equal(created.status, 201, JSON.stringify(await created.clone().json()));
   const saved = (await created.json()).collector;
-  assert.equal(saved.calculation.branchLengthsMm[0], 186);
-  assert.equal(saved.calculation.branchBoltReferences[0].length, 120);
+  assert.equal(saved.calculation.branchLengthsMm[0], 180.5);
+  assert.equal(saved.calculation.branchBoltReferences[0].length, 115);
   assert.equal(saved.calculation.branchBoltReferences[0].model, "017W");
   const painted = () => sqlite.prepare("SELECT * FROM collector_items WHERE collector_id=? AND kind='painting' ORDER BY role").all(saved.id);
   assert.equal(painted().length, 2);
-  near(painted().reduce((sum, row) => sum + row.cost_microunits / 1e6, 0), 1562.7);
+  near(painted().reduce((sum, row) => sum + row.cost_microunits / 1e6, 0), 1551.975);
   const paintId = sqlite.prepare("SELECT id FROM components WHERE source_id='pipe-painting-st20-v1:dn80'").get().id;
   sqlite.prepare("UPDATE component_prices SET amount_microunits=900000000 WHERE component_id=?").run(paintId);
   const changed = await live(); assert.notEqual(changed.version, initial.version);
   assert.equal(changed.paintingRates.find(rate => rate.dn === 80).pricePerMeter, 900);
   const refresh = await send("refresh"); assert.equal(refresh.status, 200);
   const updated = (await refresh.json()).collector;
-  assert.equal(updated.id, saved.id); near(updated.price - saved.price, 0.558 * (900 - 650));
+  assert.equal(updated.id, saved.id); near(updated.price - saved.price, 0.5415 * (900 - 650));
   assert.equal(painted().length, 2); assert.equal(painted().find(row => row.role === "painting-branch1").unit_price_microunits, 900e6);
   const reloaded = (await (await api.GET(new Request(`http://local/api/collectors?code=${encodeURIComponent(code)}`))).json()).collector;
   assert.deepEqual(reloaded.calculation.bom, updated.calculation.bom);

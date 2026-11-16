@@ -662,7 +662,7 @@ export function refreshModelAssets(current: Assembly, project: ProjectConfig, pu
     if (!fresh || c.line?.manualGeometry) return c;
     if(fresh.frameDrilling||fresh.channelFrame){
       const automatic=c.autoPose&&!c.locked&&JSON.stringify([c.position,c.rotation])===JSON.stringify([c.autoPose.position,c.autoPose.rotation])&&automaticParametersMatch(c);
-      return automatic?{...fresh,hidden:c.hidden,locked:c.locked,opacity:c.opacity,channelFrameAssembly:parseChannelFrameAssembly(c.channelFrameAssembly,fresh.channelFrame)}:c;
+      return automatic?{...fresh,hidden:c.hidden,locked:c.locked,opacity:c.opacity,...(fresh.channelFrame?{channelFrameAssembly:parseChannelFrameAssembly(c.channelFrameAssembly,fresh.channelFrame)}:{})}:c;
     }
     if(c.kind==="pump"&&fresh.ports.some(port=>port.id.startsWith("frame-foot-"))){
       const automatic=c.autoPose&&!c.locked&&distance(c.position,c.autoPose.position)<1e-6&&distance(c.rotation,c.autoPose.rotation)<1e-6;
@@ -672,7 +672,7 @@ export function refreshModelAssets(current: Assembly, project: ProjectConfig, pu
     if (fresh.valveControl) return { ...fresh, hidden: c.hidden, locked: c.locked, opacity: c.opacity, valveControl: c.valveControl?.manual && c.valveControl.revision === fresh.valveControl.revision ? c.valveControl : fresh.valveControl };
     if (fresh.instrumentMount) return { ...fresh, hidden: c.hidden, locked: c.locked, opacity: c.opacity, instrumentMount: c.instrumentMount?.manual && c.instrumentMount.revision === fresh.instrumentMount.revision ? c.instrumentMount : fresh.instrumentMount };
     if (fresh.tankMount) return {...fresh,hidden:c.hidden,locked:c.locked,opacity:c.opacity,tankMount:retainedTankMount(c.tankMount,fresh.tankMount)};
-    return { ...c, bounds: fresh.bounds, meshUrl: fresh.meshUrl, ports: fresh.ports, cadSource: fresh.cadSource,frameDrilling:fresh.frameDrilling,
+    return { ...c, bounds: fresh.bounds, meshUrl: fresh.meshUrl, ports: fresh.ports, cadSource: fresh.cadSource,...(c.frameDrilling||fresh.frameDrilling?{frameDrilling:fresh.frameDrilling}:{}),
       ...(c.pumpGeometry||fresh.pumpGeometry?{pumpGeometry:fresh.pumpGeometry}:{}),
       parameters: fresh.parameters, ...(c.line ? { shape: fresh.shape, line: { ...fresh.line!, baseline: c.line.baseline } } : {}),
       sourceNote: fresh.sourceNote + (/Расхождение габаритов/.test(c.sourceNote) && !/Расхождение габаритов/.test(fresh.sourceNote) ? `. ${c.sourceNote}` : "") };
@@ -883,7 +883,7 @@ export function mergeAssembly(current: Assembly, generated: Assembly): Assembly 
       const automatic = previous.autoPose && !previous.locked &&
         JSON.stringify([previous.position, previous.rotation]) === JSON.stringify([previous.autoPose.position, previous.autoPose.rotation]) &&
         (c.kind !== "frame" || automaticParametersMatch(previous));
-      if (automatic) return { ...c, hidden: previous.hidden, locked: previous.locked, opacity: previous.opacity,channelFrameAssembly:parseChannelFrameAssembly(previous.channelFrameAssembly,c.channelFrame) };
+      if (automatic) return { ...c, hidden: previous.hidden, locked: previous.locked, opacity: previous.opacity,...(c.channelFrame?{channelFrameAssembly:parseChannelFrameAssembly(previous.channelFrameAssembly,c.channelFrame)}:{}) };
       if (c.kind === "frame") return { ...previous, orphaned: false,
         sourceNote: `Сохранена ручная или прежняя геометрия рамы; проверьте соответствие текущему выбору. ${c.sourceNote}` };
     }

@@ -15,7 +15,7 @@ const { insertionGeometryContext } = await loadTs(new URL("../app/component-inse
 const { lineGeometry } = await loadTs(new URL("../app/line-geometry-catalog.ts", import.meta.url));
 const { buildCollectorTemplate } = await loadTs(new URL("../app/model-editor/collector-template.ts", import.meta.url));
 const rendererUrl = new URL("../app/model-editor/insertion-renderer.ts", import.meta.url);
-const { pieceObject } = await loadTs(rendererUrl, { [rendererUrl.href]: (await readFile(rendererUrl, "utf8")).replace('from "three"', `from ${JSON.stringify(new URL("../node_modules/three/build/three.module.js", import.meta.url).href)}`) });
+const { pieceObject } = await loadTs(rendererUrl, { [rendererUrl.href]: (await readFile(rendererUrl, "utf8")).replace('from "three"', `from ${JSON.stringify(import.meta.resolve("three"))}`) });
 const config = dn => ({ type: "suction", dn, pn: 16, material: "aisi304", connection: "flanged", eccentric: false, stationType: "fire", simultaneous: false, jockey: false,
   primary: { flow: 1553, working: 2, reserve: 1, dn: 200, connection: "flanged", spacing: 8500, pn: 16 }, secondary: null, sectionBreaks: 1, instrumentPorts: [] });
 

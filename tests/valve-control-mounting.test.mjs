@@ -1,3 +1,4 @@
+import { readLocalCad } from "./local-cad-assets.mjs";
 import assert from 'node:assert/strict';
 import { readFile, writeFile } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
@@ -102,7 +103,7 @@ test('unknown CAD/gear/no controls never invent mounting; old grouped markers ar
 test('published mounting sources and unscaled meshes match hashes; all assets exist',async()=>{
   const assets=[mounts.switch,...mounts.rows.map(m=>m.bracket)];
   for (const asset of new Map(assets.map(a=>[a.sourceHash,a])).values()) {
-    assert.equal(createHash('sha256').update(await readFile(new URL(`../../${asset.source}`,import.meta.url))).digest('hex'),asset.sourceHash);
+    assert.equal(createHash('sha256').update(await readLocalCad(asset.source)).digest('hex'),asset.sourceHash);
     assert.equal(createHash('sha256').update(await readFile(new URL(`../public${asset.meshUrl}`,import.meta.url))).digest('hex'),asset.meshHash);
   }
   for (const mount of mounts.rows) {

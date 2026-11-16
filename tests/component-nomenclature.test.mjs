@@ -21,8 +21,9 @@ test("only seven historical inserts move to old nomenclature, keeping IDs, names
     assert.deepEqual(markLegacyNomenclature(item), item);
   }
   const other = suctionCatalogItems.filter(item => !isLegacyNomenclature(item));
-  assert.equal(other.length, 9);
-  assert.ok(other.every(item => item.catalogId === "ответные-части" && !item.id.includes(":ff-")));
+  assert.equal(other.length, 22); // 9 original mating parts, 12 VALTEC rows and a flange hardware supplement.
+  assert.ok(other.every(item => item.catalogId !== LEGACY_NOMENCLATURE_CATALOG_ID && !item.id.includes(":ff-")));
+  assert.equal(other.filter(item=>item.id.includes("valtec-")).length,12);
 });
 
 test("catalogue routing depends on explicit classification, not an old name or directory alone", () => {

@@ -1,3 +1,4 @@
+import { readLocalCad } from "./local-cad-assets.mjs";
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFile, writeFile } from "node:fs/promises";
@@ -112,7 +113,7 @@ test("fire KIP quantities use distinct occupied sgons; open, capped, wrong DN or
 test("published KIP meshes match original CAD SHA256 and remain nonempty, unscaled assets",async()=>{
   const data=await json("data/instrument-mounts.json");
   for(const asset of Object.values(data.assets)){
-    const source=await readFile(new URL(`../../${asset.source}`,import.meta.url)),mesh=await readFile(new URL(`../public${asset.meshUrl}`,import.meta.url));
+    const source=await readLocalCad(asset.source),mesh=await readFile(new URL(`../public${asset.meshUrl}`,import.meta.url));
     assert.equal(createHash("sha256").update(source).digest("hex"),asset.sourceHash);assert.equal(createHash("sha256").update(mesh).digest("hex"),asset.meshHash);
     assert.equal(mesh.length,84+50*mesh.readUInt32LE(80));assert.ok(mesh.readUInt32LE(80)>20);
     const bounds=[Infinity,Infinity,Infinity,-Infinity,-Infinity,-Infinity];

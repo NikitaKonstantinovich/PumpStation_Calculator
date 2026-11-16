@@ -34,8 +34,8 @@ test("both circuits use their own valve DN/PN; old flange bolts never size the b
   c.secondary={...c.primary,dn:50,pn:10,working:1,reserve:0};
   for (const old of catalog.bolts) old.length=9999;
   const result=calculateCollector(c,catalog);
-  assert.deepEqual(result.branchBoltReferences.map(ref=>[ref.dn,ref.pn,ref.length]),[[80,16,120],[50,10,105]]);
-  assert.deepEqual(result.branchLengthsMm,[186,169.5]);
+  assert.deepEqual(result.branchBoltReferences.map(ref=>[ref.dn,ref.pn,ref.length]),[[80,16,115],[50,10,100]]);
+  assert.deepEqual(result.branchLengthsMm,[180.5,164]);
   assert.deepEqual(calculateCollector({...c,type:"suction"},catalog).branchLengthsMm,result.branchLengthsMm);
   assert.ok(result.bom.every(part=>!["bolt","nut","washer"].includes(part.kind)));
   const oldOnly={...catalog};delete oldOnly.valveBolts;

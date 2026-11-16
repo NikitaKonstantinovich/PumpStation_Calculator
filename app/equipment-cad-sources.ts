@@ -84,8 +84,13 @@ function hardwareModels(row:EquipmentRow):EquipmentCadModel[] {
 
 export function withEquipmentCadSources(row:EquipmentRow):EquipmentRow {
   const binding=auditedModels.get(row.key);
+  if(binding&&(binding.name!==row.name||(binding.manufacturer??null)!==(row.values.manufacturer??null)))return row;
   const verified=binding&&binding.name===row.name&&(binding.manufacturer??null)===(row.values.manufacturer??null)?binding.models:[];
-  const cadModels:EquipmentCadModel[]=[...(models.get(row.key)??[]),...hardwareModels(row),...verified];
+  // The export registry and filesystem audit may describe the same CAD file.
+  // Keep the audited note, but retain distinct hashes and SW configurations.
+  const candidates:EquipmentCadModel[]=[...(models.get(row.key)??[]),...hardwareModels(row),...verified];
+  const cadModels:EquipmentCadModel[]=[...new Map(candidates
+    .map(model=>[JSON.stringify([model.path,model.hash??null,model.configuration??null]),model])).values()];
   if(!cadModels?.length)return row;
   return {...row,cadModels,values:{...row.values,"Исходные CAD-модели":cadModels.map(model=>({"Файл":model.path,"SHA-256":model.hash,"Конфигурация SolidWorks":model.configuration??null,"Примечание":model.note??null}))}};
 }

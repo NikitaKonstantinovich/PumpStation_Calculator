@@ -229,7 +229,7 @@ test("draft and explanatory BOM survive CSV export without a second cost row", (
 });
 test("thread standard, gender and end orientation are mandatory, not inferred from DN", () => {
   // Hypothetical end is confined to this test; no source catalogue is altered.
-  const c=structuredClone(calculations.find(c=>c.complete&&c.material==="st20"&&c.pn===16&&c.dnLarge===50&&c.geometry==="straight"));
+  const c=structuredClone(calculations.find(c=>c.complete&&c.material==="st20"&&c.pn===16&&c.dnLarge===50&&c.geometry==="straight"&&c.leftConnection==="flanged"&&c.rightConnection==="flanged"));
   assert.ok(c);
   const physical=JSON.parse(c.configuration.left.part); physical[0]="threadEnd";physical[15]="G2";physical[16]="male";
   c.leftConnection="threaded";c.threadLeft="G2";c.configuration.left={connection:"threaded",part:JSON.stringify(physical),looseFlange:null};

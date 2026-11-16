@@ -1,3 +1,4 @@
+import { readLocalCad } from "./local-cad-assets.mjs";
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFile,writeFile } from "node:fs/promises";
@@ -186,7 +187,7 @@ test("updating a locked old DN25 tank takeoff changes only its section to DN20 a
 test("published tank CAD assets match sources and remain unscaled; nominal 8 L dimensions match passport metadata",async()=>{
   const data=await json("data/tank-models.json");
   for(const asset of Object.values(data.assets)){
-    const source=await readFile(new URL(asset.source,process.env.PSC_CAD_ROOT_URL??new URL("../../",import.meta.url))),mesh=await readFile(new URL(`../public${asset.meshUrl}`,import.meta.url));
+    const source=await readLocalCad(asset.source),mesh=await readFile(new URL(`../public${asset.meshUrl}`,import.meta.url));
     assert.equal(createHash("sha256").update(source).digest("hex"),asset.sourceHash);assert.equal(createHash("sha256").update(mesh).digest("hex"),asset.meshHash);assert.equal(mesh.length,84+50*mesh.readUInt32LE(80));
   }
   assert.equal(data.tank8.diameterMm,200);assert.equal(data.tank8.heightMm,311);

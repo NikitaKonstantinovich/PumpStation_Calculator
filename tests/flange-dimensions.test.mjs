@@ -84,11 +84,11 @@ test("accepted PN25 material does not widen bores or waive direct reducer profil
   assert.match(row.bom.find(item => item.role === "left-flanged").source, /Проектная взаимозаменяемость/);
 });
 
-test("139 flange executions get sourced thickness; unapproved large loose PN16/pressed variants remain pending", () => {
+test("148 flange executions get sourced thickness; unapproved large loose PN16/pressed variants remain pending", () => {
   const enriched = merge(original, reference), pressures = catalogPressures(enriched.items);
-  assert.equal(reference.rows.length, 158);
-  assert.equal(reference.rows.filter(row => row.dimensions.thicknessMm).length, 139);
-  assert.equal(enriched.items.filter(item => field(item, "Толщина фланца, мм")).length, 139);
+  assert.equal(reference.rows.length, 167);
+  assert.equal(reference.rows.filter(row => row.dimensions.thicknessMm).length, 148);
+  assert.equal(enriched.items.filter(item => field(item, "Толщина фланца, мм")).length, 148);
   assert.deepEqual(merge(enriched, reference), enriched);
   for (let i = 0; i < enriched.items.length; i++) assert.deepEqual(native(enriched.items[i]), original.items[i]);
   for (const row of reference.rows) {
@@ -169,14 +169,16 @@ test("stainless bolt grip distinguishes DIN PN10 from adopted EN PN16 and includ
   const data = merge(original, reference), grip = jointFlangeThickness(data, "aisi304", 100, 10);
   assert.equal(grip.thicknessMm, 42); // 2 × (18 + 3)
   assert.deepEqual(grip.warnings, []);
+  // 017W has its own elastomer seats: no two additional 2 mm gaskets.
   const selected = selectJointFasteners(data, "aisi304", 100, 10, true);
+  assert.equal(selected.stack.gaskets, 0);
   assert.equal(selected.flangeThickness, 42);
-  assert.equal(selected.length, 42 + selected.reference.wafer017WLength + 4 + selected.nutWidth + selected.washerWidth + 5);
+  assert.equal(selected.length, 42 + selected.reference.wafer017WLength + selected.nutWidth + selected.washerWidth + 5);
   assert.ok(selected.standardLength >= selected.length);
   assert.ok(selected.flangeDimensions.some(row => row.name.includes("Борт воротника") && row.value === 3));
   const pn16 = selectJointFasteners(data, "aisi304", 100, 16, true);
   assert.equal(pn16.flangeThickness,50); // 2 × (22 + 3), not the PN10 thickness.
-  assert.equal(pn16.length,50+pn16.reference.wafer017WLength+4+pn16.nutWidth+pn16.washerWidth+5);
+  assert.equal(pn16.length,50+pn16.reference.wafer017WLength+pn16.nutWidth+pn16.washerWidth+5);
   assert.ok(pn16.standardLength>=pn16.length);
   assert.deepEqual(pn16.warnings,[]);
   const missingDimension = structuredClone(data);

@@ -8,7 +8,7 @@ import physicalSupplement from "./pump-card-supplement.json";
 import { pumpSketchFor } from "./pump-sketches";
 import { suctionCatalogItems } from "./suction-catalog";
 import { withEquipmentCadSources } from "./equipment-cad-sources";
-import { componentMassByUnit, componentMassSourceSha256, withAssemblyMass, withComponentMass } from "./component-masses";
+import { componentMassByUnit, withAssemblyMass, withComponentMass } from "./component-masses";
 import { withComponentMasses } from "./component-mass-catalog";
 import type { ComponentItem } from "./component-database-types";
 

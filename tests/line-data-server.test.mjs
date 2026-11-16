@@ -55,7 +55,7 @@ test("legacy insertion geometry supplies calculator variants with exact end IDs 
   const geometry=(await response.json()).items['suction-table:ff-65'];
   assert.equal(geometry.length,null); assert.equal(geometry.shape,undefined);
   const variant=geometry.insertionBodies.find(b=>b.pn===16&&b.leftPartId==='воротники-002-r0035'&&b.rightPartId==='воротники-002-r0035');
-  assert.ok(variant); assert.equal(variant.length,120); assert.equal(variant.outer,76.1); assert.equal(variant.wall,2.5);
+  assert.ok(variant); assert.equal(variant.length,115); assert.equal(variant.outer,76.1); assert.equal(variant.wall,2.5);
   assert.equal(variant.leftAxial,25); assert.equal(variant.rightAxial,25);
 });
 

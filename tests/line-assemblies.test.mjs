@@ -100,7 +100,16 @@ async function realLineCatalog(p) {
 
 test("CDM42 loose flanges seat on collar backs; opposite collars face valves and the real hollow insert separates check and shutoff", async () => {
   const pump = pumps.find(p=>p.model==='CDM42-1-1'); assert.ok(pump);
-  const p=station(pump.id,65,65,'flanged'), data=await realLineCatalog(p), a=build(p,data);
+  const p=station(pump.id,65,65,'flanged');
+  // Explicit legacy composition: current selection correctly requires a published
+  // insertion, while this regression exercises individually seated loose flanges.
+  p.entities['station-spec'].items=p.entities['station-spec'].items.filter(r=>r.option);
+  for(const [role,equipmentId,quantity] of [
+    ['primary-between-valves-insertion','suction-table:ff-65',3],
+    ['primary-between-valves-flanges-collar','воротники-002-r0035',6],
+    ['primary-between-valves-flanges-looseFlange','фланцы-006-r0116',6],
+  ])p.entities['station-spec'].items.push({position:`04.${p.entities['station-spec'].items.length}`,section:'discharge',assemblyRole:role,equipmentId,name:role,details:'PN16',quantity,unit:'шт.',status:'selected'});
+  const data=await realLineCatalog(p), a=build(p,data);
   assert.ok(!model.connectionIssues(a).some(i=>i.message.includes('типы соединения стыка не совпадают')));
   const wp=(c,id)=>model.add(c.position,model.rotate(c.ports.find(p=>p.id===id).point,c.rotation));
   const axis=c=>model.rotate([1,0,0],c.rotation);
@@ -114,11 +123,11 @@ test("CDM42 loose flanges seat on collar backs; opposite collars face valves and
     }
     if (side === 'suction') {
       assert.ok(!parts.some(c=>/primary-(insertion|pump-flange|valve-flange|pump-gasket)/.test(c.line.role)));
-      assert.equal(parts.filter(c=>c.line.role==='primary-valve-gaskets').length,2);
+      assert.equal(parts.filter(c=>c.line.role==='primary-valve-gaskets').length,0, '017W rubber seats do not need separate valve gaskets');
       continue;
     }
     const pipe=parts.find(c=>c.line.role===(side==='suction'?'primary-insertion':'primary-between-valves-insertion'));
-    assert.ok(pipe); assert.equal(pipe.shape.kind,'tube'); close(pipe.shape.lengthMm,120); close(pipe.shape.outerMm,76.1); close(pipe.shape.innerMm,71.1);
+    assert.ok(pipe); assert.equal(pipe.shape.kind,'tube'); close(pipe.shape.lengthMm,115); close(pipe.shape.outerMm,76.1); close(pipe.shape.innerMm,71.1);
     const left=parts.find(c=>c.line.role===(side==='suction'?'primary-pump-flange-collar':'primary-between-valves-flanges-collar') && c.line.instance===0);
     const right=parts.find(c=>c.line.role===(side==='suction'?'primary-valve-flange-collar':'primary-between-valves-flanges-collar') && c.line.instance===(side==='suction'?0:1));
     vecClose(wp(left,'right'),wp(pipe,'left')); vecClose(wp(right,'right'),wp(pipe,'right'));
@@ -627,16 +636,16 @@ test("active second circuit builds its own branches and reserves, without multip
   assert.ok(!a.components.some(c=>c.line?.role.startsWith("network")));
 });
 
-test("expanded flanged branches exceeding the legacy 500-part limit survive reopening", () => {
-  let p=station("9",80,80,"flanged");
-  p.entities["station-settings"].stationType="combined";
-  Object.assign(p.entities["system-input"],{workingPumpCount:6,reservePumpCount:6});
-  Object.assign(p.entities["system-input-2"],{...p.entities["system-input"]});
-  Object.assign(p.entities["station-dn"],{secondarySuctionValveDn:80,secondaryDischargeValveDn:80,secondaryConnectionType:"flanged",secondaryPn:16,secondarySuctionValveType:"butterfly",secondaryDischargeValveType:"butterfly",secondaryPumpSuctionPort:{...p.entities["station-dn"].pumpSuctionPort},secondaryPumpDischargePort:{...p.entities["station-dn"].pumpDischargePort}});
-  p=refresh(synchronizeCollectors(p),db,true);
-  const a=build(p); assert.ok(a.components.length>500);
+test("expanded flanged branches exceeding the legacy 500-part limit survive reopening", async () => {
+  const {realStation}=await import("./fixtures/flange-fasteners.mjs");
+  // Use complete, published insertions and the supported 10 working + 3 reserve
+  // pumps. The old 6+6 fixture exceeded the reserve limit and had missing inserts.
+  const {assembly:a}=await realStation("371",80,"aisi304",10,true,3);
+  assert.equal(a.components.filter(c=>c.kind==="pump").length,13);
+  assert.ok(a.components.length>500,`Expected a real expanded assembly, got ${a.components.length}`);
   const loaded=model.normalizeEditor(JSON.parse(JSON.stringify({...model.emptyEditor(),assembly:a}))).assembly;
   assert.equal(loaded.components.length,a.components.length); assert.equal(loaded.lineJoints.length,a.lineJoints.length);
+  assert.deepEqual(loaded.components.map(c=>c.id),a.components.map(c=>c.id));
 });
 
 test("saved insertion keeps its calculated bore and seats, without duplicate constituent flanges", async () => {

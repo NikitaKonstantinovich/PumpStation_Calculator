@@ -1,3 +1,4 @@
+import { readLocalCad } from "./local-cad-assets.mjs";
 import assert from "node:assert/strict";
 import test from "node:test";
 import { readFile } from "node:fs/promises";
@@ -197,7 +198,7 @@ test("CDM42 fasteners clear pump, wafer and KMS STL bodies, including head and s
     for(const component of assembly.components.filter(c=>b.members.includes(c.id))) {
       const url=component.meshUrl??(component.shape?.kind==="mesh"?component.shape.meshUrl:null);
       if(!url)continue;
-      if(!cache.has(url)){const bytes=await readFile(process.env.PSC_CAD_ROOT_URL?new URL(`frontend/public${url}`,process.env.PSC_CAD_ROOT_URL):new URL(`../public${url}`,import.meta.url));cache.set(url,new STLLoader().parse(bytes.buffer.slice(bytes.byteOffset,bytes.byteOffset+bytes.byteLength)));}
+      if(!cache.has(url)){const bytes=await readLocalCad(`public${url}`);cache.set(url,new STLLoader().parse(bytes.buffer.slice(bytes.byteOffset,bytes.byteOffset+bytes.byteLength)));}
       const mesh=new THREE.Mesh(cache.get(url),new THREE.MeshBasicMaterial({side:THREE.DoubleSide}));
       const local=new THREE.Group();local.add(mesh);local.position.fromArray(component.position);local.rotation.set(...component.rotation.map(x=>x*Math.PI/180));
       if(component.shape?.kind==="mesh"){mesh.position.fromArray(component.shape.modelPosition??[0,0,0]);mesh.rotation.set(...(component.shape.modelRotation??[0,0,0]).map(x=>x*Math.PI/180));}

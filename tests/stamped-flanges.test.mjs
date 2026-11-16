@@ -1,3 +1,4 @@
+import { readLocalCad } from "./local-cad-assets.mjs";
 import {test} from "node:test";
 import assert from "node:assert/strict";
 import {readFile} from "node:fs/promises";
@@ -10,14 +11,14 @@ const id="фланцы-006-r0118",stock=data.parts["100"],old={kind:"flange",...
 
 test("saved flange switches to the measured profile in place, once, even on a hidden rotated collector",()=>{
   const piece={id:"branch-2-looseFlange",componentId:id,name:"Свободный фланец",position:[9,-80,24],rotation:[10,30,42],shape:old};
-  const c={id:"return",kind:"collector",name:"Коллектор",position:[105,6,80],rotation:[30,55,0],parameters:{},hidden:true,collector:{hiddenPieceIds:[],template:{pieces:[piece],issues:[],assumptions:[],branches:[],main:null}}};
+  const c={id:"return",kind:"collector",name:"Коллектор",position:[105,6,80],rotation:[30,55,0],parameters:{},hidden:true,collector:{hiddenPieceIds:[],template:{pieces:[piece],ports:[{id:"2"}],issues:[],assumptions:[],branches:[],main:null}}};
   const a={components:[c]},updated=upgradeStampedFlanges(a);
   assert.equal(upgradeStampedFlanges(updated),updated);
   const p=updated.components[0].collector.template.pieces[0];
   assert.equal(p.position,piece.position);assert.equal(p.rotation,piece.rotation);assert.equal(c.collector.template.pieces[0].shape,old);
   assert.equal(p.shape.stampedHash,stock.sourceHash);assert.equal(p.shape.lengthMm,23);assert.equal(p.shape.innerMm,119);
   const ins=cadContents(updated).instances.find(r=>r.pieceId===piece.id);
-  assert.ok(ins.hidden);assert.equal(ins.geometry.stampedHash,stock.sourceHash);assert.match(ins.name,/штампованный DN100/);
+  assert.ok(ins.hidden);assert.equal(ins.subassembly.id,c.id);assert.equal(ins.geometry.stampedHash,stock.sourceHash);assert.match(ins.name,/штампованный DN100/);
 });
 test("DN65 eight-hole PN16 has a distinct project ring and custom bores remain unbound",()=>{
   const shape=(id)=>({kind:"flange",...data.catalog[id].previous});
@@ -66,9 +67,9 @@ test("restore six matching DN65 collars and rings in their original poses and cl
 });
 test("each named original has one browser triangulation with the same axial extent",async()=>{
   for(const v of Object.values(data.parts)){
-    const bytes=await readFile(new URL("../../"+v.source,import.meta.url));
+    const bytes=await readLocalCad(v.source);
     assert.equal(createHash("sha256").update(bytes).digest("hex"),v.sourceHash);
-    const stl=await readFile(new URL("../public/model-assets/stamped-"+v.sourceHash+".stl",import.meta.url));
+    const stl=await readLocalCad("public/model-assets/stamped-"+v.sourceHash+".stl");
     const n=stl.readUInt32LE(80);assert.equal(stl.length,84+50*n);
     let lo=Infinity,hi=-Infinity;
     for(let i=0;i<n;i++) for(let j=0;j<3;j++){const x=stl.readFloatLE(84+50*i+12+12*j);lo=Math.min(lo,x);hi=Math.max(hi,x);}

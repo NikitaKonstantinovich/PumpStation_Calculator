@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { DatabaseSync } from 'node:sqlite';
-import { mkdtemp, readFile, readdir, mkdir, writeFile, rm, unlink } from 'node:fs/promises';
+import { mkdtemp, readFile, readdir, mkdir, writeFile, rm, unlink, realpath } from 'node:fs/promises';
 import { resolve, join, dirname } from 'node:path';
 import { tmpdir } from 'node:os';
 import { loadTs } from './load-ts.mjs';
@@ -39,10 +39,10 @@ test('registered CAD is downloadable, resolves published originals and selects a
     const info=await(await call('inspect',{candidates:[valve,published,{key:'preview',kind:'model',models:[{path:'/preview.stl'}]}]})).json();
     assert.deepEqual(info.files.map(file=>file.available),[true,true,false]);
     assert.equal(info.files[0].note,'Модель серии');assert.equal(info.files[1].name,'missing-instrument.SLDPRT');
-    assert.equal(info.files[1].path,join(sources,hash+'.sldprt'));
+    assert.equal(info.files[1].path,await realpath(join(sources,hash+'.sldprt')));
     const download=await call('download',valve);assert.deepEqual(Buffer.from(await download.arrayBuffer()),payload);
     assert.equal(download.headers.get('X-Equipment-File-Name'),'valve.stp');
-    assert.equal((await call('location',{...valve,reveal:true})).status,200);assert.equal(opened.pop(),join(equipmentRoot,'valve.stp'));
+    assert.equal((await call('location',{...valve,reveal:true})).status,200);assert.equal(opened.pop(),await realpath(join(equipmentRoot,'valve.stp')));
     await unlink(join(equipmentRoot,'valve.stp'));
     assert.equal((await(await call('inspect',{candidates:[valve]})).json()).files[0].available,false);
     assert.equal((await call('download',valve)).status,404);
@@ -140,7 +140,7 @@ test('admin catalog uses real categories, durable attachments, access control an
     const part=data.rows.find(row=>row.category==='binding:затворы').key;
     let inspected=await (await action({action:'inspect',keys:['pump:706',part]})).json();assert.equal(inspected.files['pump:706'].model.available,true);assert.equal(inspected.files[part].model.available,false);
     assert.match(await (await get('pump:706','model')).text(),/ISO-10303/);
-    assert.equal((await action({action:'reveal',key:'pump:706'})).status,200);assert.equal(opened.pop(),join(equipmentRoot,'pump.step'));
+    assert.equal((await action({action:'reveal',key:'pump:706'})).status,200);assert.equal(opened.pop(),await realpath(join(equipmentRoot,'pump.step')));
     assert.equal((await action({action:'reveal',key:'pump:706'}, {},'https://remote.example')).status,409);
     assert.equal((await action({action:'inspect',keys:[]},{origin:'https://other.test'})).status,403);
     assert.equal((await put(part,'drawing','x.pdf',Buffer.from('%PDF-1.4'))).status,400);

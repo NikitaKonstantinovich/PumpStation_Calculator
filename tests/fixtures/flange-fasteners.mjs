@@ -17,8 +17,8 @@ export const source=await json("public/component-insert-source.json");
 const catalog=makeInsertCatalog(source),context=insertionGeometryContext(source,catalog);
 const calculatedByRequest=new Map();
 export const hardware=fastenerCatalog(source.items);
-export async function realStation(pumpId="371",size=80,material="aisi304",count=2,vibration=false) {
-  let p=choose(createProject("Крепёж CDM — проверка",{id:"flange-fasteners-qa",timestamp:"2026-10-29T00:00:00Z"}),pumpId,count,0);
+export async function realStation(pumpId="371",size=80,material="aisi304",count=2,vibration=false,reserve=0) {
+  let p=choose(createProject("Крепёж CDM — проверка",{id:"flange-fasteners-qa",timestamp:"2026-10-29T00:00:00Z"}),pumpId,count,reserve);
   p.entities["station-settings"].inletHead=10;
   p.entities["station-settings"].vibrationCompensators=vibration;
   Object.assign(p.entities["station-dn"],{suctionValveDn:size,dischargeValveDn:size,connectionType:"flanged",suctionValveType:"butterfly",dischargeValveType:"butterfly",pn:16});
