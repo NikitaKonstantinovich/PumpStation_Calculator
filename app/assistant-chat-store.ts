@@ -1,4 +1,4 @@
-import { assistantHistory, validAssistantSource, type AssistantContext, type AssistantMessage, type AssistantReply, type AssistantSource } from "./assistant-types";
+import { assistantRequestBody, validAssistantSource, type AssistantContext, type AssistantMessage, type AssistantReply, type AssistantSource } from "./assistant-types";
 type ChatMessage = AssistantMessage & { id: string; sources?: AssistantSource[] };
 export type ChatState = { messages: ChatMessage[]; draft: string; pending: boolean; error: string; enabled: boolean | null };
 const stores = new Map<string, ReturnType<typeof createChatStore>>();
@@ -25,7 +25,7 @@ function createChatStore(userId: string, scope: string) {
     const request = new AbortController(); controller = request;
     update({ messages: next, draft: "", pending: true, error: "" });
     try {
-      const response = await fetch("/api/assistant", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ messages: assistantHistory(next.map(({ role, content }) => ({ role, content }))), context }), signal: request.signal });
+      const response = await fetch("/api/assistant", { method: "POST", headers: { "Content-Type": "application/json" }, body: assistantRequestBody(next.map(({ role, content }) => ({ role, content })), context), signal: request.signal });
       const result = await response.json() as AssistantReply & { error?: string };
       if (!response.ok) throw new Error(result.error ?? "Не удалось получить ответ.");
       if (!result.text || !Array.isArray(result.sources)) throw new Error("Не удалось прочитать ответ.");

@@ -37,7 +37,8 @@ import { ItemEntryPanel } from "./item-entry-panel";
 import { EquipmentAdminPanel } from "./equipment-admin-panel";
 import { loadPumpCatalog, mergePumpCatalog } from "./pump-catalog-client";
 import { HelpCenter } from "./help-center";
-import { AIAssistant } from "./ai-assistant";
+import { AIAssistant, AssistantMenu } from "./ai-assistant";
+import { currentAssistantProject } from "./assistant-project-client";
 import { BaseValuesUpdateNotice, fetchPublishedBaseValues, usePublishedBaseValues } from "./base-values-update";
 import { bindProjectComponents } from "./base-values-components";
 import { UsersPanel } from "./users-panel";
@@ -761,7 +762,8 @@ export default function Home() {
     if (expectedFingerprint && (!state.configuration || configurationFingerprint(state.configuration) !== expectedFingerprint)) return current;
     return { ...current, entities: { ...current.entities, "station-collectors": { ...entity, [type]: { ...state, ...patch } } } };
   })}/>;
-  const assistantPanel = <AIAssistant userId={account.id} context={{projectId:config.project.id}}/>;
+  const assistantProps = { userId: account.id, context: { projectId: config.project.id }, getWorkspace: () => currentAssistantProject(config, diagnostics.issues, catalogue) };
+  const assistantPanel = <AIAssistant {...assistantProps}/>;
   if (detached) { const windowState = panels.find(panel => panel.id === detached),tool=windowState?.activeTool; if(!windowState)return null; const secondary=tool==="input2"||tool==="chart2"||tool==="sketch2",entity=tool?config.entities[ENTITY_BY_TOOL[tool]]:undefined,activeInput=secondary?inputEntity2:inputEntity; return <CadProvider key={`${account.id}/${config.project.id}`} enabled={geometryEnabled} project={config}><DiagnosticsProvider value={diagnosticsValue}><main className="detached"><header className="detached__header"><div className="brand"><span className="brand__mark">PS</span><span><b>Pump Station</b><small>Calculator</small></span></div><span>{tool?PANEL_INFO[tool].title:"Пустой инструмент"}</span><div className="detached__saving"><span role="status">{saveMessage}</span><button className="button" onClick={()=>void session.current?.flush()} disabled={conflicted}>Сохранить</button>{conflicted&&<><button className="button" onClick={reloadFromDatabase}>Открыть из базы</button><button className="button" onClick={saveConflictCopy}>Сохранить копию</button></>}</div></header>{accessNotice&&<p className="access-note" role="alert">{accessNotice}</p>}<section className="detached__content"><DiagnosticSurface panelId={windowState.id}>{tool&&entity?<PanelContent project={config} issues={derivedIssues} role={account.role} key={tool} assistantPanel={assistantPanel} collectorPanel={collectorPanel} modelPanel={modelPanel} id={tool} entity={entity} input={activeInput} secondaryInput={inputEntity2} settings={settingsEntity} catalogue={catalogue} onInputChange={secondary?updateInput2:updateInput} onSecondaryInputChange={updateInput2} onSettingsChange={updateSettings} onDnChange={updateDn} onAddValves={addValvesToSpec} onAddToSpec={()=>addSelectedPumpToSpec()} onCabinetConfigured={useConfiguredCabinet} locked={secondary&&!secondaryEnabled}/>:<div className="empty-tool"><span>＋</span><b>Пустой инструмент</b></div>}</DiagnosticSurface></section></main></DiagnosticsProvider></CadProvider>; }
 
   const minimizedPanels=panels.filter(panel=>panel.minimized);
@@ -772,7 +774,7 @@ export default function Home() {
       <button ref={menuButton} className="icon-button app-header__menu" onClick={() => setSidebar(true)} aria-label="Открыть меню"><Icon name="menu" /></button>
       <Link className="brand" href="/"><span className="brand__mark">PS</span><span><b>Pump Station</b><small>Calculator</small></span></Link>
       <div className="app-header__project"><small>ТЕКУЩИЙ ПРОЕКТ</small><button onClick={rename}>{config.project.name} <span>✎</span></button></div>
-      <div className="app-header__actions"><span className="save-state" role="status"><i style={{background:saveMessage==="Сохранено на сервере"?"#48a96a":conflicted?"#d75a57":"#d29b44"}}/>{saveMessage}</span><button className="avatar" onClick={()=>{setSidebar(true)}} title={account.name}>{initials(account.name)}</button></div>
+      <div className="app-header__actions"><span className="save-state" role="status"><i style={{background:saveMessage==="Сохранено на сервере"?"#48a96a":conflicted?"#d75a57":"#d29b44"}}/>{saveMessage}</span><button className="avatar" onClick={()=>{setSidebar(true)}} title={account.name}>{initials(account.name)}</button><AssistantMenu {...assistantProps}/></div>
     </header>
 
     {accessNotice && <p className="access-note" role="status">{accessNotice}<button className="button" onClick={()=>setAccessNotice("")}>Понятно</button></p>}
