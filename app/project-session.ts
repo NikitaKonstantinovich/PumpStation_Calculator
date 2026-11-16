@@ -3,8 +3,8 @@ import type {ProjectConfig} from "./project-config";
 import {mergeProjectChanges,sameProject} from "./project-merge";
 import {delayAutosaveForCamera} from "./project-autosave";
 
-export type ProjectCard = {id:string; name:string; revision:number; createdAt:string; updatedAt:string};
-export type ProjectFile = ProjectCard & {config:ProjectConfig};
+import type {ProjectCard,ProjectFile} from "./project-types";
+export type {ProjectCard,ProjectFile} from "./project-types";
 type Receipt = {revision:number};
 type Pending = {config:ProjectConfig; baseRevision:number; operation:string};
 type Draft = {key:string; project:string; owner:string; config:ProjectConfig; baseRevision:number; pending?:Pending; time:number};

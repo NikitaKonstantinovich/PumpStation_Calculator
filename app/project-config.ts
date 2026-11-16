@@ -136,7 +136,7 @@ export const calculationMethod=typeof __PSC_CALC_METHOD__==="string"?__PSC_CALC_
 export type ProjectConfig = {
   workspace2?:WorkspaceData;
   schemaVersion: 1;
-  project: { id: string; name: string; autoName?: boolean; createdAt: string; updatedAt: string; modelLibraryVersion?: string; recalculatedAt?: string; calculationMethod?: string; graphVersion?: string };
+  project: { id: string; name: string; autoName?: boolean; copyOf?: {id:string;ownerId:string;revision:number}; createdAt: string; updatedAt: string; modelLibraryVersion?: string; recalculatedAt?: string; calculationMethod?: string; graphVersion?: string };
   station: { selectedPumpId?: string; selectedPumpModel?: string; workingPumpCount?: number; reservePumpCount?: number; totalPumpCount?: number; secondaryPumpId?: string; secondaryPumpModel?: string; secondaryWorkingPumpCount?: number; secondaryReservePumpCount?: number; secondaryTotalPumpCount?: number };
   workspace: { zoom: number; mode:WorkspaceMode; gridHeightScreens:number; grid:WorkspaceGrid; windows: PanelState[] };
   entities: Record<string, ProjectEntity>;

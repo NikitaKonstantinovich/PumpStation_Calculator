@@ -23,6 +23,8 @@ import { ItemEntryPanel } from "./item-entry-panel";
 import { EquipmentAdminPanel } from "./equipment-admin-panel";
 import { HelpCenter } from "./help-center";
 import { fetchPublishedBaseValues } from "./base-values-update";
+import { ProjectManager } from "./project-manager";
+import { copyProjectRequest, type ManagedProject } from "./project-manager-types";
 import { UsersPanel } from "./users-panel";
 import { ComponentCalculator } from "./component-calculator";
 import type { AccountUser } from "./user-types";
@@ -31,7 +33,7 @@ import { WorkspaceLoading, paintLoadingStep, PRODUCT_OPEN_STEPS, PROJECT_OPEN_ST
 
 const AlgorithmLibrary = lazy(() => import("./node-tools/algorithm-library").then(module => ({default: module.AlgorithmLibrary})));
 const ToolEditor = lazy(() => import("./node-tools/editor").then(module => ({default: module.ToolEditor})));
-const fullViews = new Set<AppView>(["projects", "users", "component-calculator", "base-values", "item-entry", "equipment-admin", "node-editor", "workspace2", "algorithm-library", "help"]);
+const fullViews = new Set<AppView>(["projects", "project-manager", "users", "component-calculator", "base-values", "item-entry", "equipment-admin", "node-editor", "workspace2", "algorithm-library", "help"]);
 const requestedView = (value: string | null): AppView => fullViews.has(value as AppView) ? value as AppView : "projects";
 
 type StoredProject=ProjectCard;
@@ -263,7 +265,7 @@ export default function Home({account, onAccountChange}: {account: AccountUser; 
   if(accountLoading)return <main className="beta-loading"><WorkspaceLoading title="Подготавливаем рабочее пространство" steps={["Загружаем список проектов", "Загружаем выбранный проект", "Проверяем правила расчёта"]} step={bootstrapStep}/></main>;
   const header = <>
       <Link prefetch={false} className="brand" href="/"><span className="brand__mark">PS</span><span><b>Pump Station</b><small>Calculator</small></span></Link>
-      {activeSession && <div className="app-header__project"><small>ТЕКУЩИЙ ПРОЕКТ</small>{config.project.autoName ? <span>{config.project.name}</span> : <button onClick={rename}>{config.project.name} <span>✎</span></button>}</div>}
+      {activeSession && <div className="app-header__project"><small>{config.project.copyOf ? "КОПИЯ ПРОЕКТА" : "ТЕКУЩИЙ ПРОЕКТ"}</small>{config.project.autoName ? <span>{config.project.name}</span> : <button onClick={rename}>{config.project.name} <span>✎</span></button>}</div>}
       <div className="app-header__actions"><span className="save-state" role="status"><i style={{background:saveMessage==="Сохранено на сервере"?"#48a96a":conflicted?"#d75a57":"#d29b44"}}/>{saveMessage}</span><button className="avatar" onClick={()=>{setSidebar(true)}} title={account.name}>{initials(account.name)}</button><AssistantMenu userId={account.id} context={activeSession && config.workspace2 ? {projectId:config.project.id} : undefined} getWorkspace={view === "workspace2" ? async signal => assistantContextRef.current?.(signal) : undefined}/></div>
   </>;
   const openAlgorithmEditor=(id:string)=>{setAlgorithmId(id);setView("node-editor");const params=new URLSearchParams({view:"node-editor",algorithm:id});if(session.current)params.set("project",session.current.latest.project.id);window.history.pushState({},"","/?"+params);};
@@ -356,6 +358,31 @@ export default function Home({account, onAccountChange}: {account: AccountUser; 
     } catch(error){setProjectCreationError(error instanceof Error?error.message:"Не удалось создать проект.");openingFailed(error);}
     finally{creation.running=false;setCreatingProject(false);finishOpening();}
   };
+  const openManagedCopy = async (source:ManagedProject,operation:string):Promise<boolean> => {
+    if(!beginOpening("Открываем копию проекта",["Сохраняем текущий проект","Создаём вашу копию","Загружаем правила и инструменты","Открываем рабочее пространство"],()=>void openManagedCopy(source,operation)))return false;
+    try {
+      if(session.current && !await session.current.flush())throw Error("Сначала сохраните текущий проект или разрешите конфликт.");
+      openingStep(1);
+      const file=await copyProjectRequest({id:source.id,revision:source.revision,operation});
+      const copy=parseAccessibleProject(file.config,role),id=algorithmForProject(copy.workspace2);
+      openingStep(2);
+      const pin=copy.workspace2?.product;
+      const [program,runtime]=await Promise.all([
+        loadProgram(copy.project.graphVersion??INITIAL_VERSION),
+        copy.workspace2?loadTools(pin?.version,pin?.baseVersions,pin?.sourceVersions,id,"manifest"):undefined
+      ]);
+      openingStep(3);await paintLoadingStep();
+      setBrowserPublication(program);copy.project.graphVersion=program.version;
+      setInitialRuntime(runtime?{projectId:copy.project.id,data:runtime}:null);
+      activate(account,copy,file.revision,true);
+      setProjects(cards=>[{...copy.project,revision:file.revision},...cards.filter(p=>p.id!==copy.project.id)]);
+      setAlgorithmId(id);setAlgorithmName(runtime?.algorithm.name??source.algorithm.name);
+      rememberedProducts.current.set(id,copy.project.id);
+      try{localStorage.setItem("product.last."+account.id+"."+id,copy.project.id);}catch{/* Optional shortcut. */}
+      showProject(copy);
+      return true;
+    }catch(error){openingFailed(error);return false;}finally{finishOpening();}
+  };
   const navigateView = (next: AppView) => {
     setView(requestedView(next)); setSidebar(false);
     const params = new URLSearchParams();
@@ -367,6 +394,7 @@ export default function Home({account, onAccountChange}: {account: AccountUser; 
   const backToProjects=()=>navigateView("projects");
   const renderPage = () => {
     if(view==="workspace2" && projectLoadError && !activeSession)return <main className="base-page"><h1>Не удалось загрузить проект</h1><p role="alert">{projectLoadError}</p><button className="button" onClick={()=>window.location.reload()}>Повторить загрузку</button><button className="button" onClick={backToProjects}>Мои проекты</button></main>;
+    if(view==="project-manager")return account.role==="admin"?<ProjectManager openCopy={openManagedCopy}/>:<main><h1>Доступ только для администратора</h1></main>;
     if(view==="help")return <HelpCenter onBack={backToProjects}/>;
     if(view==="algorithm-library")return account.role==="admin"?<AlgorithmLibrary openEditor={openAlgorithmEditor}/>:<main><h1>Доступ только для администратора</h1></main>;
     if(view==="node-editor")return account.role==="admin"?<ToolEditor key={algorithmId} algorithmId={algorithmId} selectAlgorithm={openAlgorithmEditor} project={algorithmForProject(config.workspace2)===algorithmId?config:{...config,workspace2:undefined}} back={async()=>{if(session.current && !await session.current.flush())return;backToProjects();}}/>:<main><h1>Доступ только для администратора</h1></main>;

@@ -6,10 +6,11 @@ import Link from "next/link";
 import type { AccountUser } from "./user-types";
 import "./app-navigation.css";
 
-export type AppView = "workspace" | "algorithm-library" | "projects" | "workspace2" | "node-editor" | "equipment-admin" | "component-calculator" | "item-entry" | "base-values" | "users" | "help";
+export type AppView = "workspace" | "project-manager" | "algorithm-library" | "projects" | "workspace2" | "node-editor" | "equipment-admin" | "component-calculator" | "item-entry" | "base-values" | "users" | "help";
 const destinations: { view: AppView; icon: string; label: string; admin?: boolean; full?: boolean; beta?: boolean }[] = [
   { view: "workspace", icon: "▦", label: "Рабочее пространство", beta: true },
   { view: "projects", icon: "▤", label: "Мои проекты", full: true },
+  { view: "project-manager", icon: "▤", label: "Менеджер проектов", admin: true, full: true },
   { view: "algorithm-library", icon: "▤", label: "Библиотека алгоритмов", admin: true, full: true },
   { view: "node-editor", icon: "⌘", label: "Нодовый редактор", admin: true, full: true },
   { view: "equipment-admin", icon: "⌁", label: "База комплектующих", admin: true },

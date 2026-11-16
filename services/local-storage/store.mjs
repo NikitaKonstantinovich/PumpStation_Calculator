@@ -1,5 +1,5 @@
 import pg from 'pg';
-import {createHash} from 'node:crypto';
+import {createHash,randomUUID} from 'node:crypto';
 import {readFile} from 'node:fs/promises';
 
 export class StorageError extends Error {
@@ -70,12 +70,62 @@ export async function saveProject(pool, owner, {config, baseRevision, operation,
     return {revision};
   });
 }
+const projectAlgorithm = "coalesce(nullif(r.config #>> '{workspace2,algorithmId}',''),nullif(r.config #>> '{workspace2,product,algorithmId}',''),'pump-station')";
+export async function listManagedProjects(pool, {offset=0, query='', userId='', algorithmId=''}={}) {
+  if (!Number.isSafeInteger(offset) || offset<0 || [query,userId,algorithmId].some(v=>typeof v!=='string'||v.length>500)) throw new StorageError(400,'Некорректные фильтры или страница');
+  const from=' FROM projects p JOIN project_revisions r ON r.project_id=p.id AND r.revision=p.head';
+  const where=" WHERE p.deleted_at IS NULL AND ($1='' OR p.owner_id=$1) AND ($2='' OR "+projectAlgorithm+"=$2) AND ($3='' OR strpos(translate(lower(p.name),'АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ','абвгдеёжзийклмнопрстуфхцчшщъыьэюя'),$3)>0)";
+  // The bundled PostgreSQL may use locale C; explicitly fold Russian titles as well as Latin.
+  const params=[userId,algorithmId,query.trim().toLocaleLowerCase("ru-RU")];
+  const [page,count,facets]=await Promise.all([
+    pool.query('SELECT p.id,p.name,p.owner_id AS "ownerId",p.head AS revision,p.created_at AS "createdAt",p.updated_at AS "updatedAt",'+projectAlgorithm+' AS "algorithmId"'+from+where+' ORDER BY p.updated_at DESC,p.id LIMIT 26 OFFSET $4',[...params,offset]),
+    pool.query('SELECT count(*)::integer AS total'+from+where,params),
+    pool.query('SELECT DISTINCT p.owner_id AS "ownerId",'+projectAlgorithm+' AS "algorithmId"'+from+' WHERE p.deleted_at IS NULL')
+  ]);
+  return {projects:page.rows.slice(0,25),next:page.rows.length>25?offset+25:null,total:count.rows[0].total,
+    ownerIds:[...new Set(facets.rows.map(r=>r.ownerId))],algorithmIds:[...new Set(facets.rows.map(r=>r.algorithmId))]};
+}
+
+/** Copy the stored revision as-is, including graph, catalogs and model release. Never recalculate another owner's project. */
+export async function copyManagedProject(pool, owner, {id,revision,operation}) {
+  if (typeof id!=='string'||!id||id.length>500||!Number.isSafeInteger(revision)||revision<1||!/^[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}$/i.test(operation??'')) throw new StorageError(400,'Некорректный проект, ревизия или операция');
+  return transaction(pool,async db=>{
+    // Serialize retries of one click; separate requests remain independent.
+    await db.query('SELECT pg_advisory_xact_lock(hashtextextended($1,0))',[owner+':'+operation]);
+    const {rows:[receipt]}=await db.query('SELECT source_project_id,source_revision,project_id FROM project_copy_receipts WHERE owner_id=$1 AND operation=$2',[owner,operation]);
+    if (receipt) {
+      if(receipt.source_project_id!==id||receipt.source_revision!==revision)throw new StorageError(409,'Операция уже использована для другой копии');
+      return readProject(db,owner,receipt.project_id);
+    }
+    const {rows:[source]}=await db.query('SELECT p.owner_id,p.head,r.config,r.model_release'+
+      ' FROM projects p JOIN project_revisions r ON r.project_id=p.id AND r.revision=p.head WHERE p.id=$1 AND p.deleted_at IS NULL FOR SHARE OF p',[id]);
+    if (!source) throw missing();
+    if (source.head!==revision)throw new StorageError(409,'Исходный проект изменился. Обновите список перед копированием.');
+    const config=structuredClone(source.config),copyId=randomUUID(),timestamp=new Date().toISOString();
+    config.project={...config.project,id:copyId,createdAt:timestamp,updatedAt:timestamp,
+      copyOf:{id,ownerId:source.owner_id,revision}};
+    if(source.model_release)config.project.modelLibraryVersion=source.model_release;
+    await db.query('INSERT INTO projects(id,owner_id,name,head) VALUES($1,$2,$3,1)',[copyId,owner,config.project.name]);
+    await db.query("INSERT INTO project_revisions(project_id,revision,author_id,kind,format,config,model_release) VALUES($1,1,$2,'copy',$3,$4,$5)",[copyId,owner,config.schemaVersion,JSON.stringify(config),source.model_release]);
+    await db.query('INSERT INTO project_copy_receipts(owner_id,operation,source_project_id,source_revision,project_id) VALUES($1,$2,$3,$4,$5)',[owner,operation,id,revision,copyId]);
+    return readProject(db,owner,copyId);
+  });
+}
 export function projectService(pool) {
   return async request => {
     try {
       const {action,owner,id,revision,offset=0,...input}=await request.json();
       if (!owner) throw new StorageError(401,'Требуется вход');
       switch(action) {
+        // The public admin route checks the session role; this binding is internal only.
+        case 'admin-list': {
+          if(input.admin!==true)throw new StorageError(403,'Требуется административная операция');
+          return Response.json(await listManagedProjects(pool,{...input,offset}));
+        }
+        case 'admin-copy': {
+          if(input.admin!==true)throw new StorageError(403,'Требуется административная операция');
+          return Response.json(await copyManagedProject(pool,owner,{id,revision,operation:input.operation}));
+        }
         case 'enqueue': {
           await pool.query("DELETE FROM calculation_jobs WHERE state IN ('done','error') AND created_at < now()-interval '1 day'");
           await pool.query("INSERT INTO calculation_jobs(id,owner_id,catalog_version,payload) VALUES($1,$2,$3,$4) ON CONFLICT DO NOTHING",[id,owner,input.catalog.version,JSON.stringify(input)]);

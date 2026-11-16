@@ -15,6 +15,11 @@ CREATE TABLE IF NOT EXISTS project_save_receipts (
   project_id text REFERENCES projects(id) ON DELETE CASCADE, operation uuid NOT NULL,
   digest text NOT NULL, revision integer NOT NULL, PRIMARY KEY(project_id,operation)
 );
+CREATE TABLE IF NOT EXISTS project_copy_receipts (
+  owner_id text NOT NULL, operation uuid NOT NULL, source_project_id text NOT NULL,
+  source_revision integer NOT NULL, project_id text NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
+  PRIMARY KEY(owner_id, operation)
+);
 CREATE TABLE IF NOT EXISTS model_versions (
   model_id text NOT NULL, version text NOT NULL, mesh_path text, mesh_hash text,
   source_path text, source_hash text, units text NOT NULL, ports jsonb NOT NULL,

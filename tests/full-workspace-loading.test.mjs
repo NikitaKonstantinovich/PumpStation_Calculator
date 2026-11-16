@@ -18,7 +18,7 @@ async function workspace(search, options, check) {
   const file = { ...saved.project, config: saved, revision: 3 };
   const cards = options.empty ? [] : [{ ...saved.project, revision: 3 }];
   const calls = [], sessions = [], effects = [], slots = [], cleanups = [];
-  const account = { id: "owner", name: "Fixture", role: "admin", email: "fixture@example.test" };
+  const account = { id: "owner", name: "Fixture", role: options.role ?? "admin", email: "fixture@example.test" };
   const previous = { window: globalThis.window, localStorage: globalThis.localStorage };
   const window = new EventTarget();
   window.location = new URL("http://localhost:3000/" + search);
@@ -68,12 +68,18 @@ async function workspace(search, options, check) {
     connect() { return () => {}; }
     dispose() {}
     update(config) { this.latest = config; }
-    async flush() { return true; }
+    async flush() { return !options.flushFailure; }
   }
   const program = { version: "engineering-v1", plans: {}, args: {} };
   const dependencies = {
     ...react, Link: "Link", NodeWorkspace: "NodeWorkspace", AppNavigation: "AppNavigation",
     ProjectSession, ProjectRequestError, projectApi, createProject,
+    copyProjectRequest: async request => {
+      calls.push({copy:request});
+      if(options.copyFailures){options.copyFailures--;throw Error("Временный сбой копирования");}
+      const config=structuredClone(saved);config.project.id="copied-project";config.project.copyOf={id:request.id,ownerId:"another-user",revision:request.revision};config.workspace2.algorithmId=options.copyAlgorithm??"pump-station";
+      return {...config.project,config,revision:1};
+    },
     DEFAULT_ALGORITHM: "pump-station", INITIAL_VERSION: "engineering-v1",
     algorithmForProject: data => data?.algorithmId ?? "pump-station",
     parseAccessibleProject: config => config, projectAccessError: () => null,
@@ -302,4 +308,29 @@ test("new project progress waits for persistence and retry keeps the same operat
     assert.deepEqual(ui.calls.filter(call=>call.body).at(-1).body,first);
     assert.ok(ui.find("NodeWorkspace"));
   });
+});
+
+
+test("project manager opens an independent copy in the source algorithm workspace",async()=>{
+ await workspace("?view=project-manager&project=saved-project",{copyAlgorithm:"future-algorithm"},async ui=>{
+  const source={id:"another-user-project",revision:7,algorithm:{name:"Другой продукт"}};
+  assert.equal(await ui.find("ProjectManager").props.openCopy(source,"same-operation"),true);await ui.settle();
+  const request=ui.calls.find(c=>c.copy).copy;assert.deepEqual(request,{id:source.id,revision:7,operation:"same-operation"});
+  assert.equal(ui.window.location.searchParams.get("project"),"copied-project");assert.equal(ui.window.location.searchParams.get("algorithm"),"future-algorithm");assert.equal(ui.window.location.searchParams.get("view"),"workspace2");
+  assert.equal(ui.sessions.at(-1).latest.project.id,"copied-project");assert.equal(ui.sessions.at(-1).revision,1);assert(ui.find("NodeWorkspace"));assert.equal(ui.sessions.at(-1).latest.project.copyOf.id,source.id);
+ });
+});
+test("admin copy retry keeps operation identity and refuses to leave an unsaved project",async()=>{
+ await workspace("?view=project-manager&project=saved-project",{copyFailures:1},async ui=>{
+  await ui.find("ProjectManager").props.openCopy({id:"source",revision:3,algorithm:{name:"Продукт"}},"retry-operation");await ui.settle();
+  const loading=ui.find("WorkspaceLoading");assert.match(loading.props.error,/сбой копирования/);loading.props.retry();await ui.settle();
+  assert.deepEqual(ui.calls.filter(c=>c.copy).map(c=>c.copy.operation),["retry-operation","retry-operation"]);assert(ui.find("NodeWorkspace"));
+ });
+ await workspace("?view=project-manager&project=saved-project",{flushFailure:true},async ui=>{
+  await ui.find("ProjectManager").props.openCopy({id:"source",revision:3,algorithm:{name:"Продукт"}},"no-copy");await ui.settle();
+  assert.equal(ui.calls.some(c=>c.copy),false);assert.equal(ui.sessions.at(-1).latest.project.id,"saved-project");
+ });
+});
+test("non-admin cannot render project manager from a direct URL",async()=>{
+ await workspace("?view=project-manager",{role:"pro"},ui=>{assert.equal(ui.find("ProjectManager"),undefined);assert.match(ui.text(),/Доступ только для администратора/);});
 });
