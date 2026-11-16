@@ -4,7 +4,7 @@ AI-assistant — чат о работе Pump Station Calculator. Инструм�
 
 ## Как открыть
 
-В full нажмите «☰ Pump-ик» справа в шапке. В beta выберите «AI-assistant» в списке инструментов или в пустой ячейке.
+Нажмите «☰ Pump-ик» справа в шапке. В beta чат также доступен через «AI-assistant» в списке инструментов или в пустой ячейке.
 
 ## Как спросить
 
@@ -31,5 +31,7 @@ Pump-ик приветствует пользователя: «Привет, я 
 - [Снимок результатов графа](../../../app/node-tools/assistant-project.ts)
 - [Чтение опубликованного графа](../../../app/node-tools/assistant-server.ts)
 - [Инструменты рабочего пространства](../../../app/tool-registry.ts)
+- [Снимок открытого проекта](../../../app/assistant-project.ts)
+- [Поиск по расчётным модулям](../../../app/assistant-algorithms-server.ts)
 - [Чтение данных для помощника](../../../app/assistant-data-server.ts)
 - [Запросы модели и ограничения](../../../app/assistant-server.ts)

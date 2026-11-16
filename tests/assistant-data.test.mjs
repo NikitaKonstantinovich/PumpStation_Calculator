@@ -85,6 +85,40 @@ test("assistant reads the open product from node results and keeps its pinned gr
   assert.equal(spec.data.items[0].quantity, 2);
   assert.doesNotMatch(JSON.stringify([current, spec]), /PRIVATE/);
 });
+
+test("the current workspace includes unsaved edits and paged specification data without opening another stored project", async () => {
+  const instance = tools({ context: { projectId: "theirs", workspace: {
+    product: { algorithmId: "pump-station", version: "pinned-graph", sourceVersions: {} },
+    primaryInput: { flowRate: 27.5, head: 40, secret: "PRIVATE-INPUT" },
+    versions: settings.baseValues.versions,
+    issues: [{ tool: "dn", severity: "warning", message: "Уточните давление" }],
+    specification: { totalRows: 17, knownTotal: 900, items: Array.from({ length: 17 }, (_, index) => ({
+      position: String(index + 1), name: "Фланец", quantity: 1, price: 50, note: "PRIVATE-NOTE",
+    })) },
+  } } });
+  const project = await call(instance, "read_current_project", {});
+  assert.match(project.data.origin, /снимок вкладки/);
+  assert.equal(project.data.primaryInput.flowRate, 27.5);
+  assert.equal(project.data.issues[0].tool, "dn");
+  assert.equal(project.data.specification.knownTotal, 900);
+  const first = await call(instance, "read_project_specification", { query: "Фланец", offset: 0 });
+  const next = await call(instance, "read_project_specification", { query: "Фланец", offset: first.data.nextOffset });
+  assert.equal(first.data.items.length, 15);
+  assert.deepEqual(next.data.items.map(row => row.position), ["16", "17"]);
+  assert.doesNotMatch(JSON.stringify([project, first, next]), /PRIVATE|987654/);
+  assert.match((await call(tools({ role: "base" }), "search_equipment", { catalog: "inventory", query: "", offset: 0 })).error, /admin/);
+});
+test("technical documentation has verified links and enforces role and release profile", async () => {
+  const args = { query: "", document: "doc-collector-constructor", offset: 0 };
+  const instance = tools();
+  const result = await call(instance, "search_program_documentation", args);
+  assert.ok(result.items.length > 0);
+  const answer = knowledge.assistantCitations("[doc-collector-constructor] [doc-user-administration]", instance.sources);
+  assert.equal(answer.sources.length, 1);
+  assert.equal(answer.sources[0].url, "/?view=help&tab=documentation&doc=doc-collector-constructor");
+  assert.deepEqual((await call(tools({ profile: "beta" }), "search_program_documentation", args)).items, []);
+  assert.deepEqual((await call(tools(), "search_program_documentation", { ...args, document: "doc-user-administration" })).items, []);
+});
 test("equipment search reads current import and saved records using fixed projections and paging",async()=>{
   const instance=tools();const component=await call(instance,"search_equipment",{catalog:"components",query:"DN100",offset:0});assert.equal(component.data.databaseRevision,7);assert.ok(component.data.items.length>0);assert.ok(component.data.items.length<=5);
   for(const catalog of ["insertions","collectors"]){const result=await call(instance,"search_equipment",{catalog,query:"DN",offset:0});assert.equal(result.data.items.length,5);assert.equal(result.data.nextOffset,5);assert.ok(!JSON.stringify(result).includes("PRIVATE-"));const next=await call(instance,"search_equipment",{catalog,query:"DN",offset:5});assert.equal(next.data.items.length,2);assert.equal(next.data.nextOffset,null);}

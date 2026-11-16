@@ -21,7 +21,7 @@ async function jsonResponse<T>(response:Response):Promise<T>{
   const data=await response.json();if(!response.ok)throw new Error(data.error??"Не удалось выполнить действие.");return data as T;
 }
 const localBrowser=()=>typeof window!=="undefined"&&["localhost","127.0.0.1","[::1]"].includes(window.location.hostname);
-const defaultColumns=["manufacturer","series","article","power","nominalFlow","maxHead","price","priceCurrency","family","currentPrice","currency","pumpCount","powerKw"];
+const defaultColumns=["manufacturer","series","article","power","nominalFlow","maxHead","price","priceCurrency","family","currentPrice","currency","pumpCount","powerKw","weightKg","Масса, кг","Линейная масса, кг/м","Расчётная масса деталей, кг"];
 const pageSize=40;
 
 export function EquipmentAdminPanel({actor,onBack}:{actor:AccountUser;onBack:()=>void}){
@@ -46,7 +46,7 @@ export function EquipmentAdminPanel({actor,onBack}:{actor:AccountUser;onBack:()=
   },[catalog]);
   const categoryRows=useMemo(()=>catalog?.rows.filter(row=>row.category===category)??[],[catalog,category]);
   const columns=useMemo(()=>equipmentColumns(categoryRows),[categoryRows]);
-  const initialHidden=columns.filter(key=>![...columns.filter(key=>defaultColumns.includes(key)),...columns.filter(key=>/DN|PN|Наименование|Артикул|Материал|Цена|Вес|Длина|Диаметр/i.test(key)).slice(0,8)].includes(key));
+  const initialHidden=columns.filter(key=>![...columns.filter(key=>defaultColumns.includes(key)||/^(?:Брутто|По данным об упаковке).*\/ Масса, кг$/i.test(key)),...columns.filter(key=>/DN|PN|Наименование|Артикул|Материал|Цена|Вес|Масса|Длина|Диаметр/i.test(key)).slice(0,8)].includes(key));
   const visibleColumns=columns.filter(key=>!(hidden[category]??initialHidden).includes(key));
   const filtered=useMemo(()=>filterEquipment(categoryRows,{search,field,value,status,sort,descending}),[categoryRows,search,field,value,status,sort,descending]);
   const matching=useMemo(()=>filtered.filter(row=>{

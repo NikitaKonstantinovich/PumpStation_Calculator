@@ -184,6 +184,7 @@ test("second circuit has independent counts, DN, PN and connection; network part
     let rows = build(secondCircuit(p));
     assert.equal(role(rows, "primary-between-valves-insertion").quantity, 3);
     assert.equal(role(rows, "secondary-between-valves-insertion"), undefined);
+    assert.equal(role(rows, "secondary-pump-nipple").quantity, 2);
     assert.equal(role(rows, "secondary-between-valves-nipple").quantity, 2);
     assert.equal(role(rows, "secondary-flax").quantity, 1.2);
     rows = build(secondCircuit(p, { dn: 100, count: 4, pn: 25, connection: "flanged" }));

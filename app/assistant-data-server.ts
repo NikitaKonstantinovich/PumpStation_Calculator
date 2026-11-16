@@ -8,6 +8,7 @@ import { readManualPumps } from "./manual-pump-server";
 import { mergePumpCatalog } from "./pump-catalog-client";
 import { pumpCardPhysicalData } from "./pump-card-data";
 import { currentInsertSource } from "./component-insert-catalog-server";
+import { searchProductAlgorithms } from "./assistant-algorithms-server";
 import { searchProgramDocumentation } from "./assistant-knowledge-server";
 import { assistantInputKeys, assistantProductPins, assistantProjectSnapshot } from "./assistant-project";
 import type { WorkspaceData } from "./node-tools/schema";
@@ -46,6 +47,7 @@ export const assistantDataDefinitions = [
   tool("search_product_algorithms", "Найти подключённые продукты библиотеки алгоритмов и их текущие публикации. Пустой query перечисляет продукты.", { query: querySchema, offset: offsetSchema }),
   tool("read_product_algorithm", "Прочитать действующий нодовый граф. scope=project выбирает закреплённую версию открытого проекта, algorithmId при этом пустой. Для scope=published укажи ID из search_product_algorithms. Пустой tool перечисляет инструменты и зависимости. С tool вернутся узлы, входные связи и формулы. query — имя, ID или ключевое слово, пустой для всех узлов.", { scope: scopeSchema, algorithmId: { type: "string" }, tool: { type: "string" }, query: querySchema, offset: offsetSchema }),
   tool("search_program_documentation", "Найти разделы актуального руководства и технической документации. query — ключевые слова, document — ID из результата или пустая строка для поиска по всем документам. Ссылайся на citation.", { query: querySchema, document: { type: "string" }, offset: offsetSchema }),
+  tool("search_calculation_modules", "Найти исходный код действующего расчёта: насосы, DN, коллекторы, комплектующие, КИП, рама, шкафы, спецификация, 3D. query — ключевые слова или имя функции, file — точный путь из результата либо пустая строка. Пустые query и file перечисляют модули; с file и пустым query можно читать файл постранично. Инструмент объясняет код и не запускает расчёт.", { query: querySchema, file: { type: "string" }, offset: offsetSchema }),
 ];
 
 export function createAssistantDataTools(access: AssistantDataAccess) {
@@ -224,6 +226,7 @@ export function createAssistantDataTools(access: AssistantDataAccess) {
       const { readAlgorithmGraph } = await import("./node-tools/assistant-server");
       return { title: "Нодовый алгоритм продукта", data: await readAlgorithmGraph(id, current?.version, String(args.tool), String(args.query), Number(args.offset)) };
     },
+    search_calculation_modules: (args: JsonObject) => ({ title: "Расчётные модули приложения", data: searchProductAlgorithms(String(args.query), String(args.file), Number(args.offset), access) }),
   };
 
   async function run(name: string, rawArguments: string): Promise<string> {

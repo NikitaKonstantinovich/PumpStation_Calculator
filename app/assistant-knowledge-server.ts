@@ -65,14 +65,14 @@ export function searchProgramDocumentation(query: string, document: string, offs
     const ranked = sections.map(section => ({ text: section.text, score: titleScore + assistantSearchScore(terms, section.terms) }))
       .sort((a, b) => b.score - a.score);
     return (document ? ranked : ranked.slice(0, 1)).filter(hit => !terms.length || hit.score > 0)
-      .map(hit => ({ doc, ...hit }));
-  }).sort((a, b) => b.score - a.score);
+      .map(hit => ({ doc, ...hit, archive: doc.kind === "archive" }));
+  }).sort((a, b) => b.score - a.score || Number(a.archive) - Number(b.archive));
   const hits = result.slice(offset, offset + 4);
   return {
     total: result.length,
     nextOffset: offset + 4 < result.length ? offset + 4 : null,
     sources: [...new Map(hits.map(({ doc }) => [doc.id, { id: doc.id, title: doc.title, url: helpUrl("documentation", doc.id) }])).values()],
-    items: hits.map(({ doc, text }) => ({ citation: doc.id, title: doc.title, text })),
+    items: hits.map(({ doc, text, archive }) => ({ citation: doc.id, title: doc.title, archive, text })),
   };
 }
 

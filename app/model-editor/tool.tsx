@@ -367,7 +367,14 @@ export function ModelTool({ project, catalogue, entity, onChange, cameraScope = 
             {selected.kind === "pipe" && <><NumberField label="Толщина стенки, мм" value={selected.parameters.wallThickness ?? 0} disabled={selected.locked} min={.1} onCommit={v => changeParameter(selected, "wallThickness", v)}/>{!selected.parameters.wallThickness && <p>Толщина стенки не задана: показан предварительный контур.</p>}</>}
             <h4>Габариты в осях установки</h4><p data-testid="component-dimensions">{selected.pumpGeometry?.envelope === "incomplete" ? "Не подтверждены полностью" : selected.collector && !selected.collector.template.main ? "Не подтверждены" : sizeText(selectedBounds)}</p>
             {selected.pumpGeometry && <p>Габариты насоса L × W × H: {selected.pumpGeometry.dimensionsMm.map(v => v === null ? "—" : fmt(v)).join(" × ")} мм{selected.pumpGeometry.envelope === "incomplete" ? " · неизвестные размеры обозначены прочерком" : ""}</p>}
-            {selected.ports.length > 0 && <details><summary>Точки подключения ({selected.ports.length})</summary>{selected.ports.map(p => <p key={p.id}>{p.id}: локальные X/Y/Z = {p.point.map(fmt).join("; ")} мм; в установке X/Y/Z = {worldPoint(selected, p.point).map(fmt).join("; ")} мм{p.provisional ? " · предварительно" : ""}</p>)}</details>}
+            {selected.ports.length > 0 && <details><summary>Точки подключения ({selected.ports.length})</summary>{selected.ports.map(p => {
+              const fit = assembly.lineJoints?.find(j => j.axialThreadFit && [j.a, j.b].some(end => end.componentId === selected.id && end.portId === p.id));
+              return <p key={p.id}>{p.id} · локальные X/Y/Z {p.point.map(fmt).join(" / ")} мм · в установке {worldPoint(selected, p.point).map(fmt).join(" / ")} мм
+                {p.thread && ` · ${p.thread}${p.gender === "male" ? " НР" : p.gender === "female" ? " ВР" : ""}`}
+                {p.threadDepthMm !== undefined && ` · предел захода ${fmt(p.threadDepthMm)} мм`}
+                {fit && ` · посадка в 3D ${fmt(fit.overlap)} мм`}
+                {p.provisional ? " · предварительно" : ""}</p>;
+            })}</details>}
             {selected.routing && <details><summary>Точки трассы</summary>{pipePoints(assembly, selected).map((p, i) => <p key={i}>{p.map(fmt).join("; ")} мм</p>)}</details>}
           </div> : <p>Выберите компонент в сцене или дереве сборки.</p>}
         </aside>

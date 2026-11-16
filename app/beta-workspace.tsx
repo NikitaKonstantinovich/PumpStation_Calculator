@@ -14,7 +14,7 @@ import { ItemEntryPanel } from "./item-entry-panel";
 import { EquipmentAdminPanel } from "./equipment-admin-panel";
 import { loadPumpCatalog, mergePumpCatalog } from "./pump-catalog-client";
 import { HelpCenter } from "./help-center";
-import { AIAssistant } from "./ai-assistant";
+import { AIAssistant, AssistantMenu } from "./ai-assistant";
 import { BaseValuesUpdateNotice, usePublishedBaseValues } from "./base-values-update";
 import { useBetaBaseValues } from "./beta-base-values";
 import { createProject, type SettingsEntity } from "./project-config";
@@ -134,7 +134,7 @@ function BetaTools({ account, onAccountChange }: { account: AccountUser; onAccou
   const header = <>
       <Link className="brand" href="/"><span className="brand__mark">PS</span><span><b>Pump Station</b><small>Calculator</small></span></Link>
       <div className="app-header__project"><small>Внутреннее тестирование</small><button disabled title={BETA_LOCK}>{RELEASE_LABEL}</button></div>
-      <div className="app-header__actions"><span className="save-state"><i />{saveMessage}</span><button className="avatar" onClick={()=>{setSidebar(true)}} title={account.name}>{initials(account.name)}</button></div>
+      <div className="app-header__actions"><span className="save-state"><i />{saveMessage}</span><button className="avatar" onClick={()=>{setSidebar(true)}} title={account.name}>{initials(account.name)}</button>{applied && <AssistantMenu userId={account.id} context={{ beta: { input: config.input, versions: applied.versions } }}/>}</div>
   </>;
   const renderPage = () => {
   if(view==="help")return <HelpCenter onBack={()=>navigateView("workspace")}/>;
@@ -143,13 +143,13 @@ function BetaTools({ account, onAccountChange }: { account: AccountUser; onAccou
   if(view==="base-values")return <BaseValuesPanel actor={account} onBack={()=>navigateView("workspace")}/>;
   if(!applied)return <main className="base-page"><h1>Базовые значения</h1><p role="status">{pinnedError||baseValuesError||"Загрузка версии расчёта…"}</p><button className="button" onClick={()=>window.location.reload()}>Повторить</button></main>;
   if(view==="users"&&account.role==="admin")return <UsersPanel actor={account} onBack={()=>navigateView("workspace")} onAccountChange={onAccountChange}/>;
-  const renderTool=(tool:PanelKind|undefined)=>!tool?<div className="empty-tool"><span>＋</span><b>Пустой инструмент</b><p>Выберите нужный инструмент в списке заголовка.</p></div>:tool==="assistant"?<AIAssistant userId={account.id} context={{beta:{input:config.input,versions:applied.versions}}}/>:!isBetaTool(tool)?<div className="tool-lock"><b>{BETA_LOCK}</b></div>:tool!=="components"&&!catalogue.length?<p role={catalogueError?"alert":"status"}>{catalogueError||"Загружаем каталог насосов…"}</p>:<AllowedPumpPanel id={tool} input={config.input} settings={settings} catalogue={catalogue} onInputChange={updateInput}/>;
+  const assistantProps = { userId: account.id, context: { beta: { input: config.input, versions: applied.versions } } };
+  const renderTool=(tool:PanelKind|undefined)=>!tool?<div className="empty-tool"><span>＋</span><b>Пустой инструмент</b><p>Выберите нужный инструмент в списке заголовка.</p></div>:tool==="assistant"?<AIAssistant {...assistantProps}/>:!isBetaTool(tool)?<div className="tool-lock"><b>{BETA_LOCK}</b></div>:tool!=="components"&&!catalogue.length?<p role={catalogueError?"alert":"status"}>{catalogueError||"Загружаем каталог насосов…"}</p>:<AllowedPumpPanel id={tool} input={config.input} settings={settings} catalogue={catalogue} onInputChange={updateInput}/>;
   if(detached){const tool=panels.find(panel=>panel.id===detached)?.activeTool??(isBetaTool(detached)?detached:undefined);return <DiagnosticsProvider value={diagnosticsValue}><main className="detached"><header className="detached__header"><Link className="brand" href="/"><span className="brand__mark">PS</span><span><b>Pump Station</b><small>Calculator</small></span></Link><span>{tool?PANEL_INFO[tool].title:"Пустой инструмент"}</span><span className="beta-release">{RELEASE_LABEL} · Внутреннее тестирование</span></header><section className="detached__content">{renderTool(tool)}</section></main></DiagnosticsProvider>;}
   const minimizedPanels=panels.filter(panel=>panel.minimized);
   const renderWorkspacePanel=(panel:PanelState,mode:WorkspaceMode="free")=><FloatingPanel key={panel.id} panel={panel} zoom={zoom} layoutMode={mode} content={renderTool(panel.activeTool)} isToolEnabled={isBetaTool} secondaryEnabled={false} onFocus={()=>focus(panel.id)} onChange={change} onDetach={()=>openPanel(panel.id)} onMinimize={()=>minimizePanel(panel.id)} onClose={()=>closePanel(panel.id)}/>;
   const workspaceHint=workspaceMode==="free"?"Окна можно перемещать, масштабировать и прикреплять к границам":workspaceMode==="mobile"?"Один инструмент в строке на всю ширину рабочего пространства":`Фиксированная сетка ${workspaceGrid.columns} × ${workspaceGrid.rows}`;
   return <DiagnosticsProvider value={diagnosticsValue}><div className={`app-shell beta-edition app-shell--${workspaceMode} ${ribbonCollapsed ? "app-shell--ribbon-collapsed" : ""} ${minimizedPanels.length?"app-shell--tasks":""}`}>
-
 
     <BaseValuesUpdateNotice project={diagnosticProject} latest={latest} error={pinnedError||baseValuesError} onApply={next=>accept((next.entities["station-settings"] as SettingsEntity).baseValues!)}/>
     {accessNotice && <p className="access-note" role="status">{accessNotice}<button className="button" onClick={()=>setAccessNotice("")}>Понятно</button></p>}

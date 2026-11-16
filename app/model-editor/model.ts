@@ -807,7 +807,6 @@ export function recoverLostInsertions(saved: Assembly, generated: Assembly, rows
   return repaired ? rebuildFasteners({...saved,components}) : saved;
 }
 
-/** Synchronization retains manual geometry, removed components, and unsupported connections for review. */
 /** A saved automatic placeholder can claim an exact model that became available
  * for the same selected part. Changes to the project composition remain explicit. */
 export function recoverThreadedLineGeometry(saved: Assembly, generated: Assembly): Assembly {
@@ -846,6 +845,7 @@ export function recoverPumpConnections(saved: Assembly, generated: Assembly): As
   return repaired ? mergeAssembly(saved, generated) : saved;
 }
 
+/** Synchronization retains manual geometry, removed components, and unsupported connections for review. */
 export function mergeAssembly(current: Assembly, generated: Assembly): Assembly {
   const ids = new Set(generated.components.map(c => c.id));
   const currentPumps = new Map(current.components.filter(c => c.kind === "pump").map(c => [c.id, c]));
