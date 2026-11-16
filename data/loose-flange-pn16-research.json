@@ -1,0 +1,313 @@
+{
+  "verifiedAt": "2026-10-26",
+  "status": "geometry-verified-catalogue-adoption-approved",
+  "sourceSha256": "f68b4519e1e6786982e026472d49553d70159e87154417c02f53b9ced3a1464c",
+  "standard": "EN 1092-1:2018 type 02 PN16",
+  "note": "User approved catalogue adoption on 2026-10-26. Runtime dimensions are maintained in flange-dimensions.json and persisted with an explicit accepted execution attribute. Original imported names and actual material/prices remain intact. Geometry does not replace a manufacturer certificate. DN15–40 HECO PN40 models have the same geometry as EN table 13 PN16.",
+  "sources": [
+    {
+      "path": "data/sources/loose-flange-heco-2026-10-26/en1092-pn16.pdf",
+      "url": "https://www.zzflange.com/wp-content/uploads/2025/08/EN-1092-1-PN-16-Flanges-Dimension.pdf",
+      "sha256": "2e57d07b7b8e826e8c4b53d8229967b39edd7a2e4056c05287418f82c124d3b7"
+    },
+    {
+      "path": "data/sources/loose-flange-heco-2026-10-26/en1092-pn40.pdf",
+      "url": "https://www.zzflange.com/wp-content/uploads/2025/08/EN-1092-1-PN-40-Flanges-Dimension.pdf",
+      "sha256": "170ecd6bc46b1a2da60859ff76d2dfd576782d8edcf358cfbc7d29bd45f2c3b2"
+    },
+    {
+      "path": "data/sources/loose-flange-heco-2026-10-26/heco-pn16.pdf",
+      "url": "https://www.heco.de/webservice/downloads/product-sheet/1361/en/heco-product-sheet-1361-Stainless-steel-loose-plate-flanges-DIN-EN-PN-16-EN-1092-1.pdf",
+      "sha256": "f0102df3d7320d37dfee224feebe8518363210dd97a5200fca3ea5d748c8cd41"
+    },
+    {
+      "path": "data/sources/loose-flange-heco-2026-10-26/heco-pn40.pdf",
+      "url": "https://www.heco.de/webservice/downloads/product-sheet/1341/en/heco-product-sheet-1341-Stainless-steel-loose-plate-flanges-DIN-EN-PN-40.pdf",
+      "sha256": "2921333f654865c962838afde6c69f4a5c3d16cddf74748f3a4f0f11348a291e"
+    }
+  ],
+  "rows": [
+    {
+      "dn": 15,
+      "modelSha256": "2b18cf27c1bd161185f1782e39d19ba2d0f9fc712e7e6d25a413bbb6cfae796b",
+      "modelPressure": 40,
+      "dimensions": {
+        "thicknessMm": 14.0,
+        "boreDiameterMm": 25.0,
+        "outerDiameterMm": 95.0,
+        "boltCircleMm": 65.0,
+        "boltHoleDiameterMm": 14.0,
+        "holes": 4
+      },
+      "matchesEn1092Table13": true,
+      "modelPath": "data/sources/loose-flange-heco-2026-10-26/heco_LF-021-E40-4.step",
+      "modelUrl": "https://www.heco.de/webservice/downloads/2840332/file/heco_LF-021-E40-4.step",
+      "candidateComponentId": "фланцы-006-r0110",
+      "candidateTableId": "фланцы-006",
+      "candidateFamily": "Фланец свободный AISI304",
+      "candidateName": "Фланец свободный dn15 (21,3 мм) DIN2642",
+      "candidatePn": 16,
+      "standardReference": "EN 1092-1:2018, table 13, p.56, type 02, C1 / B2; DN15–40 additionally checked against table 15, p.62"
+    },
+    {
+      "dn": 20,
+      "modelSha256": "a538e16b66046d2a16f570f533349647862046d500b839838ae4b7b7b89a7307",
+      "modelPressure": 40,
+      "dimensions": {
+        "thicknessMm": 16.0,
+        "boreDiameterMm": 31.0,
+        "outerDiameterMm": 105.0,
+        "boltCircleMm": 75.0,
+        "boltHoleDiameterMm": 14.0,
+        "holes": 4
+      },
+      "matchesEn1092Table13": true,
+      "modelPath": "data/sources/loose-flange-heco-2026-10-26/heco_LF-026-E40-4.step",
+      "modelUrl": "https://www.heco.de/webservice/downloads/2840338/file/heco_LF-026-E40-4.step",
+      "candidateComponentId": "фланцы-006-r0111",
+      "candidateTableId": "фланцы-006",
+      "candidateFamily": "Фланец свободный AISI304",
+      "candidateName": "Фланец свободный dn20 (26,9 мм) DIN2642",
+      "candidatePn": 16,
+      "standardReference": "EN 1092-1:2018, table 13, p.56, type 02, C1 / B2; DN15–40 additionally checked against table 15, p.62"
+    },
+    {
+      "dn": 25,
+      "modelSha256": "0c1a939d240808a862d0d7431f1589eb54dabc99a0824f9983b118eb8152166e",
+      "modelPressure": 40,
+      "dimensions": {
+        "thicknessMm": 16.0,
+        "boreDiameterMm": 38.0,
+        "outerDiameterMm": 115.0,
+        "boltCircleMm": 85.0,
+        "boltHoleDiameterMm": 14.0,
+        "holes": 4
+      },
+      "matchesEn1092Table13": true,
+      "modelPath": "data/sources/loose-flange-heco-2026-10-26/heco_LF-033-E40-4.step",
+      "modelUrl": "https://www.heco.de/webservice/downloads/2840342/file/heco_LF-033-E40-4.step",
+      "candidateComponentId": "фланцы-006-r0112",
+      "candidateTableId": "фланцы-006",
+      "candidateFamily": "Фланец свободный AISI304",
+      "candidateName": "Фланец свободный dn25 (33,7 мм) DIN2642",
+      "candidatePn": 16,
+      "standardReference": "EN 1092-1:2018, table 13, p.56, type 02, C1 / B2; DN15–40 additionally checked against table 15, p.62"
+    },
+    {
+      "dn": 32,
+      "modelSha256": "ce3d9a074eb55664674ed59c3ae506a95831c016b377a48ed88db52dc66c858e",
+      "modelPressure": 40,
+      "dimensions": {
+        "thicknessMm": 18.0,
+        "boreDiameterMm": 47.0,
+        "outerDiameterMm": 140.0,
+        "boltCircleMm": 100.0,
+        "boltHoleDiameterMm": 18.0,
+        "holes": 4
+      },
+      "matchesEn1092Table13": true,
+      "modelPath": "data/sources/loose-flange-heco-2026-10-26/heco_LF-042-E40-4.step",
+      "modelUrl": "https://www.heco.de/webservice/downloads/2840350/file/heco_LF-042-E40-4.step",
+      "candidateComponentId": "фланцы-006-r0113",
+      "candidateTableId": "фланцы-006",
+      "candidateFamily": "Фланец свободный AISI304",
+      "candidateName": "Фланец свободный Dn32 (42,4 мм) DIN2642",
+      "candidatePn": 16,
+      "standardReference": "EN 1092-1:2018, table 13, p.56, type 02, C1 / B2; DN15–40 additionally checked against table 15, p.62"
+    },
+    {
+      "dn": 40,
+      "modelSha256": "d68cee2039bb0b213af9f2e52c93781b1d7e7affc297c172a9627b18bc55b258",
+      "modelPressure": 40,
+      "dimensions": {
+        "thicknessMm": 18.0,
+        "boreDiameterMm": 53.0,
+        "outerDiameterMm": 150.0,
+        "boltCircleMm": 110.0,
+        "boltHoleDiameterMm": 18.0,
+        "holes": 4
+      },
+      "matchesEn1092Table13": true,
+      "modelPath": "data/sources/loose-flange-heco-2026-10-26/heco_LF-048-E40-4.step",
+      "modelUrl": "https://www.heco.de/webservice/downloads/2840370/file/heco_LF-048-E40-4.step",
+      "candidateComponentId": "фланцы-006-r0114",
+      "candidateTableId": "фланцы-006",
+      "candidateFamily": "Фланец свободный AISI304",
+      "candidateName": "Фланец свободный Dn40 (48,3 мм) DIN2642",
+      "candidatePn": 16,
+      "standardReference": "EN 1092-1:2018, table 13, p.56, type 02, C1 / B2; DN15–40 additionally checked against table 15, p.62"
+    },
+    {
+      "dn": 50,
+      "modelSha256": "0c2f0d98cc833ae8fc6a0f1bcefba3da04b6b56786057cce0bb70375981d562f",
+      "modelPressure": 16,
+      "dimensions": {
+        "thicknessMm": 20.0,
+        "boreDiameterMm": 65.0,
+        "outerDiameterMm": 165.0,
+        "boltCircleMm": 125.0,
+        "boltHoleDiameterMm": 18.0,
+        "holes": 4
+      },
+      "matchesEn1092Table13": true,
+      "modelPath": "data/sources/loose-flange-heco-2026-10-26/heco_LF-060-E16-4.step",
+      "modelUrl": "https://www.heco.de/webservice/downloads/2830607/file/heco_LF-060-E16-4.step",
+      "candidateComponentId": "фланцы-006-r0115",
+      "candidateTableId": "фланцы-006",
+      "candidateFamily": "Фланец свободный AISI304",
+      "candidateName": "Фланец свободный Dn50 (60,3 мм) DIN2642",
+      "candidatePn": 16,
+      "standardReference": "EN 1092-1:2018, table 13, p.56, type 02, C1 / B2; DN15–40 additionally checked against table 15, p.62"
+    },
+    {
+      "dn": 65,
+      "modelSha256": "59b1a0ff37c701a9918384fdfd51d27109c714d1b08ac4c1bf179f3ef2cb1896",
+      "modelPressure": 16,
+      "dimensions": {
+        "thicknessMm": 20.0,
+        "boreDiameterMm": 81.0,
+        "outerDiameterMm": 185.0,
+        "boltCircleMm": 145.0,
+        "boltHoleDiameterMm": 18.0,
+        "holes": 8
+      },
+      "matchesEn1092Table13": true,
+      "modelPath": "data/sources/loose-flange-heco-2026-10-26/heco_LF-076-E16-4.step",
+      "modelUrl": "https://www.heco.de/webservice/downloads/2830611/file/heco_LF-076-E16-4.step",
+      "candidateComponentId": "фланцы-006-r0116",
+      "candidateTableId": "фланцы-006",
+      "candidateFamily": "Фланец свободный AISI304",
+      "candidateName": "Фланец свободный Dn65 (76,1 мм) DIN2642",
+      "candidatePn": 16,
+      "standardReference": "EN 1092-1:2018, table 13, p.56, type 02, C1 / B2; DN15–40 additionally checked against table 15, p.62"
+    },
+    {
+      "dn": 80,
+      "modelSha256": "d22c0e9c155d0f5aee0246f451f5dae58991327b7a78f46ef795a3f42a5f07e8",
+      "modelPressure": 16,
+      "dimensions": {
+        "thicknessMm": 20.0,
+        "boreDiameterMm": 94.0,
+        "outerDiameterMm": 200.0,
+        "boltCircleMm": 160.0,
+        "boltHoleDiameterMm": 18.0,
+        "holes": 8
+      },
+      "matchesEn1092Table13": true,
+      "modelPath": "data/sources/loose-flange-heco-2026-10-26/heco_LF-088-E16-4.step",
+      "modelUrl": "https://www.heco.de/webservice/downloads/2830613/file/heco_LF-088-E16-4.step",
+      "candidateComponentId": "фланцы-006-r0117",
+      "candidateTableId": "фланцы-006",
+      "candidateFamily": "Фланец свободный AISI304",
+      "candidateName": "Фланец свободный Dn80 (88,9 мм) DIN2642",
+      "candidatePn": 16,
+      "standardReference": "EN 1092-1:2018, table 13, p.56, type 02, C1 / B2; DN15–40 additionally checked against table 15, p.62"
+    },
+    {
+      "dn": 100,
+      "modelSha256": "46d9103872ce700d380bb6818546f162443700f2a5817b70d32670e6bab92481",
+      "modelPressure": 16,
+      "dimensions": {
+        "thicknessMm": 22.0,
+        "boreDiameterMm": 120.0,
+        "outerDiameterMm": 220.0,
+        "boltCircleMm": 180.0,
+        "boltHoleDiameterMm": 18.0,
+        "holes": 8
+      },
+      "matchesEn1092Table13": true,
+      "modelPath": "data/sources/loose-flange-heco-2026-10-26/heco_LF-114-E16-4.step",
+      "modelUrl": "https://www.heco.de/webservice/downloads/2830616/file/heco_LF-114-E16-4.step",
+      "candidateComponentId": "фланцы-006-r0118",
+      "candidateTableId": "фланцы-006",
+      "candidateFamily": "Фланец свободный AISI304",
+      "candidateName": "Фланец свободный Dn100 (114,3 мм) DIN2642",
+      "candidatePn": 16,
+      "standardReference": "EN 1092-1:2018, table 13, p.56, type 02, C1 / B2; DN15–40 additionally checked against table 15, p.62"
+    },
+    {
+      "dn": 125,
+      "modelSha256": "454f7eca01290ad9a9a106e6c35abecf8656b1844838180754e7efbb182a5007",
+      "modelPressure": 16,
+      "dimensions": {
+        "thicknessMm": 22.0,
+        "boreDiameterMm": 145.0,
+        "outerDiameterMm": 250.0,
+        "boltCircleMm": 210.0,
+        "boltHoleDiameterMm": 18.0,
+        "holes": 8
+      },
+      "matchesEn1092Table13": true,
+      "modelPath": "data/sources/loose-flange-heco-2026-10-26/heco_LF-139-E16-4.step",
+      "modelUrl": "https://www.heco.de/webservice/downloads/2830618/file/heco_LF-139-E16-4.step",
+      "candidateComponentId": "фланцы-006-r0119",
+      "candidateTableId": "фланцы-006",
+      "candidateFamily": "Фланец свободный AISI304",
+      "candidateName": "Фланец свободный Dn125 (139,7 мм) DIN2642",
+      "candidatePn": 16,
+      "standardReference": "EN 1092-1:2018, table 13, p.56, type 02, C1 / B2; DN15–40 additionally checked against table 15, p.62"
+    },
+    {
+      "dn": 150,
+      "modelSha256": "7f8225feea87b362c10bfb7dea88b71867567392f66c7ef3e085b760d06c298d",
+      "modelPressure": 16,
+      "dimensions": {
+        "thicknessMm": 24.0,
+        "boreDiameterMm": 174.0,
+        "outerDiameterMm": 285.0,
+        "boltCircleMm": 240.0,
+        "boltHoleDiameterMm": 22.0,
+        "holes": 8
+      },
+      "matchesEn1092Table13": true,
+      "modelPath": "data/sources/loose-flange-heco-2026-10-26/heco_LF-168-E16-4.step",
+      "modelUrl": "https://www.heco.de/webservice/downloads/2830621/file/heco_LF-168-E16-4.step",
+      "candidateComponentId": "фланцы-006-r0120",
+      "candidateTableId": "фланцы-006",
+      "candidateFamily": "Фланец свободный AISI304",
+      "candidateName": "Фланец свободный Dn150 (168,3 мм) DIN2642",
+      "candidatePn": 16,
+      "standardReference": "EN 1092-1:2018, table 13, p.56, type 02, C1 / B2; DN15–40 additionally checked against table 15, p.62"
+    },
+    {
+      "dn": 200,
+      "modelSha256": "a71de7ee601bfd62075c6877b88483997ad99dc3e85377a107f23d4687e86247",
+      "modelPressure": 16,
+      "dimensions": {
+        "thicknessMm": 26.0,
+        "boreDiameterMm": 226.0,
+        "outerDiameterMm": 340.0,
+        "boltCircleMm": 295.0,
+        "boltHoleDiameterMm": 22.0,
+        "holes": 12
+      },
+      "matchesEn1092Table13": true,
+      "modelPath": "data/sources/loose-flange-heco-2026-10-26/heco_LF-219-E16-4.step",
+      "modelUrl": "https://www.heco.de/webservice/downloads/2830623/file/heco_LF-219-E16-4.step",
+      "candidateComponentId": "фланцы-006-r0121",
+      "candidateTableId": "фланцы-006",
+      "candidateFamily": "Фланец свободный AISI304",
+      "candidateName": "Фланец свободный Dn200 (219,1 мм) DIN2642",
+      "candidatePn": 16,
+      "standardReference": "EN 1092-1:2018, table 13, p.56, type 02, C1 / B2; DN15–40 additionally checked against table 15, p.62"
+    }
+  ],
+  "adoption": {
+    "date": "2026-10-26",
+    "source": "Прямое согласие пользователя: принять EN 1092-1, тип 02, PN16 для этих 12 позиций; сохранить материал и цены.",
+    "componentIds": [
+      "фланцы-006-r0110",
+      "фланцы-006-r0111",
+      "фланцы-006-r0112",
+      "фланцы-006-r0113",
+      "фланцы-006-r0114",
+      "фланцы-006-r0115",
+      "фланцы-006-r0116",
+      "фланцы-006-r0117",
+      "фланцы-006-r0118",
+      "фланцы-006-r0119",
+      "фланцы-006-r0120",
+      "фланцы-006-r0121"
+    ]
+  }
+}

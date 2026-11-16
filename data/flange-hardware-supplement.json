@@ -1,0 +1,18 @@
+[
+  {
+    "id": "hardware-grover-bl03116140z",
+    "catalogId": "метизы",
+    "tableId": "hardware-web-2026-11-15",
+    "family": "Болт DIN933 Ц 8,8",
+    "sourceSheet": "Гровер, Bl03116140Z; проверено 15.11.2026",
+    "sourceRow": 1,
+    "fields": [
+      {"column":"NAME","headerPath":["Наименование"],"value":"Болт М16х140 DIN933 Ц 8,8"},
+      {"column":"DIAMETER","headerPath":["Диаметр резьбы, мм"],"value":16},
+      {"column":"LENGTH","headerPath":["Длина болта, мм"],"value":140},
+      {"column":"ARTICLE","headerPath":["Артикул"],"value":"Bl03116140Z"},
+      {"column":"SOURCE","headerPath":["Источник цены"],"value":"Розничная цена 76,70 ₽/шт., без доставки; проверено 15.11.2026. https://grover-sk.ru/catalog/metizy/bolty/din_933/din_933_8.8_ots/bolty_m16/bolty_m16x140/bolt_din_933_polnaya_rezba_8.8_ots_m16h140/"}
+    ],
+    "prices": [{"label":"Цена, ₽/шт. (Гровер, 15.11.2026)","amount":76.7,"currency":"RUB"}]
+  }
+]

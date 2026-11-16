@@ -80,6 +80,20 @@ class ConverterTests(unittest.TestCase):
         self.assertEqual(second["converted"], 1)
         self.assertNotEqual(first["profiles"]["profiles"]["a"]["sourceHash"], second["profiles"]["profiles"]["a"]["sourceHash"])
 
+    def test_new_catalog_variant_uses_existing_source_and_returns_new_id(self):
+        digest = service.file_hash(self.root / "a.step")
+        self.models[0]["sourceHash"] = digest
+        self.registry.write_text(json.dumps({"version": 1, "models": self.models}))
+        link = {"sourceKey": "pump:a", "sourceHash": digest, "scope": "model_default", "assemblyApproved": False}
+        with patch.object(service, "catalog_links", return_value={"pump:CNP:new": link}):
+            job = self.finished(self.submit(["pump:CNP:new", "pump:CNP:new"]))
+        self.assertEqual((job["converted"], job["missing"], self.calls), (1, [], ["a.step"]))
+        profile = job["profiles"]["profiles"]["CNP:new"]
+        self.assertEqual(profile["sourceHash"], digest)
+        self.assertEqual(profile["key"], "pump:CNP:new")
+        self.assertIn("pump:CNP:new", job["profiles"]["equipment"])
+        self.assertEqual(profile["ports"][0]["point"], [3, 4, 5])
+
     def test_failed_file_does_not_stop_queue_and_retry_only_failed(self):
         self.failures.add("bad.step")
         first = self.finished(self.submit(["pump:a", "equipment:bad", "equipment:valve-a"]))
@@ -160,6 +174,36 @@ class ConverterTests(unittest.TestCase):
         self.assertEqual(same["id"], first["id"])
         with self.assertRaises(ValueError):
             self.jobs.submit("other-owner", {"projectId": "station", "requestId": "retry", "items": [], "retryJobId": first["id"]})
+
+    def test_unbound_library_stl_is_reused_only_with_matching_mesh_hash(self):
+        frontend = self.root / "frontend"
+        assets = frontend / "public/model-assets"
+        assets.mkdir(parents=True)
+        mesh = assets / "library-valve.stl"
+        mesh.write_bytes(bytes(80) + struct.pack("<I", 1) + bytes(50))
+        digest = service.file_hash(self.root / "v.step")
+        entry = {"sourceHash": digest, "status": "ready", "units": "mm", "meshUrl": "/model-assets/library-valve.stl", "meshHash": service.file_hash(mesh), "bounds": [0, 0, 0, 10, 20, 30]}
+        (assets / "library.json").write_text(json.dumps({"models": [entry]}))
+        with patch.object(service, "FRONTEND", frontend):
+            result = self.finished(self.submit(["equipment:valve-a", "equipment:valve-b"]))
+        self.assertEqual((result["ready"], result["converted"]), (1, 0))
+        self.assertEqual(self.calls, [])
+        self.assertEqual(len(result["profiles"]["equipment"]), 2)
+        mesh.write_bytes(bytes(80) + struct.pack("<I", 1) + bytes([1])*50)
+        self.jobs.db.execute("DELETE FROM assets")
+        self.jobs.db.commit()
+        with patch.object(service, "FRONTEND", frontend):
+            result = self.finished(self.submit(["equipment:valve-a"]))
+        self.assertEqual(result["converted"], 1)
+
+    def test_generated_valve_registry_preserves_explicit_user_links(self):
+        folder = self.root / "frontend/data"
+        folder.mkdir(parents=True)
+        generated = [{**self.models[1], "source": "wrong.step"}, {**self.models[1], "key": "equipment:new-valve"}]
+        (folder / "line-valve-registry.json").write_text(json.dumps({"version": 1, "models": generated}))
+        library = service.load_library(self.root)
+        self.assertEqual(library["equipment:valve-a"]["source"], "v.step")
+        self.assertIn("equipment:new-valve", library)
 
     def test_invalid_registry_is_a_retryable_error(self):
         self.registry.write_text("broken json")

@@ -21,7 +21,8 @@ export async function loadTs(url, replacements = {}) {
     const key = url.href;
     if (cache.has(key)) return cache.get(key);
     const source = replacements[key] ?? await readFile(url, "utf8");
-    let output = url.pathname.endsWith(".json") ? `export default ${source}` : ts.transpileModule(source, { compilerOptions: { module: ts.ModuleKind.ESNext, target: ts.ScriptTarget.ES2022 } }).outputText;
+    let output = url.pathname.endsWith(".json") ? `export default ${source}` : ts.transpileModule(source, { fileName: url.pathname, compilerOptions: { jsx: ts.JsxEmit.ReactJSX, module: ts.ModuleKind.ESNext, target: ts.ScriptTarget.ES2022 } }).outputText;
+    if (url.pathname.endsWith(".tsx")) output = output.replaceAll('from "react/jsx-runtime"', `from "${import.meta.resolve("react/jsx-runtime")}"`);
     const matches = [...output.matchAll(/from\s+["'](\.[^"']+)["']/g)];
     for (const match of matches) {
       const path = /\.(json|ts)$/.test(match[1]) ? match[1] : `${match[1]}.ts`;

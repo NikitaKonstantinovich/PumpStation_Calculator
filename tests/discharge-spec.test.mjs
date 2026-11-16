@@ -4,27 +4,16 @@ import test from "node:test";
 import { loadTs } from "./load-ts.mjs";
 
 const { createProject, parseProjectConfig } = await loadTs(new URL("../app/project-config.ts", import.meta.url));
+const { calculateCollector } = await loadTs(new URL("../app/collector-calculations.ts", import.meta.url));
 const { synchronizeCollectors } = await loadTs(new URL("../app/collector-project.ts", import.meta.url));
 const { dischargeHydraulics } = await loadTs(new URL("../app/dn-defaults.ts", import.meta.url));
 const { buildDischargeSpec, selectDischargeInsertion, commonDischargeHead } = await loadTs(new URL("../app/discharge-spec.ts", import.meta.url));
 const { suctionCatalogItems } = await loadTs(new URL("../app/suction-catalog.ts", import.meta.url));
 const { makeCollectorCatalog } = await loadTs(new URL("../app/collector-catalog.ts", import.meta.url));
 const binding = JSON.parse(await readFile(new URL("../public/binding-components.json", import.meta.url), "utf8"));
-const catalog = makeCollectorCatalog(binding), database = { ...binding, collectorCatalog: catalog };
-const pageUrl = new URL("../app/page.tsx", import.meta.url), page = await readFile(pageUrl, "utf8");
-const source = [
-  'import {recommendedDn,defaultCollectorMaterial,resolveDnConnection,suctionHydraulics,dischargeHydraulics} from "./dn-defaults";',
-  'import {buildSuctionSpec,replaceSuctionSpec,checkSuctionSpecPressure} from "./suction-spec";',
-  'import {buildDischargeSpec,replaceDischargeSpec,checkDischargeSpecPressure} from "./discharge-spec";',
-  'import {normalizeSpecificationItems,specificationOption} from "./specification-items";',
-  'import {synchronizeCollectors} from "./collector-project";',
-  page.match(/^const isCalculated =.*$/m)[0], page.match(/^const isSecondaryEnabled =.*$/m)[0],
-  page.match(/^const componentFieldLabel=.*$/m)[0],
-  page.slice(page.indexOf("const isJockeyCircuit="), page.indexOf("function DnCalculator(")),
-  page.slice(page.indexOf("const HYDRAULIC_SPEC_OPTIONS:"), page.indexOf("function PanelContent(")),
-  "let loadedComponentsDatabase; export {refreshSuctionSpecification as refresh, buildValveSpecItems};",
-].join("\n");
-const { refresh, buildValveSpecItems } = await loadTs(pageUrl, { [pageUrl.href]: source });
+const catalog = makeCollectorCatalog(binding), database = { ...binding, items: [...binding.items, ...suctionCatalogItems], collectorCatalog: catalog };
+const {refreshSuctionSpecification:refresh,buildValveSpecItems}=await loadTs(new URL("../app/station-hydraulic-calculation.ts",import.meta.url));
+
 function fixture({ pumpDn = 80, valveDn = 80, pumpConnection = "flanged", connection = "flanged", pn = 16, material = "st20", type = "utility", count = 3 } = {}) {
   const p = createProject();
   Object.assign(p.entities["station-settings"], { stationType: type, inletHead: 10 });
@@ -40,6 +29,33 @@ const field = (name, value) => ({ column: name, headerPath: [name], value });
 const rowsOf = p => p.entities["station-spec"].items;
 const role = (rows, name) => rows.find(row => row.generatedBy === "discharge-line" && row.assemblyRole === name);
 const fill = (p, db = database, force = true) => refresh(synchronizeCollectors(p), db, force);
+
+test("vibration option refreshes both lines without legacy duplicates and survives reload and count changes", () => {
+  const p = fixture();
+  p.entities["station-settings"].vibrationCompensators = true;
+  const manual = { position: "04.90", section: "discharge", option: "vibrationCompensators", name: "Виброкомпенсатор заказчика", details: "Ручной подбор", quantity: 1, price: 1234, status: "selected" };
+  rowsOf(p).push(manual, { position: "04.03", name: "Вставка гибкая", details: "Виброкомпенсатор, фланцевая", quantity: 3, unit: "шт.", price: null, description: "Компенсация вибраций", section: "discharge", option: "vibrationCompensators", status: "clarify" });
+  delete p.entities["station-spec"].identityVersion;
+  let filled = fill(parseProjectConfig(p));
+  const automatic = project => rowsOf(project).filter(row => row.assemblyRole?.endsWith("vibration-compensator"));
+  assert.equal(automatic(filled).length, 2);
+  assert.ok(rowsOf(filled).some(row => row.name === manual.name));
+  assert.ok(!rowsOf(filled).some(row => row.name === "Вставка гибкая"));
+  assert.deepEqual(rowsOf(fill(filled)), rowsOf(filled));
+  filled = fill(parseProjectConfig(JSON.parse(JSON.stringify(filled))), database, false);
+  assert.equal(automatic(filled).length, 2);
+  assert.ok(automatic(filled).every(row => row.selectedPn === 16));
+  filled.entities["system-input"].workingPumpCount = 3;
+  filled = fill(filled, database, false);
+  assert.ok(automatic(filled).every(row => row.quantity === 4));
+  filled.entities["station-settings"].vibrationCompensators = false;
+  filled = fill(filled, database, false);
+  assert.equal(automatic(filled).length, 0);
+  assert.ok(rowsOf(filled).every(row => !row.assemblyRole?.includes("vibration")));
+  assert.ok(rowsOf(filled).some(row => row.name === manual.name));
+  assert.equal(role(rowsOf(filled), "primary-pump-insertion"), undefined);
+});
+
 function build(p, db = database) {
   const e = p.entities;
   const valves = buildValveSpecItems(db, e["station-dn"], e["system-input"], e["system-input-2"], e["station-settings"], e["station-collectors"].discharge.configuration.material);
@@ -57,18 +73,18 @@ test("each flanged pump has one separate valve spacer, two spacer flanges and di
   assert.equal(rows.filter(row => row.assemblyRole === spacer.assemblyRole).length, 1);
   assert.equal(spacer.quantity, 3); assert.equal(spacer.price, 4140);
   assert.match(spacer.details, /обратный клапан → вставка → затвор/);
-  assert.equal(role(rows, "primary-pump-insertion").quantity, 3);
+  assert.equal(role(rows, "primary-pump-insertion"), undefined);
   assert.equal(role(rows, "primary-between-valves-flanges-weldFlange").quantity, 6);
-  assert.equal(rows.filter(row => /flange/.test(row.assemblyRole)).reduce((sum, row) => sum + row.quantity, 0), 12);
-  assert.equal(role(rows, "primary-pump-gasket").quantity, 3);
+  assert.equal(rows.filter(row => /flange/.test(row.assemblyRole)).reduce((sum, row) => sum + row.quantity, 0), 6);
+  assert.equal(role(rows, "primary-pump-gasket"), undefined);
   assert.equal(role(rows, "primary-check-gaskets").quantity, 6);
-  assert.equal(role(rows, "primary-valve-gaskets").quantity, 6);
+  assert.equal(role(rows, "primary-valve-gaskets"), undefined);
   assert.equal(role(rows, "primary-check-fasteners-studs").quantity, 24);
   for (const kind of ["nuts", "washers"]) assert.equal(role(rows, `primary-check-fasteners-${kind}`).quantity, 48);
   assert.match(role(rows, "primary-check-fasteners-studs").name, /Шпилька/);
   assert.ok(role(rows, "primary-check-fasteners-studs").price > 0);
-  assert.match(role(rows, "primary-valve-fasteners-bolts").name, /М16х120/);
-  assert.match(role(rows, "primary-check-fasteners-studs").details, /не менее 158 мм/);
+  assert.match(role(rows, "primary-valve-fasteners-bolts").name, /М16х115/);
+  assert.match(role(rows, "primary-check-fasteners-studs").description, /фланца насоса/);
   assert.equal(role(rows, "network-gaskets").quantity, 2);
   assert.ok(rows.every(row => row.section === "discharge" && /^04\./.test(row.position)));
 });
@@ -76,14 +92,15 @@ test("each flanged pump has one separate valve spacer, two spacer flanges and di
 test("insertion table respects DN, PN, material and never invents length or price", () => {
   for (const material of ["st20", "aisi304"]) {
     const row = role(build(fixture({ material })), "primary-between-valves-insertion");
-    assert.equal(row.price, 4140); assert.equal(row.status, "clarify");
-    assert.match(row.description, /Материал вставки в таблице не указан/);
+    assert.equal(row.price, material === "aisi304" ? null : 4140); assert.equal(row.status, "clarify");
+    assert.match(row.description, /Предварительный вариант/);
+    assert.equal(row.technicalStatus,"unverified");
     assert.doesNotMatch(row.details, /L\s*=|\d+ мм/);
   }
   for (const options of [{ pn: 25 }, { pumpDn: 50, valveDn: 50 }, { pumpDn: 300, valveDn: 300 }]) {
     const row = role(build(fixture(options)), "primary-between-valves-insertion");
     assert.equal(row.price, null); assert.equal(row.status, "clarify");
-    assert.match(row.description, /нет исполнения/);
+    assert.match(row.description, /изделие не найдено/);
   }
   const exact = structuredClone(suctionCatalogItems.find(item => item.id === "suction-table:ff-80"));
   exact.fields.push(field("Материал", "AISI 304"));
@@ -102,15 +119,17 @@ test("pump outlet and valve DN select the reducer independently of the inlet", (
   assert.match(role(build(fixture({ pumpDn: 100 })), "primary-error").details, /больше DN арматуры/);
 });
 
-test("threaded branches use union, nipple and five sealed joints, with no FF spacer", () => {
+test("threaded pump uses a union and two nipples with six sealed joints and no FF spacer", () => {
   const p = fixture({ pumpDn: 25, valveDn: 50, connection: "threaded", pumpConnection: "threaded" });
   const rows = build(p), h = dischargeHydraulics(p.entities["station-dn"], p.entities["system-input"], p.entities["station-settings"]);
   assert.equal(h.dn, 25); assert.equal(h.locked, true);
   assert.equal(p.entities["station-collectors"].discharge.configuration.primary.dn, 25);
-  assert.equal(role(rows, "primary-union").equipmentId, "suction-table:union-25");
+  assert.equal(role(rows, "primary-union").equipmentId, "suction-table:union-valtec-25");
+  assert.equal(role(rows, "primary-pump-nipple").equipmentId, "резьбовые-фитинги-001-r0218");
+  assert.equal(role(rows, "primary-pump-nipple").quantity, 3);
   assert.equal(role(rows, "primary-between-valves-nipple").price, 145.18);
   assert.equal(role(rows, "primary-between-valves-nipple").quantity, 3);
-  assert.equal(role(rows, "primary-flax").quantity, 1.5); assert.equal(role(rows, "primary-flax").price, 51.5);
+  assert.equal(role(rows, "primary-flax").quantity, 1.8); assert.equal(role(rows, "primary-flax").price, 51.5);
   assert.ok(!rows.some(row => /insertion|primary.*flange|primary.*gasket/.test(row.assemblyRole)));
   const filled = rowsOf(fill(p));
   assert.match(filled.find(row => row.option === "primaryCheckValve").details, /DN25/);
@@ -120,6 +139,8 @@ test("threaded branches use union, nipple and five sealed joints, with no FF spa
 test("mixed connections orient RF correctly and account for actual threaded joints", () => {
   const threaded = build(fixture({ pumpDn: 40, valveDn: 40, connection: "threaded" }));
   assert.equal(role(threaded, "primary-adapter").equipmentId, "suction-table:rf-40");
+  assert.equal(role(threaded, "primary-pump-nipple"), undefined);
+  assert.equal(role(threaded, "primary-between-valves-nipple").equipmentId, "резьбовые-фитинги-001-r0220");
   assert.equal(role(threaded, "primary-flax").quantity, 1.2);
   assert.equal(role(threaded, "primary-pump-gasket").quantity, 3);
   assert.equal(role(threaded, "primary-between-valves-insertion"), undefined);
@@ -127,25 +148,30 @@ test("mixed connections orient RF correctly and account for actual threaded join
   assert.match(role(flanged, "primary-adapter").details, /резьбой к насосу/);
   assert.equal(role(flanged, "primary-flax").quantity, .3);
   assert.equal(role(flanged, "primary-between-valves-insertion").quantity, 3);
-  assert.equal(role(flanged, "primary-limit-switches").quantity, 3);
+  assert.equal(role(flanged, "primary-limit-switches-bracket").quantity, 3);
+  assert.equal(role(flanged, "primary-limit-switches-switch").quantity, 6);
+  assert.equal(role(flanged, "primary-limit-switches"), undefined);
 });
 
 test("each wafer thickness independently controls its bolt length", () => {
   const withLength = length => ({ ...database, items: database.items.map(item => /межфланц/i.test(item.family) ? { ...item, family: "Клапан межфланцевый тестовый PN16", fields: [...item.fields, field("Строительная длина, мм", length)] } : item) });
-  const short = build(fixture(), withLength(30)), long = build(fixture(), withLength(50));
+  const short = build(fixture({ pumpDn: 65 }), withLength(30)), long = build(fixture({ pumpDn: 65 }), withLength(50));
   const boltLength = rows => { const row=role(rows, "primary-check-fasteners-bolts"); assert.ok(row.equipmentId, JSON.stringify(row)); return Number(row.name.match(/[хx](\d+)/)[1]); };
   assert.ok(boltLength(long) > boltLength(short));
   assert.equal(role(long, "primary-valve-fasteners-bolts").equipmentId, role(short, "primary-valve-fasteners-bolts").equipmentId);
   const row = role(long, "primary-check-fasteners-bolts");
   assert.ok(boltLength(long) >= Number(row.details.match(/не менее ([\d.]+)/)[1]));
   assert.ok(row.price < 1000, "piece price, not kilogram price");
-  assert.equal(role(build(fixture(), withLength(100)), "primary-check-fasteners-bolts").price, null, "unavailable long bolt remains unresolved");
+  assert.equal(role(build(fixture({ pumpDn: 65 }), withLength(100)), "primary-check-fasteners-bolts").price, null, "unavailable long bolt remains unresolved");
 });
 
 test("integral flanged check uses two joints; its flange thickness controls bolts", () => {
   const db = { ...database, items: database.items.filter(item => !/межфланц/i.test(item.family)).map(item => /012F/.test(item.family) ? { ...item, fields: [...item.fields, field("Толщина фланца, мм", 30)] } : item) };
   const rows = build(fixture(), db);
-  assert.equal(role(rows, "primary-check-fasteners-bolts").quantity, 48);
+  assert.equal(role(rows, "primary-check-fasteners-bolts").quantity, 24);
+  assert.equal(role(rows, "primary-check-pump-fasteners-bolts").quantity, 24);
+  assert.ok(role(rows, "primary-check-pump-fasteners-bolts").price > 0);
+  assert.equal(role(rows, "primary-check-pump-fasteners-bolts").equipmentId, role(rows, "primary-check-fasteners-bolts").equipmentId);
   assert.equal(role(rows, "primary-check-gaskets").quantity, 6);
   assert.ok(role(rows, "primary-check-fasteners-bolts").price > 0);
   const unknown = { ...db, items: db.items.map(item => ({ ...item, family: item.family.replace("012F", "XYZ"), fields: item.fields.filter(f => f.headerPath.at(-1) !== "Толщина фланца, мм") })) };
@@ -158,8 +184,9 @@ test("second circuit has independent counts, DN, PN and connection; network part
     let rows = build(secondCircuit(p));
     assert.equal(role(rows, "primary-between-valves-insertion").quantity, 3);
     assert.equal(role(rows, "secondary-between-valves-insertion"), undefined);
+    assert.equal(role(rows, "secondary-pump-nipple").quantity, 2);
     assert.equal(role(rows, "secondary-between-valves-nipple").quantity, 2);
-    assert.equal(role(rows, "secondary-flax").quantity, 1);
+    assert.equal(role(rows, "secondary-flax").quantity, 1.2);
     rows = build(secondCircuit(p, { dn: 100, count: 4, pn: 25, connection: "flanged" }));
     const second = role(rows, "secondary-between-valves-insertion");
     assert.equal(second.quantity, 4); assert.equal(second.price, null); assert.match(second.details, /DN|PN25/);
@@ -172,13 +199,77 @@ test("second circuit has independent counts, DN, PN and connection; network part
 test("missing components keep visible unresolved rows, including washers", () => {
   const db = { items: [], collectorCatalog: { ...catalog, components: [] } };
   const rows = build(fixture(), db);
-  for (const key of ["primary-between-valves-flanges-weldFlange", "primary-check-fasteners-bolts", "primary-check-fasteners-nuts", "primary-check-fasteners-washers", "primary-pump-fasteners-washers", "primary-valve-gaskets"]) {
+  for (const key of ["primary-between-valves-flanges-weldFlange", "primary-check-fasteners-bolts", "primary-check-fasteners-nuts", "primary-check-fasteners-washers", "primary-check-gaskets"]) {
     assert.equal(role(rows, key).status, "clarify"); assert.equal(role(rows, key).price, null);
   }
   const p = fixture({ material: "aisi304" }), stainless = build(p);
   assert.equal(role(stainless, "primary-between-valves-flanges-collar").quantity, 6);
-  assert.equal(role(stainless, "primary-between-valves-flanges-looseFlange").quantity, 6);
-  assert.equal(role(stainless, "primary-valve-fasteners-bolts").price, null);
+  assert.equal(role(stainless, "primary-between-valves-flanges-looseFlange"), undefined);
+  assert.equal(role(stainless, "primary-between-valves-insertion").price, null);
+  assert.match(role(stainless, "primary-between-valves-insertion").technicalNotes.join(" "), /Свободные фланцы должны входить/);
+  assert.ok(role(stainless, "primary-valve-fasteners-bolts").price > 0);
+  const missingThickness = structuredClone(database);
+  for (const item of missingThickness.items) if (item.id.startsWith("фланцы-006-")) {
+    item.fields = item.fields.filter(value => value.column !== "CALC_FLANGE_B");
+  }
+  assert.equal(role(build(p, missingThickness), "primary-valve-fasteners-bolts").price, null, "missing stainless thickness must not fall back to steel");
+});
+
+test("adopted DN65 PN16 loose flange uses eight fasteners per valve on discharge", () => {
+  const rows = build(fixture({ pumpDn: 65, valveDn: 65, material: "aisi304" }));
+  assert.equal(role(rows, "primary-valve-fasteners-bolts").quantity, 24);
+  assert.equal(role(rows, "primary-valve-fasteners-nuts").quantity, 24);
+});
+
+test("full workspace automatically fills ECH projects despite false or absent legacy flags", () => {
+  for (const flag of [false, undefined]) {
+    let p = createProject();
+    Object.assign(p.entities["system-input"], { selectedPumpId: "nu-b1879e1e3807d907", selectedPumpModel: "Aquastrong ECH10-30", flowRate: 21, head: 18, staticHead: 0, workingPumpCount: 2, reservePumpCount: 1, calculated: true });
+    Object.assign(p.entities["station-dn"], { suctionCollectorDn: 65, dischargeCollectorDn: 65 });
+    p.entities["station-spec"].autoHydraulics = flag;
+    const manual = { position: "99.01", name: "Ручная позиция", details: "Сохранить", quantity: 2, unit: "шт.", price: 123, description: "Добавлено вручную", section: "electrical", status: "selected" };
+    p.entities["station-spec"].items.push(manual);
+    p.entities["station-model"].view = { rotation: 27, zoom: 1.2 };
+    p = parseProjectConfig(JSON.parse(JSON.stringify(p)));
+    const model = structuredClone(p.entities["station-model"]);
+    // Initial opening/catalogue load: no force and no previously generated rows.
+    p = refresh(synchronizeCollectors(p), database);
+    assert.equal(p.entities["station-spec"].autoHydraulics, true);
+    for (const [option, dn] of [["primarySuctionValve", 40], ["primaryDischargeValve", 32], ["primaryCheckValve", 32]]) {
+      const row = rowsOf(p).find(row => row.option === option);
+      assert.equal(row.quantity, 3); assert.ok(row.equipmentId); assert.ok(row.price > 0);
+      assert.match(row.details, new RegExp(`DN${dn}.*[Рр]езьбовое`));
+      assert.doesNotMatch(row.name, /Затвор дисковый/);
+    }
+    assert.ok(rowsOf(p).some(row => row.generatedBy === "suction-line"));
+    assert.ok(rowsOf(p).some(row => row.generatedBy === "discharge-line"));
+    assert.deepEqual(rowsOf(p).find(row => row.position === manual.position), { ...manual, option: undefined });
+    assert.deepEqual(p.entities["station-model"], model);
+    assert.equal(refresh(p, database), p);
+    const reopened = refresh(parseProjectConfig(JSON.parse(JSON.stringify(p))), database);
+    assert.deepEqual(rowsOf(reopened), rowsOf(p));
+    p.entities["system-input"].workingPumpCount = 3;
+    const changed = refresh(synchronizeCollectors(p), database);
+    for (const option of ["primarySuctionValve", "primaryDischargeValve", "primaryCheckValve"]) assert.equal(rowsOf(changed).find(row => row.option === option).quantity, 4);
+  }
+});
+
+test("full autofill waits for the working point and catalogue, then clears invalidated generated lines", () => {
+  const draft = createProject();
+  const untouched = refresh(synchronizeCollectors(draft), database);
+  assert.ok(!rowsOf(untouched).some(row => ["suction-line", "discharge-line"].includes(row.generatedBy)));
+  let p = fixture();
+  p.entities["station-spec"].autoHydraulics = false;
+  const waiting = refresh(p);
+  assert.ok(!rowsOf(waiting).some(row => ["suction-line", "discharge-line"].includes(row.generatedBy)));
+  const ready = refresh(waiting, database);
+  assert.ok(rowsOf(ready).some(row => ["suction-line", "discharge-line"].includes(row.generatedBy)));
+  const manual = { position: "99.01", name: "Ручная позиция", details: "", quantity: 1, unit: "шт.", price: 10, description: "", section: "electrical", status: "selected" };
+  ready.entities["station-spec"].items.push(manual);
+  ready.entities["system-input"].calculated = false;
+  p = refresh(synchronizeCollectors(ready), database);
+  assert.ok(!rowsOf(p).some(row => ["suction-line", "discharge-line"].includes(row.generatedBy)));
+  assert.deepEqual(rowsOf(p).find(row => row.position === manual.position), { ...manual, option: undefined });
 });
 
 test("repeat fill, parameter changes and reload replace generated rows and preserve manual positions", () => {
@@ -303,6 +394,13 @@ test("gasket fallback warnings and prices survive discharge pressure changes and
   assert.equal(gasket.status, "confirmation"); assert.equal(gasket.price, 350);
   assert.match(gasket.description, /PN прокладки ниже требуемого/);
   assert.equal(gasket.dischargePressureCheck.checks[0].status, "within-limit");
+  p.entities["station-settings"].pressureChecksEnabled = false;
+  p = fill(p);
+  gasket = role(rowsOf(p), "primary-check-gaskets");
+  assert.equal(gasket.status, "confirmation"); assert.equal(gasket.price, 350);
+  assert.match(gasket.description, /присоединительные размеры/);
+  assert.doesNotMatch(gasket.description, /давлени|PN/i);
+  assert.equal(gasket.dischargePressureCheck, undefined);
 });
 
 test("automatic filling survives a temporarily uncalculated primary circuit and reload", () => {
@@ -319,7 +417,7 @@ test("automatic filling survives a temporarily uncalculated primary circuit and 
 test("collector status follows saved catalogue price and clears only the pressure warning", () => {
   let p = fill(fixture());
   const state = p.entities["station-collectors"].discharge;
-  state.database = { id: "saved-discharge", code: state.code, price: 12345 };
+  state.database = { id: "saved-discharge", code: state.code, price: 12345, calculation: calculateCollector(state.configuration, catalog) };
   state.databaseStatus = "found";
   p.entities["station-settings"].inletHead = 200;
   p = fill(p);
@@ -333,4 +431,45 @@ test("collector status follows saved catalogue price and clears only the pressur
   assert.equal(row.price, 12345);
   assert.equal(row.dischargePressureCheck.baseStatus, "selected");
   assert.equal(row.dischargePressureCheck.checks[0].status, "within-limit");
+  assert.ok(row.dischargePressureCheck.checks.every(check => !/окраска/i.test(check.message)));
+});
+
+test("discharge transitions are concentric, while suction retains eccentric transitions", async () => {
+  const { buildSuctionSpec } = await loadTs(new URL("../app/suction-spec.ts", import.meta.url));
+  for (const vibration of [false, true]) {
+    const p = fixture({ pumpDn: 50, valveDn: 80 });
+    p.entities["station-settings"].vibrationCompensators = vibration;
+    p.entities["station-dn"].pumpSuctionPort.dn = 65;
+    for (const [section, generated] of [["discharge", build(p)], ["suction", buildSuctionSpec(p, database, catalog)]]) {
+      const reducer = generated.find(r => r.assemblyRole === "primary-reducer");
+      assert.ok(reducer, section);
+      assert.equal(reducer.insertionRequirement.geometry, section === "discharge" ? "concentric" : "eccentric");
+      if (reducer.equipmentId) {
+        const item = database.items.find(i => i.id === reducer.equipmentId);
+        assert.match(item.family, section === "discharge" ? /концентр/i : /эксцентр/i);
+      }
+    }
+  }
+});
+
+test("first fire discharge inserts require sensors only with at least two working pumps; reserve and jockey never trigger the rule", () => {
+  for (const type of ["utility", "fire", "combined"]) for (const working of [1, 2, 3]) for (const reserve of [0, 1, 2]) for (const vibration of [false, true]) for (const pumpDn of [50, 80]) {
+    const count = working + reserve;
+    let p = fixture({ type, count, pumpDn, valveDn: 80 });
+    Object.assign(p.entities["system-input"], { workingPumpCount: working, reservePumpCount: reserve });
+    p.entities["station-settings"].vibrationCompensators = vibration;
+    p.entities["station-settings"].jockeyPump = type === "fire";
+    if (type !== "utility") p = secondCircuit(p, { dn: 80, connection: "flanged", count: 2 });
+    const generated = build(p);
+    const primary = generated.filter(r => r.insertionRequirement && r.assemblyRole.startsWith("primary-"));
+    const required = type !== "utility" && working >= 2;
+    const expectedRole = pumpDn !== 80 ? "primary-reducer" : vibration ? "primary-after-vibration-insertion" : "primary-between-valves-insertion";
+    assert.equal(primary[0].assemblyRole, expectedRole);
+    assert.equal(primary[0].insertionRequirement.withSensorNipple, required, JSON.stringify({ type, working, reserve, vibration, pumpDn }));
+    assert.equal(primary[0].quantity, count);
+    assert.ok(primary.slice(1).every(r => r.insertionRequirement.withSensorNipple === false));
+    const secondary = generated.filter(r => r.insertionRequirement && r.assemblyRole.startsWith("secondary-"));
+    if (type !== "utility") assert.ok(secondary.length);
+    assert.ok(secondary.every(r => r.insertionRequirement.withSensorNipple === false));
+  }
 });

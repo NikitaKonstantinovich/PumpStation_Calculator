@@ -2,34 +2,43 @@
 
 import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from "react";
 import * as THREE from "three";
+import { stampedPart } from "./stamped-flanges";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { TransformControls } from "three/addons/controls/TransformControls.js";
 import { STLLoader } from "three/addons/loaders/STLLoader.js";
-import { componentObject, disposeObject, material, vector } from "./geometry";
-import { assemblyBounds, distance, type Assembly, type CameraView, type Component, type Vec3, type EditorState } from "./model";
+import { drilledFrameGeometry } from "./frame-renderer";
+import { componentObject, componentRenderState, disposeObject, material, sameComponentGeometry, setMaterialOpacity, updateComponentAppearance, vector, type ComponentRenderState } from "./geometry";
+import { assemblyBounds, distance, parseCameraView, type Assembly, type CameraView, type Component, type Vec3, type EditorState } from "./model";
+import { noteCameraMotion } from "../project-autosave";
 import { snapGeometry, workingPlane, excludedTargets, onFace, projectPlane, type SnapGeometry, type SnapLine, type SnapFace } from "./snap-geometry";
 import { candidates, rankedCandidates, rayPlane, closestToRay, type Candidate, type SnapPick, type SnapQuery } from "./snap-engine";
 import type { SnapSettings } from "./snap-settings";
+import { InsertionRenderCache } from "./insertion-renderer";
+import { CollectorRenderCache } from "./collector-renderer";
 
-export type ViewportHandle = { fit: () => void; standard: (view: "front" | "top" | "right" | "iso") => void; prepareMeshes: (urls: string[]) => Promise<void> };
+export type ViewportHandle = { fit: () => void; standard: (view: "front" | "top" | "right" | "iso") => void; prepareMeshes: (urls: string[]) => Promise<void>; cameraView: () => CameraView | undefined };
 export type EditorMode = "translate" | "rotate" | "measure" | "move" | "reference1" | "between1" | "between2" | "addReference" | "parallelEdge" | "planeFace";
 export type ViewportProps = {
-  assembly: Assembly; selectedId: string | null; grid: boolean; snapStep: number | null;
-  mode: EditorMode; camera?: CameraView;
+  assembly: Assembly; selectedId: string | null; selectedPieceId?: string; grid: boolean; snapStep: number | null;
+  mode: EditorMode; camera?: CameraView; cameraStorageKey?: string;
   measurement: Vec3[];
   snaps: SnapSettings; referencePoints: EditorState["referencePoints"];
   reference?: Vec3; secondReference?: Vec3; parallelLine?: SnapLine;
   referenceApproximate?: boolean; secondReferenceApproximate?: boolean;
   movingId?: string; moveHasSource?: boolean; preview?: boolean;
-  onSelect: (id: string | null) => void;
+  onSelect: (id: string | null, pieceId?: string) => void;
   onTransform: (id: string, position: Vec3, rotation: Vec3) => void;
   onPick: (point: SnapPick) => void; onCancel: () => void;
   onLine: (line: SnapLine) => void; onPlane: (face: SnapFace) => void;
-  onCamera: (view: CameraView) => void;
   onAssetError: (message: string) => void;
 };
 
+const visibleHierarchy = (o: THREE.Object3D): boolean => o.visible && (!o.parent || visibleHierarchy(o.parent));
+const CAMERA_SAVE_DELAY_MS = 150;
+
 class Scene {
+  insertionCache = new InsertionRenderCache();
+  collectorCache = new CollectorRenderCache();
   renderer: THREE.WebGLRenderer;
   scene = new THREE.Scene();
   camera = new THREE.PerspectiveCamera(40, 1, 1, 1e7);
@@ -54,17 +63,22 @@ class Scene {
   grid = new THREE.GridHelper(12000, 120, 0x7694a4, 0xb2c2cb);
   axes = new THREE.AxesHelper(250);
   objects = new Map<string, THREE.Group>();
+  private rendered = new WeakMap<THREE.Group, ComponentRenderState>();
+  private assetRetries = new WeakMap<THREE.Group, Array<() => void>>();
   cache = new Map<string, Promise<THREE.BufferGeometry>>();
   observer: ResizeObserver;
   themeObserver: MutationObserver;
   options?: ViewportProps;
   assembly?: Assembly;
-  revision = 0;
   disposed = false;
   dragging = false;
   pointerStart?: { x: number; y: number };
   hasCamera = false;
-  frame = 0;
+  frame?: number;
+  snapDirty = false;
+  orbitActive = false;
+  cameraDirty = false;
+  cameraSaveTimer?: number;
   cleanup: Array<() => void> = [];
 
   constructor(host: HTMLDivElement) {
@@ -83,7 +97,7 @@ class Scene {
     this.orbit = new OrbitControls(this.camera, canvas);
     this.orbit.enableDamping = false; this.orbit.minDistance = 10; this.orbit.maxDistance = 1e6;
     this.transform = new TransformControls(this.camera, canvas);
-    this.transform.setSpace("world"); this.transform.setSize(.8);
+    this.transform.setSpace("world");
     this.scene.add(this.root, this.measurements, this.snapGuides, this.snapSelection, this.transform.getHelper(), this.selection, this.grid, this.axes);
     this.snapSelection.visible = false;
     this.selection.visible = false;
@@ -91,42 +105,72 @@ class Scene {
     this.scene.add(new THREE.HemisphereLight(0xffffff, 0x536a7a, 2.5));
     const light = new THREE.DirectionalLight(0xffffff, 3); light.position.set(1000, -2000, 4000); this.scene.add(light);
     const fill = new THREE.DirectionalLight(0xb5d5ef, 1.5); fill.position.set(-1500, 2000, 1000); this.scene.add(fill);
-    this.transform.addEventListener("dragging-changed", event => { this.dragging = Boolean(event.value); this.orbit.enabled = !event.value; });
+    this.transform.addEventListener("dragging-changed", event => { this.dragging = Boolean(event.value); this.orbit.enabled = !event.value; this.requestSnap(); });
+    this.transform.addEventListener("change", () => this.requestRender());
     this.transform.addEventListener("objectChange", () => this.highlight());
     this.transform.addEventListener("mouseUp", () => {
       const object = this.transform.object;
       if (!object) return;
       this.options?.onTransform(object.userData.componentId, object.position.toArray() as Vec3, [object.rotation.x, object.rotation.y, object.rotation.z].map(THREE.MathUtils.radToDeg) as Vec3);
     });
-    this.orbit.addEventListener("end", () => { if (!this.dragging) this.saveCamera(); });
-    this.orbit.addEventListener("change", () => this.refreshSnap());
+    this.orbit.addEventListener("start", () => { this.orbitActive = true; });
+    this.orbit.addEventListener("change", () => {
+      if (this.orbitActive) {
+        this.cameraDirty = true;
+        noteCameraMotion();
+      }
+      if (this.activePicking()) this.requestSnap(); else this.requestRender();
+    });
+    this.orbit.addEventListener("end", () => {
+      this.orbitActive = false;
+      // OrbitControls ends each wheel event, not the whole scroll gesture.
+      if (this.cameraDirty && !this.dragging) {
+        window.clearTimeout(this.cameraSaveTimer);
+        this.cameraSaveTimer = window.setTimeout(() => {
+          if (!this.orbitActive) this.saveCamera();
+        }, CAMERA_SAVE_DELAY_MS);
+      }
+    });
     const down = (event: PointerEvent) => { this.pointerStart = { x: event.clientX, y: event.clientY }; canvas.focus({ preventScroll: true }); };
     const up = (event: PointerEvent) => {
       const start = this.pointerStart; this.pointerStart = undefined;
       if (!start || event.button !== 0 || this.dragging || Math.hypot(start.x - event.clientX, start.y - event.clientY) > 4 || this.transform.axis) return;
       if (this.activePicking()) {
         // Preserve Tab's choice if the pointer has not moved since cycling.
-        if (!this.pointer || Math.hypot(this.pointer.x - event.clientX, this.pointer.y - event.clientY) > .5) { this.pointer = { x: event.clientX, y: event.clientY }; this.refreshSnap(); }
+        if (!this.pointer || Math.hypot(this.pointer.x - event.clientX, this.pointer.y - event.clientY) > .5) {
+          this.pointer = { x: event.clientX, y: event.clientY }; this.snapDirty = true;
+        }
+        if (this.snapDirty) { this.refreshSnap(); this.requestRender(); }
         if (this.options?.mode === "planeFace") { if (this.hoveredFace) this.options.onPlane(this.hoveredFace); }
         else if (this.options?.mode === "parallelEdge") { if (this.hoveredLine) this.options.onLine(this.hoveredLine); }
         else if (this.chosen || this.fallback) this.options?.onPick(this.chosen ?? this.fallback!);
         return;
       }
       const rect = canvas.getBoundingClientRect(), ray = new THREE.Raycaster();
+      this.camera.updateMatrixWorld(); this.root.updateMatrixWorld();
       ray.setFromCamera(new THREE.Vector2((event.clientX - rect.left) / rect.width * 2 - 1, -(event.clientY - rect.top) / rect.height * 2 + 1), this.camera);
-      const hit = ray.intersectObjects([...this.objects.values()].filter(o => o.visible), true).find(h => h.object instanceof THREE.Mesh);
+      const hit = ray.intersectObjects([...this.objects.values()].filter(o => o.visible), true).find(h => h.object instanceof THREE.Mesh && visibleHierarchy(h.object));
       let object: THREE.Object3D | null = hit?.object ?? null;
-      while (object && !object.userData.componentId) object = object.parent;
-      this.options?.onSelect(object?.userData.componentId ?? null);
+      let pieceId: string | undefined;
+      while (object && !object.userData.componentId) { pieceId ??= object.userData.pieceId; object = object.parent; }
+      this.options?.onSelect(object?.userData.componentId ?? null, pieceId);
     };
-    const move = (event: PointerEvent) => { this.pointer = { x: event.clientX, y: event.clientY }; if (!event.buttons) this.refreshSnap(); };
-    const leave = () => { this.pointer = undefined; this.clearSnap(); };
+    const move = (event: PointerEvent) => { this.pointer = { x: event.clientX, y: event.clientY }; if (!event.buttons && this.activePicking()) this.requestSnap(); };
+    const leave = () => {
+      this.pointer = undefined;
+      if (this.activePicking()) this.requestSnap();
+      // Keep the last view if the user leaves the canvas to switch tools.
+      if (this.cameraDirty && !this.orbitActive && !this.dragging) this.saveCamera();
+    };
     const key = (event: KeyboardEvent) => {
-      if (event.key === "Escape") { event.preventDefault(); this.options?.onCancel(); this.clearSnap(); }
-      if (event.key === "Tab" && this.activePicking() && this.choices.length) {
+      if (event.key === "Escape") { event.preventDefault(); this.options?.onCancel(); this.clearSnap(); this.requestRender(); }
+      if (event.key === "Tab" && this.activePicking()) {
+        if (this.snapDirty) this.refreshSnap();
+        if (!this.choices.length) return;
         event.preventDefault(); event.stopPropagation();
         const index = this.choices.findIndex(c => c.id === this.chosen?.id);
         this.chosen = this.choices[(index + (event.shiftKey ? -1 : 1) + this.choices.length) % this.choices.length]; this.showSnap();
+        this.requestRender();
       }
     };
     canvas.addEventListener("pointerdown", down); canvas.addEventListener("pointerup", up);
@@ -138,34 +182,52 @@ class Scene {
       const w = host.clientWidth || width, h = host.clientHeight || height;
       if (w < 1 || h < 1) return;
       this.renderer.setSize(w, h, false); this.camera.aspect = w / h; this.camera.updateProjectionMatrix();
-      this.refreshSnap();
+      // Keep handles about 80 screen pixels long, also under workspace CSS zoom.
+      const handlePixels = Math.min(80, Math.min(width, height) * .2);
+      this.transform.setSize(handlePixels * 4 / (.95 * height));
+      this.requestSnap();
     });
     this.observer.observe(host);
     const theme = () => {
       const raw = getComputedStyle(host).getPropertyValue("--theme-surface-subtle").trim();
       this.scene.background = new THREE.Color(raw || "#eff4f7");
       for (const mat of Array.isArray(this.grid.material) ? this.grid.material : [this.grid.material]) { mat.transparent = true; mat.opacity = document.documentElement.dataset.theme === "dark" ? .23 : .55; mat.depthWrite = false; }
+      this.requestRender();
     };
     this.themeObserver = new MutationObserver(theme);
     this.themeObserver.observe(document.documentElement, { attributes: true }); theme();
-    const draw = () => { if (this.disposed) return; this.renderer.render(this.scene, this.camera); this.frame = requestAnimationFrame(draw); };
-    draw();
+    const restoreContext = () => this.requestRender();
+    canvas.addEventListener("webglcontextrestored", restoreContext);
+    this.cleanup.push(() => canvas.removeEventListener("webglcontextrestored", restoreContext));
   }
-  activePicking() { return !!this.options && !["translate", "rotate"].includes(this.options.mode) && !this.options.preview; }
+  requestRender() {
+    if (this.disposed || this.frame !== undefined) return;
+    this.frame = requestAnimationFrame(() => {
+      this.frame = undefined;
+      if (this.snapDirty) this.refreshSnap();
+      this.renderer.render(this.scene, this.camera);
+    });
+  }
+  requestSnap() { this.snapDirty = true; this.requestRender(); }
+  activePicking() { const options = this.options; return !!options && options.mode !== "translate" && options.mode !== "rotate" && !options.preview; }
   clearSnap() {
+    this.snapDirty = false;
     this.chosen = undefined; this.fallback = undefined; this.choices = []; this.hoveredLine = undefined; this.hoveredFace = undefined;
     this.snapLabel.hidden = true; this.snapSelection.visible = false; disposeObject(this.snapGuides); this.snapGuides.clear();
   }
   refreshSnap() {
+    this.snapDirty = false;
     const options = this.options, pointer = this.pointer;
     if (!options || !pointer || !this.activePicking() || this.dragging) { this.clearSnap(); return; }
     const rect = this.renderer.domElement.getBoundingClientRect(), ray = new THREE.Raycaster();
+    if (!rect.width || !rect.height) { this.clearSnap(); return; }
+    this.camera.updateMatrixWorld();
     ray.setFromCamera(new THREE.Vector2((pointer.x - rect.left) / rect.width * 2 - 1, -(pointer.y - rect.top) / rect.height * 2 + 1), this.camera);
     const exclude = options.mode === "move" && options.moveHasSource ? excludedTargets(options.assembly, options.movingId) : new Set<string>();
     const onlyComponent = options.mode === "move" && !options.moveHasSource ? options.movingId : undefined;
     const targets = [...this.objects.entries()].filter(([id, o]) => o.visible && !exclude.has(id) && (!onlyComponent || id === onlyComponent)).map(([, o]) => o);
     this.scene.updateMatrixWorld(true);
-    const hit = ray.intersectObjects(targets, true).find(h => h.object instanceof THREE.Mesh);
+    const hit = ray.intersectObjects(targets, true).find(h => h.object instanceof THREE.Mesh && visibleHierarchy(h.object));
     let object: THREE.Object3D | null = hit?.object ?? null;
     while (object && !object.userData.componentId) object = object.parent;
     const surface = hit && object ? { point: hit.point.toArray() as Vec3, componentId: object.userData.componentId as string, vertices: hit.face && hit.object instanceof THREE.Mesh ? [hit.face.a, hit.face.b, hit.face.c].map(i => new THREE.Vector3().fromBufferAttribute(hit.object instanceof THREE.Mesh ? hit.object.geometry.attributes.position : null!, i).applyMatrix4(hit.object.matrixWorld).toArray() as Vec3) : [] } : undefined;
@@ -226,8 +288,25 @@ class Scene {
       const line = new THREE.LineSegments(new THREE.BufferGeometry().setFromPoints(this.chosen.guide.map(vector)), new THREE.LineBasicMaterial({ color: 0x14a68f, depthTest: false })); line.renderOrder = 110; this.snapGuides.add(line);
     }
   }
+  cameraView(): CameraView {
+    return { position: this.camera.position.toArray() as Vec3, target: this.orbit.target.toArray() as Vec3 };
+  }
   saveCamera() {
-    this.options?.onCamera({ position: this.camera.position.toArray() as Vec3, target: this.orbit.target.toArray() as Vec3 });
+    window.clearTimeout(this.cameraSaveTimer); this.cameraSaveTimer = undefined; this.cameraDirty = false;
+    const key = this.options?.cameraStorageKey;
+    if (key) {
+      try { window.localStorage.setItem(key, JSON.stringify(this.cameraView())); }
+      catch { /* The current camera still works with storage disabled. */ }
+    }
+  }
+  initialCamera(options: ViewportProps): CameraView | undefined {
+    if (options.cameraStorageKey) {
+      try {
+        const local = parseCameraView(JSON.parse(window.localStorage.getItem(options.cameraStorageKey) ?? "null"));
+        if (local) return local;
+      } catch { /* Use the camera from an imported or previously saved project. */ }
+    }
+    return options.camera;
   }
   fit(direction = new THREE.Vector3(1.3, -1.7, 1.2)) {
     const bounds = this.assembly && assemblyBounds(this.assembly, true);
@@ -237,37 +316,77 @@ class Scene {
     const fov = THREE.MathUtils.degToRad(this.camera.fov), extent = size / (2 * Math.tan(fov / 2)) * 1.5 / Math.min(1, this.camera.aspect);
     this.orbit.target.copy(center); this.camera.position.copy(center).add(direction.normalize().multiplyScalar(extent));
     this.camera.near = Math.max(.1, size / 10000); this.camera.far = Math.max(1e6, extent * 20);
-    this.camera.updateProjectionMatrix(); this.orbit.update(); this.hasCamera = true; this.saveCamera();
+    this.camera.updateProjectionMatrix(); this.orbit.update(); this.hasCamera = true; this.requestSnap(); this.saveCamera();
   }
   standard(view: "front" | "top" | "right" | "iso") {
     this.fit({ front: new THREE.Vector3(0, -1, 0), top: new THREE.Vector3(0, -.00001, 1), right: new THREE.Vector3(1, 0, 0), iso: new THREE.Vector3(1.3, -1.7, 1.2) }[view]);
   }
   highlight() {
-    const object = this.options?.selectedId ? this.objects.get(this.options.selectedId) : undefined;
-    this.selection.visible = Boolean(object?.visible);
-    if (object?.visible) this.selection.box.setFromObject(object);
+    let object: THREE.Object3D | undefined = this.options?.selectedId ? this.objects.get(this.options.selectedId) : undefined;
+    if (object && this.options?.selectedPieceId) object.traverse(o => { if (o.userData.pieceId === this.options?.selectedPieceId) object = o; });
+    this.selection.visible = !!object && visibleHierarchy(object);
+    if (object && this.selection.visible) this.selection.box.setFromObject(object);
+  }
+  removeComponent(id: string, object: THREE.Group) {
+    if (this.transform.object === object) this.transform.detach();
+    this.objects.delete(id);
+    this.root.remove(object);
+    disposeObject(object);
+  }
+  updateComponents(assembly: Assembly) {
+    const removed = new Set(this.objects.keys());
+    for (const c of assembly.components) {
+      removed.delete(c.id);
+      const next = componentRenderState(assembly, c);
+      const object = this.objects.get(c.id);
+      const previous = object && this.rendered.get(object);
+      if (object && previous && sameComponentGeometry(previous, next)) {
+        // While the gizmo is dragging, model props still contain the last
+        // committed pose. Only apply a pose that actually changed in the model.
+        if (c.position.some((v, i) => v !== previous.component.position[i])) object.position.fromArray(c.position);
+        if (c.rotation.some((v, i) => v !== previous.component.rotation[i])) object.rotation.set(...c.rotation.map(THREE.MathUtils.degToRad) as Vec3);
+        updateComponentAppearance(object, c, previous.component);
+        this.rendered.set(object, next);
+        const retries = this.assetRetries.get(object);
+        if (retries) {
+          this.assetRetries.delete(object);
+          for (const retry of retries) retry();
+        }
+        continue;
+      }
+      if (object) this.removeComponent(c.id, object);
+      const group = componentObject(assembly, c, this.insertionCache, this.collectorCache, next.route);
+      this.objects.set(c.id, group);
+      this.rendered.set(group, next);
+      this.root.add(group);
+      if (c.meshUrl) this.loadMesh(c, group);
+      if (c.collector || c.insertion || c.shape?.kind === "mesh" || c.shape?.stampedHash) this.loadInsertionMeshes(c, group);
+    }
+    for (const id of removed) this.removeComponent(id, this.objects.get(id)!);
   }
   update(options: ViewportProps) {
     const geometryChanged = options.assembly !== this.assembly || options.referencePoints !== this.refs;
     this.options = options;
     if (geometryChanged) { this.geometry = snapGeometry(options.assembly, options.referencePoints); this.refs = options.referencePoints; }
-    if (!this.hasCamera && options.camera) {
-      this.camera.position.copy(vector(options.camera.position)); this.orbit.target.copy(vector(options.camera.target)); this.orbit.update(); this.hasCamera = true;
+    if (!this.hasCamera) {
+      const camera = this.initialCamera(options);
+      if (camera) {
+        this.camera.position.fromArray(camera.position);
+        this.orbit.target.fromArray(camera.target);
+        this.orbit.update();
+        this.hasCamera = true;
+      }
     }
     if (options.assembly !== this.assembly) {
-      this.transform.detach(); this.assembly = options.assembly; this.revision++;
-      for (const object of this.objects.values()) { this.root.remove(object); disposeObject(object); }
-      this.objects.clear();
-      for (const c of options.assembly.components) {
-        const object = componentObject(options.assembly, c); this.objects.set(c.id, object); this.root.add(object);
-        if (c.meshUrl) this.loadMesh(c, object, this.revision);
-      }
+      this.assembly = options.assembly;
+      this.updateComponents(options.assembly);
       if (!this.hasCamera) this.fit();
     }
     const selected = options.assembly.components.find(c => c.id === options.selectedId), object = selected && this.objects.get(selected.id);
-    if (object && !selected!.locked && !selected!.hidden && !selected!.routing?.automatic && (options.mode === "translate" || options.mode === "rotate")) {
-      this.transform.attach(object); this.transform.setMode(options.mode);
-    } else this.transform.detach();
+    if (selected && object && !selected.locked && !selected.hidden && !selected.routing?.automatic && (options.mode === "translate" || options.mode === "rotate")) {
+      if (this.transform.object !== object) this.transform.attach(object);
+      this.transform.setMode(options.mode);
+    } else if (this.transform.object) this.transform.detach();
     this.transform.setTranslationSnap(options.snapStep);
     this.transform.setRotationSnap(options.snapStep ? Math.PI / 36 : null);
     this.grid.visible = options.grid;
@@ -279,7 +398,7 @@ class Scene {
     if (options.measurement.length === 2) {
       const line = new THREE.LineSegments(new THREE.BufferGeometry().setFromPoints(options.measurement.map(vector)), new THREE.LineBasicMaterial({ color: 0xe97922, depthTest: false })); line.renderOrder = 100; this.measurements.add(line);
     }
-    this.refreshSnap();
+    this.requestSnap();
   }
   mesh(url: string) {
     if (!this.cache.has(url)) this.cache.set(url, fetch(url).then(response => {
@@ -288,17 +407,67 @@ class Scene {
     }).then(buffer => { const geometry = new STLLoader().parse(buffer); geometry.computeVertexNormals(); return geometry; }).catch(error => { this.cache.delete(url); throw error; }));
     return this.cache.get(url)!;
   }
-  loadMesh(c: Component, object: THREE.Group, revision: number) {
-    void this.mesh(c.meshUrl!).then(geometry => {
-      if (this.disposed || this.revision !== revision) return;
+  private loadAsset(id: string, object: THREE.Group, url: string,
+    install: (geometry: THREE.BufferGeometry, current: Component) => void,
+    errorMessage: (current: Component) => string) {
+    const currentComponent = () => !this.disposed && this.objects.get(id) === object ? this.rendered.get(object)?.component : undefined;
+    const load = () => {
+      void this.mesh(url).then(geometry => {
+        const current = currentComponent();
+        if (current) install(geometry, current);
+      }).catch(() => {
+        const current = currentComponent();
+        if (!current) return;
+        // Try again on the next assembly update, even when the object is retained.
+        const retries = this.assetRetries.get(object);
+        if (retries) retries.push(load);
+        else this.assetRetries.set(object, [load]);
+        this.options?.onAssetError(errorMessage(current));
+      });
+    };
+    load();
+  }
+  loadMesh(c: Component, object: THREE.Group) {
+    this.loadAsset(c.id, object, c.meshUrl!, (geometry, current) => {
       for (const child of [...object.children]) { object.remove(child); disposeObject(child); }
-      object.add(new THREE.Mesh(geometry.clone(), material(c))); this.highlight();
-    }).catch(() => { if (!this.disposed && this.revision === revision) this.options?.onAssetError(`${c.name}: не удалось загрузить CAD-копию; показаны габариты.`); });
+      const finish = material({ ...current, opacity: 1 });
+      setMaterialOpacity(finish, current.opacity);
+      object.add(new THREE.Mesh(current.frameDrilling ? drilledFrameGeometry(geometry,current.frameDrilling) : geometry.clone(), finish)); this.highlight(); this.requestSnap();
+    }, current => `${current.name}: не удалось загрузить CAD-копию; показаны габариты.`);
+  }
+  loadInsertionMeshes(c: Component, object: THREE.Group) {
+    const pieces = c.collector?.template.pieces ?? c.insertion?.template.geometry.pieces ?? (c.shape ? [{ id: "line-body", name: c.name, shape: c.shape }] : []);
+    for (const piece of pieces) {
+      const stamped=stampedPart(piece.shape);
+      const url=stamped ? `/model-assets/stamped-${stamped.sourceHash}.stl` : piece.shape.kind==="mesh" ? piece.shape.meshUrl : undefined;
+      if(!url) continue;
+      this.loadAsset(c.id, object, url, (geometry, current) => {
+        let target: THREE.Object3D | undefined;
+        object.traverse(o => { if (o.userData.pieceId === piece.id) target = o; });
+        if (!target) return;
+        for (const child of [...target.children]) { target.remove(child); disposeObject(child); }
+        const finish = material({ ...current, opacity: 1 });
+        const outline = current.line?.fidelity === "outline" && piece.id === "line-body";
+        setMaterialOpacity(finish, current.opacity * (current.collector?.pieceOpacities?.[piece.id] ?? 1) * (outline ? .55 : 1));
+        if (outline) finish.color.setHex(0xd1a24c);
+        // The stainless backing ring is a separate part, including inside a coloured fitting.
+        if(stamped){ finish.color.setHex(0xb7c2c9); finish.metalness=.55; finish.roughness=.38; }
+        const mesh = new THREE.Mesh(geometry.clone(), finish);
+        if(!stamped){mesh.position.fromArray(piece.shape.modelPosition ?? [0, 0, 0]); mesh.rotation.set(...(piece.shape.modelRotation ?? [0, 0, 0]).map(a => a * Math.PI / 180) as Vec3);}
+        target.add(mesh); this.highlight(); this.requestSnap();
+      }, () => `${piece.name}: CAD-копия недоступна; показан условный габарит, геометрия не полная.`);
+    }
   }
   dispose() {
-    this.disposed = true; cancelAnimationFrame(this.frame); this.observer.disconnect(); this.themeObserver.disconnect();
+    if (this.cameraDirty) this.saveCamera();
+    this.disposed = true;
+    if (this.frame !== undefined) cancelAnimationFrame(this.frame);
+    window.clearTimeout(this.cameraSaveTimer);
+    this.observer.disconnect(); this.themeObserver.disconnect();
     this.cleanup.forEach(fn => fn()); this.transform.dispose(); this.orbit.dispose();
     disposeObject(this.scene);
+    this.insertionCache.dispose();
+    this.collectorCache.dispose();
     for (const geometry of this.cache.values()) void geometry.then(g => g.dispose()).catch(() => {});
     this.renderer.dispose(); this.renderer.domElement.remove(); this.snapLabel.remove();
   }
@@ -307,7 +476,7 @@ class Scene {
 const ModelViewport = forwardRef<ViewportHandle, ViewportProps>(function ModelViewport(props, ref) {
   const host = useRef<HTMLDivElement>(null), runtime = useRef<Scene | null>(null);
   const [error, setError] = useState("");
-  useImperativeHandle(ref, () => ({ fit: () => runtime.current?.fit(), standard: view => runtime.current?.standard(view),
+  useImperativeHandle(ref, () => ({ fit: () => runtime.current?.fit(), standard: view => runtime.current?.standard(view), cameraView: () => runtime.current?.cameraView(),
     prepareMeshes: async urls => { const scene = runtime.current; if (scene) await Promise.all([...new Set(urls)].map(url => scene.mesh(url))); },
   }), []);
   useEffect(() => {

@@ -1,3 +1,4 @@
+import { engineeringOperation, registerOperation } from "./engineering/runtime";
 import type { SpecItem } from "./project-config";
 import type { AssemblyComponent } from "./suction-catalog";
 import { pressureCheckWarning, type InletPressureCheck } from "./dn-defaults";
@@ -11,7 +12,7 @@ const values = (value: unknown): number[] => {
 
 // Read only explicit ratings, not required PN from a specification row or an
 // instrument's measuring range. Unknown units and ambiguous ranges stay unknown.
-export function componentPressureLimit(item?: AssemblyComponent): PressureLimit | null {
+export function coreComponentPressureLimit(item?: AssemblyComponent): PressureLimit | null {
   if (!item) return null;
   const limits: PressureLimit[] = [];
   for (const field of item.fields) {
@@ -30,7 +31,9 @@ export function componentPressureLimit(item?: AssemblyComponent): PressureLimit 
   }
   // Some source tables keep PN in the family/header instead of a separate cell.
   if (!limits.length) {
-    const text = [item.family, ...item.fields.flatMap(field => field.headerPath)].join(" ");
+    // A scoped dimensional review can mention an unverified PN; it is not a
+    // pressure rating of the component (notably KMS PN25 review metadata).
+    const text = [item.family, ...item.fields.filter(field => !field.column.startsWith("KMS_MOUNTING_")).flatMap(field => field.headerPath)].join(" ");
     const ratings = [...text.matchAll(/\bPN\s*(\d+(?:[.,]\d+)?(?:\s*\/\s*\d+(?:[.,]\d+)?)*)/gi)].flatMap(match => values(match[1]));
     if (ratings.length) limits.push({ bar: Math.max(...ratings), label: `PN${Math.max(...ratings)}` });
   }
@@ -41,3 +44,9 @@ export function withInletPressureChecks(item: SpecItem, checks: InletPressureChe
   const baseStatus = item.inletPressureCheck?.baseStatus ?? item.status;
   return { ...item, status: checks.some(pressureCheckWarning) ? "confirmation" : baseStatus, inletPressureCheck: { baseStatus, checks } };
 }
+
+export function componentPressureLimit(...args: Parameters<typeof coreComponentPressureLimit>): ReturnType<typeof coreComponentPressureLimit> {
+  return engineeringOperation("componentPressureLimit", coreComponentPressureLimit, args);
+}
+
+registerOperation("componentPressureLimit", ["item"], coreComponentPressureLimit);

@@ -1,0 +1,33 @@
+{
+  "checkedAt": "2026-10-26",
+  "componentId": "newkey-din2503:NK-FDh150-4",
+  "supplierProductId": "NK-FDh150/4",
+  "productSource": "https://www.newkey.ru/catalog/flantsy/flantsy-ploskie-din2503/",
+  "priceRub": 9487,
+  "priceBasis": "Опубликованная розничная цена производителя, без персональной скидки и пересчёта НДС.",
+  "partPn": 40,
+  "compatiblePns": [
+    25,
+    40
+  ],
+  "dimensions": {
+    "thicknessMm": 28,
+    "boreDiameterMm": 170.5,
+    "pipeOuterDiameterMm": 168.3,
+    "outerDiameterMm": 300,
+    "boltCircleMm": 250,
+    "boltHoleDiameterMm": 26,
+    "holes": 8
+  },
+  "geometryBasis": "declared-standard-nominal",
+  "dimensionSources": [
+    "https://www.hsflanges.com/DIN_2503_PN40_plate_flanges",
+    "https://www.tescoflanges.com/din-2503-pn-40-slip-on-flange"
+  ],
+  "pressureSources": [
+    "https://www.hsflanges.com/DIN_2503_PN25_plate_flanges",
+    "https://www.hsflanges.com/DIN_2503_PN40_plate_flanges"
+  ],
+  "individualPassportFound": false,
+  "note": "Применён ранее согласованный подход для серии Newkey и недостающих данных аналогов. Исходный фланец фланцы-007-r0143 не изменён."
+}

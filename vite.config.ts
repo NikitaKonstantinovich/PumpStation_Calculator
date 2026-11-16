@@ -1,7 +1,11 @@
 import vinext from "vinext";
+import {createHash} from "node:crypto";
+import {readFile,readdir} from "node:fs/promises";
 import { defineConfig } from "vite";
 import hostingConfig from "./.openai/hosting.json";
+import { betaAssets } from "./build/beta-assets-plugin";
 import { sites } from "./build/sites-vite-plugin";
+import { resolveReleaseProfile } from "./build/release-profile";
 
 const SITE_CREATOR_PLACEHOLDER_DATABASE_ID =
   "00000000-0000-4000-8000-000000000000";
@@ -13,6 +17,7 @@ const isCodexSeatbeltSandbox = process.env.CODEX_SANDBOX === "seatbelt";
 
 const localBindingConfig = {
   main: "./worker/index.ts",
+  assets: { binding: "ASSETS", run_worker_first: true },
   compatibility_flags: ["nodejs_compat"],
   d1_databases: d1
     ? [
@@ -33,7 +38,12 @@ const localBindingConfig = {
     : [],
 };
 
-export default defineConfig(async () => {
+export default defineConfig(async ({ command, isPreview }) => {
+  const profile = resolveReleaseProfile(command, process.env.PSC_RELEASE_PROFILE, isPreview);
+  const methodology=createHash("sha256");
+  for(const name of (await readdir("app")).filter(name=>name.endsWith(".ts")).sort()){
+    methodology.update(name).update(await readFile("app/"+name));
+  }
   // Keep Wrangler and Miniflare state project-local. These are non-secret tool
   // settings; application environment belongs in ignored `.env*` files.
   process.env.WRANGLER_WRITE_LOGS ??= "false";
@@ -44,12 +54,15 @@ export default defineConfig(async () => {
   const { cloudflare } = await import("@cloudflare/vite-plugin");
 
   return {
+    build: { copyPublicDir: profile !== "full" },
+    define: { __PSC_RELEASE_PROFILE__: JSON.stringify(profile), __PSC_CALC_METHOD__:JSON.stringify(methodology.digest("hex")) },
     server: isCodexSeatbeltSandbox
       ? { watch: { useFsEvents: false, usePolling: true } }
       : undefined,
     plugins: [
       vinext(),
       sites(),
+      betaAssets(),
       cloudflare({
         viteEnvironment: { name: "rsc", childEnvironments: ["ssr"] },
         config: localBindingConfig,

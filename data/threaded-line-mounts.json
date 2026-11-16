@@ -1,0 +1,1137 @@
+[
+  {
+    "equipmentId": "suction-table:union-valtec-15",
+    "source": "VALTEC VTr.341.N.0004, габаритный чертёж https://valtec.ru/document/technical/drawing/VTr.341.N/VTr.341.N.pdf, паспорт https://valtec.ru/document/technical/VTr.098-340-340C-341-728-0924.pdf",
+    "cadPath": "Equipment/Fittings/3D/Сгоны американки/Сгон разъемный (американка)/VTr.341.N.0004 - Сгон разъемный (американка) 1_2.stp",
+    "meshHash": "ea0f00dcfac28d14ceab848057e292e6711fe236894af1a0f6687d9e6806a671",
+    "stlSha256": "d0b61b82ea520cd5fc82b2bd605525449df2dbbdf450299c3a4d046f979959a3",
+    "bounds": [
+      -15.80050065,
+      0,
+      -15.80050065,
+      15.80050065,
+      44.0743756,
+      15.80050065
+    ],
+    "rotation": [
+      0,
+      0,
+      -90
+    ],
+    "position": [
+      0,
+      0,
+      0
+    ],
+    "lengthMm": 44.0743756,
+    "threads": [
+      {
+        "designation": "G1/2",
+        "gender": "male",
+        "depthMm": 18.5
+      },
+      {
+        "designation": "G1/2",
+        "gender": "female"
+      }
+    ],
+    "notes": [
+      "Торцевые плоскости и размеры проверены по STEP VTr.341.N.0004; длина соответствует габаритному чертежу с округлением до 0,1 мм.",
+      "От торца НР до первого расширяющегося бурта 18.5 мм по аналитическим поверхностям STEP. Это предел геометрического сближения, а не рабочая длина резьбы.",
+      "STEP содержит упрощённый торец ВР без достоверной геометрии резьбового углубления. Фактическая глубина навинчивания требует подтверждения."
+    ]
+  },
+  {
+    "equipmentId": "suction-table:union-valtec-20",
+    "source": "VALTEC VTr.341.N.0005, габаритный чертёж https://valtec.ru/document/technical/drawing/VTr.341.N/VTr.341.N.pdf, паспорт https://valtec.ru/document/technical/VTr.098-340-340C-341-728-0924.pdf",
+    "cadPath": "Equipment/Fittings/3D/Сгоны американки/Сгон разъемный (американка)/VTr.341.N.0005 - Сгон разъемный (американка) 3_4.stp",
+    "meshHash": "93bfaf40e0bb9b99e5e07951971712381dd2e096736ad52597fd5ebb343933b7",
+    "stlSha256": "9ba873ee4f708832e75e3e9823ca624207c340835b69f99cc3f21cec850d6f37",
+    "bounds": [
+      -19.58887335,
+      0,
+      -19.58887335,
+      19.58887335,
+      48.33187581,
+      19.58887335
+    ],
+    "rotation": [
+      0,
+      0,
+      -90
+    ],
+    "position": [
+      0,
+      0,
+      0
+    ],
+    "lengthMm": 48.33187581,
+    "threads": [
+      {
+        "designation": "G3/4",
+        "gender": "male",
+        "depthMm": 21.5
+      },
+      {
+        "designation": "G3/4",
+        "gender": "female"
+      }
+    ],
+    "notes": [
+      "Торцевые плоскости и размеры проверены по STEP VTr.341.N.0005; длина соответствует габаритному чертежу с округлением до 0,1 мм.",
+      "От торца НР до первого расширяющегося бурта 21.5 мм по аналитическим поверхностям STEP. Это предел геометрического сближения, а не рабочая длина резьбы.",
+      "STEP содержит упрощённый торец ВР без достоверной геометрии резьбового углубления. Фактическая глубина навинчивания требует подтверждения.",
+      "Сетка замкнута и пригодна для компоновки. Твердотельная проверка исходного STEP выявила дефекты."
+    ]
+  },
+  {
+    "equipmentId": "suction-table:union-valtec-25",
+    "source": "VALTEC VTr.341.N.0006, габаритный чертёж https://valtec.ru/document/technical/drawing/VTr.341.N/VTr.341.N.pdf, паспорт https://valtec.ru/document/technical/VTr.098-340-340C-341-728-0924.pdf",
+    "cadPath": "Equipment/Fittings/3D/Сгоны американки/Сгон разъемный (американка)/VTr.341.N.0006 - Сгон разъемный (американка) 1.stp",
+    "meshHash": "e0e566928d11b5b1f64efcb617bff564b5f25638d5a7b5a72b9ae08dd51298f0",
+    "stlSha256": "7b352cc9d71b1ab634539a18a5982d2b34f2291c2f10897a94bc054e6e5f9c98",
+    "bounds": [
+      -24.37724606,
+      0,
+      -24.37724606,
+      24.37724606,
+      59.22821134,
+      24.37724606
+    ],
+    "rotation": [
+      0,
+      0,
+      -90
+    ],
+    "position": [
+      0,
+      0,
+      0
+    ],
+    "lengthMm": 59.22821134,
+    "threads": [
+      {
+        "designation": "G1",
+        "gender": "male",
+        "depthMm": 27
+      },
+      {
+        "designation": "G1",
+        "gender": "female"
+      }
+    ],
+    "notes": [
+      "Торцевые плоскости и размеры проверены по STEP VTr.341.N.0006; длина соответствует габаритному чертежу с округлением до 0,1 мм.",
+      "От торца НР до первого расширяющегося бурта 27 мм по аналитическим поверхностям STEP. Это предел геометрического сближения, а не рабочая длина резьбы.",
+      "STEP содержит упрощённый торец ВР без достоверной геометрии резьбового углубления. Фактическая глубина навинчивания требует подтверждения.",
+      "Сетка замкнута и пригодна для компоновки. Твердотельная проверка исходного STEP выявила дефекты."
+    ]
+  },
+  {
+    "equipmentId": "suction-table:union-valtec-32",
+    "source": "VALTEC VTr.341.N.0007, габаритный чертёж https://valtec.ru/document/technical/drawing/VTr.341.N/VTr.341.N.pdf, паспорт https://valtec.ru/document/technical/VTr.098-340-340C-341-728-0924.pdf",
+    "cadPath": "Equipment/Fittings/3D/Сгоны американки/Сгон разъемный (американка)/VTr.341.N.0007 - Сгон разъемный (американка) 1 1_4.stp",
+    "meshHash": "730d9922d6dd8c9fff231e98223fa51c71230e387b01b88e2dc7d4528b83d0da",
+    "stlSha256": "2c9e2ea0e4fbbcca5f6b98b365da04e2e5c3357a681dfa94858d1ebe7654300b",
+    "bounds": [
+      -27.62442266,
+      0,
+      -27.62442266,
+      27.62442266,
+      68.5478223,
+      27.62442266
+    ],
+    "rotation": [
+      0,
+      0,
+      -90
+    ],
+    "position": [
+      0,
+      0,
+      0
+    ],
+    "lengthMm": 68.5478223,
+    "threads": [
+      {
+        "designation": "G1 1/4",
+        "gender": "male",
+        "depthMm": 30
+      },
+      {
+        "designation": "G1 1/4",
+        "gender": "female"
+      }
+    ],
+    "notes": [
+      "Торцевые плоскости и размеры проверены по STEP VTr.341.N.0007; длина соответствует габаритному чертежу с округлением до 0,1 мм.",
+      "От торца НР до первого расширяющегося бурта 30 мм по аналитическим поверхностям STEP. Это предел геометрического сближения, а не рабочая длина резьбы.",
+      "STEP содержит упрощённый торец ВР без достоверной геометрии резьбового углубления. Фактическая глубина навинчивания требует подтверждения.",
+      "Сетка замкнута и пригодна для компоновки. Твердотельная проверка исходного STEP выявила дефекты."
+    ]
+  },
+  {
+    "equipmentId": "suction-table:union-valtec-40",
+    "source": "VALTEC VTr.341.N.0008, габаритный чертёж https://valtec.ru/document/technical/drawing/VTr.341.N/VTr.341.N.pdf, паспорт https://valtec.ru/document/technical/VTr.098-340-340C-341-728-0924.pdf",
+    "cadPath": "Equipment/Fittings/3D/Сгоны американки/Сгон разъемный (американка)/VALTEC VTr.341.N.0008.stp",
+    "meshHash": "0032a4c5d98a7fe8f3fc0a79b6f93fba95d84a6bc368fe5163624d48b743786f",
+    "stlSha256": "a370757197aff5b06c66696fa3270ea5a250ee79f3acf4faf8387eae9bd71d80",
+    "bounds": [
+      -34.1421973,
+      0,
+      -34.1421973,
+      34.1421973,
+      75.55055102,
+      34.1421973
+    ],
+    "rotation": [
+      0,
+      0,
+      -90
+    ],
+    "position": [
+      0,
+      0,
+      0
+    ],
+    "lengthMm": 75.55055102,
+    "threads": [
+      {
+        "designation": "G1 1/2",
+        "gender": "male",
+        "depthMm": 33.5
+      },
+      {
+        "designation": "G1 1/2",
+        "gender": "female"
+      }
+    ],
+    "notes": [
+      "Торцевые плоскости и размеры проверены по STEP VTr.341.N.0008; длина соответствует габаритному чертежу с округлением до 0,1 мм.",
+      "От торца НР до первого расширяющегося бурта 33.5 мм по аналитическим поверхностям STEP. Это предел геометрического сближения, а не рабочая длина резьбы.",
+      "STEP содержит упрощённый торец ВР без достоверной геометрии резьбового углубления. Фактическая глубина навинчивания требует подтверждения.",
+      "Сетка замкнута и пригодна для компоновки. Твердотельная проверка исходного STEP выявила дефекты."
+    ]
+  },
+  {
+    "equipmentId": "suction-table:union-valtec-50",
+    "source": "VALTEC VTr.341.N.0009, габаритный чертёж https://valtec.ru/document/technical/drawing/VTr.341.N/VTr.341.N.pdf, паспорт https://valtec.ru/document/technical/VTr.098-340-340C-341-728-0924.pdf",
+    "cadPath": "Equipment/Fittings/3D/Сгоны американки/Сгон разъемный (американка)/VTr.341.N.0009 -  - Сгон разъемный (американка) 2.stp",
+    "meshHash": "9bb5ffe638dbfeb314c1963e4382e00f2d50855093dfcc40f5220b4d915b98b6",
+    "stlSha256": "c589bdd50f826c5f566cd830dd66d205fd4ba6e9f9243a5498d70823fb62679d",
+    "bounds": [
+      -43.26013881,
+      0,
+      -43.26013881,
+      43.26013881,
+      98.75833035,
+      43.26013881
+    ],
+    "rotation": [
+      0,
+      0,
+      -90
+    ],
+    "position": [
+      0,
+      0,
+      0
+    ],
+    "lengthMm": 98.75833035,
+    "threads": [
+      {
+        "designation": "G2",
+        "gender": "male",
+        "depthMm": 51.5
+      },
+      {
+        "designation": "G2",
+        "gender": "female"
+      }
+    ],
+    "notes": [
+      "Торцевые плоскости и размеры проверены по STEP VTr.341.N.0009; длина соответствует габаритному чертежу с округлением до 0,1 мм.",
+      "От торца НР до первого расширяющегося бурта 51.5 мм по аналитическим поверхностям STEP. Это предел геометрического сближения, а не рабочая длина резьбы.",
+      "STEP содержит упрощённый торец ВР без достоверной геометрии резьбового углубления. Фактическая глубина навинчивания требует подтверждения."
+    ]
+  },
+  {
+    "equipmentId": "suction-table:check-valtec-15",
+    "source": "VALTEC VT.151.N.04, официальный STEP https://valtec.ru/document/technical/drawing/VT.151.N/stp.zip, паспорт https://valtec.ru/document/technical/VT.151-0525.pdf, габаритный чертёж https://valtec.ru/document/technical/drawing/VT.151.N/VT.151.N.pdf",
+    "meshHash": "9868598cc09c661caf2912793ece413256e4982c3339905732cee96fdc41dc94",
+    "stlSha256": "db63c3a57a29fa7c5aea691ebb0cbe1bf876ec2689b7dfe88640d9b0f892edfa",
+    "bounds": [
+      -18.5,
+      -18.5,
+      -10.35,
+      18.5,
+      18.5,
+      35.7
+    ],
+    "rotation": [
+      0,
+      90,
+      0
+    ],
+    "position": [
+      10.35,
+      0,
+      0
+    ],
+    "lengthMm": 46.05,
+    "threads": [
+      {
+        "designation": "G1/2",
+        "gender": "female",
+        "depthMm": 13.2
+      },
+      {
+        "designation": "G1/2",
+        "gender": "female",
+        "depthMm": 13.2
+      }
+    ],
+    "notes": [
+      "Торцевые плоскости и соосные отверстия измерены в STEP; направление потока +Z в исходных координатах определено по седлу, золотнику и расположению возвратной пружины.",
+      "Габаритный чертёж подтверждает межторцевой размер 46,1 мм и направление потока по стрелке.",
+      "Глубина ВР измерена от торца до конца цилиндрического участка отверстия. Витки и фактическая длина навинчивания не заданы."
+    ],
+    "cadPath": "Equipment/Valves/3D/Обратные/VALTEC VT.151.N/VT.151.N.04.stp"
+  },
+  {
+    "equipmentId": "suction-table:check-valtec-20",
+    "source": "VALTEC VT.151.N.05, официальный STEP https://valtec.ru/document/technical/drawing/VT.151.N/stp.zip, паспорт https://valtec.ru/document/technical/VT.151-0525.pdf, габаритный чертёж https://valtec.ru/document/technical/drawing/VT.151.N/VT.151.N.pdf",
+    "meshHash": "a0f6f5dbfc1a1c998f9306d07c7c44cc8c1ff0c15e7266cba7a3ca99c013a0b7",
+    "stlSha256": "0c92562ba4a36d1fd69e272f7f5dd405d364b9f2b7c1238c9c6abff054b33b1b",
+    "bounds": [
+      -43.5,
+      -22.75,
+      -22.75,
+      13.5,
+      22.75,
+      22.75
+    ],
+    "rotation": [
+      0,
+      0,
+      180
+    ],
+    "position": [
+      13.5,
+      0,
+      0
+    ],
+    "lengthMm": 57,
+    "threads": [
+      {
+        "designation": "G3/4",
+        "gender": "female",
+        "depthMm": 15.5
+      },
+      {
+        "designation": "G3/4",
+        "gender": "female",
+        "depthMm": 14.5
+      }
+    ],
+    "notes": [
+      "Торцевые плоскости и соосные отверстия измерены в STEP; направление потока −X в исходных координатах определено по седлу, золотнику и расположению возвратной пружины.",
+      "Габаритный чертёж подтверждает межторцевой размер 57 мм и направление потока по стрелке.",
+      "Глубина ВР измерена от торца до конца цилиндрического участка отверстия. Витки и фактическая длина навинчивания не заданы.",
+      "Сетка замкнута и пригодна для компоновки. Твердотельная проверка исходного STEP выявила дефекты."
+    ],
+    "cadPath": "Equipment/Valves/3D/Обратные/VALTEC VT.151.N/VT.151.N.05.stp"
+  },
+  {
+    "equipmentId": "suction-table:check-valtec-25",
+    "source": "VALTEC VT.151.N.06, официальный STEP https://valtec.ru/document/technical/drawing/VT.151.N/stp.zip, паспорт https://valtec.ru/document/technical/VT.151-0525.pdf, габаритный чертёж https://valtec.ru/document/technical/drawing/VT.151.N/VT.151.N.pdf",
+    "meshHash": "de7aef7e7293ed9bf6b8dbb80be21d13627c04a978c7d3ac0eef6b9e6ca88a9f",
+    "stlSha256": "5af175cc282a725e28a206da97e166a911d3bbd37f6d1213cd6e804a0e9e6d8a",
+    "bounds": [
+      -47.8,
+      -26.5,
+      -26.5,
+      13.7,
+      26.5,
+      26.5
+    ],
+    "rotation": [
+      0,
+      0,
+      180
+    ],
+    "position": [
+      13.7,
+      0,
+      0
+    ],
+    "lengthMm": 61.5,
+    "threads": [
+      {
+        "designation": "G1",
+        "gender": "female",
+        "depthMm": 15.5
+      },
+      {
+        "designation": "G1",
+        "gender": "female",
+        "depthMm": 15.5
+      }
+    ],
+    "notes": [
+      "Торцевые плоскости и соосные отверстия измерены в STEP; направление потока −X в исходных координатах определено по седлу, золотнику и расположению возвратной пружины.",
+      "Габаритный чертёж подтверждает межторцевой размер 61,5 мм и направление потока по стрелке.",
+      "Глубина ВР измерена от торца до конца цилиндрического участка отверстия. Витки и фактическая длина навинчивания не заданы.",
+      "Сетка замкнута и пригодна для компоновки. Твердотельная проверка исходного STEP выявила дефекты."
+    ],
+    "cadPath": "Equipment/Valves/3D/Обратные/VALTEC VT.151.N/VT.151.N.06.stp"
+  },
+  {
+    "equipmentId": "suction-table:check-valtec-32",
+    "source": "VALTEC VT.151.N.07, официальный STEP https://valtec.ru/document/technical/drawing/VT.151.N/stp.zip, паспорт https://valtec.ru/document/technical/VT.151-0525.pdf, габаритный чертёж https://valtec.ru/document/technical/drawing/VT.151.N/VT.151.N.pdf",
+    "meshHash": "00fed5caf679fe10e49cf58ce211f27c8f3f28c33f33d016502c1c980ea2fefd",
+    "stlSha256": "562edf743e6941409379eb1ac737737afeedb650c42216e1301fac5a80580072",
+    "bounds": [
+      -51.2,
+      -31.75,
+      -31.75,
+      17.5,
+      31.75,
+      31.75
+    ],
+    "rotation": [
+      0,
+      0,
+      180
+    ],
+    "position": [
+      17.5,
+      0,
+      0
+    ],
+    "lengthMm": 68.7,
+    "threads": [
+      {
+        "designation": "G1 1/4",
+        "gender": "female",
+        "depthMm": 14.5
+      },
+      {
+        "designation": "G1 1/4",
+        "gender": "female",
+        "depthMm": 16
+      }
+    ],
+    "notes": [
+      "Торцевые плоскости и соосные отверстия измерены в STEP; направление потока −X в исходных координатах определено по седлу, золотнику и расположению возвратной пружины.",
+      "Габаритный чертёж подтверждает межторцевой размер 68,7 мм и направление потока по стрелке.",
+      "Глубина ВР измерена от торца до конца цилиндрического участка отверстия. Витки и фактическая длина навинчивания не заданы.",
+      "Сетка замкнута и пригодна для компоновки. Твердотельная проверка исходного STEP выявила дефекты."
+    ],
+    "cadPath": "Equipment/Valves/3D/Обратные/VALTEC VT.151.N/VT.151.N.07.stp"
+  },
+  {
+    "equipmentId": "suction-table:check-valtec-40",
+    "source": "VALTEC VT.151.N.08, официальный STEP https://valtec.ru/document/technical/drawing/VT.151.N/stp.zip, паспорт https://valtec.ru/document/technical/VT.151-0525.pdf, габаритный чертёж https://valtec.ru/document/technical/drawing/VT.151.N/VT.151.N.pdf",
+    "meshHash": "1072f6ca9b65712c552d262ca744dffa72b715e35f49f0d6e8fe30b484c16977",
+    "stlSha256": "ef5e1fc528ce6151757aced997cc81d0b88e780e7482682ef8fe5c794c0d8d34",
+    "bounds": [
+      1,
+      -36.26117742,
+      -36.26117742,
+      77.5,
+      36.26117725,
+      36.26117742
+    ],
+    "rotation": [
+      0,
+      0,
+      180
+    ],
+    "position": [
+      77.5,
+      0,
+      0
+    ],
+    "lengthMm": 76.5,
+    "threads": [
+      {
+        "designation": "G1 1/2",
+        "gender": "female",
+        "depthMm": 15
+      },
+      {
+        "designation": "G1 1/2",
+        "gender": "female",
+        "depthMm": 18
+      }
+    ],
+    "notes": [
+      "Торцевые плоскости и соосные отверстия измерены в STEP; направление потока −X в исходных координатах определено по седлу, золотнику и расположению возвратной пружины.",
+      "Габаритный чертёж подтверждает межторцевой размер 76,5 мм и направление потока по стрелке.",
+      "Глубина ВР измерена от торца до конца цилиндрического участка отверстия. Витки и фактическая длина навинчивания не заданы.",
+      "Сетка замкнута и пригодна для компоновки. Твердотельная проверка исходного STEP выявила дефекты."
+    ],
+    "cadPath": "Equipment/Valves/3D/Обратные/VALTEC VT.151.N/VT.151.N.08.stp"
+  },
+  {
+    "equipmentId": "suction-table:check-valtec-50",
+    "source": "VALTEC VT.151.N.09, официальный STEP https://valtec.ru/document/technical/drawing/VT.151.N/stp.zip, паспорт https://valtec.ru/document/technical/VT.151-0525.pdf, габаритный чертёж https://valtec.ru/document/technical/drawing/VT.151.N/VT.151.N.pdf",
+    "meshHash": "fa5fb7e9724fad5673ae9d0fa7ea25b2d5187231d999fe2594826140acfcd651",
+    "stlSha256": "938457880ddb1a3d03fed8bd2d9798a7bf1428de2dc75a0a2f4a444ae7658bc4",
+    "bounds": [
+      1,
+      -43.24791385,
+      -43.24791385,
+      86,
+      43.24791374,
+      43.24791385
+    ],
+    "rotation": [
+      0,
+      0,
+      180
+    ],
+    "position": [
+      86,
+      0,
+      0
+    ],
+    "lengthMm": 85,
+    "threads": [
+      {
+        "designation": "G2",
+        "gender": "female",
+        "depthMm": 19
+      },
+      {
+        "designation": "G2",
+        "gender": "female",
+        "depthMm": 19
+      }
+    ],
+    "notes": [
+      "Торцевые плоскости и соосные отверстия измерены в STEP; направление потока −X в исходных координатах определено по седлу, золотнику и расположению возвратной пружины.",
+      "Габаритный чертёж подтверждает межторцевой размер 85 мм и направление потока по стрелке.",
+      "Глубина ВР измерена от торца до конца цилиндрического участка отверстия. Витки и фактическая длина навинчивания не заданы.",
+      "Сетка замкнута и пригодна для компоновки. Твердотельная проверка исходного STEP выявила дефекты."
+    ],
+    "cadPath": "Equipment/Valves/3D/Обратные/VALTEC VT.151.N/VT.151.N.09.stp"
+  },
+  {
+    "equipmentId": "обратные-клапаны-004-r0183",
+    "source": "MVI AquaHit CV.720.04, паспорт ПС-CV.720.05.2019.056, стр. 3 и 5: https://mvi-rus.ru/upload/uf/cc7/zpluthkfhvihn8pgq3ygkf2mfrgon37o/%D0%A2%D0%B5%D1%85%D0%BD%D0%B8%D1%87%D0%B5%D1%81%D0%BA%D0%B8%D0%B9%20%D0%BF%D0%B0%D1%81%D0%BF%D0%BE%D1%80%D1%82%20%D0%9F%D0%A1-CV.720.05.2022.pdf",
+    "lengthMm": 43.5,
+    "outlineOuterMm": 31.5,
+    "threads": [
+      {
+        "designation": "G1/2",
+        "gender": "female",
+        "depthMm": 10
+      },
+      {
+        "designation": "G1/2",
+        "gender": "female",
+        "depthMm": 10
+      }
+    ],
+    "notes": [
+      "Паспортный размер H принят между торцами. Глубина ВР по L/L1; фактическая длина навинчивания зависит от ответной детали. Внутренний профиль и точная CAD-геометрия не подтверждены."
+    ]
+  },
+  {
+    "equipmentId": "обратные-клапаны-004-r0184",
+    "source": "MVI AquaHit CV.720.05, паспорт ПС-CV.720.05.2019.056, стр. 3 и 5: https://mvi-rus.ru/upload/uf/cc7/zpluthkfhvihn8pgq3ygkf2mfrgon37o/%D0%A2%D0%B5%D1%85%D0%BD%D0%B8%D1%87%D0%B5%D1%81%D0%BA%D0%B8%D0%B9%20%D0%BF%D0%B0%D1%81%D0%BF%D0%BE%D1%80%D1%82%20%D0%9F%D0%A1-CV.720.05.2022.pdf",
+    "lengthMm": 46,
+    "outlineOuterMm": 38.8,
+    "threads": [
+      {
+        "designation": "G3/4",
+        "gender": "female",
+        "depthMm": 11
+      },
+      {
+        "designation": "G3/4",
+        "gender": "female",
+        "depthMm": 11
+      }
+    ],
+    "notes": [
+      "Паспортный размер H принят между торцами. Глубина ВР по L/L1; фактическая длина навинчивания зависит от ответной детали. Внутренний профиль и точная CAD-геометрия не подтверждены."
+    ]
+  },
+  {
+    "equipmentId": "обратные-клапаны-004-r0185",
+    "source": "MVI AquaHit CV.720.06, паспорт ПС-CV.720.05.2019.056, стр. 3 и 5: https://mvi-rus.ru/upload/uf/cc7/zpluthkfhvihn8pgq3ygkf2mfrgon37o/%D0%A2%D0%B5%D1%85%D0%BD%D0%B8%D1%87%D0%B5%D1%81%D0%BA%D0%B8%D0%B9%20%D0%BF%D0%B0%D1%81%D0%BF%D0%BE%D1%80%D1%82%20%D0%9F%D0%A1-CV.720.05.2022.pdf",
+    "lengthMm": 53.5,
+    "outlineOuterMm": 44,
+    "threads": [
+      {
+        "designation": "G1",
+        "gender": "female",
+        "depthMm": 13
+      },
+      {
+        "designation": "G1",
+        "gender": "female",
+        "depthMm": 13
+      }
+    ],
+    "notes": [
+      "Паспортный размер H принят между торцами. Глубина ВР по L/L1; фактическая длина навинчивания зависит от ответной детали. Внутренний профиль и точная CAD-геометрия не подтверждены."
+    ]
+  },
+  {
+    "equipmentId": "обратные-клапаны-004-r0186",
+    "source": "MVI AquaHit CV.720.07, паспорт ПС-CV.720.05.2019.056, стр. 3 и 5: https://mvi-rus.ru/upload/uf/cc7/zpluthkfhvihn8pgq3ygkf2mfrgon37o/%D0%A2%D0%B5%D1%85%D0%BD%D0%B8%D1%87%D0%B5%D1%81%D0%BA%D0%B8%D0%B9%20%D0%BF%D0%B0%D1%81%D0%BF%D0%BE%D1%80%D1%82%20%D0%9F%D0%A1-CV.720.05.2022.pdf",
+    "lengthMm": 64.5,
+    "outlineOuterMm": 53.5,
+    "threads": [
+      {
+        "designation": "G1 1/4",
+        "gender": "female",
+        "depthMm": 15
+      },
+      {
+        "designation": "G1 1/4",
+        "gender": "female",
+        "depthMm": 15
+      }
+    ],
+    "notes": [
+      "Паспортный размер H принят между торцами. Глубина ВР по L/L1; фактическая длина навинчивания зависит от ответной детали. Внутренний профиль и точная CAD-геометрия не подтверждены."
+    ]
+  },
+  {
+    "equipmentId": "обратные-клапаны-004-r0187",
+    "source": "MVI AquaHit CV.720.08, паспорт ПС-CV.720.05.2019.056, стр. 3 и 5: https://mvi-rus.ru/upload/uf/cc7/zpluthkfhvihn8pgq3ygkf2mfrgon37o/%D0%A2%D0%B5%D1%85%D0%BD%D0%B8%D1%87%D0%B5%D1%81%D0%BA%D0%B8%D0%B9%20%D0%BF%D0%B0%D1%81%D0%BF%D0%BE%D1%80%D1%82%20%D0%9F%D0%A1-CV.720.05.2022.pdf",
+    "lengthMm": 72,
+    "outlineOuterMm": 61.5,
+    "threads": [
+      {
+        "designation": "G1 1/2",
+        "gender": "female",
+        "depthMm": 16
+      },
+      {
+        "designation": "G1 1/2",
+        "gender": "female",
+        "depthMm": 16
+      }
+    ],
+    "notes": [
+      "Паспортный размер H принят между торцами. Глубина ВР по L/L1; фактическая длина навинчивания зависит от ответной детали. Внутренний профиль и точная CAD-геометрия не подтверждены."
+    ]
+  },
+  {
+    "equipmentId": "обратные-клапаны-004-r0188",
+    "source": "MVI AquaHit CV.720.09, паспорт ПС-CV.720.05.2019.056, стр. 3 и 5: https://mvi-rus.ru/upload/uf/cc7/zpluthkfhvihn8pgq3ygkf2mfrgon37o/%D0%A2%D0%B5%D1%85%D0%BD%D0%B8%D1%87%D0%B5%D1%81%D0%BA%D0%B8%D0%B9%20%D0%BF%D0%B0%D1%81%D0%BF%D0%BE%D1%80%D1%82%20%D0%9F%D0%A1-CV.720.05.2022.pdf",
+    "lengthMm": 79,
+    "outlineOuterMm": 72,
+    "threads": [
+      {
+        "designation": "G2",
+        "gender": "female",
+        "depthMm": 18
+      },
+      {
+        "designation": "G2",
+        "gender": "female",
+        "depthMm": 18
+      }
+    ],
+    "notes": [
+      "Паспортный размер H принят между торцами. Глубина ВР по L/L1; фактическая длина навинчивания зависит от ответной детали. Внутренний профиль и точная CAD-геометрия не подтверждены."
+    ]
+  },
+  {
+    "equipmentId": "резьбовые-фитинги-001-r0216",
+    "source": "ЛД Прайд, паспорт «Фитинги латунные», таблица «Ниппель НР/НР», стр. 2 (ГОСТ 6357, DN15–25 PN40, DN32–50 PN25). database/component-refactor/2026-11-07/threaded-fire/geometry-research/ld/ld-nipple-passport.pdf Заводская STEP-модель LD.65.501.15: https://xn--d1an.xn--p1ai/products/3474--nippel_pramoj_ld_pride_dn15_1_2_nr_nr_latun/",
+    "threads": [
+      {
+        "designation": "G1/2",
+        "gender": "male",
+        "depthMm": 10
+      },
+      {
+        "designation": "G1/2",
+        "gender": "male",
+        "depthMm": 10
+      }
+    ],
+    "position": [
+      0,
+      0,
+      0
+    ],
+    "notes": [
+      "Предел захода от торца до плеча шестигранника по заводской модели: 10 мм с каждой стороны. Фактическая глубина затяжки зависит от ответной детали."
+    ],
+    "cadPath": "Equipment/Fittings/3D/Ниппели/LD Pride/LD.65.501.15.step",
+    "lengthMm": 25.0,
+    "meshHash": "3a105c8cf07f329389f04a67b023e71610ebad51a1c110ebd2fe20dc57f7a750",
+    "stlSha256": "f1b32b055897fa8650a33c8091d6e01e518a3570e659b23cced80f7c05173ce2",
+    "bounds": [
+      -11.892304,
+      0.0,
+      -10.5,
+      11.892304,
+      25.0,
+      10.5
+    ],
+    "rotation": [
+      0,
+      0,
+      -90
+    ]
+  },
+  {
+    "equipmentId": "резьбовые-фитинги-001-r0217",
+    "source": "ЛД Прайд, паспорт «Фитинги латунные», таблица «Ниппель НР/НР», стр. 2 (ГОСТ 6357, DN15–25 PN40, DN32–50 PN25). database/component-refactor/2026-11-07/threaded-fire/geometry-research/ld/ld-nipple-passport.pdf Заводская STEP-модель LD.65.501.20: https://xn--d1an.xn--p1ai/products/3480--nippel_pramoj_ld_pride_dn20_3_4_nr_nr_latun/",
+    "threads": [
+      {
+        "designation": "G3/4",
+        "gender": "male",
+        "depthMm": 12
+      },
+      {
+        "designation": "G3/4",
+        "gender": "male",
+        "depthMm": 12
+      }
+    ],
+    "position": [
+      0,
+      0,
+      0
+    ],
+    "notes": [
+      "Предел захода от торца до плеча шестигранника по заводской модели: 12 мм с каждой стороны. Фактическая глубина затяжки зависит от ответной детали."
+    ],
+    "cadPath": "Equipment/Fittings/3D/Ниппели/LD Pride/LD.65.501.20.step",
+    "lengthMm": 29.0,
+    "meshHash": "6a4a68a9f80a994e6c50fb00bbabe3c03859e56d2d06ec97c95f1523fd7b9a74",
+    "stlSha256": "e6eea57c4349401f3a61f5cff6abd33cae6ac3ca78c240e316a06532d6ca0b99",
+    "bounds": [
+      -14.990381,
+      0.0,
+      -13.25,
+      14.990381,
+      29.0,
+      13.25
+    ],
+    "rotation": [
+      0,
+      0,
+      -90
+    ]
+  },
+  {
+    "equipmentId": "резьбовые-фитинги-001-r0218",
+    "source": "ЛД Прайд, паспорт «Фитинги латунные», таблица «Ниппель НР/НР», стр. 2 (ГОСТ 6357, DN15–25 PN40, DN32–50 PN25). database/component-refactor/2026-11-07/threaded-fire/geometry-research/ld/ld-nipple-passport.pdf Заводская STEP-модель LD.65.501.25: https://xn--d1an.xn--p1ai/products/3481--nippel_pramoj_ld_pride_dn25_1_nr_nr_latun/",
+    "threads": [
+      {
+        "designation": "G1",
+        "gender": "male",
+        "depthMm": 14
+      },
+      {
+        "designation": "G1",
+        "gender": "male",
+        "depthMm": 14
+      }
+    ],
+    "position": [
+      0,
+      0,
+      0
+    ],
+    "notes": [
+      "Предел захода от торца до плеча шестигранника по заводской модели: 14 мм с каждой стороны. Фактическая глубина затяжки зависит от ответной детали."
+    ],
+    "cadPath": "Equipment/Fittings/3D/Ниппели/LD Pride/LD.65.501.25.step",
+    "lengthMm": 35.0,
+    "meshHash": "bfd91214a9095d0b272045874cc8ce473c13f45a1fd913d4f0f6853035c7a057",
+    "stlSha256": "4c5d34ce54f8248770c3842d436eca0de4b62843ec5d51dbbe5c08a2206881a4",
+    "bounds": [
+      -18.703928,
+      0.0,
+      -16.6,
+      18.703928,
+      35.0,
+      16.6
+    ],
+    "rotation": [
+      0,
+      0,
+      -90
+    ]
+  },
+  {
+    "equipmentId": "резьбовые-фитинги-001-r0219",
+    "source": "ЛД Прайд, паспорт «Фитинги латунные», таблица «Ниппель НР/НР», стр. 2 (ГОСТ 6357, DN15–25 PN40, DN32–50 PN25). database/component-refactor/2026-11-07/threaded-fire/geometry-research/ld/ld-nipple-passport.pdf",
+    "threads": [
+      {
+        "designation": "G1 1/4",
+        "gender": "male"
+      },
+      {
+        "designation": "G1 1/4",
+        "gender": "male"
+      }
+    ],
+    "position": [
+      0,
+      0,
+      0
+    ],
+    "notes": [
+      "Порты на геометрических торцах ниппеля. Фактическая глубина навинчивания зависит от ответной детали.",
+      "Размерная оболочка по L/SW/d. Форма резьбовых участков и корпуса требуют заводского CAD."
+    ],
+    "lengthMm": 32.5,
+    "fidelity": "outline",
+    "meshHash": "db868545c81bce627e8633207711a60125f8bfe9faea9009d6f604449bd18b70",
+    "stlSha256": "3d69644b552cbb041b231a04dbb793576e674984523a9d57a0d6974c25cee1c7",
+    "bounds": [
+      0.0,
+      -24.826061,
+      -21.5,
+      32.5,
+      24.826061,
+      21.5
+    ],
+    "rotation": [
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "equipmentId": "резьбовые-фитинги-001-r0220",
+    "source": "ЛД Прайд, паспорт «Фитинги латунные», таблица «Ниппель НР/НР», стр. 2 (ГОСТ 6357, DN15–25 PN40, DN32–50 PN25). database/component-refactor/2026-11-07/threaded-fire/geometry-research/ld/ld-nipple-passport.pdf",
+    "threads": [
+      {
+        "designation": "G1 1/2",
+        "gender": "male"
+      },
+      {
+        "designation": "G1 1/2",
+        "gender": "male"
+      }
+    ],
+    "position": [
+      0,
+      0,
+      0
+    ],
+    "notes": [
+      "Порты на геометрических торцах ниппеля. Фактическая глубина навинчивания зависит от ответной детали.",
+      "Размерная оболочка по L/SW/d. Форма резьбовых участков и корпуса требуют заводского CAD."
+    ],
+    "lengthMm": 38,
+    "fidelity": "outline",
+    "meshHash": "f787e6fb455a57ea1fd13e0fbadf582ef9bd0d8e750a2482dc31d3ed1a313dc6",
+    "stlSha256": "c75e0cf9ed465383d6ed95053cc41a0487420da7a32eb753ada318281a087af2",
+    "bounds": [
+      0.0,
+      -28.290163,
+      -24.5,
+      38.0,
+      28.290163,
+      24.5
+    ],
+    "rotation": [
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "equipmentId": "резьбовые-фитинги-001-r0221",
+    "source": "ЛД Прайд, паспорт «Фитинги латунные», таблица «Ниппель НР/НР», стр. 2 (ГОСТ 6357, DN15–25 PN40, DN32–50 PN25). database/component-refactor/2026-11-07/threaded-fire/geometry-research/ld/ld-nipple-passport.pdf",
+    "threads": [
+      {
+        "designation": "G2",
+        "gender": "male"
+      },
+      {
+        "designation": "G2",
+        "gender": "male"
+      }
+    ],
+    "position": [
+      0,
+      0,
+      0
+    ],
+    "notes": [
+      "Порты на геометрических торцах ниппеля. Фактическая глубина навинчивания зависит от ответной детали.",
+      "Размерная оболочка по L/SW/d. Форма резьбовых участков и корпуса требуют заводского CAD."
+    ],
+    "lengthMm": 39,
+    "fidelity": "outline",
+    "meshHash": "9b6965903d80ed138d815593181002ef6901c17c3440c682de8b2033b89ba818",
+    "stlSha256": "b6d974276fbf4c6081e6b38348d1d054c161d4501d512c92fc548d9d305f3873",
+    "bounds": [
+      0.0,
+      -35.218365,
+      -30.5,
+      39.0,
+      35.218365,
+      30.5
+    ],
+    "rotation": [
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "equipmentId": "шаровые-краны-001-r0193",
+    "source": "Заводской STEP LD 47.301.15.0, ВР/ВР, стальной рычаг, DN15 PN40. https://xn--d1an.xn--p1ai/products/3901--kran_sarovoj_latunnyj_ld_pride_47_15_v_v_r_du_15_ru_40_rycag_stal_noj/",
+    "cadPath": "Equipment/Valves/3D/Шаровые/LD Pride 47/LD Pride 47.301.15.0.step",
+    "meshHash": "3d55b409e1de4bc53bc51a63cecc72ebc24a9f27ba7e730f409e87d5ab44a490",
+    "stlSha256": "8ef0a050350ef3e5f6fab5b0d820f77bcbb29903a830fc7a98bec380cacd3017",
+    "lengthMm": 49.0,
+    "threads": [
+      {
+        "designation": "G1/2",
+        "gender": "female",
+        "depthMm": 12.0
+      },
+      {
+        "designation": "G1/2",
+        "gender": "female",
+        "depthMm": 11.809
+      }
+    ],
+    "bounds": [
+      -14.75,
+      -107.704018,
+      -14.75,
+      14.998897,
+      10.970963,
+      42.0
+    ],
+    "rotation": [
+      0,
+      0,
+      -90
+    ],
+    "position": [
+      38.02904,
+      0,
+      0
+    ],
+    "notes": [
+      "В CAD порты находятся на торцах резьбы. Глубина задана до внутреннего уступа по STEP. Фактическая глубина затяжки зависит от ответной детали."
+    ]
+  },
+  {
+    "equipmentId": "шаровые-краны-001-r0194",
+    "source": "Заводской STEP LD 47.301.20.0, ВР/ВР, стальной рычаг, DN20 PN40. https://xn--d1an.xn--p1ai/products/3902--kran_sarovoj_latunnyj_ld_pride_47_20_v_v_r_du_20_ru_40_rycag_stal_noj/",
+    "cadPath": "Equipment/Valves/3D/Шаровые/LD Pride 47/LD Pride 47.301.20.0.step",
+    "meshHash": "d5a751e89616ba450d4fcd7f13df3751c6c64e345a9bb7f7dac6c1c2ae70720d",
+    "stlSha256": "b9b650763721ec09e702ab1da03e6b034787ac7ab76899653c753cc9b926f30c",
+    "lengthMm": 54.0,
+    "threads": [
+      {
+        "designation": "G3/4",
+        "gender": "female",
+        "depthMm": 12.12
+      },
+      {
+        "designation": "G3/4",
+        "gender": "female",
+        "depthMm": 11.187
+      }
+    ],
+    "bounds": [
+      -17.75,
+      -110.679985,
+      -17.75,
+      17.998186,
+      11.370015,
+      45.0
+    ],
+    "rotation": [
+      0,
+      0,
+      -90
+    ],
+    "position": [
+      42.63,
+      0,
+      0
+    ],
+    "notes": [
+      "В CAD порты находятся на торцах резьбы. Глубина задана до внутреннего уступа по STEP. Фактическая глубина затяжки зависит от ответной детали."
+    ]
+  },
+  {
+    "equipmentId": "шаровые-краны-001-r0195",
+    "source": "Заводской STEP LD 47.301.25.0, ВР/ВР, стальной рычаг, DN25 PN40. https://xn--d1an.xn--p1ai/products/3903--kran_sarovoj_latunnyj_ld_pride_47_25_v_v_r_du_25_ru_40_rycag_stal_noj/",
+    "cadPath": "Equipment/Valves/3D/Шаровые/LD Pride 47/LD Pride 47.301.25.0.step",
+    "meshHash": "6b60353421be3b290651a6ff600407b97b225768799a5f94ae2881077b466688",
+    "stlSha256": "4e5beeabea3365bdd935573ce9654170dff947104c51d625131734718bad4a77",
+    "lengthMm": 64,
+    "threads": [
+      {
+        "designation": "G1",
+        "gender": "female",
+        "depthMm": 14.13
+      },
+      {
+        "designation": "G1",
+        "gender": "female",
+        "depthMm": 15.17
+      }
+    ],
+    "bounds": [
+      -21.5,
+      -141.75,
+      -21.5,
+      21.748339,
+      13.0,
+      56.5
+    ],
+    "rotation": [
+      0,
+      0,
+      -90
+    ],
+    "position": [
+      51,
+      0,
+      0
+    ],
+    "notes": [
+      "В CAD порты находятся на торцах резьбы. Глубина задана до внутреннего уступа по STEP. Фактическая глубина затяжки зависит от ответной детали."
+    ]
+  },
+  {
+    "equipmentId": "шаровые-краны-001-r0196",
+    "source": "Заводской STEP LD 47.301.32.0, ВР/ВР, стальной рычаг, DN32 PN25. https://xn--d1an.xn--p1ai/products/3904--kran_sarovoj_latunnyj_ld_pride_47_32_v_v_r_du_32_ru_25_rycag_stal_noj/",
+    "cadPath": "Equipment/Valves/3D/Шаровые/LD Pride 47/LD Pride 47.301.32.0.step",
+    "meshHash": "e3bf1f1a84b052eb865022f7676fae0cf7569b30b004f29c984fa4e9b28a7fb1",
+    "stlSha256": "259f36ba156f866f6aa652c429e03218079f9776994489a0a559e107b54a4a90",
+    "lengthMm": 73.5,
+    "threads": [
+      {
+        "designation": "G1 1/4",
+        "gender": "female",
+        "depthMm": 16.25
+      },
+      {
+        "designation": "G1 1/4",
+        "gender": "female",
+        "depthMm": 15.0
+      }
+    ],
+    "bounds": [
+      -27.0,
+      -147.050003,
+      -27.0,
+      27.24794,
+      12.99998,
+      62.0
+    ],
+    "rotation": [
+      0,
+      0,
+      -90
+    ],
+    "position": [
+      60.50002,
+      0,
+      0
+    ],
+    "notes": [
+      "В CAD порты находятся на торцах резьбы. Глубина задана до внутреннего уступа по STEP. Фактическая глубина затяжки зависит от ответной детали."
+    ]
+  },
+  {
+    "equipmentId": "шаровые-краны-001-r0197",
+    "source": "Заводской STEP LD 47.301.40.0, ВР/ВР, стальной рычаг, DN40 PN25. https://xn--d1an.xn--p1ai/products/3905--kran_sarovoj_latunnyj_ld_pride_47_40_v_v_r_du_40_ru_25_rycag_stal_noj/",
+    "cadPath": "Equipment/Valves/3D/Шаровые/LD Pride 47/LD Pride 47.301.40.0.step",
+    "meshHash": "dc5231449213b11e83032566404a7883e1279330b4b9d1cc6b8645da038401dd",
+    "stlSha256": "aae3420e25771ae9bad80abeea6a3a0c6126183ece43f637b1adc193867617c6",
+    "lengthMm": 86,
+    "threads": [
+      {
+        "designation": "G1 1/2",
+        "gender": "female",
+        "depthMm": 16.75
+      },
+      {
+        "designation": "G1 1/2",
+        "gender": "female",
+        "depthMm": 16
+      }
+    ],
+    "bounds": [
+      -32.754799,
+      -115.25,
+      -32.754799,
+      32.873486,
+      86.0,
+      75.5
+    ],
+    "rotation": [
+      0,
+      0,
+      -90
+    ],
+    "position": [
+      0,
+      0,
+      0
+    ],
+    "notes": [
+      "В CAD порты находятся на торцах резьбы. Глубина задана до внутреннего уступа по STEP. Фактическая глубина затяжки зависит от ответной детали."
+    ]
+  },
+  {
+    "equipmentId": "шаровые-краны-001-r0198",
+    "source": "Заводской STEP LD 47.301.50.0, ВР/ВР, стальной рычаг, DN50 PN25. https://xn--d1an.xn--p1ai/products/3906--kran_sarovoj_latunnyj_ld_pride_47_50_v_v_r_du_50_ru_25_rycag_stal_noj/",
+    "cadPath": "Equipment/Valves/3D/Шаровые/LD Pride 47/LD Pride 47.301.50.0.step",
+    "meshHash": "763f4f39fa78d18c101a56fa3848fe3138c13934b3dbe35d8cdb99970323d436",
+    "stlSha256": "eaca6700c12005192c53e7334b8b0f6296353344daaa3f10294e6618c5bcf715",
+    "lengthMm": 95,
+    "threads": [
+      {
+        "designation": "G2",
+        "gender": "female",
+        "depthMm": 17.5
+      },
+      {
+        "designation": "G2",
+        "gender": "female",
+        "depthMm": 19
+      }
+    ],
+    "bounds": [
+      -40.25,
+      -167.0,
+      -40.25,
+      40.497658,
+      38.0,
+      82.5
+    ],
+    "rotation": [
+      0,
+      0,
+      -90
+    ],
+    "position": [
+      57,
+      0,
+      0
+    ],
+    "notes": [
+      "В CAD порты находятся на торцах резьбы. Глубина задана до внутреннего уступа по STEP. Фактическая глубина затяжки зависит от ответной детали.",
+      "По карточке длина 94 мм. По торцам заводского STEP 95 мм, в модели использовано это расстояние."
+    ]
+  }
+]

@@ -1,5 +1,7 @@
 import { add, subtract, distance, rotate, worldPoint, pipePoints, type Vec3, type Assembly, type Component, type EditorState } from "./model";
 import type { SnapKind, SnapPlane, SnapSettings } from "./snap-settings";
+import { branchFrame, saddleRings } from "./collector-intersection";
+import { resolvedCollectorMetal } from "./collector-mesh";
 
 export const scale = (a: Vec3, n: number): Vec3 => a.map(v => v * n) as Vec3;
 export const dot = (a: Vec3, b: Vec3) => a.reduce((s, v, i) => s + v * b[i], 0);
@@ -31,10 +33,19 @@ export function snapGeometry(assembly: Assembly, references: EditorState["refere
     const feature = (id: string) => ({ id: `${c.id}/${id}`, componentId: c.id });
     const point = (id: string, p: Vec3, kinds: SnapKind[]) => g.points.push({ ...feature(id), point: p, kinds });
     point("base", c.position, ["base"]);
-    for (const p of c.ports) g.points.push({ ...feature(`port/${p.id}`), point: worldPoint(c, p.point), kinds: ["port"], axis: p.axis && rotate(p.axis, c.rotation), approximate: p.provisional,
+    for (const p of c.ports.filter(p => !c.collector?.hiddenPieceIds.includes(`branch-${p.id}`)&&!c.channelFrameAssembly?.hiddenPieceIds.includes(c.channelFrame?.holes.find(h=>h.id===p.id)?.memberId??""))) g.points.push({ ...feature(`port/${p.id}`), point: worldPoint(c, p.point), kinds: ["port"], axis: p.axis && rotate(p.axis, c.rotation), approximate: p.provisional,
       note: p.provisional ? "предварительные данные патрубка" : "метаданные патрубка; монтажная пригодность требует проверки" });
     for (const p of references.filter(p => p.componentId === c.id)) g.points.push({ ...feature(`reference/${p.id}`), point: worldPoint(c, p.point), kinds: ["reference"], approximate: p.approximate, note: p.approximate ? "опора сохранена по полигональной сетке" : undefined });
-    if (c.kind === "frame") frameBoxes(c.parameters).forEach((box, bi) => {
+    for(const hole of c.frameDrilling?.holes??[]){
+      const origin=worldPoint(c,hole.point),u=rotate([1,0,0],c.rotation),v=rotate([0,0,1],c.rotation),radius=hole.diameter/2;
+      g.circles.push({...feature(`hole/${hole.id}`),origin,u,v,radius});point(`hole/${hole.id}/center`,origin,["center","faceCenter"]);
+      for(let i=0;i<4;i++)point(`hole/${hole.id}/q${i}`,add(origin,scale([u,v,scale(u,-1),scale(v,-1)][i],radius)),["quadrant"]);
+    }
+    if(c.channelFrame)for(const h of c.channelFrame.holes.filter(h=>h.valid&&h.diameterMm&&!c.channelFrameAssembly?.hiddenPieceIds.includes(h.memberId??""))){
+      const origin=worldPoint(c,[h.y,h.face==="top"?c.channelFrame.heightMm:0,-h.x]);
+      g.circles.push({...feature(`channel-hole/${h.id}`),origin,u:rotate([1,0,0],c.rotation),v:rotate([0,0,1],c.rotation),radius:h.diameterMm!/2});point(`channel-hole/${h.id}/center`,origin,["center","faceCenter"]);
+    }
+    if (c.kind === "frame"&&!c.meshUrl&&!c.channelFrame) frameBoxes(c.parameters).forEach((box, bi) => {
       const vertices: Vec3[] = [];
       for (let bits = 0; bits < 8; bits++) vertices.push(worldPoint(c, add(box.center, box.size.map((s, a) => (bits & (1 << a) ? 1 : -1) * s / 2) as Vec3)));
       vertices.forEach((p, vi) => point(`beam${bi}/vertex${vi}`, p, ["vertex", "end"]));
@@ -46,7 +57,23 @@ export function snapGeometry(assembly: Assembly, references: EditorState["refere
         g.faces.push(face); point(face.id + "/center", face.origin, ["faceCenter", "centroid"]);
       }
     });
-    if (c.kind === "pipe" || c.kind === "collector") {
+    if (c.collector) {
+      const t = c.collector.template, hidden = c.collector.hiddenPieceIds, metal = resolvedCollectorMetal(t);
+      const end = (id: string, origin: Vec3, axis: Vec3, radius: number) => {
+        const [u,v] = branchFrame(axis), circle: SnapCircle = { ...feature(id), origin: worldPoint(c,origin), u: rotate(u,c.rotation), v: rotate(v,c.rotation), radius };
+        g.circles.push(circle); point(id+"/center",circle.origin,["center","faceCenter","centroid"]);
+        for(let i=0;i<4;i++) point(id+`/q${i}`,add(circle.origin,scale([circle.u,circle.v,scale(circle.u,-1),scale(circle.v,-1)][i],radius)),["quadrant"]);
+      };
+      if(t.main&&!hidden.includes("main"))for(const s of [-1,1])end(`main-end-${s}`,[s*t.main.lengthMm/2,0,0],[s,0,0],t.main.outerMm/2);
+      for(const b of t.branches.filter(b=>!hidden.includes(b.id) && metal.branches[b.id])) {
+        const tip=add(b.origin,scale(b.axis,b.endMm));end(`${b.id}/end`,tip,b.axis,b.outerMm/2);end(`${b.id}/bore`,tip,b.axis,b.innerMm/2);
+        if(t.main)try { const rings=saddleRings(t.main,b),base=scale(rings.outer.reduce((sum,p)=>add(sum,p),[0,0,0] as Vec3),1/rings.outer.length);
+          g.lines.push({...feature(`${b.id}/axis`),a:worldPoint(c,base),b:worldPoint(c,tip),axis:true});
+          rings.outer.forEach((p,i)=>g.points.push({...feature(`${b.id}/saddle-${i}`),point:worldPoint(c,p),kinds:["vertex"],approximate:true,note:"Дискретизированный аналитический контур седла"}));
+        }catch { /* Invalid cuts have diagnostic symbols, never fictitious flat saddle faces. */ }
+      }
+    }
+    if (c.kind === "pipe" || c.kind === "collector" && !c.collector) {
       const points = c.kind === "pipe" ? pipePoints(assembly, c) : [-1, 1].map(s => worldPoint(c, [s * c.parameters.length / 2, 0, 0]));
       for (let i = 1; i < points.length; i++) if (distance(points[i - 1], points[i]) > 1e-6) g.lines.push({ ...feature(`axis${i}`), a: points[i - 1], b: points[i], axis: true });
       // Only exposed end circles. Spherical bend proxies are not analytic pipe arcs.

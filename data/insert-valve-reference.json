@@ -1,0 +1,711 @@
+{
+  "verifiedAt": "2026-10-04",
+  "notes": [
+    "Это строительная длина корпуса затвора, а не длина болта.",
+    "Длина DIN933 выбирается из каталога только после подтверждения всего пакета конкретного соединения; пропуски не равны нулю.",
+    "Для широкого уплотнения перенесены только размеры, прямо представленные на рис.5.",
+    "Руководство 017W.Z/017W.ZS PN16 и пожарное исполнение PN25 не объединяются в одну модель."
+  ],
+  "rows": [
+    {
+      "model": "017W",
+      "dn": 32,
+      "pn": 10,
+      "bodyLengthMm": 32,
+      "mounting": "weld-neck-only",
+      "source": "https://dendor.ru/re/re017w.pdf; п.1.2.6, 2.2.2; рис.1, стр.13",
+      "allowedFlangeStandards": [
+        "ГОСТ33259-2015 тип11"
+      ]
+    },
+    {
+      "model": "017W",
+      "dn": 32,
+      "pn": 16,
+      "bodyLengthMm": 32,
+      "mounting": "weld-neck-only",
+      "source": "https://dendor.ru/re/re017w.pdf; п.1.2.6, 2.2.2; рис.1, стр.13",
+      "allowedFlangeStandards": [
+        "ГОСТ33259-2015 тип11"
+      ]
+    },
+    {
+      "model": "017W",
+      "dn": 40,
+      "pn": 10,
+      "bodyLengthMm": 33,
+      "mounting": "weld-neck-only",
+      "source": "https://dendor.ru/re/re017w.pdf; п.1.2.6, 2.2.2; рис.1, стр.13",
+      "allowedFlangeStandards": [
+        "ГОСТ33259-2015 тип11"
+      ]
+    },
+    {
+      "model": "017W",
+      "dn": 40,
+      "pn": 16,
+      "bodyLengthMm": 33,
+      "mounting": "weld-neck-only",
+      "source": "https://dendor.ru/re/re017w.pdf; п.1.2.6, 2.2.2; рис.1, стр.13",
+      "allowedFlangeStandards": [
+        "ГОСТ33259-2015 тип11"
+      ]
+    },
+    {
+      "model": "017W",
+      "dn": 50,
+      "pn": 10,
+      "bodyLengthMm": 43,
+      "mounting": "weld-neck-only",
+      "source": "https://dendor.ru/re/re017w.pdf; п.1.2.6, 2.2.2; рис.1, стр.13",
+      "allowedFlangeStandards": [
+        "ГОСТ33259-2015 тип11"
+      ]
+    },
+    {
+      "model": "017W",
+      "dn": 50,
+      "pn": 16,
+      "bodyLengthMm": 43,
+      "mounting": "weld-neck-only",
+      "source": "https://dendor.ru/re/re017w.pdf; п.1.2.6, 2.2.2; рис.1, стр.13",
+      "allowedFlangeStandards": [
+        "ГОСТ33259-2015 тип11"
+      ]
+    },
+    {
+      "model": "017W",
+      "dn": 65,
+      "pn": 10,
+      "bodyLengthMm": 46,
+      "mounting": "weld-neck-only",
+      "source": "https://dendor.ru/re/re017w.pdf; п.1.2.6, 2.2.2; рис.1, стр.13",
+      "allowedFlangeStandards": [
+        "ГОСТ33259-2015 тип11"
+      ]
+    },
+    {
+      "model": "017W",
+      "dn": 65,
+      "pn": 16,
+      "bodyLengthMm": 46,
+      "mounting": "weld-neck-only",
+      "source": "https://dendor.ru/re/re017w.pdf; п.1.2.6, 2.2.2; рис.1, стр.13",
+      "allowedFlangeStandards": [
+        "ГОСТ33259-2015 тип11"
+      ]
+    },
+    {
+      "model": "017W",
+      "dn": 80,
+      "pn": 10,
+      "bodyLengthMm": 46,
+      "mounting": "weld-neck-only",
+      "source": "https://dendor.ru/re/re017w.pdf; п.1.2.6, 2.2.2; рис.1, стр.13",
+      "allowedFlangeStandards": [
+        "ГОСТ33259-2015 тип11"
+      ]
+    },
+    {
+      "model": "017W",
+      "dn": 80,
+      "pn": 16,
+      "bodyLengthMm": 46,
+      "mounting": "weld-neck-only",
+      "source": "https://dendor.ru/re/re017w.pdf; п.1.2.6, 2.2.2; рис.1, стр.13",
+      "allowedFlangeStandards": [
+        "ГОСТ33259-2015 тип11"
+      ]
+    },
+    {
+      "model": "017W",
+      "dn": 100,
+      "pn": 10,
+      "bodyLengthMm": 52,
+      "mounting": "weld-neck-only",
+      "source": "https://dendor.ru/re/re017w.pdf; п.1.2.6, 2.2.2; рис.1, стр.13",
+      "allowedFlangeStandards": [
+        "ГОСТ33259-2015 тип11"
+      ]
+    },
+    {
+      "model": "017W",
+      "dn": 100,
+      "pn": 16,
+      "bodyLengthMm": 52,
+      "mounting": "weld-neck-only",
+      "source": "https://dendor.ru/re/re017w.pdf; п.1.2.6, 2.2.2; рис.1, стр.13",
+      "allowedFlangeStandards": [
+        "ГОСТ33259-2015 тип11"
+      ]
+    },
+    {
+      "model": "017W",
+      "dn": 125,
+      "pn": 10,
+      "bodyLengthMm": 56,
+      "mounting": "weld-neck-only",
+      "source": "https://dendor.ru/re/re017w.pdf; п.1.2.6, 2.2.2; рис.1, стр.13",
+      "allowedFlangeStandards": [
+        "ГОСТ33259-2015 тип11"
+      ]
+    },
+    {
+      "model": "017W",
+      "dn": 125,
+      "pn": 16,
+      "bodyLengthMm": 56,
+      "mounting": "weld-neck-only",
+      "source": "https://dendor.ru/re/re017w.pdf; п.1.2.6, 2.2.2; рис.1, стр.13",
+      "allowedFlangeStandards": [
+        "ГОСТ33259-2015 тип11"
+      ]
+    },
+    {
+      "model": "017W",
+      "dn": 150,
+      "pn": 10,
+      "bodyLengthMm": 56,
+      "mounting": "weld-neck-only",
+      "source": "https://dendor.ru/re/re017w.pdf; п.1.2.6, 2.2.2; рис.1, стр.13",
+      "allowedFlangeStandards": [
+        "ГОСТ33259-2015 тип11"
+      ]
+    },
+    {
+      "model": "017W",
+      "dn": 150,
+      "pn": 16,
+      "bodyLengthMm": 56,
+      "mounting": "weld-neck-only",
+      "source": "https://dendor.ru/re/re017w.pdf; п.1.2.6, 2.2.2; рис.1, стр.13",
+      "allowedFlangeStandards": [
+        "ГОСТ33259-2015 тип11"
+      ]
+    },
+    {
+      "model": "017W",
+      "dn": 200,
+      "pn": 10,
+      "bodyLengthMm": 60,
+      "mounting": "weld-neck-only",
+      "source": "https://dendor.ru/re/re017w.pdf; п.1.2.6, 2.2.2; рис.1, стр.13",
+      "allowedFlangeStandards": [
+        "ГОСТ33259-2015 тип11"
+      ]
+    },
+    {
+      "model": "017W",
+      "dn": 200,
+      "pn": 16,
+      "bodyLengthMm": 60,
+      "mounting": "weld-neck-only",
+      "source": "https://dendor.ru/re/re017w.pdf; п.1.2.6, 2.2.2; рис.1, стр.13",
+      "allowedFlangeStandards": [
+        "ГОСТ33259-2015 тип11"
+      ]
+    },
+    {
+      "model": "017W",
+      "dn": 250,
+      "pn": 10,
+      "bodyLengthMm": 68,
+      "mounting": "weld-neck-only",
+      "source": "https://dendor.ru/re/re017w.pdf; п.1.2.6, 2.2.2; рис.1, стр.13",
+      "allowedFlangeStandards": [
+        "ГОСТ33259-2015 тип11"
+      ]
+    },
+    {
+      "model": "017W",
+      "dn": 250,
+      "pn": 16,
+      "bodyLengthMm": 68,
+      "mounting": "weld-neck-only",
+      "source": "https://dendor.ru/re/re017w.pdf; п.1.2.6, 2.2.2; рис.1, стр.13",
+      "allowedFlangeStandards": [
+        "ГОСТ33259-2015 тип11"
+      ]
+    },
+    {
+      "model": "017W",
+      "dn": 300,
+      "pn": 10,
+      "bodyLengthMm": 78,
+      "mounting": "weld-neck-only",
+      "source": "https://dendor.ru/re/re017w.pdf; п.1.2.6, 2.2.2; рис.1, стр.13",
+      "allowedFlangeStandards": [
+        "ГОСТ33259-2015 тип11"
+      ]
+    },
+    {
+      "model": "017W",
+      "dn": 300,
+      "pn": 16,
+      "bodyLengthMm": 78,
+      "mounting": "weld-neck-only",
+      "source": "https://dendor.ru/re/re017w.pdf; п.1.2.6, 2.2.2; рис.1, стр.13",
+      "allowedFlangeStandards": [
+        "ГОСТ33259-2015 тип11"
+      ]
+    },
+    {
+      "model": "017W",
+      "dn": 350,
+      "pn": 10,
+      "bodyLengthMm": 78,
+      "mounting": "weld-neck-only",
+      "source": "https://dendor.ru/re/re017w.pdf; п.1.2.6, 2.2.2; рис.2, стр.14",
+      "allowedFlangeStandards": [
+        "ГОСТ33259-2015 тип11"
+      ]
+    },
+    {
+      "model": "017W",
+      "dn": 350,
+      "pn": 16,
+      "bodyLengthMm": 78,
+      "mounting": "weld-neck-only",
+      "source": "https://dendor.ru/re/re017w.pdf; п.1.2.6, 2.2.2; рис.2, стр.14",
+      "allowedFlangeStandards": [
+        "ГОСТ33259-2015 тип11"
+      ]
+    },
+    {
+      "model": "017W",
+      "dn": 400,
+      "pn": 10,
+      "bodyLengthMm": 102,
+      "mounting": "weld-neck-only",
+      "source": "https://dendor.ru/re/re017w.pdf; п.1.2.6, 2.2.2; рис.2, стр.14",
+      "allowedFlangeStandards": [
+        "ГОСТ33259-2015 тип11"
+      ]
+    },
+    {
+      "model": "017W",
+      "dn": 400,
+      "pn": 16,
+      "bodyLengthMm": 102,
+      "mounting": "weld-neck-only",
+      "source": "https://dendor.ru/re/re017w.pdf; п.1.2.6, 2.2.2; рис.2, стр.14",
+      "allowedFlangeStandards": [
+        "ГОСТ33259-2015 тип11"
+      ]
+    },
+    {
+      "model": "017W",
+      "dn": 500,
+      "pn": 10,
+      "bodyLengthMm": 127,
+      "mounting": "weld-neck-only",
+      "source": "https://dendor.ru/re/re017w.pdf; п.1.2.6, 2.2.2; рис.2, стр.14",
+      "allowedFlangeStandards": [
+        "ГОСТ33259-2015 тип11"
+      ]
+    },
+    {
+      "model": "017W",
+      "dn": 500,
+      "pn": 16,
+      "bodyLengthMm": 127,
+      "mounting": "weld-neck-only",
+      "source": "https://dendor.ru/re/re017w.pdf; п.1.2.6, 2.2.2; рис.2, стр.14",
+      "allowedFlangeStandards": [
+        "ГОСТ33259-2015 тип11"
+      ]
+    },
+    {
+      "model": "017W",
+      "dn": 600,
+      "pn": 10,
+      "bodyLengthMm": 154,
+      "mounting": "weld-neck-only",
+      "source": "https://dendor.ru/re/re017w.pdf; п.1.2.6, 2.2.2; рис.2, стр.14",
+      "allowedFlangeStandards": [
+        "ГОСТ33259-2015 тип11"
+      ]
+    },
+    {
+      "model": "017W",
+      "dn": 600,
+      "pn": 16,
+      "bodyLengthMm": 154,
+      "mounting": "weld-neck-only",
+      "source": "https://dendor.ru/re/re017w.pdf; п.1.2.6, 2.2.2; рис.2, стр.14",
+      "allowedFlangeStandards": [
+        "ГОСТ33259-2015 тип11"
+      ]
+    },
+    {
+      "model": "017W",
+      "dn": 700,
+      "pn": 16,
+      "bodyLengthMm": 165,
+      "mounting": "weld-neck-only",
+      "source": "https://dendor.ru/re/re017w.pdf; п.1.2.6, 2.2.2; рис.2, стр.14",
+      "allowedFlangeStandards": [
+        "ГОСТ33259-2015 тип11"
+      ]
+    },
+    {
+      "model": "017W",
+      "dn": 800,
+      "pn": 16,
+      "bodyLengthMm": 190,
+      "mounting": "weld-neck-only",
+      "source": "https://dendor.ru/re/re017w.pdf; п.1.2.6, 2.2.2; рис.2, стр.14",
+      "allowedFlangeStandards": [
+        "ГОСТ33259-2015 тип11"
+      ]
+    },
+    {
+      "model": "017W (широкая манжета)",
+      "dn": 50,
+      "pn": 10,
+      "bodyLengthMm": 43,
+      "mounting": "broad-seat",
+      "source": "https://dendor.ru/re/re017w.pdf; рис.5, стр.17; варианты исполнения стр.18 (широкое уплотнение для плоских фланцев)",
+      "allowedFlangeStandards": [
+        "ГОСТ33259-2015 тип01",
+        "ГОСТ33259-2015 тип11"
+      ]
+    },
+    {
+      "model": "017W (широкая манжета)",
+      "dn": 50,
+      "pn": 16,
+      "bodyLengthMm": 43,
+      "mounting": "broad-seat",
+      "source": "https://dendor.ru/re/re017w.pdf; рис.5, стр.17; варианты исполнения стр.18 (широкое уплотнение для плоских фланцев)",
+      "allowedFlangeStandards": [
+        "ГОСТ33259-2015 тип01",
+        "ГОСТ33259-2015 тип11"
+      ]
+    },
+    {
+      "model": "017W (широкая манжета)",
+      "dn": 65,
+      "pn": 10,
+      "bodyLengthMm": 46,
+      "mounting": "broad-seat",
+      "source": "https://dendor.ru/re/re017w.pdf; рис.5, стр.17; варианты исполнения стр.18 (широкое уплотнение для плоских фланцев)",
+      "allowedFlangeStandards": [
+        "ГОСТ33259-2015 тип01",
+        "ГОСТ33259-2015 тип11"
+      ]
+    },
+    {
+      "model": "017W (широкая манжета)",
+      "dn": 65,
+      "pn": 16,
+      "bodyLengthMm": 46,
+      "mounting": "broad-seat",
+      "source": "https://dendor.ru/re/re017w.pdf; рис.5, стр.17; варианты исполнения стр.18 (широкое уплотнение для плоских фланцев)",
+      "allowedFlangeStandards": [
+        "ГОСТ33259-2015 тип01",
+        "ГОСТ33259-2015 тип11"
+      ]
+    },
+    {
+      "model": "017W (широкая манжета)",
+      "dn": 80,
+      "pn": 10,
+      "bodyLengthMm": 46,
+      "mounting": "broad-seat",
+      "source": "https://dendor.ru/re/re017w.pdf; рис.5, стр.17; варианты исполнения стр.18 (широкое уплотнение для плоских фланцев)",
+      "allowedFlangeStandards": [
+        "ГОСТ33259-2015 тип01",
+        "ГОСТ33259-2015 тип11"
+      ]
+    },
+    {
+      "model": "017W (широкая манжета)",
+      "dn": 80,
+      "pn": 16,
+      "bodyLengthMm": 46,
+      "mounting": "broad-seat",
+      "source": "https://dendor.ru/re/re017w.pdf; рис.5, стр.17; варианты исполнения стр.18 (широкое уплотнение для плоских фланцев)",
+      "allowedFlangeStandards": [
+        "ГОСТ33259-2015 тип01",
+        "ГОСТ33259-2015 тип11"
+      ]
+    },
+    {
+      "model": "017W (широкая манжета)",
+      "dn": 100,
+      "pn": 10,
+      "bodyLengthMm": 52,
+      "mounting": "broad-seat",
+      "source": "https://dendor.ru/re/re017w.pdf; рис.5, стр.17; варианты исполнения стр.18 (широкое уплотнение для плоских фланцев)",
+      "allowedFlangeStandards": [
+        "ГОСТ33259-2015 тип01",
+        "ГОСТ33259-2015 тип11"
+      ]
+    },
+    {
+      "model": "017W (широкая манжета)",
+      "dn": 100,
+      "pn": 16,
+      "bodyLengthMm": 52,
+      "mounting": "broad-seat",
+      "source": "https://dendor.ru/re/re017w.pdf; рис.5, стр.17; варианты исполнения стр.18 (широкое уплотнение для плоских фланцев)",
+      "allowedFlangeStandards": [
+        "ГОСТ33259-2015 тип01",
+        "ГОСТ33259-2015 тип11"
+      ]
+    },
+    {
+      "model": "017W (широкая манжета)",
+      "dn": 125,
+      "pn": 10,
+      "bodyLengthMm": 56,
+      "mounting": "broad-seat",
+      "source": "https://dendor.ru/re/re017w.pdf; рис.5, стр.17; варианты исполнения стр.18 (широкое уплотнение для плоских фланцев)",
+      "allowedFlangeStandards": [
+        "ГОСТ33259-2015 тип01",
+        "ГОСТ33259-2015 тип11"
+      ]
+    },
+    {
+      "model": "017W (широкая манжета)",
+      "dn": 125,
+      "pn": 16,
+      "bodyLengthMm": 56,
+      "mounting": "broad-seat",
+      "source": "https://dendor.ru/re/re017w.pdf; рис.5, стр.17; варианты исполнения стр.18 (широкое уплотнение для плоских фланцев)",
+      "allowedFlangeStandards": [
+        "ГОСТ33259-2015 тип01",
+        "ГОСТ33259-2015 тип11"
+      ]
+    },
+    {
+      "model": "017W (широкая манжета)",
+      "dn": 150,
+      "pn": 10,
+      "bodyLengthMm": 56,
+      "mounting": "broad-seat",
+      "source": "https://dendor.ru/re/re017w.pdf; рис.5, стр.17; варианты исполнения стр.18 (широкое уплотнение для плоских фланцев)",
+      "allowedFlangeStandards": [
+        "ГОСТ33259-2015 тип01",
+        "ГОСТ33259-2015 тип11"
+      ]
+    },
+    {
+      "model": "017W (широкая манжета)",
+      "dn": 150,
+      "pn": 16,
+      "bodyLengthMm": 56,
+      "mounting": "broad-seat",
+      "source": "https://dendor.ru/re/re017w.pdf; рис.5, стр.17; варианты исполнения стр.18 (широкое уплотнение для плоских фланцев)",
+      "allowedFlangeStandards": [
+        "ГОСТ33259-2015 тип01",
+        "ГОСТ33259-2015 тип11"
+      ]
+    },
+    {
+      "model": "017W (широкая манжета)",
+      "dn": 200,
+      "pn": 10,
+      "bodyLengthMm": 60,
+      "mounting": "broad-seat",
+      "source": "https://dendor.ru/re/re017w.pdf; рис.5, стр.17; варианты исполнения стр.18 (широкое уплотнение для плоских фланцев)",
+      "allowedFlangeStandards": [
+        "ГОСТ33259-2015 тип01",
+        "ГОСТ33259-2015 тип11"
+      ]
+    },
+    {
+      "model": "017W (широкая манжета)",
+      "dn": 200,
+      "pn": 16,
+      "bodyLengthMm": 60,
+      "mounting": "broad-seat",
+      "source": "https://dendor.ru/re/re017w.pdf; рис.5, стр.17; варианты исполнения стр.18 (широкое уплотнение для плоских фланцев)",
+      "allowedFlangeStandards": [
+        "ГОСТ33259-2015 тип01",
+        "ГОСТ33259-2015 тип11"
+      ]
+    },
+    {
+      "model": "017W.ZS пожарный PN25",
+      "dn": 32,
+      "pn": 25,
+      "bodyLengthMm": 33,
+      "mounting": "broad-seat",
+      "source": "https://dendor.ru/re/tech/017W.YS%2C017W.ZS.pdf; основные массогабаритные характеристики 017W.ZS PN25 DN32–600; применение плоских фланцев требует проверки конкретного пожарного РЭ",
+      "allowedFlangeStandards": [],
+      "warnings": [
+        "Не подтверждён полный пакет крепежа и присоединение PN25: таблица размеров содержит графы сверловки PN10/PN16. Требуется паспорт выбранного пожарного исполнения."
+      ]
+    },
+    {
+      "model": "017W.ZS пожарный PN25",
+      "dn": 40,
+      "pn": 25,
+      "bodyLengthMm": 33,
+      "mounting": "broad-seat",
+      "source": "https://dendor.ru/re/tech/017W.YS%2C017W.ZS.pdf; основные массогабаритные характеристики 017W.ZS PN25 DN32–600; применение плоских фланцев требует проверки конкретного пожарного РЭ",
+      "allowedFlangeStandards": [],
+      "warnings": [
+        "Не подтверждён полный пакет крепежа и присоединение PN25: таблица размеров содержит графы сверловки PN10/PN16. Требуется паспорт выбранного пожарного исполнения."
+      ]
+    },
+    {
+      "model": "017W.ZS пожарный PN25",
+      "dn": 50,
+      "pn": 25,
+      "bodyLengthMm": 43,
+      "mounting": "broad-seat",
+      "source": "https://dendor.ru/re/tech/017W.YS%2C017W.ZS.pdf; основные массогабаритные характеристики 017W.ZS PN25 DN32–600; применение плоских фланцев требует проверки конкретного пожарного РЭ",
+      "allowedFlangeStandards": [],
+      "warnings": [
+        "Не подтверждён полный пакет крепежа и присоединение PN25: таблица размеров содержит графы сверловки PN10/PN16. Требуется паспорт выбранного пожарного исполнения."
+      ]
+    },
+    {
+      "model": "017W.ZS пожарный PN25",
+      "dn": 65,
+      "pn": 25,
+      "bodyLengthMm": 46,
+      "mounting": "broad-seat",
+      "source": "https://dendor.ru/re/tech/017W.YS%2C017W.ZS.pdf; основные массогабаритные характеристики 017W.ZS PN25 DN32–600; применение плоских фланцев требует проверки конкретного пожарного РЭ",
+      "allowedFlangeStandards": [],
+      "warnings": [
+        "Не подтверждён полный пакет крепежа и присоединение PN25: таблица размеров содержит графы сверловки PN10/PN16. Требуется паспорт выбранного пожарного исполнения."
+      ]
+    },
+    {
+      "model": "017W.ZS пожарный PN25",
+      "dn": 80,
+      "pn": 25,
+      "bodyLengthMm": 46,
+      "mounting": "broad-seat",
+      "source": "https://dendor.ru/re/tech/017W.YS%2C017W.ZS.pdf; основные массогабаритные характеристики 017W.ZS PN25 DN32–600; применение плоских фланцев требует проверки конкретного пожарного РЭ",
+      "allowedFlangeStandards": [],
+      "warnings": [
+        "Не подтверждён полный пакет крепежа и присоединение PN25: таблица размеров содержит графы сверловки PN10/PN16. Требуется паспорт выбранного пожарного исполнения."
+      ]
+    },
+    {
+      "model": "017W.ZS пожарный PN25",
+      "dn": 100,
+      "pn": 25,
+      "bodyLengthMm": 52,
+      "mounting": "broad-seat",
+      "source": "https://dendor.ru/re/tech/017W.YS%2C017W.ZS.pdf; основные массогабаритные характеристики 017W.ZS PN25 DN32–600; применение плоских фланцев требует проверки конкретного пожарного РЭ",
+      "allowedFlangeStandards": [],
+      "warnings": [
+        "Не подтверждён полный пакет крепежа и присоединение PN25: таблица размеров содержит графы сверловки PN10/PN16. Требуется паспорт выбранного пожарного исполнения."
+      ]
+    },
+    {
+      "model": "017W.ZS пожарный PN25",
+      "dn": 125,
+      "pn": 25,
+      "bodyLengthMm": 56,
+      "mounting": "broad-seat",
+      "source": "https://dendor.ru/re/tech/017W.YS%2C017W.ZS.pdf; основные массогабаритные характеристики 017W.ZS PN25 DN32–600; применение плоских фланцев требует проверки конкретного пожарного РЭ",
+      "allowedFlangeStandards": [],
+      "warnings": [
+        "Не подтверждён полный пакет крепежа и присоединение PN25: таблица размеров содержит графы сверловки PN10/PN16. Требуется паспорт выбранного пожарного исполнения."
+      ]
+    },
+    {
+      "model": "017W.ZS пожарный PN25",
+      "dn": 150,
+      "pn": 25,
+      "bodyLengthMm": 56,
+      "mounting": "broad-seat",
+      "source": "https://dendor.ru/re/tech/017W.YS%2C017W.ZS.pdf; основные массогабаритные характеристики 017W.ZS PN25 DN32–600; применение плоских фланцев требует проверки конкретного пожарного РЭ",
+      "allowedFlangeStandards": [],
+      "warnings": [
+        "Не подтверждён полный пакет крепежа и присоединение PN25: таблица размеров содержит графы сверловки PN10/PN16. Требуется паспорт выбранного пожарного исполнения."
+      ]
+    },
+    {
+      "model": "017W.ZS пожарный PN25",
+      "dn": 200,
+      "pn": 25,
+      "bodyLengthMm": 60,
+      "mounting": "broad-seat",
+      "source": "https://dendor.ru/re/tech/017W.YS%2C017W.ZS.pdf; основные массогабаритные характеристики 017W.ZS PN25 DN32–600; применение плоских фланцев требует проверки конкретного пожарного РЭ",
+      "allowedFlangeStandards": [],
+      "warnings": [
+        "Не подтверждён полный пакет крепежа и присоединение PN25: таблица размеров содержит графы сверловки PN10/PN16. Требуется паспорт выбранного пожарного исполнения."
+      ]
+    },
+    {
+      "model": "017W.ZS пожарный PN25",
+      "dn": 250,
+      "pn": 25,
+      "bodyLengthMm": 68,
+      "mounting": "broad-seat",
+      "source": "https://dendor.ru/re/tech/017W.YS%2C017W.ZS.pdf; основные массогабаритные характеристики 017W.ZS PN25 DN32–600; применение плоских фланцев требует проверки конкретного пожарного РЭ",
+      "allowedFlangeStandards": [],
+      "warnings": [
+        "Не подтверждён полный пакет крепежа и присоединение PN25: таблица размеров содержит графы сверловки PN10/PN16. Требуется паспорт выбранного пожарного исполнения."
+      ]
+    },
+    {
+      "model": "017W.ZS пожарный PN25",
+      "dn": 300,
+      "pn": 25,
+      "bodyLengthMm": 78,
+      "mounting": "broad-seat",
+      "source": "https://dendor.ru/re/tech/017W.YS%2C017W.ZS.pdf; основные массогабаритные характеристики 017W.ZS PN25 DN32–600; применение плоских фланцев требует проверки конкретного пожарного РЭ",
+      "allowedFlangeStandards": [],
+      "warnings": [
+        "Не подтверждён полный пакет крепежа и присоединение PN25: таблица размеров содержит графы сверловки PN10/PN16. Требуется паспорт выбранного пожарного исполнения."
+      ]
+    },
+    {
+      "model": "017W.ZS пожарный PN25",
+      "dn": 350,
+      "pn": 25,
+      "bodyLengthMm": 78,
+      "mounting": "broad-seat",
+      "source": "https://dendor.ru/re/tech/017W.YS%2C017W.ZS.pdf; основные массогабаритные характеристики 017W.ZS PN25 DN32–600; применение плоских фланцев требует проверки конкретного пожарного РЭ",
+      "allowedFlangeStandards": [],
+      "warnings": [
+        "Не подтверждён полный пакет крепежа и присоединение PN25: таблица размеров содержит графы сверловки PN10/PN16. Требуется паспорт выбранного пожарного исполнения."
+      ]
+    },
+    {
+      "model": "017W.ZS пожарный PN25",
+      "dn": 400,
+      "pn": 25,
+      "bodyLengthMm": 102,
+      "mounting": "broad-seat",
+      "source": "https://dendor.ru/re/tech/017W.YS%2C017W.ZS.pdf; основные массогабаритные характеристики 017W.ZS PN25 DN32–600; применение плоских фланцев требует проверки конкретного пожарного РЭ",
+      "allowedFlangeStandards": [],
+      "warnings": [
+        "Не подтверждён полный пакет крепежа и присоединение PN25: таблица размеров содержит графы сверловки PN10/PN16. Требуется паспорт выбранного пожарного исполнения."
+      ]
+    },
+    {
+      "model": "017W.ZS пожарный PN25",
+      "dn": 500,
+      "pn": 25,
+      "bodyLengthMm": 127,
+      "mounting": "broad-seat",
+      "source": "https://dendor.ru/re/tech/017W.YS%2C017W.ZS.pdf; основные массогабаритные характеристики 017W.ZS PN25 DN32–600; применение плоских фланцев требует проверки конкретного пожарного РЭ",
+      "allowedFlangeStandards": [],
+      "warnings": [
+        "Не подтверждён полный пакет крепежа и присоединение PN25: таблица размеров содержит графы сверловки PN10/PN16. Требуется паспорт выбранного пожарного исполнения."
+      ]
+    },
+    {
+      "model": "017W.ZS пожарный PN25",
+      "dn": 600,
+      "pn": 25,
+      "bodyLengthMm": 154,
+      "mounting": "broad-seat",
+      "source": "https://dendor.ru/re/tech/017W.YS%2C017W.ZS.pdf; основные массогабаритные характеристики 017W.ZS PN25 DN32–600; применение плоских фланцев требует проверки конкретного пожарного РЭ",
+      "allowedFlangeStandards": [],
+      "warnings": [
+        "Не подтверждён полный пакет крепежа и присоединение PN25: таблица размеров содержит графы сверловки PN10/PN16. Требуется паспорт выбранного пожарного исполнения."
+      ]
+    }
+  ]
+}

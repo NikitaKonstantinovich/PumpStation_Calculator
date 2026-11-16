@@ -1,7 +1,8 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { readFile } from "node:fs/promises";
-import ts from "typescript";
+import { build } from "esbuild";
+import { fileURLToPath } from "node:url";
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { loadTs } from "./load-ts.mjs";
@@ -11,7 +12,9 @@ const { componentPressureLimit, withInletPressureChecks } = await loadTs(new URL
 const { checkSuctionSpecPressure } = await loadTs(new URL("../app/suction-spec.ts", import.meta.url));
 const { createProject, parseProjectConfig } = await loadTs(new URL("../app/project-config.ts", import.meta.url));
 const { synchronizeCollectors } = await loadTs(new URL("../app/collector-project.ts", import.meta.url));
-const { collectorPressureChecks } = await loadTs(new URL("../app/collector-calculations.ts", import.meta.url));
+const { collectorPressureChecks, calculateCollector } = await loadTs(new URL("../app/collector-calculations.ts", import.meta.url));
+const { makeCollectorCatalog } = await loadTs(new URL("../app/collector-catalog.ts", import.meta.url));
+const collectorCatalog = makeCollectorCatalog(JSON.parse(await readFile(new URL("../public/binding-components.json", import.meta.url), "utf8")));
 const component = (id, fields = { PN: 16 }, family = id) => ({ id, family, catalogId: "test", fields: Object.entries(fields).map(([label, value]) => ({ column: label, headerPath: [label], value })), prices: [{ label: "Цена", amount: 125, currency: "RUB" }] });
 const row = (id, patch = {}) => ({ position: "03.10", name: id, equipmentId: id, section: "suction", details: "Выбрано пользователем", price: 125, quantity: 2, status: "selected", description: "Существующее описание", ...patch });
 function project(head = 200, pn = 16) {
@@ -117,7 +120,7 @@ test("collector BOM checks actual component ratings and reports missing ratings"
 test("collector pressure warning preserves a database price and is removed after lowering head", () => {
   let p = project(200, 16);
   const state = p.entities["station-collectors"].suction;
-  state.database = { id: "saved-collector", code: state.code, price: 12345 };
+  state.database = { id: "saved-collector", code: state.code, price: 12345, calculation: calculateCollector(state.configuration,collectorCatalog) };
   state.databaseStatus = "found";
   p = synchronizeCollectors(p);
   const high = p.entities["station-spec"].items.find(item => item.option === "suctionCollector");
@@ -133,26 +136,32 @@ test("collector pressure warning preserves a database price and is removed after
 });
 
 test("actual specification render keeps technical descriptions and warnings behind the button", async () => {
-  const pageUrl = new URL("../app/page.tsx", import.meta.url);
-  const page = await readFile(pageUrl, "utf8");
-  const source = [
-    `import { useRef, useState } from ${JSON.stringify(import.meta.resolve("react"))};`,
-    'import { specificationItemPresentation, specificationIssueId, specificationSection, visibleSpecificationItems } from "./specification-presentation";',
-    'const IssueNavigationMessage=()=>null; const IssueMessages=()=>null;',
-    'const normalizeSpecificationItems=items=>items; const isSecondaryEnabled=()=>false; const pumpPriceRub=()=>0;',
-    page.slice(page.indexOf("const SPEC_GROUPS:"), page.indexOf("\n];", page.indexOf("const SPEC_GROUPS:")) + 3),
-    page.slice(page.indexOf("function Specification("), page.indexOf("function PumpSketchView(")),
-    'export {Specification};',
-  ].join("\n");
-  const compiled = ts.transpileModule(source, { compilerOptions: { module: ts.ModuleKind.ESNext, jsx: ts.JsxEmit.ReactJSX, target: ts.ScriptTarget.ES2022 } }).outputText.replaceAll('"react/jsx-runtime"', JSON.stringify(import.meta.resolve("react/jsx-runtime")));
-  const { Specification } = await loadTs(pageUrl, { [pageUrl.href]: compiled });
+  const { outputFiles } = await build({ entryPoints: [fileURLToPath(new URL("../app/node-tools/specification-view.tsx", import.meta.url))], bundle: true, write: false, format: "esm", platform: "node", loader: { ".css": "empty" }, plugins: [{ name: "runtime-libraries", setup(builder) { builder.onResolve({ filter: /^(react(?:\/.*)?|exceljs)$/ }, args => ({ path: import.meta.resolve(args.path), external: true })); } }] });
+  const { NodeSpecificationView } = await import("data:text/javascript;base64," + Buffer.from(outputFiles[0].text).toString("base64"));
+  const render = (project,items) => renderToStaticMarkup(createElement(NodeSpecificationView, {
+    view: {kind:"specification",node:"spec/table",specification:{status:"ready",project,items,manualRows:[],readiness:{ready:true,compositionComplete:true,technicalReady:true,costComplete:true,knownTotal:items.reduce((total,item)=>total+(item.price??0)*item.quantity,0),findings:[]}}},change(){}
+  }));
   const item = withInletPressureChecks(row("Фланец", { details: "DN100 · PN16 · Ст20", description: "Предупреждение: проверить размеры" }), [checkInletPressure(200, "Фланец", 16, "PN16")]);
-  const html = renderToStaticMarkup(createElement(Specification, { entity: { items: [item] }, settings: project().entities["station-settings"], catalogue: [] }));
+  const current = project(); current.entities["station-spec"].items = [item];
+  const html = render(current,current.entities["station-spec"].items);
   assert.match(html, /spec-table__row--warning/);
+  assert.match(html, /<summary[^>]*>Выгрузить/);
+  assert.match(html, /<button[^>]*>CSV<\/button>/);
+  assert.match(html, /<button[^>]*>XLSX<\/button>/);
   assert.match(html, /spec-table__cell--price[^>]*>125</);
   assert.match(html, /<button[^>]*aria-label="Ошибка: Фланец"/);
   assert.match(html, /spec-table__cell--description">DN100 · PN16 · Ст20<\/span>/);
   assert.doesNotMatch(html, /проверить размеры|200 м|19,6 бар|превышает PN16/);
   const css = await readFile(new URL("../app/globals.css", import.meta.url), "utf8");
   assert.match(css, /\.spec-table__row--warning\s*\{\s*background:var\(--theme-surface-warning, #fff8df\)/);
+  const {fixture,sync,rows}=await import("./fixtures/station-specification.mjs");
+  const flatProject=fixture();flatProject.entities["station-settings"].stationType="fire";
+  const selected=sync(flatProject),parts=rows(selected).filter(r=>r.assemblyRole==="discharge:transducer"||r.hydraulicPart?.location==="discharge:transducer");
+  const flatHtml=render(selected,parts);
+  assert.equal((flatHtml.match(/spec-table__row--item/g)??[]).length,4);
+  assert.equal((flatHtml.match(/spec-table__cell--quantity">2<\/span>/g)??[]).length,3);
+  assert.match(flatHtml,/spec-table__cell--quantity">0\.6<\/span>/);
+  assert.match(flatHtml,/spec-table__cell--price[^>]*>3\s445,91<\/span>/);
+  assert.doesNotMatch(flatHtml,/spec-table__row--warning|Не подтверждено требуемое рабочее давление|не указано допустимое рабочее давление/i);
+  assert.doesNotMatch(flatHtml,/Стоимость комплекта|Состав на один комплект|Состав на 1 узел/);
 });

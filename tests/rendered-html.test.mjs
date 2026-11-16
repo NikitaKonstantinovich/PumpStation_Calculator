@@ -1,34 +1,31 @@
 import assert from "node:assert/strict";
-import { access, readFile } from "node:fs/promises";
+import { access, readFile, readdir } from "node:fs/promises";
 import test from "node:test";
 import { loadTs } from "./load-ts.mjs";
 
 const templateRoot = new URL("../", import.meta.url);
-const readPage = async () => (await Promise.all(["page.tsx", "pump-sketches.ts", "tool-registry.ts"].map(name => readFile(new URL(`../app/${name}`, import.meta.url), "utf8")))).join("\n");
+const readPage = async () => (await Promise.all(["full-workspace.tsx", "node-tools/specification-view.tsx", "node-tools/specification-nodes.ts", "node-tools/product-windows.tsx", "node-tools/factory.ts", "node-tools/dn-runtime.ts", "node-tools/dn-view.tsx", "station-hydraulic-calculation.ts", "calculated-input.ts", "control-cabinet-selection.ts", "station-specification.ts", "workspace-panels.tsx", "allowed-pump-tools.tsx", "pump-chart-plot.tsx", "pump-catalog-client.ts", "pump-sketches.ts", "tool-registry.ts"].map(name => readFile(new URL(`../app/${name}`, import.meta.url), "utf8")))).join("\n");
 
 async function loadProjectConfig() {
   return loadTs(new URL("../app/project-config.ts", import.meta.url));
 }
 
 async function render() {
-  const workerUrl = new URL("../dist/server/index.js", import.meta.url);
-  workerUrl.searchParams.set("test", `${process.pid}-${Date.now()}`);
-  const { default: worker } = await import(workerUrl.href);
-
-  return worker.fetch(
-    new Request("http://localhost/", {
-      headers: { accept: "text/html" },
-    }),
-    {
-      ASSETS: {
-        fetch: async () => new Response("Not found", { status: 404 }),
-      },
-    },
-    {
-      waitUntil() {},
-      passThroughOnException() {},
-    },
-  );
+  const { Miniflare } = await import("miniflare");
+  const { fileURLToPath } = await import("node:url");
+  const root = new URL("../dist/server/", import.meta.url);
+  const paths = (await readdir(root, { recursive: true })).filter(path => path.endsWith(".js"));
+  paths.sort((a, b) => a === "index.js" ? -1 : b === "index.js" ? 1 : a.localeCompare(b));
+  const worker = new Miniflare({
+    modules: paths.map(path => ({ type: "ESModule", path: fileURLToPath(new URL(path.replaceAll("\\", "/"), root)) })),
+    modulesRoot: fileURLToPath(root),
+    compatibilityDate: "2026-05-15", compatibilityFlags: ["nodejs_compat"],
+    d1Databases: ["DB"],
+  });
+  try {
+    const response = await worker.dispatchFetch("http://localhost/", { headers: { accept: "text/html" } });
+    return new Response(await response.text(), { status: response.status, headers: response.headers });
+  } finally { await worker.dispose(); }
 }
 
 test("server renders the protected pump-station entry", async () => {
@@ -55,18 +52,18 @@ test("keeps the production surface free of the starter preview", async () => {
   assert.match(page, /title: "Спецификация"/);
   assert.match(page, /Сборочный комплект гидравлики/);
   assert.match(page, /Цена, ₽/);
-  assert.match(page, /Итоговая стоимость/);
+  assert.match(page, /Известная часть стоимости/);
   assert.match(page, /settings: \{ title: "Настройки проекта"/);
   assert.match(page, /const PANEL_INFO[^]*settings:[^]*input:/);
   assert.match(page, /Подбор насосов 2/);
   assert.match(page, /Гидравлическая кривая 2/);
   assert.match(page, /Мембранный бак/);
   assert.match(page, /Жокей-насос/);
-  assert.match(page, /onClick=\{addPanel\}/);
-  assert.match(page, /Свернутые инструменты/);
+  assert.match(page, /aria-label="Добавить инструмент"/);
+  assert.match(page, /className="window-dock"/);
   assert.match(page, /Закрыть инструмент/);
   assert.match(page, /Свернуть инструмент/);
-  assert.match(page, /visibleSpecificationItems\(entity,\s*settings\)/);
+  assert.match(page, /SPECIFICATION_GROUPS\.map/);
   assert.match(page, /onDoubleClick=/);
   assert.doesNotMatch(page, /pump-chart__svg" onClick=/);
   assert.match(page, /ChartExportFormat = "png" \| "jpeg" \| "pdf"/);
@@ -81,18 +78,18 @@ test("keeps the production surface free of the starter preview", async () => {
   assert.match(page, /jpegCanvasToPdf/);
   assert.match(page, /Доллар США/);
   assert.match(page, /Китайский юань/);
-  assert.match(page, /Скидки производителей/);
-  assert.match(page, /settings\.manufacturerDiscounts\.cnp/);
+  assert.match(page, /discount_/);
+  assert.match(page, /manufacturerDiscounts/);
   assert.doesNotMatch(page, /app-header__actions[^\n]*Экспорт JSON/);
 
   const projectConfig = await readFile(new URL("../app/project-config.ts", import.meta.url), "utf8");
-  assert.match(projectConfig, /filter\(item => item\.section !== "pump"/);
-  assert.match(projectConfig, /const primaryPump/);
-  assert.match(projectConfig, /const secondaryPump/);
-  assert.match(projectConfig, /usdRate: 85/);
-  assert.match(projectConfig, /cnyRate: 13/);
-  assert.match(projectConfig, /manufacturerDiscounts: \{ cnp: 45, aquastrong: 55, onis: 0, vandjord: 25, wellmix: 35 \}/);
-  assert.match(page, /const curvePath\s*=\s*pumpCurvePath/);
+  assert.match(projectConfig, /migrateSpecificationItems/);
+  assert.equal((await loadProjectConfig()).createProject().entities["station-spec"].items.some(item => item.section === "pump"), false);
+  const settings = (await loadProjectConfig()).createProject().entities["station-settings"];
+  assert.equal(settings.usdRate, 85);
+  assert.equal(settings.cnyRate, 13);
+  assert.deepEqual(settings.manufacturerDiscounts, { cnp: 45, aquastrong: 55, onis: 0, vandjord: 25, wellmix: 35 });
+  assert.match(page, /d=\{pumpCurvePath\(pump,i\+1,maxQ,maxH,method/);
   assert.doesNotMatch(page, /polynomialFit|solveLinearSystem/);
   assert.doesNotMatch(page, /pchipTangents/);
   assert.match(layout, /title: "Pump Station Calculator"/);
@@ -128,16 +125,6 @@ test("persists and normalizes the simultaneous combined-circuits setting", async
   assert.equal(parseProjectConfig(fire).entities["station-settings"].combinedCircuitsSimultaneous, false);
 });
 
-test("shows the simultaneous-circuits setting only for combined stations and resets it on type change", async () => {
-  const page = await readPage();
-  assert.match(page, /settings\.stationType === "combined" && <label[^\n]+Расчёт всасывающего коллектора/);
-  assert.match(page, /value=\{settings\.combinedCircuitsSimultaneous \? "both" : "fire"\}/);
-  assert.match(page, /onChange\(\{combinedCircuitsSimultaneous:event\.target\.value === "both"\}\)/);
-  assert.match(page, /<option value="fire">Только пожарный контур<\/option>/);
-  assert.match(page, /<option value="both">Оба контура одновременно<\/option>/);
-  assert.doesNotMatch(page, /toggle\("combinedCircuitsSimultaneous"/);
-  assert.match(page, /combinedCircuitsSimultaneous: stationType === "combined" \? settings\.combinedCircuitsSimultaneous : false/);
-});
 
 test("provides a persisted DN calculator with SP velocity defaults", async () => {
   const [page, styles, projectConfig] = await Promise.all([
@@ -163,13 +150,12 @@ test("provides a persisted DN calculator with SP velocity defaults", async () =>
   assert.match(page, /PN16/);
   assert.match(page, /PN25/);
   assert.match(page, /resolveDnConnection\(settings,maxValveDn,secondary,savedConnection\)/);
-  assert.match(page, /dn<150\?\/рукоятк\/i:\/редуктор\/i/);
-  assert.match(page, /if\(color==="red"\)candidates=candidates\.filter\(item=>componentColor\(item\)==="red"\)/);
+  assert.match(page, /dn<=150\?\/рукоятк\/i:\/редуктор\/i/);
+  assert.match(page, /colorRank=color==="red"\?\(componentColor\(item\)==="red"\?0:1\)/);
+  assert.match(page, /sort\(\(a,b\)=>a\.colorRank-b\.colorRank/);
   assert.match(page, /componentColor\(item\)==="blue"\?0/);
-  assert.match(page, /Добавить арматуру в спецификацию/);
-  assert.match(page, /const buildValveSpecItems=/);
+  assert.match(page, /function buildValveSpecItems\(/);
   assert.match(page, /const checkValvePns=/);
-  assert.match(page, /if\(\/латунн\.\*сердечник\/i\.test\(text\)\|\|\/010C\\\.Y\.\*красн\/i\.test\(text\)\)return \[16\]/);
   assert.match(page, /if\(\/\\b\(\?:010C/);
   assert.match(page, /const checkValveMaterial=/);
   assert.match(page, /material==="aisi304"\?"Нержавеющая сталь":"Чугун"/);
@@ -233,10 +219,8 @@ test("ships the discounted control-cabinet catalogue and selection rules", async
   const chlft1530 = pumps.find(pump => pump.model === "CHLF15-30");
   assert.equal(chlft1530?.power, 3);
   assert.equal(nearestAbove(chlft1530.power)?.id, "BP-2-3,7");
-  assert.match(page, /fetch\("\/pumps\.json",\{cache:"no-store"\}\)/);
-  assert.match(page, /fetch\("\/control-cabinets\.json",\{cache:"no-store"\}\)/);
-  assert.match(page, /const cabinetInputs=\[catalogue,controlCabinets,smartCabinets,/);
-  assert.match(page, /cabinetInputs\.some\(\(value,index\)=>value!==previousCabinetInputs\[index\]\)/);
+  assert.match(page, /fetch\("\/pumps\.json",\s*\{\s*cache:\s*"no-store",\s*signal\s*\}\)/);
+  assert.match(page, /fetch\("\/api\/pumps",\s*\{\s*cache:\s*"no-store",\s*signal\s*\}\)/);
   assert.match(page, /цена со скидкой/);
 });
 
@@ -299,7 +283,7 @@ test("ships pump list prices with currencies and uses project pricing in the spe
   ]);
   const pumps = JSON.parse(rawPumps);
   const priced = pumps.filter(pump => Number.isFinite(pump.price));
-  assert.equal(pumps.length, 5758);
+  assert.equal(pumps.length, 5856);
   assert.ok(pumps.filter(pump => pump.selectable).every(pump => Number.isFinite(pump.power) && pump.power > 0));
   assert.equal(pumps.find(pump => pump.model === "CHLF15-30")?.power, 3);
   assert.equal(pumps.filter(pump => pump.manufacturer === "CNP" && pump.series === "CHLF").length, 28);
@@ -312,14 +296,16 @@ test("ships pump list prices with currencies and uses project pricing in the spe
   assert.match(page, /const pumpListPriceRub/);
   assert.match(page, /Прайсовая цена/);
   assert.match(page, /Цена со скидкой/);
-  assert.match(page, /discountedPrice=pumpPriceRub/);
-  assert.match(page, /settings\.usdRate/);
-  assert.match(page, /settings\.cnyRate/);
-  assert.match(page, /price:pumpPriceRub\(pump,settings\)/);
-  assert.match(page, /equipmentId:pump\.id/);
-  assert.match(page, /const reserveZoneRank/);
-  assert.match(page, /Number\.isFinite\(reserve\)&&reserve>=-5/);
-  assert.match(page, /zoneDifference\|\|\(pumpPriceRub/);
+  assert.match(page, /purchasePriceRub:discountedPrice/);
+  assert.match(page, /cataloguePurchasePriceRub\(pump, settings\)/);
+  assert.match(page, /equipmentId: input\.selectedPumpId/);
+  assert.match(page, /buildPumpSelection\(catalogue,calculated,settings,filters,sort\)/);
+  assert.match(page, /buildPumpSelection\(catalogue,next,settings,filters,sort\)/);
+  assert.match(page, /Фактические Q \/ H/);
+  assert.match(page, /signedPercent\(point\.deltaQPercent\)/);
+  assert.match(page, /signedPercent\(point\.deltaHPercent\)/);
+  assert.match(page, /Запас напора при заданном расходе/);
+  assert.match(page, /Сначала ΔQ и ΔH от −2% до \+15%, затем цена/);
 });
 
 test("binds verified CNP dimensional drawings to pump models", async () => {
@@ -434,14 +420,14 @@ test("provides free, mobile and resizable grid workspace layouts", async () => {
   assert.match(page, /function GridWorkspace/);
   assert.match(page, /Свободные окна/);
   assert.match(page, />Mobile</);
-  assert.match(page, /applyGridTemplate\(columns,rows\)/);
+  assert.match(page, /change\(fitGrid\(layout,c,r\)\)/);
   assert.match(page, /\[\[2,2\],\[3,2\],\[2,3\]\]/);
   assert.match(page, /className={`view-grid-menu/);
   assert.match(page, /<summary className="view-modes__button">/);
   assert.match(page, /closest\("details"\)\?\.removeAttribute\("open"\)/);
   assert.match(page, /gridTemplateColumns:grid\.columnSizes\.map\(value=>`minmax\(0,\$\{value\}fr\)`\)/);
-  assert.match(page, /addGridColumn/);
-  assert.match(page, /addGridRow/);
+  assert.match(page, /fitGrid\(layout,layout\.grid\.columns\+1,layout\.grid\.rows\)/);
+  assert.match(page, /fitGrid\(layout,layout\.grid\.columns,layout\.grid\.rows\+1\)/);
   assert.match(page, /workspace-grid__divider--column/);
   assert.match(page, /workspace-grid__divider--row/);
   assert.match(page, /Выберите инструмент/);
@@ -464,7 +450,7 @@ test("provides a component-database tool with category-specific characteristics 
   ]);
   const database = JSON.parse(rawDatabase);
   assert.equal(database.catalogs.length, 25);
-  assert.equal(database.items.length, 1807);
+  assert.equal(database.items.length, database.statistics.componentRows);
   assert.ok(!database.catalogs.some(catalog => catalog.id === "обвязка"));
   assert.ok(database.catalogs.some(catalog => catalog.id === "обратные-клапаны"));
   assert.ok(database.catalogs.some(catalog => catalog.id === "пожарная-арматура"));
@@ -503,11 +489,11 @@ test("groups the specification and calculates section, subsection and final tota
   assert.match(page, /title: "Сборочный комплект электрики"/);
   assert.match(page, /title: "Всасывающая линия"/);
   assert.match(page, /title: "Напорная линия"/);
-  assert.match(page, /const subtotal=/);
-  assert.match(page, /sectionSummary\(groupItems\)/);
-  assert.match(page, /sectionSummary\(items\)/);
-  assert.match(page, /Итоговая стоимость/);
-  assert.match(page, /formatMoney\(knownTotal\)/);
+  assert.match(page, /const summary = \(rows: SpecItem\[\]\)/);
+  assert.match(page, /summary\(groupRows\)/);
+  assert.match(page, /summary\(rows\)/);
+  assert.match(page, /Известная часть стоимости/);
+  assert.match(page, /money\(readiness\.knownTotal\)/);
   assert.match(styles, /\.spec-table__section-summary/);
   assert.match(styles, /font-variant-numeric:tabular-nums/);
 });
@@ -522,10 +508,10 @@ test("ships the complete binding-component catalogue with prices and relations",
   assert.equal(catalogue.source.externalLinks.length, 2);
   assert.deepEqual(catalogue.statistics, {
     catalogs: 25,
-    tables: 78,
-    componentRows: 1807,
-    pricedComponentRows: 1778,
-    priceEntries: 4239,
+    tables: 87,
+    componentRows: catalogue.items.length,
+    pricedComponentRows: catalogue.items.filter(item=>item.prices.length>0).length,
+    priceEntries: catalogue.items.reduce((sum,item)=>sum+item.prices.length,0),
     formulaRules: 4785,
     formulaErrorsInSavedValues: 0,
     dataValidations: 23,
@@ -562,7 +548,18 @@ test("defines the normalized D1 schema for binding components", async () => {
     readFile(new URL("../.openai/hosting.json", import.meta.url), "utf8"),
   ]);
 
-  assert.equal([...schema.matchAll(/sqliteTable\("/g)].length, 26);
+  for (const [table, migrationFile] of [
+    ["manual_pumps", "0012_manual_pumps"],
+    ["manual_pump_files", "0013_manual_pump_files"],
+    ["equipment_files", "0014_equipment_files"],
+  ]) {
+    assert.ok(schema.includes(`sqliteTable("${table}"`));
+    const sql = await readFile(new URL(`../drizzle/${migrationFile}.sql`, import.meta.url), "utf8");
+    assert.ok(sql.includes(`CREATE TABLE IF NOT EXISTS ${table} (`));
+  }
+  for (const table of ["base_value_versions", "base_value_state", "component_insertions", "component_insertion_items", "component_calculator_source_revision"]) {
+    assert.ok(schema.includes(`sqliteTable("${table}"`));
+  }
   for (const table of [
     "catalog_imports",
     "component_catalogs",

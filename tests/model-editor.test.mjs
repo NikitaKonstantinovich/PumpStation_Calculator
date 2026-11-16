@@ -25,6 +25,28 @@ test("assembly uses actual catalogue identity, STEP bounds and three physical pu
   assert.match(pump.sourceNote, /Монтажная пригодность/);
   assert.equal(new Set(a.components.map(c => c.id)).size, a.components.length);
 });
+test("CDM15-6FSWPC receives its reviewed STEP with the frame and nozzle positions from the STEP", async () => {
+  const { cadContents } = await loadTs(new URL("../app/cad-export.ts", import.meta.url));
+  const p = station(), legacy = pumps.find(x => x.id === "256"), id = "CNP:CDM:1100092321";
+  const execution = { ...legacy, id, manufacturer: "CNP", series: "CDM", model: "CDM15-6",
+    article: "1100092321", execution: "CDM15-6FSWPC", power: 5.5, frequencyHz: 50, electric: { phaseCount: 3, efficiencyClass: "IE3" } };
+  Object.assign(p.entities["system-input"], { selectedPumpId: id, workingPumpCount: 1, reservePumpCount: 1 });
+  p.entities["station-spec"].frameCalculation = { issues: [], parts: [], layout: { pumps: [{ id: "pump-1-0", x: 225 }, { id: "pump-1-1", x: 675 }] } };
+  const built = model.buildAssembly(p, [execution], { version: 1, profiles: {} });
+  const installed = built.components.filter(c => c.kind === "pump");
+  assert.equal(installed.length, 2);
+  for (const c of installed) {
+    assert.ok(c.meshUrl);
+    assert.equal(c.cadSource.hash, profiles.profiles["256"].sourceHash);
+    assert.ok(Math.abs(c.position[0] - -170) < .001);
+    assert.deepEqual(c.ports.map(port => port.point), [[0, 0, 0], [300, 0, 0]]);
+  }
+  const { instances, warnings } = cadContents({ ...built, components: installed });
+  assert.equal(instances.filter(c => c.geometry.kind === "native").length, 2);
+  assert.ok(warnings.some(w => /YE2.*IE3/.test(w)));
+  const differentMotor = model.buildAssembly(p, [{ ...execution, power: 7.5 }], { version: 1, profiles: {} });
+  assert.ok(differentMotor.components.filter(c => c.kind === "pump").every(c => !c.cadSource));
+});
 test("empty project does not present invented selected pumps", () => {
   assert.equal(model.buildAssembly(createProject(), pumps, profiles).components.length, 0);
 });

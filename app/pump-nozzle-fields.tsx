@@ -1,17 +1,18 @@
 import type { DnEntity, InputEntity, ValveConnection } from "./project-config";
 import { STANDARD_DN } from "./dn-defaults";
 import { catalogPumpPort, pumpPortField, resolvePumpPortData, type PumpPortSide } from "./pump-ports";
+import type { Pump } from "./pump-catalog";
 
-export function PumpNozzleFields({ entity, input, secondary = false, title, onChange }: {
-  entity: DnEntity; input: InputEntity; secondary?: boolean; title: string;
+export function PumpNozzleFields({ entity, input, secondary = false, title, onChange, pump }: {
+  entity: DnEntity; input: InputEntity; secondary?: boolean; title: string; pump?: Pump;
   onChange?: (patch: Partial<DnEntity>) => void;
 }) {
   return <div>
     {!input.selectedPumpId && <p className="dn-calculator__error">Выберите насос — его патрубки заполнятся автоматически.</p>}
     {(["inlet", "outlet"] as PumpPortSide[]).map(side => {
       const field = pumpPortField(secondary, side);
-      const port = resolvePumpPortData(entity, input, secondary, side);
-      const catalog = catalogPumpPort(input.selectedPumpId, side);
+      const port = resolvePumpPortData(entity, input, secondary, side, pump);
+      const catalog = catalogPumpPort(input.selectedPumpId, side, pump);
       const manual = Boolean(input.selectedPumpId && entity[field]?.pumpId === input.selectedPumpId);
       const label = side === "inlet" ? "Всасывающий патрубок" : "Напорный патрубок";
       const missing = [!port?.dn && "диаметр", !port?.connection && "тип соединения"].filter(Boolean);

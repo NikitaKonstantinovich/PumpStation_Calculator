@@ -1,0 +1,213 @@
+{
+  "id": "bene-inox-5714-pn16-20261030",
+  "sourceSha256": "f68b4519e1e6786982e026472d49553d70159e87154417c02f53b9ced3a1464c",
+  "checkedAt": "2026-10-30",
+  "family": "Фланцы плоские AISI304L Béné Inox 5714 PN16 EN1092-1 тип 01A",
+  "dimensionUrl": "https://www.bene-inox.com/fr/bride-plate-souder-type-01a-pn-10-pn40-inox-304l-316l-5714/",
+  "priceUrl": "https://www.bene-inox.com/custom/docs/modele/5714_i/bride_plate_a_souder_iso_type_01a-inox-5714-fiche-produit-pdf-267-ko-5714_fiche_produit-lmod1.pdf",
+  "priceDocumentCreatedAt": "2020-06-22",
+  "priceDocumentSha256": "13169d72d189aa1ed5dae568688b3781cb233a08b5c70cf651a49b9853019b21",
+  "exchangeRate": {
+    "rubPerEur": 89.8167,
+    "date": "2026-10-30",
+    "url": "https://www.cbr.ru/currency_base/daily/?UniDbQuery.Posted=True&UniDbQuery.To=30.10.2026"
+  },
+  "replaces": {
+    "tableId": "werk-flanges-pn16-20261030",
+    "family": "Фланцы плоские AISI304 WERK PN16 ISO — прайс поставщика",
+    "componentIds": [
+      "werk-iso-pn16:00000012035",
+      "werk-iso-pn16:00000012045",
+      "werk-iso-pn16:00000012052",
+      "werk-iso-pn16:00000012062",
+      "werk-iso-pn16:00000012074"
+    ]
+  },
+  "rows": [
+    {
+      "id": "bene-inox-5714:357142-20016",
+      "tableId": "bene-inox-5714-pn16-20261030",
+      "supplier": "Béné Inox",
+      "supplierProductId": "357142-20016",
+      "name": "Фланец плоский DN200 AISI304L PN16 EN1092-1 тип 01A Béné Inox 357142-20016",
+      "material": "AISI304L",
+      "dn": 200,
+      "pn": 16,
+      "compatiblePns": [
+        16
+      ],
+      "standard": "EN 1092-1, тип 01, поверхность A; Béné Inox 5714, 1.4307 (304L), PN16",
+      "price": 22418.25,
+      "originalPriceEur": 249.6,
+      "priceStatus": "reference-2020",
+      "priceDate": "2020-06-22 (метаданные PDF; срок действия прайса не указан)",
+      "priceLabel": "Цена справочная Béné Inox PDF 2020, без НДС, ₽/шт.",
+      "vat": "Справочная цена PDF (создан 22.06.2020), не актуальная оферта. Prix HT — без НДС. EUR пересчитан по курсу ЦБ 30.10.2026: 89,8167 ₽/EUR. Доставка, пошлины и налоги не добавлены. Требуется актуальное предложение.",
+      "url": "https://www.bene-inox.com/fr/bride-plate-souder-type-01a-pn-10-pn40-inox-304l-316l-5714/",
+      "weightKg": 10,
+      "dimensions": {
+        "pipeOuterDiameterMm": 219.1,
+        "outerDiameterMm": 340,
+        "thicknessMm": 26,
+        "boreDiameterMm": 221.5,
+        "boltCircleMm": 295,
+        "holes": 12,
+        "boltHoleDiameterMm": 22
+      },
+      "dimensionSource": "Béné Inox, таблица производителя 5714, артикул 357142-20016, PN16, 1.4307: D1=340, D2=295, D3=22, D4=221.5, L=26 мм, 12 отверстий. Тип 01A — плоская поверхность A. https://www.bene-inox.com/fr/bride-plate-souder-type-01a-pn-10-pn40-inox-304l-316l-5714/; PDF: https://www.bene-inox.com/custom/docs/modele/5714_i/bride_plate_a_souder_iso_type_01a-inox-5714-fiche-produit-pdf-267-ko-5714_fiche_produit-lmod1.pdf. Проверено 30.10.2026. Номинальная таблица конкретного артикула; не обмер STEP или партии.",
+      "geometryBasis": "Таблица производителя Béné Inox 5714, конкретный артикул 357142-20016, EN1092-1 тип 01A. Размеры WERK и СТ20 не переносятся.",
+      "pressureSource": "PN16 явно указан в строке 357142-20016 каталога Béné Inox. Другие PN автоматически не разрешаются.",
+      "reason": "Габариты и сверловка подтверждены таблицей производителя; фаски/скругления не выдумываются. Точная CAD-конфигурация найдена, STEP не скачан: CADENAS требует аккаунт. Привязки к модели СТ20 нет.",
+      "cadUrl": "https://maurin-embedded.partcommunity.com/3d-cad-models/?info=bene_inox_raccords%2Findustrie%2F57_brides%2F03_brides_inox%2F5714.prj&languageIso=fr&varset=%7BREF%3D357142-20016%7D",
+      "cadStatus": "Готовая конфигурация производителя найдена; STEP не загружен — CADENAS требует вход. Аккаунта нет; локальной 3D-привязки нет."
+    },
+    {
+      "id": "bene-inox-5714:357142-25016",
+      "tableId": "bene-inox-5714-pn16-20261030",
+      "supplier": "Béné Inox",
+      "supplierProductId": "357142-25016",
+      "name": "Фланец плоский DN250 AISI304L PN16 EN1092-1 тип 01A Béné Inox 357142-25016",
+      "material": "AISI304L",
+      "dn": 250,
+      "pn": 16,
+      "compatiblePns": [
+        16
+      ],
+      "standard": "EN 1092-1, тип 01, поверхность A; Béné Inox 5714, 1.4307 (304L), PN16",
+      "price": 31435.85,
+      "originalPriceEur": 350.0,
+      "priceStatus": "reference-2020",
+      "priceDate": "2020-06-22 (метаданные PDF; срок действия прайса не указан)",
+      "priceLabel": "Цена справочная Béné Inox PDF 2020, без НДС, ₽/шт.",
+      "vat": "Справочная цена PDF (создан 22.06.2020), не актуальная оферта. Prix HT — без НДС. EUR пересчитан по курсу ЦБ 30.10.2026: 89,8167 ₽/EUR. Доставка, пошлины и налоги не добавлены. Требуется актуальное предложение.",
+      "url": "https://www.bene-inox.com/fr/bride-plate-souder-type-01a-pn-10-pn40-inox-304l-316l-5714/",
+      "weightKg": 14,
+      "dimensions": {
+        "pipeOuterDiameterMm": 273.0,
+        "outerDiameterMm": 405,
+        "thicknessMm": 29,
+        "boreDiameterMm": 276.5,
+        "boltCircleMm": 355,
+        "holes": 12,
+        "boltHoleDiameterMm": 26
+      },
+      "dimensionSource": "Béné Inox, таблица производителя 5714, артикул 357142-25016, PN16, 1.4307: D1=405, D2=355, D3=26, D4=276.5, L=29 мм, 12 отверстий. Тип 01A — плоская поверхность A. https://www.bene-inox.com/fr/bride-plate-souder-type-01a-pn-10-pn40-inox-304l-316l-5714/; PDF: https://www.bene-inox.com/custom/docs/modele/5714_i/bride_plate_a_souder_iso_type_01a-inox-5714-fiche-produit-pdf-267-ko-5714_fiche_produit-lmod1.pdf. Проверено 30.10.2026. Номинальная таблица конкретного артикула; не обмер STEP или партии.",
+      "geometryBasis": "Таблица производителя Béné Inox 5714, конкретный артикул 357142-25016, EN1092-1 тип 01A. Размеры WERK и СТ20 не переносятся.",
+      "pressureSource": "PN16 явно указан в строке 357142-25016 каталога Béné Inox. Другие PN автоматически не разрешаются.",
+      "reason": "Габариты и сверловка подтверждены таблицей производителя; фаски/скругления не выдумываются. Точная CAD-конфигурация найдена, STEP не скачан: CADENAS требует аккаунт. Привязки к модели СТ20 нет.",
+      "cadUrl": "https://maurin-embedded.partcommunity.com/3d-cad-models/?info=bene_inox_raccords%2Findustrie%2F57_brides%2F03_brides_inox%2F5714.prj&languageIso=fr&varset=%7BREF%3D357142-25016%7D",
+      "cadStatus": "Готовая конфигурация производителя найдена; STEP не загружен — CADENAS требует вход. Аккаунта нет; локальной 3D-привязки нет."
+    },
+    {
+      "id": "bene-inox-5714:357142-30016",
+      "tableId": "bene-inox-5714-pn16-20261030",
+      "supplier": "Béné Inox",
+      "supplierProductId": "357142-30016",
+      "name": "Фланец плоский DN300 AISI304L PN16 EN1092-1 тип 01A Béné Inox 357142-30016",
+      "material": "AISI304L",
+      "dn": 300,
+      "pn": 16,
+      "compatiblePns": [
+        16
+      ],
+      "standard": "EN 1092-1, тип 01, поверхность A; Béné Inox 5714, 1.4307 (304L), PN16",
+      "price": 37749.96,
+      "originalPriceEur": 420.3,
+      "priceStatus": "reference-2020",
+      "priceDate": "2020-06-22 (метаданные PDF; срок действия прайса не указан)",
+      "priceLabel": "Цена справочная Béné Inox PDF 2020, без НДС, ₽/шт.",
+      "vat": "Справочная цена PDF (создан 22.06.2020), не актуальная оферта. Prix HT — без НДС. EUR пересчитан по курсу ЦБ 30.10.2026: 89,8167 ₽/EUR. Доставка, пошлины и налоги не добавлены. Требуется актуальное предложение.",
+      "url": "https://www.bene-inox.com/fr/bride-plate-souder-type-01a-pn-10-pn40-inox-304l-316l-5714/",
+      "weightKg": 19,
+      "dimensions": {
+        "pipeOuterDiameterMm": 323.9,
+        "outerDiameterMm": 460,
+        "thicknessMm": 32,
+        "boreDiameterMm": 327.5,
+        "boltCircleMm": 410,
+        "holes": 12,
+        "boltHoleDiameterMm": 26
+      },
+      "dimensionSource": "Béné Inox, таблица производителя 5714, артикул 357142-30016, PN16, 1.4307: D1=460, D2=410, D3=26, D4=327.5, L=32 мм, 12 отверстий. Тип 01A — плоская поверхность A. https://www.bene-inox.com/fr/bride-plate-souder-type-01a-pn-10-pn40-inox-304l-316l-5714/; PDF: https://www.bene-inox.com/custom/docs/modele/5714_i/bride_plate_a_souder_iso_type_01a-inox-5714-fiche-produit-pdf-267-ko-5714_fiche_produit-lmod1.pdf. Проверено 30.10.2026. Номинальная таблица конкретного артикула; не обмер STEP или партии.",
+      "geometryBasis": "Таблица производителя Béné Inox 5714, конкретный артикул 357142-30016, EN1092-1 тип 01A. Размеры WERK и СТ20 не переносятся.",
+      "pressureSource": "PN16 явно указан в строке 357142-30016 каталога Béné Inox. Другие PN автоматически не разрешаются.",
+      "reason": "Габариты и сверловка подтверждены таблицей производителя; фаски/скругления не выдумываются. Точная CAD-конфигурация найдена, STEP не скачан: CADENAS требует аккаунт. Привязки к модели СТ20 нет.",
+      "cadUrl": "https://maurin-embedded.partcommunity.com/3d-cad-models/?info=bene_inox_raccords%2Findustrie%2F57_brides%2F03_brides_inox%2F5714.prj&languageIso=fr&varset=%7BREF%3D357142-30016%7D",
+      "cadStatus": "Готовая конфигурация производителя найдена; STEP не загружен — CADENAS требует вход. Аккаунта нет; локальной 3D-привязки нет."
+    },
+    {
+      "id": "bene-inox-5714:357142-35016",
+      "tableId": "bene-inox-5714-pn16-20261030",
+      "supplier": "Béné Inox",
+      "supplierProductId": "357142-35016",
+      "name": "Фланец плоский DN350 AISI304L PN16 EN1092-1 тип 01A Béné Inox 357142-35016",
+      "material": "AISI304L",
+      "dn": 350,
+      "pn": 16,
+      "compatiblePns": [
+        16
+      ],
+      "standard": "EN 1092-1, тип 01, поверхность A; Béné Inox 5714, 1.4307 (304L), PN16",
+      "price": null,
+      "originalPriceEur": null,
+      "priceStatus": "on-request",
+      "priceDate": "2020-06-22 (метаданные PDF; срок действия прайса не указан)",
+      "priceLabel": "Цена справочная Béné Inox PDF 2020, без НДС, ₽/шт.",
+      "vat": "Sur demande — цена по запросу, не ноль. Требуется предложение поставщика.",
+      "url": "https://www.bene-inox.com/fr/bride-plate-souder-type-01a-pn-10-pn40-inox-304l-316l-5714/",
+      "weightKg": 28,
+      "dimensions": {
+        "pipeOuterDiameterMm": 355.6,
+        "outerDiameterMm": 520,
+        "thicknessMm": 35,
+        "boreDiameterMm": 359.5,
+        "boltCircleMm": 470,
+        "holes": 16,
+        "boltHoleDiameterMm": 26
+      },
+      "dimensionSource": "Béné Inox, таблица производителя 5714, артикул 357142-35016, PN16, 1.4307: D1=520, D2=470, D3=26, D4=359.5, L=35 мм, 16 отверстий. Тип 01A — плоская поверхность A. https://www.bene-inox.com/fr/bride-plate-souder-type-01a-pn-10-pn40-inox-304l-316l-5714/; PDF: https://www.bene-inox.com/custom/docs/modele/5714_i/bride_plate_a_souder_iso_type_01a-inox-5714-fiche-produit-pdf-267-ko-5714_fiche_produit-lmod1.pdf. Проверено 30.10.2026. Номинальная таблица конкретного артикула; не обмер STEP или партии.",
+      "geometryBasis": "Таблица производителя Béné Inox 5714, конкретный артикул 357142-35016, EN1092-1 тип 01A. Размеры WERK и СТ20 не переносятся.",
+      "pressureSource": "PN16 явно указан в строке 357142-35016 каталога Béné Inox. Другие PN автоматически не разрешаются.",
+      "reason": "Габариты и сверловка подтверждены таблицей производителя; фаски/скругления не выдумываются. Точная CAD-конфигурация найдена, STEP не скачан: CADENAS требует аккаунт. Привязки к модели СТ20 нет.",
+      "cadUrl": "https://maurin-embedded.partcommunity.com/3d-cad-models/?info=bene_inox_raccords%2Findustrie%2F57_brides%2F03_brides_inox%2F5714.prj&languageIso=fr&varset=%7BREF%3D357142-35016%7D",
+      "cadStatus": "Готовая конфигурация производителя найдена; STEP не загружен — CADENAS требует вход. Аккаунта нет; локальной 3D-привязки нет."
+    },
+    {
+      "id": "bene-inox-5714:357142-40016",
+      "tableId": "bene-inox-5714-pn16-20261030",
+      "supplier": "Béné Inox",
+      "supplierProductId": "357142-40016",
+      "name": "Фланец плоский DN400 AISI304L PN16 EN1092-1 тип 01A Béné Inox 357142-40016",
+      "material": "AISI304L",
+      "dn": 400,
+      "pn": 16,
+      "compatiblePns": [
+        16
+      ],
+      "standard": "EN 1092-1, тип 01, поверхность A; Béné Inox 5714, 1.4307 (304L), PN16",
+      "price": 62395.66,
+      "originalPriceEur": 694.7,
+      "priceStatus": "reference-2020",
+      "priceDate": "2020-06-22 (метаданные PDF; срок действия прайса не указан)",
+      "priceLabel": "Цена справочная Béné Inox PDF 2020, без НДС, ₽/шт.",
+      "vat": "Справочная цена PDF (создан 22.06.2020), не актуальная оферта. Prix HT — без НДС. EUR пересчитан по курсу ЦБ 30.10.2026: 89,8167 ₽/EUR. Доставка, пошлины и налоги не добавлены. Требуется актуальное предложение.",
+      "url": "https://www.bene-inox.com/fr/bride-plate-souder-type-01a-pn-10-pn40-inox-304l-316l-5714/",
+      "weightKg": 36,
+      "dimensions": {
+        "pipeOuterDiameterMm": 406.4,
+        "outerDiameterMm": 580,
+        "thicknessMm": 38,
+        "boreDiameterMm": 411,
+        "boltCircleMm": 525,
+        "holes": 16,
+        "boltHoleDiameterMm": 30
+      },
+      "dimensionSource": "Béné Inox, таблица производителя 5714, артикул 357142-40016, PN16, 1.4307: D1=580, D2=525, D3=30, D4=411, L=38 мм, 16 отверстий. Тип 01A — плоская поверхность A. https://www.bene-inox.com/fr/bride-plate-souder-type-01a-pn-10-pn40-inox-304l-316l-5714/; PDF: https://www.bene-inox.com/custom/docs/modele/5714_i/bride_plate_a_souder_iso_type_01a-inox-5714-fiche-produit-pdf-267-ko-5714_fiche_produit-lmod1.pdf. Проверено 30.10.2026. Номинальная таблица конкретного артикула; не обмер STEP или партии.",
+      "geometryBasis": "Таблица производителя Béné Inox 5714, конкретный артикул 357142-40016, EN1092-1 тип 01A. Размеры WERK и СТ20 не переносятся.",
+      "pressureSource": "PN16 явно указан в строке 357142-40016 каталога Béné Inox. Другие PN автоматически не разрешаются.",
+      "reason": "Габариты и сверловка подтверждены таблицей производителя; фаски/скругления не выдумываются. Точная CAD-конфигурация найдена, STEP не скачан: CADENAS требует аккаунт. Привязки к модели СТ20 нет.",
+      "cadUrl": "https://maurin-embedded.partcommunity.com/3d-cad-models/?info=bene_inox_raccords%2Findustrie%2F57_brides%2F03_brides_inox%2F5714.prj&languageIso=fr&varset=%7BREF%3D357142-40016%7D",
+      "cadStatus": "Готовая конфигурация производителя найдена; STEP не загружен — CADENAS требует вход. Аккаунта нет; локальной 3D-привязки нет."
+    }
+  ]
+}

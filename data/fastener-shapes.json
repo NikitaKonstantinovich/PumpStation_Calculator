@@ -1,0 +1,21 @@
+{
+  "version": 1,
+  "sources": ["https://taurusfix.com/standards/din-933", "https://taurusfix.com/standards/din-934", "https://taurusfix.com/standards/din-125"],
+  "checked": "2026-10-29",
+  "note": "Nominal DIN 933 head and DIN 934 wrench dimensions, DIN 125 washer bore/OD. Axial nut/washer dimensions and rod lengths remain catalogue values. Threads and chamfers simplified; no ISO substitution.",
+  "rows": [
+    {"d":8,"flats":13,"head":5.3,"washerInner":8.4,"washerOuter":16},
+    {"d":10,"flats":17,"head":6.4,"washerInner":10.5,"washerOuter":20},
+    {"d":12,"flats":19,"head":7.5,"washerInner":13,"washerOuter":24},
+    {"d":14,"flats":22,"head":8.8,"washerInner":15,"washerOuter":28},
+    {"d":16,"flats":24,"head":10,"washerInner":17,"washerOuter":30},
+    {"d":18,"flats":27,"head":11.5,"washerInner":19,"washerOuter":34},
+    {"d":20,"flats":30,"head":12.5,"washerInner":21,"washerOuter":37},
+    {"d":22,"flats":32,"head":14,"washerInner":23,"washerOuter":39},
+    {"d":24,"flats":36,"head":15,"washerInner":25,"washerOuter":44},
+    {"d":27,"flats":41,"head":17,"washerInner":28,"washerOuter":50},
+    {"d":30,"flats":46,"head":18.7,"washerInner":31,"washerOuter":56},
+    {"d":33,"flats":50,"head":21,"washerInner":34,"washerOuter":60},
+    {"d":36,"flats":55,"head":22.5,"washerInner":37,"washerOuter":66}
+  ]
+}

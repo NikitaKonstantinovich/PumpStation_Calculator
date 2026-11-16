@@ -1,0 +1,36 @@
+{
+  "source": {
+    "url": "https://vandjord.com/upload/iblock/527/cij5bf0q5o05y75jxho2tj2z8s5c1gvo/%D0%9C%D0%9D%D0%9E%D0%93%D0%9E%D0%A1%D0%A2%D0%A3%D0%9F%D0%95%D0%9D%D0%A7%D0%90%D0%A2%D0%AB%D0%95%20%D0%A6%D0%95%D0%9D%D0%A2%D0%A0%D0%9E%D0%91%D0%95%D0%96%D0%9D%D0%AB%D0%95%20%D0%9D%D0%90%D0%A1%D0%9E%D0%A1%D0%AB%20CRV-C%2C%20VCM-C.pdf",
+    "sha256": "d96a1d449c2f91c4c36d40b95d468d50a5b24923b986efff5ac9d3055da53774"
+  },
+  "variants": {
+    "HM:VANDJORD:VCM:61794457f7278f9b:74212001": {"page": 71, "boundsMm": [0, null, -75, 318, null, 99], "outletMm": [68, 0, 86], "legacyId": "nu-e2d8417c09d04a07"},
+    "HM:VANDJORD:VCM:f2533511904cb048:74212002": {"page": 71, "boundsMm": [0, null, -75, 318, null, 99], "outletMm": [68, 0, 86], "legacyId": "nu-257ebdfd10cfcef6"},
+    "HM:VANDJORD:VCM:8652c87049d1c57e:74212003": {"page": 71, "boundsMm": [0, null, -75, 336, null, 99], "outletMm": [86, 0, 86], "legacyId": "nu-529fd0b55a15b395"},
+    "HM:VANDJORD:VCM:e9e85de93774cebb:74212004": {"page": 71, "boundsMm": [0, null, -75, 354, null, 99], "outletMm": [104, 0, 86], "legacyId": "nu-7acc3c73f57caf4c"},
+    "HM:VANDJORD:VCM:18fbc6411c348b20:74212005": {"page": 71, "boundsMm": [0, null, -75, 416, null, 113], "outletMm": [140, 0, 86], "legacyId": "nu-0d0a627bf7ab685c"},
+    "HM:VANDJORD:VCM:8a89bc429df608a6:74212006": {"page": 71, "boundsMm": [0, null, -75, 317, null, 99], "outletMm": [68, 0, 86], "legacyId": "nu-ccc34b830a8151cc"},
+    "HM:VANDJORD:VCM:dbf37ce0c8a965cd:74212007": {"page": 71, "boundsMm": [0, null, -75, 317, null, 99], "outletMm": [68, 0, 86], "legacyId": "nu-c08ebd19d845fc23"},
+    "HM:VANDJORD:VCM:cecd9d2dfdfb7dba:74212008": {"page": 71, "boundsMm": [0, null, -75, 360, null, 113], "outletMm": [86, 0, 86], "legacyId": "nu-e4038f163f3ccf4f"},
+    "HM:VANDJORD:VCM:a442d0d455e09df4:74212009": {"page": 71, "boundsMm": [0, null, -75, 378, null, 113], "outletMm": [104, 0, 86], "legacyId": "nu-dc24646e415a4095"},
+    "HM:VANDJORD:VCM:cebe163f20459998:74212010": {"page": 71, "boundsMm": [0, null, -75, 414, null, 113], "outletMm": [140, 0, 86], "legacyId": "nu-0c5b6bcec1af8b9c"},
+    "HM:VANDJORD:VCM:9950d087dca1090a:74212011": {"page": 72, "boundsMm": [0, null, -100, 377, null, 112], "outletMm": [100, 0, 108], "legacyId": "nu-26feb5cf690171c4"},
+    "HM:VANDJORD:VCM:b4a94ea7aefdd34c:74212012": {"page": 72, "boundsMm": [0, null, -100, 377, null, 112], "outletMm": [100, 0, 108], "legacyId": "nu-23e07f2034484819"},
+    "HM:VANDJORD:VCM:384890077b0e5c13:74212013": {"page": 72, "boundsMm": [0, null, -100, 408, null, 117], "outletMm": [100, 0, 108], "legacyId": "nu-c05a5e5044b25c12"},
+    "HM:VANDJORD:VCM:761c2f4f762ca7d2:74212014": {"page": 72, "boundsMm": [0, null, -100, 438, null, 117], "outletMm": [130, 0, 108], "legacyId": "nu-28ae7fc611a6502f"},
+    "HM:VANDJORD:VCM:3d6ce644ee3720f3:74212015": {"page": 72, "boundsMm": [0, null, -100, 498, null, 117], "outletMm": [190, 0, 108], "legacyId": "nu-26ec0826c8a35cbd"},
+    "HM:VANDJORD:VCM:3f4e7fb907819d27:74212016": {"page": 72, "boundsMm": [0, null, -100, 377, null, 112], "outletMm": [100, 0, 108], "legacyId": "nu-845caab55930e441"},
+    "HM:VANDJORD:VCM:91297840be2a315d:74212017": {"page": 72, "boundsMm": [0, null, -100, 402, null, 117], "outletMm": [100, 0, 108], "legacyId": "nu-68c13cd0f4d5c750"},
+    "HM:VANDJORD:VCM:4fc1bec2e36ac325:74212018": {"page": 72, "boundsMm": [0, null, -100, 402, null, 117], "outletMm": [100, 0, 108], "legacyId": "nu-9b5eef87f1ad2ad8"},
+    "HM:VANDJORD:VCM:908ffb0323f86508:74212019": {"page": 72, "boundsMm": [0, null, -100, 438, null, 117], "outletMm": [130, 0, 108], "legacyId": "nu-032a88b4175a9605"},
+    "HM:VANDJORD:VCM:d43d833c031a8cae:74212020": {"page": 72, "boundsMm": [0, null, -100, 539, null, 112], "outletMm": [190, 0, 108], "legacyId": "nu-adf066ec7bf3c062"},
+    "HM:VANDJORD:VCM:436aa66f32fdb319:74212021": {"page": 73, "boundsMm": [0, null, -100, 408, null, 112], "outletMm": [130, 0, 108], "legacyId": "nu-bf27aac40047e0bf"},
+    "HM:VANDJORD:VCM:47b63154dab80937:74212022": {"page": 73, "boundsMm": [0, null, -100, 439, null, 117], "outletMm": [130, 0, 108], "legacyId": "nu-4cfc37114e5ee863"},
+    "HM:VANDJORD:VCM:6aabb5271ca7b734:74212023": {"page": 73, "boundsMm": [0, null, -100, 480, null, 112], "outletMm": [130, 0, 108], "legacyId": "nu-e58b74c33e332a0d"},
+    "HM:VANDJORD:VCM:8f6f7e4f339fd912:74212024": {"page": 73, "boundsMm": [0, null, -100, 545, null, 112], "outletMm": [175, 0, 108], "legacyId": "nu-cd55a9564a83d305"},
+    "HM:VANDJORD:VCM:5688f395eb326bda:74212025": {"page": 73, "boundsMm": [0, null, -100, 408, null, 112], "outletMm": [130, 0, 108], "legacyId": "nu-37f090ff0031cc4f"},
+    "HM:VANDJORD:VCM:f4143ccd6decdd52:74212026": {"page": 73, "boundsMm": [0, null, -100, 439, null, 117], "outletMm": [130, 0, 108], "legacyId": "nu-33e99836af3842af"},
+    "HM:VANDJORD:VCM:63463b47c0779524:74212027": {"page": 73, "boundsMm": [0, null, -100, 500, null, 112], "outletMm": [130, 0, 108], "legacyId": "nu-114f33ffc2aa996b"},
+    "HM:VANDJORD:VCM:62f51a9b9fff9c53:74212028": {"page": 73, "boundsMm": [0, null, -100, 561, null, 152], "outletMm": [175, 0, 108], "legacyId": "nu-270622056f9b4461"}
+  }
+}

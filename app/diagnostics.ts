@@ -1,14 +1,19 @@
+import { engineeringOperation, registerOperation } from "./engineering/runtime";
+import { MAX_WORKING_PUMPS } from "./pump-counts";
 import type { ProjectConfig, InputEntity, SettingsEntity, DnEntity, SpecEntity, PanelKind } from "./project-config";
 import type { Pump } from "./pump-catalog";
 import type { CollectorCatalog } from "./collector-calculations";
 import type { CollectorsEntity } from "./collector-project";
-import type { SmartCabinet } from "./cabinet-configurator";
-import { interpolateCurve, operatingPoint, usablePump } from "./pump-catalog";
+import type { SmartCabinet } from "./smart-cabinet-types";
+import { selectionHeadAtFlow, operatingPoint, usablePump } from "./pump-catalog";
+import { HEAD_RESERVE_WARNING_PERCENT, headReserveClass } from "./pump-selection";
 import { suctionHydraulics, dischargeHydraulics, recommendedDn, flowVelocity, dnVelocityLimit, pressureCheckWarning } from "./dn-defaults";
-import { calculateCollector, configurationFingerprint, configurationWarnings, collectorPressureChecks, collectorVelocityWarning } from "./collector-calculations";
+import { calculateCollector, matchesCollectorConfiguration, configurationWarnings, collectorBranchDiameterErrors, collectorPressureChecks, collectorVelocityWarning } from "./collector-calculations";
 import { pumpSketchFor } from "./pump-sketches";
+import { pressureChecksEnabled } from "./pressure-check-policy";
 import { specificationItemPresentation, specificationIssueId, visibleSpecificationItems } from "./specification-presentation";
 import { ENTITY_BY_TOOL, PANEL_INFO } from "./tool-registry";
+import { assessSpecification } from "./specification-readiness";
 
 export type IssueSeverity = "error" | "warning";
 export type ToolIssue = { id: string; tool: PanelKind; severity: IssueSeverity; message: string; subject?: string };
@@ -24,7 +29,7 @@ export function inputIssues(input: InputEntity, tool: "input" | "input2"): ToolI
     ["flowRate", "Расход станции", (v: number) => v > 0, "должен быть больше нуля"],
     ["head", "Напор", (v: number) => v > 0, "должен быть больше нуля"],
     ["staticHead", "Статический напор", (v: number) => v >= 0 && (input.head === null || v <= input.head), "должен быть от 0 до общего напора"],
-    ["workingPumpCount", "Количество рабочих насосов", (v: number) => Number.isInteger(v) && v >= 1 && v <= 6, "должно быть целым числом от 1 до 6"],
+    ["workingPumpCount", "Количество рабочих насосов", (v: number) => Number.isInteger(v) && v >= 1 && v <= MAX_WORKING_PUMPS, `должно быть целым числом от 1 до ${MAX_WORKING_PUMPS}`],
     ["reservePumpCount", "Количество резервных насосов", (v: number) => Number.isInteger(v) && v >= 0 && v <= 3, "должно быть целым числом от 0 до 3"],
   ] as const;
   return fields.flatMap<ToolIssue>(([field, label, valid, requirement]) => {
@@ -41,15 +46,10 @@ export function diagnosticScope(project: ProjectConfig, tool: PanelKind) {
   return JSON.stringify(project.entities[secondary ? "system-input-2" : "system-input"]);
 }
 
-export function collectProjectIssues(project: ProjectConfig, catalogue: Pump[], catalog: CollectorCatalog | null, cabinets: SmartCabinet[], assetErrors: Record<string, string> = {}): ToolIssue[] {
-  const result: ToolIssue[] = [];
-  const settings = project.entities["station-settings"] as SettingsEntity;
-  const dn = project.entities["station-dn"] as DnEntity;
-  const add = (tool: PanelKind, suffix: string, severity: IssueSeverity, message: string, subject?: string) => result.push({ id: `${tool}/${suffix}`, tool, severity, message, subject });
-  const primaryInput = project.entities["system-input"] as InputEntity;
-  const inputs = [{ input: primaryInput, secondary: false }, ...(secondaryToolsEnabled(settings) ? [{ input: project.entities["system-input-2"] as InputEntity, secondary: true }] : [])];
-  for (const { input, secondary } of inputs) {
-    const tool = secondary ? "input2" : "input", chart = secondary ? "chart2" : "chart", card = secondary ? "sketch2" : "sketch";
+export function corePumpIssues(input:InputEntity, tool:"input"|"input2", catalogue:Pump[]):ToolIssue[] {
+  const result:ToolIssue[]=[];
+  const add=(tool:PanelKind,suffix:string,severity:IssueSeverity,message:string,subject?:string)=>result.push({id:`${tool}/${suffix}`,tool,severity,message,subject});
+  const secondary=tool==="input2",chart=secondary?"chart2":"chart",card=secondary?"sketch2":"sketch";
     const validation = inputIssues(input, tool);
     result.push(...validation);
     const selected = catalogue.find(pump => pump.id === input.selectedPumpId);
@@ -60,11 +60,12 @@ export function collectProjectIssues(project: ProjectConfig, catalogue: Pump[], 
     else if (!selected) add(chart, "empty", "warning", "Для заданной рабочей точки насос не выбран.");
     else if (!usablePump(selected, input.medium)) add(chart, "empty", "error", "Для выбранной модели нет подтверждённой рабочей кривой для этой среды.");
     else {
-      const head = interpolateCurve(selected.curve, input.flowRate! / input.workingPumpCount!);
+      const head = selectionHeadAtFlow(selected, input.flowRate! / input.workingPumpCount!);
       if (head === null) add(tool, "selection/range", "error", "Запрашиваемый расход находится вне рабочего диапазона выбранного насоса.");
       else {
         const reserve = (head - input.head!) / input.head! * 100;
-        if (reserve < 0 || reserve > 5) add(tool, "selection/reserve", reserve < 0 || reserve > 10 ? "error" : "warning", `Запас напора выбранного насоса ${reserve.toLocaleString("ru-RU", { maximumFractionDigits: 1 })}%: ${reserve < 0 ? "заданный напор не обеспечен" : "превышает рекомендуемые 5%"}.`);
+        const status = headReserveClass(reserve);
+        if (status !== "good") add(tool, "selection/reserve", status === "danger" ? "error" : "warning", `Запас напора выбранного насоса ${reserve.toLocaleString("ru-RU", { maximumFractionDigits: 1 })}%: ${status === "danger" ? "заданный напор не обеспечен" : `превышает рекомендуемые ${HEAD_RESERVE_WARNING_PERCENT}%`}.`);
       }
       if (!operatingPoint(selected, input.workingPumpCount!, { flowRate: input.flowRate!, head: input.head!, staticHead: input.staticHead! })) add(chart, "operating-point", "warning", "Пересечение характеристики насоса и системы не найдено.");
     }
@@ -74,25 +75,38 @@ export function collectProjectIssues(project: ProjectConfig, catalogue: Pump[], 
       if (selected.active === false || selected.selectable === false) add(card, "availability", "error", "Модель недоступна для подбора.", selected.model);
       selected.dataWarnings?.forEach((message, index) => { add(card, `data/${index}`, "warning", message, selected.model); add(tool, `selection/data/${index}`, "warning", message, selected.model); });
     }
+  return result;
+}
+
+export function coreCollectProjectIssues(project: ProjectConfig, catalogue: Pump[], catalog: CollectorCatalog | null, cabinets: SmartCabinet[], assetErrors: Record<string, string> = {}): ToolIssue[] {
+  const result: ToolIssue[] = [];
+  const settings = project.entities["station-settings"] as SettingsEntity;
+  const dn = project.entities["station-dn"] as DnEntity;
+  const add = (tool: PanelKind, suffix: string, severity: IssueSeverity, message: string, subject?: string) => result.push({ id: `${tool}/${suffix}`, tool, severity, message, subject });
+  const primaryInput = project.entities["system-input"] as InputEntity;
+  const inputs = [{ input: primaryInput, secondary: false }, ...(secondaryToolsEnabled(settings) ? [{ input: project.entities["system-input-2"] as InputEntity, secondary: true }] : [])];
+  for (const { input, secondary } of inputs) {
+    result.push(...pumpIssues(input, secondary?"input2":"input", catalogue));
+    const valid=inputIssues(input,secondary?"input2":"input").length===0&&input.calculated;
     if (!valid) { if (!secondary) add("dn", "empty", "warning", "Сначала задайте корректную рабочую точку в инструменте «Подбор насосов»."); continue; }
     const circuit = secondary ? "secondary" : "primary", subject = secondary ? "Контур 2" : "Контур 1";
-    const suction = suctionHydraulics(dn, input, settings, secondary), discharge = dischargeHydraulics(dn, input, settings, secondary);
+    const suction = suctionHydraulics(dn, input, settings, secondary, catalogue.find(p=>p.id===input.selectedPumpId)), discharge = dischargeHydraulics(dn, input, settings, secondary, catalogue.find(p=>p.id===input.selectedPumpId));
     suction.errors.forEach((message, index) => add("dn", `${circuit}/suction/${index}`, "error", message, subject));
     discharge.errors.forEach((message, index) => add("dn", `${circuit}/discharge/${index}`, "error", message, subject));
-    if (pressureCheckWarning(suction.inletPressureCheck)) add("dn", `${circuit}/pressure`, suction.inletPressureCheck.status === "exceeded" ? "error" : "warning", suction.inletPressureCheck.message, subject);
+    if (suction.inletPressureCheck && pressureCheckWarning(suction.inletPressureCheck)) add("dn", `${circuit}/pressure`, suction.inletPressureCheck.status === "exceeded" ? "error" : "warning", suction.inletPressureCheck.message, subject);
     const flow = input.flowRate!, perPump = flow / input.workingPumpCount!;
     const rows = secondary ? [["secondarySuctionCollectorDn", flow], ["secondaryDischargeCollectorDn", flow], ["secondarySuctionValveDn", perPump], ["secondaryDischargeValveDn", perPump]] as const :
       [["suctionCollectorDn", flow], ["dischargeCollectorDn", flow], ["suctionValveDn", perPump], ["dischargeValveDn", perPump]] as const;
     for (const [field, rowFlow] of rows) {
-      const size = field.endsWith("SuctionValveDn") || field === "suctionValveDn" ? suction.dn : field.endsWith("DischargeValveDn") || field === "dischargeValveDn" ? discharge.dn : dn[field] ?? recommendedDn(rowFlow);
-      const velocity = flowVelocity(rowFlow, size), limit = dnVelocityLimit(size);
+      const size = field.endsWith("SuctionValveDn") || field === "suctionValveDn" ? suction.dn : field.endsWith("DischargeValveDn") || field === "dischargeValveDn" ? discharge.dn : dn[field] ?? recommendedDn(rowFlow,settings.baseValues?.values.velocity);
+      const velocity = flowVelocity(rowFlow, size), limit = dnVelocityLimit(size,settings.baseValues?.values.velocity);
       const rowLabel = field.toLowerCase().includes("suction") ? "Всасывающая линия" : "Напорная линия";
       if (velocity > limit + 1e-9) add("dn", `${circuit}/${field}`, "warning", `DN${size}: скорость ${velocity.toLocaleString("ru-RU", { maximumFractionDigits: 2 })} м/с превышает предел ${limit} м/с. Увеличьте диаметр.`, `${subject} · ${rowLabel}`);
     }
   }
-  if (settings.inletHead === null || settings.inletHead === undefined) add("settings", "inlet-head", "warning", "Напор на входе не указан; проверка допустимого давления не выполнена.");
+  if (pressureChecksEnabled(settings) && (settings.inletHead === null || settings.inletHead === undefined)) add("settings", "inlet-head", "warning", "Напор на входе не указан; проверка допустимого давления не выполнена.");
   for (const [key, label] of [["usdRate", "Курс доллара"], ["cnyRate", "Курс юаня"]] as const) if (!Number.isFinite(settings[key]) || settings[key] <= 0) add("settings", `rates/${key}`, "error", `${label} должен быть больше нуля.`);
-  for (const [manufacturer, discount] of Object.entries(settings.manufacturerDiscounts)) if (!Number.isFinite(discount) || discount < 0 || discount > 100) add("settings", `discounts/${manufacturer}`, "error", `Скидка ${manufacturer.toUpperCase()} должна быть от 0 до 100%.`);
+  for (const [manufacturer, discount] of Object.entries(settings.manufacturerDiscounts)) if (typeof discount !== "number" || !Number.isFinite(discount) || discount < 0 || discount > 100) add("settings", `discounts/${manufacturer}`, "error", `Скидка ${manufacturer.toUpperCase()} должна быть от 0 до 100%.`);
   for (const item of visibleSpecificationItems(project.entities["station-spec"] as SpecEntity, settings)) {
     const presentation = specificationItemPresentation(item);
     if (presentation.hasWarning) result.push({ id: specificationIssueId(item), tool: "spec", severity: presentation.severity, message: presentation.warningText, subject: `${item.position} · ${item.name}` });
@@ -102,25 +116,29 @@ export function collectProjectIssues(project: ProjectConfig, catalogue: Pump[], 
     const state = collectors[type], c = state.configuration, subject = type === "suction" ? "Всасывающий коллектор" : "Напорный коллектор";
     if (!c || !state.recommended) continue;
     const stale = state.status === "stale" || Boolean(state.calculation && catalog && state.calculation.catalogVersion !== catalog.version);
-    const calculation = !stale && state.calculation?.fingerprint === configurationFingerprint(c) ? state.calculation : null;
+    const calculation = !stale && matchesCollectorConfiguration(state.calculation?.fingerprint,c) ? state.calculation : null;
     const preview = catalog ? calculateCollector(c, catalog) : calculation;
     if (state.databaseStatus === "error") add("collectors", `${type}/database`, "error", state.databaseError || "Не удалось проверить базу коллекторов.", subject);
     else if (state.databaseStatus === "missing") add("collectors", `${type}/database`, "warning", "Коллектор отсутствует в базе — выполните расчёт в конструкторе.", subject);
     if (stale) add("collectors", `${type}/stale`, "warning", "Расчёт устарел — выполните повторный расчёт.", subject);
-    const velocity = collectorVelocityWarning(c.dn, preview?.velocities.collector);
+    const velocity = collectorVelocityWarning(c.dn, preview?.velocities.collector,c.velocityRules);
     if (velocity) add("collectors", `${type}/velocity`, "warning", velocity, subject);
-    const invalidConfiguration = new Set(configurationWarnings(c));
-    preview?.warnings.forEach((message, index) => add("collectors", `${type}/calculation/${index}`, invalidConfiguration.has(message) ? "error" : "warning", message, subject));
-    if (type === "suction") collectorPressureChecks(c, settings.inletHead, catalog).forEach((check, index) => { if (pressureCheckWarning(check)) add("collectors", `${type}/pressure/${index}`, check.status === "exceeded" ? "error" : "warning", check.message, subject); });
+    const invalidConfiguration = new Set([...configurationWarnings(c), ...collectorBranchDiameterErrors(c, catalog)]);
+    [...invalidConfiguration].forEach((message,index) => add("collectors", `${type}/configuration/${index}`, "error", message, subject));
+    preview?.warnings.forEach((message, index) => { if (!invalidConfiguration.has(message)) add("collectors", `${type}/calculation/${index}`, "warning", message, subject); });
+    if (type === "suction" && pressureChecksEnabled(settings)) collectorPressureChecks(c, settings.inletHead, catalog).forEach((check, index) => { if (pressureCheckWarning(check)) add("collectors", `${type}/pressure/${index}`, check.status === "exceeded" ? "error" : "warning", check.message, subject); });
   }
+  if (settings.stationType === "smart") {
   const pump = catalogue.find(p => p.id === primaryInput.selectedPumpId), count = primaryInput.workingPumpCount === null || primaryInput.reservePumpCount === null ? null : primaryInput.workingPumpCount + primaryInput.reservePumpCount;
   if (!pump || count === null || pump.power === null) add("cabinet", "selection", "warning", "Для конфигуратора NS Smart выберите насос и укажите количество и мощность насосов.");
   else if (pump.power > 7.5 + 1e-7) add("cabinet", "selection", "error", "Мощность одного насоса для NS Smart превышает 7,5 кВт. Подберите насос меньшей мощности или измените тип станции.");
   else if (cabinets.length && !cabinets.some(c => c.pumpCount === count && supportsPower(c, pump.power!))) add("cabinet", "selection", "warning", "Готовый шкаф NS Smart для выбранного количества и мощности насосов не найден.");
+  }
   for (const [id, message] of Object.entries(assetErrors)) {
     const tool=id.split("/")[0] as PanelKind;
     if (message && issueToolEnabled(tool,settings)) result.push({ id, tool, severity: "error", message });
   }
+  for (const finding of assessSpecification(project, undefined, result).findings) result.push({ id: finding.id, tool: "spec", severity: finding.severity, message: finding.message });
   return sortIssues(result);
 }
 
@@ -166,3 +184,15 @@ export function openIssueInFirstPanel(project: ProjectConfig, issue: ToolIssue, 
   Object.assign(first, { activeTool: issue.tool, entityId: ENTITY_BY_TOOL[issue.tool], minimized: false, z: maxZ + 3 });
   return { project: { ...project, workspace: { ...workspace, windows, grid } }, panelId: first.id };
 }
+
+export function collectProjectIssues(...args: Parameters<typeof coreCollectProjectIssues>): ReturnType<typeof coreCollectProjectIssues> {
+  return engineeringOperation("collectProjectIssues", coreCollectProjectIssues, args);
+}
+
+registerOperation("collectProjectIssues", ["project","catalogue","catalog","cabinets","assetErrors"], coreCollectProjectIssues);
+
+export function pumpIssues(...args: Parameters<typeof corePumpIssues>): ReturnType<typeof corePumpIssues> {
+  return engineeringOperation("pumpIssues", corePumpIssues, args);
+}
+
+registerOperation("pumpIssues", ["input","tool","catalogue"], corePumpIssues);

@@ -1,0 +1,629 @@
+{
+  "version": 1,
+  "rows": [
+    {
+      "kind": "reducer",
+      "componentId": "переходы-005-r0389",
+      "sourceSha256": "f68b4519e1e6786982e026472d49553d70159e87154417c02f53b9ced3a1464c",
+      "match": {
+        "geometry": "concentric",
+        "outerDiameter": 114.3,
+        "outerDiameterSmall": 60.3,
+        "wallThickness": 3.6,
+        "wallThicknessSmall": 2.9,
+        "lengthMm": 102
+      },
+      "hash": "4e6d8974a3c6269d20532fb0a337b197bdc4f9bdd2278f3fca7eb49f45ce5787",
+      "bounds": [
+        -57.1500001,
+        -57.1500001,
+        -1e-7,
+        57.1500001,
+        57.1500001,
+        102.0000001
+      ],
+      "rotation": [
+        0,
+        90,
+        0
+      ],
+      "position": [
+        0,
+        0,
+        0
+      ],
+      "source": "Equipment/Piping/3D/Элементы трубопроводов/Переходы/Переход К исп 1 ГОСТ 17378-2001 ISO/Переход К-1-114,3 x 3,6-60,3 x 2,9 ISO.stp"
+    },
+    {
+      "kind": "reducer",
+      "componentId": "переходы-005-r0404",
+      "sourceSha256": "f68b4519e1e6786982e026472d49553d70159e87154417c02f53b9ced3a1464c",
+      "match": {
+        "geometry": "concentric",
+        "outerDiameter": 139.7,
+        "outerDiameterSmall": 114.3,
+        "wallThickness": 4,
+        "wallThicknessSmall": 3.6,
+        "lengthMm": 127
+      },
+      "hash": "de1f17c24d6f9394a0ea001ddf0b1218e991b75851ed3baf40face3ed2154cde",
+      "bounds": [
+        -69.85000009999999,
+        -69.85000009999999,
+        -1e-7,
+        69.8500001,
+        69.85000009999999,
+        127.0000001
+      ],
+      "rotation": [
+        0,
+        90,
+        0
+      ],
+      "position": [
+        0,
+        0,
+        0
+      ],
+      "source": "Equipment/Piping/3D/Элементы трубопроводов/Переходы/Переход К исп 1 ГОСТ 17378-2001 ISO/Переход К-1-139,7 x 4-114,3 x 3,6 ISO.stp"
+    },
+    {
+      "kind": "reducer",
+      "componentId": "переходы-005-r0365",
+      "sourceSha256": "f68b4519e1e6786982e026472d49553d70159e87154417c02f53b9ced3a1464c",
+      "match": {
+        "geometry": "concentric",
+        "outerDiameter": 60.3,
+        "outerDiameterSmall": 42.4,
+        "wallThickness": 2.9,
+        "wallThicknessSmall": 2.6,
+        "lengthMm": 76
+      },
+      "hash": "ea62f1fd0db6b4a9022a8c4a0190ee58e54138d259171918aa36c8cf14f7cb0a",
+      "bounds": [
+        -30.1500001,
+        -30.1500001,
+        -1e-7,
+        30.1500001,
+        30.1500001,
+        76.0000001
+      ],
+      "rotation": [
+        0,
+        90,
+        0
+      ],
+      "position": [
+        0,
+        0,
+        0
+      ],
+      "source": "Equipment/Piping/3D/Элементы трубопроводов/Переходы/Переход К исп 1 ГОСТ 17378-2001 ISO/Переход К-1-60,3 x 2,9-42,4 x 2,6 ISO.stp"
+    },
+    {
+      "kind": "reducer",
+      "componentId": "переходы-005-r0368",
+      "sourceSha256": "f68b4519e1e6786982e026472d49553d70159e87154417c02f53b9ced3a1464c",
+      "match": {
+        "geometry": "concentric",
+        "outerDiameter": 60.3,
+        "outerDiameterSmall": 48.3,
+        "wallThickness": 2.9,
+        "wallThicknessSmall": 2.6,
+        "lengthMm": 76
+      },
+      "hash": "6a547c7af72db573ea7477fac14c8f702fc4642464cef93856fbb23f592d4b44",
+      "bounds": [
+        -30.1500001,
+        -30.150000100000003,
+        -1e-7,
+        30.150000100000003,
+        30.150000100000003,
+        76.0000001
+      ],
+      "rotation": [
+        0,
+        90,
+        0
+      ],
+      "position": [
+        0,
+        0,
+        0
+      ],
+      "source": "Equipment/Piping/3D/Элементы трубопроводов/Переходы/Переход К исп 1 ГОСТ 17378-2001 ISO/Переход К-1-60,3 x 2,9-48,3 x 2,6 AISI304.stp"
+    },
+    {
+      "kind": "reducer",
+      "componentId": "переходы-005-r0392",
+      "sourceSha256": "f68b4519e1e6786982e026472d49553d70159e87154417c02f53b9ced3a1464c",
+      "match": {
+        "geometry": "concentric",
+        "outerDiameter": 114.3,
+        "outerDiameterSmall": 76.1,
+        "wallThickness": 3.6,
+        "wallThicknessSmall": 2.9,
+        "lengthMm": 102
+      },
+      "hash": "a99b319411e5e521cb3be139b539419f5c167ae74971dc17b21848fbff7b8416",
+      "bounds": [
+        -57.1500001,
+        -57.1500001,
+        -1e-7,
+        57.1500001,
+        57.1500001,
+        102.0000001
+      ],
+      "rotation": [
+        0,
+        90,
+        0
+      ],
+      "position": [
+        0,
+        0,
+        0
+      ],
+      "source": "Equipment/Piping/3D/Элементы трубопроводов/Переходы/Переход К исп 1 ГОСТ 17378-2001 ISO/Переход К-114,3х3.6 - 76,1х2.9 ISO.stp"
+    },
+    {
+      "kind": "reducer",
+      "componentId": "переходы-005-r0393",
+      "sourceSha256": "f68b4519e1e6786982e026472d49553d70159e87154417c02f53b9ced3a1464c",
+      "match": {
+        "geometry": "concentric",
+        "outerDiameter": 114.3,
+        "outerDiameterSmall": 76.1,
+        "wallThickness": 6.3,
+        "wallThicknessSmall": 5,
+        "lengthMm": 102
+      },
+      "hash": "27aded1b6bb41ebce9507e166c3de0ce73f4e7cd50a90c5ecb8fb8483ec7c426",
+      "bounds": [
+        -57.1500001,
+        -57.1500001,
+        -1e-7,
+        57.1500001,
+        57.1500001,
+        102.0000001
+      ],
+      "rotation": [
+        0,
+        90,
+        0
+      ],
+      "position": [
+        0,
+        0,
+        0
+      ],
+      "source": "Equipment/Piping/3D/Элементы трубопроводов/Переходы/Переход К исп 1 ГОСТ 17378-2001 ISO/Переход К-114,3х6.3 - 76,1х5 ISO.stp"
+    },
+    {
+      "kind": "reducer",
+      "componentId": "st20-concentric:r0035",
+      "sourceSha256": "f68b4519e1e6786982e026472d49553d70159e87154417c02f53b9ced3a1464c",
+      "match": {
+        "geometry": "concentric",
+        "outerDiameter": 60.3,
+        "outerDiameterSmall": 42.4,
+        "wallThickness": 2.9,
+        "wallThicknessSmall": 2.6,
+        "lengthMm": 76
+      },
+      "hash": "ea62f1fd0db6b4a9022a8c4a0190ee58e54138d259171918aa36c8cf14f7cb0a",
+      "bounds": [
+        -30.1500001,
+        -30.1500001,
+        -1e-7,
+        30.1500001,
+        30.1500001,
+        76.0000001
+      ],
+      "rotation": [
+        0,
+        90,
+        0
+      ],
+      "position": [
+        0,
+        0,
+        0
+      ],
+      "source": "Equipment/Piping/3D/Элементы трубопроводов/Переходы/Переход К исп 1 ГОСТ 17378-2001 ISO/Переход К-1-60,3 x 2,9-42,4 x 2,6 ISO.stp"
+    },
+    {
+      "kind": "reducer",
+      "componentId": "st20-concentric:r0038",
+      "sourceSha256": "f68b4519e1e6786982e026472d49553d70159e87154417c02f53b9ced3a1464c",
+      "match": {
+        "geometry": "concentric",
+        "outerDiameter": 60.3,
+        "outerDiameterSmall": 48.3,
+        "wallThickness": 2.9,
+        "wallThicknessSmall": 2.6,
+        "lengthMm": 76
+      },
+      "hash": "6a547c7af72db573ea7477fac14c8f702fc4642464cef93856fbb23f592d4b44",
+      "bounds": [
+        -30.1500001,
+        -30.150000100000003,
+        -1e-7,
+        30.150000100000003,
+        30.150000100000003,
+        76.0000001
+      ],
+      "rotation": [
+        0,
+        90,
+        0
+      ],
+      "position": [
+        0,
+        0,
+        0
+      ],
+      "source": "Equipment/Piping/3D/Элементы трубопроводов/Переходы/Переход К исп 1 ГОСТ 17378-2001 ISO/Переход К-1-60,3 x 2,9-48,3 x 2,6 AISI304.stp"
+    },
+    {
+      "kind": "collar",
+      "match": {
+        "outerDiameter": 114.3,
+        "wallThickness": 2,
+        "lengthMm": 16,
+        "lipOuterDiameterMm": 158,
+        "thicknessMm": 2
+      },
+      "hash": "77ada38a239ca76b080bbff98c1eef048d2ac33b1cdbe6dc8ca1246c4c311993",
+      "bounds": [
+        0,
+        -79,
+        -79,
+        16,
+        79,
+        79
+      ],
+      "rotation": [
+        0,
+        0,
+        180
+      ],
+      "position": [
+        16,
+        0,
+        0
+      ],
+      "source": "Equipment/Piping/3D/Воротники STEP/1f37b468365aa85b.step"
+    },
+    {
+      "kind": "collar",
+      "match": {
+        "outerDiameter": 139.7,
+        "wallThickness": 2,
+        "lengthMm": 16,
+        "lipOuterDiameterMm": 185,
+        "thicknessMm": 2
+      },
+      "hash": "5f860cc782ba553b6050a76ec4017b5361c59f717ad1a20f34ba722df6ca4958",
+      "bounds": [
+        0,
+        -92.5,
+        -92.5,
+        16,
+        92.5,
+        92.5
+      ],
+      "rotation": [
+        0,
+        0,
+        180
+      ],
+      "position": [
+        16,
+        0,
+        0
+      ],
+      "source": "Equipment/Piping/3D/Воротники STEP/8b475560e14c7d85.step"
+    },
+    {
+      "kind": "collar",
+      "match": {
+        "outerDiameter": 33.7,
+        "wallThickness": 2,
+        "lengthMm": 15,
+        "lipOuterDiameterMm": 68,
+        "thicknessMm": 2
+      },
+      "hash": "aed13d0019301352915cb4c8ee866dca6d966a741de9a02d369fcee484a2d9e8",
+      "bounds": [
+        0,
+        -34,
+        -34,
+        15,
+        34,
+        34
+      ],
+      "rotation": [
+        0,
+        0,
+        180
+      ],
+      "position": [
+        15,
+        0,
+        0
+      ],
+      "source": "Equipment/Piping/3D/Воротники STEP/2a7b2fc3121fbbb1.step"
+    },
+    {
+      "kind": "collar",
+      "match": {
+        "outerDiameter": 42.4,
+        "wallThickness": 2,
+        "lengthMm": 15,
+        "lipOuterDiameterMm": 78,
+        "thicknessMm": 2
+      },
+      "hash": "a9977ca3542a5d048c6c67c00f28af0bc49cb20f3106b2fcb02518583ad09c89",
+      "bounds": [
+        0,
+        -39,
+        -39,
+        15,
+        39,
+        39
+      ],
+      "rotation": [
+        0,
+        0,
+        180
+      ],
+      "position": [
+        15,
+        0,
+        0
+      ],
+      "source": "Equipment/Piping/3D/Воротники STEP/2cee7497b86ca42c.step"
+    },
+    {
+      "kind": "collar",
+      "match": {
+        "outerDiameter": 114.3,
+        "wallThickness": 3,
+        "lengthMm": 28,
+        "lipOuterDiameterMm": 158,
+        "thicknessMm": 3
+      },
+      "hash": "4e7ef38e2c1c8a6ba6c99204cef9e92a913f805a7426e0188034675b418ef12c",
+      "bounds": [
+        0,
+        -79,
+        -79,
+        28,
+        79,
+        79
+      ],
+      "rotation": [
+        0,
+        0,
+        180
+      ],
+      "position": [
+        28,
+        0,
+        0
+      ],
+      "source": "Equipment/Piping/3D/Воротники STEP/96e1bf7f79b02f1e.step"
+    },
+    {
+      "kind": "collar",
+      "match": {
+        "outerDiameter": 133,
+        "wallThickness": 3,
+        "lengthMm": 28,
+        "lipOuterDiameterMm": 188,
+        "thicknessMm": 3
+      },
+      "hash": "c86d22b8d1c2c2f90bd56e02c11f2fe500815a9b3425e32cca1e95accbbf9949",
+      "bounds": [
+        0,
+        -94,
+        -94,
+        28,
+        94,
+        94
+      ],
+      "rotation": [
+        0,
+        0,
+        180
+      ],
+      "position": [
+        28,
+        0,
+        0
+      ],
+      "source": "Equipment/Piping/3D/Воротники STEP/1889f711c3023694.step"
+    },
+    {
+      "kind": "collar",
+      "match": {
+        "outerDiameter": 154,
+        "wallThickness": 2,
+        "lengthMm": 28,
+        "lipOuterDiameterMm": 210,
+        "thicknessMm": 3
+      },
+      "hash": "0973f1047eefe6649ce4ad86fc5dca6849ebc2167a8b0d644951da698852f2df",
+      "bounds": [
+        0,
+        -105,
+        -105,
+        28,
+        105,
+        105
+      ],
+      "rotation": [
+        0,
+        0,
+        180
+      ],
+      "position": [
+        28,
+        0,
+        0
+      ],
+      "source": "Equipment/Piping/3D/Воротники STEP/a81d0ddd348f458b.step"
+    },
+    {
+      "kind": "collar",
+      "match": {
+        "outerDiameter": 219.1,
+        "wallThickness": 2,
+        "lengthMm": 18,
+        "lipOuterDiameterMm": 270,
+        "thicknessMm": 2
+      },
+      "hash": "dd2e587d30f0da426f0db92d0ce956052d0e31802a3e96e27add8abfdacce86a",
+      "bounds": [
+        0,
+        -135,
+        -135,
+        18,
+        135,
+        135
+      ],
+      "rotation": [
+        0,
+        0,
+        180
+      ],
+      "position": [
+        18,
+        0,
+        0
+      ],
+      "source": "Equipment/Piping/3D/Воротники STEP/099c579d13fd2622.step"
+    },
+    {
+      "kind": "collar",
+      "match": {
+        "outerDiameter": 33.7,
+        "wallThickness": 3,
+        "lengthMm": 14,
+        "lipOuterDiameterMm": 68,
+        "thicknessMm": 3
+      },
+      "hash": "012a556cadd52f01dc98be85f44e170d532fb5ea5ace514675ca636ef504cc24",
+      "bounds": [
+        0,
+        -34,
+        -34,
+        14,
+        34,
+        34
+      ],
+      "rotation": [
+        0,
+        0,
+        180
+      ],
+      "position": [
+        14,
+        0,
+        0
+      ],
+      "source": "Equipment/Piping/3D/Воротники STEP/af3e8794353e9b83.step"
+    },
+    {
+      "kind": "collar",
+      "match": {
+        "outerDiameter": 42.4,
+        "wallThickness": 2,
+        "lengthMm": 15,
+        "lipOuterDiameterMm": 78,
+        "thicknessMm": 2
+      },
+      "hash": "2aae6b5e0ce5ee32e68324333fffdf9af701fc09e61b716b68593215330e1231",
+      "bounds": [
+        0,
+        -39,
+        -39,
+        15,
+        39,
+        39
+      ],
+      "rotation": [
+        0,
+        0,
+        180
+      ],
+      "position": [
+        15,
+        0,
+        0
+      ],
+      "source": "Equipment/Piping/3D/Воротники STEP/bfd51b652ba5f21d.step"
+    },
+    {
+      "kind": "collar",
+      "match": {
+        "outerDiameter": 48.3,
+        "wallThickness": 2,
+        "lengthMm": 17,
+        "lipOuterDiameterMm": 88,
+        "thicknessMm": 2
+      },
+      "hash": "7d5aabc9135d521bf35d5bee21d09bcd0d7b51b8db7192521b97380cc49ac888",
+      "bounds": [
+        0,
+        -44,
+        -44,
+        17,
+        44,
+        44
+      ],
+      "rotation": [
+        0,
+        0,
+        180
+      ],
+      "position": [
+        17,
+        0,
+        0
+      ],
+      "source": "Equipment/Piping/3D/Воротники STEP/3fa8056566be07e9.step"
+    },
+    {
+      "kind": "collar",
+      "match": {
+        "outerDiameter": 60.3,
+        "wallThickness": 2,
+        "lengthMm": 12,
+        "lipOuterDiameterMm": 102,
+        "thicknessMm": 2
+      },
+      "hash": "04f74af8fbafd24284e6b7d1248b6849504d10ed6f31728ba26f1ca6fc96d053",
+      "bounds": [
+        0,
+        -51,
+        -51,
+        12,
+        51,
+        51
+      ],
+      "rotation": [
+        0,
+        0,
+        180
+      ],
+      "position": [
+        12,
+        0,
+        0
+      ],
+      "source": "Equipment/Piping/3D/Воротники STEP/a5f7f02daff32c8a.step"
+    }
+  ]
+}

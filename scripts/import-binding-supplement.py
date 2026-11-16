@@ -11,13 +11,18 @@ from pathlib import Path
 import sqlite3
 
 
-def import_supplement(db, data, supplier_id):
+def import_supplement(db, data, supplier_id, *, add_only=False, manage_transaction=True):
     supplement = [row for row in data["items"] if row["tableId"] == supplier_id]
     if not supplement:
         raise ValueError("Supplier data missing; run npm run prebuild first")
-    db.execute("BEGIN IMMEDIATE")
+    if manage_transaction:
+        db.execute("BEGIN IMMEDIATE")
+    elif not db.in_transaction:
+        raise ValueError("Caller must start a transaction")
     try:
-        active = db.execute("SELECT id FROM catalog_imports WHERE is_active=1 ORDER BY imported_at DESC,id DESC LIMIT 1").fetchone()
+        active = db.execute("SELECT id,source_sha256 FROM catalog_imports WHERE is_active=1 ORDER BY imported_at DESC,id DESC LIMIT 1").fetchone()
+        if add_only and (active is None or active[1] != data["source"]["sha256"]):
+            raise ValueError("Add-only import requires the matching active workbook")
         bootstrap = active is None
         if bootstrap:
             source = data["source"]
@@ -28,7 +33,27 @@ def import_supplement(db, data, supplier_id):
         import_id = active[0]
         rows = data["items"] if bootstrap else supplement
         catalogs = {v["id"]: v for v in data["catalogs"]}
+        created, unchanged = 0, 0
         for row in rows:
+            if add_only:
+                matches = db.execute("""SELECT c.id,f.source_id,f.title FROM components c
+                    JOIN component_families f ON f.id=c.family_id JOIN component_catalogs cat ON cat.id=f.catalog_id
+                    WHERE cat.import_id=? AND c.source_id=?""", (import_id, row["id"])).fetchall()
+                if matches:
+                    if len(matches) != 1 or matches[0][1:] != (row["tableId"], row["family"]):
+                        raise ValueError(f"Conflicting existing component: {row['id']}")
+                    component_id = matches[0][0]
+                    actual_fields = db.execute("""SELECT a.source_column,a.header_path_json,v.value_type,v.numeric_value,v.text_value
+                        FROM component_attribute_values v JOIN attribute_definitions a ON a.id=v.attribute_definition_id
+                        WHERE v.component_id=?""", (component_id,)).fetchall()
+                    actual = {c: (json.loads(h), n if kind == "number" else t) for c,h,kind,n,t in actual_fields}
+                    expected = {f["column"]: (f["headerPath"], f["value"]) for f in row["fields"]}
+                    actual_prices = db.execute("SELECT label,amount_microunits,currency,source_column FROM component_prices WHERE component_id=? ORDER BY label,source_column", (component_id,)).fetchall()
+                    expected_prices = sorted([(p["label"],round(p["amount"]*1_000_000),p["currency"],p["sourceColumn"]) for p in row["prices"]], key=lambda p:(p[0],p[3]))
+                    if actual != expected or actual_prices != expected_prices:
+                        raise ValueError(f"Existing component was edited; preserved without overwrite: {row['id']}")
+                    unchanged += 1
+                    continue
             catalog = catalogs[row["catalogId"]]
             db.execute("INSERT OR IGNORE INTO component_catalogs (import_id,source_id,name,source_sheet) VALUES (?,?,?,?)",
                        (import_id, catalog["id"], catalog["name"], catalog["sourceSheet"]))
@@ -47,6 +72,8 @@ def import_supplement(db, data, supplier_id):
                 display_name=excluded.display_name,manufacturer=excluded.manufacturer,article=excluded.article,is_active=1""",
                 (family_id, row["id"], row["sourceRow"], fields.get("Наименование", row["family"]), fields.get("Производитель"), fields.get("Артикул")))
             component_id = db.execute("SELECT id FROM components WHERE family_id=? AND source_id=?", (family_id, row["id"])).fetchone()[0]
+            if not existing:
+                created += 1
             for field in row["fields"]:
                 value = field["value"]
                 numeric = isinstance(value, (int, float)) and not isinstance(value, bool)
@@ -69,10 +96,12 @@ def import_supplement(db, data, supplier_id):
                 roles = ["documentation"] if url.endswith(".pdf") else ["product", "price"]
                 for role in roles:
                     db.execute("INSERT OR IGNORE INTO component_data_sources (component_id,data_source_id,role) VALUES (?,?,?)", (component_id, source_id, role))
-        db.commit()
-        return {"importId": import_id, "initializedCatalogue": bootstrap, "supplierRows": len(supplement)}
+        if manage_transaction:
+            db.commit()
+        return {"importId": import_id, "initializedCatalogue": bootstrap, "supplierRows": len(supplement), "created": created, "unchanged": unchanged}
     except Exception:
-        db.rollback()
+        if manage_transaction:
+            db.rollback()
         raise
 
 
@@ -81,6 +110,7 @@ def main():
     parser.add_argument("--database", type=Path, required=True, help="Exact existing local D1 .sqlite file")
     parser.add_argument("--catalog", type=Path, default=Path(__file__).resolve().parents[1] / "public/binding-components.json")
     parser.add_argument("--supplier", default="lunda-ld-67-504")
+    parser.add_argument("--add-only", action="store_true", help="Require the matching active workbook; preserve edited existing supplier records")
     args = parser.parse_args()
     path = args.database.resolve(strict=True)
     with sqlite3.connect(path.as_uri() + "?mode=rw", uri=True, timeout=30) as db:
@@ -92,7 +122,7 @@ def main():
         with sqlite3.connect(backup) as destination:
             db.backup(destination)
         data = json.loads(args.catalog.read_text(encoding="utf-8"))
-        result = import_supplement(db, data, args.supplier)
+        result = import_supplement(db, data, args.supplier, add_only=args.add_only)
         result.update(backup=str(backup), integrity=db.execute("PRAGMA quick_check").fetchone()[0])
         print(json.dumps(result, ensure_ascii=True))
 

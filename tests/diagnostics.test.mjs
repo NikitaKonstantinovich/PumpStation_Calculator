@@ -49,9 +49,9 @@ test("known pressure limit exceedance is an error and missing pressure data is a
   const p = project();
   const item = { position: "01", name: "Насос Test", details: "3 кВт", quantity: 2, section: "pump", status: "confirmation", inletPressureCheck: { baseStatus: "selected", checks: [{ status: "exceeded", message: "Превышение PN16" }] } };
   p.entities["station-spec"].items = [item];
-  assert.equal(collect(p).find(i => i.tool === "spec").severity, "error");
+  assert.equal(collect(p).find(i => i.id.startsWith("spec/01/")).severity, "error");
   item.inletPressureCheck.checks[0] = { status: "unknown-limit", message: "Допустимое давление неизвестно" };
-  assert.equal(collect(p).find(i => i.tool === "spec").severity, "warning");
+  assert.equal(collect(p).find(i => i.id.startsWith("spec/01/")).severity, "warning");
 });
 
 test("severity filters are independent and combine with the tool filter", () => {

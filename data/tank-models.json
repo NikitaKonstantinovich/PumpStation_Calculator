@@ -1,0 +1,313 @@
+{
+  "version": 1,
+  "revision": "tank-native-cad-v1",
+  "assets": {
+    "tank50": {
+      "name": "Мембранный бак WAV-50",
+      "source": "Equipment/Tanks/3D/Баки/Wester/Мембранный бак WAV-50.SLDPRT",
+      "sourceHash": "2e6e6a8d92cabee4d0385112e2ed87d54e9064b3e6dce46049c6f1b9e14d3406",
+      "meshHash": "213613f810eb2d361cf203797c54857d113d3541abf9d8ff4733de31731ee459",
+      "meshUrl": "/model-assets/model-2e6e6a8d92cabee4d0385112e2ed87d54e9064b3e6dce46049c6f1b9e14d3406-v1.stl",
+      "bounds": [
+        -208.97050201892853,
+        -197.17811048030853,
+        -409.5638394355774,
+        182.7985942363739,
+        197.21531867980957,
+        259.4393491744995
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "ports": [
+        {
+          "id": "inlet",
+          "point": [
+            0,
+            0,
+            -301.5606689453125
+          ],
+          "axis": [
+            0,
+            0,
+            -1
+          ],
+          "dn": 25,
+          "thread": "G1",
+          "gender": "male",
+          "connection": "threaded",
+          "plane": "thread-reference",
+          "provisional": true
+        }
+      ]
+    },
+    "tank100": {
+      "name": "Мембранный бак WAV-100",
+      "source": "Equipment/Tanks/3D/Баки/Wester/Мембранный бак WAV-100.SLDPRT",
+      "sourceHash": "653b02c5f8db6c1eeee28b4ef686aeede6366b74165104e97a4cec067aa5eb03",
+      "meshHash": "79fa5434f84e514214bde0bcc3b452b34403df3dd3e758ff889ad091b2546ad9",
+      "meshUrl": "/model-assets/model-653b02c5f8db6c1eeee28b4ef686aeede6366b74165104e97a4cec067aa5eb03-v1.stl",
+      "bounds": [
+        -247.5000023841858,
+        -5.377642775528102e-14,
+        -247.5000023841858,
+        247.5000023841858,
+        806.9999814033508,
+        247.5000023841858
+      ],
+      "rotation": [
+        90,
+        0,
+        0
+      ],
+      "ports": [
+        {
+          "id": "inlet",
+          "point": [
+            0,
+            78,
+            0
+          ],
+          "axis": [
+            0,
+            -1,
+            0
+          ],
+          "dn": 25,
+          "thread": "G1",
+          "gender": "male",
+          "connection": "threaded",
+          "plane": "thread-reference",
+          "provisional": true
+        }
+      ]
+    },
+    "tank80": {
+      "name": "Мембранный бак WAV-80",
+      "source": "Equipment/Tanks/3D/Баки/Wester/Мембранный бак WAV-80.SLDPRT",
+      "sourceHash": "418da00a4200869a53edd54bfefae305b11ef4ec56e984fc90be886ab74d370a",
+      "meshHash": "b5b67467c5541dd0f06e1cec0b1f5679244640fa526afa0645b1cc8ddd007951",
+      "meshUrl": "/model-assets/model-418da00a4200869a53edd54bfefae305b11ef4ec56e984fc90be886ab74d370a-v1.stl",
+      "bounds": [
+        -204.52210307121277,
+        -2.7755575615628914e-14,
+        -204.99999821186066,
+        204.99999821186066,
+        806.9999814033508,
+        204.99999821186066
+      ],
+      "rotation": [
+        90,
+        0,
+        0
+      ],
+      "ports": [
+        {
+          "id": "inlet",
+          "point": [
+            0,
+            78,
+            0
+          ],
+          "axis": [
+            0,
+            -1,
+            0
+          ],
+          "dn": 25,
+          "thread": "G1",
+          "gender": "male",
+          "connection": "threaded",
+          "plane": "thread-reference",
+          "provisional": true
+        }
+      ]
+    },
+    "valve20": {
+      "name": "Ld_pride_44_20_40Pn Б с воздухоотводчиком",
+      "source": "Equipment/Valves/3D/Шаровые/Ld_pride_44_20_40Pn Б с воздухоотводчиком.SLDPRT",
+      "sourceHash": "c8711b3a244af81e68b195422a41ee192999088d9fd0b74370d392dfa316e978",
+      "meshHash": "0efc0c14dbb21eb1058f76e1e309df44851854a32d3fa567fca05d6734fe4be3",
+      "meshUrl": "/model-assets/model-c8711b3a244af81e68b195422a41ee192999088d9fd0b74370d392dfa316e978-v1.stl",
+      "bounds": [
+        -40.44639319181442,
+        -26.000000536441803,
+        -14.2000000923872,
+        22.50000089406967,
+        29.500000178813934,
+        37.25000098347664
+      ],
+      "rotation": [
+        90,
+        0,
+        0
+      ],
+      "position": [
+        0,
+        0,
+        16
+      ],
+      "ports": [
+        {
+          "id": "inlet",
+          "point": [
+            0,
+            -26,
+            0
+          ],
+          "axis": [
+            0,
+            -1,
+            0
+          ],
+          "dn": 20,
+          "thread": "G3/4",
+          "gender": "female",
+          "connection": "threaded",
+          "plane": "thread-reference",
+          "provisional": true
+        },
+        {
+          "id": "outlet",
+          "point": [
+            0,
+            29.5,
+            0
+          ],
+          "axis": [
+            0,
+            1,
+            0
+          ],
+          "dn": 20,
+          "thread": "G3/4",
+          "gender": "female",
+          "connection": "threaded",
+          "plane": "thread-reference",
+          "provisional": true
+        }
+      ]
+    },
+    "valve25": {
+      "name": "Кран шаровой Ld_pride_47_25_40Pn Р Красный",
+      "source": "Equipment/Valves/3D/Шаровые/Кран шаровой Ld_pride_47_25_40Pn Р Красный.SLDPRT",
+      "sourceHash": "b7427b8e4df9dc99f75025aa5216ead2f84b62de88a3f0e859f6e970e0cc6028",
+      "meshHash": "58f30696247830c6328fa2d7e3b6b67f69d664fcd4a12c498ea0a4f207a6bb4f",
+      "meshUrl": "/model-assets/model-b7427b8e4df9dc99f75025aa5216ead2f84b62de88a3f0e859f6e970e0cc6028-v1.stl",
+      "bounds": [
+        -119.99999731779099,
+        -21.250000223517418,
+        -21.55018225312233,
+        32.00000151991844,
+        68.49043816328049,
+        21.549999713897705
+      ],
+      "rotation": [
+        0,
+        90,
+        0
+      ],
+      "position": [
+        0,
+        0,
+        22
+      ],
+      "ports": [
+        {
+          "id": "inlet",
+          "point": [
+            32,
+            0,
+            0
+          ],
+          "axis": [
+            1,
+            0,
+            0
+          ],
+          "dn": 25,
+          "thread": "G1",
+          "gender": "female",
+          "connection": "threaded",
+          "plane": "thread-reference",
+          "provisional": true
+        },
+        {
+          "id": "outlet",
+          "point": [
+            -32,
+            0,
+            0
+          ],
+          "axis": [
+            -1,
+            0,
+            0
+          ],
+          "dn": 25,
+          "thread": "G1",
+          "gender": "female",
+          "connection": "threaded",
+          "plane": "thread-reference",
+          "provisional": true
+        }
+      ]
+    },
+    "cap20": {
+      "name": "Заглушка ВР 6ти гранная нержавеющая AISI304 DN20 3_4 PN16",
+      "source": "Equipment/Fittings/3D/Заглушки/Заглушка ВР 6ти гранная нержавеющая AISI304 DN20 3_4 PN16.SLDPRT",
+      "sourceHash": "f6c47179c8bd02bd93e0e1df498eefe44c6037c868aced6113125ebc429f8216",
+      "meshHash": "f59c218e7f411e5a355a38367286c6b6dedf648c33324bd96634755c773af400",
+      "meshUrl": "/model-assets/model-f6c47179c8bd02bd93e0e1df498eefe44c6037c868aced6113125ebc429f8216-v1.stl",
+      "bounds": [
+        -16.722431406378746,
+        -1.3676816006188573e-14,
+        -14.750071801245213,
+        16.722431406378746,
+        13.299999758601189,
+        14.750071801245213
+      ],
+      "rotation": [
+        90,
+        0,
+        0
+      ],
+      "position": [
+        0,
+        0,
+        -10
+      ],
+      "ports": [
+        {
+          "id": "inlet",
+          "point": [
+            0,
+            0,
+            0
+          ],
+          "axis": [
+            0,
+            -1,
+            0
+          ],
+          "dn": 20,
+          "thread": "G3/4",
+          "gender": "female",
+          "connection": "threaded",
+          "plane": "thread-reference",
+          "provisional": true
+        }
+      ]
+    }
+  },
+  "tank8": {
+    "diameterMm": 200,
+    "heightMm": 311,
+    "thread": "G3/4",
+    "source": "Паспорт Wester WAV/WAO, таблица размеров, стр. 3; локальная копия work/spec-stage3-2026-10-29/wester-wav.pdf",
+    "sourceSha256": "4b69608b4fb57725f2596b944e0f17283c78ed1989003b2d1bfd058dc1513a60",
+    "note": "Габаритная модель; исходная сборка WAV 8 не содержит доступной сетки бака. Профиль днищ и локальные детали условные."
+  }
+}

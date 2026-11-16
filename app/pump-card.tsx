@@ -1,9 +1,10 @@
+import {withCircuit} from "./engineering/runtime";
 import type { ReactNode } from "react";
 import type { Pump } from "./pump-catalog";
 import { pumpCardCurves, pumpCardPhysicalData, pumpCardSections, pumpCardValue, PUMP_TYPE_LABELS } from "./pump-card-data";
 
 export function PumpCard({ pump, children, issueTool = "sketch" }: { pump: Pump; children?: ReactNode; issueTool?: "sketch"|"sketch2" }) {
-  const curves = pumpCardCurves(pump);
+  const curves = withCircuit(issueTool==="sketch2",()=>pumpCardCurves(pump));
   const physical = pumpCardPhysicalData(pump);
   return <article className="pump-card" aria-label={`Карточка насоса ${pump.manufacturer} ${pump.model}`}>
     <header className="pump-card__header">
@@ -22,13 +23,14 @@ export function PumpCard({ pump, children, issueTool = "sketch" }: { pump: Pump;
         <div><dt>Масса, кг</dt><dd>{physical.weight}</dd></div>
       </dl>
     </header>
+    {pump.assets?.files && <section className="pump-card__section"><h3>Файлы насоса</h3><ul>{Object.values(pump.assets.files).map(file => file && <li key={file.id}><a href={file.url} target="_blank" rel="noreferrer">{file.name}</a></li>)}</ul></section>}
     {(pump.selectable === false || pump.active === false || Boolean(pump.dataWarnings?.length)) && <aside className="pump-card__notice">
       {(pump.selectable === false || pump.active === false) && <p data-issue-id={`${issueTool}/availability`}>Модель недоступна для подбора.</p>}
       {pump.dataWarnings?.map((warning, index) => <p data-issue-id={`${issueTool}/data/${index}`} key={index}>{warning}</p>)}
     </aside>}
     <div className="pump-card__characteristics">
       <p className="pump-card__hint">Характеристики одного насоса по данным каталога. «—» — значение не указано.</p>
-      {pumpCardSections(pump).map(section => <section className="pump-card__section" key={section.title}>
+      {withCircuit(issueTool==="sketch2",()=>pumpCardSections(pump)).map(section => <section className="pump-card__section" key={section.title}>
         <h3>{section.title}</h3>
         <dl>{section.rows.map((row, index) => <div className="pump-card__row" key={`${row.label}-${index}`}>
           <dt>{row.label}</dt><dd>{row.value}</dd>
@@ -46,7 +48,7 @@ export function PumpCard({ pump, children, issueTool = "sketch" }: { pump: Pump;
     </div>
     <section className="pump-card__drawing" aria-label="Эскиз с габаритами">
       <h3>Эскиз с габаритами</h3>
-      {children ?? <div data-issue-id={`${issueTool}/drawing`} className="pump-sketch__empty"><span aria-hidden="true">⌁</span><b>Чертёж не найден</b><p>Для насоса {pump.manufacturer} {pump.model} в подключённых каталогах нет подтверждённого габаритного листа.</p></div>}
+      {children ?? (pump.assets?.files?.drawing ? <a href={pump.assets.files.drawing.url} target="_blank" rel="noreferrer">Открыть чертёж: {pump.assets.files.drawing.name}</a> : <div data-issue-id={`${issueTool}/drawing`} className="pump-sketch__empty"><span aria-hidden="true">⌁</span><b>Чертёж не найден</b><p>Для насоса {pump.manufacturer} {pump.model} в подключённых каталогах нет подтверждённого габаритного листа.</p></div>)}
     </section>
   </article>;
 }

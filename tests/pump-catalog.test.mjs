@@ -21,12 +21,19 @@ test("migration retains every legacy identity and every legacy field as evidence
   assert.equal(pumps.length, report.totalCount);
   assert.equal(legacy.length, report.legacyCount);
   assert.equal(pumps.filter(p => p.selectable).length, report.selectableCount);
-  assert.deepEqual([...new Set(pumps.map(p => p.manufacturer))].sort(), ["Aquastrong", "CNP", "ONIS", "VANDJORD", "Wellmix"]);
+  assert.deepEqual([...new Set(pumps.map(p => p.manufacturer))].sort(), ["Aquastrong", "CNP", "LEO", "ONIS", "VANDJORD", "Wellmix"]);
   for (const old of legacy) {
     assert.ok(byId.has(old.id), old.model);
     assert.equal(normalize(byId.get(old.id)), normalize(old));
     assert.deepEqual(evidence[old.id].legacy, old);
     for (const field of ["drawing", "price", "efficiency", "nominalFlow"]) {
+      const invalid = evidence[old.id].verticalPhysicalData?.invalidDrawing;
+      if (field === "drawing" && invalid?.path === old.drawing) {
+        assert.equal(byId.get(old.id).drawing, null);
+        assert.equal(invalid.drawingModel, "TD100-9/2");
+        assert.match(byId.get(old.id).physicalNote, /не соответствует модели/);
+        continue;
+      }
       if (old[field] != null) assert.notEqual(byId.get(old.id)[field], null, `${old.model}: ${field}`);
     }
   }
@@ -138,7 +145,11 @@ test("sketch resolver preserves legacy coverage and prioritizes exact reference 
     if (sketch?.src.startsWith("/")) paths.add(sketch.src);
   }
   for (const old of legacy) {
-    if (pumpSketchFor(old)) assert.ok(pumpSketchFor(byId.get(old.id)), old.model);
+    const invalid = evidence[old.id].verticalPhysicalData?.invalidDrawing;
+    if (invalid?.path === old.drawing) {
+      assert.equal(pumpSketchFor(byId.get(old.id)), undefined, old.model);
+      assert.equal(createHash("sha256").update(await readFile(new URL(`../public${invalid.path}`, import.meta.url))).digest("hex"), invalid.sha256);
+    } else if (pumpSketchFor(old)) assert.ok(pumpSketchFor(byId.get(old.id)), old.model);
   }
   for (const path of paths) await access(new URL(`../public${path}`, import.meta.url));
   const changedExecution = pumps.find(p => p.model === "CDM32-3");

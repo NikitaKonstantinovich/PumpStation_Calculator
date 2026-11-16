@@ -1,0 +1,31 @@
+EN 1092-1:2018 (E) 
+55 
+ 
+ 
+a) 
+  
+  
+  
+  
+  
+  
+This diagram illustrates the 
+arrangement but not necessarily the 
+correct number of bolt holes. 
+Refer to the column “Bolting 
+Number” in Table 13 for the actual 
+number. 
+b) Type 01 c) Type 02 and 32 d) Type 02 and 33 e) Type 02 and 35 f) Type 02 and 36 g) Type 02 and 37 
+ 
+  
+  
+  
+  
+  
+  h) Type 04 and 34 i) Type 05 j) Type 11 k) Type 12 l) Type 13 m) Type 21 
+NOTE 1 Dimensions N1, N2 and N3 are measured at the intersection of the hub draft angle and the back face of the flange.  
+NOTE 2 For dimension d1, see Table 8. 
+NOTE 3 For dimensions Gmax refer to NOTE 1 of 5.6.1. 
+NOTE 4 Type 33; lapped pipe end without determination of thickness and height.  
+Figure 8 — Dimensions of PN 16 flanges 
+  

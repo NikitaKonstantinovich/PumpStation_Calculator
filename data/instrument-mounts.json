@@ -1,0 +1,384 @@
+{
+  "version": 1,
+  "revision": "collector-kip-mounts-v1",
+  "assets": {
+    "valve": {
+      "name": "Кран шаровой латунный с дренажем и воздухоотводчиком трехходовой LD Pride 44_15_В-В_С_Б Ду 15 Ру40",
+      "source": "Equipment/Valves/3D/Шаровые/Кран шаровой латунный с дренажем и воздухоотводчиком трехходовой LD Pride 44_15_В-В_С_Б Ду 15 Ру40.SLDPRT",
+      "sourceHash": "bf08b0b3cc7928c3d47d8d4ee52053ea830c3c399cbcc735d04a3b7bf0d88a49",
+      "meshHash": "26a7aebf8484a21afe6e79f10cab7f4509c3ff7a01cdb3d425c8a6f570ae256a",
+      "meshUrl": "/model-assets/model-bf08b0b3cc7928c3d47d8d4ee52053ea830c3c399cbcc735d04a3b7bf0d88a49-v1.stl",
+      "bounds": [
+        -29.500000178813934,
+        -14.499999582767487,
+        -40.00993072986603,
+        26.000000536441803,
+        37.50000149011612,
+        22.50000089406967
+      ],
+      "position": [
+        0,
+        0,
+        14.5
+      ],
+      "rotation": [
+        0,
+        90,
+        0
+      ],
+      "ports": [
+        {
+          "id": "inlet",
+          "point": [
+            24.5,
+            0,
+            0
+          ],
+          "axis": [
+            1,
+            0,
+            0
+          ],
+          "dn": 15,
+          "thread": "G1/2",
+          "gender": "female",
+          "connection": "threaded",
+          "plane": "thread-reference",
+          "provisional": true
+        },
+        {
+          "id": "gauge",
+          "point": [
+            -29.5,
+            0,
+            0
+          ],
+          "axis": [
+            -1,
+            0,
+            0
+          ],
+          "dn": 15,
+          "thread": "G1/2",
+          "gender": "female",
+          "connection": "threaded",
+          "plane": "thread-reference",
+          "provisional": true
+        },
+        {
+          "id": "sensor",
+          "point": [
+            -15.5,
+            0,
+            22.5
+          ],
+          "axis": [
+            0,
+            0,
+            1
+          ],
+          "dn": 8,
+          "thread": "G1/4",
+          "gender": "female",
+          "connection": "threaded",
+          "plane": "thread-reference",
+          "provisional": true
+        }
+      ]
+    },
+    "gauge": {
+      "name": "Манометр ТМ-510Р",
+      "source": "Equipment/Instrumentation/3D/Манометры/Манометр ТМ-510Р.SLDPRT",
+      "sourceHash": "850fe6bd6606663ef860f0baf20357cf4d583e8b0a0d18a55f8943f60701eef8",
+      "meshHash": "2957517ed2c70f8bb4bb51378b44485a097ca57b5b2a181eb8019c56ae320062",
+      "meshUrl": "/model-assets/model-850fe6bd6606663ef860f0baf20357cf4d583e8b0a0d18a55f8943f60701eef8-v1.stl",
+      "bounds": [
+        -3.311851389919268e-11,
+        -50.00000074505806,
+        -87.99999952316284,
+        46.00000008940697,
+        50.00000074505806,
+        50.00000074505806
+      ],
+      "position": [
+        0,
+        -17,
+        122
+      ],
+      "rotation": [
+        0,
+        0,
+        90
+      ],
+      "ports": [
+        {
+          "id": "inlet",
+          "point": [
+            17,
+            0,
+            -88
+          ],
+          "axis": [
+            0,
+            0,
+            -1
+          ],
+          "dn": 15,
+          "thread": "G1/2",
+          "gender": "male",
+          "connection": "threaded",
+          "plane": "thread-reference",
+          "provisional": true
+        }
+      ]
+    },
+    "adapter": {
+      "name": "Переходник ВР1_2-НР1_4",
+      "source": "Equipment/Fittings/3D/Переходники/Переходник ВР1_2-НР1_4.SLDPRT",
+      "sourceHash": "2f3112a21588f559c47567fb825486ea80221c3d9da65cef7302379373e9969f",
+      "meshHash": "cb269629bf0a8d6a38b21f05f1324003b8470b09aa657f5384160a0f35c991aa",
+      "meshUrl": "/model-assets/model-2f3112a21588f559c47567fb825486ea80221c3d9da65cef7302379373e9969f-v1.stl",
+      "bounds": [
+        -8.673617379884035e-16,
+        -13.484708964824677,
+        -12.000000104308128,
+        20.999999716877937,
+        13.484708964824677,
+        12.000000104308128
+      ],
+      "position": [
+        35.5,
+        0,
+        30
+      ],
+      "rotation": [
+        0,
+        0,
+        180
+      ],
+      "ports": [
+        {
+          "id": "inlet",
+          "point": [
+            21,
+            0,
+            0
+          ],
+          "axis": [
+            1,
+            0,
+            0
+          ],
+          "dn": 8,
+          "thread": "G1/4",
+          "gender": "male",
+          "connection": "threaded",
+          "plane": "thread-reference",
+          "provisional": true
+        },
+        {
+          "id": "outlet",
+          "point": [
+            0,
+            0,
+            0
+          ],
+          "axis": [
+            -1,
+            0,
+            0
+          ],
+          "dn": 15,
+          "thread": "G1/2",
+          "gender": "female",
+          "connection": "threaded",
+          "plane": "thread-reference",
+          "provisional": true
+        }
+      ]
+    },
+    "bush": {
+      "name": "Футорка 1_2-1_4 нар_вн лат.",
+      "source": "Equipment/Fittings/3D/Переходники/Футорка 1_2-1_4 нар_вн лат..SLDPRT",
+      "sourceHash": "321a72ff935eb46a793c65260dd9267f149bc47d682731d7fc8990036d33b658",
+      "meshHash": "80ed2709072bf470222d7c2272c800721330beb44676a8787983b5c9248ab0fc",
+      "meshUrl": "/model-assets/model-321a72ff935eb46a793c65260dd9267f149bc47d682731d7fc8990036d33b658-v1.stl",
+      "bounds": [
+        0.0,
+        -12.494864873588085,
+        -10.999999940395355,
+        17.999999225139618,
+        12.494864873588085,
+        10.999999940395355
+      ],
+      "position": [
+        42.5,
+        0,
+        30
+      ],
+      "rotation": [
+        0,
+        0,
+        180
+      ],
+      "ports": [
+        {
+          "id": "inlet",
+          "point": [
+            18,
+            0,
+            0
+          ],
+          "axis": [
+            1,
+            0,
+            0
+          ],
+          "dn": 15,
+          "thread": "G1/2",
+          "gender": "male",
+          "connection": "threaded",
+          "plane": "thread-reference",
+          "provisional": true
+        },
+        {
+          "id": "outlet",
+          "point": [
+            0,
+            0,
+            0
+          ],
+          "axis": [
+            -1,
+            0,
+            0
+          ],
+          "dn": 8,
+          "thread": "G1/4",
+          "gender": "female",
+          "connection": "threaded",
+          "plane": "thread-reference",
+          "provisional": true
+        }
+      ]
+    },
+    "relay": {
+      "name": "Реле давления РД-2Р, мод. 35, резьба G14",
+      "source": "Equipment/Instrumentation/3D/Датчики давления/Реле давления РД-2Р, мод. 35, резьба G14.SLDPRT",
+      "sourceHash": "575354b567aed4b356a03fa6a98ea8779b575260db0d5a2c956314327d490d32",
+      "meshHash": "4dcb954a38f8bb40e97d0d4a8377aeba1eacfc2fb0cf39077a0ee5f404c7fa6f",
+      "meshUrl": "/model-assets/model-575354b567aed4b356a03fa6a98ea8779b575260db0d5a2c956314327d490d32-v1.stl",
+      "bounds": [
+        -4.718447854656915e-13,
+        -59.50000137090683,
+        -41.999999433755875,
+        45.099999755620956,
+        37.50000149011612,
+        41.999999433755875
+      ],
+      "position": [
+        94,
+        20,
+        12
+      ],
+      "rotation": [
+        0,
+        0,
+        -90
+      ],
+      "ports": [
+        {
+          "id": "inlet",
+          "point": [
+            20,
+            -59.5,
+            18
+          ],
+          "axis": [
+            0,
+            -1,
+            0
+          ],
+          "dn": 8,
+          "thread": "G1/4",
+          "gender": "male",
+          "connection": "threaded",
+          "plane": "thread-reference",
+          "provisional": true
+        }
+      ]
+    },
+    "transducer": {
+      "name": "ПД РРТ10 G1_4 Mini",
+      "source": "Equipment/Instrumentation/3D/Датчики давления/ПД РРТ10 G1_4 Mini.SLDPRT",
+      "sourceHash": "eb515f2f02638698034314d72c9786907971c8061a2897f19f40339d157f8891",
+      "meshHash": "d0aa98e7104be089596b443702c9586935c2c407a307842ca5ef1375d70b248b",
+      "meshUrl": "/model-assets/model-eb515f2f02638698034314d72c9786907971c8061a2897f19f40339d157f8891-v1.stl",
+      "bounds": [
+        -10.999999940395355,
+        -1.3409306706921315e-30,
+        -12.701706029474735,
+        10.999999940395355,
+        53.50000038743019,
+        12.701706029474735
+      ],
+      "position": [
+        34.5,
+        0,
+        30
+      ],
+      "rotation": [
+        0,
+        0,
+        -90
+      ],
+      "ports": [
+        {
+          "id": "inlet",
+          "point": [
+            0,
+            0,
+            0
+          ],
+          "axis": [
+            0,
+            -1,
+            0
+          ],
+          "dn": 8,
+          "thread": "G1/4",
+          "gender": "male",
+          "connection": "threaded",
+          "plane": "thread-reference",
+          "provisional": true
+        }
+      ]
+    },
+    "connector": {
+      "name": "Разъем DIN43650 для apz2412",
+      "source": "Equipment/Instrumentation/3D/Датчики давления/Разъем DIN43650 для apz2412.SLDPRT",
+      "sourceHash": "d77c919565428d941110ae9e9c9937830565144fc31a6ad9844f2e03ef4fbb36",
+      "meshHash": "024c35e098f319a2a6a1f100e4b086d8ca014d18a7a38fa18cdaf6ded35a2104",
+      "meshUrl": "/model-assets/model-d77c919565428d941110ae9e9c9937830565144fc31a6ad9844f2e03ef4fbb36-v1.stl",
+      "bounds": [
+        -8.082903921604156,
+        -6.661795104936165e-31,
+        -9.30000003427267,
+        22.39999920129776,
+        35.84032878279686,
+        9.30000003427267
+      ],
+      "position": [
+        82,
+        0,
+        30
+      ],
+      "rotation": [
+        0,
+        0,
+        -90
+      ],
+      "ports": []
+    }
+  }
+}

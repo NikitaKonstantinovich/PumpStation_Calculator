@@ -1,0 +1,27 @@
+// Read-only reproduction from exported, pinned project/snapshot data.
+import {readFile,writeFile} from 'node:fs/promises';
+import {resolve,join} from 'node:path';
+import {loadTs} from '../tests/load-ts.mjs';
+const dir=resolve(process.argv[2]);
+const current=process.argv.includes('--current');
+const read=async file=>JSON.parse(await readFile(join(dir,file),'utf8'));
+const project=await read(current?'project-after.json':'project-before.json'),program=await read('program.json');
+const stationSaved=await read(current?'station_catalog-after.json':'station_catalog-stored.json');
+const station={...JSON.parse(stationSaved.chunks.join('')),id:project.workspace2.product.sourceVersions.station_catalog};
+const saved=await read(current?'pump_catalog_v2-after.json':'pump_catalog_v2-stored.json'),pumps={...saved.header,items:saved.chunks.flat()};
+const reviewed=JSON.parse(await readFile(new URL('../data/pump-mountings-reviewed.json',import.meta.url),'utf8'));
+const mountings=new Map(reviewed.rows.filter(r=>r.mounting).map(r=>[r.variantId,r.mounting]));
+if(!current)for(const item of pumps.items)if(mountings.has(item.variantId))item.pump.mounting={...item.pump.mounting,frameV1:mountings.get(item.variantId)};
+const {productContexts}=await loadTs(new URL('../app/node-tools/product-state.ts',import.meta.url));
+const {evaluateProduct}=await loadTs(new URL('../app/node-tools/runtime.ts',import.meta.url));
+const {defaultProjectSettings}=await loadTs(new URL('../app/default-settings.ts',import.meta.url));
+const settings=defaultProjectSettings(station.baseSettings);
+const defaults={...settings,membraneTankVolume:String(settings.membraneTankVolume),...Object.fromEntries(Object.entries(settings.manufacturerDiscounts).map(([k,v])=>['discount_'+k,v]))};
+const contexts=productContexts(program,project.workspace2,defaults,'admin',{pump_catalog_v2:pumps,station_catalog:station});
+const id=program.tools.find(t=>program.plans[t.id].steps.some(s=>s.operation==='frame.result'))?.id;
+if(!id)throw Error('No frame plan');
+const evaluated=evaluateProduct(program,id,contexts);
+const frame=evaluated.value?.frameResult??Object.values(evaluated.trace).flatMap(t=>Object.values(t.outputs??{})).find(v=>v?.frameResult)?.frameResult;
+const result={tool:id,mountingWhatIf:!current,sourceVersions:project.workspace2.product.sourceVersions,issues:evaluated.issues,valueKeys:Object.keys(evaluated.value??{}),traceCount:Object.keys(evaluated.trace).length,frame};
+await writeFile(join(dir,current?'frame-evaluation-after.json':'frame-evaluation.json'),JSON.stringify(result,null,2));
+console.log(JSON.stringify({tool:id,status:frame?.status,variant:frame?.variant?.id,issues:frame?.issues??evaluated.issues},null,2));

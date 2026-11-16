@@ -1,0 +1,49 @@
+.nt-product-workspace{padding:0;display:flex;flex-direction:column;height:calc(100dvh - var(--app-header-height,64px));min-height:0;overflow:hidden;background:var(--theme-surface,#fff);color:var(--theme-text-primary,#243642)}
+.nt-product-workspace>.nt-product-ribbon{display:block;padding:0;flex-shrink:0;position:relative;top:auto;font-family:inherit}
+.nt-product-ribbon .ribbon__tab{padding:0 18px;border:0;border-radius:0;border-bottom:2px solid transparent;background:none;font-size:12px}
+.nt-product-ribbon .ribbon__tab--active{color:var(--blue-dark);border-bottom-color:var(--blue-dark)}
+.nt-product-ribbon .ribbon__toggle{padding:0;border:0;background:transparent;border-radius:4px;margin-left:auto}
+.nt-product-ribbon .ribbon__toggle svg{transition:transform .18s ease}
+.nt-product-ribbon .tool-group button,.nt-product-ribbon .grid-actions button{border:0;background:none}
+.nt-product-ribbon .tool-group--labeled button{padding:5px 8px;border-radius:5px}
+.nt-product-ribbon .tool-group button:hover,.nt-product-ribbon .grid-actions button:hover{background:var(--theme-surface-subtle,#edf2f5)}
+.nt-product-ribbon .ribbon__tools>*{flex-shrink:0}
+.nt-product-ribbon .ribbon__tools>small{align-self:center;font-size:11px;color:var(--theme-text-muted,#697b89);max-width:190px}
+.nt-ribbon-product{align-self:center;margin-left:auto;max-width:260px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--muted);font-size:11px}
+.nt-product-ribbon .nt-ribbon-product+.ribbon__toggle{margin-left:4px}
+.nt-ribbon-save{align-self:center;font-size:11px;max-width:300px;color:var(--muted);overflow-wrap:anywhere}
+.nt-product-ribbon .nt-ribbon-zoom{align-self:center;position:static;display:flex!important}
+.nt-product-workspace .workspace__zoom button{min-height:24px;padding:0}.nt-product-workspace .workspace__zoom button:nth-child(2){width:48px;font-size:11px}
+.nt-product-workspace .nt-workspace-menu{position:relative;align-self:center}.nt-workspace-menu>summary{cursor:pointer;padding:7px 11px;border:1px solid var(--theme-border,#d4dce2);border-radius:5px;font-size:12px;list-style:none}.nt-workspace-menu[open]>summary{background:var(--theme-surface-raised,#eaf0f5)}
+.nt-product-ribbon .ribbon__tools:has(.nt-workspace-menu){overflow:visible}
+.nt-workspace-menu>div{position:absolute;left:0;top:calc(100% + 4px);min-width:250px;max-width:min(380px,90vw);display:grid;gap:6px;padding:10px;z-index:100;background:var(--theme-surface,#fff);border:1px solid var(--theme-border,#d4dce2);border-radius:6px;box-shadow:0 8px 28px #0003}.nt-workspace-menu small{overflow-wrap:anywhere}
+.nt-product-workspace>.workspace{flex:1;min-height:0;display:grid;grid-template-rows:minmax(0,1fr)}
+.nt-product-workspace .workspace__canvas{overflow:auto}.nt-product-workspace .workspace__surface{transform-origin:top left;position:relative;min-width:100%}
+.nt-product-workspace .floating-panel__body{container-type:inline-size}.nt-product-workspace .floating-panel__identity{flex:1}.nt-product-workspace .floating-panel__identity select{max-width:100%;width:100%;min-width:0}
+.nt-product-workspace .floating-panel__tools button{padding:0;border:0}.nt-product-workspace .nt-tool{border:0;border-radius:0;max-width:none;margin:0;padding:10px;background:var(--theme-surface,#fff)}.nt-product-workspace .nt-tool>header{display:none}
+.nt-product-workspace .nt-tool>details,.nt-product-workspace .nt-tool>p{font-size:12px;overflow-wrap:anywhere}.nt-product-workspace .nt-form{padding:5px}.nt-product-workspace .nt-form h2{font-size:16px}
+.nt-product-workspace>.window-dock{flex-shrink:0;display:flex;gap:6px;overflow:auto;padding:8px 12px;position:static}
+.nt-product-workspace>p{margin:4px 16px;font-size:12px;flex-shrink:0}.nt-product-workspace>.al-empty{padding:24px}.nt-detached-window{flex:1;min-height:0;overflow:auto}.nt-detached-window>.floating-panel{height:100%;position:relative}
+.nt-product-workspace .pressure-check-toggle{display:flex;align-items:center;gap:8px;padding:4px 8px;border:0}.nt-product-workspace .pressure-check-toggle__track{flex-shrink:0}
+@media(max-width:759px){
+  .app-navigation__content .nt-product-workspace{height:calc(100dvh - var(--app-header-height,56px));min-height:0}
+  .nt-product-ribbon .ribbon__tabs{padding-left:8px;gap:2px}.nt-product-ribbon .ribbon__tab{padding:0 12px}.nt-product-ribbon .ribbon__toggle{margin-right:6px}.nt-product-ribbon .nt-ribbon-product+.ribbon__toggle{margin-left:auto}
+  .nt-product-ribbon .ribbon__tools,.nt-product-ribbon .ribbon__tools:has(.nt-workspace-menu),.nt-product-ribbon .ribbon__tools:has(.view-grid-menu){height:58px;padding:4px 8px;gap:7px;overflow-x:auto;overflow-y:hidden}
+  .nt-product-ribbon .tool-group--labeled button{padding:2px 5px}.nt-product-ribbon .tool-group--labeled small{display:block;font-size:9px}
+  .nt-ribbon-product,.nt-ribbon-save,.nt-product-ribbon .ribbon__tools>small:not(.nt-ribbon-empty){display:none}
+  .nt-product-ribbon .nt-workspace-menu>div,.nt-product-ribbon .view-grid-menu__list{position:fixed;left:8px;right:auto;top:148px;max-height:60dvh;overflow:auto}
+  .nt-product-workspace .workspace__canvas{overflow:auto;min-height:0}.nt-product-workspace .workspace__surface{min-height:0!important}
+  .nt-product-workspace .floating-panel{height:70dvh!important;min-height:350px}.nt-product-workspace .workspace-grid__cell>.floating-panel{height:100%!important}.nt-product-workspace .floating-panel__body{overflow:auto}
+}
+@media(prefers-reduced-motion:reduce){.nt-product-ribbon .ribbon__toggle svg{transition:none}}
+
+/* Preserve the window height through the graph form wrappers around the CAD editor. */
+.nt-product-workspace .floating-panel__body:has(.nt-geometry){overflow:hidden}
+.nt-product-workspace .nt-tool:has(.nt-geometry){height:100%;padding:0;display:flex;flex-direction:column;min-height:0;overflow:hidden}
+.nt-product-workspace .nt-form-root:has(.nt-geometry),.nt-product-workspace .nt-form:has(.nt-geometry),.nt-product-workspace .nt-form [data-view-node]:has(.nt-geometry),.nt-product-workspace .nt-geometry{display:flex;flex-direction:column;flex:1;min-height:0;min-width:0}
+.nt-product-workspace .nt-form:has(.nt-geometry){padding:0}
+.nt-product-workspace .nt-form:has(.nt-geometry)>button[type=submit]{align-self:flex-end;flex:none;padding:3px 8px;font-size:10px;margin:3px 6px}
+.nt-product-workspace .nt-geometry .model-tool{flex:1;min-height:0}
+.nt-geometry-feedback{flex:none;max-height:30%;overflow:auto;padding:4px 8px;border-top:1px solid var(--theme-border,#d9e2e8);font-size:10px}
+.nt-geometry-feedback summary{cursor:pointer}.nt-geometry-feedback p{margin:6px 0}
+.nt-preview .nt-geometry{height:600px;min-height:0}

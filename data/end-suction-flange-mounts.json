@@ -1,0 +1,100 @@
+{
+  "6f37639db64dafa2ca7bff1e788143ad6e58de128ba723612abb52c1cd803cd3": {
+    "inlet": {
+      "source": "STEP Equipment/Pumps/3D_Normalized/models/end_suction/CNP/NIS/NIS80-65-160-5.5__970/_check_execution/NIS(F)80-65-160_5.5__INLET_ZERO_Z_UP.step; SHA256 6f37639db64dafa2ca7bff1e788143ad6e58de128ba723612abb52c1cd803cd3; cylindrical through walls and planar back bearing lands around every hole",
+      "face": [
+        3.000000000000014,
+        0,
+        0
+      ],
+      "axis": [
+        -1,
+        0,
+        0
+      ],
+      "holes": [
+        [
+          3.000000000000014,
+          73.91036260090297,
+          30.614674589207105
+        ],
+        [
+          3.000000000000014,
+          73.91036260090291,
+          -30.61467458920726
+        ],
+        [
+          3.000000000000014,
+          30.614674589207112,
+          -73.91036260090297
+        ],
+        [
+          3.000000000000014,
+          -73.91036260090297,
+          -30.614674589207116
+        ],
+        [
+          3.000000000000014,
+          -73.91036260090291,
+          30.61467458920725
+        ],
+        [
+          3.000000000000014,
+          -30.61467458920712,
+          73.91036260090297
+        ],
+        [
+          3.000000000000014,
+          -30.614674589207254,
+          -73.91036260090291
+        ],
+        [
+          3.000000000000014,
+          30.614674589207247,
+          73.91036260090291
+        ]
+      ],
+      "holeDiameter": 18.000000000000014,
+      "thickness": 16.999999999999986,
+      "holeKind": "through"
+    },
+    "outlet": {
+      "source": "STEP Equipment/Pumps/3D_Normalized/models/end_suction/CNP/NIS/NIS80-65-160-5.5__970/_check_execution/NIS(F)80-65-160_5.5__INLET_ZERO_Z_UP.step; SHA256 6f37639db64dafa2ca7bff1e788143ad6e58de128ba723612abb52c1cd803cd3; cylindrical through walls and planar back bearing lands around every hole",
+      "face": [
+        100,
+        0,
+        177.0
+      ],
+      "axis": [
+        0,
+        0,
+        1
+      ],
+      "holes": [
+        [
+          48.7347583639752,
+          51.26524163602459,
+          177.0
+        ],
+        [
+          48.73475836397541,
+          -51.2652416360248,
+          177.0
+        ],
+        [
+          151.2652416360248,
+          -51.2652416360246,
+          177.0
+        ],
+        [
+          151.2652416360246,
+          51.26524163602479,
+          177.0
+        ]
+      ],
+      "holeDiameter": 18.000000000000014,
+      "thickness": 17.0,
+      "holeKind": "through"
+    }
+  }
+}

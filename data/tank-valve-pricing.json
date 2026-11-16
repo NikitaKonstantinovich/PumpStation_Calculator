@@ -1,0 +1,23 @@
+{
+  "checkedOn": "2026-11-15",
+  "currency": "RUB",
+  "unit": "шт.",
+  "basis": "Ориентировочная стоимость по аналогу VALTEC VT.245.N.05: DN20, G3/4 ВР/ВР, PN40, с дренажем и воздухоотводчиком. Точная цена и артикул LD Pride DN20 не найдены. Аналог используется только для оценки стоимости, без замены выбранной 3D-модели.",
+  "method": "Среднее арифметическое опубликованной розничной цены и рекомендованной розничной цены производителя, без доставки, округление до копеек.",
+  "offers": [
+    {
+      "seller": "Электрика",
+      "article": "VT.245.N.05",
+      "priceRub": 1099,
+      "kind": "Розничная цена за штуку",
+      "url": "https://electrical.ru/product/39422-kran-sharovoy-34-vv-s-drenazhom-i-vozduhootvodchikom-base-1553053"
+    },
+    {
+      "seller": "VALTEC",
+      "article": "VT.245.N.05",
+      "priceRub": 1341,
+      "kind": "Рекомендованная розничная цена за штуку",
+      "url": "https://valtec.ru/catalog/truboprovodnaya_armatura/sharovye_krany_specialnogo_naznacheniya/kran_sharovoj_valtec_base_s_drenajem_i_vozduhootvodchikom_vt245n.html"
+    }
+  ]
+}

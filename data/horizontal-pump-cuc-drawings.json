@@ -1,0 +1,659 @@
+{
+  "source": {
+    "url": "https://wellmix-pump.ru/upload/iblock/464/1r5a2lvchiurj9jihle2gucmxvxef8x5/Katalog-CUC-22.05.2025.pdf",
+    "sha256": "93bce5e00e3e68ef2b43180651a6bcec3ff4542956327f27165b722a47246515"
+  },
+  "variants": {
+    "HM:WELLMIX:CUC:08b5abd665243682:11019928": {
+      "page": 14,
+      "boundsMm": [
+        0,
+        null,
+        -118,
+        563,
+        null,
+        112
+      ],
+      "outletMm": [
+        226,
+        0,
+        95
+      ],
+      "inletDn": 50,
+      "outletDn": 50,
+      "inletThread": "G2",
+      "outletThread": "G2",
+      "variantDrawingSha256": "cd8fa05d75200d595c344b849b5a01b2323e5775e52a9562ec2a981a72dd33b7"
+    },
+    "HM:WELLMIX:CUC:11f3fac801d29092:11019966": {
+      "page": 12,
+      "boundsMm": [
+        0,
+        null,
+        -118,
+        504,
+        null,
+        107
+      ],
+      "outletMm": [
+        175,
+        0,
+        98
+      ],
+      "inletDn": 40,
+      "outletDn": 40,
+      "inletThread": "G1 1/2",
+      "outletThread": "G1 1/2",
+      "variantDrawingSha256": "e3e4df5749537fccb1c8569deeb301b095f43cf3c1e2c2cb48d166eea9253e73"
+    },
+    "HM:WELLMIX:CUC:14161d46629c9aa7:11019982": {
+      "page": 11,
+      "boundsMm": [
+        0,
+        null,
+        -90,
+        380,
+        null,
+        103
+      ],
+      "outletMm": [
+        129,
+        0,
+        79
+      ],
+      "inletDn": 32,
+      "outletDn": 25,
+      "inletThread": "G1 1/4",
+      "outletThread": "G1",
+      "variantDrawingSha256": "c0154f038787ce1b5f5809c5625475985ac2e146dbb7cfbb58e3f5fa03237164"
+    },
+    "HM:WELLMIX:CUC:19152a7b8c2306a8:11019929": {
+      "page": 14,
+      "boundsMm": [
+        0,
+        null,
+        -118,
+        518,
+        null,
+        112
+      ],
+      "outletMm": [
+        226,
+        0,
+        95
+      ],
+      "inletDn": 50,
+      "outletDn": 50,
+      "inletThread": "G2",
+      "outletThread": "G2",
+      "variantDrawingSha256": "bcb59b045fde1e615fdbd2f82014d9d4e8ef720d7181e9c9e90625c98015f585"
+    },
+    "HM:WELLMIX:CUC:1d5a2ebb70ae036e:11019972": {
+      "page": 12,
+      "boundsMm": [
+        0,
+        null,
+        -118,
+        370,
+        null,
+        102
+      ],
+      "outletMm": [
+        113,
+        0,
+        98
+      ],
+      "inletDn": 40,
+      "outletDn": 40,
+      "inletThread": "G1 1/2",
+      "outletThread": "G1 1/2",
+      "variantDrawingSha256": "93a619c6530c0965ea296d4d1a0ebe986edd700d570df70bbf38a0022f4da96a"
+    },
+    "HM:WELLMIX:CUC:1da35824cb0232d7:11019924": {
+      "page": 15,
+      "boundsMm": [
+        0,
+        null,
+        -118,
+        431,
+        null,
+        107
+      ],
+      "outletMm": [
+        136,
+        0,
+        95
+      ],
+      "inletDn": 50,
+      "outletDn": 50,
+      "inletThread": "G2",
+      "outletThread": "G2",
+      "variantDrawingSha256": "61954bdb3313bb1438d55244c2ea7e3c995f3d4ebf655120704e31430f951a7a"
+    },
+    "HM:WELLMIX:CUC:1f177c4967d8e6da:11019974": {
+      "page": 12,
+      "boundsMm": [
+        0,
+        null,
+        -118,
+        370,
+        null,
+        102
+      ],
+      "outletMm": [
+        113,
+        0,
+        98
+      ],
+      "inletDn": 40,
+      "outletDn": 40,
+      "inletThread": "G1 1/2",
+      "outletThread": "G1 1/2",
+      "variantDrawingSha256": "ac4bd09cd286db20ad81fd723800670821ebe7bb6e018e7751b7d2af499f0c23"
+    },
+    "HM:WELLMIX:CUC:1fd5fb0b5a95aa90:11019945": {
+      "page": 13,
+      "boundsMm": [
+        0,
+        null,
+        -118,
+        474,
+        null,
+        107
+      ],
+      "outletMm": [
+        144,
+        0,
+        98
+      ],
+      "inletDn": 40,
+      "outletDn": 40,
+      "inletThread": "G1 1/2",
+      "outletThread": "G1 1/2",
+      "variantDrawingSha256": "cc474e9f982ae023d470217f11537dde49bd40a8f3d87852204e07d2deca83ae"
+    },
+    "HM:WELLMIX:CUC:22fa6be6ffd1ce41:11019926": {
+      "page": 15,
+      "boundsMm": [
+        0,
+        null,
+        -118,
+        354,
+        null,
+        102
+      ],
+      "outletMm": [
+        90,
+        0,
+        95
+      ],
+      "inletDn": 50,
+      "outletDn": 50,
+      "inletThread": "G2",
+      "outletThread": "G2",
+      "variantDrawingSha256": "b7e156282b7730753fed1b22adc64ce7eb2bbf16d1a28e79145a7eefc7a7fa87"
+    },
+    "HM:WELLMIX:CUC:2d57a5612c61f111:11019949": {
+      "page": 13,
+      "boundsMm": [
+        0,
+        null,
+        -118,
+        402,
+        null,
+        107
+      ],
+      "outletMm": [
+        113,
+        0,
+        98
+      ],
+      "inletDn": 40,
+      "outletDn": 40,
+      "inletThread": "G1 1/2",
+      "outletThread": "G1 1/2",
+      "variantDrawingSha256": "c8303369fceced8da8533c65f62b439a0458cff42b0037003cf62dba5927018f"
+    },
+    "HM:WELLMIX:CUC:3b99631ed30f0c0a:11019931": {
+      "page": 14,
+      "boundsMm": [
+        0,
+        null,
+        -118,
+        431,
+        null,
+        107
+      ],
+      "outletMm": [
+        136,
+        0,
+        95
+      ],
+      "inletDn": 50,
+      "outletDn": 50,
+      "inletThread": "G2",
+      "outletThread": "G2",
+      "variantDrawingSha256": "b8dfa15d973e50dc3834b515e9597f430f933035ac2777c239ac3e84f3293c14"
+    },
+    "HM:WELLMIX:CUC:420638e5f828b68c:11019996": {
+      "page": 10,
+      "boundsMm": [
+        0,
+        null,
+        -90,
+        360,
+        null,
+        102
+      ],
+      "outletMm": [
+        110,
+        0,
+        79
+      ],
+      "inletDn": 25,
+      "outletDn": 25,
+      "inletThread": "G1",
+      "outletThread": "G1",
+      "variantDrawingSha256": "d7db0fa3c5f4fb437ac66f646a2eb7cc4e3e63d31fc110e2505f949cbb0e9879"
+    },
+    "HM:WELLMIX:CUC:47781b4659a0edc3:11019984": {
+      "page": 11,
+      "boundsMm": [
+        0,
+        null,
+        -90,
+        361,
+        null,
+        89
+      ],
+      "outletMm": [
+        110,
+        0,
+        79
+      ],
+      "inletDn": 32,
+      "outletDn": 25,
+      "inletThread": "G1 1/4",
+      "outletThread": "G1",
+      "variantDrawingSha256": "8034f9976468c7ea3f453fc0421cd2aa5bc555ec7c2f35d875829b40d6963e88"
+    },
+    "HM:WELLMIX:CUC:4e97970db3043fb9:11019992": {
+      "page": 10,
+      "boundsMm": [
+        0,
+        null,
+        -90,
+        396,
+        null,
+        102
+      ],
+      "outletMm": [
+        146,
+        0,
+        79
+      ],
+      "inletDn": 25,
+      "outletDn": 25,
+      "inletThread": "G1",
+      "outletThread": "G1",
+      "variantDrawingSha256": "6784302e6ac73f6c8c96bef457304784159c6fcd9ab1b46ec48551cb1cdacde2"
+    },
+    "HM:WELLMIX:CUC:4f82c1a13adc8647:11019978": {
+      "page": 11,
+      "boundsMm": [
+        0,
+        null,
+        -90,
+        416,
+        null,
+        103
+      ],
+      "outletMm": [
+        165,
+        0,
+        79
+      ],
+      "inletDn": 32,
+      "outletDn": 25,
+      "inletThread": "G1 1/4",
+      "outletThread": "G1",
+      "variantDrawingSha256": "b1433fc5f661d0b98cdcc66f66bb8963efd9aca2456265263789461e320038e0"
+    },
+    "HM:WELLMIX:CUC:50c07a99bab45d5b:11019923": {
+      "page": 15,
+      "boundsMm": [
+        0,
+        null,
+        -118,
+        538,
+        null,
+        112
+      ],
+      "outletMm": [
+        181,
+        0,
+        95
+      ],
+      "inletDn": 50,
+      "outletDn": 50,
+      "inletThread": "G2",
+      "outletThread": "G2",
+      "variantDrawingSha256": "746ce653574c2a57114e33c48bc889614a161aee001e4d7711250c5e1f3ec7e8"
+    },
+    "HM:WELLMIX:CUC:7392088efeb109bd:11019976": {
+      "page": 12,
+      "boundsMm": [
+        0,
+        null,
+        -118,
+        340,
+        null,
+        102
+      ],
+      "outletMm": [
+        83,
+        0,
+        98
+      ],
+      "inletDn": 40,
+      "outletDn": 40,
+      "inletThread": "G1 1/2",
+      "outletThread": "G1 1/2",
+      "variantDrawingSha256": "70184a2fc26ab9159508521d1dd15961b00d529457acf261606da8e3f414aaeb"
+    },
+    "HM:WELLMIX:CUC:7bf36e37d2681131:11019968": {
+      "page": 12,
+      "boundsMm": [
+        0,
+        null,
+        -118,
+        474,
+        null,
+        107
+      ],
+      "outletMm": [
+        144,
+        0,
+        98
+      ],
+      "inletDn": 40,
+      "outletDn": 40,
+      "inletThread": "G1 1/2",
+      "outletThread": "G1 1/2",
+      "variantDrawingSha256": "21704d453df57992e941aa6809878c198a405114ffec85a3d0f5edba85eceaaa"
+    },
+    "HM:WELLMIX:CUC:837ca66f53cb7300:11019944": {
+      "page": 13,
+      "boundsMm": [
+        0,
+        null,
+        -118,
+        494,
+        null,
+        112
+      ],
+      "outletMm": [
+        144,
+        0,
+        98
+      ],
+      "inletDn": 40,
+      "outletDn": 40,
+      "inletThread": "G1 1/2",
+      "outletThread": "G1 1/2",
+      "variantDrawingSha256": "a30adbe06f73a580ab168f4224ea84867ff6426dbbe2e7d31fa182e3b56769ba"
+    },
+    "HM:WELLMIX:CUC:8bd7e115017b7246:11019922": {
+      "page": 15,
+      "boundsMm": [
+        0,
+        null,
+        -132,
+        602,
+        null,
+        147
+      ],
+      "outletMm": [
+        226,
+        0,
+        95
+      ],
+      "inletDn": 50,
+      "outletDn": 50,
+      "inletThread": "G2",
+      "outletThread": "G2",
+      "variantDrawingSha256": "a4e4d138c6642585d7c2dd1d9aa3c7dd16811dc68258d34b424eba5c78a263e4"
+    },
+    "HM:WELLMIX:CUC:9639af57aed145fd:11019970": {
+      "page": 12,
+      "boundsMm": [
+        0,
+        null,
+        -118,
+        432,
+        null,
+        107
+      ],
+      "outletMm": [
+        144,
+        0,
+        98
+      ],
+      "inletDn": 40,
+      "outletDn": 40,
+      "inletThread": "G1 1/2",
+      "outletThread": "G1 1/2",
+      "variantDrawingSha256": "e2da073efb0f76a52102aa1809143c0094371209875611b64431217d9659cd75"
+    },
+    "HM:WELLMIX:CUC:a6a98234459b2057:11019998": {
+      "page": 10,
+      "boundsMm": [
+        0,
+        null,
+        -90,
+        342,
+        null,
+        102
+      ],
+      "outletMm": [
+        92,
+        0,
+        79
+      ],
+      "inletDn": 25,
+      "outletDn": 25,
+      "inletThread": "G1",
+      "outletThread": "G1",
+      "variantDrawingSha256": "39fa7fe799404630f9891d710bf7f29c20bc77c322800b1a18b137e2bed8c751"
+    },
+    "HM:WELLMIX:CUC:b1eb5d809d087643:11019980": {
+      "page": 11,
+      "boundsMm": [
+        0,
+        null,
+        -90,
+        398,
+        null,
+        103
+      ],
+      "outletMm": [
+        147,
+        0,
+        79
+      ],
+      "inletDn": 32,
+      "outletDn": 25,
+      "inletThread": "G1 1/4",
+      "outletThread": "G1",
+      "variantDrawingSha256": "132f904a31b237841cbdb0e703a20911e287f795a0630d3742bd8413e8706f9b"
+    },
+    "HM:WELLMIX:CUC:b2b6e7860d9a1a58:11019951": {
+      "page": 13,
+      "boundsMm": [
+        0,
+        null,
+        -118,
+        340,
+        null,
+        102
+      ],
+      "outletMm": [
+        83,
+        0,
+        98
+      ],
+      "inletDn": 40,
+      "outletDn": 40,
+      "inletThread": "G1 1/2",
+      "outletThread": "G1 1/2",
+      "variantDrawingSha256": "53fe5443a5d0b8b78d388520cb1c3a479587026db79fdb8b5aea6b7facdf1987"
+    },
+    "HM:WELLMIX:CUC:b49dcabb72d09e40:11019988": {
+      "page": 10,
+      "boundsMm": [
+        0,
+        null,
+        -90,
+        432,
+        null,
+        102
+      ],
+      "outletMm": [
+        182,
+        0,
+        79
+      ],
+      "inletDn": 25,
+      "outletDn": 25,
+      "inletThread": "G1",
+      "outletThread": "G1",
+      "variantDrawingSha256": "6add5cf481f76ae31720d2dff49abb9d0cfeeaa30a54cbcb1912d21d4787a8c8"
+    },
+    "HM:WELLMIX:CUC:bb9b29bea0883d15:11019947": {
+      "page": 13,
+      "boundsMm": [
+        0,
+        null,
+        -118,
+        444,
+        null,
+        107
+      ],
+      "outletMm": [
+        113,
+        0,
+        98
+      ],
+      "inletDn": 40,
+      "outletDn": 40,
+      "inletThread": "G1 1/2",
+      "outletThread": "G1 1/2",
+      "variantDrawingSha256": "ffc65fec42f6845842ba76dd32a0b9ee1ca79530a8c855d1a8541d7e89c2df60"
+    },
+    "HM:WELLMIX:CUC:c65ccd69317ff7fd:11019994": {
+      "page": 10,
+      "boundsMm": [
+        0,
+        null,
+        -90,
+        378,
+        null,
+        102
+      ],
+      "outletMm": [
+        128,
+        0,
+        79
+      ],
+      "inletDn": 25,
+      "outletDn": 25,
+      "inletThread": "G1",
+      "outletThread": "G1",
+      "variantDrawingSha256": "fca4f0d183378c87dfc4403c4d9033a4b76264450567bad7cfd9154754fb0346"
+    },
+    "HM:WELLMIX:CUC:d1f94898b0b73fa9:11019933": {
+      "page": 14,
+      "boundsMm": [
+        0,
+        null,
+        -118,
+        345,
+        null,
+        102
+      ],
+      "outletMm": [
+        90,
+        0,
+        95
+      ],
+      "inletDn": 50,
+      "outletDn": 50,
+      "inletThread": "G2",
+      "outletThread": "G2",
+      "variantDrawingSha256": "75771168424e4b687b61cb36f37ae277e51769e863a2b396857ee55f2462efa0"
+    },
+    "HM:WELLMIX:CUC:e4812b86ef754db6:11019964": {
+      "page": 12,
+      "boundsMm": [
+        0,
+        null,
+        -118,
+        504,
+        null,
+        107
+      ],
+      "outletMm": [
+        175,
+        0,
+        98
+      ],
+      "inletDn": 40,
+      "outletDn": 40,
+      "inletThread": "G1 1/2",
+      "outletThread": "G1 1/2",
+      "variantDrawingSha256": "1f342e5046d35dd0e095bae38e5136d8857c3fec3083371a823a5042dd4f6641"
+    },
+    "HM:WELLMIX:CUC:ea4ca9c4e6f4f237:11019986": {
+      "page": 11,
+      "boundsMm": [
+        0,
+        null,
+        -90,
+        329,
+        null,
+        89
+      ],
+      "outletMm": [
+        92,
+        0,
+        79
+      ],
+      "inletDn": 32,
+      "outletDn": 25,
+      "inletThread": "G1 1/4",
+      "outletThread": "G1",
+      "variantDrawingSha256": "bb6f168717103b9bfee6d6b52d0aebcb47110042368c31cec5638d9db9fd0d3a"
+    },
+    "HM:WELLMIX:CUC:ffdb52cf86f48779:11019990": {
+      "page": 10,
+      "boundsMm": [
+        0,
+        null,
+        -90,
+        414,
+        null,
+        102
+      ],
+      "outletMm": [
+        164,
+        0,
+        79
+      ],
+      "inletDn": 25,
+      "outletDn": 25,
+      "inletThread": "G1",
+      "outletThread": "G1",
+      "variantDrawingSha256": "1fc604825ec2585d35dee1bea02a1a246938bb421856351fdba740b76367b9cb"
+    }
+  }
+}

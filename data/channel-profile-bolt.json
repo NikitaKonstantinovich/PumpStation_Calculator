@@ -1,0 +1,43 @@
+{
+  "id": "frame-standard-bolt-m8-40",
+  "catalogId": "метизы",
+  "family": "Болт М8×40 DIN933",
+  "fields": [
+    {
+      "column": "Наименование",
+      "headerPath": [
+        "Наименование"
+      ],
+      "value": "Болт М8×40 DIN933 Ц 8,8"
+    },
+    {
+      "column": "Диаметр резьбы, мм",
+      "headerPath": [
+        "Диаметр резьбы, мм"
+      ],
+      "value": 8
+    },
+    {
+      "column": "Длина болта, мм",
+      "headerPath": [
+        "Длина болта, мм"
+      ],
+      "value": 40
+    },
+    {
+      "column": "Источник",
+      "headerPath": [
+        "Источник"
+      ],
+      "value": "DIN 933 M8×40; https://eshop.wuerth.de/Hexagonal-bolt-with-thread-up-to-the-head-DIN-933-zinc-plated-88-steel-with-thick-layer-passivation-VZD-SCR-HEX-DIN933-88-SL-VZD-M8X40/097255840.sku/en/US/EUR/"
+    },
+    {
+      "column": "Источник цены",
+      "headerPath": [
+        "Источник цены"
+      ],
+      "value": "Цена в закреплённом каталоге отсутствует"
+    }
+  ],
+  "prices": []
+}

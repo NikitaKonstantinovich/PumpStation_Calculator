@@ -1,0 +1,43 @@
+EN 1092-1:2018 (E) 
+15 
+conditions. For selection of bolting, see  EN 1515-4, for combination of the materials of flanges and 
+bolting see EN 1515-2, for information. 
+5.4 Gaskets 
+The various gasket types, dimensions, design characteristics and materials used are  not within the 
+scope of this European Standard. Dimensions of gaskets are given in the EN 1514 series. 
+5.5 Determination of p/T ratings 
+p/T ratings for flanges according to this standard shall be calculated in accordance with the rules given  
+in Annex F. 
+p/T ratings for a selection of EN materials are given in Annex G. 
+5.6 Dimensions 
+5.6.1 Flanges and collars 
+The dimensions of flanges and collars shall be as given in Table  8 and Table 10 to Table 22 according to 
+the PN designation. Dimension Gmax may be varied from the given value (see  NOTE 1) which is a 
+maximum limit. The wall thickness, S is a minimum value, selected according to pipe thickness  T given 
+in ISO 4200 (see NOTE 2). Outside diameter of neck (A) is selected according to EN 10220. The reduced 
+wall thickness Sp is used in case of unequal S and T (type 34 see Table 12 to Table 15 and Annex A). 
+The following flange types have been re -calculated according to the calculation me thod in EN 1591-1 
+with the basic rules as described in Annex E of this European Standard: 
+— flanges type 11 for PN 2,5 to PN 400. Types 12 and 13 have been adjusted to the results for Type 11. 
+As a result the thickness of some flanges above DN  500 had to b e increased and the wall thickness 
+had to be adjusted; 
+— flanges type 05; 
+— flanges type 01; 
+— flanges type 02 with 32 resp. 33 up to DN 600 for PN 2,5 to PN 40; 
+— flanges types 35 for PN 2,5 to PN 40; 
+— flanges types 36 and 37 for PN 2,5 to PN 16; 
+— types 21 and 04 with 34 have not been re-calculated according to EN 1591-1. 
+NOTE 1 The centre portion of the face of a flange type  05 need not be machined provided that the diameter of 
+the un-machined portion does not exceed the recommended diameter for Gmax., given in Tables 10 to 21. 
+NOTE 2 When requested by the pressure equipment manufacturer/purchaser, wall 
+thickness components/parts S, other than those given in this European Standard, can be supplied by agreement 
+with the flange manufacturer, provided a calculation exists. 
+NOTE 3 A summary of the various types of flanges specified is given in Table  7 showing the nominal sizes 
+applicable to each type and to each PN. 
+NOTE 4 Diameters N1, N2 and N3 of flange and collar types  11, 12, 13, 21 and 34 are the theore tical values 
+permitting the use of ring spanners or the application of normal series plain washers without any additional 
+machining, e.g. spot facing (see 5.8). 
+NOTE 5 The bore diameters of flanges type  21 are not specified in this standard, the effective bore diameters 
+are usually given in the relevant component standard(s). 
+NOTE 6 Approximate masses of flanges and collars are given in Annex C. 
+  

@@ -1,7 +1,6 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
-import ts from "typescript";
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { loadTs } from "./load-ts.mjs";
@@ -10,22 +9,14 @@ import { catalogNozzle, parseNozzleSize } from "../scripts/build-pump-nozzles.mj
 const portsUrl = new URL("../app/pump-ports.ts", import.meta.url);
 const { resolvePumpPort, resolvePumpPortData, catalogPumpPort } = await loadTs(portsUrl);
 const { createProject, parseProjectConfig } = await loadTs(new URL("../app/project-config.ts", import.meta.url));
+const { parseManualPump } = await loadTs(new URL("../app/manual-pump.ts", import.meta.url));
 const pumps = JSON.parse(await readFile(new URL("../public/pumps.json", import.meta.url), "utf8"));
 const index = JSON.parse(await readFile(new URL("../app/pump-nozzles.json", import.meta.url), "utf8"));
 
-const moduleUrl = source => `data:text/javascript;base64,${Buffer.from(ts.transpileModule(source, {
-  compilerOptions: { module: ts.ModuleKind.ESNext, target: ts.ScriptTarget.ES2022, jsx: ts.JsxEmit.ReactJSX },
-}).outputText.replaceAll('from "react/jsx-runtime"', `from "${import.meta.resolve("react/jsx-runtime")}"`)).toString("base64")}`;
-let portsSource = await readFile(portsUrl, "utf8");
-for (const [name, file] of [["evidence", "pump-connections"], ["importedPorts", "imported-pump-ports"], ["catalogNozzles", "pump-nozzles"]]) {
-  portsSource = portsSource.replace(`import ${name} from "./${file}.json";`, `const ${name} = ${await readFile(new URL(`../app/${file}.json`, import.meta.url), "utf8")};`);
-}
-const componentSource = (await readFile(new URL("../app/pump-nozzle-fields.tsx", import.meta.url), "utf8"))
-  .replace('from "./pump-ports"', `from "${moduleUrl(portsSource)}"`)
-  .replace('import { STANDARD_DN } from "./dn-defaults";', 'const STANDARD_DN = [25,32,40,50,65,80,100,125,150,200,250,300,350,400,450,500,600,700,800,900,1000,1200];');
-const { PumpNozzleFields } = await import(moduleUrl(componentSource));
+const { PumpNozzleFields } = await loadTs(new URL("../app/pump-nozzle-fields.tsx", import.meta.url));
 
 test("generated index tracks current pump database and preserves separate ports", () => {
+  for (const p of pumps) assert.equal(index[p.id]?.type, p.type, `${p.model}: pump type for default valve DN`);
   for (const p of pumps) for (const side of ["inlet", "outlet"]) {
     assert.deepEqual(index[p.id]?.[side] ?? null, catalogNozzle(p, side), `${p.model}: ${side}`);
   }
@@ -81,6 +72,24 @@ test("manual values persist independently for both nozzles and circuits, and do 
 });
 
 const nodes = element => !element || typeof element !== "object" ? [] : [element, ...[element.props?.children].flat(Infinity).flatMap(nodes)];
+test("DN fields show saved manual pump nozzles and reset project overrides to their current values", () => {
+  const pump=parseManualPump({model:"Manual",inletDn:"80",outletDn:"65",inletType:"flange",outletType:"flange"},"manual-nozzles");
+  for(const secondary of [false,true]) {
+    const entity=createProject().entities["station-dn"];
+    const props={entity,input:{selectedPumpId:pump.id},pump,secondary,title:secondary?"Контур 2":"Контур 1",onChange:patch=>Object.assign(entity,patch)};
+    const selects=nodes(PumpNozzleFields(props)).filter(n=>n.type==="select");
+    assert.deepEqual(selects.map(n=>n.props.value),[80,"flanged",65,"flanged"]);
+    assert.doesNotMatch(renderToStaticMarkup(createElement(PumpNozzleFields,props)),/role="alert"/);
+    selects[0].props.onChange({target:{value:"100"}});
+    const reset=nodes(PumpNozzleFields(props)).find(n=>n.type==="button");
+    assert.equal(reset.props.disabled,false);reset.props.onClick();
+    assert.equal(nodes(PumpNozzleFields(props)).find(n=>n.type==="select").props.value,80);
+    const partial={...pump,inlet:undefined};
+    const html=renderToStaticMarkup(createElement(PumpNozzleFields,{...props,pump:partial}));
+    assert.match(html,/<option value="80" selected="">DN80<\/option>/);
+    assert.match(html,/выберите тип соединения вручную/);
+  }
+});
 test("UI auto-fills both sides, prompts only for missing fields, and dropdown edits/reset work", () => {
   let entity = createProject().entities["station-dn"];
   let props = { entity, input: { selectedPumpId: "979" }, title: "Контур 1", onChange: patch => Object.assign(entity, patch) };

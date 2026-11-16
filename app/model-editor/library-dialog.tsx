@@ -1,10 +1,10 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { filterLibrary, parseModelLibrary, type LibraryModel, type ModelLibrary } from "./library";
+import { filterLibrary, mergePreparedPumpLibrary, parseModelLibrary, type LibraryModel, type ModelLibrary } from "./library";
 
 const PAGE_SIZE = 25;
-export function ModelLibraryDialog({ onClose, onAdd, full }: { onClose: () => void; onAdd: (model: LibraryModel, signal: AbortSignal) => Promise<void>; full: boolean }) {
+export function ModelLibraryDialog({ onClose, onAdd, full, version }: { onClose: () => void; onAdd: (model: LibraryModel, signal: AbortSignal) => Promise<void>; version?:string; full: boolean }) {
   const dialog = useRef<HTMLDialogElement>(null), alive = useRef(true);
   const addition = useRef<AbortController | null>(null);
   const [library, setLibrary] = useState<ModelLibrary | null>(null), [error, setError] = useState("");
@@ -13,14 +13,17 @@ export function ModelLibraryDialog({ onClose, onAdd, full }: { onClose: () => vo
   useEffect(() => { alive.current = true; dialog.current?.showModal(); return () => { alive.current = false; addition.current?.abort(); }; }, []);
   useEffect(() => {
     const controller = new AbortController();
-    void fetch("/model-assets/library.json", { signal: controller.signal, cache: "no-store" }).then(async response => {
+    void fetch("/model-assets/library.json"+(version?"?version="+encodeURIComponent(version):""), { signal: controller.signal, cache: "no-store" }).then(async response => {
       if (!response.ok) throw new Error(response.status === 404 ? "Библиотека ещё не подготовлена" : "Не удалось загрузить библиотеку моделей");
-      return parseModelLibrary(await response.json());
+      return mergePreparedPumpLibrary(parseModelLibrary(await response.json()));
     }).then(data => { if (!controller.signal.aborted) setLibrary(data); }).catch(error => {
-      if (!controller.signal.aborted) setError(error instanceof Error ? error.message : "Не удалось загрузить библиотеку");
+      if (!controller.signal.aborted) {
+        setLibrary(mergePreparedPumpLibrary({ version: 1, models: [] }));
+        setError(error instanceof Error ? error.message : "Не удалось загрузить библиотеку");
+      }
     }).finally(() => { if (!controller.signal.aborted) setLoading(false); });
     return () => controller.abort();
-  }, [retry]);
+  }, [retry,version]);
   const categories = useMemo(() => [...new Set(library?.models.flatMap(model => model.categories) ?? [])].sort((a,b) => a.localeCompare(b, "ru")), [library]);
   const filtered = useMemo(() => filterLibrary(library?.models ?? [], search, category, status), [library, search, category, status]);
   const lastPage = Math.max(0, Math.ceil(filtered.length / PAGE_SIZE) - 1), currentPage = Math.min(page, lastPage);
@@ -37,7 +40,7 @@ export function ModelLibraryDialog({ onClose, onAdd, full }: { onClose: () => vo
     <div className="model-library__heading"><b>Библиотека 3D-моделей</b><button onClick={close} aria-label="Закрыть библиотеку моделей">×</button></div>
     <p>Выберите модель для ручного размещения. Размеры — в миллиметрах; масштаб и исходная ориентация сохранены.</p>
     <div className="model-library__filters">
-      <label>Поиск<input value={search} placeholder="Название, DN, производитель…" onChange={e => { setSearch(e.target.value); setPage(0); }}/></label>
+      <label>Поиск<input value={search} placeholder="Название, артикул, DN…" onChange={e => { setSearch(e.target.value); setPage(0); }}/></label>
       <label>Категория<select value={category} onChange={e => { setCategory(e.target.value); setPage(0); }}><option value="">Все категории</option>{categories.map(value => <option key={value}>{value}</option>)}</select></label>
       <label>Состояние<select value={status} onChange={e => { setStatus(e.target.value); setPage(0); }}><option value="ready">Готовые</option><option value="">Все</option><option value="pending">Подготавливаются</option><option value="error">Ошибка подготовки</option></select></label>
     </div>

@@ -1,8 +1,9 @@
-"""Prepare every STEP in Equipment for the browser; resume by source and mesh SHA-256.
+"""Prepare component STEP files in Equipment for the browser; resume by SHA-256.
 
 Each conversion runs in a separate hidden process with a timeout. Original CAD
 is read-only. Duplicate contents share one STL; unbound models remain available
 for manual placement without inventing catalogue IDs or connection ports.
+Complete stations in Equipment/Stations are excluded from the component library.
 """
 import argparse
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -18,6 +19,7 @@ import tempfile
 import time
 
 from model_assets import CONVERTER_VERSION, convert_step, file_hash, load_library, run_cad_command, valid_stl
+from native_display_models import native_library_models
 
 FRONTEND = Path(__file__).resolve().parents[1]
 ROOT = FRONTEND.parent
@@ -33,7 +35,10 @@ def atomic_json(path, value):
 
 def inventory(root):
     groups, failures = {}, []
-    files = sorted(p for p in (root / "Equipment").rglob("*") if p.is_file() and p.suffix.lower() in (".stp", ".step"))
+    equipment = root / "Equipment"
+    files = sorted(p for p in equipment.rglob("*")
+                   if p.relative_to(equipment).parts[0].casefold() != "stations"
+                   and p.is_file() and p.suffix.lower() in (".stp", ".step"))
     for index, path in enumerate(files, 1):
         relative = path.relative_to(root).as_posix()
         try:
@@ -160,8 +165,14 @@ def main():
     results = {}
     # Small components first; large assemblies cannot starve the usable library.
     ordered = sorted(groups, key=lambda digest: (args.root / groups[digest][0]).stat().st_size)
+    native_models = native_library_models(args.root, args.output)
     def save():
         library = make_library(groups, results, failures, count)
+        library["models"].extend(native_models)
+        library["summary"]["sourceFiles"] += len(native_models)
+        library["summary"]["uniqueModels"] += len(native_models)
+        library["summary"]["ready"] += sum(m["status"] == "ready" for m in native_models)
+        library["summary"]["errors"] += sum(m["status"] == "error" for m in native_models)
         atomic_json(args.output / "library.json", library)
         atomic_json(args.state / "progress.json", library["summary"])
         return library["summary"]

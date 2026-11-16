@@ -1,3 +1,4 @@
+import { guardDisabledBetaFeature } from "../../release-server";
 import { currentUser, db, json } from "../../auth-server";
 
 type CabinetRow={
@@ -68,6 +69,7 @@ async function readCabinets(stationType:string){
 }
 
 export async function GET(request:Request){
+  const betaDenied = await guardDisabledBetaFeature(request); if (betaDenied) return betaDenied;
   const user=await currentUser(request);if(!user)return json({error:"Требуется вход."},401);
   const stationType=new URL(request.url).searchParams.get("stationType")??"smart";
   if(!["fire","utility","combined","smart"].includes(stationType))return json({error:"Неизвестный тип шкафа."},400);
@@ -76,6 +78,7 @@ export async function GET(request:Request){
 }
 
 export async function POST(request:Request){
+  const betaDenied = await guardDisabledBetaFeature(request); if (betaDenied) return betaDenied;
   const user=await currentUser(request);if(!user)return json({error:"Требуется вход."},401);
   let body:CreateBody;
   try{body=await request.json() as CreateBody;}catch{return json({error:"Запрос не содержит корректную конфигурацию шкафа."},400);}

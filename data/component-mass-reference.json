@@ -1,0 +1,636 @@
+{
+  "version": 1,
+  "checkedOn": "2026-11-15",
+  "rows": [
+    {
+      "id": "шаровые-краны-001-r0193",
+      "kg": 0.166,
+      "unit": "шт.",
+      "source": "Каталог изготовителя LD Pride, стр. 4; ВР/ВР, DN15, соответствующее исполнение рукоятки. https://image.stoking.ru/uploads/image/truboprovodnaya-armatura/krany-sharovye/ld/pride/ld-47.353/ld-47-353.25/katalog-ld-prajd.pdf"
+    },
+    {
+      "id": "шаровые-краны-001-r0194",
+      "kg": 0.237,
+      "unit": "шт.",
+      "source": "Каталог изготовителя LD Pride, стр. 4; ВР/ВР, DN20, соответствующее исполнение рукоятки. https://image.stoking.ru/uploads/image/truboprovodnaya-armatura/krany-sharovye/ld/pride/ld-47.353/ld-47-353.25/katalog-ld-prajd.pdf"
+    },
+    {
+      "id": "шаровые-краны-001-r0195",
+      "kg": 0.39,
+      "unit": "шт.",
+      "source": "Каталог изготовителя LD Pride, стр. 4; ВР/ВР, DN25, соответствующее исполнение рукоятки. https://image.stoking.ru/uploads/image/truboprovodnaya-armatura/krany-sharovye/ld/pride/ld-47.353/ld-47-353.25/katalog-ld-prajd.pdf"
+    },
+    {
+      "id": "шаровые-краны-001-r0196",
+      "kg": 0.557,
+      "unit": "шт.",
+      "source": "Каталог изготовителя LD Pride, стр. 4; ВР/ВР, DN32, соответствующее исполнение рукоятки. https://image.stoking.ru/uploads/image/truboprovodnaya-armatura/krany-sharovye/ld/pride/ld-47.353/ld-47-353.25/katalog-ld-prajd.pdf"
+    },
+    {
+      "id": "шаровые-краны-001-r0197",
+      "kg": 0.894,
+      "unit": "шт.",
+      "source": "Каталог изготовителя LD Pride, стр. 4; ВР/ВР, DN40, соответствующее исполнение рукоятки. https://image.stoking.ru/uploads/image/truboprovodnaya-armatura/krany-sharovye/ld/pride/ld-47.353/ld-47-353.25/katalog-ld-prajd.pdf"
+    },
+    {
+      "id": "шаровые-краны-001-r0198",
+      "kg": 1.404,
+      "unit": "шт.",
+      "source": "Каталог изготовителя LD Pride, стр. 4; ВР/ВР, DN50, соответствующее исполнение рукоятки. https://image.stoking.ru/uploads/image/truboprovodnaya-armatura/krany-sharovye/ld/pride/ld-47.353/ld-47-353.25/katalog-ld-prajd.pdf"
+    },
+    {
+      "id": "шаровые-краны-003-r0208",
+      "kg": 0.156,
+      "unit": "шт.",
+      "source": "Каталог изготовителя LD Pride, стр. 4; ВР/ВР, DN15, соответствующее исполнение рукоятки. https://image.stoking.ru/uploads/image/truboprovodnaya-armatura/krany-sharovye/ld/pride/ld-47.353/ld-47-353.25/katalog-ld-prajd.pdf"
+    },
+    {
+      "id": "шаровые-краны-003-r0209",
+      "kg": 0.227,
+      "unit": "шт.",
+      "source": "Каталог изготовителя LD Pride, стр. 4; ВР/ВР, DN20, соответствующее исполнение рукоятки. https://image.stoking.ru/uploads/image/truboprovodnaya-armatura/krany-sharovye/ld/pride/ld-47.353/ld-47-353.25/katalog-ld-prajd.pdf"
+    },
+    {
+      "id": "шаровые-краны-003-r0210",
+      "kg": 0.367,
+      "unit": "шт.",
+      "source": "Каталог изготовителя LD Pride, стр. 4; ВР/ВР, DN25, соответствующее исполнение рукоятки. https://image.stoking.ru/uploads/image/truboprovodnaya-armatura/krany-sharovye/ld/pride/ld-47.353/ld-47-353.25/katalog-ld-prajd.pdf"
+    },
+    {
+      "id": "шаровые-краны-003-r0211",
+      "kg": 0.54,
+      "unit": "шт.",
+      "source": "Каталог изготовителя LD Pride, стр. 4; ВР/ВР, DN32, соответствующее исполнение рукоятки. https://image.stoking.ru/uploads/image/truboprovodnaya-armatura/krany-sharovye/ld/pride/ld-47.353/ld-47-353.25/katalog-ld-prajd.pdf"
+    },
+    {
+      "id": "шаровые-краны-002-r0203",
+      "kg": 0.211,
+      "unit": "шт.",
+      "source": "Каталог изготовителя LD Pride, стр. 8, артикул LD 44.344.15, масса 211 г. https://image.stoking.ru/uploads/image/truboprovodnaya-armatura/krany-sharovye/ld/pride/ld-47.353/ld-47-353.25/katalog-ld-prajd.pdf"
+    },
+    {
+      "id": "кипиа-001-r0005",
+      "kg": 0.33,
+      "unit": "шт.",
+      "source": "Экомера МД02-100, стандартное исполнение: карточка производителя, масса 0,33 кг. https://ekomera.ru/product/манометр-вакуумметр-экомера-мд02-100мм-01-0/"
+    },
+    {
+      "id": "кипиа-001-r0006",
+      "kg": 0.33,
+      "unit": "шт.",
+      "source": "Экомера МД02-100, стандартное исполнение: карточка производителя, масса 0,33 кг. https://ekomera.ru/product/манометр-вакуумметр-экомера-мд02-100мм-01-0/"
+    },
+    {
+      "id": "кипиа-001-r0007",
+      "kg": 0.33,
+      "unit": "шт.",
+      "source": "Экомера МД02-100, стандартное исполнение: карточка производителя, масса 0,33 кг. https://ekomera.ru/product/манометр-вакуумметр-экомера-мд02-100мм-01-0/"
+    },
+    {
+      "id": "кипиа-001-r0008",
+      "kg": 0.33,
+      "unit": "шт.",
+      "source": "Экомера МД02-100, стандартное исполнение: карточка производителя, масса 0,33 кг. https://ekomera.ru/product/манометр-вакуумметр-экомера-мд02-100мм-01-0/"
+    },
+    {
+      "id": "кипиа-002-r0013",
+      "kg": 0.33,
+      "unit": "шт.",
+      "source": "РД-2Р, IP44, G1/4, без отдельного монтажного кронштейна: таблица изготовителя РОСМА. https://rosma.spb.ru/rele_davleniya/rd_2r_rele_davleniya_dlya_zhidkih_i_gazoobraznyh_neagressivnyh_sred/"
+    },
+    {
+      "id": "кипиа-002-r0014",
+      "kg": 0.33,
+      "unit": "шт.",
+      "source": "РД-2Р, IP44, G1/4, без отдельного монтажного кронштейна: таблица изготовителя РОСМА. https://rosma.spb.ru/rele_davleniya/rd_2r_rele_davleniya_dlya_zhidkih_i_gazoobraznyh_neagressivnyh_sred/"
+    },
+    {
+      "id": "кипиа-002-r0015",
+      "kg": 0.33,
+      "unit": "шт.",
+      "source": "РД-2Р, IP44, G1/4, без отдельного монтажного кронштейна: таблица изготовителя РОСМА. https://rosma.spb.ru/rele_davleniya/rd_2r_rele_davleniya_dlya_zhidkih_i_gazoobraznyh_neagressivnyh_sred/"
+    },
+    {
+      "id": "кипиа-002-r0016",
+      "kg": 0.33,
+      "unit": "шт.",
+      "source": "РД-2Р, IP44, G1/4, без отдельного монтажного кронштейна: таблица изготовителя РОСМА. https://rosma.spb.ru/rele_davleniya/rd_2r_rele_davleniya_dlya_zhidkih_i_gazoobraznyh_neagressivnyh_sred/"
+    },
+    {
+      "id": "frame-hardware-stand-right-1800",
+      "kg": 4.5,
+      "unit": "шт.",
+      "source": "Масса в основной надписи чертежа пользователя: Equipment/FabricatedParts/3D/Стойки под шкафы/Стойка правая 1800х400 WD.pdf, лист 1"
+    },
+    {
+      "id": "frame-hardware-stand-left-1800",
+      "kg": 4.5,
+      "unit": "шт.",
+      "source": "Масса в основной надписи чертежа пользователя: Equipment/FabricatedParts/3D/Стойки под шкафы/Стойка левая 1800х400 WD.pdf, лист 1"
+    },
+    {
+      "id": "frame-hardware-stand-right",
+      "kg": 3.8,
+      "unit": "шт.",
+      "source": "Чертёж пользователя Equipment/FabricatedParts/3D/Стойки под шкафы/Стойка правая.pdf, основная надпись: 3,8 кг"
+    },
+    {
+      "id": "frame-hardware-stand-left",
+      "kg": 3.8,
+      "unit": "шт.",
+      "source": "Чертёж пользователя Equipment/FabricatedParts/3D/Стойки под шкафы/Стойка левая.pdf, основная надпись: 3,8 кг"
+    },
+    {
+      "id": "station-v11-oni-ppt10-16",
+      "kg": 0.22,
+      "unit": "шт.",
+      "source": "Карточка изготовителя ONI PPT10 PPT-G-ST-016-4-20-1-1: опубликованное нетто 0,22 кг. В логистической таблице брутто 0,134 кг меньше нетто; принято большее опубликованное значение как оценка. https://oni-system.com/products/catalog/avtomatizatsiya_zdaniy_i_protsessov/kontrolno_izmeritelnye_pribory_i_avtomatika/datchiki_dlya_sistem_promyshlennoy_avtomatizatsii/datchiki_fizicheskikh_velichin/preobrazovateli_davleniya/preobrazovatel_izbytochnogo_davleniya_ppt10_0_5_0_16bar_4_20ma_g1_4_mini_4_pin_oni",
+      "estimated": true
+    },
+    {
+      "id": "station-v11-oni-ppt10-25",
+      "kg": 0.22,
+      "unit": "шт.",
+      "source": "Карточка изготовителя ONI PPT10 PPT-G-ST-025-4-20-1-1: опубликованное нетто 0,22 кг. В логистической таблице брутто 0,134 кг меньше нетто; принято большее опубликованное значение как оценка. https://oni-system.com/products/catalog/avtomatizatsiya_zdaniy_i_protsessov/kontrolno_izmeritelnye_pribory_i_avtomatika/datchiki_dlya_sistem_promyshlennoy_avtomatizatsii/datchiki_fizicheskikh_velichin/preobrazovateli_davleniya/preobrazovatel_izbytochnogo_davleniya_ppt10_0_5_0_25bar_4_20ma_g1_4_mini_4_pin_oni",
+      "estimated": true
+    },
+    {
+      "id": "frame-support-1",
+      "kg": 0.632,
+      "unit": "шт.",
+      "source": "Каталог РОВЕН, «Виброопоры тип EC», стр. 85–86; нагрузка на сжатие. https://nn.rowen.ru/upload/iblock/95d/igfbbwirvrn4hhcfathmthicd0jpchs0.pdf",
+      "support": {
+        "capacityKg": 500,
+        "threadMm": 16,
+        "heightMm": 75,
+        "diameterMm": 100
+      }
+    },
+    {
+      "id": "frame-support-2",
+      "kg": 0.071,
+      "unit": "шт.",
+      "source": "Каталог РОВЕН, «Виброопоры тип EC», стр. 85–86; нагрузка на сжатие. https://nn.rowen.ru/upload/iblock/95d/igfbbwirvrn4hhcfathmthicd0jpchs0.pdf",
+      "support": {
+        "capacityKg": 45,
+        "threadMm": 8,
+        "heightMm": 20,
+        "diameterMm": 30
+      }
+    },
+    {
+      "id": "frame-support-6",
+      "kg": 0.323,
+      "unit": "шт.",
+      "source": "Каталог РОВЕН, «Виброопоры тип EC», стр. 85–86; нагрузка на сжатие. https://nn.rowen.ru/upload/iblock/95d/igfbbwirvrn4hhcfathmthicd0jpchs0.pdf",
+      "support": {
+        "capacityKg": 350,
+        "threadMm": 10,
+        "heightMm": 60,
+        "diameterMm": 70
+      }
+    },
+    {
+      "id": "резьбовые-фитинги-003-r0235",
+      "kg": 0.03013688446263221,
+      "unit": "шт.",
+      "estimated": true,
+      "source": "Расчётная масса по замкнутой CAD-геометрии: Equipment/Fittings/3D/Переходники/Переходник ВР1_2-НР1_4.SLDPRT; SHA256 исходника 2f3112a21588f559c47567fb825486ea80221c3d9da65cef7302379373e9969f; объём 3545.516 мм³, плотность латуни 8500 кг/м³.",
+      "meshHash": "cb269629bf0a8d6a38b21f05f1324003b8470b09aa657f5384160a0f35c991aa"
+    },
+    {
+      "id": "резьбовые-фитинги-002-r0225",
+      "kg": 0.038880043198979475,
+      "unit": "шт.",
+      "estimated": true,
+      "source": "Расчётная масса по замкнутой CAD-геометрии: Equipment/Fittings/3D/Переходники/Футорка 1_2-1_4 нар_вн лат..SLDPRT; SHA256 исходника 321a72ff935eb46a793c65260dd9267f149bc47d682731d7fc8990036d33b658; объём 4574.123 мм³, плотность латуни 8500 кг/м³.",
+      "meshHash": "80ed2709072bf470222d7c2272c800721330beb44676a8787983b5c9248ab0fc"
+    },
+    {
+      "id": "lunda-ld-67-504:LD.67.504.15",
+      "kg": 0.025,
+      "unit": "шт.",
+      "source": "Каталог изготовителя LD 24.03.2025, стр. 26, заглушка ВР LD 67.504.15. https://image.stoking.ru/uploads/image/stoking-library/ld/pride/ld-47-247-15/katalog-latunnykh-kranov-ld-pride-ot-24-03-2025.pdf"
+    },
+    {
+      "id": "lunda-ld-67-504:LD.67.504.20",
+      "kg": 0.036,
+      "unit": "шт.",
+      "source": "Каталог изготовителя LD 24.03.2025, стр. 26, заглушка ВР LD 67.504.20. https://image.stoking.ru/uploads/image/stoking-library/ld/pride/ld-47-247-15/katalog-latunnykh-kranov-ld-pride-ot-24-03-2025.pdf"
+    },
+    {
+      "id": "lunda-ld-67-504:LD.67.504.25",
+      "kg": 0.057,
+      "unit": "шт.",
+      "source": "Каталог изготовителя LD 24.03.2025, стр. 26, заглушка ВР LD 67.504.25. https://image.stoking.ru/uploads/image/stoking-library/ld/pride/ld-47-247-15/katalog-latunnykh-kranov-ld-pride-ot-24-03-2025.pdf"
+    },
+    {
+      "id": "lunda-ld-67-504:LD.67.504.32",
+      "kg": 0.09,
+      "unit": "шт.",
+      "source": "Каталог изготовителя LD 24.03.2025, стр. 26, заглушка ВР LD 67.504.32. https://image.stoking.ru/uploads/image/stoking-library/ld/pride/ld-47-247-15/katalog-latunnykh-kranov-ld-pride-ot-24-03-2025.pdf"
+    },
+    {
+      "id": "lunda-ld-67-504:LD.67.504.40",
+      "kg": 0.115,
+      "unit": "шт.",
+      "source": "Каталог изготовителя LD 24.03.2025, стр. 26, заглушка ВР LD 67.504.40. https://image.stoking.ru/uploads/image/stoking-library/ld/pride/ld-47-247-15/katalog-latunnykh-kranov-ld-pride-ot-24-03-2025.pdf"
+    },
+    {
+      "id": "lunda-ld-67-504:LD.67.504.50",
+      "kg": 0.185,
+      "unit": "шт.",
+      "source": "Каталог изготовителя LD 24.03.2025, стр. 26, заглушка ВР LD 67.504.50. https://image.stoking.ru/uploads/image/stoking-library/ld/pride/ld-47-247-15/katalog-latunnykh-kranov-ld-pride-ot-24-03-2025.pdf"
+    },
+    {
+      "id": "резьбовые-фитинги-001-r0216",
+      "kg": 0.028,
+      "unit": "шт.",
+      "source": "Каталог изготовителя LD 24.03.2025, стр. 28, ниппель прямой НР/НР DN15. https://image.stoking.ru/uploads/image/stoking-library/ld/pride/ld-47-247-15/katalog-latunnykh-kranov-ld-pride-ot-24-03-2025.pdf"
+    },
+    {
+      "id": "резьбовые-фитинги-001-r0217",
+      "kg": 0.046,
+      "unit": "шт.",
+      "source": "Каталог изготовителя LD 24.03.2025, стр. 28, ниппель прямой НР/НР DN20. https://image.stoking.ru/uploads/image/stoking-library/ld/pride/ld-47-247-15/katalog-latunnykh-kranov-ld-pride-ot-24-03-2025.pdf"
+    },
+    {
+      "id": "резьбовые-фитинги-001-r0218",
+      "kg": 0.08,
+      "unit": "шт.",
+      "source": "Каталог изготовителя LD 24.03.2025, стр. 28, ниппель прямой НР/НР DN25. https://image.stoking.ru/uploads/image/stoking-library/ld/pride/ld-47-247-15/katalog-latunnykh-kranov-ld-pride-ot-24-03-2025.pdf"
+    },
+    {
+      "id": "резьбовые-фитинги-001-r0219",
+      "kg": 0.123,
+      "unit": "шт.",
+      "source": "Каталог изготовителя LD 24.03.2025, стр. 28, ниппель прямой НР/НР DN32. https://image.stoking.ru/uploads/image/stoking-library/ld/pride/ld-47-247-15/katalog-latunnykh-kranov-ld-pride-ot-24-03-2025.pdf"
+    },
+    {
+      "id": "резьбовые-фитинги-001-r0220",
+      "kg": 0.138,
+      "unit": "шт.",
+      "source": "Каталог изготовителя LD 24.03.2025, стр. 28, ниппель прямой НР/НР DN40. https://image.stoking.ru/uploads/image/stoking-library/ld/pride/ld-47-247-15/katalog-latunnykh-kranov-ld-pride-ot-24-03-2025.pdf"
+    },
+    {
+      "id": "резьбовые-фитинги-001-r0221",
+      "kg": 0.24,
+      "unit": "шт.",
+      "source": "Каталог изготовителя LD 24.03.2025, стр. 28, ниппель прямой НР/НР DN50. https://image.stoking.ru/uploads/image/stoking-library/ld/pride/ld-47-247-15/katalog-latunnykh-kranov-ld-pride-ot-24-03-2025.pdf"
+    },
+    {
+      "id": "прокладки-001-r0012",
+      "kg": 0.041209841633464125,
+      "unit": "шт.",
+      "source": "Расчётная масса по объёму исходной модели E:/PumpStation_Calculator/Equipment/Seals/3D/Прокладки паронит/Прокладка А_100_10ПОН ГОСТ 15180_86.SLDPRT; SHA256 c1e58248fadb9e7f977bfcff584b8e1bb2b5b7333da136ae20ef2fbed7e95dac; объём 0.000022894356463035624 м³, принятая плотность паронита 1800 кг/м³.",
+      "estimated": true
+    },
+    {
+      "id": "прокладки-001-r0013",
+      "kg": 0.04234364242214467,
+      "unit": "шт.",
+      "source": "Расчётная масса по объёму исходной модели E:/PumpStation_Calculator/Equipment/Seals/3D/Прокладки паронит/Прокладка А_125_10ПОН ГОСТ 15180_86.SLDPRT; SHA256 ac098617edc8520a3a12437b3f3a7472f4b28af07789fe07c94227edfddf2e01; объём 0.00002352424579008037 м³, принятая плотность паронита 1800 кг/м³.",
+      "estimated": true
+    },
+    {
+      "id": "прокладки-001-r0014",
+      "kg": 0.04823884103660589,
+      "unit": "шт.",
+      "source": "Расчётная масса по объёму исходной модели E:/PumpStation_Calculator/Equipment/Seals/3D/Прокладки паронит/Прокладка А_150_10ПОН ГОСТ 15180_86.SLDPRT; SHA256 e9f67e9ce5f19382334f6ebb7817b5a867c8efd91514f87b59e00e3ee81cf14e; объём 0.000026799356131447715 м³, принятая плотность паронита 1800 кг/м³.",
+      "estimated": true
+    },
+    {
+      "id": "прокладки-001-r0016",
+      "kg": 0.08886057652531802,
+      "unit": "шт.",
+      "source": "Расчётная масса по объёму исходной модели E:/PumpStation_Calculator/Equipment/Seals/3D/Прокладки паронит/Прокладка А_250_10ПОН ГОСТ 15180_86.SLDPRT; SHA256 def94230c9dbd86ed9d19c7b3ada318b5b006a3b3a2ec84ed930dd2a4c3a5e0c; объём 0.00004936698695851001 м³, принятая плотность паронита 1800 кг/м³.",
+      "estimated": true
+    },
+    {
+      "id": "прокладки-001-r0007",
+      "kg": 0.014467976647577072,
+      "unit": "шт.",
+      "source": "Расчётная масса по объёму исходной модели E:/PumpStation_Calculator/Equipment/Seals/3D/Прокладки паронит/Прокладка А_32_10ПОН ГОСТ 15180_86.SLDPRT; SHA256 3c3fbe7ef8ae0d9cb916f264842704c8a3ee19d103d6f6af3548279ea97d017e; объём 0.000008037764804209485 м³, принятая плотность паронита 1800 кг/м³.",
+      "estimated": true
+    },
+    {
+      "id": "прокладки-001-r0008",
+      "kg": 0.01768842327677197,
+      "unit": "шт.",
+      "source": "Расчётная масса по объёму исходной модели E:/PumpStation_Calculator/Equipment/Seals/3D/Прокладки паронит/Прокладка А_40_10ПОН ГОСТ 15180_86.SLDPRT; SHA256 fea4d746611646753299c9fb689db31a61d059ef1d76b782c35e7e9a82f1442d; объём 0.000009826901820428872 м³, принятая плотность паронита 1800 кг/м³.",
+      "estimated": true
+    },
+    {
+      "id": "прокладки-001-r0009",
+      "kg": 0.022582710471799525,
+      "unit": "шт.",
+      "source": "Расчётная масса по объёму исходной модели E:/PumpStation_Calculator/Equipment/Seals/3D/Прокладки паронит/Прокладка А_50_10ПОН ГОСТ 15180_86.SLDPRT; SHA256 fba5fb22726706ac2314a1c91c34db304d5080080f8ec7a5a362e45a3ccf2223; объём 0.000012545950262110847 м³, принятая плотность паронита 1800 кг/м³.",
+      "estimated": true
+    },
+    {
+      "id": "прокладки-001-r0010",
+      "kg": 0.02898401966275407,
+      "unit": "шт.",
+      "source": "Расчётная масса по объёму исходной модели E:/PumpStation_Calculator/Equipment/Seals/3D/Прокладки паронит/Прокладка А_65_10ПОН ГОСТ 15180_86.SLDPRT; SHA256 af16a13bd70d1a21fce48c208859b875933267fc923d2d6b1bf62fe728a3bb7f; объём 0.000016102233145974483 м³, принятая плотность паронита 1800 кг/м³.",
+      "estimated": true
+    },
+    {
+      "id": "прокладки-001-r0011",
+      "kg": 0.03481135987589779,
+      "unit": "шт.",
+      "source": "Расчётная масса по объёму исходной модели E:/PumpStation_Calculator/Equipment/Seals/3D/Прокладки паронит/Прокладка А_80_10ПОН ГОСТ 15180_86.SLDPRT; SHA256 c41f6b93ae43a99c3f68e2e29596b06e77a8e2a7a482b71e48e77d5c65c46757; объём 0.000019339644375498773 м³, принятая плотность паронита 1800 кг/м³.",
+      "estimated": true
+    },
+    {
+      "id": "tank-ld-pride-dn20-drain",
+      "kg": 0.27233665728420703,
+      "unit": "шт.",
+      "source": "Расчётная масса полного CAD крана LD DN20: E:/PumpStation_Calculator/Equipment/Valves/3D/Шаровые/Ld_pride_44_20_40Pn Б с воздухоотводчиком.SLDPRT; SHA256 c8711b3a244af81e68b195422a41ee192999088d9fd0b74370d392dfa316e978; две замкнутые проверенные оболочки после сшивки с допуском 0,01 мм. Плотность латуни принята 8500 кг/м³; мелкие детали и рукоятка условно рассчитаны с той же плотностью.",
+      "estimated": true
+    },
+    {
+      "id": "обратные-клапаны-003-r0092",
+      "kg": 7.6,
+      "source": "Техническое описание изготовителя Dendor 012F, стр. 152 (лист 3), DN50. https://dendor.ru/re/tech/012F.pdf",
+      "unit": "шт."
+    },
+    {
+      "id": "обратные-клапаны-003-r0093",
+      "kg": 10,
+      "source": "Техническое описание изготовителя Dendor 012F, стр. 152 (лист 3), DN65. https://dendor.ru/re/tech/012F.pdf",
+      "unit": "шт."
+    },
+    {
+      "id": "обратные-клапаны-003-r0094",
+      "kg": 12.4,
+      "source": "Техническое описание изготовителя Dendor 012F, стр. 152 (лист 3), DN80. https://dendor.ru/re/tech/012F.pdf",
+      "unit": "шт."
+    },
+    {
+      "id": "обратные-клапаны-003-r0095",
+      "kg": 18,
+      "source": "Техническое описание изготовителя Dendor 012F, стр. 152 (лист 3), DN100. https://dendor.ru/re/tech/012F.pdf",
+      "unit": "шт."
+    },
+    {
+      "id": "обратные-клапаны-003-r0096",
+      "kg": 26,
+      "source": "Техническое описание изготовителя Dendor 012F, стр. 152 (лист 3), DN125. https://dendor.ru/re/tech/012F.pdf",
+      "unit": "шт."
+    },
+    {
+      "id": "обратные-клапаны-003-r0097",
+      "kg": 39,
+      "source": "Техническое описание изготовителя Dendor 012F, стр. 152 (лист 3), DN150. https://dendor.ru/re/tech/012F.pdf",
+      "unit": "шт."
+    },
+    {
+      "id": "обратные-клапаны-003-r0098",
+      "kg": 67,
+      "source": "Техническое описание изготовителя Dendor 012F, стр. 152 (лист 3), DN200. https://dendor.ru/re/tech/012F.pdf",
+      "unit": "шт."
+    },
+    {
+      "id": "обратные-клапаны-003-r0099",
+      "kg": 115,
+      "source": "Техническое описание изготовителя Dendor 012F, стр. 152 (лист 3), DN250. https://dendor.ru/re/tech/012F.pdf",
+      "unit": "шт."
+    },
+    {
+      "id": "обратные-клапаны-003-r0100",
+      "kg": 144,
+      "source": "Техническое описание изготовителя Dendor 012F, стр. 152 (лист 3), DN300. https://dendor.ru/re/tech/012F.pdf",
+      "unit": "шт."
+    },
+    {
+      "id": "обратные-клапаны-003-r0101",
+      "kg": 175,
+      "source": "Техническое описание изготовителя Dendor 012F, стр. 152 (лист 3), DN350. https://dendor.ru/re/tech/012F.pdf",
+      "unit": "шт."
+    },
+    {
+      "id": "обратные-клапаны-003-r0102",
+      "kg": 310,
+      "source": "Техническое описание изготовителя Dendor 012F, стр. 152 (лист 3), DN400. https://dendor.ru/re/tech/012F.pdf",
+      "unit": "шт."
+    },
+    {
+      "id": "обратные-клапаны-003-r0103",
+      "kg": 380,
+      "source": "Техническое описание изготовителя Dendor 012F, стр. 152 (лист 3), DN500. https://dendor.ru/re/tech/012F.pdf",
+      "unit": "шт."
+    },
+    {
+      "id": "suction-table:check-valtec-15",
+      "kg": 0.131,
+      "source": "Технический каталог VALTEC, стр. 332, VT.151 DN15. https://valtec.ru/document/TechCat_compressed.pdf",
+      "unit": "шт."
+    },
+    {
+      "id": "suction-table:check-valtec-20",
+      "kg": 0.2,
+      "source": "Технический каталог VALTEC, стр. 332, VT.151 DN20. https://valtec.ru/document/TechCat_compressed.pdf",
+      "unit": "шт."
+    },
+    {
+      "id": "suction-table:check-valtec-25",
+      "kg": 0.298,
+      "source": "Технический каталог VALTEC, стр. 332, VT.151 DN25. https://valtec.ru/document/TechCat_compressed.pdf",
+      "unit": "шт."
+    },
+    {
+      "id": "suction-table:check-valtec-32",
+      "kg": 0.403,
+      "source": "Технический каталог VALTEC, стр. 332, VT.151 DN32. https://valtec.ru/document/TechCat_compressed.pdf",
+      "unit": "шт."
+    },
+    {
+      "id": "suction-table:check-valtec-40",
+      "kg": 0.68,
+      "source": "Технический каталог VALTEC, стр. 332, VT.151 DN40. https://valtec.ru/document/TechCat_compressed.pdf",
+      "unit": "шт."
+    },
+    {
+      "id": "suction-table:check-valtec-50",
+      "kg": 0.95,
+      "source": "Технический каталог VALTEC, стр. 332, VT.151 DN50. https://valtec.ru/document/TechCat_compressed.pdf",
+      "unit": "шт."
+    },
+    {
+      "id": "suction-table:union-valtec-15",
+      "kg": 0.092,
+      "source": "Технический каталог VALTEC, стр. 139, VTr.341 DN15. https://valtec.ru/document/TechCat_compressed.pdf",
+      "unit": "шт."
+    },
+    {
+      "id": "suction-table:union-valtec-20",
+      "kg": 0.146,
+      "source": "Технический каталог VALTEC, стр. 139, VTr.341 DN20. https://valtec.ru/document/TechCat_compressed.pdf",
+      "unit": "шт."
+    },
+    {
+      "id": "suction-table:union-valtec-25",
+      "kg": 0.276,
+      "source": "Технический каталог VALTEC, стр. 139, VTr.341 DN25. https://valtec.ru/document/TechCat_compressed.pdf",
+      "unit": "шт."
+    },
+    {
+      "id": "suction-table:union-valtec-32",
+      "kg": 0.424,
+      "source": "Технический каталог VALTEC, стр. 139, VTr.341 DN32. https://valtec.ru/document/TechCat_compressed.pdf",
+      "unit": "шт."
+    },
+    {
+      "id": "suction-table:union-valtec-40",
+      "kg": 0.588,
+      "source": "Технический каталог VALTEC, стр. 139, VTr.341 DN40. https://valtec.ru/document/TechCat_compressed.pdf",
+      "unit": "шт."
+    },
+    {
+      "id": "suction-table:union-valtec-50",
+      "kg": 1.331,
+      "source": "Технический каталог VALTEC, стр. 139, VTr.341 DN50. https://valtec.ru/document/TechCat_compressed.pdf",
+      "unit": "шт."
+    },
+    {
+      "id": "металл-002-r0020",
+      "kg": 4.4274,
+      "source": "Расчётная масса 1 м: Труба квадратная 50х50х3, номинальное прямоугольное кольцо без скруглений, сталь 7850 кг/м³. Размеры из поля B исходной строки Металл!20; округления углов не вычитаются.",
+      "unit": "м",
+      "estimated": true
+    },
+    {
+      "id": "металл-002-r0021",
+      "kg": 7.0336,
+      "source": "Расчётная масса 1 м: Труба квадратная 60х60х4, номинальное прямоугольное кольцо без скруглений, сталь 7850 кг/м³. Размеры из поля B исходной строки Металл!21; округления углов не вычитаются.",
+      "unit": "м",
+      "estimated": true
+    },
+    {
+      "id": "металл-002-r0022",
+      "kg": 7.253399999999999,
+      "source": "Расчётная масса 1 м: Труба квадратная 80х80х3, номинальное прямоугольное кольцо без скруглений, сталь 7850 кг/м³. Размеры из поля B исходной строки Металл!22; округления углов не вычитаются.",
+      "unit": "м",
+      "estimated": true
+    },
+    {
+      "id": "металл-002-r0023",
+      "kg": 9.545599999999999,
+      "source": "Расчётная масса 1 м: Труба квадратная 80х80х4, номинальное прямоугольное кольцо без скруглений, сталь 7850 кг/м³. Размеры из поля B исходной строки Металл!23; округления углов не вычитаются.",
+      "unit": "м",
+      "estimated": true
+    },
+    {
+      "id": "металл-002-r0024",
+      "kg": 14.915,
+      "source": "Расчётная масса 1 м: Труба квадратная 100х100х5, номинальное прямоугольное кольцо без скруглений, сталь 7850 кг/м³. Размеры из поля B исходной строки Металл!24; округления углов не вычитаются.",
+      "unit": "м",
+      "estimated": true
+    },
+    {
+      "id": "металл-002-r0025",
+      "kg": 18.055,
+      "source": "Расчётная масса 1 м: Труба квадратная 120х120х5, номинальное прямоугольное кольцо без скруглений, сталь 7850 кг/м³. Размеры из поля B исходной строки Металл!25; округления углов не вычитаются.",
+      "unit": "м",
+      "estimated": true
+    },
+    {
+      "id": "металл-002-r0026",
+      "kg": 29.233399999999996,
+      "source": "Расчётная масса 1 м: Труба квадратная 140х140х7, номинальное прямоугольное кольцо без скруглений, сталь 7850 кг/м³. Размеры из поля B исходной строки Металл!26; округления углов не вычитаются.",
+      "unit": "м",
+      "estimated": true
+    },
+    {
+      "id": "металл-002-r0027",
+      "kg": 29.013599999999997,
+      "source": "Расчётная масса 1 м: Труба квадратная 160х160х6, номинальное прямоугольное кольцо без скруглений, сталь 7850 кг/м³. Размеры из поля B исходной строки Металл!27; округления углов не вычитаются.",
+      "unit": "м",
+      "estimated": true
+    },
+    {
+      "id": "frame-eyelet-m8",
+      "kg": 0.05171470653093178,
+      "source": "Расчётная масса по замкнутой CAD-сетке E:\\PumpStation_Calculator\\Equipment\\Fasteners\\3D\\Болты\\DIN580\\Рым-болт М8 DIN580.SLDPRT; SHA256 исходника b37dc12fbe1007b4e59f326151d2a0bc3c18ddaa9dde36372272eb494e81d439, сетки 446f26781a0be57c44bf2964a15f6afd3d422ad96b27da59a4634dbab3b728e0; объём 6587.861 мм³. Принята сталь плотностью 7850 кг/м³; масса не подтверждает грузоподъёмность рым-болта.",
+      "unit": "шт.",
+      "estimated": true
+    },
+    {
+      "id": "frame-eyelet-m10",
+      "kg": 0.10172619011992774,
+      "source": "Расчётная масса по замкнутой CAD-сетке E:\\PumpStation_Calculator\\Equipment\\Fasteners\\3D\\Болты\\DIN580\\Рым-болт М10 DIN580.SLDPRT; SHA256 исходника 3af7ab379f11e0c70c478ec8a74487333bc1f48092abc3904bdee76ec8ed0553, сетки 493ced80a6fd1ad5efaea7d7d7a9575eeb97851dc91bad80465b561e4ab33b54; объём 12958.750 мм³. Принята сталь плотностью 7850 кг/м³; масса не подтверждает грузоподъёмность рым-болта.",
+      "unit": "шт.",
+      "estimated": true
+    },
+    {
+      "id": "frame-eyelet-m12",
+      "kg": 0.1710310449021861,
+      "source": "Расчётная масса по замкнутой CAD-сетке E:\\PumpStation_Calculator\\Equipment\\Fasteners\\3D\\Болты\\DIN580\\Рым-болт М12 DIN580.SLDPRT; SHA256 исходника 454017739acd421d37907f00a39db28e8b31797185c1a46064f3bf59695e71b8, сетки 5060c67bd0ad2c287bb1da005d5d0ea8790daac9930e3a32a230ec3a344bfa08; объём 21787.394 мм³. Принята сталь плотностью 7850 кг/м³; масса не подтверждает грузоподъёмность рым-болта.",
+      "unit": "шт.",
+      "estimated": true
+    },
+    {
+      "id": "frame-eyelet-m16",
+      "kg": 0.2863118704711939,
+      "source": "Расчётная масса по замкнутой CAD-сетке E:\\PumpStation_Calculator\\Equipment\\Fasteners\\3D\\Болты\\DIN580\\Рым-болт М16 DIN580.SLDPRT; SHA256 исходника 6c52aa8edd7d50a8f4bb7b543a54464d88a58834ea4003383a4abbf150102c8a, сетки 55d225f76f630f7bb62a565ae46d1f6a539ca24b928a054e19de89b01ee0b786; объём 36472.850 мм³. Принята сталь плотностью 7850 кг/м³; масса не подтверждает грузоподъёмность рым-болта.",
+      "unit": "шт.",
+      "estimated": true
+    },
+    {
+      "id": "frame-eyelet-m20",
+      "kg": 0.4436591678295142,
+      "source": "Расчётная масса по замкнутой CAD-сетке E:\\PumpStation_Calculator\\Equipment\\Fasteners\\3D\\Болты\\DIN580\\Рым-болт М20 DIN580.SLDPRT; SHA256 исходника 55634fb533fd7ffb4cb6aaf995f5249388ba7f2752ff9b6823d2c6c173828095, сетки 14a1c333b2b663d61eeefa95d6360cd6cace4692e38adfe16c5da2b5c1406b11; объём 56517.091 мм³. Принята сталь плотностью 7850 кг/м³; масса не подтверждает грузоподъёмность рым-болта.",
+      "unit": "шт.",
+      "estimated": true
+    },
+    {
+      "id": "frame-eyelet-m24",
+      "kg": 0.8726903762287019,
+      "source": "Расчётная масса по замкнутой CAD-сетке E:\\PumpStation_Calculator\\Equipment\\Fasteners\\3D\\Болты\\DIN580\\Рым-болт М24 DIN580.SLDPRT; SHA256 исходника d85664b4134b0e31bc302a8e986378029629e352316e84bf39d187835eaae556, сетки a3d71698895548e39809c53a79cc9ebc9af856536e0fb59febadd87337f719f8; объём 111170.749 мм³. Принята сталь плотностью 7850 кг/м³; масса не подтверждает грузоподъёмность рым-болта.",
+      "unit": "шт.",
+      "estimated": true
+    },
+    {
+      "id": "frame-eyelet-m30",
+      "kg": 1.6192379094492197,
+      "source": "Расчётная масса по замкнутой CAD-сетке E:\\PumpStation_Calculator\\Equipment\\Fasteners\\3D\\Болты\\DIN580\\Рым-болт М30 DIN580.SLDPRT; SHA256 исходника f09cbbbc89e9b6bf2e79212a6feb56d5a8865d08790c006947efdc9f91e5c6ef, сетки a9275619932badcf5d27e70999f04fd468f5ad296331207432203c52939c3613; объём 206272.345 мм³. Принята сталь плотностью 7850 кг/м³; масса не подтверждает грузоподъёмность рым-болта.",
+      "unit": "шт.",
+      "estimated": true
+    },
+    {
+      "id": "frame-eyelet-m36",
+      "kg": 2.6018887786052955,
+      "source": "Расчётная масса по замкнутой CAD-сетке E:\\PumpStation_Calculator\\Equipment\\Fasteners\\3D\\Болты\\DIN580\\Рым-болт М36 DIN580.SLDPRT; SHA256 исходника 711c5bf13828a8f6bc4f2189d385675e35f7ee7c26dc27e3f5f9056f6f33ca2a, сетки 74c6ddc52e4e94825ac2d9088b3cde65d28929a2b0c8824e6b224b7f3a00cf63; объём 331450.800 мм³. Принята сталь плотностью 7850 кг/м³; масса не подтверждает грузоподъёмность рым-болта.",
+      "unit": "шт.",
+      "estimated": true
+    },
+    {
+      "id": "frame-eyelet-m42",
+      "kg": 3.965421621338205,
+      "source": "Расчётная масса по замкнутой CAD-сетке E:\\PumpStation_Calculator\\Equipment\\Fasteners\\3D\\Болты\\DIN580\\Рым-болт М42 DIN580.SLDPRT; SHA256 исходника c8bbdb51e77ba5ecb809ba29bb2e90f7e0c77151c508554b4adbaaa24240bc48, сетки 622b7d11055b7e5ddda89284451f27646e16069c290de7583b11cb2904a9f689; объём 505149.251 мм³. Принята сталь плотностью 7850 кг/м³; масса не подтверждает грузоподъёмность рым-болта.",
+      "unit": "шт.",
+      "estimated": true
+    },
+    {
+      "id": "frame-eyelet-m48",
+      "kg": 6.224609198520447,
+      "source": "Расчётная масса по замкнутой CAD-сетке E:\\PumpStation_Calculator\\Equipment\\Fasteners\\3D\\Болты\\DIN580\\Рым-болт М48 DIN580.SLDPRT; SHA256 исходника 1aa35535fb00d3fa46e66aa8ffa553f14f3d84d1bd0f11f9eda1f0db979c39cc, сетки 01ccc5809423acaf9605b74dbd1175e2827a916982f28bc9cf9cfcf0c3a23dad; объём 792943.847 мм³. Принята сталь плотностью 7850 кг/м³; масса не подтверждает грузоподъёмность рым-болта.",
+      "unit": "шт.",
+      "estimated": true
+    },
+    {
+      "id": "frame-eyelet-m56",
+      "kg": 8.570568510391858,
+      "source": "Расчётная масса по замкнутой CAD-сетке E:\\PumpStation_Calculator\\Equipment\\Fasteners\\3D\\Болты\\DIN580\\Рым-болт М56 DIN580.SLDPRT; SHA256 исходника 7832745b225147b6028d4ae368f8874f1fc6db73740d89cd3305f9a7b43a7572, сетки 1cf1453d390bcc351626a8c48d96195cd90ec7f491d56c922ce40972b4561bcd; объём 1091792.167 мм³. Принята сталь плотностью 7850 кг/м³; масса не подтверждает грузоподъёмность рым-болта.",
+      "unit": "шт.",
+      "estimated": true
+    },
+    {
+      "id": "frame-eyelet-m64",
+      "kg": 12.183326810198954,
+      "source": "Расчётная масса по замкнутой CAD-сетке E:\\PumpStation_Calculator\\Equipment\\Fasteners\\3D\\Болты\\DIN580\\Рым-болт М64 DIN580.SLDPRT; SHA256 исходника 1d0a71dea301c769a09e3390396d09cad2a9af6ddb280fab41d2d5aab31d6133, сетки a14224c736a02947bbe5bcd7d599c4b8549920474e89bf7762ee55e70883a5b4; объём 1552016.154 мм³. Принята сталь плотностью 7850 кг/м³; масса не подтверждает грузоподъёмность рым-болта.",
+      "unit": "шт.",
+      "estimated": true
+    }
+  ]
+}

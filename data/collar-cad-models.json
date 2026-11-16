@@ -1,0 +1,3169 @@
+{
+  "version": 1,
+  "converter": "cadmpeg 0.6.6 + OCCT 8.0.1 analytic meridian export",
+  "models": [
+    {
+      "nativePath": "Equipment/Piping/3D/Воротники/Воротник приварной DN100 ISO.SLDPRT",
+      "nativeSha256": "1f37b468365aa85bc3f25f5a8484ea83bbedcf76b538a9d7be899d7d2dfcab87",
+      "modelPath": "Equipment/Piping/3D/Воротники STEP/1f37b468365aa85b.step",
+      "modelSha256": "77ada38a239ca76b080bbff98c1eef048d2ac33b1cdbe6dc8ca1246c4c311993",
+      "dimensions": [
+        {
+          "lengthMm": 16.0,
+          "outerDiameterMm": 114.3,
+          "innerDiameterMm": 110.3,
+          "wallThicknessMm": 2.0,
+          "lipOuterDiameterMm": 158.0,
+          "lipThicknessMm": 2.0,
+          "volumeMm3": 37988.528968
+        }
+      ],
+      "conversion": {
+        "cadirSha256": "e6948aa7396bdbbe6032a5b10ee96ab292ea67704bf9f8981092dba2d052dc0f",
+        "stepSha256": "77ada38a239ca76b080bbff98c1eef048d2ac33b1cdbe6dc8ca1246c4c311993",
+        "method": "native analytic meridian B-Rep; OCCT revolution; native display trim verification; STEP roundtrip",
+        "bodies": [
+          {
+            "body": "sldprt:brep:body#3",
+            "volumeMm3": 37988.52896845622,
+            "profile": [
+              {
+                "kind": "arc",
+                "a": [
+                  4.0,
+                  57.15
+                ],
+                "b": [
+                  14.0,
+                  67.15
+                ],
+                "center": [
+                  4.000000000000002,
+                  67.15
+                ],
+                "radius": 10.000000000000002,
+                "mid": [
+                  11.071067811865476,
+                  60.07893218813453
+                ],
+                "t0": -1.5707963267948968,
+                "delta": 1.5707963267948966
+              },
+              {
+                "kind": "line",
+                "a": [
+                  14.0,
+                  67.15
+                ],
+                "b": [
+                  14.0,
+                  79.0
+                ]
+              },
+              {
+                "kind": "line",
+                "a": [
+                  14.0,
+                  79.0
+                ],
+                "b": [
+                  16.0,
+                  79.0
+                ]
+              },
+              {
+                "kind": "line",
+                "a": [
+                  16.0,
+                  79.0
+                ],
+                "b": [
+                  16.0,
+                  55.15
+                ]
+              },
+              {
+                "kind": "line",
+                "a": [
+                  16.0,
+                  55.15
+                ],
+                "b": [
+                  0.0,
+                  55.15
+                ]
+              },
+              {
+                "kind": "line",
+                "a": [
+                  0.0,
+                  55.15
+                ],
+                "b": [
+                  0.0,
+                  57.15
+                ]
+              },
+              {
+                "kind": "line",
+                "a": [
+                  0.0,
+                  57.15
+                ],
+                "b": [
+                  4.0,
+                  57.15
+                ]
+              }
+            ],
+            "nativePointCount": 1020,
+            "nativeMaxDeviationMm": 0.17617509000000808
+          }
+        ]
+      }
+    },
+    {
+      "nativePath": "Equipment/Piping/3D/Воротники/Воротник приварной DN125 ISO.SLDPRT",
+      "nativeSha256": "8b475560e14c7d85c80747e299445357634489cee82a29a068fe233b63b795a5",
+      "modelPath": "Equipment/Piping/3D/Воротники STEP/8b475560e14c7d85.step",
+      "modelSha256": "5f860cc782ba553b6050a76ec4017b5361c59f717ad1a20f34ba722df6ca4958",
+      "dimensions": [
+        {
+          "lengthMm": 16.0,
+          "outerDiameterMm": 139.7,
+          "innerDiameterMm": 135.7,
+          "wallThicknessMm": 2.0,
+          "lipOuterDiameterMm": 185.0,
+          "lipThicknessMm": 2.0,
+          "volumeMm3": 46667.457223
+        }
+      ],
+      "conversion": {
+        "cadirSha256": "6a788d91e38d73a2ae0deeaf722257541ebb80974b1f519dfae31cad3c46d2ee",
+        "stepSha256": "5f860cc782ba553b6050a76ec4017b5361c59f717ad1a20f34ba722df6ca4958",
+        "method": "native analytic meridian B-Rep; OCCT revolution; native display trim verification; STEP roundtrip",
+        "bodies": [
+          {
+            "body": "sldprt:brep:body#3",
+            "volumeMm3": 46667.45722321795,
+            "profile": [
+              {
+                "kind": "arc",
+                "a": [
+                  4.0,
+                  69.85
+                ],
+                "b": [
+                  14.0,
+                  79.85
+                ],
+                "center": [
+                  4.000000000000002,
+                  79.84999999999998
+                ],
+                "radius": 9.999999999999991,
+                "mid": [
+                  11.071067811865476,
+                  72.77893218813452
+                ],
+                "t0": -1.5707963267948968,
+                "delta": 1.5707963267948983
+              },
+              {
+                "kind": "line",
+                "a": [
+                  14.0,
+                  79.85
+                ],
+                "b": [
+                  14.0,
+                  92.5
+                ]
+              },
+              {
+                "kind": "line",
+                "a": [
+                  14.0,
+                  92.5
+                ],
+                "b": [
+                  16.0,
+                  92.5
+                ]
+              },
+              {
+                "kind": "line",
+                "a": [
+                  16.0,
+                  92.5
+                ],
+                "b": [
+                  16.0,
+                  67.85
+                ]
+              },
+              {
+                "kind": "line",
+                "a": [
+                  16.0,
+                  67.85
+                ],
+                "b": [
+                  0.0,
+                  67.85
+                ]
+              },
+              {
+                "kind": "line",
+                "a": [
+                  0.0,
+                  67.85
+                ],
+                "b": [
+                  0.0,
+                  69.85
+                ]
+              },
+              {
+                "kind": "line",
+                "a": [
+                  0.0,
+                  69.85
+                ],
+                "b": [
+                  4.0,
+                  69.85
+                ]
+              }
+            ],
+            "nativePointCount": 1020,
+            "nativeMaxDeviationMm": 0.2153258099999924
+          }
+        ]
+      }
+    },
+    {
+      "nativePath": "Equipment/Piping/3D/Воротники/Воротник приварной DN150 ISO.SLDPRT",
+      "nativeSha256": "1b6e956e2336bf8cb1f9fdeccf6c87fd26de0f51f6fecaae625bb0c4e80dc9d3",
+      "modelPath": "Equipment/Piping/3D/Воротники STEP/1b6e956e2336bf8c.step",
+      "modelSha256": "8955995bd4857d6ff5f74054ef61fc4426d881fd5b78f93823f15cae49ca8312",
+      "dimensions": [
+        {
+          "lengthMm": 28.0,
+          "outerDiameterMm": 154.0,
+          "innerDiameterMm": 150.0,
+          "wallThicknessMm": 2.0,
+          "lipOuterDiameterMm": 212.0,
+          "lipThicknessMm": 3.0,
+          "volumeMm3": 72359.28259
+        },
+        {
+          "lengthMm": 28.0,
+          "outerDiameterMm": 154.0,
+          "innerDiameterMm": 150.0,
+          "wallThicknessMm": 2.0,
+          "lipOuterDiameterMm": 212.0,
+          "lipThicknessMm": 3.0,
+          "volumeMm3": 72359.28259
+        }
+      ],
+      "conversion": {
+        "cadirSha256": "067dbfa8500276fd8d643ea9f1cff774840d454390f8571f0682232381d0c2b5",
+        "stepSha256": "8955995bd4857d6ff5f74054ef61fc4426d881fd5b78f93823f15cae49ca8312",
+        "method": "native analytic meridian B-Rep; OCCT revolution; native display trim verification; STEP roundtrip",
+        "bodies": [
+          {
+            "body": "sldprt:brep:body#3",
+            "volumeMm3": 72359.28259023202,
+            "profile": [
+              {
+                "kind": "line",
+                "a": [
+                  0.0,
+                  75.0
+                ],
+                "b": [
+                  16.0,
+                  75.0
+                ]
+              },
+              {
+                "kind": "arc",
+                "a": [
+                  16.0,
+                  75.0
+                ],
+                "b": [
+                  28.0,
+                  87.0
+                ],
+                "center": [
+                  16.0,
+                  87.00000000000001
+                ],
+                "radius": 12.0,
+                "mid": [
+                  24.485281374238568,
+                  78.51471862576145
+                ],
+                "t0": -1.5707963267948966,
+                "delta": 1.5707963267948957
+              },
+              {
+                "kind": "line",
+                "a": [
+                  28.0,
+                  87.0
+                ],
+                "b": [
+                  28.0,
+                  106.0
+                ]
+              },
+              {
+                "kind": "line",
+                "a": [
+                  28.0,
+                  106.0
+                ],
+                "b": [
+                  25.0,
+                  106.0
+                ]
+              },
+              {
+                "kind": "line",
+                "a": [
+                  25.0,
+                  106.0
+                ],
+                "b": [
+                  25.0,
+                  87.0
+                ]
+              },
+              {
+                "kind": "arc",
+                "a": [
+                  25.0,
+                  87.0
+                ],
+                "b": [
+                  15.0,
+                  77.0
+                ],
+                "center": [
+                  15.000000000000004,
+                  87.0
+                ],
+                "radius": 9.999999999999996,
+                "mid": [
+                  22.071067811865476,
+                  79.92893218813452
+                ],
+                "t0": -1.570796326794897,
+                "delta": 1.5707963267948966
+              },
+              {
+                "kind": "line",
+                "a": [
+                  15.0,
+                  77.0
+                ],
+                "b": [
+                  0.0,
+                  77.0
+                ]
+              },
+              {
+                "kind": "line",
+                "a": [
+                  0.0,
+                  77.0
+                ],
+                "b": [
+                  0.0,
+                  75.0
+                ]
+              }
+            ],
+            "nativePointCount": 1666,
+            "nativeMaxDeviationMm": 0.25400802000000056
+          },
+          {
+            "body": "sldprt:brep:body#3@block@44064",
+            "volumeMm3": 72359.28259023202,
+            "profile": [
+              {
+                "kind": "line",
+                "a": [
+                  0.0,
+                  75.0
+                ],
+                "b": [
+                  16.0,
+                  75.0
+                ]
+              },
+              {
+                "kind": "arc",
+                "a": [
+                  16.0,
+                  75.0
+                ],
+                "b": [
+                  28.0,
+                  87.0
+                ],
+                "center": [
+                  16.0,
+                  87.00000000000001
+                ],
+                "radius": 12.0,
+                "mid": [
+                  24.485281374238568,
+                  78.51471862576145
+                ],
+                "t0": -1.5707963267948966,
+                "delta": 1.5707963267948957
+              },
+              {
+                "kind": "line",
+                "a": [
+                  28.0,
+                  87.0
+                ],
+                "b": [
+                  28.0,
+                  106.0
+                ]
+              },
+              {
+                "kind": "line",
+                "a": [
+                  28.0,
+                  106.0
+                ],
+                "b": [
+                  25.0,
+                  106.0
+                ]
+              },
+              {
+                "kind": "line",
+                "a": [
+                  25.0,
+                  106.0
+                ],
+                "b": [
+                  25.0,
+                  87.0
+                ]
+              },
+              {
+                "kind": "arc",
+                "a": [
+                  25.0,
+                  87.0
+                ],
+                "b": [
+                  15.0,
+                  77.0
+                ],
+                "center": [
+                  15.000000000000004,
+                  87.0
+                ],
+                "radius": 9.999999999999996,
+                "mid": [
+                  22.071067811865476,
+                  79.92893218813452
+                ],
+                "t0": -1.570796326794897,
+                "delta": 1.5707963267948966
+              },
+              {
+                "kind": "line",
+                "a": [
+                  15.0,
+                  77.0
+                ],
+                "b": [
+                  0.0,
+                  77.0
+                ]
+              },
+              {
+                "kind": "line",
+                "a": [
+                  0.0,
+                  77.0
+                ],
+                "b": [
+                  0.0,
+                  75.0
+                ]
+              }
+            ],
+            "nativePointCount": 1666,
+            "nativeMaxDeviationMm": 0.25400802000000056
+          }
+        ]
+      }
+    },
+    {
+      "nativePath": "Equipment/Piping/3D/Воротники/Воротник приварной DN200 ISO.SLDPRT",
+      "nativeSha256": "7b14fe3cb1e0e1b68d35a7a80a6fafd686f3dba6b9fa2ed6a53b4e37126c17f2",
+      "modelPath": "Equipment/Piping/3D/Воротники STEP/7b14fe3cb1e0e1b6.step",
+      "modelSha256": "3e6d147067450305bf1363500007f4c8bc3de907c09ccbe7e19d4e2a8fdb2627",
+      "dimensions": [
+        {
+          "lengthMm": 18.0,
+          "outerDiameterMm": 219.1,
+          "innerDiameterMm": 215.1,
+          "wallThicknessMm": 2.0,
+          "lipOuterDiameterMm": 270.0,
+          "lipThicknessMm": 2.0,
+          "volumeMm3": 57328.29955
+        },
+        {
+          "lengthMm": 18.0,
+          "outerDiameterMm": 219.1,
+          "innerDiameterMm": 215.1,
+          "wallThicknessMm": 2.0,
+          "lipOuterDiameterMm": 270.0,
+          "lipThicknessMm": 2.0,
+          "volumeMm3": 57328.29955
+        }
+      ],
+      "conversion": {
+        "cadirSha256": "9dacb4919bbd62ea11d1feec1ca28cae950acb24851344b2032ff0ba693660bb",
+        "stepSha256": "3e6d147067450305bf1363500007f4c8bc3de907c09ccbe7e19d4e2a8fdb2627",
+        "method": "native analytic meridian B-Rep; OCCT revolution; native display trim verification; STEP roundtrip",
+        "bodies": [
+          {
+            "body": "sldprt:brep:body#3",
+            "volumeMm3": 57328.29955000765,
+            "profile": [
+              {
+                "kind": "line",
+                "a": [
+                  0.0,
+                  107.55
+                ],
+                "b": [
+                  6.0,
+                  107.55
+                ]
+              },
+              {
+                "kind": "arc",
+                "a": [
+                  6.0,
+                  107.55
+                ],
+                "b": [
+                  18.0,
+                  119.55
+                ],
+                "center": [
+                  5.999999999999998,
+                  119.54999999999998
+                ],
+                "radius": 12.0,
+                "mid": [
+                  14.485281374238571,
+                  111.06471862576142
+                ],
+                "t0": -1.5707963267948966,
+                "delta": 1.5707963267948974
+              },
+              {
+                "kind": "line",
+                "a": [
+                  18.0,
+                  119.55
+                ],
+                "b": [
+                  18.0,
+                  135.0
+                ]
+              },
+              {
+                "kind": "line",
+                "a": [
+                  18.0,
+                  135.0
+                ],
+                "b": [
+                  16.0,
+                  135.0
+                ]
+              },
+              {
+                "kind": "line",
+                "a": [
+                  16.0,
+                  135.0
+                ],
+                "b": [
+                  16.0,
+                  119.55
+                ]
+              },
+              {
+                "kind": "arc",
+                "a": [
+                  16.0,
+                  119.55
+                ],
+                "b": [
+                  6.0,
+                  109.55
+                ],
+                "center": [
+                  6.000000000000003,
+                  119.54999999999998
+                ],
+                "radius": 9.999999999999991,
+                "mid": [
+                  13.071067811865476,
+                  112.47893218813452
+                ],
+                "t0": -1.5707963267948968,
+                "delta": 1.5707963267948983
+              },
+              {
+                "kind": "line",
+                "a": [
+                  6.0,
+                  109.55
+                ],
+                "b": [
+                  0.0,
+                  109.55
+                ]
+              },
+              {
+                "kind": "line",
+                "a": [
+                  0.0,
+                  109.55
+                ],
+                "b": [
+                  0.0,
+                  107.55
+                ]
+              }
+            ],
+            "nativePointCount": 4438,
+            "nativeMaxDeviationMm": 0.06386721999998635
+          },
+          {
+            "body": "sldprt:brep:body#3@block@41810",
+            "volumeMm3": 57328.29955000765,
+            "profile": [
+              {
+                "kind": "line",
+                "a": [
+                  0.0,
+                  107.55
+                ],
+                "b": [
+                  6.0,
+                  107.55
+                ]
+              },
+              {
+                "kind": "arc",
+                "a": [
+                  6.0,
+                  107.55
+                ],
+                "b": [
+                  18.0,
+                  119.55
+                ],
+                "center": [
+                  5.999999999999998,
+                  119.54999999999998
+                ],
+                "radius": 12.0,
+                "mid": [
+                  14.485281374238571,
+                  111.06471862576142
+                ],
+                "t0": -1.5707963267948966,
+                "delta": 1.5707963267948974
+              },
+              {
+                "kind": "line",
+                "a": [
+                  18.0,
+                  119.55
+                ],
+                "b": [
+                  18.0,
+                  135.0
+                ]
+              },
+              {
+                "kind": "line",
+                "a": [
+                  18.0,
+                  135.0
+                ],
+                "b": [
+                  16.0,
+                  135.0
+                ]
+              },
+              {
+                "kind": "line",
+                "a": [
+                  16.0,
+                  135.0
+                ],
+                "b": [
+                  16.0,
+                  119.55
+                ]
+              },
+              {
+                "kind": "arc",
+                "a": [
+                  16.0,
+                  119.55
+                ],
+                "b": [
+                  6.0,
+                  109.55
+                ],
+                "center": [
+                  6.000000000000003,
+                  119.54999999999998
+                ],
+                "radius": 9.999999999999991,
+                "mid": [
+                  13.071067811865476,
+                  112.47893218813452
+                ],
+                "t0": -1.5707963267948968,
+                "delta": 1.5707963267948983
+              },
+              {
+                "kind": "line",
+                "a": [
+                  6.0,
+                  109.55
+                ],
+                "b": [
+                  0.0,
+                  109.55
+                ]
+              },
+              {
+                "kind": "line",
+                "a": [
+                  0.0,
+                  109.55
+                ],
+                "b": [
+                  0.0,
+                  107.55
+                ]
+              }
+            ],
+            "nativePointCount": 4438,
+            "nativeMaxDeviationMm": 0.06386721999998635
+          }
+        ]
+      }
+    },
+    {
+      "nativePath": "Equipment/Piping/3D/Воротники/Воротник приварной DN25 ISO.SLDPRT",
+      "nativeSha256": "2a7b2fc3121fbbb1d114b6823d95ddbec43f056d359c99b9713dabadbbd59a05",
+      "modelPath": "Equipment/Piping/3D/Воротники STEP/2a7b2fc3121fbbb1.step",
+      "modelSha256": "aed13d0019301352915cb4c8ee866dca6d966a741de9a02d369fcee484a2d9e8",
+      "dimensions": [
+        {
+          "lengthMm": 15.0,
+          "outerDiameterMm": 33.7,
+          "innerDiameterMm": 29.7,
+          "wallThicknessMm": 2.0,
+          "lipOuterDiameterMm": 68.0,
+          "lipThicknessMm": 2.0,
+          "volumeMm3": 7893.791768
+        }
+      ],
+      "conversion": {
+        "cadirSha256": "36c40da828f05c03e6bc8235bd71013640da5039bd2d1ecd3bde5ffd1f36b818",
+        "stepSha256": "aed13d0019301352915cb4c8ee866dca6d966a741de9a02d369fcee484a2d9e8",
+        "method": "native analytic meridian B-Rep; OCCT revolution; native display trim verification; STEP roundtrip",
+        "bodies": [
+          {
+            "body": "sldprt:brep:body#3",
+            "volumeMm3": 7893.791767622115,
+            "profile": [
+              {
+                "kind": "line",
+                "a": [
+                  0.0,
+                  14.85
+                ],
+                "b": [
+                  9.0,
+                  14.85
+                ]
+              },
+              {
+                "kind": "arc",
+                "a": [
+                  9.0,
+                  14.85
+                ],
+                "b": [
+                  15.0,
+                  20.85
+                ],
+                "center": [
+                  9.0,
+                  20.85
+                ],
+                "radius": 6.000000000000001,
+                "mid": [
+                  13.242640687119286,
+                  16.607359312880718
+                ],
+                "t0": -1.5707963267948966,
+                "delta": 1.5707963267948966
+              },
+              {
+                "kind": "line",
+                "a": [
+                  15.0,
+                  20.85
+                ],
+                "b": [
+                  15.0,
+                  34.0
+                ]
+              },
+              {
+                "kind": "line",
+                "a": [
+                  15.0,
+                  34.0
+                ],
+                "b": [
+                  13.0,
+                  34.0
+                ]
+              },
+              {
+                "kind": "line",
+                "a": [
+                  13.0,
+                  34.0
+                ],
+                "b": [
+                  13.0,
+                  19.85
+                ]
+              },
+              {
+                "kind": "arc",
+                "a": [
+                  13.0,
+                  19.85
+                ],
+                "b": [
+                  10.0,
+                  16.85
+                ],
+                "center": [
+                  10.0,
+                  19.849999999999998
+                ],
+                "radius": 3.0,
+                "mid": [
+                  12.121320343559644,
+                  17.728679656440356
+                ],
+                "t0": -1.5707963267948966,
+                "delta": 1.5707963267948974
+              },
+              {
+                "kind": "line",
+                "a": [
+                  10.0,
+                  16.85
+                ],
+                "b": [
+                  -0.0,
+                  16.85
+                ]
+              },
+              {
+                "kind": "line",
+                "a": [
+                  -0.0,
+                  16.85
+                ],
+                "b": [
+                  0.0,
+                  14.85
+                ]
+              }
+            ],
+            "nativePointCount": 1232,
+            "nativeMaxDeviationMm": 0.0762985399999998
+          }
+        ]
+      }
+    },
+    {
+      "nativePath": "Equipment/Piping/3D/Воротники/Воротник приварной DN32 ISO.SLDPRT",
+      "nativeSha256": "2cee7497b86ca42cc328b9c303fe976be995558ad3dc2ec5fe73e8326df66a8b",
+      "modelPath": "Equipment/Piping/3D/Воротники STEP/2cee7497b86ca42c.step",
+      "modelSha256": "a9977ca3542a5d048c6c67c00f28af0bc49cb20f3106b2fcb02518583ad09c89",
+      "dimensions": [
+        {
+          "lengthMm": 15.0,
+          "outerDiameterMm": 42.4,
+          "innerDiameterMm": 38.4,
+          "wallThicknessMm": 2.0,
+          "lipOuterDiameterMm": 78.0,
+          "lipThicknessMm": 2.0,
+          "volumeMm3": 10223.67355
+        }
+      ],
+      "conversion": {
+        "cadirSha256": "55408dd93339b9b3846b69c4c01bb93a128db21624b366a8770b3e1ea0c563be",
+        "stepSha256": "a9977ca3542a5d048c6c67c00f28af0bc49cb20f3106b2fcb02518583ad09c89",
+        "method": "native analytic meridian B-Rep; OCCT revolution; native display trim verification; STEP roundtrip",
+        "bodies": [
+          {
+            "body": "sldprt:brep:body#3",
+            "volumeMm3": 10223.673549892043,
+            "profile": [
+              {
+                "kind": "line",
+                "a": [
+                  13.0,
+                  23.2
+                ],
+                "b": [
+                  13.0,
+                  39.0
+                ]
+              },
+              {
+                "kind": "line",
+                "a": [
+                  13.0,
+                  39.0
+                ],
+                "b": [
+                  15.0,
+                  39.0
+                ]
+              },
+              {
+                "kind": "line",
+                "a": [
+                  15.0,
+                  39.0
+                ],
+                "b": [
+                  15.0,
+                  23.2
+                ]
+              },
+              {
+                "kind": "arc",
+                "a": [
+                  15.0,
+                  23.2
+                ],
+                "b": [
+                  11.0,
+                  19.2
+                ],
+                "center": [
+                  11.00000000000001,
+                  23.200000000000003
+                ],
+                "radius": 3.999999999999999,
+                "mid": [
+                  13.828427124746195,
+                  20.371572875253808
+                ],
+                "t0": -1.5707963267948992,
+                "delta": 1.5707963267948983
+              },
+              {
+                "kind": "line",
+                "a": [
+                  11.0,
+                  19.2
+                ],
+                "b": [
+                  -0.0,
+                  19.2
+                ]
+              },
+              {
+                "kind": "line",
+                "a": [
+                  -0.0,
+                  19.2
+                ],
+                "b": [
+                  -0.0,
+                  21.2
+                ]
+              },
+              {
+                "kind": "line",
+                "a": [
+                  -0.0,
+                  21.2
+                ],
+                "b": [
+                  11.0,
+                  21.2
+                ]
+              },
+              {
+                "kind": "arc",
+                "a": [
+                  11.0,
+                  21.2
+                ],
+                "b": [
+                  13.0,
+                  23.2
+                ],
+                "center": [
+                  11.00000000000001,
+                  23.2
+                ],
+                "radius": 1.9999999999999991,
+                "mid": [
+                  12.414213562373101,
+                  21.7857864376269
+                ],
+                "t0": -1.5707963267949019,
+                "delta": 1.5707963267949019
+              }
+            ],
+            "nativePointCount": 3650,
+            "nativeMaxDeviationMm": 0.018532459999999418
+          }
+        ]
+      }
+    },
+    {
+      "nativePath": "Equipment/Piping/3D/Воротники/Воротник приварной DN40 ISO.SLDPRT",
+      "nativeSha256": "11dcc1988eaf2d7d553a60fd1e248bba3a49107b61b8b877b60274b161a7a4d6",
+      "modelPath": "Equipment/Piping/3D/Воротники STEP/11dcc1988eaf2d7d.step",
+      "modelSha256": "653f4e7078793a3338694b3de1973ade1803235bf47526481735ab4e05f2f0df",
+      "dimensions": [
+        {
+          "lengthMm": 17.0,
+          "outerDiameterMm": 48.3,
+          "innerDiameterMm": 44.3,
+          "wallThicknessMm": 2.0,
+          "lipOuterDiameterMm": 88.0,
+          "lipThicknessMm": 2.0,
+          "volumeMm3": 12962.134606
+        }
+      ],
+      "conversion": {
+        "cadirSha256": "b0073b9311d5d556243849fefbe0df161747e9daeb20b0c1580ba1889c37407a",
+        "stepSha256": "653f4e7078793a3338694b3de1973ade1803235bf47526481735ab4e05f2f0df",
+        "method": "native analytic meridian B-Rep; OCCT revolution; native display trim verification; STEP roundtrip",
+        "bodies": [
+          {
+            "body": "sldprt:brep:body#3",
+            "volumeMm3": 12962.134605659243,
+            "profile": [
+              {
+                "kind": "line",
+                "a": [
+                  0.0,
+                  27.15
+                ],
+                "b": [
+                  0.0,
+                  44.0
+                ]
+              },
+              {
+                "kind": "line",
+                "a": [
+                  0.0,
+                  44.0
+                ],
+                "b": [
+                  2.0,
+                  44.0
+                ]
+              },
+              {
+                "kind": "line",
+                "a": [
+                  2.0,
+                  44.0
+                ],
+                "b": [
+                  2.0,
+                  27.15
+                ]
+              },
+              {
+                "kind": "arc",
+                "a": [
+                  2.0,
+                  27.15
+                ],
+                "b": [
+                  5.0,
+                  24.15
+                ],
+                "center": [
+                  5.0,
+                  27.15
+                ],
+                "radius": 2.9999999999999996,
+                "mid": [
+                  2.878679656440357,
+                  25.028679656440357
+                ],
+                "t0": 3.141592653589793,
+                "delta": 1.5707963267948966
+              },
+              {
+                "kind": "line",
+                "a": [
+                  5.0,
+                  24.15
+                ],
+                "b": [
+                  17.0,
+                  24.15
+                ]
+              },
+              {
+                "kind": "line",
+                "a": [
+                  17.0,
+                  24.15
+                ],
+                "b": [
+                  17.0,
+                  22.15
+                ]
+              },
+              {
+                "kind": "line",
+                "a": [
+                  17.0,
+                  22.15
+                ],
+                "b": [
+                  5.0,
+                  22.15
+                ]
+              },
+              {
+                "kind": "arc",
+                "a": [
+                  5.0,
+                  22.15
+                ],
+                "b": [
+                  0.0,
+                  27.15
+                ],
+                "center": [
+                  5.0,
+                  27.149999999999995
+                ],
+                "radius": 4.999999999999999,
+                "mid": [
+                  1.464466094067261,
+                  23.61446609406726
+                ],
+                "t0": 3.1415926535897927,
+                "delta": 1.5707963267948966
+              }
+            ],
+            "nativePointCount": 1142,
+            "nativeMaxDeviationMm": 0.102823620000001
+          }
+        ]
+      }
+    },
+    {
+      "nativePath": "Equipment/Piping/3D/Воротники/Воротник приварной DN50 ISO.SLDPRT",
+      "nativeSha256": "8c1165690ad471115bc5d5455bbe6dffc5f681e0389ba99edbb86106ede9e0ad",
+      "modelPath": "Equipment/Piping/3D/Воротники STEP/8c1165690ad47111.step",
+      "modelSha256": "8dbf1becdd2e29efa88b9ed9aedadc2afcef39881534ed88abc18477fed3bf22",
+      "dimensions": [
+        {
+          "lengthMm": 23.0,
+          "outerDiameterMm": 60.3,
+          "innerDiameterMm": 56.3,
+          "wallThicknessMm": 2.0,
+          "lipOuterDiameterMm": 102.0,
+          "lipThicknessMm": 2.5,
+          "volumeMm3": 21101.326349
+        }
+      ],
+      "conversion": {
+        "cadirSha256": "e03c41e9a2b15274e13131155c1169de178dd86ddd65ff3b4d6cb981d38e6279",
+        "stepSha256": "8dbf1becdd2e29efa88b9ed9aedadc2afcef39881534ed88abc18477fed3bf22",
+        "method": "native analytic meridian B-Rep; OCCT revolution; native display trim verification; STEP roundtrip",
+        "bodies": [
+          {
+            "body": "sldprt:brep:body#3",
+            "volumeMm3": 21101.32634875331,
+            "profile": [
+              {
+                "kind": "line",
+                "a": [
+                  5.5,
+                  30.15
+                ],
+                "b": [
+                  23.0,
+                  30.15
+                ]
+              },
+              {
+                "kind": "line",
+                "a": [
+                  23.0,
+                  30.15
+                ],
+                "b": [
+                  23.0,
+                  28.15
+                ]
+              },
+              {
+                "kind": "line",
+                "a": [
+                  23.0,
+                  28.15
+                ],
+                "b": [
+                  5.0,
+                  28.15
+                ]
+              },
+              {
+                "kind": "arc",
+                "a": [
+                  5.0,
+                  28.15
+                ],
+                "b": [
+                  -0.0,
+                  33.15
+                ],
+                "center": [
+                  4.999999999999782,
+                  33.15
+                ],
+                "radius": 5.000000000000001,
+                "mid": [
+                  1.4644660940671206,
+                  29.614466094067183
+                ],
+                "t0": 3.141592653589793,
+                "delta": 1.57079632679494
+              },
+              {
+                "kind": "line",
+                "a": [
+                  -0.0,
+                  33.15
+                ],
+                "b": [
+                  0.0,
+                  51.0
+                ]
+              },
+              {
+                "kind": "line",
+                "a": [
+                  0.0,
+                  51.0
+                ],
+                "b": [
+                  2.5,
+                  51.0
+                ]
+              },
+              {
+                "kind": "line",
+                "a": [
+                  2.5,
+                  51.0
+                ],
+                "b": [
+                  2.5,
+                  33.15
+                ]
+              },
+              {
+                "kind": "arc",
+                "a": [
+                  2.5,
+                  33.15
+                ],
+                "b": [
+                  5.5,
+                  30.15
+                ],
+                "center": [
+                  5.499999999999727,
+                  33.15
+                ],
+                "radius": 3.000000000000001,
+                "mid": [
+                  3.37867965644018,
+                  31.02867965644026
+                ],
+                "t0": 3.141592653589793,
+                "delta": 1.5707963267949872
+              }
+            ],
+            "nativePointCount": 3798,
+            "nativeMaxDeviationMm": 0.023827579999998072
+          }
+        ]
+      }
+    },
+    {
+      "nativePath": "Equipment/Piping/3D/Воротники/Воротник приварной DN65 ISO.SLDPRT",
+      "nativeSha256": "6716a4b95f1f158cf0a24529daade41a05b1ff40fb3e67a734f18316f89c5dd2",
+      "modelPath": "Equipment/Piping/3D/Воротники STEP/6716a4b95f1f158c.step",
+      "modelSha256": "d5a9478d9849e7302c47572df33bca64f7cf71c43c27bbe68aada5e8e03c6b04",
+      "dimensions": [
+        {
+          "lengthMm": 25.0,
+          "outerDiameterMm": 76.1,
+          "innerDiameterMm": 72.1,
+          "wallThicknessMm": 2.0,
+          "lipOuterDiameterMm": 122.0,
+          "lipThicknessMm": 3.0,
+          "volumeMm3": 32280.989816
+        }
+      ],
+      "conversion": {
+        "cadirSha256": "d2b776201560361c6e124c170612c44931b2dfa816e94e710fed7eebbef8446f",
+        "stepSha256": "d5a9478d9849e7302c47572df33bca64f7cf71c43c27bbe68aada5e8e03c6b04",
+        "method": "native analytic meridian B-Rep; OCCT revolution; native display trim verification; STEP roundtrip",
+        "bodies": [
+          {
+            "body": "sldprt:brep:body#3",
+            "volumeMm3": 32280.989815605804,
+            "profile": [
+              {
+                "kind": "line",
+                "a": [
+                  5.0,
+                  36.05
+                ],
+                "b": [
+                  25.0,
+                  36.05
+                ]
+              },
+              {
+                "kind": "line",
+                "a": [
+                  25.0,
+                  36.05
+                ],
+                "b": [
+                  25.0,
+                  38.05
+                ]
+              },
+              {
+                "kind": "line",
+                "a": [
+                  25.0,
+                  38.05
+                ],
+                "b": [
+                  6.0,
+                  38.05
+                ]
+              },
+              {
+                "kind": "arc",
+                "a": [
+                  6.0,
+                  38.05
+                ],
+                "b": [
+                  3.0,
+                  41.05
+                ],
+                "center": [
+                  6.000000000000005,
+                  41.050000000000004
+                ],
+                "radius": 3.0000000000000013,
+                "mid": [
+                  3.878679656440363,
+                  38.92867965644036
+                ],
+                "t0": -3.141592653589791,
+                "delta": 1.570796326794893
+              },
+              {
+                "kind": "line",
+                "a": [
+                  3.0,
+                  41.05
+                ],
+                "b": [
+                  3.0,
+                  61.0
+                ]
+              },
+              {
+                "kind": "line",
+                "a": [
+                  3.0,
+                  61.0
+                ],
+                "b": [
+                  -0.0,
+                  61.0
+                ]
+              },
+              {
+                "kind": "line",
+                "a": [
+                  -0.0,
+                  61.0
+                ],
+                "b": [
+                  0.0,
+                  41.05
+                ]
+              },
+              {
+                "kind": "arc",
+                "a": [
+                  0.0,
+                  41.05
+                ],
+                "b": [
+                  5.0,
+                  36.05
+                ],
+                "center": [
+                  4.999999999999893,
+                  41.04999999999999
+                ],
+                "radius": 4.999999999999999,
+                "mid": [
+                  1.464466094067192,
+                  37.51446609406722
+                ],
+                "t0": 3.141592653589792,
+                "delta": 1.5707963267949197
+              }
+            ],
+            "nativePointCount": 3718,
+            "nativeMaxDeviationMm": 0.029093849999995314
+          }
+        ]
+      }
+    },
+    {
+      "nativePath": "Equipment/Piping/3D/Воротники/Зеркально отразитьВоротник приварной DN65 ISO.SLDPRT",
+      "nativeSha256": "4724ceb2799b9e392456d64107c113f494e0fd0614cf655de1fc30d5a9fca9b9",
+      "modelPath": "Equipment/Piping/3D/Воротники STEP/4724ceb2799b9e39.step",
+      "modelSha256": "15ee577c9f7e6d56fa2d0c0d5cb23ced6067bf88b597a141513fac6093981647",
+      "dimensions": [
+        {
+          "lengthMm": 25.0,
+          "outerDiameterMm": 76.1,
+          "innerDiameterMm": 72.1,
+          "wallThicknessMm": 2.0,
+          "lipOuterDiameterMm": 122.0,
+          "lipThicknessMm": 3.0,
+          "volumeMm3": 32280.989816
+        },
+        {
+          "lengthMm": 25.0,
+          "outerDiameterMm": 76.1,
+          "innerDiameterMm": 72.1,
+          "wallThicknessMm": 2.0,
+          "lipOuterDiameterMm": 122.0,
+          "lipThicknessMm": 3.0,
+          "volumeMm3": 32280.989816
+        }
+      ],
+      "conversion": {
+        "cadirSha256": "e514ff9e5540a58e4f891024edfd499dff61fd8f3e207d2ef3a09b95262ce7c3",
+        "stepSha256": "15ee577c9f7e6d56fa2d0c0d5cb23ced6067bf88b597a141513fac6093981647",
+        "method": "native analytic meridian B-Rep; OCCT revolution; native display trim verification; STEP roundtrip",
+        "bodies": [
+          {
+            "body": "sldprt:brep:body#3@block@11160",
+            "volumeMm3": 32280.98981560571,
+            "profile": [
+              {
+                "kind": "line",
+                "a": [
+                  0.0,
+                  61.0
+                ],
+                "b": [
+                  3.0,
+                  61.0
+                ]
+              },
+              {
+                "kind": "line",
+                "a": [
+                  3.0,
+                  61.0
+                ],
+                "b": [
+                  3.0,
+                  41.05
+                ]
+              },
+              {
+                "kind": "arc",
+                "a": [
+                  3.0,
+                  41.05
+                ],
+                "b": [
+                  6.0,
+                  38.05
+                ],
+                "center": [
+                  6.0,
+                  41.050000000000004
+                ],
+                "radius": 3.0000000000000013,
+                "mid": [
+                  3.8786796564403594,
+                  38.92867965644036
+                ],
+                "t0": -3.141592653589791,
+                "delta": 1.5707963267948948
+              },
+              {
+                "kind": "line",
+                "a": [
+                  6.0,
+                  38.05
+                ],
+                "b": [
+                  25.0,
+                  38.05
+                ]
+              },
+              {
+                "kind": "line",
+                "a": [
+                  25.0,
+                  38.05
+                ],
+                "b": [
+                  25.0,
+                  36.05
+                ]
+              },
+              {
+                "kind": "line",
+                "a": [
+                  25.0,
+                  36.05
+                ],
+                "b": [
+                  5.0,
+                  36.05
+                ]
+              },
+              {
+                "kind": "arc",
+                "a": [
+                  5.0,
+                  36.05
+                ],
+                "b": [
+                  0.0,
+                  41.05
+                ],
+                "center": [
+                  5.0,
+                  41.04999999999999
+                ],
+                "radius": 4.999999999999999,
+                "mid": [
+                  1.464466094067261,
+                  37.51446609406725
+                ],
+                "t0": 3.141592653589792,
+                "delta": 1.5707963267948983
+              },
+              {
+                "kind": "line",
+                "a": [
+                  0.0,
+                  41.05
+                ],
+                "b": [
+                  0.0,
+                  61.0
+                ]
+              }
+            ],
+            "nativePointCount": 0,
+            "nativeMaxDeviationMm": null,
+            "corroboration": {
+              "reportSha256": "b034e3757ed584714d7d1eb3f43cb9f722ada4d184c68770c12d034c38922fdd",
+              "cadirSha256": "d2b776201560361c6e124c170612c44931b2dfa816e94e710fed7eebbef8446f"
+            }
+          },
+          {
+            "body": "sldprt:brep:body#3@block@21311",
+            "volumeMm3": 32280.989815605717,
+            "profile": [
+              {
+                "kind": "line",
+                "a": [
+                  0.0,
+                  41.05
+                ],
+                "b": [
+                  0.0,
+                  61.0
+                ]
+              },
+              {
+                "kind": "line",
+                "a": [
+                  0.0,
+                  61.0
+                ],
+                "b": [
+                  3.0,
+                  61.0
+                ]
+              },
+              {
+                "kind": "line",
+                "a": [
+                  3.0,
+                  61.0
+                ],
+                "b": [
+                  3.0,
+                  41.05
+                ]
+              },
+              {
+                "kind": "arc",
+                "a": [
+                  3.0,
+                  41.05
+                ],
+                "b": [
+                  6.0,
+                  38.05
+                ],
+                "center": [
+                  6.0,
+                  41.050000000000004
+                ],
+                "radius": 3.0000000000000013,
+                "mid": [
+                  3.8786796564403594,
+                  38.92867965644036
+                ],
+                "t0": -3.141592653589791,
+                "delta": 1.5707963267948948
+              },
+              {
+                "kind": "line",
+                "a": [
+                  6.0,
+                  38.05
+                ],
+                "b": [
+                  25.0,
+                  38.05
+                ]
+              },
+              {
+                "kind": "line",
+                "a": [
+                  25.0,
+                  38.05
+                ],
+                "b": [
+                  25.0,
+                  36.05
+                ]
+              },
+              {
+                "kind": "line",
+                "a": [
+                  25.0,
+                  36.05
+                ],
+                "b": [
+                  5.0,
+                  36.05
+                ]
+              },
+              {
+                "kind": "arc",
+                "a": [
+                  5.0,
+                  36.05
+                ],
+                "b": [
+                  0.0,
+                  41.05
+                ],
+                "center": [
+                  5.0,
+                  41.04999999999999
+                ],
+                "radius": 4.999999999999999,
+                "mid": [
+                  1.464466094067261,
+                  37.51446609406725
+                ],
+                "t0": 3.141592653589792,
+                "delta": 1.5707963267948983
+              }
+            ],
+            "nativePointCount": 0,
+            "nativeMaxDeviationMm": null,
+            "corroboration": {
+              "reportSha256": "b034e3757ed584714d7d1eb3f43cb9f722ada4d184c68770c12d034c38922fdd",
+              "cadirSha256": "d2b776201560361c6e124c170612c44931b2dfa816e94e710fed7eebbef8446f"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "nativePath": "Equipment/Piping/3D/Элементы трубопроводов/Воротники/Воротник приварной DN100 ISO.SLDPRT",
+      "nativeSha256": "96e1bf7f79b02f1e31529614b5b8d71402372be75ee442f54dace2860140d6b6",
+      "modelPath": "Equipment/Piping/3D/Воротники STEP/96e1bf7f79b02f1e.step",
+      "modelSha256": "4e7ef38e2c1c8a6ba6c99204cef9e92a913f805a7426e0188034675b418ef12c",
+      "dimensions": [
+        {
+          "lengthMm": 28.0,
+          "outerDiameterMm": 114.3,
+          "innerDiameterMm": 108.3,
+          "wallThicknessMm": 3.0,
+          "lipOuterDiameterMm": 158.0,
+          "lipThicknessMm": 3.0,
+          "volumeMm3": 55417.016688
+        }
+      ],
+      "conversion": {
+        "cadirSha256": "1c6be4ee3c30d067847e0d09ff0d71255d0d971bc57f1b1644a8b577d3bf657b",
+        "stepSha256": "4e7ef38e2c1c8a6ba6c99204cef9e92a913f805a7426e0188034675b418ef12c",
+        "method": "native analytic meridian B-Rep; OCCT revolution; native display trim verification; STEP roundtrip",
+        "bodies": [
+          {
+            "body": "sldprt:brep:body#3",
+            "volumeMm3": 55417.01668777611,
+            "profile": [
+              {
+                "kind": "line",
+                "a": [
+                  0.0,
+                  54.15
+                ],
+                "b": [
+                  22.0,
+                  54.15
+                ]
+              },
+              {
+                "kind": "arc",
+                "a": [
+                  22.0,
+                  54.15
+                ],
+                "b": [
+                  28.0,
+                  60.15
+                ],
+                "center": [
+                  22.0,
+                  60.15
+                ],
+                "radius": 6.0,
+                "mid": [
+                  26.242640687119284,
+                  55.907359312880715
+                ],
+                "t0": -1.5707963267948966,
+                "delta": 1.5707963267948966
+              },
+              {
+                "kind": "line",
+                "a": [
+                  28.0,
+                  60.15
+                ],
+                "b": [
+                  28.0,
+                  79.0
+                ]
+              },
+              {
+                "kind": "line",
+                "a": [
+                  28.0,
+                  79.0
+                ],
+                "b": [
+                  25.0,
+                  79.0
+                ]
+              },
+              {
+                "kind": "line",
+                "a": [
+                  25.0,
+                  79.0
+                ],
+                "b": [
+                  25.0,
+                  60.15
+                ]
+              },
+              {
+                "kind": "arc",
+                "a": [
+                  25.0,
+                  60.15
+                ],
+                "b": [
+                  22.0,
+                  57.15
+                ],
+                "center": [
+                  22.000000000000007,
+                  60.15
+                ],
+                "radius": 2.999999999999999,
+                "mid": [
+                  24.121320343559645,
+                  58.02867965644035
+                ],
+                "t0": -1.570796326794899,
+                "delta": 1.5707963267948992
+              },
+              {
+                "kind": "line",
+                "a": [
+                  22.0,
+                  57.15
+                ],
+                "b": [
+                  0.0,
+                  57.15
+                ]
+              },
+              {
+                "kind": "line",
+                "a": [
+                  0.0,
+                  57.15
+                ],
+                "b": [
+                  0.0,
+                  54.15
+                ]
+              }
+            ],
+            "nativePointCount": 1206,
+            "nativeMaxDeviationMm": 0.19410378999999978
+          }
+        ]
+      }
+    },
+    {
+      "nativePath": "Equipment/Piping/3D/Элементы трубопроводов/Воротники/Воротник приварной DN125 ISO.SLDPRT",
+      "nativeSha256": "1889f711c30236944ab90c73bd9a1227d8b7b75b31196d465e971d748a784e18",
+      "modelPath": "Equipment/Piping/3D/Воротники STEP/1889f711c3023694.step",
+      "modelSha256": "c86d22b8d1c2c2f90bd56e02c11f2fe500815a9b3425e32cca1e95accbbf9949",
+      "dimensions": [
+        {
+          "lengthMm": 28.0,
+          "outerDiameterMm": 133.0,
+          "innerDiameterMm": 127.0,
+          "wallThicknessMm": 3.0,
+          "lipOuterDiameterMm": 188.0,
+          "lipThicknessMm": 3.0,
+          "volumeMm3": 72042.91796
+        }
+      ],
+      "conversion": {
+        "cadirSha256": "cc33620ae1f6f62bdae9e67cca22bcd1ebafb56710bb27624dc28582b5ccd621",
+        "stepSha256": "c86d22b8d1c2c2f90bd56e02c11f2fe500815a9b3425e32cca1e95accbbf9949",
+        "method": "native analytic meridian B-Rep; OCCT revolution; native display trim verification; STEP roundtrip",
+        "bodies": [
+          {
+            "body": "sldprt:brep:body#3",
+            "volumeMm3": 72042.91795991399,
+            "profile": [
+              {
+                "kind": "line",
+                "a": [
+                  0.0,
+                  66.5
+                ],
+                "b": [
+                  19.0,
+                  66.5
+                ]
+              },
+              {
+                "kind": "arc",
+                "a": [
+                  19.0,
+                  66.5
+                ],
+                "b": [
+                  25.0,
+                  72.5
+                ],
+                "center": [
+                  19.000000000000007,
+                  72.50000000000001
+                ],
+                "radius": 6.0,
+                "mid": [
+                  23.242640687119284,
+                  68.25735931288072
+                ],
+                "t0": -1.570796326794898,
+                "delta": 1.5707963267948957
+              },
+              {
+                "kind": "line",
+                "a": [
+                  25.0,
+                  72.5
+                ],
+                "b": [
+                  25.0,
+                  94.0
+                ]
+              },
+              {
+                "kind": "line",
+                "a": [
+                  25.0,
+                  94.0
+                ],
+                "b": [
+                  28.0,
+                  94.0
+                ]
+              },
+              {
+                "kind": "line",
+                "a": [
+                  28.0,
+                  94.0
+                ],
+                "b": [
+                  28.0,
+                  72.5
+                ]
+              },
+              {
+                "kind": "arc",
+                "a": [
+                  28.0,
+                  72.5
+                ],
+                "b": [
+                  19.0,
+                  63.5
+                ],
+                "center": [
+                  19.000000000000007,
+                  72.50000000000001
+                ],
+                "radius": 8.999999999999993,
+                "mid": [
+                  25.363961030678922,
+                  66.13603896932108
+                ],
+                "t0": -1.5707963267948974,
+                "delta": 1.5707963267948957
+              },
+              {
+                "kind": "line",
+                "a": [
+                  19.0,
+                  63.5
+                ],
+                "b": [
+                  0.0,
+                  63.5
+                ]
+              },
+              {
+                "kind": "line",
+                "a": [
+                  0.0,
+                  63.5
+                ],
+                "b": [
+                  0.0,
+                  66.5
+                ]
+              }
+            ],
+            "nativePointCount": 1314,
+            "nativeMaxDeviationMm": 0.2257855200000023
+          }
+        ]
+      }
+    },
+    {
+      "nativePath": "Equipment/Piping/3D/Элементы трубопроводов/Воротники/Воротник приварной DN150 ISO.SLDPRT",
+      "nativeSha256": "a81d0ddd348f458ba8f8e5170f6cf6973de583e7d9e4e21290359ea847e4254d",
+      "modelPath": "Equipment/Piping/3D/Воротники STEP/a81d0ddd348f458b.step",
+      "modelSha256": "0973f1047eefe6649ce4ad86fc5dca6849ebc2167a8b0d644951da698852f2df",
+      "dimensions": [
+        {
+          "lengthMm": 28.0,
+          "outerDiameterMm": 154.0,
+          "innerDiameterMm": 150.0,
+          "wallThicknessMm": 2.0,
+          "lipOuterDiameterMm": 210.0,
+          "lipThicknessMm": 3.0,
+          "volumeMm3": 75039.581777
+        }
+      ],
+      "conversion": {
+        "cadirSha256": "d67c06d1090b71b798d1798b5a1acca0f8c586f066b976e3c417022b29c5bdd2",
+        "stepSha256": "0973f1047eefe6649ce4ad86fc5dca6849ebc2167a8b0d644951da698852f2df",
+        "method": "native analytic meridian B-Rep; OCCT revolution; native display trim verification; STEP roundtrip",
+        "bodies": [
+          {
+            "body": "sldprt:brep:body#3",
+            "volumeMm3": 75039.58177676397,
+            "profile": [
+              {
+                "kind": "line",
+                "a": [
+                  0.0,
+                  75.0
+                ],
+                "b": [
+                  18.0,
+                  75.0
+                ]
+              },
+              {
+                "kind": "arc",
+                "a": [
+                  18.0,
+                  75.0
+                ],
+                "b": [
+                  28.0,
+                  85.0
+                ],
+                "center": [
+                  18.000000000000004,
+                  85.0
+                ],
+                "radius": 10.0,
+                "mid": [
+                  25.071067811865476,
+                  77.92893218813452
+                ],
+                "t0": -1.570796326794897,
+                "delta": 1.5707963267948966
+              },
+              {
+                "kind": "line",
+                "a": [
+                  28.0,
+                  85.0
+                ],
+                "b": [
+                  28.0,
+                  105.0
+                ]
+              },
+              {
+                "kind": "line",
+                "a": [
+                  28.0,
+                  105.0
+                ],
+                "b": [
+                  25.0,
+                  105.0
+                ]
+              },
+              {
+                "kind": "line",
+                "a": [
+                  25.0,
+                  105.0
+                ],
+                "b": [
+                  25.0,
+                  87.0
+                ]
+              },
+              {
+                "kind": "arc",
+                "a": [
+                  25.0,
+                  87.0
+                ],
+                "b": [
+                  15.0,
+                  77.0
+                ],
+                "center": [
+                  15.000000000000004,
+                  87.0
+                ],
+                "radius": 9.999999999999996,
+                "mid": [
+                  22.071067811865476,
+                  79.92893218813452
+                ],
+                "t0": -1.570796326794897,
+                "delta": 1.5707963267948966
+              },
+              {
+                "kind": "line",
+                "a": [
+                  15.0,
+                  77.0
+                ],
+                "b": [
+                  0.0,
+                  77.0
+                ]
+              },
+              {
+                "kind": "line",
+                "a": [
+                  0.0,
+                  77.0
+                ],
+                "b": [
+                  0.0,
+                  75.0
+                ]
+              }
+            ],
+            "nativePointCount": 1650,
+            "nativeMaxDeviationMm": 0.24320324999999343
+          }
+        ]
+      }
+    },
+    {
+      "nativePath": "Equipment/Piping/3D/Элементы трубопроводов/Воротники/Воротник приварной DN200 ISO.SLDPRT",
+      "nativeSha256": "099c579d13fd2622e9ec9030aad94e56c1820b9c859b12e52b274ed9e46100a9",
+      "modelPath": "Equipment/Piping/3D/Воротники STEP/099c579d13fd2622.step",
+      "modelSha256": "dd2e587d30f0da426f0db92d0ce956052d0e31802a3e96e27add8abfdacce86a",
+      "dimensions": [
+        {
+          "lengthMm": 18.0,
+          "outerDiameterMm": 219.1,
+          "innerDiameterMm": 215.1,
+          "wallThicknessMm": 2.0,
+          "lipOuterDiameterMm": 270.0,
+          "lipThicknessMm": 2.0,
+          "volumeMm3": 78731.427039
+        }
+      ],
+      "conversion": {
+        "cadirSha256": "eedcc6f2a862523f74dc9ff04d305315949233549101967c04f0b349957f5b60",
+        "stepSha256": "dd2e587d30f0da426f0db92d0ce956052d0e31802a3e96e27add8abfdacce86a",
+        "method": "native analytic meridian B-Rep; OCCT revolution; native display trim verification; STEP roundtrip",
+        "bodies": [
+          {
+            "body": "sldprt:brep:body#3",
+            "volumeMm3": 78731.42703888123,
+            "profile": [
+              {
+                "kind": "line",
+                "a": [
+                  0.0,
+                  107.55
+                ],
+                "b": [
+                  0.0,
+                  109.55
+                ]
+              },
+              {
+                "kind": "line",
+                "a": [
+                  0.0,
+                  109.55
+                ],
+                "b": [
+                  6.0,
+                  109.55
+                ]
+              },
+              {
+                "kind": "arc",
+                "a": [
+                  6.0,
+                  109.55
+                ],
+                "b": [
+                  16.0,
+                  119.55
+                ],
+                "center": [
+                  6.000000000000005,
+                  119.54999999999998
+                ],
+                "radius": 9.999999999999991,
+                "mid": [
+                  13.071067811865476,
+                  112.47893218813452
+                ],
+                "t0": -1.5707963267948972,
+                "delta": 1.5707963267948983
+              },
+              {
+                "kind": "line",
+                "a": [
+                  16.0,
+                  119.55
+                ],
+                "b": [
+                  16.0,
+                  135.0
+                ]
+              },
+              {
+                "kind": "line",
+                "a": [
+                  16.0,
+                  135.0
+                ],
+                "b": [
+                  18.0,
+                  135.0
+                ]
+              },
+              {
+                "kind": "line",
+                "a": [
+                  18.0,
+                  135.0
+                ],
+                "b": [
+                  18.0,
+                  107.55
+                ]
+              },
+              {
+                "kind": "line",
+                "a": [
+                  18.0,
+                  107.55
+                ],
+                "b": [
+                  0.0,
+                  107.55
+                ]
+              }
+            ],
+            "nativePointCount": 2576,
+            "nativeMaxDeviationMm": 0.06386721999998635
+          }
+        ]
+      }
+    },
+    {
+      "nativePath": "Equipment/Piping/3D/Элементы трубопроводов/Воротники/Воротник приварной DN25 ISO.SLDPRT",
+      "nativeSha256": "af3e8794353e9b83d62c6667871074a8b793678a64bfe2696aba832f86c0aeae",
+      "modelPath": "Equipment/Piping/3D/Воротники STEP/af3e8794353e9b83.step",
+      "modelSha256": "012a556cadd52f01dc98be85f44e170d532fb5ea5ace514675ca636ef504cc24",
+      "dimensions": [
+        {
+          "lengthMm": 14.0,
+          "outerDiameterMm": 33.7,
+          "innerDiameterMm": 27.7,
+          "wallThicknessMm": 3.0,
+          "lipOuterDiameterMm": 68.0,
+          "lipThicknessMm": 3.0,
+          "volumeMm3": 11745.160781
+        }
+      ],
+      "conversion": {
+        "cadirSha256": "5c7acd92cd6d93c587b0a11f6ceac0182bb95a2df320353a7af085fd707de450",
+        "stepSha256": "012a556cadd52f01dc98be85f44e170d532fb5ea5ace514675ca636ef504cc24",
+        "method": "native analytic meridian B-Rep; OCCT revolution; native display trim verification; STEP roundtrip",
+        "bodies": [
+          {
+            "body": "sldprt:brep:body#3",
+            "volumeMm3": 11745.16078079672,
+            "profile": [
+              {
+                "kind": "line",
+                "a": [
+                  0.0,
+                  13.85
+                ],
+                "b": [
+                  8.0,
+                  13.85
+                ]
+              },
+              {
+                "kind": "arc",
+                "a": [
+                  8.0,
+                  13.85
+                ],
+                "b": [
+                  14.0,
+                  19.85
+                ],
+                "center": [
+                  8.0,
+                  19.849999999999998
+                ],
+                "radius": 5.999999999999999,
+                "mid": [
+                  12.242640687119287,
+                  15.607359312880714
+                ],
+                "t0": -1.5707963267948966,
+                "delta": 1.5707963267948974
+              },
+              {
+                "kind": "line",
+                "a": [
+                  14.0,
+                  19.85
+                ],
+                "b": [
+                  14.0,
+                  34.0
+                ]
+              },
+              {
+                "kind": "line",
+                "a": [
+                  14.0,
+                  34.0
+                ],
+                "b": [
+                  11.0,
+                  34.0
+                ]
+              },
+              {
+                "kind": "line",
+                "a": [
+                  11.0,
+                  34.0
+                ],
+                "b": [
+                  11.0,
+                  19.85
+                ]
+              },
+              {
+                "kind": "arc",
+                "a": [
+                  11.0,
+                  19.85
+                ],
+                "b": [
+                  8.0,
+                  16.85
+                ],
+                "center": [
+                  8.000000000000002,
+                  19.849999999999998
+                ],
+                "radius": 2.9999999999999982,
+                "mid": [
+                  10.121320343559644,
+                  17.728679656440356
+                ],
+                "t0": -1.5707963267948972,
+                "delta": 1.5707963267948983
+              },
+              {
+                "kind": "line",
+                "a": [
+                  8.0,
+                  16.85
+                ],
+                "b": [
+                  -0.0,
+                  16.85
+                ]
+              },
+              {
+                "kind": "line",
+                "a": [
+                  -0.0,
+                  16.85
+                ],
+                "b": [
+                  0.0,
+                  13.85
+                ]
+              }
+            ],
+            "nativePointCount": 1222,
+            "nativeMaxDeviationMm": 0.07629854000002156
+          }
+        ]
+      }
+    },
+    {
+      "nativePath": "Equipment/Piping/3D/Элементы трубопроводов/Воротники/Воротник приварной DN32 ISO.SLDPRT",
+      "nativeSha256": "bfd51b652ba5f21d48a58e411d3b8d578ac54ae1c69458d46a26d9e5e2dff895",
+      "modelPath": "Equipment/Piping/3D/Воротники STEP/bfd51b652ba5f21d.step",
+      "modelSha256": "2aae6b5e0ce5ee32e68324333fffdf9af701fc09e61b716b68593215330e1231",
+      "dimensions": [
+        {
+          "lengthMm": 15.0,
+          "outerDiameterMm": 42.4,
+          "innerDiameterMm": 38.4,
+          "wallThicknessMm": 2.0,
+          "lipOuterDiameterMm": 78.0,
+          "lipThicknessMm": 2.0,
+          "volumeMm3": 10223.67355
+        }
+      ],
+      "conversion": {
+        "cadirSha256": "dc1b56a08e040a0c6c3a6d07b3edb5189d3d452beecc1095f4b5c8084765a70f",
+        "stepSha256": "2aae6b5e0ce5ee32e68324333fffdf9af701fc09e61b716b68593215330e1231",
+        "method": "native analytic meridian B-Rep; OCCT revolution; native display trim verification; STEP roundtrip",
+        "bodies": [
+          {
+            "body": "sldprt:brep:body#3",
+            "volumeMm3": 10223.673549892035,
+            "profile": [
+              {
+                "kind": "line",
+                "a": [
+                  15.0,
+                  23.2
+                ],
+                "b": [
+                  15.0,
+                  39.0
+                ]
+              },
+              {
+                "kind": "line",
+                "a": [
+                  15.0,
+                  39.0
+                ],
+                "b": [
+                  13.0,
+                  39.0
+                ]
+              },
+              {
+                "kind": "line",
+                "a": [
+                  13.0,
+                  39.0
+                ],
+                "b": [
+                  13.0,
+                  23.2
+                ]
+              },
+              {
+                "kind": "arc",
+                "a": [
+                  13.0,
+                  23.2
+                ],
+                "b": [
+                  11.0,
+                  21.2
+                ],
+                "center": [
+                  10.999999999999982,
+                  23.2
+                ],
+                "radius": 1.9999999999999991,
+                "mid": [
+                  12.414213562373083,
+                  21.78578643762691
+                ],
+                "t0": -1.5707963267948877,
+                "delta": 1.5707963267948877
+              },
+              {
+                "kind": "line",
+                "a": [
+                  11.0,
+                  21.2
+                ],
+                "b": [
+                  0.0,
+                  21.2
+                ]
+              },
+              {
+                "kind": "line",
+                "a": [
+                  0.0,
+                  21.2
+                ],
+                "b": [
+                  0.0,
+                  19.2
+                ]
+              },
+              {
+                "kind": "line",
+                "a": [
+                  0.0,
+                  19.2
+                ],
+                "b": [
+                  11.0,
+                  19.2
+                ]
+              },
+              {
+                "kind": "arc",
+                "a": [
+                  11.0,
+                  19.2
+                ],
+                "b": [
+                  15.0,
+                  23.2
+                ],
+                "center": [
+                  10.999999999999982,
+                  23.200000000000003
+                ],
+                "radius": 3.999999999999999,
+                "mid": [
+                  13.828427124746177,
+                  20.37157287525382
+                ],
+                "t0": -1.5707963267948921,
+                "delta": 1.5707963267948912
+              }
+            ],
+            "nativePointCount": 3650,
+            "nativeMaxDeviationMm": 0.018532459999999418
+          }
+        ]
+      }
+    },
+    {
+      "nativePath": "Equipment/Piping/3D/Элементы трубопроводов/Воротники/Воротник приварной DN40 ISO.SLDPRT",
+      "nativeSha256": "3fa8056566be07e9d5f6851f87f98ebac802da1d2289f91afb8dce5bab8056e8",
+      "modelPath": "Equipment/Piping/3D/Воротники STEP/3fa8056566be07e9.step",
+      "modelSha256": "7d5aabc9135d521bf35d5bee21d09bcd0d7b51b8db7192521b97380cc49ac888",
+      "dimensions": [
+        {
+          "lengthMm": 17.0,
+          "outerDiameterMm": 48.3,
+          "innerDiameterMm": 44.3,
+          "wallThicknessMm": 2.0,
+          "lipOuterDiameterMm": 88.0,
+          "lipThicknessMm": 2.0,
+          "volumeMm3": 13080.767311
+        }
+      ],
+      "conversion": {
+        "cadirSha256": "3f8a6ff24d5bbcfe6741f325e56d82fcfa141497d67ade32e3db7d75ea7e398f",
+        "stepSha256": "7d5aabc9135d521bf35d5bee21d09bcd0d7b51b8db7192521b97380cc49ac888",
+        "method": "native analytic meridian B-Rep; OCCT revolution; native display trim verification; STEP roundtrip",
+        "bodies": [
+          {
+            "body": "sldprt:brep:body#3",
+            "volumeMm3": 13080.767311169166,
+            "profile": [
+              {
+                "kind": "arc",
+                "a": [
+                  13.0,
+                  24.15
+                ],
+                "b": [
+                  15.0,
+                  26.15
+                ],
+                "center": [
+                  13.000000000000004,
+                  26.15
+                ],
+                "radius": 2.0,
+                "mid": [
+                  14.414213562373098,
+                  24.735786437626903
+                ],
+                "t0": -1.5707963267948983,
+                "delta": 1.5707963267948983
+              },
+              {
+                "kind": "line",
+                "a": [
+                  15.0,
+                  26.15
+                ],
+                "b": [
+                  15.0,
+                  44.0
+                ]
+              },
+              {
+                "kind": "line",
+                "a": [
+                  15.0,
+                  44.0
+                ],
+                "b": [
+                  17.0,
+                  44.0
+                ]
+              },
+              {
+                "kind": "line",
+                "a": [
+                  17.0,
+                  44.0
+                ],
+                "b": [
+                  17.0,
+                  26.15
+                ]
+              },
+              {
+                "kind": "arc",
+                "a": [
+                  17.0,
+                  26.15
+                ],
+                "b": [
+                  13.0,
+                  22.15
+                ],
+                "center": [
+                  13.000000000000002,
+                  26.149999999999995
+                ],
+                "radius": 4.0,
+                "mid": [
+                  15.828427124746193,
+                  23.321572875253807
+                ],
+                "t0": -1.570796326794897,
+                "delta": 1.5707963267948983
+              },
+              {
+                "kind": "line",
+                "a": [
+                  13.0,
+                  22.15
+                ],
+                "b": [
+                  0.0,
+                  22.15
+                ]
+              },
+              {
+                "kind": "line",
+                "a": [
+                  0.0,
+                  22.15
+                ],
+                "b": [
+                  0.0,
+                  24.15
+                ]
+              },
+              {
+                "kind": "line",
+                "a": [
+                  0.0,
+                  24.15
+                ],
+                "b": [
+                  13.0,
+                  24.15
+                ]
+              }
+            ],
+            "nativePointCount": 1112,
+            "nativeMaxDeviationMm": 0.10914518000001605
+          }
+        ]
+      }
+    },
+    {
+      "nativePath": "Equipment/Piping/3D/Элементы трубопроводов/Воротники/Воротник приварной DN50 ISO.SLDPRT",
+      "nativeSha256": "a5f7f02daff32c8a471509402be4c238a3a56b85fe9b1023792ddb086a38ea07",
+      "modelPath": "Equipment/Piping/3D/Воротники STEP/a5f7f02daff32c8a.step",
+      "modelSha256": "04f74af8fbafd24284e6b7d1248b6849504d10ed6f31728ba26f1ca6fc96d053",
+      "dimensions": [
+        {
+          "lengthMm": 12.0,
+          "outerDiameterMm": 60.3,
+          "innerDiameterMm": 56.3,
+          "wallThicknessMm": 2.0,
+          "lipOuterDiameterMm": 102.0,
+          "lipThicknessMm": 2.0,
+          "volumeMm3": 14565.161469
+        }
+      ],
+      "conversion": {
+        "cadirSha256": "82f9528aa2c075aa97856fc7d03cd3d214320fad436e7eb679c65aaa0bfe3ebb",
+        "stepSha256": "04f74af8fbafd24284e6b7d1248b6849504d10ed6f31728ba26f1ca6fc96d053",
+        "method": "native analytic meridian B-Rep; OCCT revolution; native display trim verification; STEP roundtrip",
+        "bodies": [
+          {
+            "body": "sldprt:brep:body#3",
+            "volumeMm3": 14565.16146930856,
+            "profile": [
+              {
+                "kind": "line",
+                "a": [
+                  10.0,
+                  32.15
+                ],
+                "b": [
+                  10.0,
+                  51.0
+                ]
+              },
+              {
+                "kind": "line",
+                "a": [
+                  10.0,
+                  51.0
+                ],
+                "b": [
+                  12.0,
+                  51.0
+                ]
+              },
+              {
+                "kind": "line",
+                "a": [
+                  12.0,
+                  51.0
+                ],
+                "b": [
+                  12.0,
+                  32.15
+                ]
+              },
+              {
+                "kind": "arc",
+                "a": [
+                  12.0,
+                  32.15
+                ],
+                "b": [
+                  8.0,
+                  28.15
+                ],
+                "center": [
+                  8.000000000000007,
+                  32.15
+                ],
+                "radius": 3.9999999999999982,
+                "mid": [
+                  10.828427124746193,
+                  29.321572875253807
+                ],
+                "t0": -1.5707963267948983,
+                "delta": 1.5707963267948983
+              },
+              {
+                "kind": "line",
+                "a": [
+                  8.0,
+                  28.15
+                ],
+                "b": [
+                  -0.0,
+                  28.15
+                ]
+              },
+              {
+                "kind": "line",
+                "a": [
+                  -0.0,
+                  28.15
+                ],
+                "b": [
+                  -0.0,
+                  30.15
+                ]
+              },
+              {
+                "kind": "line",
+                "a": [
+                  -0.0,
+                  30.15
+                ],
+                "b": [
+                  8.0,
+                  30.15
+                ]
+              },
+              {
+                "kind": "arc",
+                "a": [
+                  8.0,
+                  30.15
+                ],
+                "b": [
+                  10.0,
+                  32.15
+                ],
+                "center": [
+                  8.000000000000007,
+                  32.15
+                ],
+                "radius": 1.9999999999999991,
+                "mid": [
+                  9.4142135623731,
+                  30.735786437626903
+                ],
+                "t0": -1.5707963267949,
+                "delta": 1.5707963267949
+              }
+            ],
+            "nativePointCount": 1538,
+            "nativeMaxDeviationMm": 0.1286137800000331
+          }
+        ]
+      }
+    },
+    {
+      "nativePath": "Equipment/Piping/3D/Элементы трубопроводов/Воротники/Воротник приварной DN65 ISO.SLDPRT",
+      "nativeSha256": "f941d5edfd3e496635c70ca42960a1c794398adc9689278ae4d5c277e44e3fa0",
+      "modelPath": "Equipment/Piping/3D/Воротники STEP/f941d5edfd3e4966.step",
+      "modelSha256": "37fd653528d8889006b35ef4a90c72401bdf547525855f89e1b4c9a3be3c2439",
+      "dimensions": [
+        {
+          "lengthMm": 25.0,
+          "outerDiameterMm": 70.0,
+          "innerDiameterMm": 66.0,
+          "wallThicknessMm": 2.0,
+          "lipOuterDiameterMm": 122.0,
+          "lipThicknessMm": 3.0,
+          "volumeMm3": 33488.469243
+        }
+      ],
+      "conversion": {
+        "cadirSha256": "b0099a6edccfd01a7d55456f60baa27ae32a3734418b2fd4b9a8ef0b326c3aec",
+        "stepSha256": "37fd653528d8889006b35ef4a90c72401bdf547525855f89e1b4c9a3be3c2439",
+        "method": "native analytic meridian B-Rep; OCCT revolution; native display trim verification; STEP roundtrip",
+        "bodies": [
+          {
+            "body": "sldprt:brep:body#3",
+            "volumeMm3": 33488.46924346892,
+            "profile": [
+              {
+                "kind": "line",
+                "a": [
+                  6.0,
+                  35.0
+                ],
+                "b": [
+                  25.0,
+                  35.0
+                ]
+              },
+              {
+                "kind": "line",
+                "a": [
+                  25.0,
+                  35.0
+                ],
+                "b": [
+                  25.0,
+                  33.0
+                ]
+              },
+              {
+                "kind": "line",
+                "a": [
+                  25.0,
+                  33.0
+                ],
+                "b": [
+                  5.0,
+                  33.0
+                ]
+              },
+              {
+                "kind": "arc",
+                "a": [
+                  5.0,
+                  33.0
+                ],
+                "b": [
+                  0.0,
+                  38.0
+                ],
+                "center": [
+                  5.000000000000004,
+                  37.99999999999999
+                ],
+                "radius": 4.999999999999999,
+                "mid": [
+                  1.4644660940672622,
+                  34.46446609406726
+                ],
+                "t0": 3.141592653589792,
+                "delta": 1.5707963267948966
+              },
+              {
+                "kind": "line",
+                "a": [
+                  0.0,
+                  38.0
+                ],
+                "b": [
+                  -0.0,
+                  61.0
+                ]
+              },
+              {
+                "kind": "line",
+                "a": [
+                  -0.0,
+                  61.0
+                ],
+                "b": [
+                  3.0,
+                  61.0
+                ]
+              },
+              {
+                "kind": "line",
+                "a": [
+                  3.0,
+                  61.0
+                ],
+                "b": [
+                  3.0,
+                  38.0
+                ]
+              },
+              {
+                "kind": "arc",
+                "a": [
+                  3.0,
+                  38.0
+                ],
+                "b": [
+                  6.0,
+                  35.0
+                ],
+                "center": [
+                  6.000000000000005,
+                  38.00000000000001
+                ],
+                "radius": 3.0000000000000013,
+                "mid": [
+                  3.878679656440363,
+                  35.87867965644036
+                ],
+                "t0": -3.141592653589791,
+                "delta": 1.570796326794893
+              }
+            ],
+            "nativePointCount": 1144,
+            "nativeMaxDeviationMm": 0.1490215099999972
+          }
+        ]
+      }
+    },
+    {
+      "nativePath": "Equipment/Piping/3D/Элементы трубопроводов/Воротники/Воротник приварной DN80 ISO.SLDPRT",
+      "nativeSha256": "46bc6bc9178cef7dab7f282dd8cf9fb9a16e465ccf73bf54565018b3bd5d9d37",
+      "modelPath": "Equipment/Piping/3D/Воротники STEP/46bc6bc9178cef7d.step",
+      "modelSha256": "b62cc0c5a57531187090d6a909a08099361acb907edc935370f9808e5d13d44f",
+      "dimensions": [
+        {
+          "lengthMm": 25.0,
+          "outerDiameterMm": 85.0,
+          "innerDiameterMm": 81.0,
+          "wallThicknessMm": 2.0,
+          "lipOuterDiameterMm": 125.0,
+          "lipThicknessMm": 3.0,
+          "volumeMm3": 31950.645688
+        }
+      ],
+      "conversion": {
+        "cadirSha256": "29baf7c662993f3d79c1096a01e9efac742adb544541a129fbd2a7f32448d19d",
+        "stepSha256": "b62cc0c5a57531187090d6a909a08099361acb907edc935370f9808e5d13d44f",
+        "method": "native analytic meridian B-Rep; OCCT revolution; native display trim verification; STEP roundtrip",
+        "bodies": [
+          {
+            "body": "sldprt:brep:body#3",
+            "volumeMm3": 31950.6456884004,
+            "profile": [
+              {
+                "kind": "line",
+                "a": [
+                  5.0,
+                  40.5
+                ],
+                "b": [
+                  25.0,
+                  40.5
+                ]
+              },
+              {
+                "kind": "line",
+                "a": [
+                  25.0,
+                  40.5
+                ],
+                "b": [
+                  25.0,
+                  42.5
+                ]
+              },
+              {
+                "kind": "line",
+                "a": [
+                  25.0,
+                  42.5
+                ],
+                "b": [
+                  6.0,
+                  42.5
+                ]
+              },
+              {
+                "kind": "arc",
+                "a": [
+                  6.0,
+                  42.5
+                ],
+                "b": [
+                  3.0,
+                  45.5
+                ],
+                "center": [
+                  6.0,
+                  45.50000000000001
+                ],
+                "radius": 3.000000000000001,
+                "mid": [
+                  3.87867965644036,
+                  43.37867965644036
+                ],
+                "t0": -3.141592653589791,
+                "delta": 1.5707963267948948
+              },
+              {
+                "kind": "line",
+                "a": [
+                  3.0,
+                  45.5
+                ],
+                "b": [
+                  3.0,
+                  62.5
+                ]
+              },
+              {
+                "kind": "line",
+                "a": [
+                  3.0,
+                  62.5
+                ],
+                "b": [
+                  0.0,
+                  62.5
+                ]
+              },
+              {
+                "kind": "line",
+                "a": [
+                  0.0,
+                  62.5
+                ],
+                "b": [
+                  0.0,
+                  45.5
+                ]
+              },
+              {
+                "kind": "arc",
+                "a": [
+                  0.0,
+                  45.5
+                ],
+                "b": [
+                  5.0,
+                  40.5
+                ],
+                "center": [
+                  5.0,
+                  45.49999999999999
+                ],
+                "radius": 5.000000000000003,
+                "mid": [
+                  1.4644660940672587,
+                  41.964466094067255
+                ],
+                "t0": 3.141592653589792,
+                "delta": 1.5707963267948983
+              }
+            ],
+            "nativePointCount": 1200,
+            "nativeMaxDeviationMm": 0.15286148999999938
+          }
+        ]
+      }
+    }
+  ]
+}

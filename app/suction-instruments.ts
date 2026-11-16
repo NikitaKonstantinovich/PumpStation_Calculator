@@ -1,7 +1,7 @@
 import type { AssemblyComponent } from "./suction-catalog";
+import { componentPressureLimit } from "./suction-pressure";
+import type { InstrumentPressure } from "./instrument-pressure";
 
-// Project selection policy, not a calculated suction-line loss.
-export const LOW_INLET_HEAD_M = 5;
 const MPA_PER_METRE_WATER = 0.00980665;
 const GAUGE_MARGIN = 1.5;
 type Range = { min: number; max: number };
@@ -31,29 +31,49 @@ const format = (n: number) => n.toLocaleString("ru-RU", { maximumFractionDigits:
 const rangeText = (r: Range) => `${format(r.min)}…${format(r.max)} МПа`;
 const model = (item: AssemblyComponent) => item.family.replace(/[,\s]+$/, "");
 
-export function selectSuctionInstruments(items: AssemblyComponent[], inletHead?: number | null): InstrumentSelection[] {
-  return selectLineInstruments(items, inletHead, "suction");
-}
-
-export function selectDischargeInstruments(items: AssemblyComponent[], outletHead?: number | null): InstrumentSelection[] {
-  return selectLineInstruments(items, outletHead, "discharge");
-}
-
-function selectLineInstruments(items: AssemblyComponent[], inletHead: number | null | undefined, side: "suction" | "discharge"): InstrumentSelection[] {
-  const head = typeof inletHead === "number" && Number.isFinite(inletHead) ? inletHead : null;
-  const vacuum = side === "suction" ? head === null || head <= LOW_INLET_HEAD_M : head !== null && head < 0;
-  const pressure = (head ?? 0) * MPA_PER_METRE_WATER;
-  const upper = Math.max(0, pressure) * GAUGE_MARGIN;
-  const location = side === "suction" ? "на входе" : "на выходе";
-  const basis = head === null ? `Напор ${location} не указан` : `Напор ${location} ${format(head)} м (${format(pressure)} МПа)`;
-  const reason = side === "discharge" ? "напор на входе + напор насоса; общий коллектор — по наибольшему напору контуров" : vacuum ? `учтено разрежение: напор не указан или ≤ ${LOW_INLET_HEAD_M} м` : "положительный подпор";
-  const candidates: Candidate[] = items.flatMap(item => {
+function instrumentCandidates(items: AssemblyComponent[]): Candidate[] {
+  return items.flatMap(item => {
     const range = pressureRange(item);
     return range ? [{ item, range }] : [];
-  }).sort((a, b) => a.range.max - b.range.max || (a.range.max - a.range.min) - (b.range.max - b.range.min) || a.item.id.localeCompare(b.item.id));
+  });
+}
+
+const isGauge = ({ item, range }: Candidate) => /манометр|мановакуумметр/i.test(item.family) && range.max > 0;
+const isRelay = ({ item }: Candidate) => /реле давления/i.test(item.family);
+const candidateLabel = ({ item, range }: Candidate) => `${model(item)} · ${rangeText(range)}`;
+
+export function selectSuctionInstruments(items: AssemblyComponent[]): InstrumentSelection[] {
+  const candidates = instrumentCandidates(items).sort((a, b) =>
+    a.range.max - b.range.max || a.range.min - b.range.min || a.item.id.localeCompare(b.item.id));
+  const gauge = candidates.find(isGauge);
+  const relay = candidates.find(isRelay);
+  const selection = (role: InstrumentSelection["role"], name: string, candidate?: Candidate): InstrumentSelection => ({
+    role, name, item: candidate?.item,
+    details: candidate ? candidateLabel(candidate) : "Исполнение отсутствует в каталоге",
+    description: candidate ? `Минимальный верхний предел шкалы на всасе. База комплектующих: ${candidate.item.id}.` : "В каталоге нет прибора с указанным диапазоном.",
+  });
+  return [
+    selection("gauge", gauge && gauge.range.min < 0 ? "Мановакуумметр" : "Манометр", gauge),
+    selection("pressure-switch", "Реле давления", relay),
+  ];
+}
+
+export function selectDischargeInstruments(items: AssemblyComponent[], outletHead?: number | null, rating?: InstrumentPressure, checkPressure = true): InstrumentSelection[] {
+  const head = typeof outletHead === "number" && Number.isFinite(outletHead) ? outletHead : null;
+  if (!checkPressure && head === null) {
+    const details = "Не определён пиковый напор выбранных насосов";
+    const description = rating?.source ?? details;
+    return [{ role: "gauge", name: "Манометр", details, description }, { role: "pressure-switch", name: "Реле давления", details, description }];
+  }
+  const vacuum = head !== null && head < 0;
+  const pressure = (head ?? 0) * MPA_PER_METRE_WATER;
+  const upper = Math.max(0, pressure) * GAUGE_MARGIN;
+  const basis = !checkPressure ? `Пиковый напор ${format(head!)} м (${format(pressure)} МПа)`
+    : head === null ? "Напор на выходе не указан" : `Напор на выходе ${format(head)} м (${format(pressure)} МПа)`;
+  const candidates = instrumentCandidates(items).sort((a, b) => a.range.max - b.range.max || b.range.min - a.range.min || a.item.id.localeCompare(b.item.id));
   // More negative than -0.1 MPa cannot be represented by these gauge ranges.
-  const validPressure = pressure >= -0.1 && (side === "suction" || head !== null);
-  const gauges = candidates.filter(({item,range}) => /манометр|мановакуумметр/i.test(item.family) && range.max > 0);
+  const validPressure = pressure >= -0.1 && head !== null;
+  const gauges = candidates.filter(isGauge);
   const matchingGauge = validPressure ? gauges.find(({ range }) =>
     (vacuum ? range.min <= -0.1 : range.min === 0) && range.max > 0 && range.max >= upper) : undefined;
   const standardUpper = (vacuum ? [0.15, 0.3, 0.5, 0.9, 1.5, 2.4] : [0.06, 0.1, 0.16, 0.25, 0.4, 0.6, 1, 1.6, 2.5, 4, 6, 10, 16, 25, 40, 60, 100]).find(value => value >= upper);
@@ -62,31 +82,39 @@ function selectLineInstruments(items: AssemblyComponent[], inletHead: number | n
   // both endpoints from the required range; catalogue ordering breaks ties.
   const distance = ({range}: Candidate) => Math.abs(range.min - (vacuum ? -0.1 : 0)) + Math.abs(range.max - (standardUpper ?? upper));
   const gauge = matchingGauge ?? (validPressure ? [...gauges].sort((a,b) => distance(a)-distance(b))[0] : undefined);
-  const mismatch = gauge && !matchingGauge;
+  const mismatch = checkPressure && gauge && !matchingGauge;
   const limitations = gauge ? [
     vacuum && gauge.range.min > -0.1 ? "разрежение до −0,1 МПа не измеряется" : "",
     gauge.range.max < upper ? "запас верхнего предела 1,5 не обеспечен" : "",
-    pressure < gauge.range.min || pressure > gauge.range.max ? `${side === "suction" ? "входное" : "выходное"} давление вне шкалы прибора` : "",
+    pressure < gauge.range.min || pressure > gauge.range.max ? "выходное давление вне шкалы прибора" : "",
   ].filter(Boolean) : [];
   const warning = mismatch ? `Предупреждение: выбран ближайший манометр из базы. Требуется ${requiredGauge}, выбран ${rangeText(gauge.range)}.${limitations.length ? ` ${limitations.join("; ")}.` : ""} Требуется проверка применимости.` : undefined;
-  const gaugeDetails = gauge ? `${model(gauge.item)} · ${rangeText(gauge.range)}` : `${requiredGauge} · исполнение и цена требуют уточнения`;
+  const gaugeDetails = gauge ? candidateLabel(gauge) : checkPressure ? `${requiredGauge} · исполнение и цена требуют уточнения` : "Исполнение отсутствует в каталоге";
 
-  // Select a switch range covering inlet pressure, with a negative lower limit
-  // in vacuum mode. Trip/reset settings require dynamic pressure and NPSH data.
-  const relay = validPressure ? candidates.find(({ item, range }) =>
-    /реле давления/i.test(item.family) && range.max >= Math.max(0, pressure) &&
-    range.min < pressure && (!vacuum || range.min < 0)) : undefined;
-  const invalid = validPressure ? "" : head === null ? "Для подбора требуется напор на входе и напор насоса. " : `Расчётное давление ниже −0,1 МПа: проверьте напор ${location}. `;
+  const relayCandidates = candidates.filter(isRelay);
+  const relays = validPressure ? relayCandidates.filter(({ item, range }) =>
+    range.max >= Math.max(0, pressure) &&
+    range.min < pressure && (!vacuum || range.min < 0) &&
+    (rating?.pressureBar == null || componentPressureLimit(item) === null || componentPressureLimit(item)!.bar + 1e-9 >= rating.pressureBar)) : [];
+  const relay = [...relays].sort((a,b) => {
+    if (rating?.pressureBar == null) return 0;
+    const pa=componentPressureLimit(a.item)?.bar,pb=componentPressureLimit(b.item)?.bar;
+    return Number(pa===undefined)-Number(pb===undefined) || (pa??Infinity)-(pb??Infinity) || a.range.max-b.range.max || a.item.id.localeCompare(b.item.id);
+  })[0] ?? [...relayCandidates].sort((a,b)=>
+    Math.max(0,a.range.min-pressure,pressure-a.range.max)-Math.max(0,b.range.min-pressure,pressure-b.range.max)
+    || a.range.max-b.range.max || a.item.id.localeCompare(b.item.id))[0];
+  const relayRating = relay && rating && componentPressureLimit(relay.item);
+  const invalid = validPressure || !checkPressure ? "" : head === null ? "Для подбора требуется напор на входе и напор насоса. " : "Расчётное давление ниже −0,1 МПа. Проверьте напор на выходе. ";
   return [
     {
       role: "gauge", name: (gauge ? gauge.range.min < 0 : vacuum) ? "Мановакуумметр" : "Манометр", item: gauge?.item, warning,
-      details: `${gaugeDetails} · ${basis} · ${reason}${warning ? ` · ⚠ ${warning}` : ""}${invalid ? ` · ${invalid}` : ""}`,
-      description: `${warning ? `${warning} ` : ""}${invalid}${basis}. Требуемый запас верхнего предела шкалы 1,5. ${gauge ? `База комплектующих: ${gauge.item.id}.` : "Подходящего прибора в базе нет; указано требуемое исполнение без цены."}`,
+      details: `${gaugeDetails} · ${basis}${warning ? ` · ⚠ ${warning}` : ""}${invalid ? ` · ${invalid}` : ""}`,
+      description: `${warning ? `${warning} ` : ""}${invalid}${rating?.source ?? basis}. Требуемый запас верхнего предела шкалы 1,5. ${gauge ? `База комплектующих: ${gauge.item.id}.` : "Подходящего прибора в базе нет. Показано требуемое исполнение."}`,
     },
     {
       role: "pressure-switch", name: "Реле давления", item: relay?.item,
-      details: `${relay ? `${model(relay.item)} · ${rangeText(relay.range)}` : "Подходящего диапазона в базе нет · требуется уточнение"} · ${basis} · ${reason} · уставки отключения и возврата — при наладке`,
-      description: `${invalid}Предварительный подбор диапазона для ${side === "suction" ? "защиты по снижению давления. Уставки и дифференциал определяют по минимальному рабочему давлению и условиям всасывания." : "контроля давления напорной линии. Уставки и дифференциал определяют при наладке."}${head === null ? " Максимальный подпор требуется проверить, поскольку напор на входе не указан." : ""}${relay ? ` База комплектующих: ${relay.item.id}.` : " Исполнение и цена требуют уточнения."}`,
+      details: `${relay ? candidateLabel(relay) : "Подходящего исполнения в базе нет"} · ${rating?.source ?? basis}${relayRating ? ` · допустимое давление ${format(relayRating.bar)} бар` : ""}`,
+      description: `${invalid}Уставки отключения и возврата определяют при наладке.${relay ? ` База комплектующих: ${relay.item.id}.` : ""}`,
     },
   ];
 }

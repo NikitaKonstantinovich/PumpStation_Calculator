@@ -1,0 +1,3 @@
+export const MAX_WORKING_PUMPS = 10;
+export const MAX_RESERVE_PUMPS = 3;
+export const MAX_TOTAL_PUMPS = MAX_WORKING_PUMPS + MAX_RESERVE_PUMPS;

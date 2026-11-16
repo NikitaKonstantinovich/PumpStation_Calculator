@@ -19,7 +19,11 @@ test("conversion proxy requires authentication and reports missing configuration
   const state = globalThis.__converterTest;
   state.user = null;
   assert.equal((await converterRequest(new Request("https://app.test/api/model-preparation"), "/v1/jobs")).status, 401);
-  state.user = { id: "owner-1" };
+  for (const role of ["base","plus"]) {
+    state.user = { id: "owner-1", role };
+    assert.equal((await converterRequest(new Request("https://app.test/api/model-preparation"), "/v1/jobs", {})).status, 403);
+  }
+  state.user = { id: "owner-1", role: "pro" };
   const response = await converterRequest(new Request("https://app.test/api/model-preparation"), "/v1/jobs");
   assert.equal(response.status, 503); assert.match((await response.json()).error, /MODEL_CONVERTER_URL/);
   assert.equal(state.calls.length, 0);

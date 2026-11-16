@@ -1,5 +1,6 @@
 import type { InputEntity } from "./project-config";
 import { IssueNotice } from "./diagnostics-ui";
+import { MAX_WORKING_PUMPS } from "./pump-counts";
 
 export function CircuitInputFields({ input, onChange, showStaticHead = true, issueTool }: {
   input: InputEntity;
@@ -21,7 +22,7 @@ export function CircuitInputFields({ input, onChange, showStaticHead = true, iss
     {numberField("flowRate", "Расход станции", "м³/ч", 0)}
     {numberField("head", "Напор", "м", 0)}
     {showStaticHead && numberField("staticHead", "Статический напор", "м", 0)}
-    {numberField("workingPumpCount", "Рабочих насосов", "шт.", 1, 6)}
+    {numberField("workingPumpCount", "Рабочих насосов", "шт.", 1, MAX_WORKING_PUMPS)}
     {numberField("reservePumpCount", "Резервных насосов", "шт.", 0, 3)}
   </div>;
 }

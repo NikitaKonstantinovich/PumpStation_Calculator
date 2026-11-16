@@ -58,6 +58,7 @@ const AQUASTRONG_DIMENSION_DRAWINGS:Record<string,{page:number;file:string}>={
   "EDH15":{page:58,file:"aquastrong-edh15.png"},"EDH20":{page:59,file:"aquastrong-edh20.png"}
 };
 export const pumpSketchFor=(pump:Pump):PumpSketchInfo|undefined=>{
+  if(pump.assets?.files?.drawing&&!pump.assets.files.drawing.contentType.startsWith("image/"))return undefined;
   const manufacturer=pump.manufacturer.toUpperCase(),normalized=pump.model.toUpperCase().replace(/\s+/g," ").trim(),compact=normalized.replace(/\s+/g,"");
   if(pump.drawing&&pump.drawingSource)return {src:pump.drawing,caption:`Чертёж · ${pump.manufacturer} ${pump.model}`,source:pump.drawingSource};
   if(manufacturer==="CNP"){

@@ -1,0 +1,15 @@
+.pump-chart.pump-chart--with-settings{grid-template-rows:auto minmax(190px,1fr) auto auto auto auto}
+.pump-chart__settings{border-top:1px solid var(--theme-border,#dce2e7);color:var(--theme-text-primary,#344b5a);font-size:11px;margin-top:0}
+.pump-chart__settings>summary{padding:11px 2px;cursor:pointer;font-weight:650}
+.pump-chart__settings-body{padding:0 0 14px}.pump-chart__settings-body>p{margin:0 0 12px;color:var(--theme-text-muted,#71808a);line-height:1.5}
+.pump-chart__settings fieldset{min-width:0;padding:10px;margin:0 0 12px;border:1px solid var(--theme-border,#dce2e7);border-radius:6px}.pump-chart__settings legend{padding:0 5px;font-weight:600}
+.pump-chart__grid-fields,.pump-chart__grid-appearance{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.pump-chart__settings label{min-width:0;display:grid;gap:5px}.pump-chart__settings input:not([type=checkbox]),.pump-chart__settings select{width:100%;min-width:0;padding:7px;border:1px solid var(--theme-border,#cbd7de);border-radius:5px;background:var(--theme-surface,#fff);color:inherit;font:inherit}
+.pump-chart__settings input[type=color]{height:32px;padding:3px}.pump-chart__grid-toggles{display:flex;flex-wrap:wrap;gap:10px 18px;margin:12px 0}
+.pump-chart__settings .pump-chart__grid-toggles label,.pump-chart__settings .pump-chart__grid-theme{display:flex;align-items:center;gap:6px}.pump-chart__grid-theme{margin:10px 0}
+.pump-chart__settings input[type=checkbox]{width:14px;height:14px;margin:0;accent-color:var(--theme-text-accent,#1976bd)}
+.pump-chart__settings .pump-chart__grid-error{padding:9px;border:1px solid var(--theme-text-danger,#b64e47);border-radius:5px;color:var(--theme-text-danger,#923f2f)}
+.pump-chart__settings .button{width:auto;margin-top:5px;font-size:11px}.pump-chart__settings :is(input,select,button,summary):focus-visible{outline:2px solid var(--theme-text-accent,#1976bd);outline-offset:2px}
+@container(max-width:380px){.pump-chart__grid-fields,.pump-chart__grid-appearance{grid-template-columns:minmax(0,1fr)}}
+.pump-chart__frequency>summary>span{margin-left:8px;color:var(--theme-text-muted,#71808a);font-weight:400}.pump-chart__frequency-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.pump-chart__settings .pump-chart__frequency-range{margin:14px 0}.pump-chart__settings input[type=range]{padding:0;border:0;accent-color:var(--theme-text-accent,#1976bd)}
+.pump-chart .pump-chart__line--nominal{stroke:#8b98a4;stroke-width:2;stroke-dasharray:6 5;fill:none}.pump-chart__dot--nominal{background:#8b98a4}
