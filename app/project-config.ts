@@ -1,3 +1,4 @@
+import { validRequestNumber, REQUEST_NUMBER_MESSAGE } from "./request-number";
 import {parseWorkspaceData} from "./node-tools/data";
 import type {WorkspaceData} from "./node-tools/schema";
 import { normalizeHydraulicOptions } from "./hydraulic-option-config";
@@ -47,6 +48,7 @@ export type SettingsEntity = {
   pressureChecksEnabled?: boolean;
   geometryEnabled?: boolean;
   stationType: StationType;
+  requestNumber?: string;
   combinedCircuitsSimultaneous: boolean;
   membraneTank: boolean;
   cabinetSeparate?: boolean;
@@ -134,7 +136,7 @@ export const calculationMethod=typeof __PSC_CALC_METHOD__==="string"?__PSC_CALC_
 export type ProjectConfig = {
   workspace2?:WorkspaceData;
   schemaVersion: 1;
-  project: { id: string; name: string; createdAt: string; updatedAt: string; modelLibraryVersion?: string; recalculatedAt?: string; calculationMethod?: string; graphVersion?: string };
+  project: { id: string; name: string; autoName?: boolean; createdAt: string; updatedAt: string; modelLibraryVersion?: string; recalculatedAt?: string; calculationMethod?: string; graphVersion?: string };
   station: { selectedPumpId?: string; selectedPumpModel?: string; workingPumpCount?: number; reservePumpCount?: number; totalPumpCount?: number; secondaryPumpId?: string; secondaryPumpModel?: string; secondaryWorkingPumpCount?: number; secondaryReservePumpCount?: number; secondaryTotalPumpCount?: number };
   workspace: { zoom: number; mode:WorkspaceMode; gridHeightScreens:number; grid:WorkspaceGrid; windows: PanelState[] };
   entities: Record<string, ProjectEntity>;
@@ -232,8 +234,9 @@ export function parseProjectConfig(raw: unknown, preserveCalculation = false): P
   const input2 = entities["system-input-2"] as InputEntity | undefined;
   if (input2?.kind === "input") entities["system-input-2"] = { ...input2, staticHead: input2.staticHead ?? 0, workingPumpCount: input2.workingPumpCount == null ? null : Math.max(1, finite(input2.workingPumpCount, 1)), reservePumpCount: input2.reservePumpCount == null ? null : Math.max(0, finite(input2.reservePumpCount, 0)), calculated: input2.calculated ?? false };
   const rawSettings = entities["station-settings"] as Partial<SettingsEntity>;
+  if (rawSettings.requestNumber !== undefined && !validRequestNumber(rawSettings.requestNumber)) throw Error(REQUEST_NUMBER_MESSAGE);
   const stationType = rawSettings.stationType ?? "utility";
-  entities["station-settings"] = { kind: "settings", pressureChecksEnabled: rawSettings.pressureChecksEnabled !== false, inletHead: typeof rawSettings.inletHead === "number" && Number.isFinite(rawSettings.inletHead) ? rawSettings.inletHead : null, stationType, combinedCircuitsSimultaneous: stationType === "combined" && rawSettings.combinedCircuitsSimultaneous === true, membraneTank: rawSettings.membraneTank ?? false, ...(typeof rawSettings.cabinetSeparate === "boolean" ? {cabinetSeparate:rawSettings.cabinetSeparate} : {}), membraneTankVolume: [8, 50, 80, 100].includes(rawSettings.membraneTankVolume ?? 0) ? rawSettings.membraneTankVolume! : 8, vibrationCompensators: rawSettings.vibrationCompensators ?? false, collectorPlugs: rawSettings.collectorPlugs ?? false, isolatingValves: rawSettings.isolatingValves ?? false, jockeyPump: rawSettings.jockeyPump ?? false, ...(rawSettings.hydraulicOptions ? { hydraulicOptions: normalizeHydraulicOptions(rawSettings.hydraulicOptions) } : {}), usdRate: finite(rawSettings.usdRate, 85), cnyRate: finite(rawSettings.cnyRate, 13), manufacturerDiscounts: { cnp: finite(rawSettings.manufacturerDiscounts?.cnp, 45), aquastrong: finite(rawSettings.manufacturerDiscounts?.aquastrong, 55), onis: finite(rawSettings.manufacturerDiscounts?.onis, 0), vandjord: finite(rawSettings.manufacturerDiscounts?.vandjord, 25), wellmix: finite(rawSettings.manufacturerDiscounts?.wellmix, 35) } };
+  entities["station-settings"] = { kind: "settings", ...(rawSettings.requestNumber !== undefined ? {requestNumber:rawSettings.requestNumber} : {}), pressureChecksEnabled: rawSettings.pressureChecksEnabled !== false, inletHead: typeof rawSettings.inletHead === "number" && Number.isFinite(rawSettings.inletHead) ? rawSettings.inletHead : null, stationType, combinedCircuitsSimultaneous: stationType === "combined" && rawSettings.combinedCircuitsSimultaneous === true, membraneTank: rawSettings.membraneTank ?? false, ...(typeof rawSettings.cabinetSeparate === "boolean" ? {cabinetSeparate:rawSettings.cabinetSeparate} : {}), membraneTankVolume: [8, 50, 80, 100].includes(rawSettings.membraneTankVolume ?? 0) ? rawSettings.membraneTankVolume! : 8, vibrationCompensators: rawSettings.vibrationCompensators ?? false, collectorPlugs: rawSettings.collectorPlugs ?? false, isolatingValves: rawSettings.isolatingValves ?? false, jockeyPump: rawSettings.jockeyPump ?? false, ...(rawSettings.hydraulicOptions ? { hydraulicOptions: normalizeHydraulicOptions(rawSettings.hydraulicOptions) } : {}), usdRate: finite(rawSettings.usdRate, 85), cnyRate: finite(rawSettings.cnyRate, 13), manufacturerDiscounts: { cnp: finite(rawSettings.manufacturerDiscounts?.cnp, 45), aquastrong: finite(rawSettings.manufacturerDiscounts?.aquastrong, 55), onis: finite(rawSettings.manufacturerDiscounts?.onis, 0), vandjord: finite(rawSettings.manufacturerDiscounts?.vandjord, 25), wellmix: finite(rawSettings.manufacturerDiscounts?.wellmix, 35) } };
   const rawDn = entities["station-dn"] as Partial<DnEntity>;
   const savedDn = (value:unknown) => typeof value === "number" && Number.isFinite(value) && value > 0 ? value : null;
   const connection = (value:unknown):ValveConnection|null => value==="threaded"||value==="flanged"?value:null;

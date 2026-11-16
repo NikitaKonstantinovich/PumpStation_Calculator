@@ -1,3 +1,4 @@
+import { validRequestNumber } from "../request-number";
 export type DataKind = "number" | "float" | "int" | "string" | "boolean" | "enum" | "reference" | "object" | "array";
 export type Field = {
   key: string;
@@ -108,7 +109,7 @@ export function accepts(field: Field, value: unknown): boolean {
       return typeof value === "object" && !Array.isArray(value) && (!field.shape || field.shape.every(f=>accepts(f,(value as Record<string,unknown>)[f.key])));
     case "reference":
     case "string":
-      return typeof value === "string";
+      return typeof value === "string" && (field.meaning !== "requestNumber" || validRequestNumber(value));
     case "enum":
       return typeof value === "string" && !!field.options?.includes(value);
     case "boolean":

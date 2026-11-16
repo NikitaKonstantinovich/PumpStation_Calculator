@@ -4,6 +4,7 @@ import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { GeometryView } from "./geometry-view";
 import { useParameterDraft } from "./parameter-drafts-context";
 import { parseNumber } from "./runtime";
+import { REQUEST_NUMBER_MESSAGE } from "../request-number";
 import { accepts } from "../engineering/schema";
 import { DataTree } from "./data-inspector";
 import { diagnosticKey, type Diagnostic, type ParameterBinding, type View } from "./schema";
@@ -57,7 +58,7 @@ function Input({
     if (draft === null) return;
     try {
       const next = numeric ? parseNumber(draft, field) : structured ? draft.trim() ? JSON.parse(draft) : null : draft;
-      if (!accepts(field, next)) throw Error(field.name + " · требуется значение");
+      if (!accepts(field, next)) throw Error(field.meaning === "requestNumber" ? REQUEST_NUMBER_MESSAGE : field.name + " · требуется значение");
       change(b.key, next);
       setDraft(null);
       setError("");
@@ -73,7 +74,7 @@ function Input({
     {structured ? <><textarea id={uid} disabled={disabled} value={draft ?? (value == null ? "" : JSON.stringify(value, null, 2))} onChange={e => {
         setDraft(e.target.value);
         validity(validationKey(b), false);
-      }} onBlur={commit} /><DataTree value={value} label={label || field.name} /></> : field.kind === "boolean" || widget === "toggle" ? <input id={uid} type="checkbox" checked={value === true} disabled={disabled} onChange={e => change(b.key, e.target.checked)} /> : field.kind === "enum" || widget === "select" ? <select id={uid} value={value == null ? "" : String(value)} disabled={disabled} onChange={e => change(b.key, e.target.value || null)}><option value="">Выберите…</option>{field.options?.map(v => <option key={v} value={v}>{field.optionNames?.[v] ?? v}</option>)}</select> : <span className="nt-number"><input id={uid} type="text" inputMode={numeric ? "decimal" : undefined} value={draft ?? (value == null ? "" : String(value))} disabled={disabled} onChange={e => {
+      }} onBlur={commit} /><DataTree value={value} label={label || field.name} /></> : field.kind === "boolean" || widget === "toggle" ? <input id={uid} type="checkbox" checked={value === true} disabled={disabled} onChange={e => change(b.key, e.target.checked)} /> : field.kind === "enum" || widget === "select" ? <select id={uid} value={value == null ? "" : String(value)} disabled={disabled} onChange={e => change(b.key, e.target.value || null)}><option value="">Выберите…</option>{field.options?.map(v => <option key={v} value={v}>{field.optionNames?.[v] ?? v}</option>)}</select> : <span className="nt-number"><input id={uid} type="text" placeholder={field.meaning === "requestNumber" ? "123-1234-1" : undefined} inputMode={numeric ? "decimal" : undefined} value={draft ?? (value == null ? "" : String(value))} disabled={disabled} onChange={e => {
         setDraft(e.target.value);
         validity(validationKey(b), false);
       }} onBlur={commit} onKeyDown={e => {

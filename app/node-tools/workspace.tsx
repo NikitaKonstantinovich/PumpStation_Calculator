@@ -19,6 +19,7 @@ import { ParameterDraftProvider, usePendingParameterDrafts } from "./parameter-d
 import { CalculationToggle } from "../pressure-check-toggle";
 import { controlInfo, productEvaluator, toolAvailable, workspaceControls, writeControl } from "./workspace-controls";
 import { toolSourceDependencies } from "./workspace-sources";
+import { workspaceStationName } from "./project-name";
 import { useWorkspaceCatalogs, WorkspaceCatalogGate } from "./workspace-catalogs";
 import { nodeAssistantProject, type NodeAssistantReader } from "./assistant-project";
 import { WorkspaceLoading } from "../workspace-loading";
@@ -262,6 +263,7 @@ function ProductTool({
 }
 function NodeWorkspaceContent({
   project,
+  updateName,
   update,
   back,
   status,
@@ -277,6 +279,7 @@ function NodeWorkspaceContent({
   pendingSave = false
 }: {
   project: ProjectConfig;
+  updateName?: (projectId:string,name:string)=>void;
   update: (data: WorkspaceData) => void;
   back: () => void;
   status: string;
@@ -356,6 +359,16 @@ function NodeWorkspaceContent({
   const tools = remote?.program.tools.filter(t => t.enabled !== false) ?? [];
   const contexts = useMemo(()=>remote ? productContexts(remote.program,working,remote.defaults,remote.role,catalogs.resources) : {},[remote,working,catalogs.resources]);
   const evaluate = useMemo(()=>remote ? productEvaluator(remote.program,contexts) : ()=>{throw Error("Загружаем граф");},[remote,contexts]);
+  const identity = useMemo(() => {
+    if (!remote || !working.product) return {needsCatalog:false};
+    try { return workspaceStationName(remote.program,working,catalogs.resources,evaluate); }
+    catch { return {needsCatalog:false}; }
+  }, [remote,working,catalogs.resources,evaluate]);
+  const requestCatalog = catalogs.request;
+  useEffect(() => { if (identity.needsCatalog) requestCatalog("pump_catalog_v2"); }, [identity.needsCatalog,requestCatalog]);
+  useEffect(() => {
+    if (identity.name && (project.project.name !== identity.name || !project.project.autoName)) updateName?.(project.project.id,identity.name);
+  }, [identity.name,project.project.name,project.project.autoName,project.project.id,updateName]);
   const controlSources = useMemo(() => remote && working.product
     ? [...new Set(Object.values(remote.program.product?.controls ?? {}).flatMap(ref => toolSourceDependencies(remote.program, ref.toolId)))]
     : [], [remote, working.product]);

@@ -52,7 +52,7 @@ async function dispatch(request: Request) {
     const settings=config.entities["station-settings"] as SettingsEntity;
     try{settings.baseValues=await verifyAppliedBaseValues(settings.baseValues);}
     catch(error){return json({error:error instanceof BaseValuesError?error.message:"Справочник базовых значений недоступен. Проект не записан."},error instanceof BaseValuesError?error.status:503);}
-    if(config.workspace2){let prior:ProjectConfig|undefined;if(input.baseRevision>0){const response=await storageOperation(user.id,{action:"load",id:config.project.id});if(!response.ok)return response;prior=(await response.json() as {config:ProjectConfig}).config;}await verifyWorkspace(config.workspace2,prior?.workspace2,user.role);}
+    if(config.workspace2){let prior:ProjectConfig|undefined;if(input.baseRevision>0){const response=await storageOperation(user.id,{action:"load",id:config.project.id});if(!response.ok)return response;prior=(await response.json() as {config:ProjectConfig}).config;}const identity=await verifyWorkspace(config.workspace2,prior?.workspace2,user.role);if(identity?.name)config.project={...config.project,name:identity.name,autoName:true};}
     return storageOperation(user.id,{action:"save",config,operation:input.operation,baseRevision:input.baseRevision,restore:input.restore});
   } catch(error) {
     if(error instanceof ToolError)return json({error:error.message},error.status);

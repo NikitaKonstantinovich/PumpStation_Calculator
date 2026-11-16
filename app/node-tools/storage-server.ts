@@ -1,3 +1,4 @@
+import { workspaceStationName } from "./project-name";
 import { accepts } from "../engineering/schema";
 import { db } from "../auth-server";
 import { compileTools, runTests } from "./compiler";
@@ -248,7 +249,7 @@ export async function verifyWorkspace(next: WorkspaceData | undefined, prior: Wo
     }
     for (const [id, saved] of Object.entries(next.tools)) if (!program.tools.some(t => t.id === id && t.enabled !== false) && JSON.stringify(saved) !== JSON.stringify(prior?.tools[id])) throw new ToolError("Архив отключённого инструмента доступен только для чтения · " + id, 403);
     for (const id of Object.keys(prior?.tools ?? {})) if (!next.tools[id]) throw new ToolError("Архив инструмента должен сохраняться в проекте · " + id, 403);
-    return;
+    return workspaceStationName(program, next, sources.resources, id => evaluateProduct(program, id, contexts));
   }
   for (const [id, saved] of Object.entries(next.tools)) {
     const program = await toolProgram(saved.version,algorithmId);

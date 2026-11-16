@@ -112,3 +112,17 @@ test("catalogue updates require an explicit new snapshot and keep prior product 
   assert.equal(evaluatePump(f,selected).value.pump.model,"F10");
  }finally{f.close();}
 });
+
+
+test("request number saves with computed station name and rejects invalid edits",async()=>{
+ const f=await fixture();try{
+  const program=await publish(f,f.product.upgradeDocument(f.state.draft));
+  const data=f.productState.migrateProduct(program,undefined,f.base.defaults,f.base.baseVersions,"admin").data;
+  data.tools.settings.values={...values,requestNumber:"001-0023-1",membraneTank:true};
+  const result=await f.storage.verifyWorkspace(data,undefined,"admin");
+  assert.equal(result.name,"Насосная установка повышения давления WENARD PS 1 - opt - 001-0023-1");
+  const invalid=structuredClone(data);invalid.tools.settings.values.requestNumber="abc-123";
+  await assert.rejects(()=>f.storage.verifyWorkspace(invalid,data,"admin"),/Номер запроса/);
+  const repeated=await f.storage.verifyWorkspace(data,data,"admin");assert.deepEqual(repeated,result);
+ }finally{f.close();}
+});
