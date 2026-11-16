@@ -24,7 +24,7 @@ function headingIds() {
 }
 
 const currentLocation = () => typeof window === "undefined" ? helpLocation("") : helpLocation(window.location.search, window.location.hash);
-const kindLabel = (kind: string) => kind === "guide" ? "Руководство" : kind === "archive" ? "История и планы" : "Подробная инструкция";
+const kindLabel = (kind: string) => kind === "guide" ? "Руководство" : "Подробная инструкция";
 
 export function HelpCenter({ onBack }: { onBack: () => void }) {
   const [location, setLocation] = useState<HelpLocation>(currentLocation);
@@ -126,7 +126,6 @@ export function HelpCenter({ onBack }: { onBack: () => void }) {
             {articleLoading || (!articleError && article?.id !== location.documentId) ? <p role="status">Загрузка документа…</p> : articleError ? <div className="help-center__notice" role="alert"><p>{articleError}</p><button className="button" onClick={() => setRetry((value) => value + 1)}>Повторить загрузку</button></div> : article && <article className="help-article">
               <div className="help-article__meta">{index?.sections.find((item) => item.id === article.section)?.title}<span>·</span>{kindLabel(article.kind)}</div>
               <h2 ref={articleHeading} tabIndex={-1} id={`help-${headingAnchor(article.title)}`}>{article.title}</h2>
-              {article.kind === "archive" && <p className="help-center__notice">Исторический материал или план. Он описывает состояние на указанную дату и может отличаться от текущей версии приложения.</p>}
               <div className="help-markdown"><Markdown remarkPlugins={[remarkGfm]} rehypePlugins={[headingIds]} skipHtml disallowedElements={["img"]} urlTransform={(url) => resolveHelpLink(url, article.path, index?.links ?? {}) ?? ""} components={{
                 a: ({ href, children }) => !href ? <span>{children}</span> : <a href={href} target={/^https?:/.test(href) ? "_blank" : undefined} rel={/^https?:/.test(href) ? "noreferrer noopener" : undefined} onClick={(event) => { if (!href.startsWith("/?view=help") || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey || event.button !== 0) return; event.preventDefault(); const target = new URL(href, window.location.origin); const next = helpLocation(target.search, target.hash); navigate(next.tab, next.documentId, next.anchor); }}>{children}</a>,
                 // eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex -- Wide tables need a keyboard-accessible horizontal scroll area.

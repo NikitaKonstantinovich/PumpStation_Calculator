@@ -29,6 +29,66 @@ function station(id = "nu-b1879e1e3807d907", dn = 40, discharge = 32, connection
 const build = (p, data = empty, pr = profiles) => model.buildAssembly(p, pumps, pr, data);
 const close = (a, b) => assert.ok(Math.abs(a-b) < 1e-6, `${a} != ${b}`);
 const vecClose = (a,b) => a.forEach((v,i) => close(v,b[i]));
+
+for (const side of ["suction", "discharge"]) for (const reversed of [false, true]) for (const reducer of [false, true]) {
+  test(`saved ${reducer ? "reducer" : "RF insertion"} mounts the selected end: ${side}, reversed=${reversed}`, () => {
+    const p = station("9", 50, 50, "flanged"), id = "calculated-insertion:orientation";
+    p.entities["station-spec"].items = [];
+    const base = build(p);
+    const ports = [
+      { id: "left", point: [0,0,0], axis: [-1,0,0], dn: reducer ? 80 : 50, connection: reducer ? "collar" : "threaded" },
+      { id: "right", point: [120,0,reducer ? -15 : 0], axis: [1,0,0], dn: 50, connection: "collar" },
+    ];
+    p.entities["station-spec"].items = [{ position: "04.40", section: side, assemblyRole: reducer ? "primary-reducer" : "primary-adapter", equipmentId: id,
+      name: "Расчётная вставка", quantity: 3, unit: "шт.", details: "PN16", status: "selected", insertionAssembly: { reversed } }];
+    const template = { geometry: { ports, pieces: [] } };
+    const data = { ...empty, items: { [id]: { equipmentId: id, revision: "1", source: "fixture", kind: reducer ? "reducer" : "pipe", length: 120, ports, template, fidelity: "parametric", issues: [] } } };
+    const a = addLineAssemblies(base, p, profiles, data);
+    for (const pump of a.components.filter(c => c.kind === "pump")) {
+      const c = a.components.find(c => c.line?.pumpId === pump.id && c.line.side === side);
+      const near = ports[reversed ? 1 : 0], far = ports[reversed ? 0 : 1], nozzle = pump.ports.find(p => p.id === (side === "suction" ? "inlet" : "outlet"));
+      assert.deepEqual(c.line.ports, [near.id, far.id]);
+      vecClose(model.worldPoint(c, near.point), model.worldPoint(pump, nozzle.point));
+      vecClose(model.rotate(near.axis, c.rotation), model.rotate(nozzle.axis, pump.rotation).map(v => -v));
+      assert.equal(a.lineJoints.find(j => j.b.componentId === c.id).b.portId, near.id);
+    }
+  });
+}
+
+test("an unselected mandatory insertion stops the physical chain instead of joining a valve across zero length", () => {
+  const p = station("9",50,50,"flanged");
+  const row = { position: "03.40", section: "suction", assemblyRole: "primary-adapter", name: "Нет вставки", quantity: 3, unit: "шт.", details: "", status: "clarify",
+    insertionRequirement: { from: {dn:80,connection:"collar"}, to: {dn:50,connection:"threaded"} } };
+  const valve = p.entities["station-spec"].items.find(r => r.option === "primarySuctionValve");
+  p.entities["station-spec"].items = [row, valve];
+  const a = build(p);
+  assert.equal(a.components.filter(c => c.line?.role === "primary-adapter").length,3);
+  assert.ok(a.components.filter(c => c.line?.role === "primary-adapter").every(c => c.line.issues.some(i => i.includes("Сборка ветви остановлена"))));
+  assert.ok(!a.lineJoints.some(j => j.id.includes("suction")));
+  assert.ok(!a.components.some(c => c.line?.role === "primarySuctionValve"));
+});
+
+test("collar sealing faces mate to flanges, while collar weld ends and threads remain incompatible", () => {
+  const a = build(station());
+  const first = a.components.find(c => c.kind === "pump"), second = structuredClone(first);
+  second.id = "joint-test"; second.position = [...first.position];
+  first.ports = [{id:"face",point:[0,0,0],axis:[1,0,0],dn:50,connection:"flanged",plane:"mating-face"}];
+  second.ports = [{id:"face",point:[0,0,0],axis:[-1,0,0],dn:50,connection:"collar",plane:"mating-face"}];
+  const assembly={...a,components:[first,second],lineJoints:[{id:"joint",a:{componentId:first.id,portId:"face"},b:{componentId:second.id,portId:"face"},kind:"face",overlap:0,provisional:false}]};
+  const mismatch=()=>model.connectionIssues(assembly).filter(i=>i.message.includes("типы соединения стыка"));
+  assert.equal(mismatch().length,0);
+  second.ports[0].plane="weld-end";assert.equal(mismatch().length,1);
+  second.ports[0].plane="thread-reference";second.ports[0].connection="threaded";assert.equal(mismatch().length,1);
+});
+
+test("size-only inch labels do not conflict with the same G size or authorize measured threaded overlap", async () => {
+  const {pipeThreadConflict,pipeThreadDesignation}=await loadTs(new URL("../app/model-editor/line-types.ts",import.meta.url));
+  assert.equal(pipeThreadConflict('2"','G2'),false);
+  assert.equal(pipeThreadConflict('1 1/2"','G 1 1/2'),false);
+  assert.equal(pipeThreadConflict('2"','G1 1/2'),true);
+  assert.equal(pipeThreadConflict('R2','G2'),true);
+  assert.equal(pipeThreadDesignation('2"'),undefined,"size-only label must not become evidence for thread engagement");
+});
 async function realLineCatalog(p) {
   const source = await json("../public/component-insert-source.json"), catalog = makeInsertCatalog(source);
   const { insertionGeometryContext } = await loadTs(new URL("../app/component-insert-3d-server.ts", import.meta.url), {
@@ -147,7 +207,7 @@ test("editor applies an explicit size refresh only after the matching request an
   const end = tool.indexOf("  useEffect(() => {", start + 1);
   assert.ok(requestEffectEnd >= 0 && start > requestEffectEnd && end > start);
   const { apply } = await loadTs(toolUrl, { [toolUrl.href]: `
-    import {execute, mergeAssembly, recoverLostInsertions, recoverThreadedLineGeometry} from "./model";
+    import {execute, mergeAssembly, recoverLostInsertions, recoverPumpConnections, recoverThreadedLineGeometry} from "./model";
     export function apply({current, requestedLineRefresh, lineRecoveryKey, lineRequestKey, generated, lineData, spec}) {
       const {editor} = current, profiles = {}, catalogue = [{}], latest = {current};
       const setHistory = () => {}, useEffect = effect => effect();

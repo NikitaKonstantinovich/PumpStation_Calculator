@@ -1,4 +1,5 @@
 import models from "../../data/tank-models.json";
+import channelModels from "../../data/tank-channel-models.json";
 import { TANK_LAYOUT_REVISION, TANK_PUMP_GAP_MM, TANK_VALVE_20_ID, tankConnectionDn } from "../tank-connection";
 import type { ProjectConfig, SettingsEntity, SpecEntity } from "../project-config";
 import type { Assembly, Bounds, Component, Port, Vec3 } from "./model";
@@ -42,6 +43,9 @@ function portFrame(c:Component,p:Port){
 /** Exact 200 mm between projected CAD envelopes along the pump row. Pump
  * centers and tank centers are never used as a substitute for body clearance. */
 export function floorTankAnchor(assembly:Assembly,pump:Component,tank:Component){
+  const channel=assembly.components.find(c=>c.kind==="frame"&&c.channelFrame?.tank?.equipmentId===tank.equipmentId);
+  if(channel&&tank.tankMount?.frameAnchor&&channelModels.rows.some(a=>a.sourceHash===tank.cadSource?.hash))
+    return composeValvePose(channel,{position:tank.tankMount.frameAnchor,rotation:[-90,0,0]});
   const pumps=assembly.components.filter(c=>c.kind==="pump"),first=pumps[0]??pump;
   const delta:Vec3=[pump.position[0]-first.position[0],pump.position[1]-first.position[1],0],length=Math.hypot(...delta);
   const axis:Vec3=length>1e-6?delta.map(v=>v/length) as Vec3:[0,1,0];
@@ -134,10 +138,16 @@ export function addTankConnections(assembly:Assembly,project:ProjectConfig):Asse
       [{id:"inlet",point:[0,0,0],axis:[0,0,-1],dn:20,connection:"threaded",thread:"G3/4",gender:"male",provisional:true}],`${models.tank8.source}. ${models.tank8.note}. ${selected?"Установлен на кране DN20.":"Для выбранной позиции крана нет подтверждённой модели."}`));
   }else{
     const last=base.components.filter(c=>c.kind==="pump").at(-1);if(!last)return base;
-    const asset=models.assets[`tank${volume}`],tank=make(`Мембранный бак WAV ${volume} · у последнего насоса`,asset.bounds as Bounds,
+    const frameResult=(project.entities["station-spec"] as SpecEntity).frameCalculation,geometry=frameResult?.channel?.geometry;
+    const channelAsset=geometry?.tank?.equipmentId===row.equipmentId?channelModels.rows.find(a=>a.volumeL===volume&&a.equipmentId===row.equipmentId):undefined;
+    const asset=channelAsset??models.assets[`tank${volume}`],tank=make(`Мембранный бак WAV ${volume} · у последнего насоса`,asset.bounds as Bounds,
       binding(last.id,"floor","floor",[0,0,0],[0,0,0]),structuredClone(asset.ports) as Port[],`Исходная CAD-сетка Wester без масштабирования. Зазор между габаритами последнего насоса и бака 200 мм; опорная плоскость — верх рамы. Отличия габаритов CAD от паспорта требуют проверки. ${omitted}`);
-    const frameResult=(project.entities["station-spec"] as SpecEntity).frameCalculation;
-    if(frameResult?.variant&&frameResult.layout?.tank&&frameResult.variant.boundsMm){
+    if(channelAsset&&geometry?.tank){
+      const hardware=frameResult?.channel?.hardwareGroups?.find(g=>g.owner==="tank")?.hardware;
+      const lift=hardware?(hardware.supportLift??hardware.head):0;
+      tank.tankMount={...tank.tankMount!,revision:geometry.revision,frameAnchor:[geometry.tank.y,geometry.heightMm+lift,-geometry.tank.x]};
+      tank.sourceNote="Исходный STEP Wester; три отверстия совмещены с расчётной сеткой рамы. Одна ножка к насосам, две к торцу; отступы из правил гнутой рамы. "+omitted;
+    }else if(frameResult?.variant&&frameResult.layout?.tank&&frameResult.variant.boundsMm){
       tank.tankMount={...tank.tankMount!,revision:frameResult.version,frameAnchor:[0,frameResult.variant.boundsMm[4],frameResult.variant.lengthMm/2-frameResult.layout.tank.x]};
       tank.sourceNote="Положение бака из расчёта рамы; зазор 40 мм проверен по исходным габаритам. CAD-привязка ножек требует проверки. "+omitted;
     }

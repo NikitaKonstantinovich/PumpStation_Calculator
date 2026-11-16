@@ -1,0 +1,134 @@
+{
+  "version": 1,
+  "rows": [
+    {
+      "volumeL": 50,
+      "equipmentId": "мембранный-бак-001-r0005",
+      "source": "Equipment/Tanks/3D_FrameMounted/WAV_050_frame.step",
+      "sourceHash": "8c7fac5dfc0404992c65e94145ca132688790ada2a7b3ccc4b0304bbebed0cd6",
+      "rawSourceHash": "9e8d9e6dce5f82a3976b7af3c9542a02b9eaef3fa33315c9015686b479db683d",
+      "meshUrl": "/model-assets/model-8c7fac5dfc0404992c65e94145ca132688790ada2a7b3ccc4b0304bbebed0cd6-v1.stl",
+      "bounds": [
+        -198.13043452201708,
+        -210.031792296847,
+        -1.0000000233146835e-07,
+        198.13462975807803,
+        182.00000010000002,
+        675.5000001000011
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "ports": [],
+      "mountingPoints": [
+        [
+          151.5544,
+          87.5,
+          0
+        ],
+        [
+          -151.5544,
+          87.5,
+          0
+        ],
+        [
+          -0.0,
+          -175.0,
+          0
+        ]
+      ],
+      "normalization": {
+        "matrix": "flow=Y,row=-Z,up=-X",
+        "zOffset": 243.695680684101
+      }
+    },
+    {
+      "volumeL": 80,
+      "equipmentId": "мембранный-бак-001-r0006",
+      "source": "Equipment/Tanks/3D_FrameMounted/WAV_080_frame.step",
+      "sourceHash": "2d999a8e0224a4d2d0d64a056e3990fe4ed3779468667606b7c6fc816dc11c1d",
+      "rawSourceHash": "c5a9bb06c6c11a7963db295d776e1591e3985de553203e25fbe2b96b42643af9",
+      "meshUrl": "/model-assets/model-2d999a8e0224a4d2d0d64a056e3990fe4ed3779468667606b7c6fc816dc11c1d-v1.stl",
+      "bounds": [
+        -205.00000010000002,
+        -209.991993647123,
+        -1.0000000172008641e-07,
+        205.00000010000002,
+        205.00000010000002,
+        805.5571309747393
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "ports": [],
+      "mountingPoints": [
+        [
+          -151.5563,
+          87.5011,
+          0
+        ],
+        [
+          0.0,
+          -175.0021,
+          0
+        ],
+        [
+          151.5563,
+          87.5011,
+          0
+        ]
+      ],
+      "normalization": {
+        "matrix": "flow=-Z,row=-Y,up=-X",
+        "zOffset": 319.695680684101
+      }
+    },
+    {
+      "volumeL": 100,
+      "equipmentId": "мембранный-бак-001-r0007",
+      "source": "Equipment/Tanks/3D_FrameMounted/WAV_100_frame.step",
+      "sourceHash": "03c76e161a2ce67f0f24add9a0c4847887e438c94d1454c4bf7f72dbab8dcd1c",
+      "rawSourceHash": "b17587fc5e3452e2fd2daea0b6a7389ed09e96f87bf202ba1241e756af6a81d0",
+      "meshUrl": "/model-assets/model-03c76e161a2ce67f0f24add9a0c4847887e438c94d1454c4bf7f72dbab8dcd1c-v1.stl",
+      "bounds": [
+        -250.0730398074755,
+        -270.055171013994,
+        -1.0000001286949152e-07,
+        250.0797988136115,
+        247.500000100001,
+        784.1988782236749
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "ports": [],
+      "mountingPoints": [
+        [
+          -203.516,
+          117.5,
+          0
+        ],
+        [
+          203.516,
+          117.5,
+          0
+        ],
+        [
+          0.0,
+          -235.0,
+          0
+        ]
+      ],
+      "normalization": {
+        "matrix": "flow=-Z,row=-Y,up=-X",
+        "zOffset": 286.595680684101
+      }
+    }
+  ]
+}

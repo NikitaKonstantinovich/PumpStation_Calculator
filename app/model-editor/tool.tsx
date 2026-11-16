@@ -7,12 +7,13 @@ import type { Pump } from "../pump-catalog";
 import { useRuntimeDiagnostic } from "../diagnostics-ui";
 import {
   addManualPipe, assemblyBounds, buildAssembly, componentBounds, connectionIssues, createHistory, dimensions,
-  distance, worldPoint, editComponent, emptyEditor, execute, mergeAssembly, recoverCollectorNipples, recoverEmptyCollectors, recoverLostInsertions, recoverThreadedLineGeometry, pipePoints, redo, routeLength, setAutomaticRoute,
+  distance, worldPoint, editComponent, emptyEditor, execute, mergeAssembly, pumpConnectionsRecovered, recoverPumpConnections, recoverCollectorNipples, recoverEmptyCollectors, recoverLostInsertions, recoverThreadedLineGeometry, pipePoints, redo, routeLength, setAutomaticRoute,
   sourceFingerprint, undo, combineProfiles, refreshModelAssets, type Assembly, type Component, type Edit, type EditorState, type ProfileCatalog, type Vec3,
 } from "./model";
 import type { ViewportHandle, EditorMode } from "./viewport";
 import { SnapDialog } from "./snap-dialog";
 import { InsertionDialog, InsertionDetails } from "./insertion-dialog";
+import { ChannelFrameDetails,ChannelFramePieces } from "./channel-frame-properties";
 import { insertionComponent } from "./insertion-template";
 import { ModelLibraryDialog } from "./library-dialog";
 import { addLibraryModel, type LibraryModel } from "./library";
@@ -130,10 +131,9 @@ export function ModelTool({ project, catalogue, entity, onChange, cameraScope = 
   });
   const selected = assembly.components.find(c => c.id === editor.selectedId);
   const stale = Boolean(editor.assembly && (editor.assembly.sourceFingerprint !== sourceFingerprint(project) || lineData && editor.assembly.lineDataRevision !== lineData.revision));
-  const unassigned = assembly.components.filter(c => c.kind === "pump" && c.ports.some(p => p.id === "port-a" || p.id === "port-b"));
-  const recoveredPumps = unassigned.filter(c => c.cadSource && generated.components.some(fresh =>
-    fresh.id===c.id && fresh.cadSource?.hash===c.cadSource?.hash && fresh.ports.some(p=>p.id==="inlet") && fresh.ports.some(p=>p.id==="outlet")
-  ));
+  const unassigned = assembly.components.filter(c => c.kind === "pump" &&
+    c.ports.some(p => p.id === "port-a" || p.id === "port-b"));
+  const recoveredPumps = assembly.components.filter(saved => generated.components.some(fresh => pumpConnectionsRecovered(saved, fresh)));
   const issues = useMemo(() => connectionIssues(assembly), [assembly]);
   const sourceWarnings = assembly.components.filter(c => !isHardwareRow(c) && (c.kind === "pump" || c.kind === "equipment")).map(c => c.sourceNote);
   const diagnostic = [...(stale ? ["Состав установки изменён. Обновите состав в 3D-редакторе; ручная компоновка сохранена."] : []), ...issues.map(i => i.message), catalogError, assetError, lineError, ...(lineData?.issues ?? [])].filter(Boolean).join("\n");
@@ -159,7 +159,8 @@ export function ModelTool({ project, catalogue, entity, onChange, cameraScope = 
     lineRecoveryKey.current = lineRequestKey;
     const repair = (value: Assembly) => {
       const restored = recoverLostInsertions(value, generated, spec.items);
-      return recover ? recoverThreadedLineGeometry(restored, generated) : restored;
+      const connected = recoverPumpConnections(restored, generated);
+      return recover ? recoverThreadedLineGeometry(connected, generated) : connected;
     };
     const next = explicit ? mergeAssembly(current.assembly, generated) : repair(saved);
     if (next === saved) return;
@@ -347,6 +348,7 @@ export function ModelTool({ project, catalogue, entity, onChange, cameraScope = 
         <aside hidden={!propertiesOpen} className="model-editor__properties" aria-label="Свойства компонента">
           <h3>Свойства<button type="button" aria-label="Скрыть свойства компонента" onClick={()=>setPropertiesOpen(false)}>×</button></h3>{selected ? <div key={selected.id}>
             <b>{selected.name}</b><p className="model-editor__source">{selected.collector ? "Размеры из расчёта коллектора и выбранных позиций каталога. Монтажные допущения указаны ниже." : selected.sourceNote}</p>
+            {selected.channelFrame && <ChannelFrameDetails component={selected} selectedPieceId={editor.selectedPieceId} onSelect={selectedPieceId=>update({selectedPieceId})} onReplace={next=>commit({...assembly,components:assembly.components.map(c=>c.id===next.id?next:c)})}/>}
             {selected.collector && <CollectorDetails component={selected} card={(project.entities["station-collectors"] as CollectorsEntity)[selected.collector.template.side]} data={lineData} selectedPieceId={editor.selectedPieceId} onSelect={selectedPieceId => update({selectedPieceId})} onReplace={next => commit({...assembly,components:assembly.components.map(c=>c.id===next.id?next:c)})}/>}
             {selected.line && <><p>Спецификация: {selected.line.specPosition} · {selected.line.quantity} шт.</p><p>Геометрия: {{ cad: "CAD", parametric: "По подтверждённым размерам", outline: "Предварительный контур", missing: "Нет геометрии" }[selected.line.fidelity]}</p><p>Монтажная длина: {selected.line.length === null ? "Не задана" : `${fmt(selected.line.length)} мм`}</p>{selected.shape?.innerMm && selected.shape.outerMm && <p>Наружный Ø{fmt(selected.shape.outerMm)} · внутренний Ø{fmt(selected.shape.innerMm)} · стенка {fmt((selected.shape.outerMm - selected.shape.innerMm) / 2)} мм</p>}</>}
             {selected.insertion && <><InsertionDetails template={selected.insertion.template}/><details><summary>Видимость деталей</summary>{selected.insertion.template.geometry.pieces.map(p => <label key={p.id} className="model-editor__toggle"><input type="checkbox" checked={!selected.insertion!.hiddenPieceIds.includes(p.id)} onChange={e => commit({ ...assembly, components: assembly.components.map(c => c.id === selected.id && c.insertion ? { ...c, insertion: { ...c.insertion, hiddenPieceIds: e.target.checked ? c.insertion.hiddenPieceIds.filter(id => id !== p.id) : [...c.insertion.hiddenPieceIds, p.id] } } : c) })}/>{p.name}</label>)}</details>{selected.insertion.template.source.recordId && <button type="button" disabled={selected.locked} onClick={() => setInsertDialog({ componentId: selected.id, recordId: selected.insertion!.template.source.recordId!, angle: selected.insertion!.template.geometry.eccentricAngleDeg })}>Обновить из базы / эксцентриситет</button>}</>}
@@ -359,7 +361,7 @@ export function ModelTool({ project, catalogue, entity, onChange, cameraScope = 
             {selected.routing?.automatic && <p className="model-editor__source">Трасса перестраивается по патрубкам. Для перемещения отключите «Следовать патрубкам».</p>}
             <h4>Положение, мм</h4>{(["X", "Y", "Z"] as const).map((label, i) => <NumberField key={label} label={`${label}, мм`} value={selected.position[i]} disabled={transformDisabled} onCommit={value => numericPose(selected, "position", i, value)}/>)}
             <h4>Поворот, °</h4>{(["X", "Y", "Z"] as const).map((label, i) => <NumberField key={label} label={`Поворот ${label}, °`} value={selected.rotation[i]} disabled={transformDisabled} onCommit={value => numericPose(selected, "rotation", i, value)}/>)}
-            {selected.kind === "frame" && <><h4>Размеры рамы, мм</h4>{(["length", "width", "height"] as const).map((key, i) => <NumberField key={key} label={["Длина, мм", "Ширина, мм", "Высота, мм"][i]} value={selected.parameters[key]} min={1} disabled={selected.locked} onCommit={v => changeParameter(selected, key, v)}/>)}</>}
+            {selected.kind === "frame" && !selected.channelFrame && <><h4>Размеры рамы, мм</h4>{(["length", "width", "height"] as const).map((key, i) => <NumberField key={key} label={["Длина, мм", "Ширина, мм", "Высота, мм"][i]} value={selected.parameters[key]} min={1} disabled={selected.locked} onCommit={v => changeParameter(selected, key, v)}/>)}</>}
             {(selected.kind === "collector" || selected.kind === "pipe") && <><h4>Геометрия, мм</h4>{(!selected.routing) && <NumberField label="Длина, мм" value={selected.parameters.length} disabled={selected.locked} min={1} onCommit={v => changeParameter(selected, "length", v)}/>}<NumberField label="Наружный диаметр, мм" value={selected.parameters.diameter} disabled={selected.locked} min={1} onCommit={v => changeParameter(selected, "diameter", v)}/>{selected.routing?.automatic && <NumberField label="Отступ трассы, мм" value={selected.parameters.routeOffset} disabled={selected.locked} onCommit={v => changeParameter(selected, "routeOffset", v)}/>}</>}
             {selected.kind === "pipe" && <p>Длина по оси: {fmt(routeLength(assembly, selected))} мм</p>}
             {selected.kind === "pipe" && <><NumberField label="Толщина стенки, мм" value={selected.parameters.wallThickness ?? 0} disabled={selected.locked} min={.1} onCommit={v => changeParameter(selected, "wallThickness", v)}/>{!selected.parameters.wallThickness && <p>Толщина стенки не задана: показан предварительный контур.</p>}</>}
@@ -395,9 +397,13 @@ export function ModelTool({ project, catalogue, entity, onChange, cameraScope = 
   </div>;
 
   function updateSelectionAfterReset() { setResetOpen(false); setMeasurement([]); }
-  function treeRow(c: Component) { if (isHardwareRow(c)) return null; return <div key={c.id} className={`model-editor__tree-row ${selected?.id === c.id ? "is-selected" : ""}`}>
+  function treeRow(c: Component) { if (isHardwareRow(c)) return null; const row=<div key={c.id} className={`model-editor__tree-row ${selected?.id === c.id ? "is-selected" : ""}`}>
     <button type="button" className="model-editor__tree-name" aria-pressed={selected?.id === c.id} title={c.name + "\n" + c.sourceNote} onClick={() => { setPropertiesOpen(true); update({ selectedId: c.id, selectedPieceId: undefined }); }}>{c.name}{c.line && c.line.quantity !== 1 ? ` ×${c.line.quantity}` : ""}{c.orphaned || c.line?.fidelity === "missing" || c.fastener?.status === "blocked" ? " ⚠" : ""}</button>
     <input aria-label={`Показывать ${c.name}`} type="checkbox" checked={!c.hidden} onChange={e => edit(c.id, { hidden: !e.target.checked })}/>
     <input aria-label={`Зафиксировать ${c.name}`} title="Зафиксировать" type="checkbox" checked={c.locked} disabled={!!c.fastener} onChange={e => edit(c.id, { locked: e.target.checked })}/>
-  </div>; }
+  </div>;
+    return c.channelFrame?<div key={c.id}>{row}<details className="model-editor__tree-group"><summary>Детали рамы ({c.channelFrame.members.length})</summary>
+      <ChannelFramePieces component={c} selectedPieceId={selected?.id===c.id?editor.selectedPieceId:undefined} onSelect={selectedPieceId=>{setPropertiesOpen(true);update({selectedId:c.id,selectedPieceId});}} onReplace={next=>commit({...assembly,components:assembly.components.map(old=>old.id===next.id?next:old)})}/>
+    </details></div>:row;
+  }
 }

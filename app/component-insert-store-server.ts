@@ -3,7 +3,7 @@ import type { InsertCalculation } from "./component-insert-calculations";
 import type { InsertResultRow } from "./component-insert-types";
 import { suctionCatalogItems, type AssemblyComponent } from "./suction-catalog";
 import { isLegacyNomenclature } from "./component-nomenclature";
-import { insertionPrice, type CalculatedInsertion } from "./calculated-insertion";
+import { insertionBomIssues, insertionPrice, type CalculatedInsertion } from "./calculated-insertion";
 
 export type SavedInsertion = {
   id: string; identity_key: string; name: string; configuration_json: string; calculation_json: string;
@@ -101,6 +101,8 @@ export function savedInsertionComponent(saved: SavedInsertion, currentCatalogVer
 export class InsertionSourceChanged extends Error {}
 
 export async function saveInsertion(row: InsertResultRow, userId: string, expectedSourceRevision: number): Promise<"created" | "updated"> {
+  const compositionIssues=insertionBomIssues(row);
+  if(compositionIssues.length)throw new Error(compositionIssues.join(" "));
   if (!row.exportable || !row.complete || row.pn === null || row.price === null || row.baseLengthMm === null || row.totalLengthMm === null || row.weldLengthMm === null || row.weldCost === null) throw new Error(row.conflict ?? (row.warnings.join("; ") || "Расчёт неполный."));
   const database = db(), timestamp = new Date().toISOString(), micro = (value: number) => Math.round(value * 1_000_000);
   const statements = [

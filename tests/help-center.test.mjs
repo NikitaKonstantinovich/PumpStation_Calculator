@@ -34,6 +34,7 @@ test("all roles can read the complete help library including administrative inst
 test("unknown IDs, oversized queries and non-reading beta requests fail closed", async () => {
   const headers = { "x-test-role": "base" };
   assert.equal((await route.GET(new Request("https://app.example/api/help?document=../../.env.ai.local", { headers }))).status, 404);
+  assert.equal((await route.GET(new Request("https://app.example/api/help?document=doc-current-state-2026-11-03", { headers }))).status, 404);
   assert.equal((await route.GET(new Request(`https://app.example/api/help?q=${"x".repeat(201)}`, { headers }))).status, 400);
   assert.equal(policy.betaApiAllowed("/api/help", "GET"), true);
   for (const method of ["POST", "PUT", "PATCH", "DELETE"]) assert.equal(policy.betaApiAllowed("/api/help", method), false);
@@ -65,12 +66,13 @@ test("document navigation supports history, relative links and anchors without a
   assert.deepEqual(links.helpLocation("?view=help&tab=support"), { tab: "support", documentId: null, anchor: "" });
 });
 
-test("generated help contains all source documentation and excludes assistant control files", async () => {
+test("generated help publishes current guides and reviewed references only", async () => {
   const expected = await collectHelpDocuments();
   const built = JSON.parse(await readFile(new URL("../app/help-documents.json", import.meta.url), "utf8"));
   assert.deepEqual(built, expected);
   assert.equal(new Set(built.documents.map((doc) => doc.id)).size, built.documents.length);
   assert.equal(built.documents.filter((doc) => doc.kind === "guide").length, 16);
-  assert.ok(built.documents.some((doc) => doc.kind === "archive"));
-  assert.ok(built.documents.every((doc) => !/assistant-instructions|source-lock|\.env|evaluation-cases/.test(doc.path)));
+  assert.ok(built.sections.some(section => section.id === "products"));
+  assert.ok(built.documents.some(doc => doc.id === "doc-algorithm-library" && doc.section === "products"));
+  assert.ok(built.documents.every((doc) => doc.kind !== "archive" && !/current-state|development-plan|audit|\/reports\/|assistant-instructions|source-lock|\.env|evaluation-cases/.test(doc.path)));
 });

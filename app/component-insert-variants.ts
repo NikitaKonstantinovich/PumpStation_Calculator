@@ -27,7 +27,8 @@ export function coreSelectInsertVariants(rows: InsertCalculation[], coreRows: In
     const core = cores.get(recipe(row)) ?? row;
     const supplements = sourceParts(row).filter(part => part?.origin === "supplement").length;
     // Optional sensor pressure/price cannot change the selected body and ends.
-    return [core.complete ? 0 : 1, core.complete ? 0 : core.warnings.length, supplements];
+    const diameterDifference = core.welds.reduce((sum, weld) => sum + (weld.acceptedDiameterDifferenceMm ?? 0), 0);
+    return [core.complete ? 0 : 1, core.complete ? 0 : core.warnings.length, supplements, diameterDifference];
   };
   const groups = new Map<string, InsertCalculation[]>();
   for (const row of rows) { const key = insertVariantSlot(row); groups.set(key, [...groups.get(key) ?? [], row]); }

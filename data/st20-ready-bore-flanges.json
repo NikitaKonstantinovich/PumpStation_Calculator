@@ -23,11 +23,12 @@
       "geometryBasis": "ГОСТ 33259-2015: номинальные размеры; фактическую посадку подтверждают чертежом или обмером",
       "supplier": "ДетальЛидерСнаб",
       "supplierProductId": "32-10-01-2-B-Ст.20-IV",
-      "price": null,
-      "priceStatus": "on-request",
-      "priceLabel": "Цена, ₽/шт.",
-      "vat": "Цена и НДС по запросу",
-      "url": "https://detalllidersnab.ru/page145856686.html"
+      "price": 337,
+      "priceStatus": "analogue",
+      "priceLabel": "Цена, ₽/шт. (по аналогу)",
+      "vat": "Цена второго ряда по запросу. Расчётная цена по фланцу ряда 1 из базы: фланцы-001-r0007, тот же DN, PN, тип 01, исполнение B и Ст20.",
+      "url": "https://detalllidersnab.ru/page145856686.html",
+      "priceDate": "2026-11-16"
     },
     {
       "id": "st20-ready-bore:32-16",
@@ -47,11 +48,12 @@
       "geometryBasis": "ГОСТ 33259-2015: номинальные размеры; фактическую посадку подтверждают чертежом или обмером",
       "supplier": "ДетальЛидерСнаб",
       "supplierProductId": "32-16-01-2-B-Ст.20-IV",
-      "price": null,
-      "priceStatus": "on-request",
-      "priceLabel": "Цена, ₽/шт.",
-      "vat": "Цена и НДС по запросу",
-      "url": "https://detalllidersnab.ru/page145856686.html"
+      "price": 349,
+      "priceStatus": "analogue",
+      "priceLabel": "Цена, ₽/шт. (по аналогу)",
+      "vat": "Цена второго ряда по запросу. Расчётная цена по фланцу ряда 1 из базы: фланцы-002-r0030, тот же DN, PN, тип 01, исполнение B и Ст20.",
+      "url": "https://detalllidersnab.ru/page145856686.html",
+      "priceDate": "2026-11-16"
     },
     {
       "id": "st20-ready-bore:32-25",
@@ -71,11 +73,12 @@
       "geometryBasis": "ГОСТ 33259-2015: номинальные размеры; фактическую посадку подтверждают чертежом или обмером",
       "supplier": "ДетальЛидерСнаб",
       "supplierProductId": "32-25-01-2-B-Ст.20-IV",
-      "price": null,
-      "priceStatus": "on-request",
-      "priceLabel": "Цена, ₽/шт.",
-      "vat": "Цена и НДС по запросу",
-      "url": "https://detalllidersnab.ru/page145856686.html"
+      "price": 443,
+      "priceStatus": "analogue",
+      "priceLabel": "Цена, ₽/шт. (по аналогу)",
+      "vat": "Цена второго ряда по запросу. Расчётная цена по фланцу ряда 1 из базы: фланцы-003-r0053, тот же DN, PN, тип 01, исполнение B и Ст20.",
+      "url": "https://detalllidersnab.ru/page145856686.html",
+      "priceDate": "2026-11-16"
     },
     {
       "id": "st20-ready-bore:40-10",
@@ -95,11 +98,12 @@
       "geometryBasis": "ГОСТ 33259-2015: номинальные размеры; фактическую посадку подтверждают чертежом или обмером",
       "supplier": "ДетальЛидерСнаб",
       "supplierProductId": "40-10-01-2-B-Ст.20-IV",
-      "price": null,
-      "priceStatus": "on-request",
-      "priceLabel": "Цена, ₽/шт.",
-      "vat": "Цена и НДС по запросу",
-      "url": "https://detalllidersnab.ru/page145856686.html"
+      "price": 346,
+      "priceStatus": "analogue",
+      "priceLabel": "Цена, ₽/шт. (по аналогу)",
+      "vat": "Цена второго ряда по запросу. Расчётная цена по фланцу ряда 1 из базы: фланцы-001-r0008, тот же DN, PN, тип 01, исполнение B и Ст20.",
+      "url": "https://detalllidersnab.ru/page145856686.html",
+      "priceDate": "2026-11-16"
     },
     {
       "id": "st20-ready-bore:40-16",
@@ -119,11 +123,12 @@
       "geometryBasis": "ГОСТ 33259-2015: номинальные размеры; фактическую посадку подтверждают чертежом или обмером",
       "supplier": "ДетальЛидерСнаб",
       "supplierProductId": "40-16-01-2-B-Ст.20-IV",
-      "price": null,
-      "priceStatus": "on-request",
-      "priceLabel": "Цена, ₽/шт.",
-      "vat": "Цена и НДС по запросу",
-      "url": "https://detalllidersnab.ru/page145856686.html"
+      "price": 384,
+      "priceStatus": "analogue",
+      "priceLabel": "Цена, ₽/шт. (по аналогу)",
+      "vat": "Цена второго ряда по запросу. Расчётная цена по фланцу ряда 1 из базы: фланцы-002-r0031, тот же DN, PN, тип 01, исполнение B и Ст20.",
+      "url": "https://detalllidersnab.ru/page145856686.html",
+      "priceDate": "2026-11-16"
     },
     {
       "id": "st20-ready-bore:40-25",
@@ -143,11 +148,12 @@
       "geometryBasis": "ГОСТ 33259-2015: номинальные размеры; фактическую посадку подтверждают чертежом или обмером",
       "supplier": "ДетальЛидерСнаб",
       "supplierProductId": "40-25-01-2-B-Ст.20-IV",
-      "price": null,
-      "priceStatus": "on-request",
-      "priceLabel": "Цена, ₽/шт.",
-      "vat": "Цена и НДС по запросу",
-      "url": "https://detalllidersnab.ru/page145856686.html"
+      "price": 551,
+      "priceStatus": "analogue",
+      "priceLabel": "Цена, ₽/шт. (по аналогу)",
+      "vat": "Цена второго ряда по запросу. Расчётная цена по фланцу ряда 1 из базы: фланцы-003-r0054, тот же DN, PN, тип 01, исполнение B и Ст20.",
+      "url": "https://detalllidersnab.ru/page145856686.html",
+      "priceDate": "2026-11-16"
     },
     {
       "id": "st20-ready-bore:50-10",
@@ -167,11 +173,12 @@
       "geometryBasis": "ГОСТ 33259-2015: номинальные размеры; фактическую посадку подтверждают чертежом или обмером",
       "supplier": "Изготовление по ГОСТ",
       "supplierProductId": "50-10-01-2-B-Ст.20-IV",
-      "price": null,
-      "priceStatus": "on-request",
-      "priceLabel": "Цена, ₽/шт.",
-      "vat": "Цена и НДС по запросу",
-      "url": "https://signal-teplo.ru/upload/iblock/203/vq3htl65l1axjlrwvdsrcwpcfenf7afx.pdf"
+      "price": 450,
+      "priceStatus": "analogue",
+      "priceLabel": "Цена, ₽/шт. (по аналогу)",
+      "vat": "Цена второго ряда по запросу. Расчётная цена по фланцу ряда 1 из базы: фланцы-001-r0009, тот же DN, PN, тип 01, исполнение B и Ст20.",
+      "url": "https://signal-teplo.ru/upload/iblock/203/vq3htl65l1axjlrwvdsrcwpcfenf7afx.pdf",
+      "priceDate": "2026-11-16"
     },
     {
       "id": "st20-ready-bore:50-16",
@@ -191,11 +198,12 @@
       "geometryBasis": "ГОСТ 33259-2015: номинальные размеры; фактическую посадку подтверждают чертежом или обмером",
       "supplier": "ДетальЛидерСнаб",
       "supplierProductId": "50-16-01-2-B-Ст.20-IV",
-      "price": null,
-      "priceStatus": "on-request",
-      "priceLabel": "Цена, ₽/шт.",
-      "vat": "Цена и НДС по запросу",
-      "url": "https://detalllidersnab.ru/page145856686.html"
+      "price": 560,
+      "priceStatus": "analogue",
+      "priceLabel": "Цена, ₽/шт. (по аналогу)",
+      "vat": "Цена второго ряда по запросу. Расчётная цена по фланцу ряда 1 из базы: фланцы-002-r0032, тот же DN, PN, тип 01, исполнение B и Ст20.",
+      "url": "https://detalllidersnab.ru/page145856686.html",
+      "priceDate": "2026-11-16"
     },
     {
       "id": "st20-ready-bore:50-25",
@@ -215,11 +223,12 @@
       "geometryBasis": "ГОСТ 33259-2015: номинальные размеры; фактическую посадку подтверждают чертежом или обмером",
       "supplier": "ДетальЛидерСнаб",
       "supplierProductId": "50-25-01-2-B-Ст.20-IV",
-      "price": null,
-      "priceStatus": "on-request",
-      "priceLabel": "Цена, ₽/шт.",
-      "vat": "Цена и НДС по запросу",
-      "url": "https://detalllidersnab.ru/page145856686.html"
+      "price": 540,
+      "priceStatus": "analogue",
+      "priceLabel": "Цена, ₽/шт. (по аналогу)",
+      "vat": "Цена второго ряда по запросу. Расчётная цена по фланцу ряда 1 из базы: фланцы-003-r0055, тот же DN, PN, тип 01, исполнение B и Ст20.",
+      "url": "https://detalllidersnab.ru/page145856686.html",
+      "priceDate": "2026-11-16"
     }
   ]
 }

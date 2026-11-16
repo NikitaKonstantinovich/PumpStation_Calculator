@@ -12,13 +12,26 @@ export function mergeThreadEnds(input, reference) {
         field("PURPOSE", "Назначение", "Резьбовой конец вставки"), field("DN", "DN", r.dn), field("PN", "PN", r.pn), field("THREAD", "Резьба, дюйм", r.thread), field("GENDER", "Исполнение резьбы", "НР"),
         field("OD", "Диаметр, мм", r.outerDiameter), field("WALL", "Толщина, мм", r.wallThickness), field("L", "Длина, мм", r.lengthMm),
         field("DIM_SOURCE", "Источник размеров", r.dimensionsSource), field("L_SOURCE", "Источник длины", r.dimensionsSource), field("PRICE_SOURCE", "Источник цены", r.priceSource),
-        field("CHECKED", "Дата проверки", reference.checkedAt), field("ARTICLE", "Артикул", r.article), field("MAKER", "Производитель", r.manufacturer), field("NOTE", "Примечание", r.note), field("ISSUES", "Неподтверждённые данные", r.warnings.join(" "))],
-      prices: r.price === null ? [] : [{ label: "Цена, ₽/шт.", amount: r.price, currency: "RUB", sourceColumn: "PRICE" }],
+        field("CHECKED", "Дата проверки", r.checkedAt ?? reference.checkedAt), field("ARTICLE", "Артикул", r.article), field("MAKER", "Производитель", r.manufacturer), field("NOTE", "Примечание", r.note), field("ISSUES", "Неподтверждённые данные", r.warnings.join(" ")),
+        ...(r.weightKg ? [field("WEIGHT", "Масса, кг", r.weightKg)] : [])],
+      prices: r.price === null ? [] : [{ label: r.priceStatus === "analogue" ? "Цена, ₽/шт. (по аналогу)" : "Цена, ₽/шт.", amount: r.price, currency: "RUB", sourceColumn: "PRICE" }],
       sourceUrls: [...new Set([r.dimensionsSource, r.priceSource])],
     }));
     for (const item of items) {
-      // A rebuild must never reset edits made to a previously added source row.
-      if (!data.items.some(old => old.id === item.id)) data.items.push(item);
+      const old = data.items.find(row => row.id === item.id);
+      if (!old) {
+        data.items.push(item);
+        continue;
+      }
+      // Fill a previously unpriced SKU if the size and connection still match the reviewed record.
+      const priceFields = new Set(["PRICE_SOURCE", "CHECKED", "NOTE", "ISSUES"]);
+      const physicalFields = new Set(["NAME", "PURPOSE", "DN", "PN", "THREAD", "GENDER", "OD", "WALL", "L", "ARTICLE"]);
+      if (old.tableId !== item.tableId || old.prices.length || !item.prices[0]?.label.includes("по аналогу")
+        || !item.fields.filter(field => physicalFields.has(field.column))
+          .every(field => old.fields.some(current => current.column === field.column && current.value === field.value))) continue;
+      old.prices = item.prices;
+      old.fields = [...old.fields.filter(field => !priceFields.has(field.column)), ...item.fields.filter(field => priceFields.has(field.column))];
+      old.sourceUrls = [...new Set([...old.sourceUrls, ...item.sourceUrls])];
     }
     const table = catalog.tables.find(t => t.id === tableId);
     if (!table) catalog.tables.push({ id: tableId, title: family, sourceRange: `1:${items.length}`, sourceUrls: [...new Set(items.flatMap(i => i.sourceUrls))], headerRows: [], columns: items[0].fields.map(f => ({ column: f.column, headerPath: f.headerPath })), recordIds: items.map(i => i.id) });

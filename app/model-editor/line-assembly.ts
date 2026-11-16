@@ -3,6 +3,7 @@ import type { Assembly, Component, Port, PortRef, ProfileCatalog, Vec3 } from ".
 import { pipeThreadDesignation, type LineCatalog, type LineGeometry, type LineJoint } from "./line-types";
 import { applyCollectorTemplate, moveCollectorBranchX } from "./collector-template";
 import { occupyInsertionSensor } from "./insertion-template";
+import { pumpMatingFlangeTemplate } from "../pump-mating-flange";
 
 const add = (a: Vec3, b: Vec3): Vec3 => a.map((v, i) => v + b[i]) as Vec3;
 const sub = (a: Vec3, b: Vec3): Vec3 => a.map((v, i) => v - b[i]) as Vec3;
@@ -50,12 +51,16 @@ export function lineEntries(rows: SpecItem[], prefix: string, side: "suction" | 
   const order: Record<string, number> = { "pump-gasket": 1, "vibration-pump-gasket": 1, "vibration-compensator": 4, "vibration-insertion-gasket": 6,
     "pump-flange": 9, "adapter-flange": 9, "after-vibration-insertion-flange": 9, "union": 12, "adapter": 12, "insertion": 12, "pump-insertion": 12, "after-vibration-insertion": 12, "pump-nipple": 15,
     "insertion-reducer-gasket": 17, "reducer-small-flange": 18, "reducer": 20, "reducer-large-flange": 22, "check-flange": 24, "valve-flange": side === "suction" ? 24 : 85,
+    "mixed-first-insertion-from-flange": 9, "mixed-first-insertion": 12, "mixed-first-insertion-to-flange": 15,
+    "mixed-joint-gasket": 17, "mixed-second-insertion-from-flange": 18, "mixed-second-insertion": 20, "mixed-second-insertion-to-flange": 22,
     "between-valves-insertion": 55, "between-valves-nipple": 55 };
   const threadedFirst = rows.some(row => row.section === side && row.assemblyRole?.startsWith(`${prefix}-`) &&
     row.equipmentId?.startsWith("suction-table:rf-") && row.insertionRequirement?.from.connection === "threaded");
+  const butterfly = rows.some(row => row.section === side && row.option === `${prefix}${side === "suction" ? "SuctionValve" : "DischargeValve"}` && /затвор|017W/i.test(row.name));
   for (const row of rows) {
     if (row.section !== side || row.quantity <= 0) continue;
     const option = row.option ?? "", role = row.assemblyRole?.replace(`${prefix}-`, "");
+    if (butterfly && role === "valve-gaskets") continue;
     const valve = option === `${prefix}${side === "suction" ? "SuctionValve" : "DischargeValve"}`;
     const check = side === "discharge" && option === `${prefix}CheckValve`;
     if (valve || check) { entries.push({ row, sequence: check ? 35 : 75, index: 0, quantity: row.quantity / count, auxiliary: false }); continue; }
@@ -243,10 +248,18 @@ export function addLineAssemblies(base: Assembly, project: ProjectConfig, profil
       const entries = lineEntries(rows, prefix, side, count, data);
       const geometries = branchGeometry(entries, data, profiles), branch: Component[] = [];
       let point = port ? world(pump, port.point) : pump.position, axis: Vec3 = port?.axis ? norm(rotate(port.axis, pump.rotation)) : [side === "suction" ? -1 : 1, 0, 0];
-      let previous: PortRef = { componentId: pump.id, portId: port.id }, previousPort = port, provisional = port.provisional === true;
+      let previous: PortRef = { componentId: pump.id, portId: port.id }, previousPort = port, provisional = port.provisional === true, interrupted = false;
       for (const entry of entries) {
         const { row, index, quantity, auxiliary } = entry, role = row.assemblyRole ?? row.option ?? row.position;
         const g = geometries.get(entry)!;
+        if (g.template && row.insertionAssembly) {
+          const installed = pumpMatingFlangeTemplate(g.template, row.insertionAssembly);
+          if (installed !== g.template) {
+            g.template = installed; g.ports = installed.geometry.ports;
+            g.revision += `:${row.insertionAssembly.pumpFlangeExecution}`;
+            g.issues = [...installed.issues, ...installed.warnings];
+          }
+        }
         if (g.template && row.insertionAssembly?.sensorConnection === "fire-pressure-switch") {
           g.template = occupyInsertionSensor(g.template);
           g.issues = g.issues.filter(issue => !issue.includes("подключение занято заглушкой"));
@@ -256,9 +269,16 @@ export function addLineAssemblies(base: Assembly, project: ProjectConfig, profil
         const ports = g.ports.length >= 2 ? g.ports : [{ id: "left", point: [0, 0, 0] as Vec3, axis: [-1, 0, 0] as Vec3, provisional: true }, { id: "right", point: [0, 0, 0] as Vec3, axis: [1, 0, 0] as Vec3, provisional: true }];
         let a = ports.find(p => p.id === "left" || p.id === "inlet" || p.id === "large-end") ?? ports[0];
         let b = ports.find(p => p !== a && /^(right|outlet|small-end)$/.test(p.id)) ?? ports[1];
-        // Reducers lead out from the pump's smaller end. Check valves follow actual flow.
-        if (g.kind === "reducer" || /reducer$/.test(role) || ["collar", "weldFlange"].includes(g.kind ?? "") && reverseEnd(entry, prefix) || side === "suction" && /CheckValve/.test(role)) [a, b] = [b, a];
-        if (g.equipmentId.startsWith("suction-table:rf-") && row.insertionRequirement?.from.connection === "threaded") [a, b] = [b, a];
+        // A calculated insertion's ends are selected by the specification.
+        // Its DN may decrease or increase away from the pump, and a straight
+        // RF insertion can have its flange on either stored end.
+        if (g.template && row.insertionAssembly) {
+          if (row.insertionAssembly.reversed) [a, b] = [b, a];
+        } else {
+          if (g.kind === "reducer" || /reducer$/.test(role) || ["collar", "weldFlange"].includes(g.kind ?? "") && reverseEnd(entry, prefix)) [a, b] = [b, a];
+          if (g.equipmentId.startsWith("suction-table:rf-") && row.insertionRequirement?.from.connection === "threaded") [a, b] = [b, a];
+        }
+        if (side === "suction" && /CheckValve/.test(role)) [a, b] = [b, a];
         const butterfly = row.option === `${prefix}${side === "discharge" ? "Discharge" : "Suction"}Valve` && /затвор/i.test(row.name);
         const upright = butterfly && verticalPumpIds.has(pump.equipmentId ?? "");
         const rollDischargeValve = butterfly && side === "discharge" && !upright;
@@ -287,9 +307,14 @@ export function addLineAssemblies(base: Assembly, project: ProjectConfig, profil
         c.line!.baseline.position = [...c.position];
         components.push(c); branch.push(c); represented.add(`${row.section}:${row.position}`);
         if (!auxiliary) {
+          if (row.insertionRequirement && !row.equipmentId) {
+            c.line!.issues.push("Сборка ветви остановлена: не определены длина и монтажные концы обязательной вставки. Следующие детали не присоединены.");
+            interrupted = true;
+            break;
+          }
           provisional ||= !g.length || a.provisional === true || b.provisional === true;
           const thread = a.connection === "threaded" || previousPort.connection === "threaded";
-          const seat = a.connection === "weld" || a.connection === "collar";
+          const seat = a.connection === "weld" || a.connection === "collar" && a.plane !== "mating-face";
           joints.push({ id: `${id}-in`, a: previous, b: { componentId: id, portId: a.id }, provisional: provisional || thread && !overlap,
             kind: thread ? "thread" : seat ? "seat" : "face", overlap, ...(overlap ? { axialThreadFit: true } : {}) });
           if (seat && !g.template && g.mountingDepth === undefined && !g.insertionBodies?.length) c.line!.issues.push("Посадка стыка со вставкой требует сохранённого расчёта; осевое перекрытие не назначено");
@@ -301,7 +326,7 @@ export function addLineAssemblies(base: Assembly, project: ProjectConfig, profil
         }
       }
       seatLooseFlanges(branch, joints);
-      if (!entries.length) continue;
+      if (!entries.length || interrupted) continue;
       const key = `collector-${side}`;
       endpoints.set(key, [...(endpoints.get(key) ?? []), { pumpId: pump.id, point, axis, from: previous, port: previousPort, provisional }]);
     }

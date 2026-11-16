@@ -2,6 +2,7 @@ import type { SpecItem } from "./project-config";
 import type { AssemblyComponent } from "./suction-catalog";
 import { jointFlangeThickness } from "./joint-flange-dimensions";
 import type { CollectorConfiguration } from "./collector-calculations";
+import { installedPumpFlange } from "./pump-mating-flange";
 
 function matchesSavedThickness(identity: string | null, current: number | undefined): boolean {
   if (!identity || current === undefined) return false;
@@ -43,7 +44,8 @@ export function insertionEndThickness(row: SpecItem | undefined, end: "from" | "
     if (loose && !result.partThicknesses.has(loose)) return null;
     if (configuration.looseFlange && (!loose || !matchesSavedThickness(configuration.looseFlange, result.partThicknesses.get(loose)))) return null;
   }
-  return result.thicknessMm / 2;
+  const execution = installedPumpFlange(assembly);
+  return end === "from" && execution ? execution.thickness : result.thicknessMm / 2;
 }
 
 /** Project allowance for bolt sizing at a pump port. This is a single side of the grip. */

@@ -12,9 +12,12 @@ export type SpecificationFinding = { id: string; category: "composition" | "tech
 export type RequiredSpecificationNode = { id: string; label: string; matches: (item: SpecItem) => boolean; quantity?: number; equipmentId?: string };
 // Preserve a manually entered historical price in project data, but never total a stale selection.
 export const coreSpecificationHasPrice = (item: SpecItem) => item.technicalStatus !== "stale" && typeof item.price === "number" && Number.isFinite(item.price) && item.price >= 0 &&
+  (!item.frameAssembly || item.frameAssembly.parts.every(p=>typeof p.unitPriceRub==="number"&&Number.isFinite(p.unitPriceRub)&&p.unitPriceRub>=0)) &&
   (!item.insertionAssembly || installedInsertionPrice(item.insertionAssembly) === item.price) &&
   (!item.hydraulicAssembly || hydraulicProductRowPrice(item.hydraulicAssembly) === item.price);
-export const coreSpecificationLineTotal = (item: SpecItem) => specificationHasPrice(item) && Number.isFinite(item.quantity) && item.quantity > 0 ? item.price! * item.quantity : 0;
+export const coreSpecificationLineTotal = (item: SpecItem) => item.frameAssembly && item.technicalStatus!=="stale" && Number.isFinite(item.quantity) && item.quantity>0
+  ? item.quantity*item.frameAssembly.parts.reduce((sum,p)=>sum+(typeof p.unitPriceRub==="number"&&Number.isFinite(p.unitPriceRub)&&p.unitPriceRub>=0&&Number.isFinite(p.quantity)&&p.quantity>0?p.unitPriceRub*p.quantity:0),0)
+  : specificationHasPrice(item) && Number.isFinite(item.quantity) && item.quantity > 0 ? item.price! * item.quantity : 0;
 type ExistingIssue = { id: string; tool: string; severity: "error" | "warning"; message: string; subject?: string };
 
 export function specificationTechnicalStatus(item: SpecItem): SpecTechnicalStatus {

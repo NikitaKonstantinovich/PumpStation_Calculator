@@ -54,6 +54,17 @@ test("unconfigured release is beta and URL/storage cannot enable extra tools", (
   assert.notEqual(state.betaStorageKey("alice"), state.betaStorageKey("bob"));
 });
 
+test("retired and current full editor links keep beta access restrictions", async () => {
+  for (const view of ["geometry-nodes", "node-editor"]) {
+    assert.equal((await guard.guardReleaseRequest(request("/?view=" + view))).status, 401);
+    for (const role of Object.keys(sessions)) {
+      const response = await guard.guardReleaseRequest(request("/?view=" + view, "GET", role));
+      assert.equal(response.status, 403);
+      assert.equal(response.headers.get("location"), null);
+    }
+  }
+});
+
 test("every disabled API method is denied for all roles before side effects", async () => {
   const before = snapshot();
   const routes = ["projects", "collectors", "control-cabinets", "component-calculator", "model-preparation", "model-preparation/assets/[filename]"];

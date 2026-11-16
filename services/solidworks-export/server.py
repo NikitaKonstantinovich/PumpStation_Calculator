@@ -26,7 +26,7 @@ HERE = Path(__file__).resolve().parent
 
 
 READY = {"completed", "partial"}
-PHASES = ("import", "insert", "rebuild", "pack", "verify")
+PHASES = ("session", "import", "insert", "rebuild", "pack", "verify")
 FORMATS = {"solidworks": "project.zip", "edrawings": "assembly.easm", "edrawings-exe": "assembly.exe"}
 REMEDIES = {
     "source_missing": "Привяжите детализированную модель нужного исполнения в библиотеке.",
@@ -106,6 +106,19 @@ def stale_source(folder):
     return None
 
 
+def validate_transform(t):
+    if not isinstance(t, list) or len(t) != 16 or any(type(x) not in (int, float) or not math.isfinite(x) or abs(x) > 10000 for x in t):
+        raise ValueError("Некорректная матрица детали")
+    rows = [t[i:i+3] for i in (0, 3, 6)]
+    dot = lambda a, b: sum(x*y for x, y in zip(a, b))
+    if any(abs(dot(a, b) - (1 if i == j else 0)) > 1e-7 for i, a in enumerate(rows) for j, b in enumerate(rows)) or t[12:] != [1, 0, 0, 0]:
+        raise ValueError("Масштабирование и деформированные системы координат запрещены")
+    a, b, c = rows
+    determinant = a[0]*(b[1]*c[2]-b[2]*c[1])-a[1]*(b[0]*c[2]-b[2]*c[0])+a[2]*(b[0]*c[1]-b[1]*c[0])
+    if abs(determinant-1) > 1e-7:
+        raise ValueError("Зеркальная система координат не поддерживается")
+
+
 def validate(payload):
     if not isinstance(payload, dict) or not re.fullmatch("[0-9a-f]{64}", str(payload.get("snapshotKey", ""))):
         raise ValueError("Не задан идентификатор снимка")
@@ -120,23 +133,22 @@ def validate(payload):
     if not isinstance(parts, list) or not 1 <= len(parts) <= 30000:
         raise ValueError("Допускается от 1 до 30000 физических деталей")
     ids = set()
+    owners = {}
     for p in parts:
-        if not isinstance(p, dict) or not isinstance(p.get("id"), str) or not 1 <= len(p["id"]) <= 1000 or p["id"] in ids:
+        if not isinstance(p, dict) or not isinstance(p.get("id"), str) or not 1 <= len(p["id"]) <= 1000 or p["id"] in ids or p["id"].startswith("subassembly:"):
             raise ValueError("Повторный или некорректный ID детали")
         ids.add(p["id"])
         if not isinstance(p.get("name"), str) or len(p["name"]) > 1000 or not isinstance(p.get("geometry"), dict) or not isinstance(p.get("hidden"), bool):
             raise ValueError("Некорректное описание детали")
-        t = p.get("transform")
-        if not isinstance(t, list) or len(t) != 16 or any(type(x) not in (int, float) or not math.isfinite(x) or abs(x) > 10000 for x in t):
-            raise ValueError("Некорректная матрица детали")
-        rows = [t[i:i+3] for i in (0, 3, 6)]
-        dot = lambda a, b: sum(x*y for x, y in zip(a, b))
-        if any(abs(dot(a, b) - (1 if i == j else 0)) > 1e-7 for i, a in enumerate(rows) for j, b in enumerate(rows)) or t[12:] != [1, 0, 0, 0]:
-            raise ValueError("Масштабирование и деформированные системы координат запрещены")
-        a, b, c = rows
-        determinant = a[0]*(b[1]*c[2]-b[2]*c[1])-a[1]*(b[0]*c[2]-b[2]*c[0])+a[2]*(b[0]*c[1]-b[1]*c[0])
-        if abs(determinant-1) > 1e-7:
-            raise ValueError("Зеркальная система координат не поддерживается")
+        validate_transform(p.get("transform"))
+        owner=p.get("subassembly")
+        if owner is not None:
+            if not isinstance(owner,dict) or not isinstance(owner.get("id"),str) or not 1<=len(owner["id"])<=240 or not isinstance(owner.get("name"),str) or not 1<=len(owner["name"])<=1000:
+                raise ValueError("Некорректная подсборка")
+            validate_transform(owner.get("transform"))
+            if owner["id"] in owners and owner!=owners[owner["id"]]:
+                raise ValueError("Несогласованная база подсборки")
+            owners[owner["id"]]=owner
     if not isinstance(m.get("warnings"), list) or len(m["warnings"]) > 10000 or any(not isinstance(w, str) or len(w) > 20000 for w in m["warnings"]):
         raise ValueError("Некорректные примечания")
     return payload
@@ -259,6 +271,7 @@ class Jobs:
             self.save(job)
             self.command([self.python, str(HERE / "prepare.py"), "--root", str(self.root), "--job", str(folder)], folder, "prepare")
             resolved = read_json(folder / "resolved.json")
+            job["warnings"] = list(dict.fromkeys(job["warnings"] + resolved.get("warnings", [])))
             request = read_json(folder / "request.json")["manifest"]
             instances = {part["id"]: part for part in request["instances"]}
             self.record_omissions(job, resolved["omissions"], instances)
@@ -278,6 +291,14 @@ class Jobs:
                 raise RuntimeError("Состав готовой сборки не совпадает со снимком и отчётом.")
             job.update(completed=len(included), status="partial" if omitted else "completed",
                        stage="Сборка готова с предупреждениями" if omitted else "Сборка готова")
+            diagnostics = folder / "import-diagnostics.json"
+            if diagnostics.is_file():
+                import_warnings = [
+                    f'{row["name"]}: {row["warning"]}' for row in read_json(diagnostics) if row.get("warning")
+                ]
+                job["warnings"] = list(dict.fromkeys(job["warnings"] + import_warnings))
+                if import_warnings and not omitted:
+                    job["stage"] = "Сборка готова; есть замечания к исходным CAD-моделям"
             report = {key: job[key] for key in ("id", "projectId", "snapshotKey", "createdAt", "total", "completed", "omissions", "warnings")}
             report["excluded"] = len(omitted)
             (folder / "report.json").write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
@@ -298,7 +319,8 @@ class Jobs:
             try:
                 progress = read_json(self.state / job["id"] / "progress.json")
                 phase, done, total = progress["phase"], progress["done"], progress["total"]
-                label = {"import": "Подготовка CAD-моделей", "insert": "Размещение элементов",
+                label = {"session": "Закрытие текущего сеанса SOLIDWORKS",
+                         "import": "Подготовка CAD-моделей", "insert": "Размещение элементов",
                          "rebuild": "Проверка положений", "pack": "Упаковка зависимостей",
                          "verify": "Проверка упакованной сборки"}[phase]
                 if type(done) is int and type(total) is int and 0 <= done <= total:
@@ -394,6 +416,8 @@ class Jobs:
                             archive.write(file, file.relative_to(snapshot))
                     for name in ("report.json", "request.json", "verification.json"):
                         archive.write(folder / name, "export/" + name)
+                    for name in ("import-diagnostics.json", "bill-of-materials.json", "bill-of-materials.csv"):
+                        if (folder / name).is_file(): archive.write(folder / name, "export/" + name)
                 temp.replace(folder / "project.zip")
             if not (folder / FORMATS[fmt]).stat().st_size:
                 raise ValueError("Пустой файл экспорта")

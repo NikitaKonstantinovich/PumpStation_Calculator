@@ -1,4 +1,6 @@
 import { frameTankConnection } from "./tank-connection";
+import { channelProjectInputs, placeChannelFrame, channelFrameParts, weighChannelFrame, finishChannelFrame } from "./channel-project";
+import type { ChannelInputs, ChannelResult } from "./channel-types";
 import { tankFrameMounting } from "./tank-mountings";
 import { cabinetFrameWidth } from "./cabinet-mountings";
 import { specificationMassParts, frameManagedOptions } from "./specification-mass";
@@ -31,10 +33,11 @@ export function readMounting(value:unknown):Mounting|null {
   return Math.abs(y-row-Number(h.x))>.05||Math.abs(x-flow-Number(h.y))>.05||Math.abs(z-support)>.15;
  })))return null;
  const pocket=object(m.rivetHeadPocket),{diameterMm,depthMm}=pocket;
- return {verified:m.verified,source:m.source,bounds:b as Mounting["bounds"],holes:m.holes.map((h,i)=>({...object(h),id:`mount-${i}`,owner:"mount"})) as Mounting["holes"],footThicknessMm:number(m.footThicknessMm),clampHeightMm:number(m.clampHeightMm),boltDiameterMm:number(m.boltDiameterMm),...(cad?{cad}:{}),...(typeof m.fastenerSource==="string"?{fastenerSource:m.fastenerSource}:{}),...(positive(diameterMm)&&positive(depthMm)?{rivetHeadPocket:{diameterMm,depthMm}}:{})};
+ const flangeSpan=positive(m.flangeFaceToFaceMm)?{flangeFaceToFaceMm:m.flangeFaceToFaceMm}:{};
+ return {verified:m.verified,source:m.source,bounds:b as Mounting["bounds"],holes:m.holes.map((h,i)=>({...object(h),id:`mount-${i}`,owner:"mount"})) as Mounting["holes"],footThicknessMm:number(m.footThicknessMm),clampHeightMm:number(m.clampHeightMm),boltDiameterMm:number(m.boltDiameterMm),...flangeSpan,...(cad?{cad}:{}),...(typeof m.fastenerSource==="string"?{fastenerSource:m.fastenerSource}:{}),...(positive(diameterMm)&&positive(depthMm)?{rivetHeadPocket:{diameterMm,depthMm}}:{})};
 }
-export type FrameResult={version:string;status:"ready"|"incomplete"|"unsupported";variant:FrameVariant|null;layout:Layout|null;parts:Part[];mass:MassResult|null;issues:Issue[];liftingApproved:boolean;rules:Rules;sourceFingerprint:string};
-export type FrameWork={work:StationWork;pumps:PumpInput[];tank:TankInput|null;cabinetWidth:number|null;components:ComponentItem[];base:Part[];result:FrameResult;maxPumpMassKg:number|null;thicknessMm:3|4|5|null};
+export type FrameResult={version:string;status:"ready"|"incomplete"|"unsupported";variant:FrameVariant|null;layout:Layout|null;parts:Part[];mass:MassResult|null;issues:Issue[];liftingApproved:boolean;rules:Rules;sourceFingerprint:string;channel?:ChannelResult};
+export type FrameWork={work:StationWork;pumps:PumpInput[];tank:TankInput|null;cabinetWidth:number|null;components:ComponentItem[];base:Part[];result:FrameResult;maxPumpMassKg:number|null;thicknessMm:3|4|5|null;channelProfileCode?:string;channelInputs?:ChannelInputs};
 export function beginFrame(work:StationWork,rules:Rules=DEFAULT_FRAME_RULES):FrameWork {
  rules=resolveFrameRules(rules);
  work=frameTankConnection(work);
@@ -54,21 +57,23 @@ export function beginFrame(work:StationWork,rules:Rules=DEFAULT_FRAME_RULES):Fra
  const maxPumpMassKg=pumps.every(p=>positive(p.massKg))?Math.max(...pumps.map(p=>p.massKg!)):null;
  const result:FrameResult={version:rules.version,status:"incomplete",variant:null,layout:null,parts:[],mass:null,issues:[],liftingApproved:false,rules:structuredClone(rules),sourceFingerprint:JSON.stringify([rules,inputs,pumps,base,tank,cabinetRow?.equipmentId,collectors?.discharge?.configuration,cabinetWidth])};
  if(spec.items.some(row=>row.option==="frame"&&!automaticFrameItem(row)))result.issues.push({code:"manual-frame",message:"Ручная рама сохранена: требуется проверка применимости новой компоновки",blocking:true});
- return {work,pumps,tank,cabinetWidth,components,base,result,maxPumpMassKg,thicknessMm:null};
+ return {work,pumps,tank,cabinetWidth,components,base,result,maxPumpMassKg,thicknessMm:null,channelInputs:channelProjectInputs(work)};
 }
 export function selectFrameConstruction(state:FrameWork):FrameWork {
  const construction=coreFrameConstructionForPumpMass(state.maxPumpMassKg);
  if(!construction)state.result.issues.push({code:"pump-mass",message:"Нет подтверждённой массы каждого активного насоса",blocking:true});
- else if(!construction.sheetThicknessMm){state.result.status="unsupported";state.result.issues.push({code:"channel",message:`Требуется другой тип рамы: ${construction.label}`,blocking:true});}
+ else if(!construction.sheetThicknessMm)state.channelProfileCode=construction.code;
  else state.thicknessMm=construction.sheetThicknessMm;
  return state;
 }
 export function placeFrame(state:FrameWork):FrameWork {
+ if(state.channelProfileCode)return placeChannelFrame(state);
  if(state.result.status==="unsupported")return state;
- state.result.layout=layoutFrame(state.pumps,state.cabinetWidth,state.tank,state.result.rules);
+ state.result.layout=layoutFrame(state.pumps,state.cabinetWidth,state.tank,state.result.rules,(state.work.next.entities["station-settings"] as SettingsEntity).cabinetSeparate===true);
  state.result.issues.push(...state.result.layout.issues);return state;
 }
 export function selectFrameVariant(state:FrameWork):FrameWork {
+ if(state.channelProfileCode)return state;
  const length=state.result.layout?.lengthMm;if(!length||!state.thicknessMm)return state;
  const settings=state.work.next.entities["station-settings"] as SettingsEntity,color=settings.stationType==="fire"||settings.stationType==="combined"?"red":"blue";
  const calculated=frameVariants(frameAnchors(state.components),state.result.rules.priceWidthTransferApproved).find(v=>v.lengthMm===length&&v.thicknessMm===state.thicknessMm&&v.color===color)!;
@@ -79,8 +84,9 @@ export function selectFrameVariant(state:FrameWork):FrameWork {
 }
 const bindPart=bindFramePart;
 export function frameParts(state:FrameWork):FrameWork {
+ if(state.channelProfileCode)return channelFrameParts(state);
  const r=state.result,v=r.variant,l=r.layout;if(!v||!l)return state;
- const parts:Part[]=[{id:"frame/body",role:"frame",name:`Рама гнутая 410×${v.lengthMm}×${v.thicknessMm}, ${v.color==="blue"?"синяя":"красная"}`,quantity:1,unitMassKg:v.massKg,unitPriceRub:v.price.transferApproved?v.price.value:null,componentId:v.id,source:v.price.rule},...standHardware(l.profiles,state.cabinetWidth!)];
+ const parts:Part[]=[{id:"frame/body",role:"frame",name:`Рама гнутая 410×${v.lengthMm}×${v.thicknessMm}, ${v.color==="blue"?"синяя":"красная"}`,quantity:1,unitMassKg:v.massKg,unitPriceRub:v.price.transferApproved?v.price.value:null,componentId:v.id,source:v.price.rule},...((state.work.next.entities["station-settings"] as SettingsEntity).cabinetSeparate?[]:standHardware(l.profiles,state.cabinetWidth!))];
  for(const p of state.pumps){
   const count=(p.mounting?.holes.length??4)*p.count;
   const fasteners=pumpFasteners(p.mounting,v.thicknessMm,count,`pump-${p.circuit}`,state.components);
@@ -102,8 +108,9 @@ export function frameParts(state:FrameWork):FrameWork {
  for(const p of r.parts.filter(p=>!p.componentId))r.issues.push({code:"unbound-component",message:p.name+(p.specified?": размеры заданы; нет каталожных данных цены и массы":": не найдена однозначная каталожная позиция"),blocking:!p.specified});
  return state;
 }
-export function weighFrame(state:FrameWork):FrameWork {state.result.mass=stationMass([...state.base,...state.result.parts],(state.tank?.volumeL??0)*state.result.rules.waterDensityKgL);return state;}
+export function weighFrame(state:FrameWork):FrameWork {if(state.channelProfileCode)return weighChannelFrame(state);state.result.mass=stationMass([...state.base,...state.result.parts],(state.tank?.volumeL??0)*state.result.rules.waterDensityKgL);return state;}
 export function loadFrame(state:FrameWork):FrameWork {
+ if(state.channelProfileCode)return state;
  const r=state.result;if(!r.layout?.lengthMm)return state;
  const supports=state.components.flatMap(c=>{const s=field(c,"FRAME_SUPPORT");return s?[s as Support]:[];}),eyes=state.components.flatMap(c=>{const e=field(c,"FRAME_EYELET");return e?[e as Eyelet]:[];});
  const selected=chooseLoadHardware([...state.base,...r.parts],(state.tank?.volumeL??0)*r.rules.waterDensityKgL,supportCount(r.layout.lengthMm),supports,eyes,r.rules,(diameter,quantity,kind)=>["Шайба",...(kind==="support"?["Гровер"]:[]),"Гайка"].map((name,i)=>bindPart({id:`frame/${kind}-hardware-${i}`,role:`${kind}-hardware`,name:`${name} М${diameter}`,quantity,unitMassKg:null,unitPriceRub:null},state.components)));
@@ -114,6 +121,7 @@ export function loadFrame(state:FrameWork):FrameWork {
  return state;
 }
 export function finishFrame(state:FrameWork):StationWork & {frameResult:FrameResult} {
+ if(state.result.channel)return finishChannelFrame(state);
  const r=state.result;if(r.status!=="unsupported")r.status=r.variant&&r.layout?.lengthMm&&positive(r.mass?.operatingKg)&&r.parts.every(p=>!!p.componentId)&&!r.issues.some(i=>i.blocking)?"ready":"incomplete";
  const spec=state.work.next.entities["station-spec"] as SpecEntity;
  const manual=spec.items.some(row=>row.option==="frame"&&!automaticFrameItem(row));

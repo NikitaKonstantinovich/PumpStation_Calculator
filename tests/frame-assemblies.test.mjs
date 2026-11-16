@@ -205,6 +205,19 @@ test('direct cabinet CAD holes match both native stand sizes and hardware matche
    close(result.layout.standDistanceMm,args.width===800?766:560);
   }
   const hardware=a.components.filter(c=>c.frameHardware),counts=new Map();
+  const {cadContents}=await load('cad-export'),manifest=cadContents(a).instances;
+  for(const c of hardware){
+   const f=c.frameHardware,parts=manifest.filter(p=>p.componentId===c.id);
+   assert(f.parts.bolt?.name && f.parts.rivet?.name,'Catalog designations must reach the assembly');
+   assert.equal(parts.filter(p=>p.geometry.kind==='rivet-nut').length,f.centers.length);
+   assert.equal(parts.filter(p=>p.geometry.hardware==='bolt').length,f.centers.length);
+   for(const part of parts)assert(!/левой|правой|насоса|стойки/i.test(part.name),part.name);
+  }
+  for(const group of [hardware.filter(c=>c.id.startsWith('frame-hardware-pump-1-')),hardware.filter(c=>/^frame-hardware-stand-/.test(c.id))]){
+   assert(group.length>0);
+   assert.equal(new Set(group.map(c=>JSON.stringify(c.frameHardware.parts.bolt))).size,1);
+   assert.equal(new Set(group.map(c=>JSON.stringify(c.frameHardware.parts.rivet))).size,1);
+  }
   for(const c of hardware){const f=c.frameHardware,n=f.centers.length;counts.set(`M${f.diameter}x${f.length}`,(counts.get(`M${f.diameter}x${f.length}`)??0)+n);}
   const rows=p.entities['station-spec'].items.filter(r=>r.section==='frame'&&r.quantity>0);
   for(const row of rows){assert(row.price>0,`Missing price: ${row.name}`);}
@@ -241,8 +254,9 @@ test('a recessed rivet head keeps its shape and only lowers the pump and bolt se
  const {cadContents}=await load('cad-export'),{parseFrameHardware}=await load('model-editor/frame-hardware');
  const part=(assembly,suffix)=>cadContents(assembly).instances.find(c=>c.id===JSON.stringify([id,'0/'+suffix]));
  close((part(a,'bolt').transform[11]-part(b,'bolt').transform[11])*1000,fastening.head);
- assert.deepEqual(part(a,'rivet-head').transform,part(b,'rivet-head').transform);
- assert.deepEqual(part(a,'rivet-head').geometry,part(b,'rivet-head').geometry);
+ assert.deepEqual(part(a,'rivet').transform,part(b,'rivet').transform);
+ assert.deepEqual(part(a,'rivet').geometry,part(b,'rivet').geometry);
+ assert.equal(part(a,'rivet').geometry.kind,'rivet-nut');
  assert.equal(parseFrameHardware(flush.frameHardware).supportLift,0);
  assert.equal(parseFrameHardware({...flush.frameHardware,supportLift:fastening.head+.1}),undefined);
 });

@@ -17,7 +17,7 @@ export const itemName = (item?:AssemblyComponent) => item ? String(field(item,/^
 
 // Thickness is the sum of all elements captured by this set of bolts.
 // null means dimensions are missing; no bolt length may be guessed.
-export type JointStack = { gaskets: number; thickness: number | null; flangeThickness?: number | null; fastener?: "bolt" | "stud"; source?: string; allowance?: string };
+export type JointStack = { gaskets: number; thickness: number | null; flangeThickness?: number | null; holes?: number; fastener?: "bolt" | "stud"; source?: string; allowance?: string };
 /** Shared by station valve hardware and insert pipe sizing. Keeps the same catalogue selection. */
 export function selectJointFasteners(database: { items: AssemblyComponent[] }, material: CollectorConfiguration["material"], size: number, pn: number, wafer: boolean | JointStack = false, collarComponentId?: string, weldFlangeComponentId?: string) {
   const reference = fastenerReference.find(row => row.dn === size && row.pn === pn);
@@ -26,7 +26,7 @@ export function selectJointFasteners(database: { items: AssemblyComponent[] }, m
   const hardware = database.items.filter(item => item.catalogId === "метизы" && number(field(item, /^Диаметр резьбы, мм$/i)) === diameter);
   const nut = hardware.find(item => /^Гайка /i.test(itemName(item))), washer = hardware.find(item => /^Шайба /i.test(itemName(item)));
   const nutWidth = number(nut && field(nut, /^Ширина, мм$/i)), washerWidth = number(washer && field(washer, /^Ширина, мм$/i));
-  const stack: JointStack = typeof wafer === "object" ? wafer : { gaskets: wafer ? 2 : 1, thickness: wafer ? reference.wafer017WLength : 0 };
+  const stack: JointStack = typeof wafer === "object" ? wafer : { gaskets: wafer ? 0 : 1, thickness: wafer ? reference.wafer017WLength : 0 };
   const ends = stack.fastener === "stud" ? 2 : 1;
   // An explicit grip changes thickness, not the confirmed drilling pattern.
   const flange = jointFlangeThickness(database, material, size, pn, collarComponentId, weldFlangeComponentId);
@@ -38,7 +38,8 @@ export function selectJointFasteners(database: { items: AssemblyComponent[] }, m
   const lengthField = /^Длина (?:болта|шпильки), мм$/i;
   const bolt = length ? hardware.filter(item => kind.test(itemName(item)) && (number(field(item, lengthField)) ?? 0) >= length)
     .sort((a, b) => number(field(a, lengthField))! - number(field(b, lengthField))!)[0] : undefined;
-  return { reference: flange?.holes ? { ...reference, holes: flange.holes } : reference, diameter, nut, washer, nutWidth, washerWidth, stack, ends, flangeThickness, length, bolt,
+  const holes = stack.source && Number.isInteger(stack.holes) && stack.holes! > 0 && stack.holes! <= 128 ? stack.holes : flange?.holes;
+  return { reference: holes ? { ...reference, holes } : reference, diameter, nut, washer, nutWidth, washerWidth, stack, ends, flangeThickness, length, bolt,
     standardLength: bolt ? number(field(bolt, lengthField)) : null,
     warnings: legacySteel || stack.flangeThickness !== undefined ? [] : flange?.warnings ?? [], flangeDimensions: flange?.dimensions ?? [],
     source: [stack.source ?? reference.source, flange?.source].filter(Boolean).join("; ") };
@@ -69,12 +70,15 @@ export function lineSpecParts(rows: SpecItem[], section: "suction" | "discharge"
       const supplied=assembly?.snapshot.calculation.bom.filter(part=>part.kind===kind && (!side || part.role.startsWith(`${side}-`))).reduce((sum,part)=>sum+(part.quantity??0),0)??0;
       const remaining=Math.max(0,count-supplied*(insertion?.quantity??0));
       if(!remaining)continue;
+      if(kind==="looseFlange"&&insertion){
+        const note="Свободные фланцы должны входить в состав и стоимость вставки. Пересчитайте и выгрузите изделие с полным составом.";
+        insertion.price=null;insertion.status="clarify";
+        if(assembly)insertion.technicalStatus="incomplete";
+        insertion.technicalNotes=[...new Set([...(insertion.technicalNotes??[]),note])];
+        continue;
+      }
       const part=catalog.components.find(x=>x.kind===kind&&x.dn===size&&x.pn===pn&&x.material===collector.material);
       const item=database.items.find(x=>x.id===part?.id);
-      if(assembly&&kind==="looseFlange"&&item){
-        assembly.externalFlanges??={};
-        for(const target of end?[end]:["from","to"] as const) assembly.externalFlanges[target]=item.id;
-      }
       add(`${role}-${kind}`,part?.name??`${kind==="collar"?"Воротник":"Фланец"} DN${size}`,remaining,`DN${size} · PN${pn} · ${collector.material==="aisi304"?"AISI 304":"Ст20"}`,item, "шт.",part?.price??undefined);
     }
   };

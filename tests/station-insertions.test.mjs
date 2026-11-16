@@ -114,7 +114,10 @@ test("both lines, circuits and vibration modes count the supplied BOM once and p
       const supplied=bom.filter(part=>part.kind===kind).reduce((sum,part)=>sum+part.quantity,0);
       const external=result.filter(row=>row.assemblyRole.endsWith(`-${kind}`)).reduce((sum,row)=>sum+row.quantity,0);
       if(supplied===2) assert.equal(external,0,`included ${kind} must not be added again`);
-      if(kind==="looseFlange"&&c.leftConnection==="collar"&&!supplied) assert.equal(external,6,"loose flanges excluded from factory BOM remain external");
+      if(kind==="looseFlange"){
+        assert.equal(supplied,[c.leftConnection,c.rightConnection].filter(end=>end==="collar").length);
+        assert.equal(external,0,"free flanges are paid for only inside the insertion");
+      }
     }
     assert.ok(result.some(row => /fasteners-bolts/.test(row.assemblyRole)));
     assert.ok(result.some(row => /gasket/.test(row.assemblyRole)));
@@ -140,6 +143,45 @@ test("both lines, circuits and vibration modes count the supplied BOM once and p
     }
   }
 });
+test("included loose flanges follow either insertion orientation and are priced once in station exports", () => {
+  for(const reversed of [false,true])for(const count of [1,4])for(const section of ["suction","discharge"]){
+    const c=valid("aisi304",16,section==="suction"?"eccentric":"concentric"),item=component(c),db={...resources.components,items:[...resources.components.items,item]};
+    const output=[],role="primary-audit",location=`${section}:${role}`;
+    const fromDn=reversed?c.dnSmall:c.dnLarge,toDn=reversed?c.dnLarge:c.dnSmall;
+    const parts=lineSpecParts(output,section,"audit",{material:"aisi304"},db,db.collectorCatalog,{[location]:insertionDesign(c)});
+    const row=parts.insertion(role,"Insert",count,"",{fromDn,toDn,fromConnection:"flanged",toConnection:"flanged",pn:16,purpose:"pump-transition"});
+    parts.flanges("primary-from-flange",fromDn,16,count,row,"from");
+    parts.flanges("primary-to-flange",toDn,16,count,row,"to");
+    assert.equal(row.insertionAssembly.reversed,reversed);
+    assert.equal(output.length,1);assert.equal(row.price,c.price);
+    assert(insertionEndThickness(row,"from",db)>0);assert(insertionEndThickness(row,"to",db)>0);
+    const exported=specificationExportRows(output,[{title:section,sections:[{id:section}]}]);
+    assert.equal(exported.filter(row=>row.kind==="item").length,1);
+    assert.equal(exported.find(row=>row.kind==="item").cells[5],count*c.price);
+    assert.match(specificationCsv(exported),/left-looseFlange/);
+    assert.match(specificationCsv(exported),/right-looseFlange/);
+  }
+});
+
+test("legacy insertions without included flanges require recalculation and cannot add external price rows",async()=>{
+  const {selectAutomaticStationInsertion}=await load("station-insertion-selection");
+  const old=structuredClone(valid("aisi304"));
+  for(const side of ["left","right"])old.configuration[side].looseFlange=null;
+  old.bom=old.bom.filter(part=>part.kind!=="looseFlange");old.price=old.bom.reduce((sum,part)=>sum+part.cost,0);
+  old.identityKey=`insert:v1:${JSON.stringify(old.configuration)}`;
+  const legacy=component(old,"legacy"),current=component(valid("aisi304"),"current");
+  legacy.calculatedInsertion.pricedAt="2099-01-01";
+  assert.equal(insertionPrice(legacy.calculatedInsertion),null);
+  const req=requirement(old);
+  assert.equal(selectStationInsertion([legacy],req).technicalStatus,"incomplete");
+  assert.equal(selectAutomaticStationInsertion([legacy,current],{...req,design:undefined}).item.id,current.id);
+  const output=[],role="primary-old",parts=lineSpecParts(output,"suction","audit",{material:"aisi304"},{...resources.components,items:[...resources.components.items,legacy]},resources.components.collectorCatalog,{[`suction:${role}`]:insertionDesign(old)});
+  const row=parts.insertion(role,"Insert",3,"",{fromDn:old.dnLarge,toDn:old.dnSmall,fromConnection:"flanged",toConnection:"flanged",pn:16,purpose:"between-valves"});
+  parts.flanges("primary-old-flanges",old.dnLarge,16,6,row);
+  assert.equal(output.length,1);assert.equal(row.price,null);assert.equal(row.technicalStatus,"incomplete");
+  assert.match(row.technicalNotes.join(" "),/Свободные фланцы должны входить/);
+});
+
 test("confirmed insert dimensions reach the bolt stack and exclude replacement by a generic flange", () => {
   const c = valid("st20"), item = component(c), row = { insertionAssembly: { snapshot: item.calculatedInsertion, reversed: false, accounting: "assembly" } };
   const thickness = insertionEndThickness(row, "from", resources.components); assert.ok(thickness > 0);

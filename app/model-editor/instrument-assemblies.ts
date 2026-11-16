@@ -7,7 +7,7 @@ import { composeValvePose, relativePose } from "./valve-controls";
 import { FIRE_INSERTION_INSTRUMENTS_REVISION } from "../fire-insertion-instruments";
 import { occupyInsertionSensor } from "./insertion-template";
 
-export const INSTRUMENT_MOUNT_REVISION = mounts.revision;
+export const INSTRUMENT_MOUNT_REVISION = mounts.revision + "-kip1-suction-kip2-discharge";
 type Role = keyof typeof mounts.assets;
 export type InstrumentMount = {
   version: 1; parentId: string; portId: string; role: Role; revision: string;
@@ -109,7 +109,7 @@ export function addInstrumentAssemblies(assembly: Assembly, project: ProjectConf
         const note = part.role === "gauge" ? (layoutGauge ? "Компоновочная модель ТМ-510Р Ø100 G1/2. Диапазон, артикул и цена манометра не определены в спецификации." : "Компоновочная CAD-геометрия ТМ-510Р Ø100 G1/2 по изображению пользователя; в расчёте сохранён выбранный манометр Экомера. Точное соответствие корпуса требует проверки.")
           : part.role === "connector" ? "Разъём DIN43650 — часть геометрии преобразователя; отдельная покупная позиция и стоимость не добавляются."
           : "Исходная CAD-геометрия КИП; номинальная посадка по резьбе. Глубины навинчивания и допуски требуют проверки при изготовлении.";
-        components.push({ id: componentId, name: `${part.role === "connector" ? "Разъём DIN43650" : part.row.name}${layoutGauge ? " (компоновочный ТМ-510Р)" : ""} · КИП ${i + 1}`, kind: "equipment", equipmentId: part.row.equipmentId,
+        components.push({ id: componentId, name: `${part.role === "connector" ? "Разъём DIN43650" : part.row.name}${layoutGauge ? " (компоновочный ТМ-510Р)" : ""} · КИП${side === "suction" ? 1 : 2}${total > 1 ? ` · ${i + 1}` : ""}`, kind: "equipment", equipmentId: part.row.equipmentId,
           sourceKey: part.row.equipmentId ? `equipment:${part.row.equipmentId}` : "layout:tm510r", sourceNote: note, position: [0, 0, 0], rotation: [0, 0, 0], hidden: false, locked: false, opacity: 1,
           bounds, meshUrl: asset.meshUrl, cadSource: { path: asset.source, hash: asset.sourceHash }, ports: structuredClone(asset.ports) as Port[], instrumentMount: binding,
           parameters: { length: bounds[3] - bounds[0], width: bounds[4] - bounds[1], height: bounds[5] - bounds[2], diameter: 1, routeOffset: 0 } });

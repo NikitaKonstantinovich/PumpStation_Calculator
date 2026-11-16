@@ -1,4 +1,4 @@
-import { readFile, readdir, writeFile } from "node:fs/promises";
+import { readFile, writeFile } from "node:fs/promises";
 import { createHash } from "node:crypto";
 import { resolve } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
@@ -6,34 +6,39 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 const root = fileURLToPath(new URL("../", import.meta.url));
 export const helpSections = [
   { id: "start", title: "Начало работы", description: "Проекты, подбор насосов, кривые и основные понятия." },
+  { id: "products", title: "Продукты и алгоритмы", description: "Рабочее пространство продукта, нодовый редактор и версии графов." },
   { id: "calculation", title: "Расчёт станции", description: "DN, коллекторы, обвязка, шкафы и спецификация." },
   { id: "models", title: "3D и компоновка", description: "Модели оборудования, сборки и монтажные соединения." },
   { id: "management", title: "Настройки и доступ", description: "Базовые значения, версии расчёта и пользователи." },
   { id: "engineering", title: "Размеры и исходные данные", description: "Каталоги, фланцы, вставки и принятые инженерные решения." },
   { id: "operations", title: "Установка и эксплуатация", description: "Запуск приложения, профили выпуска и подготовка моделей." },
-  { id: "archive", title: "История и планы", description: "Датированные проверки и предложения; учитывайте состояние на дату документа." },
 ];
 
-function sectionFor(name) {
-  if (["ai-assistant", "hydraulic-curves"].includes(name)) return "start";
-  if (/audit|current-state|development-plan|solidworks-assembly-algorithm/.test(name)) return "archive";
-  if (/^3d-|^collector-3d|^collector-instrument-mounting|^fire-insertion-instruments|^tank-connection-3d|^insertion-3d|^valve-control-mounting/.test(name)) return "models";
-  if (["base-values", "user-administration", "item-entry", "equipment-admin"].includes(name)) return "management";
-  if (["README", "beta-0.1", "beta-0.1-windows-hosting", "model-converter", "help-center"].includes(name)) return "operations";
-  if (/^(collector-constructor|component-calculator|diagnostics|discharge-spec|frame-selection|pipe-painting|pressure-checks|sealing-selection|specification-consistency|specification-hydraulics-instruments|specification-insertions|suction-instruments|suction-pressure|threaded-inserts|valve-fasteners)$/.test(name)) return "calculation";
-  return "engineering";
-}
+// Files in docs/ also include research, task reports and source evidence.
+// Publish a reference only after it has been reviewed against the current UI or code.
+const references = {
+  start: ["README", "ai-assistant", "node-pump-selection-manual", "hydraulic-curves"],
+  products: ["node-tools-workspace2", "algorithm-library", "node-spacing-sources"],
+  calculation: ["collector-constructor", "component-calculator", "diagnostics", "discharge-spec", "frame-selection",
+    "bent-frame-calculation", "horizontal-channel-frame", "pipe-painting", "pressure-checks", "sealing-selection",
+    "specification-consistency", "specification-hydraulics-instruments", "specification-insertions", "suction-instruments",
+    "suction-pressure", "threaded-inserts", "valve-fasteners", "sensor-nipple-pn25-warning"],
+  models: ["3d-editor", "3d-flange-fasteners", "3d-line-assemblies", "collector-3d", "collector-instrument-mounting",
+    "end-suction-ports", "fire-insertion-instruments", "insertion-3d", "node-pump-drawings", "onis-3d-models",
+    "solidworks-export", "steel-flange-display", "tank-connection-3d", "valve-control-mounting"],
+  management: ["base-values", "user-administration", "item-entry", "equipment-admin"],
+  engineering: ["bene-inox-pn16-flanges", "newkey-din2503-dimensions", "newkey-dn125-pn25", "newkey-dn150-pn25",
+    "newkey-dn40-pn25", "reducer-ready-bore-seating", "st20-concentric-reducers", "standard-stainless-pn16-flanges", "werk-pn16-flanges"],
+  operations: ["beta-0.1", "help-center", "local-project-storage", "model-converter"],
+};
 
 export async function collectHelpDocuments(directory = root) {
   const read = async (path) => (await readFile(resolve(directory, path), "utf8")).replace(/^\uFEFF/, "").replace(/\r\n?/g, "\n");
   const registry = JSON.parse(await read("docs/assistant/registry.json"));
   const guideSections = { assistant: "start", access: "start", projects: "start", selection: "start", curves: "start", glossary: "start", model: "models", "base-values": "management", administration: "management" };
   const inputs = registry.documents.map((doc) => ({ id: doc.id, path: doc.path, section: guideSections[doc.topic] ?? "calculation", kind: "guide" }));
-  // Only documentation, never the assistant's system prompt, env, D1 or source files.
-  for (const name of (await readdir(resolve(directory, "docs"))).filter((name) => name.endsWith(".md")).sort()) {
-    const slug = name.slice(0, -3);
-    const section = sectionFor(slug);
-    inputs.push({ id: `doc-${slug.toLowerCase()}`, path: `docs/${name}`, section, kind: section === "archive" ? "archive" : "reference" });
+  for (const [section, names] of Object.entries(references)) {
+    for (const name of names) inputs.push({ id: `doc-${name.toLowerCase()}`, path: `docs/${name}.md`, section, kind: "reference" });
   }
   inputs.push(
     { id: "app-readme", path: "README.md", section: "operations", kind: "reference" },

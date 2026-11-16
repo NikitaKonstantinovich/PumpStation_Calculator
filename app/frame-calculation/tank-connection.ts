@@ -1,7 +1,7 @@
 import type {StationWork} from "../station-specification";
 import type {SettingsEntity, SpecEntity, SpecItem} from "../project-config";
 import {componentField,componentPrice} from "./components";
-import {tankValve20} from "../tank-connection";
+import {tankValve20,TANK_VALVE_20_ID} from "../tank-connection";
 
 /** Applied only by the new frame graph. Historical algorithms retain their own hookup. */
 export function frameTankConnection(work:StationWork):StationWork {
@@ -21,8 +21,9 @@ export function frameTankConnection(work:StationWork):StationWork {
       const v=componentField(item,"FRAME_TANK_CONNECTION") as {key?:string;verified?:boolean;source?:string}|undefined;
       return v?.key===definition.key&&v.verified===true&&!!v.source;
     });
-    const item=found.length===1?found[0]:definition.key==="hose-20mf"?items.find(i=>i.id==="мембранный-бак-002-r0011"):definition.key==="valve-20ff"?tankValve20:undefined;
-    return {...row,name:definition.name,details:definition.description,description:definition.description,equipmentId:item?.id,price:componentPrice(item),status:"clarify",technicalStatus:"unverified",technicalNotes:[item?"Проверьте PN, выбранную длину подводки и трассу по текущей компоновке":"Нужен точный артикул с подтверждёнными резьбами, PN и длиной; цена прежнего DN25 не применяется"],sourceFingerprint:"frame-tank-connection-dn20-v1"};
+    const item=found.length===1?found[0]:definition.key==="hose-20mf"?items.find(i=>i.id==="мембранный-бак-002-r0011"):definition.key==="valve-20ff"?items.find(i=>i.id===TANK_VALVE_20_ID)??tankValve20:undefined;
+    const priceSource=componentField(item,"PRICE_SOURCE");
+    return {...row,name:definition.name,details:definition.description,description:[definition.description,priceSource].filter(Boolean).join(". "),equipmentId:item?.id,price:componentPrice(item),status:"clarify",technicalStatus:"unverified",technicalNotes:[item?"Проверьте PN, выбранную длину подводки и трассу по текущей компоновке":"Нужен точный артикул с подтверждёнными резьбами, PN и длиной; цена прежнего DN25 не применяется"],sourceFingerprint:"frame-tank-connection-dn20-v1"};
   };
   return {...work,next:{...work.next,entities:{...work.next.entities,"station-spec":{...spec,items:spec.items.map(row=>{
     if(row.option!=="membraneTank"||!row.hydraulicAssembly)return replace(row);

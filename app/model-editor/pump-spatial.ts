@@ -4,6 +4,8 @@ import { applyMvFlowReview } from "./onis-flow";
 import echMounts from "../../data/ech-threaded-mounts.json";
 import { horizontalPumpDrawing } from "./horizontal-pump-drawings";
 import { applyHorizontalPumpCadPorts } from "./horizontal-pump-cad";
+import { applyEndSuctionCadPorts, endSuctionDrawing } from "./end-suction-ports";
+import { applyCdmCadPorts } from "./cdm-cad-ports";
 
 export type PumpGeometryInfo = {
   version: 1;
@@ -48,13 +50,15 @@ export function parsePumpGeometry(raw: unknown): PumpGeometryInfo | undefined {
  * DN, packing dimensions and extra instrument connections are not coordinates. */
 export function resolvePumpSpatial(pump: Pump, profile?: PumpProfile): { bounds: Bounds; ports: Port[]; info: PumpGeometryInfo; note: string } {
   profile = applyMvFlowReview(pump.id, profile);
+  if (profile && pump.manufacturer === "CNP" && pump.series === "CDM") profile = applyCdmCadPorts(profile);
   if (profile && pump.type === "horizontal_multistage") profile = applyHorizontalPumpCadPorts(profile);
+  if (profile && pump.type === "end_suction") profile = applyEndSuctionCadPorts(pump, profile);
   const dimensions = pump.dimensions ?? {}, issues: string[] = [];
   const sizes = ["length", "width", "height"].map(key => positive(dimensions[`overall_${key}`]) ? dimensions[`overall_${key}`] : null) as PumpGeometryInfo["dimensionsMm"];
   const measured = validBounds(profile?.bounds);
   const catalogSpatial = parseCatalogPumpSpatial(pump.spatialData);
-  const drawing = !catalogSpatial && pump.type === "horizontal_multistage" ? horizontalPumpDrawing(pump.id) : undefined;
-  const catalog = catalogSpatial ?? parseCatalogPumpSpatial(drawing);
+  const drawing = !catalogSpatial ? pump.type === "end_suction" ? endSuctionDrawing(pump) : pump.type === "horizontal_multistage" ? horizontalPumpDrawing(pump.id) : undefined : undefined;
+  const catalog = catalogSpatial ?? parseCatalogPumpSpatial(drawing) ?? verticalInstallationDrawing(pump, sizes);
   const info: PumpGeometryInfo = { version: 1, envelope: measured ? "cad" : sizes.every(positive) ? "catalog" : "incomplete", dimensionsMm: sizes, coordinateSystem: measured ? "cad" : "envelope-base", issues };
   // 100 mm on an unknown axis is only the selectable diagnostic marker size.
   // It is never published as a pump dimension or used as a nozzle coordinate.
@@ -120,13 +124,57 @@ export function resolvePumpSpatial(pump: Pump, profile?: PumpProfile): { bounds:
   return { bounds, ports, info, note };
 }
 
+function verticalInstallationDrawing(pump: Pump, sizes: PumpGeometryInfo["dimensionsMm"]): PumpSpatialData | undefined {
+  if (pump.type !== "vertical_multistage") return;
+  const inlet = pump.inlet, outlet = pump.outlet;
+  const low = inlet?.axis_height_mm, high = outlet?.axis_height_mm;
+  if (!positive(low) || !positive(high) || typeof inlet?.installation_source !== "string" || typeof outlet?.installation_source !== "string") return;
+  const opposed = inlet.layout === "inline_opposed" && outlet.layout === inlet.layout;
+  const sameSide = inlet.layout === "same_side_different_heights" && outlet.layout === inlet.layout;
+  const span = inlet.face_to_face_mm;
+  if (opposed ? !positive(span) || span !== outlet.face_to_face_mm : !sameSide) return;
+  const source = [...new Set([inlet.installation_source, outlet.installation_source])].join(", ");
+  const declaredWidth = pump.dimensions?.base_width;
+  const width = sizes[1] ?? (positive(declaredWidth) ? declaredWidth : null);
+  const length = opposed && positive(span) ? Math.max(span, sizes[0] ?? 0) : sizes[0];
+  const height = sizes[2];
+  return {
+    version: 1, units: "mm", coordinateSystem: "inlet", source, issues: [],
+    rule: opposed ? "Оси патрубков и расстояние между присоединительными плоскостями по каталогу."
+      : "Присоединения на одной стороне. Высота каждой оси от основания по каталогу.",
+    boundsMm: [0, width === null ? null : -width / 2, -low, length, width === null ? null : width / 2, height === null ? null : height - low],
+    ports: [
+      { id: "inlet", point: [0, 0, 0], axis: [-1, 0, 0], source },
+      { id: "outlet", point: [opposed && positive(span) ? span : 0, 0, high - low], axis: opposed ? [1, 0, 0] : [-1, 0, 0], source },
+    ],
+  };
+}
+
 /** Display-only convention approved 31.10.2026. Never enrich catalog dimensions
  * or audited nozzle coordinates with these schematic mounting points. */
 export function resolvePumpLayout(pump: Pump, profile?: PumpProfile, allowSchematicPorts = true): ReturnType<typeof resolvePumpSpatial> {
   const r = resolvePumpSpatial(pump, profile);
+  return completePumpLayout(pump, r, allowSchematicPorts);
+}
+
+/** A schematic nozzle must be drawn on its own envelope, never guessed onto
+ * a real mesh in an unverified coordinate system. */
+export function resolveStationPumpLayout(pump: Pump, profile?: PumpProfile): ReturnType<typeof resolvePumpSpatial> {
+  const measured = resolvePumpSpatial(pump, profile);
+  if (requiredPorts(pump).every(id => usablePort(measured.ports, id))) return measured;
+  const outline = profile ? resolvePumpSpatial(pump) : measured;
+  if (requiredPorts(pump).every(id => usablePort(outline.ports, id))) return outline;
+  return completePumpLayout(pump, outline, true);
+}
+
+const requiredPorts = (pump: Pump) => pump.type === "submersible" ? ["outlet"] : ["inlet", "outlet"];
+const usablePort = (ports: Port[], id: string) =>
+  ports.some(p => p.id === id && vector(p.axis) && Math.abs(Math.hypot(...p.axis) - 1) < 1e-6);
+
+function completePumpLayout(pump: Pump, r: ReturnType<typeof resolvePumpSpatial>, allowSchematicPorts: boolean): ReturnType<typeof resolvePumpSpatial> {
   if (!allowSchematicPorts) return r;
-  const required = pump.type === "submersible" ? ["outlet"] : ["inlet", "outlet"];
-  const usable = (id: string) => r.ports.some(p => p.id === id && vector(p.axis) && Math.abs(Math.hypot(...p.axis) - 1) < 1e-6);
+  const required = requiredPorts(pump);
+  const usable = (id: string) => usablePort(r.ports, id);
   // Unassigned CAD port roles still require direction review, not remapping.
   if (required.every(usable) || r.ports.some(p => /^port-[ab]$/.test(p.id))) return r;
   const bounds = [...r.bounds] as Bounds;

@@ -19,8 +19,8 @@ function flange(id,x,rotation=0){
 }
 
 test("CDM65-2 has upright butterfly actuators and eight measured holes on both pump nozzles",async()=>{
-  // Use real KMS counterflanges; an incomplete spec with no discharge
-  // counterflange must still block that joint even with a measured pump.
+  // Complete insertion templates supply their counterflanges. Removing those
+  // supports must still block a joint even with a measured pump.
   const {assembly:a}=await realStation("425",100,"aisi304",2,true);
   const valves=a.components.filter(c=>/^(primary|secondary)(SuctionValve|DischargeValve)$/.test(c.line?.role));
   assert.equal(valves.length,4);for(const c of valves)assert.ok(model.rotate([0,0,1],c.rotation)[2]>.999999);
@@ -28,8 +28,10 @@ test("CDM65-2 has upright butterfly actuators and eight measured holes on both p
   assert.equal(joints.length,4);
   for(const c of joints){assert.equal(c.fastener.status,"ready",c.fastener.issues.join("; "));assert.equal(c.fastener.centers.length,8);}
   const missing=await realStation("425",100,"aisi304",1,false);
-  const open=missing.assembly.components.find(c=>c.fastener?.members.includes("pump-1-425-0")&&c.fastener.members.some(id=>id.includes("-discharge-")));
-  assert.equal(open.fastener.status,"blocked");assert.match(open.fastener.issues.join(" "),/опорные поверхности/);
+  for(const c of missing.assembly.components.filter(c=>c.insertion))
+    c.insertion.template.geometry.pieces=c.insertion.template.geometry.pieces.filter(p=>p.shape.kind!=="flange");
+  const open=rebuildFasteners(missing.assembly).components.find(c=>c.fastener?.members.includes("pump-1-425-0")&&c.fastener.members.some(id=>id.includes("-discharge-")));
+  assert.equal(open.fastener.status,"blocked");assert.match(open.fastener.issues.join(" "),/нет подтверждённых отверстий, углового положения или толщины фланца/);
 });
 
 test("opening a project with geometry off preserves the scene and defers fastener generation until the editor opens", async()=>{
@@ -115,7 +117,8 @@ test("real CDM assembly groups wafer packages once and preserves pump flow and m
   assert.equal(groups.length,6);
   assert.ok(groups.every(c=>c.fastener.status==="ready"),groups.map(c=>c.fastener.issues).flat().join("\n"));
   assert.equal(groups.filter(c=>c.fastener.dimensions.ends===2).length,2);
-  assert.ok(groups.some(c=>c.fastener.members.some(id=>/between-valves-flanges-looseFlange/.test(id))),"loose insert flange is a package support");
+  assert.ok(groups.some(c=>c.fastener.members.some(id=>a.components.find(p=>p.id===id)?.insertion?.template.geometry.pieces.some(p=>/-loose$/.test(p.id)&&p.shape.kind==="flange"))),"included loose insert flange is a package support");
+  assert.ok(!a.components.some(c=>/between-valves-flanges-looseFlange/.test(c.id)),"no duplicate standalone insertion flange");
   assert.ok(groups.some(c=>c.fastener.members.some(id=>a.components.find(p=>p.id===id)?.collector)),"collector flange is a package support");
   for(const c of a.components.filter(c=>/CheckValve|SuctionValve|DischargeValve/.test(c.line?.role??"")))assert.ok(groups.filter(g=>g.fastener.members.includes(c.id)).length<=1,`duplicate ${c.id}`);
   const pump=a.components.find(c=>c.kind==="pump"),changed=model.editComponent(a,{id:pump.id,patch:{position:model.add(pump.position,[0,0,7]),locked:true}});

@@ -53,7 +53,7 @@ export function makeCollectorCatalog(data: BindingCatalog): CollectorCatalog {
     if (!selected.flangeThickness) warnings.push(`${label}: не подтверждена толщина фланцевого пакета`);
     if (!selected.standardLength) warnings.push(`${label}: нет стандартного болта М${selected.diameter}${selected.length ? ` длиной не менее ${selected.length} мм` : " с подтверждённой длиной"}`);
     valveBolts.push({ dn, pn, material, model: "017W", length: selected.standardLength, minimumLengthMm: selected.length, componentId: selected.bolt?.id ?? null, diameter: selected.diameter,
-      source: `${label}; ${selected.source}; две прокладки по 2 мм, гайка, шайба, выступ резьбы 5 мм; выбранный болт: ${selected.bolt?.id ?? "не найден"}`, warnings: [...new Set(warnings)] });
+      source: `${label}; ${selected.source}; без прокладок у затвора, гайка, шайба, выступ резьбы 5 мм; выбранный болт: ${selected.bolt?.id ?? "не найден"}`, warnings: [...new Set(warnings)] });
   }
-  return { version: `collector:v3:017W:${data.source.sha256}:${data.source.importedAt}`, components, valveBolts, bolts: data.collectorReference?.bolts ?? [], paintingRates: readPipePaintingRates(data) };
+  return { version: `collector:v4:017W-no-gaskets:${data.source.sha256}:${data.source.importedAt}`, components, valveBolts, bolts: data.collectorReference?.bolts ?? [], paintingRates: readPipePaintingRates(data) };
 }

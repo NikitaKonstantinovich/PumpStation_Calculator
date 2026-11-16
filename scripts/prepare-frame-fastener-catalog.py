@@ -17,11 +17,18 @@ for width in [600,800]:
     item(f'frame-hardware-profile-{width}',f'Профиль С-образный 40×40×20, L={width} мм',{'Источник':'Задано пользователем; учёт в штуках, цена не зависит от длины','Длина, мм':width})
 # Steel, flat head, open end, page 22. L2 is the installed projection below
 # the sheet, not a guessed multiple of the thread diameter.
-for d,lo,hi,head,tail,code in [(6,3,5.5,1.5,9.3,'23301060055'),(8,3,5.5,1.5,11,'23301080055'),(10,1,3.5,2,15,'23301100035'),(10,3.5,6,2,15,'23301100060'),(12,1,4,2,17.1,'23301120040'),(12,4,7,2,17.1,'23301120070')]:
-    item('frame-hardware-rivkle-'+code,f'Гайка-заклёпка М{d} RIVKLE {code}',{'FRAME_PUMP_FASTENER':True,'FRAME_RIVET':{'verified':True,'source':source+' · стр. 22 · '+code,'sourceSha256':hashlib.sha256(pdf.read_bytes()).hexdigest(),'threadMm':d,'gripMinMm':lo,'gripMaxMm':hi,'headThicknessMm':head,'installedProjectionMm':tail},'Диаметр резьбы, мм':d})
+for d,lo,hi,head,tail,code in [(6,3,5.5,1.5,9.3,'23301060055'),(8,3,5.5,1.5,11,'23301080055'),(10,1,3.5,2,15,'23301100035'),(10,3.5,6,2,15,'23301100060'),(12,1,4,2,17.1,'23301120040'),(12,4,7,2,17.1,'23301120070'),(6,5.5,8,1.5,10,'23301060080'),(8,.5,3,1.5,11,'23301080030'),(8,5.5,8,1.5,11.7,'23301080080'),(8,8,10.5,1.5,11.8,'23301080105'),(10,6,8.5,2,15,'23301100085'),(12,7,10,2,17.5,'23301120100')]:
+    hole,head_diameter={6:(9,13),8:(11,16),10:(13,19),12:(16,23)}[d]
+    item('frame-hardware-rivkle-'+code,f'Гайка-заклёпка М{d} RIVKLE {code}',{'FRAME_PUMP_FASTENER':True,'FRAME_RIVET':{'verified':True,'source':source+' · стр. 22 · '+code,'sourceSha256':hashlib.sha256(pdf.read_bytes()).hexdigest(),'threadMm':d,'gripMinMm':lo,'gripMaxMm':hi,'headThicknessMm':head,'installedProjectionMm':tail,'holeDiameterMm':hole,'headDiameterMm':head_diameter},'Диаметр резьбы, мм':d})
 # Complete the M12 length series needed by the reviewed raised pump bases.
 # Standard sizes, not an assertion that these are already priced/stocked.
 for length in [45,50,55,60,65,70,75,80]:
     item(f'frame-hardware-bolt-m12-{length}',f'Болт М12×{length} DIN933 Ц 8,8',{'FRAME_PUMP_FASTENER':True,'Диаметр резьбы, мм':12,'Длина, мм':length,'Источник':'Размерный ряд DIN 933; полная резьба. Цена и масса поставщика не заданы.','Справочный каталог':'https://www.fabory.com/en_NL/hexagon-head-screw-din-933-steel-zinc-plated-8-8-m12x60-s%3D19/p/01210120060'})
-(app/'data/frame-fasteners-import.json').write_text(json.dumps({'schema':1,'prepared':'2026-11-10','items':items},ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+# Preserve reviewed prices, source notes, CAD and technical edits. Regeneration
+# supplements the seed; it must never reset an already reviewed catalogue.
+target=app/'data/frame-fasteners-import.json'
+existing=json.loads(target.read_text(encoding='utf-8')) if target.exists() else {'schema':1,'prepared':'2026-11-15','items':[]}
+known={row['id'] for row in existing['items']}
+existing['items'].extend(row for row in items if row['id'] not in known)
+target.write_text(json.dumps(existing,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
 print(len(items))

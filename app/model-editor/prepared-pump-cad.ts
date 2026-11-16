@@ -3,6 +3,7 @@ import horizontal from "../../data/horizontal-frame-mounts.json";
 import type { Pump } from "../pump-catalog";
 import type { PumpProfile } from "./model";
 import { applyHorizontalPumpCadPorts } from "./horizontal-pump-cad";
+import { applyEndSuctionCadPorts } from "./end-suction-ports";
 
 const scopeNotes = {
   variant_step: "STEP привязан к исполнению насоса. Монтажную пригодность проверяют отдельно.",
@@ -33,7 +34,7 @@ function modelFor(id?: string): Entry | undefined {
   if (!Object.hasOwn(scopeNotes, model.scope) || !profile || !/^[a-f0-9]{64}$/.test(profile.sourceHash) ||
     !/^Equipment\/[^\\]+\.(?:stp|step)$/i.test(profile.source) || profile.source.split("/").includes("..") ||
     profile.meshUrl !== `/model-assets/model-${profile.sourceHash}-v1.stl`) return;
-  const restored = applyHorizontalPumpCadPorts(profile);
+  const restored = applyEndSuctionCadPorts({ id, type: "end_suction", ...model, power: model.powerKw }, applyHorizontalPumpCadPorts(profile));
   return restored === profile ? model : { ...model, profile: restored };
 }
 

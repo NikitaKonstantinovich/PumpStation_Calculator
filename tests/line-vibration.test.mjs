@@ -30,6 +30,25 @@ function fixture({ pumpDn = 80, valveDn = pumpDn, connection = "flanged", pumpCo
   return synchronizeCollectors(p);
 }
 
+test("unlike DN and connections use a flanged reducer plus an equal-DN RF, with one intermediate joint", () => {
+  for (const vibration of [false,true]) for (const threadedPump of [false,true]) for (const [side, build] of Object.entries(builders)) {
+    const p = fixture({pumpDn:threadedPump?50:80,valveDn:threadedPump?80:50,pumpConnection:threadedPump?"threaded":"flanged",connection:threadedPump?"flanged":"threaded"});
+    p.entities["station-settings"].vibrationCompensators = vibration;
+    const rows = build(p,binding,catalog);
+    const first = role(rows,"primary-mixed-first-insertion"), second = role(rows,"primary-mixed-second-insertion");
+    assert.ok(first && second);
+    for (const row of [first,second]) {
+      const r = row.insertionRequirement;
+      if ([r.from.connection,r.to.connection].includes("threaded")) { assert.equal(r.from.dn,r.to.dn); assert.equal(r.geometry,"straight"); }
+      else { assert.equal(r.geometry,side === "suction" ? "eccentric" : "concentric"); }
+    }
+    assert.deepEqual(first.insertionRequirement.to,second.insertionRequirement.from);
+    assert.equal(role(rows,"primary-mixed-joint-gasket").quantity,3);
+    assert.equal(role(rows,"primary-mixed-joint-fasteners-bolts").quantity,12);
+    assert.equal(role(rows,"primary-adapter"),undefined);
+  }
+});
+
 test("both lines use nozzle-sized compensators followed by a separate rigid insertion, with two joint kits and integral elastomer seals", () => {
   const p = fixture();
   p.entities["station-dn"].pumpDischargePort.dn = 100;
@@ -55,7 +74,9 @@ test("both lines use nozzle-sized compensators followed by a separate rigid inse
     }
     assert.equal(role(rows, "primary-pump-gasket"), undefined, "old pump joint must not be duplicated");
     const branchGaskets = rows.filter(row => row.assemblyRole.startsWith("primary-") && /gasket/.test(row.assemblyRole));
-    assert.equal(branchGaskets.reduce((sum, row) => sum + row.quantity, 0), (side === "suction" ? 2 : 4) * 3);
+    // KMS seals with its elastomer; butterfly valves also use their own liner.
+    // Only the two discharge check-valve faces retain separate gaskets.
+    assert.equal(branchGaskets.reduce((sum, row) => sum + row.quantity, 0), (side === "suction" ? 0 : 2) * 3);
     if (side === "discharge") assert.equal(role(rows, "primary-between-valves-insertion").quantity, 3);
   }
 });

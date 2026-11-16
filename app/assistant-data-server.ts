@@ -8,11 +8,15 @@ import { readManualPumps } from "./manual-pump-server";
 import { mergePumpCatalog } from "./pump-catalog-client";
 import { pumpCardPhysicalData } from "./pump-card-data";
 import { currentInsertSource } from "./component-insert-catalog-server";
+import { searchProgramDocumentation } from "./assistant-knowledge-server";
+import { assistantInputKeys, assistantProductPins, assistantProjectSnapshot } from "./assistant-project";
+import type { WorkspaceData } from "./node-tools/schema";
 import type { AssistantContext, AssistantSource } from "./assistant-types";
-import type { UserRole } from "./user-types";
+import { canUseGeometry, type UserRole } from "./user-types";
 
 export type AssistantDataAccess = { userId: string; role: UserRole; profile: "full" | "beta"; context?: AssistantContext };
 type JsonObject = Record<string, unknown>;
+type AssistantProjectData = { data: JsonObject; applied: AppliedBaseValues; product?: NonNullable<ReturnType<typeof assistantProductPins>>; specification?: ReturnType<typeof assistantProjectSnapshot>["specification"] };
 const object = (value: unknown): JsonObject => value && typeof value === "object" && !Array.isArray(value) ? value as JsonObject : {};
 const short = (value: unknown, limit = 400) => typeof value === "string" ? value.slice(0, limit) : null;
 const number = (value: unknown) => typeof value === "number" && Number.isFinite(value) ? value : null;
@@ -21,7 +25,6 @@ const pick = (value: unknown, keys: string[]) => Object.fromEntries(keys.map(key
   const item = object(value)[key];
   return [key, typeof item === "string" ? item.slice(0, 300) : typeof item === "boolean" ? item : number(item)];
 }));
-const inputKeys = ["flowRate", "head", "staticHead", "workingPumpCount", "reservePumpCount", "medium", "selectedPumpId", "calculated"];
 const settingKeys = ["stationType", "inletHead", "pressureChecksEnabled", "combinedCircuitsSimultaneous", "membraneTank", "membraneTankVolume", "vibrationCompensators", "collectorPlugs", "isolatingValves", "jockeyPump", "usdRate", "cnyRate"];
 const dnKeys = ["suctionCollectorDn", "dischargeCollectorDn", "suctionValveDn", "dischargeValveDn", "collectorMaterial", "connectionType", "pn", "suctionValveType", "dischargeValveType", "secondarySuctionCollectorDn", "secondaryDischargeCollectorDn", "secondarySuctionValveDn", "secondaryDischargeValveDn", "secondaryConnectionType", "secondaryPn"];
 const safeDiscounts = (raw: unknown) => Object.fromEntries(Object.entries(object(raw)).slice(0, 50).filter(([key,value]) => key.length <= 80 && number(value) !== null));
@@ -37,14 +40,19 @@ function tool(name: string, description: string, properties: JsonObject) {
 export const assistantDataDefinitions = [
   tool("read_base_values", "Прочитать реальные базовые значения из D1: межосевые расстояния, скорости, курсы/скидки, сварка, окраска, сгоны и предпочтения. Для расстояния конкретного насоса удобнее search_pumps. Только опубликованные или закреплённые версии, без черновиков.", { scope: scopeSchema, section: { type: "string", enum: [...BASE_SECTIONS] }, query: querySchema, offset: offsetSchema }),
   tool("search_pumps", "Найти насос в действующем каталоге по точной модели (например CDM 10-5), серии, производителю или ID. Возвращает реальные характеристики, патрубки, цену и межосевое расстояние, рассчитанное кодом приложения по выбранной версии правил. Если точная модель не найдена, не подменяй её соседней.", { query: querySchema, scope: scopeSchema, offset: offsetSchema }),
-  tool("search_equipment", "Читать базу комплектующих и сохранённых изделий. components — действующий каталог D1; insertions — сохранённые расчётные вставки; collectors — сохранённые коллекторы (только full). Цены сохранённых изделий являются снимком на указанную дату.", { catalog: { type: "string", enum: ["components", "insertions", "collectors"] }, query: querySchema, offset: offsetSchema }),
-  tool("read_current_project", "Прочитать разрешённые технические поля текущего проекта: насосы, Q/H, настройки, DN, расстояния и версии базовых значений. Full: последняя сохранённая версия только собственного проекта. Beta: параметры текущей вкладки. Не изменяет проект.", {}),
+  tool("search_equipment", "Читать базу комплектующих и сохранённых изделий. project_components — закреплённый каталог комплектации нодового проекта (full); components — действующий каталог D1; insertions — сохранённые расчётные вставки; collectors — сохранённые коллекторы (full); inventory — административная база. Цены сохранённых изделий действительны на дату расчёта.", { catalog: { type: "string", enum: ["project_components", "components", "insertions", "collectors", "inventory"] }, query: querySchema, offset: offsetSchema }),
+  tool("read_current_project", "Прочитать текущие результаты нодового продукта: закреплённый алгоритм и справочники, значения параметров, насосы, Q/H, DN, коллекторы, межосевые расстояния, диагностика и итог спецификации. Снимок вкладки может содержать ещё не сохранённые правки. Beta: параметры подбора насосов.", {}),
+  tool("read_project_specification", "Прочитать строки и состояние спецификации открытого проекта (full). Цена строки за единицу в рублях. Поиск по разделу, позиции, названию или ID; пустой запрос для всех строк.", { query: querySchema, offset: offsetSchema }),
+  tool("search_product_algorithms", "Найти подключённые продукты библиотеки алгоритмов и их текущие публикации. Пустой query перечисляет продукты.", { query: querySchema, offset: offsetSchema }),
+  tool("read_product_algorithm", "Прочитать действующий нодовый граф. scope=project выбирает закреплённую версию открытого проекта, algorithmId при этом пустой. Для scope=published укажи ID из search_product_algorithms. Пустой tool перечисляет инструменты и зависимости. С tool вернутся узлы, входные связи и формулы. query — имя, ID или ключевое слово, пустой для всех узлов.", { scope: scopeSchema, algorithmId: { type: "string" }, tool: { type: "string" }, query: querySchema, offset: offsetSchema }),
+  tool("search_program_documentation", "Найти разделы актуального руководства и технической документации. query — ключевые слова, document — ID из результата или пустая строка для поиска по всем документам. Ссылайся на citation.", { query: querySchema, document: { type: "string" }, offset: offsetSchema }),
 ];
 
 export function createAssistantDataTools(access: AssistantDataAccess) {
   const sources: AssistantSource[] = [];
+  let dataReads = 0;
   let publishedPromise: Promise<{ applied: AppliedBaseValues; publishedAt: string }> | undefined;
-  let projectPromise: Promise<{ data: JsonObject; applied: AppliedBaseValues }> | undefined;
+  let projectPromise: Promise<AssistantProjectData> | undefined;
   let pumpsPromise: Promise<Pump[]> | undefined;
   const published = () => publishedPromise ??= currentBasePublication().then(publication => ({ applied: baseSnapshot(publication.id, publication.values), publishedAt: publication.createdAt }));
   const pumps = () => pumpsPromise ??= (async () => {
@@ -56,24 +64,40 @@ export function createAssistantDataTools(access: AssistantDataAccess) {
     if (!Array.isArray(result)) throw new DataError("Каталог насосов имеет неверный формат.");
     return mergePumpCatalog(result as Pump[], (await readManualPumps()).map(record => record.pump));
   })();
-  const project = () => projectPromise ??= (async () => {
+  async function nodeProject(snapshot: ReturnType<typeof assistantProjectSnapshot>, origin: string) {
+    const { versions, specification, ...summary } = snapshot;
+    const applied = await resolveBaseVersions(Object.keys(versions).length ? versions : undefined);
+    if (!canUseGeometry(access.role)) summary.settings.geometryEnabled = false;
+    const { items, ...readiness } = specification;
+    return { applied, product: summary.product, specification,
+      data: { origin, ...summary, specification: { ...readiness, availableRows: items.length }, baseVersions: applied.versions } };
+  }
+
+  const project = (): Promise<AssistantProjectData> => projectPromise ??= (async () => {
     const context = access.context;
     if (access.profile === "beta") {
-      if (!context?.beta || context.projectId) throw new DataError("Параметры текущей beta-вкладки не переданы.");
+      if (!context?.beta || context.projectId || context.workspace) throw new DataError("Параметры текущей beta-вкладки не переданы.");
       const applied = await resolveBaseVersions(context.beta.versions);
-      return { applied, data: { origin: "Текущая beta-вкладка, ввод пользователя; это не сохранённый проект D1", input: pick(context.beta.input, inputKeys), baseVersions: applied.versions } };
+      return { applied, data: { origin: "Текущая beta-вкладка, ввод пользователя; это не сохранённый проект D1", input: pick(context.beta.input, assistantInputKeys), baseVersions: applied.versions } };
     }
     if (!context?.projectId) throw new DataError("Текущий проект не передан. Для общего вопроса используйте опубликованные правила.");
+    if (context.workspace && assistantProductPins(object(context.workspace).product)) return nodeProject(assistantProjectSnapshot(context.workspace), "Открытый нодовый продукт, снимок вкладки на момент вопроса");
     const response=await storageOperation(access.userId,{action:"load",id:context.projectId});
     if (!response.ok) throw new DataError("Текущий проект не сохранён или недоступен этой учётной записи.");
     const row=await response.json() as {config:unknown;updatedAt:string};
     const raw=object(row.config), entities=object(raw.entities), settings=object(entities["station-settings"]);
+    if (raw.workspace2) {
+      const workspace = raw.workspace2 as WorkspaceData;
+      if (!workspace.product) throw new DataError("В проекте не закреплена публикация продукта. Примените версию в рабочем пространстве.");
+      const { readSavedNodeWorkspace } = await import("./node-tools/assistant-server");
+      return nodeProject(await readSavedNodeWorkspace(workspace, access.role), "Последняя сохранённая версия нодового проекта PostgreSQL");
+    }
     if (!raw.schemaVersion || !entities["system-input"] || !entities["station-settings"]) throw new DataError("Не удалось прочитать технические поля проекта.");
     // Resolve version IDs through D1; never trust values embedded in project JSON.
     const applied = await resolveBaseVersions(object(settings.baseValues).versions);
     const collectors = object(entities["station-collectors"]);
     const data = { origin: "Последняя сохранённая версия собственного проекта PostgreSQL", savedAt: row.updatedAt,
-      primaryInput: pick(entities["system-input"], inputKeys), secondaryInput: pick(entities["system-input-2"], inputKeys),
+      primaryInput: pick(entities["system-input"], assistantInputKeys), secondaryInput: pick(entities["system-input-2"], assistantInputKeys),
       settings: { ...pick(settings, settingKeys), manufacturerDiscounts: safeDiscounts(settings.manufacturerDiscounts) },
       dn: pick(entities["station-dn"], dnKeys),
       collectors: Object.fromEntries(["suction", "discharge"].map(side => [side, pick(collectors[side], ["spacing1", "spacing2", "spacing1Manual", "spacing2Manual", "eccentric"])])),
@@ -81,7 +105,7 @@ export function createAssistantDataTools(access: AssistantDataAccess) {
     };
     return { data, applied };
   })();
-  const scoped = async (scope: string) => scope === "published" ? { ...await published(), origin: "Опубликованные базовые значения" } : { applied: (await project()).applied, origin: access.profile === "beta" ? "Версии текущей beta-вкладки" : "Версии сохранённого текущего проекта", publishedAt: null };
+  const scoped = async (scope: string) => scope === "published" ? { ...await published(), origin: "Опубликованные базовые значения" } : { applied: (await project()).applied, origin: "Закреплённые версии текущего проекта или beta-вкладки", publishedAt: null };
 
   async function readBase(args: JsonObject) {
     const section = args.section as BaseSection, result = await scoped(String(args.scope)), values = result.applied.values, query = normalize(String(args.query));
@@ -95,6 +119,19 @@ export function createAssistantDataTools(access: AssistantDataAccess) {
     return { title: `Базовые значения: ${BASE_LABELS[section]}`, data: { origin: result.origin, version: result.applied.versions[section], publishedAt: result.publishedAt, section, values: data } };
   }
   async function searchPumps(args: JsonObject) {
+    if (args.scope === "project" && access.profile === "full" && (await project().catch(() => undefined))?.product) {
+      const { product } = await project();
+      const pin = product?.sourceVersions.pump_catalog_v2;
+      if (!pin) throw new DataError("Каталог насосов не закреплён за этим продуктом.");
+      const { catalogSnapshot } = await import("./node-tools/catalog-server");
+      const snapshot = await catalogSnapshot(pin);
+      const query = normalize(String(args.query));
+      const exact = snapshot.items.filter(({ pump, variantId, modelId }) => query && [pump.id, pump.model, `${pump.manufacturer} ${pump.model}`, variantId, modelId].some(value => normalize(value) === query));
+      const matching = exact.length ? exact : snapshot.items.filter(({ pump, variantId }) => !query || normalize(`${pump.manufacturer} ${pump.series} ${pump.model} ${pump.article ?? ""} ${variantId}`).includes(query));
+      const result = page(matching, Number(args.offset), 5);
+      return { title: "Закреплённый каталог насосов продукта", data: { snapshot: snapshot.id, created: snapshot.created, exactMatch: exact.length > 0, ...result,
+        items: result.items.map(({ pump, variantId, modelId, frequencyHz }) => ({ ...pick(pump, ["manufacturer", "model", "series", "power", "minFlow", "maxFlow", "minHead", "maxHead", "medium", "article", "price", "priceCurrency", "availability"]), variantId, modelId, frequencyHz, physical: pumpCardPhysicalData(pump) })) } };
+    }
     const list = await pumps(), query = normalize(String(args.query));
     const exact = list.filter(p => query && [p.id, p.model, `${p.manufacturer} ${p.model}`, p.execution ?? ""].some(value => normalize(value) === query));
     const matches = exact.length ? exact : list.filter(p => !query || [p.id, p.model, p.manufacturer, p.series, `${p.manufacturer} ${p.model}`, p.type, p.article ?? ""].some(value => normalize(value).includes(query)));
@@ -117,11 +154,36 @@ export function createAssistantDataTools(access: AssistantDataAccess) {
   async function searchEquipment(args: JsonObject) {
     const catalog = String(args.catalog), query = String(args.query), offset = Number(args.offset);
     if (catalog === "collectors" && access.profile !== "full") throw new DataError("База коллекторов недоступна в beta.");
-    if (catalog === "components") {
-      const source = await currentInsertSource(), terms = query.split(/\s+/).map(normalize).filter(Boolean);
+    if (catalog === "inventory") {
+      if (access.role !== "admin") throw new DataError("Административная база комплектующих доступна с ролью admin.");
+      const { readEquipmentCatalog } = await import("./equipment-catalog-server");
+      const { rows } = await readEquipmentCatalog();
+      const terms = query.split(/\s+/).map(normalize).filter(Boolean);
+      const keys = ["id", "article", "manufacturer", "model", "family", "name", "code", "dn", "pn", "material", "weightKg", "price", "priceCurrency", "currentPrice", "currency", "cachedPrice", "cachedTotal", "priceUpdatedAt"];
+      const items = rows.filter(row => !row.pump && (access.profile === "full" || row.category !== "collectors")).map(row => {
+        const attributes = Object.entries(row.values).filter(([key, value]) => /(?:артикул|масса|диаметр|толщина|длина|материал|давление|\bDN\b|\bPN\b)/i.test(key) && (typeof value === "string" || typeof value === "number"));
+        return {
+          key: row.key, category: row.categoryName, name: short(row.name, 180), active: row.active, incomplete: row.incomplete,
+          details: pick(row.values, keys), attributes: Object.fromEntries(attributes.slice(0, 20).map(([key, value]) => [key.slice(0, 120), number(value) ?? short(value, 180)])),
+        };
+      }).filter(item => { const text = normalize(JSON.stringify(item)); return terms.every(term => text.includes(term)); });
+      return { title: "База комплектующих администратора", data: page(items, offset, 5) };
+    }
+    if (catalog === "components" || catalog === "project_components") {
+      const terms = query.split(/\s+/).map(normalize).filter(Boolean);
+      const getSource = async () => {
+        if (catalog === "components") return { ...await currentInsertSource(), origin: "Действующий импорт комплектующих D1" };
+        if (access.profile !== "full") throw new DataError("Снимок комплектации продукта доступен в full.");
+        const { product, applied } = await project(), pin = product?.sourceVersions.station_catalog;
+        if (!pin) throw new DataError("Справочники комплектации не закреплены за этим продуктом.");
+        const { stationCatalogSnapshot } = await import("./node-tools/station-catalog-server");
+        const snapshot = await stationCatalogSnapshot(pin, applied.versions);
+        return { items: snapshot.components.items, databaseRevision: snapshot.id, origin: "Закреплённые справочники комплектации продукта" };
+      };
+      const source = await getSource();
       const matches = source.items.filter(item => { const text = normalize(`${item.id} ${item.family} ${item.catalogId} ${item.fields.map(field => `${field.headerPath.join(" ")} ${String(field.value ?? "")}`).join(" ")}`); return terms.every(term => text.includes(term)); });
       const result = page(matches, offset, 5);
-      return { title: "База комплектующих", data: { origin: "Действующий импорт комплектующих D1 (при отсутствии импорта — поставляемый каталог)", databaseRevision: source.databaseRevision, ...result,
+      return { title: "База комплектующих", data: { origin: source.origin, databaseRevision: source.databaseRevision, ...result,
         items: result.items.map(item => ({ id: item.id, catalogId: item.catalogId, family: short(item.family), fields: item.fields.slice(0,30).map(field => ({ name: field.headerPath.join(" / ").slice(0,180), value: typeof field.value === "boolean" ? field.value : number(field.value) ?? short(field.value) })), prices: item.prices.slice(0,8).map(price => ({ label: short(price.label), amount: number(price.amount), currency: short(price.currency,10) })) })) } };
     }
     const pattern = `%${query.replace(/[!%_]/g, character => `!${character}`)}%`;
@@ -132,6 +194,37 @@ export function createAssistantDataTools(access: AssistantDataAccess) {
     const entries = rows.results ?? [];
     return { title: catalog === "insertions" ? "Сохранённые вставки" : "Сохранённые коллекторы", data: { origin: "Сохранённые изделия D1", offset, nextOffset: entries.length > 5 ? offset + 5 : null, note: "Сохранённая цена может устареть. Это не новый расчёт и не подтверждение наличия.", items: entries.slice(0,5).map(row => ({ ...pick(row,["id","name","pricedAt","catalogVersion","revision"]), savedPriceRub: number(row.price) === null ? null : Number(row.price)/1_000_000, configuration: pick(JSON.parse(String(row.configuration)), ["type","dn","pn","material","connection","eccentric","dnLarge","dnSmall","geometry","construction","baseLengthMm","axialLeftMm","axialRightMm"]) })) } };
   }
+
+  async function readSpecification(args: JsonObject) {
+    if (access.profile !== "full") throw new DataError("Спецификация недоступна в beta.");
+    const { specification } = await project();
+    if (!specification) throw new DataError("Строки спецификации не переданы из рабочей вкладки.");
+    const query = normalize(String(args.query));
+    const { items, ...summary } = specification;
+    const matching = items.filter(item => !query || normalize(`${item.position} ${item.name} ${item.section} ${item.details} ${item.equipmentId}`).includes(query));
+    return { title: "Спецификация открытого проекта", data: { ...summary, availableRows: items.length, ...page(matching, Number(args.offset), 15) } };
+  }
+
+  const handlers = {
+    read_base_values: readBase,
+    search_pumps: searchPumps,
+    search_equipment: searchEquipment,
+    read_current_project: async () => ({ title: "Текущий проект", data: (await project()).data }),
+    read_project_specification: readSpecification,
+    search_product_algorithms: async (args: JsonObject) => {
+      if (access.profile !== "full") throw new DataError("Библиотека нодовых продуктов доступна в full.");
+      const { searchPublishedAlgorithms } = await import("./node-tools/assistant-server");
+      return { title: "Библиотека алгоритмов продуктов", data: await searchPublishedAlgorithms(String(args.query), Number(args.offset)) };
+    },
+    read_product_algorithm: async (args: JsonObject) => {
+      if (access.profile !== "full") throw new DataError("Библиотека нодовых продуктов доступна в full.");
+      const current = args.scope === "project" ? (await project()).product : undefined;
+      const id = current?.algorithmId ?? String(args.algorithmId);
+      if ((args.scope === "project" && !current) || !/^[\w.-]{1,100}$/.test(id)) throw new DataError("Укажите доступный продукт с закреплённой версией или ID из библиотеки.");
+      const { readAlgorithmGraph } = await import("./node-tools/assistant-server");
+      return { title: "Нодовый алгоритм продукта", data: await readAlgorithmGraph(id, current?.version, String(args.tool), String(args.query), Number(args.offset)) };
+    },
+  };
 
   async function run(name: string, rawArguments: string): Promise<string> {
     try {
@@ -146,15 +239,21 @@ export function createAssistantDataTools(access: AssistantDataAccess) {
         const schema = object(definition.parameters.properties[key]), value = args[key];
         if (schema.type === "string" && (typeof value !== "string" || value.length > 120) || schema.type === "integer" && (!Number.isInteger(value) || Number(value) < 0 || Number(value) > 10000) || Array.isArray(schema.enum) && !schema.enum.includes(value)) throw new DataError("Некорректные параметры поиска.");
       }
-      const result = name === "read_base_values" ? await readBase(args) : name === "search_pumps" ? await searchPumps(args) : name === "search_equipment" ? await searchEquipment(args) : { title: "Текущий проект", data: (await project()).data };
+      if (name === "search_program_documentation") {
+        const { sources: documents, ...result } = searchProgramDocumentation(String(args.query), String(args.document), Number(args.offset), access.role, access.profile);
+        sources.push(...documents);
+        return JSON.stringify(result);
+      }
+      const result = await handlers[name as keyof typeof handlers](args);
       const text = JSON.stringify(result.data);
       if (text.length > 24000) throw new DataError("Результат слишком большой. Уточните модель, раздел или название.");
-      const id = `DATA-${String(sources.length+1).padStart(3,"0")}`, fetchedAt = new Date().toISOString();
+      const id = `DATA-${String(++dataReads).padStart(3,"0")}`, fetchedAt = new Date().toISOString();
       sources.push({ id, title: `${result.title} · ${fetchedAt.slice(0,16).replace("T"," ")} UTC`, url: "", kind: "data" });
       return JSON.stringify({ citation: id, fetchedAt, data: result.data });
     } catch (error) {
       return JSON.stringify({ error: error instanceof DataError ? error.message : "Источник данных временно недоступен. Не подставляйте неподтверждённые значения." });
     }
   }
-  return { definitions: assistantDataDefinitions, run, sources };
+  const definitions = access.profile === "full" ? assistantDataDefinitions : assistantDataDefinitions.filter(definition => !["read_project_specification", "search_product_algorithms", "read_product_algorithm"].includes(definition.name));
+  return { definitions, run, sources };
 }

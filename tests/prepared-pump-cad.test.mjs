@@ -26,7 +26,8 @@ const data = { version: 1, nonRoundVariantIds: [blocked.id], models: { [pump.id]
   [secondary.id]: { ...entry, article: secondary.article, execution: secondary.execution, scope: "drawing_reference", profile: drawingProfile },
   [noArticle.id]: { ...entry, article: null, scope: "model_reference", displayArticle: "DEMO-VM-3-5" },
 } };
-const replace = { [new URL("data/prepared-pump-cad-models.json", root).href]: JSON.stringify(data) };
+const replace = { [new URL("data/prepared-pump-cad-models.json", root).href]: JSON.stringify(data),
+  [new URL("data/horizontal-frame-mounts.json", root).href]: JSON.stringify({ models: {} }) };
 const load = name => loadTs(new URL(name, root), replace);
 const { coreBuildStationLayout, corePlaceStationPumps, mergeAssembly, sourceFingerprint } = await load("app/model-editor/model.ts");
 const { createProject } = await load("app/project-config.ts");

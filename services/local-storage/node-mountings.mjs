@@ -6,6 +6,8 @@ const fasteners = JSON.parse(readFileSync(new URL("../../data/pump-fasteners-rev
 const fastenerBindings = new Map(fasteners.rows.map(row => [row.variantId, row]));
 const horizontal = JSON.parse(readFileSync(new URL("../../data/horizontal-frame-mounts.json", import.meta.url), "utf8"));
 const horizontalBindings = new Map(horizontal.rows.map(row => [row.variantId, row]));
+const vertical = JSON.parse(readFileSync(new URL("../../data/vertical-pump-mountings-reviewed.json", import.meta.url), "utf8"));
+const verticalBindings = new Map(vertical.rows.map(row => [row.variantId, row]));
 const foundationPlates = JSON.parse(readFileSync(new URL("../../data/pump-optional-foundation-plates.json", import.meta.url), "utf8"));
 const plateTypesByModel = new Map(Object.entries(foundationPlates.models));
 const positive = n => typeof n === "number" && Number.isFinite(n) && n > 0;
@@ -19,7 +21,7 @@ function validMounting(m, evidence) {
 }
 
 /** Match the complete execution identity. Catalogue layout does not approve fasteners or lifting. */
-export function catalogMounting({ variant, model, motor, manufacturer, series }, rows = bindings, supplements = fastenerBindings) {
+export function catalogMounting({ variant, model, motor, manufacturer, series }, rows = bindings, supplements = fastenerBindings, verticalRows = verticalBindings) {
   const row = rows.get(String(variant.id));
   const identity={variant,model,motor,manufacturer,series};
   if (!matches(row,identity)) return undefined;
@@ -29,16 +31,31 @@ export function catalogMounting({ variant, model, motor, manufacturer, series },
   const horizontalMount=matches(horizontalCandidate,identity)&&validMounting(horizontalCandidate.mounting,horizontalCandidate.evidence)
     ? horizontalCandidate : undefined;
   const supplementValid=supplement&&validMounting(supplement.mounting,supplement.evidence);
-  const m = horizontalMount?.mounting ?? (supplementValid ? supplement.mounting : row.mounting);
-  const valid = !!horizontalMount || supplementValid || row.status === "catalogue_grid" && validMounting(m,row.evidence);
+  const priorValid = row.status === "catalogue_grid" && validMounting(row.mounting,row.evidence);
+  const verticalCandidate=verticalRows.get(String(variant.id));
+  const verticalValid=matches(verticalCandidate,identity)&&validMounting(verticalCandidate.mounting,verticalCandidate.evidence);
+  // Preserve existing exact CAD/user-reviewed placement. A new grid is a
+  // fallback for this complete execution, never an inferred family substitution.
+  const verticalMount=!horizontalMount&&!supplementValid&&!priorValid&&verticalValid
+    ? verticalCandidate : undefined;
+  let m = horizontalMount?.mounting ?? (supplementValid ? supplement.mounting : priorValid ? row.mounting : verticalMount?.mounting);
+  const enrichment=!horizontalMount&&supplementValid&&verticalValid&&verticalCandidate.mode==="fill_missing_fastener_dimensions"&&
+    JSON.stringify(m.bounds)===JSON.stringify(verticalCandidate.mounting.bounds)&&m.holes.length===verticalCandidate.mounting.holes.length&&
+    m.holes.every((h,i)=>h.x===verticalCandidate.mounting.holes[i].x&&h.y===verticalCandidate.mounting.holes[i].y&&h.diameterMm===null)
+    ? verticalCandidate : undefined;
+  if(enrichment)m={...m,holes:m.holes.map((h,i)=>({...h,diameterMm:enrichment.mounting.holes[i].diameterMm})),
+    footThicknessMm:m.footThicknessMm??enrichment.mounting.footThicknessMm,clampHeightMm:m.clampHeightMm??enrichment.mounting.clampHeightMm,
+    boltDiameterMm:m.boltDiameterMm??enrichment.mounting.boltDiameterMm,fastenerSource:enrichment.mounting.fastenerSource};
+  const valid = !!horizontalMount || supplementValid || priorValid || !!verticalMount;
+  const facts=verticalMount??enrichment??supplement;
   const plateType = manufacturer === foundationPlates.manufacturer && series === foundationPlates.series
     ? plateTypesByModel.get(model.designation) : undefined;
   return {
     ...(valid ? { frameV1: structuredClone(m) } : {}),
-    ...(supplement?.fasteners ? {fastenersV1:structuredClone(supplement.fasteners)} : {}),
+    ...(facts?.fasteners ? {fastenersV1:structuredClone(facts.fasteners)} : {}),
     ...(plateType ? {optionalFoundationPlate: structuredClone({
       type: plateType, ...foundationPlates.plates[plateType], source: foundationPlates.source,
     })} : {}),
-    frameAssessment: { status: valid ? "catalogue_grid" : row.status === "catalogue_grid" ? "invalid" : row.status, missing: supplement?.missing??row.missing, version:horizontalMount?horizontal.version:fasteners.version, fastenerStatus:supplement?.status??"missing", ...(horizontalMount?.evidence||supplement?.evidence||row.evidence ? { evidence:structuredClone(horizontalMount?.evidence??supplement?.evidence??row.evidence) } : {}) },
+    frameAssessment: { status: valid ? "catalogue_grid" : row.status === "catalogue_grid" ? "invalid" : row.status, missing: facts?.missing??row.missing, version:horizontalMount?horizontal.version:verticalMount||enrichment?vertical.version:fasteners.version, fastenerStatus:verticalMount?(facts.fasteners?.boltDiameterMm&&facts.fasteners?.clampHeightMm?"dimensions_ready":"partial"):supplement?.status??"missing", ...(verticalMount?.mounting.note?{note:verticalMount.mounting.note}:{}), ...(horizontalMount?.evidence||facts?.evidence||row.evidence ? { evidence:structuredClone(horizontalMount?.evidence??facts?.evidence??row.evidence) } : {}) },
   };
 }

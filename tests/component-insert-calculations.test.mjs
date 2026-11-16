@@ -46,6 +46,8 @@ function compactFixture(material = "st20") {
   c.engineering.flangeAssembly = { faceOffsetMm: 5, clearanceFactor: 1.1, fastenerModels: [], source: provenance };
   c.engineering.collarAssembly = { insertionDepthMm: 0, weldGapMm: 0, weldFactor: 2, source: provenance, weldSource: provenance };
   c.engineering.boltReferences = []; c.standardBolts = [];
+  c.engineering.looseFlangeInBom.include = true;
+  if(material === "aisi304")for(const pn of [10,16])c.parts.push(part("looseFlange",50,pn,{thicknessMm:12}));
   if (material === "aisi304") asStainless(c);
   return c;
 }
@@ -61,7 +63,7 @@ test("compact ready ends: one weld, actual purchased pieces, no pipe or bolt len
       assert.equal(row.totalLengthMm, threaded ? 76 : material === "st20" ? 43 : 61);
       assert.ok([10,16].includes(row.pn)); assert.equal(row.welds.length, 1);
       near(row.weldLengthMm, 2 * Math.PI * 60.3);
-      assert.equal(row.bom.filter(b => !["welding","painting"].includes(b.kind)).length, 2);
+      assert.equal(row.bom.filter(b => !["welding","painting"].includes(b.kind)).length, !threaded && material === "aisi304" ? 3 : 2);
       assert.ok(row.bom.every(b => b.kind !== "pipe" && b.kind !== "machining"));
       if (material === "st20") near(row.bom.find(b => b.kind === "painting").quantity, threaded ? .076 : .038);
       near(row.price, row.bom.reduce((n,b) => n+b.cost,0));
@@ -462,12 +464,24 @@ test("length research explains ambiguity and missing standards only for the revi
   assert.equal(actual.warnings.some(reason => reason.startsWith("Проверка длины:")), false);
 });
 
-test("confirmed user scope excludes loose flanges and does not invent pressure relay fitting or bolt stack", () => {
+test("confirmed scope includes loose flanges in composition and price without adding length or welds", () => {
   const catalog = adapter.makeInsertCatalog(source);
-  assert.equal(catalog.engineering.looseFlangeInBom.include, false);
+  assert.equal(catalog.engineering.looseFlangeInBom.include, true);
   assert.equal(catalog.engineering.connectionPairs.length, 9);
   const results = rows(catalog, { dnFrom: 50, dnTo: 50, materials: ["aisi304"] });
-  assert.ok(results.every(row => row.bom.every(item => item.kind !== "looseFlange")));
+  for(const row of results.filter(row=>row.complete)){
+    const ends=[row.leftConnection,row.rightConnection].filter(connection=>connection==="collar").length;
+    const flanges=row.bom.filter(item=>item.kind==="looseFlange");
+    assert.equal(flanges.reduce((sum,item)=>sum+item.quantity,0),ends);
+    assert(flanges.every(item=>item.cost>0&&item.componentId));
+    near(row.price,row.bom.reduce((sum,item)=>sum+item.cost,0));
+  }
+  const legacy=structuredClone(catalog);legacy.engineering.looseFlangeInBom.include=false;
+  const collarPair=rs=>rs.find(row=>row.geometry==="straight"&&row.pn===16&&row.leftConnection==="collar"&&row.rightConnection==="collar");
+  const included=collarPair(results),excluded=collarPair(rows(legacy,{dnFrom:50,dnTo:50,materials:["aisi304"]}));
+  near(included.price-excluded.price,included.bom.filter(item=>item.kind==="looseFlange").reduce((sum,item)=>sum+item.cost,0));
+  near(included.totalLengthMm,excluded.totalLengthMm);near(included.weldLengthMm,excluded.weldLengthMm);
+  assert.notEqual(included.identityKey,excluded.identityKey);
   assert.equal(results.find(row => row.geometry === "straight" && row.pn === 10 && row.leftConnection === "collar" && row.rightConnection === "collar").complete, true);
   assert.ok(results.filter(row => row.geometry === "straight" && row.pn === 16 && row.bom.filter(item => /^(left|right)-collar$/.test(item.role)).length === 2).every(row => row.complete));
   const pn25 = results.filter(row => row.geometry === "straight" && row.pn === 25);

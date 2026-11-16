@@ -20,7 +20,7 @@ function shiftStation(l:Layout,offset:number){
  for(const p of [...l.pumps,...(l.tank?[l.tank]:[])]){p.x+=offset;if(p.bounds)p.bounds=moveBounds(p.bounds,offset);}
  l.holes=l.holes.map(h=>({...h,x:h.x+offset}));l.stationOffsetMm=offset;
 }
-export function layoutFrame(pumps:PumpInput[],cabinetWidth:number|null,tank:TankInput|null,r:Rules):Layout {
+export function layoutFrame(pumps:PumpInput[],cabinetWidth:number|null,tank:TankInput|null,r:Rules,cabinetSeparate=false):Layout {
  const result:Layout={lengthMm:null,pumps:[],stands:[],standDistanceMm:null,profiles:false,holes:[],issues:[]};
  const fail=(code:string,message:string)=>result.issues.push({code,message,blocking:true});
  if(!pumps.length){fail("pumps","Не выбраны насосы для рамы");return result;}
@@ -57,6 +57,14 @@ export function layoutFrame(pumps:PumpInput[],cabinetWidth:number|null,tank:Tank
   result.tank={id:"tank",kind:"tank",x,y:0,bounds:moveBounds(m.bounds,x)};
   result.holes.push(...translated(m.holes,"tank",x));
   needed=Math.max(needed,x+max+50,x+m.bounds.maxX+r.endMarginMm);
+ }
+ if(cabinetSeparate){
+  const bodies=[...result.pumps.map(p=>p.bounds!),...(result.tank?.bounds?[result.tank.bounds]:[])];
+  const min=Math.min(...bodies.map(b=>b.minX)),max=Math.max(...bodies.map(b=>b.maxX));
+  result.lengthMm=FRAME_LENGTHS.find(length=>length>=Math.max(needed,max-min+2*r.endMarginMm))??null;
+  if(!result.lengthMm){fail("frame-length","Требуется другой тип рамы: компоновка длиннее 2000 мм");return result;}
+  shiftStation(result,(result.lengthMm-min-max)/2);result.stationAlignment="centered";
+  return result;
  }
  if(cabinetWidth!==600&&cabinetWidth!==800){fail("cabinet-width","Подтвердите ширину шкафа: поддерживаются 600 и 800 мм");return result;}
  // Native 1800 mm stands offset each cabinet hole by 4 mm from its base row.

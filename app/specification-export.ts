@@ -16,7 +16,7 @@ const subtotal = (items: SpecItem[]) => items.reduce((sum, item) => sum + specif
 const partialTotalNote = (items: SpecItem[]) => items.some(item => !hasPrice(item)) ? "По заполненным ценам" : "";
 
 // The caller supplies the displayed rows, including current pump prices and tank volume.
-export function specificationExportRows(items: SpecItem[], groups: SpecificationGroup[], readiness?: SpecificationReadiness): SpecificationExportRow[] {
+export function specificationExportRows(items: SpecItem[], groups: SpecificationGroup[], readiness?: SpecificationReadiness, present=specificationItemPresentation): SpecificationExportRow[] {
   const rows: SpecificationExportRow[] = [{ kind: "header", cells: ["№", "Наименование", "Кол-во", "Ед.", "Цена, ₽", "Сумма, ₽", "Описание", "Примечание"] }];
   if (readiness) {
     rows.push({ kind: "status", cells: [null, readiness.ready ? "Спецификация готова" : "Черновик — спецификация не завершена", null, null, null, null,
@@ -33,10 +33,10 @@ export function specificationExportRows(items: SpecItem[], groups: Specification
       const members = groupItems.filter(item => specificationSection(item) === section.id);
       if (section.title) rows.push(sectionRow(section.title, members, "subgroup"));
       for (const item of members) {
-        const presentation = specificationItemPresentation(item);
+        const presentation = present(item);
         rows.push({ kind: "item", cells: [item.position, item.name, item.quantity, item.unit ?? "шт.",
-          hasPrice(item) ? item.price! : null, hasPrice(item) && item.quantity > 0 ? specificationLineTotal(item) : null,
-          presentation.description + (item.hydraulicAssembly ? `\n${hydraulicAssemblyDescription(item.hydraulicAssembly)}` : "") + (item.insertionAssembly ? `\nИсточник вставки: ${item.insertionAssembly.snapshot.id}; ревизия ${item.insertionAssembly.snapshot.revision}; версия каталога ${item.insertionAssembly.snapshot.catalogVersion}.\nВложенный состав на 1 изделие (включён в цену, не суммируется повторно):\n${installedInsertionBom(item.insertionAssembly, item.insertionRequirement?.checkPressure).map(part => `${part.role}: ${part.name}; ${part.quantity ?? "?"} ${part.unit}; стоимость ${part.cost ?? "не подтверждена"}; ${part.source ?? "нет источника"}`).join("\n")}` : ""), presentation.hasWarning ? presentation.warningText : ""] });
+          hasPrice(item) ? item.price! : null, (hasPrice(item)||item.frameAssembly) && item.quantity > 0 ? specificationLineTotal(item) : null,
+          presentation.description + (item.frameAssembly ? `\nСостав рамы (учтён один раз):\n${item.frameAssembly.parts.map(p=>`${p.name}; ${p.quantity} ${p.unit}; цена ${p.unitPriceRub??"не определена"}; стоимость ${p.unitPriceRub===null?"не определена":p.quantity*p.unitPriceRub}; ${p.source}`).join("\n")}` : "") + (item.hydraulicAssembly ? `\n${hydraulicAssemblyDescription(item.hydraulicAssembly)}` : "") + (item.insertionAssembly ? `\nИсточник вставки: ${item.insertionAssembly.snapshot.id}; ревизия ${item.insertionAssembly.snapshot.revision}; версия каталога ${item.insertionAssembly.snapshot.catalogVersion}.\nВложенный состав на 1 изделие (включён в цену, не суммируется повторно):\n${installedInsertionBom(item.insertionAssembly, item.insertionRequirement?.checkPressure).map(part => `${part.role}: ${part.name}; ${part.quantity ?? "?"} ${part.unit}; стоимость ${part.cost ?? "не подтверждена"}; ${part.source ?? "нет источника"}`).join("\n")}` : ""), presentation.hasWarning ? presentation.warningText : ""] });
       }
     }
   }

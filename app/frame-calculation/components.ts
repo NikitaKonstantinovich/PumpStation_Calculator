@@ -1,5 +1,6 @@
 import type { ComponentItem } from "../component-database-types";
 import type { Part, Mounting } from "./types";
+import { readComponentMass, type MassSelection } from "../component-mass";
 import { nonnegative, positive } from "./types";
 export const componentField = (item:ComponentItem|undefined,key:string) => item?.fields.find(f=>f.column===key||f.headerPath.at(-1)===key)?.value;
 export const numeric = (value:unknown):number|null => {
@@ -7,13 +8,7 @@ export const numeric = (value:unknown):number|null => {
   const n=typeof value==="number"?value:Number(String(value).replace(/\s/g,"").replace(",","."));
   return Number.isFinite(n)?n:null;
 };
-export const componentMass = (item:ComponentItem|undefined,unit="шт.") => {
-  const perMetre=["м","м.","м.п.","м.п"].includes(unit.trim());
-  // These are actual catalogue headers. Do not mix piece and linear masses,
-  // or substitute an unconfirmed CAD mass / one of several actuator variants.
-  const keys=perMetre?["Масса 1 м, кг","Масса, кг/м","Вес 1 кг/метр"]:["Масса, кг","Вес, кг","Масса по каталогу, кг","weightKg"];
-  return numeric(keys.map(key=>componentField(item,key)).find(value=>value!==undefined&&value!==null));
-};
+export const componentMass = (item:ComponentItem|undefined,unit="шт.",selection:MassSelection={}) => readComponentMass(item,unit,selection)?.kg??null;
 export function componentPrice(item:ComponentItem|undefined):number|null {
   const prices=item?.prices.filter(p=>p.currency==="RUB"&&nonnegative(p.amount))??[];
   const single=prices.find(p=>/(?:\/|за\s*)\s*(?:1\s*)?шт/i.test(p.label));if(single)return single.amount;

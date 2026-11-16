@@ -70,6 +70,39 @@ test("BOM hardware rows do not duplicate physical fasteners", () => {
   const m=createCadManifest(project([component(),component({id:"bom",line:{role:"fasteners-bolts"}})]));
   assert.equal(m.instances.length,1);
 });
+test("collector subassemblies contain fabrication parts while KIP and caps keep their world poses at station level", async () => {
+  const c=component({id:"collector-suction",name:"Всасывающий коллектор",kind:"equipment",cadSource:undefined});
+  const makePiece=(id,shape)=>({id,componentId:id,name:id,role:id,...pose([55,12,83],[0,25,90]),ports:[],source:"fixture",fidelity:"parametric",shape});
+  const flange={kind:"flange",lengthMm:20,outerMm:185,innerMm:81,boltCircleMm:145,boltHoleMm:18,boltHoles:8};
+  const collar={kind:"collar",lengthMm:30,outerMm:76,innerMm:70,lipOuterMm:100,lipThicknessMm:3};
+  const main={componentId:"pipe",outerMm:159,innerMm:153,lengthMm:900};
+  const branch=(id,role)=>({id,name:id,role,componentId:id,portId:id,origin:[50,0,0],axis:[0,0,1],outerMm:26,innerMm:20,endMm:150});
+  const pieces=[makePiece("end-left-weldFlange",flange),makePiece("end-right-collar",collar),makePiece("end-right-looseFlange",flange),
+    makePiece("branch-pump-1-0-collar",collar),makePiece("branch-pump-1-0-looseFlange",flange),
+    makePiece("instrument-reserve-0",{kind:"tube",lengthMm:50,outerMm:26,innerMm:20}),
+    makePiece("instrument-reserve-0-plug",{kind:"mesh",modelHash:"b".repeat(64),modelPosition:[0,0,-10],modelRotation:[0,90,0]})];
+  c.collector={hiddenPieceIds:[pieces.at(-1).id],template:{main,branches:[branch("branch-pump-1-0","branch"),branch("instrument-kip-1-0","instrument")],
+    pieces,ports:["network-left","network-right","pump-1-0","instrument-kip-1-0","instrument-reserve-0"].map(id=>({id})),issues:[],assumptions:[]}};
+  const instruments=["valve","gauge","switch","transducer","adapter","bush","connector"].map((role,i)=>component({id:`kip-${role}`,kind:"equipment",name:role,
+    ...pose([100+i,125,720],[15,i,30]),instrumentMount:{parentId:c.id,role,portId:"instrument-kip-1-0"}}));
+  const loose=component({id:"separate-loose",kind:"equipment",cadSource:undefined,shape:flange,line:{role:"branch-looseFlange",fidelity:"parametric"}});
+  const p=project([c,...instruments,loose]);
+  p.entities["station-model"].editor.assembly.lineJoints=[{a:{componentId:loose.id,portId:"left"},b:{componentId:c.id,portId:"pump-1-0"},kind:"seat"}];
+  const before=JSON.stringify(p),m=createCadManifest(p),parts=m.instances.filter(i=>i.componentId===c.id);
+  assert.equal(JSON.stringify(p),before,"export never changes mounting relationships or saved scene");
+  assert.equal(m.instances.length,18,"all physical components remain exported exactly once");
+  for(const part of parts.filter(i=>!i.pieceId.endsWith("-plug")))assert.equal(part.subassembly?.id,c.id,part.pieceId);
+  assert.equal(m.instances.find(i=>i.componentId===loose.id).subassembly?.id,c.id,"seated loose flanges remain included");
+  for(const instrument of instruments) {
+    const part=m.instances.find(i=>i.componentId===instrument.id);
+    assert.equal(part.subassembly,undefined);assert.deepEqual(part.transform,cadTransform(instrument));
+  }
+  const cap=parts.find(i=>i.pieceId.endsWith("-plug"));
+  assert.equal(cap.subassembly,undefined);assert.equal(cap.hidden,true);
+  assert.deepEqual(cap.transform,cadTransform(c,pieces.at(-1),pose([0,0,-10],[0,90,0])));
+  const legacy=m.instances.map(i=>instruments.some(c=>c.id===i.componentId)||i.id===cap.id?{...i,subassembly:{id:c.id,name:c.name,transform:cadTransform(c)}}:i);
+  assert.notEqual(await snapshotKey(legacy),await snapshotKey(m.instances),"previous SOLIDWORKS builds become stale");
+});
 test("cabinet profiles retain their cut length, slot coordinates and pose in the CAD snapshot", async () => {
   for (const length of [600, 800]) {
     const c = component({id:"frame-profile-upper",kind:"equipment",cadSource:undefined,

@@ -54,7 +54,7 @@ test("real DN125–65 PN25 uses 127 mm reducer, 137 mm finished length and 5 mm 
   assert.equal(g.pieces.find(p => p.id === "left").shape.lengthMm - 5, 21);
 });
 
-test("straight collar assembly uses exact 3 mm CAD, butt joints and auxiliary loose flanges without changing price/length", async () => {
+test("legacy collar assembly retains auxiliary loose flanges without changing its saved price/length", async () => {
   const t = await build(1), g = t.geometry;
   assert.equal(g.baseLengthMm, 130); assert.equal(g.totalLengthMm, 186);
   const collars = g.pieces.filter(p => p.id === "left" || p.id === "right");
@@ -67,6 +67,29 @@ test("straight collar assembly uses exact 3 mm CAD, butt joints and auxiliary lo
   const c = collars[0], shape = c.shape;
   closeVec(model.add(shape.modelPosition, model.rotate([28, 0, 0], shape.modelRotation)), [0, 0, 0]);
   closeVec(c.ports[1].point, [28, 0, 0]);
+});
+
+test("included loose flanges use the exact BOM parts in 3D without duplicate pieces or extra length",async()=>{
+  const {insertPartIdentity}=await loadTs(new URL("../app/component-insert-calculations.ts",import.meta.url));
+  const original=await build(1),updated=structuredClone(fixture),row=updated.rows[1];
+  for(const side of ["left","right"]){
+    const piece=original.geometry.pieces.find(piece=>piece.id===`${side}-loose`),part=updated.catalog.parts.find(part=>part.id===piece.componentId);
+    assert(part);
+    row.configuration[side].looseFlange=insertPartIdentity(part);
+    row.bom.push({role:`${side}-looseFlange`,componentId:part.id,kind:"looseFlange",name:part.name,quantity:1,unit:"шт.",unitPrice:part.price,cost:part.price,source:part.source});
+  }
+  row.price=row.bom.reduce((sum,part)=>sum+part.cost,0);row.identityKey=`insert:v1:${JSON.stringify(row.configuration)}`;
+  const current=await build(1,0,updated),flanges=current.geometry.pieces.filter(piece=>piece.id.endsWith("-loose"));
+  assert.equal(flanges.length,2);assert(flanges.every(piece=>!piece.auxiliary));
+  assert.equal(current.geometry.pieces.length,original.geometry.pieces.length);
+  assert.equal(current.geometry.totalLengthMm,original.geometry.totalLengthMm);
+  for(const piece of flanges){
+    assert.equal(piece.componentId,row.bom.find(part=>part.role===piece.id.replace("-loose","-looseFlange")).componentId);
+    closeVec(piece.position,original.geometry.pieces.find(part=>part.id===piece.id).position);
+  }
+  const changed=updated.catalog.parts.find(part=>part.id===flanges[0].componentId);changed.thicknessMm+=1;
+  const invalid=await build(1,0,updated);
+  assert(invalid.geometry.pieces.filter(piece=>piece.id.endsWith("-loose")).length<2,"a changed flange cannot be silently replaced");
 });
 
 test("eccentricity rotates while sensor stays upward at base midpoint; cap occupies its provisional thread port", async () => {

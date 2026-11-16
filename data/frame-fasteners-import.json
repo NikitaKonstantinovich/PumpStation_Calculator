@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "prepared": "2026-11-11",
+  "prepared": "2026-11-15",
   "items": [
     {
       "id": "frame-hardware-stand-left",
@@ -1590,6 +1590,450 @@
         {
           "label": "Цена, руб./шт.",
           "amount": 2500,
+          "currency": "RUB"
+        }
+      ]
+    },
+    {
+      "id": "frame-hardware-rivkle-23301060080",
+      "catalogId": "метизы",
+      "family": "Гайка-заклёпка М6 RIVKLE 23301060080",
+      "fields": [
+        {
+          "column": "Наименование",
+          "headerPath": [
+            "Наименование"
+          ],
+          "value": "Гайка-заклёпка М6 RIVKLE 23301060080"
+        },
+        {
+          "column": "FRAME_PUMP_FASTENER",
+          "headerPath": [
+            "FRAME_PUMP_FASTENER"
+          ],
+          "value": true
+        },
+        {
+          "column": "FRAME_RIVET",
+          "headerPath": [
+            "FRAME_RIVET"
+          ],
+          "value": {
+            "verified": true,
+            "source": "https://media.boellhoff.com/files/pdf13/rivkle-blind-rivet-nuts-and-studs-en-2307.pdf · стр. 22 · 23301060080",
+            "sourceSha256": "14a37a455daa9ba3c05ebcb710dc43643c21b7d0cd50584bbc4a769f031edf47",
+            "threadMm": 6,
+            "gripMinMm": 5.5,
+            "gripMaxMm": 8,
+            "headThicknessMm": 1.5,
+            "installedProjectionMm": 10,
+            "holeDiameterMm": 9,
+            "headDiameterMm": 13
+          }
+        },
+        {
+          "column": "Диаметр резьбы, мм",
+          "headerPath": [
+            "Диаметр резьбы, мм"
+          ],
+          "value": 6
+        },
+        {
+          "column": "Источник цены",
+          "headerPath": [
+            "Источник цены"
+          ],
+          "value": "Калькулятор по ОБВЯЗКЕ.xlsm · Метизы!H120 · Цена аналога BRALO того же диаметра; согласовано пользователем 11.11.2026. Технические параметры RIVKLE не заменены; новое исполнение по тому же правилу цены аналога по диаметру, 15.11.2026"
+        },
+        {
+          "column": "FRAME_PRICE_SOURCE",
+          "headerPath": [
+            "FRAME_PRICE_SOURCE"
+          ],
+          "value": {
+            "path": "E:\\PumpStation_Calculator\\Equipment\\Калькулятор по ОБВЯЗКЕ.xlsm",
+            "sha256": "f68b4519e1e6786982e026472d49553d70159e87154417c02f53b9ced3a1464c",
+            "sheet": "Метизы",
+            "cell": "H120",
+            "rule": "Цена аналога BRALO того же диаметра; согласовано пользователем 11.11.2026. Технические параметры RIVKLE не заменены",
+            "checked": "2026-11-11"
+          }
+        }
+      ],
+      "prices": [
+        {
+          "label": "Цена, руб./шт.",
+          "amount": 6.3,
+          "currency": "RUB"
+        }
+      ]
+    },
+    {
+      "id": "frame-hardware-rivkle-23301080030",
+      "catalogId": "метизы",
+      "family": "Гайка-заклёпка М8 RIVKLE 23301080030",
+      "fields": [
+        {
+          "column": "Наименование",
+          "headerPath": [
+            "Наименование"
+          ],
+          "value": "Гайка-заклёпка М8 RIVKLE 23301080030"
+        },
+        {
+          "column": "FRAME_PUMP_FASTENER",
+          "headerPath": [
+            "FRAME_PUMP_FASTENER"
+          ],
+          "value": true
+        },
+        {
+          "column": "FRAME_RIVET",
+          "headerPath": [
+            "FRAME_RIVET"
+          ],
+          "value": {
+            "verified": true,
+            "source": "https://media.boellhoff.com/files/pdf13/rivkle-blind-rivet-nuts-and-studs-en-2307.pdf · стр. 22 · 23301080030",
+            "sourceSha256": "14a37a455daa9ba3c05ebcb710dc43643c21b7d0cd50584bbc4a769f031edf47",
+            "threadMm": 8,
+            "gripMinMm": 0.5,
+            "gripMaxMm": 3,
+            "headThicknessMm": 1.5,
+            "installedProjectionMm": 11,
+            "holeDiameterMm": 11,
+            "headDiameterMm": 16
+          }
+        },
+        {
+          "column": "Диаметр резьбы, мм",
+          "headerPath": [
+            "Диаметр резьбы, мм"
+          ],
+          "value": 8
+        },
+        {
+          "column": "Источник цены",
+          "headerPath": [
+            "Источник цены"
+          ],
+          "value": "Калькулятор по ОБВЯЗКЕ.xlsm · Метизы!H121 · Цена аналога BRALO того же диаметра; согласовано пользователем 11.11.2026. Технические параметры RIVKLE не заменены; новое исполнение по тому же правилу цены аналога по диаметру, 15.11.2026"
+        },
+        {
+          "column": "FRAME_PRICE_SOURCE",
+          "headerPath": [
+            "FRAME_PRICE_SOURCE"
+          ],
+          "value": {
+            "path": "E:\\PumpStation_Calculator\\Equipment\\Калькулятор по ОБВЯЗКЕ.xlsm",
+            "sha256": "f68b4519e1e6786982e026472d49553d70159e87154417c02f53b9ced3a1464c",
+            "sheet": "Метизы",
+            "cell": "H121",
+            "rule": "Цена аналога BRALO того же диаметра; согласовано пользователем 11.11.2026. Технические параметры RIVKLE не заменены",
+            "checked": "2026-11-11"
+          }
+        }
+      ],
+      "prices": [
+        {
+          "label": "Цена, руб./шт.",
+          "amount": 5.81,
+          "currency": "RUB"
+        }
+      ]
+    },
+    {
+      "id": "frame-hardware-rivkle-23301080080",
+      "catalogId": "метизы",
+      "family": "Гайка-заклёпка М8 RIVKLE 23301080080",
+      "fields": [
+        {
+          "column": "Наименование",
+          "headerPath": [
+            "Наименование"
+          ],
+          "value": "Гайка-заклёпка М8 RIVKLE 23301080080"
+        },
+        {
+          "column": "FRAME_PUMP_FASTENER",
+          "headerPath": [
+            "FRAME_PUMP_FASTENER"
+          ],
+          "value": true
+        },
+        {
+          "column": "FRAME_RIVET",
+          "headerPath": [
+            "FRAME_RIVET"
+          ],
+          "value": {
+            "verified": true,
+            "source": "https://media.boellhoff.com/files/pdf13/rivkle-blind-rivet-nuts-and-studs-en-2307.pdf · стр. 22 · 23301080080",
+            "sourceSha256": "14a37a455daa9ba3c05ebcb710dc43643c21b7d0cd50584bbc4a769f031edf47",
+            "threadMm": 8,
+            "gripMinMm": 5.5,
+            "gripMaxMm": 8,
+            "headThicknessMm": 1.5,
+            "installedProjectionMm": 11.7,
+            "holeDiameterMm": 11,
+            "headDiameterMm": 16
+          }
+        },
+        {
+          "column": "Диаметр резьбы, мм",
+          "headerPath": [
+            "Диаметр резьбы, мм"
+          ],
+          "value": 8
+        },
+        {
+          "column": "Источник цены",
+          "headerPath": [
+            "Источник цены"
+          ],
+          "value": "Калькулятор по ОБВЯЗКЕ.xlsm · Метизы!H121 · Цена аналога BRALO того же диаметра; согласовано пользователем 11.11.2026. Технические параметры RIVKLE не заменены; новое исполнение по тому же правилу цены аналога по диаметру, 15.11.2026"
+        },
+        {
+          "column": "FRAME_PRICE_SOURCE",
+          "headerPath": [
+            "FRAME_PRICE_SOURCE"
+          ],
+          "value": {
+            "path": "E:\\PumpStation_Calculator\\Equipment\\Калькулятор по ОБВЯЗКЕ.xlsm",
+            "sha256": "f68b4519e1e6786982e026472d49553d70159e87154417c02f53b9ced3a1464c",
+            "sheet": "Метизы",
+            "cell": "H121",
+            "rule": "Цена аналога BRALO того же диаметра; согласовано пользователем 11.11.2026. Технические параметры RIVKLE не заменены",
+            "checked": "2026-11-11"
+          }
+        }
+      ],
+      "prices": [
+        {
+          "label": "Цена, руб./шт.",
+          "amount": 5.81,
+          "currency": "RUB"
+        }
+      ]
+    },
+    {
+      "id": "frame-hardware-rivkle-23301080105",
+      "catalogId": "метизы",
+      "family": "Гайка-заклёпка М8 RIVKLE 23301080105",
+      "fields": [
+        {
+          "column": "Наименование",
+          "headerPath": [
+            "Наименование"
+          ],
+          "value": "Гайка-заклёпка М8 RIVKLE 23301080105"
+        },
+        {
+          "column": "FRAME_PUMP_FASTENER",
+          "headerPath": [
+            "FRAME_PUMP_FASTENER"
+          ],
+          "value": true
+        },
+        {
+          "column": "FRAME_RIVET",
+          "headerPath": [
+            "FRAME_RIVET"
+          ],
+          "value": {
+            "verified": true,
+            "source": "https://media.boellhoff.com/files/pdf13/rivkle-blind-rivet-nuts-and-studs-en-2307.pdf · стр. 22 · 23301080105",
+            "sourceSha256": "14a37a455daa9ba3c05ebcb710dc43643c21b7d0cd50584bbc4a769f031edf47",
+            "threadMm": 8,
+            "gripMinMm": 8,
+            "gripMaxMm": 10.5,
+            "headThicknessMm": 1.5,
+            "installedProjectionMm": 11.8,
+            "holeDiameterMm": 11,
+            "headDiameterMm": 16
+          }
+        },
+        {
+          "column": "Диаметр резьбы, мм",
+          "headerPath": [
+            "Диаметр резьбы, мм"
+          ],
+          "value": 8
+        },
+        {
+          "column": "Источник цены",
+          "headerPath": [
+            "Источник цены"
+          ],
+          "value": "Калькулятор по ОБВЯЗКЕ.xlsm · Метизы!H121 · Цена аналога BRALO того же диаметра; согласовано пользователем 11.11.2026. Технические параметры RIVKLE не заменены; новое исполнение по тому же правилу цены аналога по диаметру, 15.11.2026"
+        },
+        {
+          "column": "FRAME_PRICE_SOURCE",
+          "headerPath": [
+            "FRAME_PRICE_SOURCE"
+          ],
+          "value": {
+            "path": "E:\\PumpStation_Calculator\\Equipment\\Калькулятор по ОБВЯЗКЕ.xlsm",
+            "sha256": "f68b4519e1e6786982e026472d49553d70159e87154417c02f53b9ced3a1464c",
+            "sheet": "Метизы",
+            "cell": "H121",
+            "rule": "Цена аналога BRALO того же диаметра; согласовано пользователем 11.11.2026. Технические параметры RIVKLE не заменены",
+            "checked": "2026-11-11"
+          }
+        }
+      ],
+      "prices": [
+        {
+          "label": "Цена, руб./шт.",
+          "amount": 5.81,
+          "currency": "RUB"
+        }
+      ]
+    },
+    {
+      "id": "frame-hardware-rivkle-23301100085",
+      "catalogId": "метизы",
+      "family": "Гайка-заклёпка М10 RIVKLE 23301100085",
+      "fields": [
+        {
+          "column": "Наименование",
+          "headerPath": [
+            "Наименование"
+          ],
+          "value": "Гайка-заклёпка М10 RIVKLE 23301100085"
+        },
+        {
+          "column": "FRAME_PUMP_FASTENER",
+          "headerPath": [
+            "FRAME_PUMP_FASTENER"
+          ],
+          "value": true
+        },
+        {
+          "column": "FRAME_RIVET",
+          "headerPath": [
+            "FRAME_RIVET"
+          ],
+          "value": {
+            "verified": true,
+            "source": "https://media.boellhoff.com/files/pdf13/rivkle-blind-rivet-nuts-and-studs-en-2307.pdf · стр. 22 · 23301100085",
+            "sourceSha256": "14a37a455daa9ba3c05ebcb710dc43643c21b7d0cd50584bbc4a769f031edf47",
+            "threadMm": 10,
+            "gripMinMm": 6,
+            "gripMaxMm": 8.5,
+            "headThicknessMm": 2,
+            "installedProjectionMm": 15,
+            "holeDiameterMm": 13,
+            "headDiameterMm": 19
+          }
+        },
+        {
+          "column": "Диаметр резьбы, мм",
+          "headerPath": [
+            "Диаметр резьбы, мм"
+          ],
+          "value": 10
+        },
+        {
+          "column": "Источник цены",
+          "headerPath": [
+            "Источник цены"
+          ],
+          "value": "Калькулятор по ОБВЯЗКЕ.xlsm · Метизы!H122 · Цена аналога BRALO того же диаметра; согласовано пользователем 11.11.2026. Технические параметры RIVKLE не заменены; новое исполнение по тому же правилу цены аналога по диаметру, 15.11.2026"
+        },
+        {
+          "column": "FRAME_PRICE_SOURCE",
+          "headerPath": [
+            "FRAME_PRICE_SOURCE"
+          ],
+          "value": {
+            "path": "E:\\PumpStation_Calculator\\Equipment\\Калькулятор по ОБВЯЗКЕ.xlsm",
+            "sha256": "f68b4519e1e6786982e026472d49553d70159e87154417c02f53b9ced3a1464c",
+            "sheet": "Метизы",
+            "cell": "H122",
+            "rule": "Цена аналога BRALO того же диаметра; согласовано пользователем 11.11.2026. Технические параметры RIVKLE не заменены",
+            "checked": "2026-11-11"
+          }
+        }
+      ],
+      "prices": [
+        {
+          "label": "Цена, руб./шт.",
+          "amount": 7.94,
+          "currency": "RUB"
+        }
+      ]
+    },
+    {
+      "id": "frame-hardware-rivkle-23301120100",
+      "catalogId": "метизы",
+      "family": "Гайка-заклёпка М12 RIVKLE 23301120100",
+      "fields": [
+        {
+          "column": "Наименование",
+          "headerPath": [
+            "Наименование"
+          ],
+          "value": "Гайка-заклёпка М12 RIVKLE 23301120100"
+        },
+        {
+          "column": "FRAME_PUMP_FASTENER",
+          "headerPath": [
+            "FRAME_PUMP_FASTENER"
+          ],
+          "value": true
+        },
+        {
+          "column": "FRAME_RIVET",
+          "headerPath": [
+            "FRAME_RIVET"
+          ],
+          "value": {
+            "verified": true,
+            "source": "https://media.boellhoff.com/files/pdf13/rivkle-blind-rivet-nuts-and-studs-en-2307.pdf · стр. 22 · 23301120100",
+            "sourceSha256": "14a37a455daa9ba3c05ebcb710dc43643c21b7d0cd50584bbc4a769f031edf47",
+            "threadMm": 12,
+            "gripMinMm": 7,
+            "gripMaxMm": 10,
+            "headThicknessMm": 2,
+            "installedProjectionMm": 17.5,
+            "holeDiameterMm": 16,
+            "headDiameterMm": 23
+          }
+        },
+        {
+          "column": "Диаметр резьбы, мм",
+          "headerPath": [
+            "Диаметр резьбы, мм"
+          ],
+          "value": 12
+        },
+        {
+          "column": "Источник цены",
+          "headerPath": [
+            "Источник цены"
+          ],
+          "value": "Калькулятор по ОБВЯЗКЕ.xlsm · Метизы!H123 · Цена аналога BRALO того же диаметра; согласовано пользователем 11.11.2026. Технические параметры RIVKLE не заменены; новое исполнение по тому же правилу цены аналога по диаметру, 15.11.2026"
+        },
+        {
+          "column": "FRAME_PRICE_SOURCE",
+          "headerPath": [
+            "FRAME_PRICE_SOURCE"
+          ],
+          "value": {
+            "path": "E:\\PumpStation_Calculator\\Equipment\\Калькулятор по ОБВЯЗКЕ.xlsm",
+            "sha256": "f68b4519e1e6786982e026472d49553d70159e87154417c02f53b9ced3a1464c",
+            "sheet": "Метизы",
+            "cell": "H123",
+            "rule": "Цена аналога BRALO того же диаметра; согласовано пользователем 11.11.2026. Технические параметры RIVKLE не заменены",
+            "checked": "2026-11-11"
+          }
+        }
+      ],
+      "prices": [
+        {
+          "label": "Цена, руб./шт.",
+          "amount": 15.12,
           "currency": "RUB"
         }
       ]

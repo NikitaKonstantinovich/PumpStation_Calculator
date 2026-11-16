@@ -36,6 +36,7 @@ try {
   const origin = (await worker.ready).origin;
   const adminPath="/api/admin/geometry-nodes";
   const url=(path,role,body)=>fetch(new URL(path,origin),{
+    redirect:"manual",
     method:body?"POST":"GET",
     headers:{...(role?{Cookie:"ps_session="+role}:{}),"Content-Type":"application/json",Origin:origin},
     ...(body?{body:JSON.stringify(body)}:{})
@@ -50,7 +51,9 @@ try {
     assert.equal((await url("/?view=geometry-nodes",role)).status,status);
     assert.equal((await url(adminPath,role)).status,status);
   }
-  assert.equal((await url("/?view=geometry-nodes","admin")).status,200);
+  const retiredEditor=await url("/?view=geometry-nodes","admin");
+  assert.equal(retiredEditor.status,307);
+  assert.equal(new URL(retiredEditor.headers.get("location")).searchParams.get("view"),"algorithm-library");
   async function json(path,body){
     const response=await url(path,"admin",body), value=await response.json();
     assert.equal(response.status,200,value.error);return value;

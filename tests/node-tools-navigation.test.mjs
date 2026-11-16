@@ -8,6 +8,20 @@ const { initialTools } = await store.load("node-tools/factory");
 const { addressFromTrace, addressId, graphBreadcrumbs, parameterRepresentations, provenance } = await store.load("node-tools/navigation");
 const { encapsulate } = await store.load("engineering/hierarchy");
 
+test("retired station editor links lead to the algorithm library with the same access checks", async () => {
+  const { guardReleaseRequest } = await store.load("release-server");
+  const url = "http://fixture/?view=geometry-nodes&project=PS-EXISTING&algorithm=pump-station";
+  assert.equal((await guardReleaseRequest(new Request(url))).status, 401);
+  assert.equal((await guardReleaseRequest(new Request(url, { headers: { "x-test-role": "pro" } }))).status, 403);
+  const redirected = await guardReleaseRequest(new Request(url, { headers: { "x-test-role": "admin" } }));
+  assert.equal(redirected.status, 307);
+  const target = new URL(redirected.headers.get("location"));
+  assert.equal(target.searchParams.get("view"), "algorithm-library");
+  assert.equal(target.searchParams.get("project"), "PS-EXISTING");
+  assert.equal(target.searchParams.get("algorithm"), "pump-station");
+  assert.equal(await guardReleaseRequest(new Request("http://fixture/?view=node-editor", { headers: { "x-test-role": "admin" } })), null);
+});
+
 test("trace navigation and breadcrumbs retain the chosen use of a shared contour", () => {
   const doc = initialTools(), main = addressFromTrace(doc, "tools", "settings/main/flowRate"), secondary = addressFromTrace(doc, "tools", "settings/secondary/flowRate");
   assert.equal(main.graph, "tool.contour");

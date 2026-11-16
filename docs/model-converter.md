@@ -102,8 +102,7 @@ $env:MODEL_CONVERTER_TOKEN = ((Get-Content .dev.vars | Where-Object { $_.StartsW
 
 Для обычного запуска из каталога приложения выполните `npm run start:local`.
 Команда читает `%LOCALAPPDATA%\PumpStationCalculator\full.json` и запускает приложение
-вместе с конвертером. Адрес службы задаёт `MODEL_CONVERTER_URL`. В проверенном
-профиле приложение слушало порт 3000, а конвертер — 18766.
+вместе с конвертером. Адрес службы задаёт `MODEL_CONVERTER_URL` в профиле.
 
 «Подготовка недоступна» появляется, когда редактору не удаётся получить статус очереди.
 Это возможно даже при работающем калькуляторе, например после отдельного запуска
@@ -122,57 +121,15 @@ Test-NetConnection -ComputerName $endpoint.Host -Port $endpoint.Port -Informatio
 запрашивает статус уже принятого задания. Отдельное сообщение «Сервис конвертации
 отклонил подключение» указывает на необходимость сверить токен в настройках двух процессов.
 
-### Отдельный конвертер нодовой версии на порту 3010
+### Отдельный конвертер для локального full
 
-Когда приложение уже запущено отдельно, сервис можно запустить скрытым процессом
-из актуального каталога приложения. Для текущей тестовой базы используется команда:
-
-```powershell
-.\scripts\start-model-converter.ps1 -DatabaseName geometry_nodes_preview -DatabasePort 15432 -StateDirectory E:/PumpStation_Calculator/outputs/geometry-nodes-converter -CatalogPath E:/PumpStation_Calculator/database/catalog-v2/pumps.sqlite -SourceRoot E:/PumpStation_Calculator
-```
-
-Скрипт берёт Python, токен и адрес из `full.json`, проверяет OCP и PostgreSQL-драйвер,
-запускает сервис и проверяет готовность. Очередь находится в базе нодовой версии,
-кэш и журналы — в указанном отдельном каталоге. Не запускайте второй процесс на
-занятом порту. Перезапуск приложения не останавливает этот отдельный сервис.
-
-### Архивный пример запуска от 26.10.2026
-
-`scripts/preview-full.mjs` запускает только профиль `full`, обслуживает STL через
-авторизованный ASSETS и сохраняет текущую D1-базу. Большие модели читаются из
-`public/model-assets`, поэтому их не нужно включать в ограниченный по размеру
-манифест Workers. Миграции этот скрипт не применяет.
-
-Для перезапуска после остановки предыдущих процессов, первый PowerShell:
+Если приложение запущено отдельно, можно использовать `scripts/start-model-converter.ps1`. Передайте значения того же профиля:
 
 ```powershell
-Set-Location E:\PumpStation_Calculator\frontend
-$env:MODEL_CONVERTER_TOKEN = (Get-Content .model-converter/service-token -Raw).Trim()
-& E:\PumpStation_Calculator\work\3d-audit\.venv\Scripts\python.exe services/model-converter/server.py --root E:\PumpStation_Calculator --state E:\PumpStation_Calculator\frontend\.model-converter --port 8766
+.\scripts\start-model-converter.ps1 -DatabaseName '<база>' -DatabasePort <порт> -StateDirectory '<каталог конвертера>' -CatalogPath '<путь к базе насосов>' -SourceRoot '<каталог исходников>'
 ```
 
-Во втором PowerShell:
-
-```powershell
-Set-Location E:\PumpStation_Calculator\frontend
-$env:MODEL_CONVERTER_TOKEN = (Get-Content .model-converter/service-token -Raw).Trim()
-$env:MODEL_CONVERTER_URL = 'http://127.0.0.1:8766'
-node scripts/preview-full.mjs --build-dir work/line-seating-fix-20261026/dist --state-dir .wrangler/state --port 3000
-```
-
-Ключ создан локально, не выводится в журнал и исключён из Git. Для нового
-`npm run dev` используйте тот же ключ в `.dev.vars`; не публикуйте его в клиенте.
-Для дальнейшего обновления кода сначала создайте новую неизменяемую копию:
-
-```powershell
-npm run build:full
-if ($LASTEXITCODE -ne 0) { throw 'Сборка не завершилась' }
-$snapshot = 'work/local-full-' + (Get-Date -Format 'yyyyMMdd-HHmmss') + '/dist'
-node scripts/snapshot-local-full.mjs $snapshot
-```
-
-Затем перезапустите preview с `--build-dir $snapshot` и прежним `--state-dir`.
-Не указывайте общий `dist` работающему серверу: следующая сборка заменяет его.
+Скрипт читает интерпретатор Python, токен и адрес службы из `full.json`. Очередь хранится в PostgreSQL, а кэш и журналы в указанном каталоге. Приложение должно использовать тот же адрес и токен. [Локальный профиль full](local-project-storage.md)
 
 ## Библиотека и арматура
 

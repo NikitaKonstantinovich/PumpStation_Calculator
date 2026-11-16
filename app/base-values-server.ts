@@ -1,4 +1,5 @@
 import { db } from "./auth-server";
+import { isPipeBasePaintingRate } from "./base-values";
 import { BASE_SECTIONS, baseEqual, baseSnapshot, catalogManufacturers, initialBaseValues, legacyBaseValues, validateBaseValues, type AppliedBaseValues, type BasePublication, type BaseValues, type BaseVersions } from "./base-values";
 
 export class BaseValuesError extends Error { constructor(message:string, public status=400) { super(message); } }
@@ -50,8 +51,8 @@ export async function writeBaseValues(actor:{id:string;name:string}, body:{actio
   for(const manufacturer of catalogManufacturers())if(!Object.hasOwn(values.financial.discounts,manufacturer))throw new BaseValuesError(`Задайте скидку для производителя ${manufacturer} из действующего каталога.`);
   if(values.spacing.legacy)throw new BaseValuesError("Режим прежних расстояний предназначен только для миграции старых проектов.");
   // Painting edits retain the catalogue's source row identities.
-  const initial=(await readBasePublication("initial-v1")).values.painting;
-  if(values.painting.length!==initial.length||values.painting.some(r=>!initial.some(p=>p.id===r.id&&p.dn===r.dn&&p.material===r.material)))throw new BaseValuesError("Окраска редактируется по существующим строкам каталога. ID, DN и материал записи менять нельзя.");
+  const initial=(await readBasePublication("initial-v1")).values.painting.filter(isPipeBasePaintingRate),pipes=values.painting.filter(isPipeBasePaintingRate);
+  if(pipes.length!==initial.length||pipes.some(r=>!initial.some(p=>p.id===r.id&&p.dn===r.dn&&p.material===r.material)))throw new BaseValuesError("Окраска труб редактируется по существующим строкам каталога. ID, DN и материал записи менять нельзя.");
   const revision=body.revision!,author=`${actor.name} (${actor.id})`,json=JSON.stringify(values),database=db();
   if(body.action==="publish") {
     const id=crypto.randomUUID();

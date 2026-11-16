@@ -25,7 +25,7 @@ export type ParameterBinding = {
 };
 export type ParameterWrite = { binding: ParameterBinding; value: unknown };
 export type View = {
-  kind: "form" | "section" | "grid" | "field" | "condition" | "message" | "table" | "select" | "pump-card" | "hydraulic-chart" | "pump-detail" | "dn-calculator" | "collector-constructor" | "specification" | "station-geometry";
+  kind: "form" | "section" | "grid" | "field" | "condition" | "message" | "table" | "select" | "pump-card" | "hydraulic-chart" | "pump-detail" | "dn-calculator" | "collector-constructor" | "specification" | "component-masses" | "station-geometry";
   node: string;
   label: string;
   rows?:Record<string,unknown>[];
@@ -44,6 +44,7 @@ export type View = {
   dn?: import("./dn-nodes").DnResult;
   collector?: import("./collector-nodes").CollectorViewData;
   specification?: import("./specification-nodes").SpecificationData;
+  componentMasses?: import("./component-masses").ComponentMassData;
   specificationBindings?: import("./specification-nodes").SpecificationBindings;
   chartBindings?: { method?: ParameterBinding; frequency?: ParameterBinding; grid?: ParameterBinding };
   pointBindings?: { flow: ParameterBinding; head: ParameterBinding };

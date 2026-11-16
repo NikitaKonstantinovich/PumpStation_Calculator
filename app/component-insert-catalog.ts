@@ -51,8 +51,9 @@ export const CONFIRMED_INSERT_ENGINEERING: InsertEngineering = {
   flangedEndExclusions: { dns: [15, 20, 25], source: "Уточнение пользователя 26.10.2026: DN15, DN20 и DN25 не используются во фланцевом исполнении вставок. Исключены приварные фланцы и воротники со свободным фланцем на каждом конце; резьбовые концы сохраняются при наличии подтверждённых деталей." },
   collarSelections: collarDimensions.insertSelections as InsertEngineering["collarSelections"],
   collarAssembly: collarDimensions.assembly,
+  weldOuterDiameterTolerance: { exclusiveLimitMm: 4, source: "Решение пользователя 16.11.2026: при расчёте сварных стыков вставки допускается разница наружных диаметров менее 4 мм." },
   connectionPairs: connectionKinds.flatMap(left => connectionKinds.map(right => ({ left, right, source: "Уточнение пользователя 04.10.2026: все возможные сочетания; резьба не более 2 дюймов" }))),
-  looseFlangeInBom: { include: false, source: "Уточнение пользователя 04.10.2026: свободные фланцы исключаются из длины, состава и стоимости вставки" },
+  looseFlangeInBom: { include: true, source: "Уточнение пользователя 14.11.2026: свободные фланцы входят в состав и стоимость вставки, как у коллекторов, и не оплачиваются повторно отдельными строками станции. Они не добавляют осевую длину или сварной шов." },
   sensorNipple: { dn: 15, threadGender: "male", withPlug: true, source: "Уточнение пользователя 05.10.2026: приварной сгон DN15 для реле давления с заглушкой; стандартная наружная резьба 1/2 дюйма; длина сгона не требуется для расчёта, стоимость за штуку" },
   straightLength: { model: "017W-line-spec", basis: "standard-bolt", source: "Уточнение пользователя 05.10.2026: длину трубы определять тем же подбором крепежа 017W по DN/PN/материалу, что в обвязке; selectJointFasteners в line-spec-parts.ts; полная длина выбранного каталожного болта" },
   flangeAssembly: { faceOffsetMm: 5, clearanceFactor: 1.1, fastenerModels: ["017W-line-spec", "010C-line-spec"], source: "Уточнение пользователя 05.10.2026: торец основы не доходит до наружной плоскости каждого приварного фланца на 5 мм; уточнение 26.10.2026: только для прямых вставок внутренний зазор между фланцами не менее 1,1 × max(полная длина крепежа затвора 017W, обратного клапана 010C); подбор крепежа из обвязки" },
@@ -133,6 +134,7 @@ export function makeInsertCatalog(data: BindingCatalog, engineering: InsertEngin
     if (kind === "threadEnd") {
       part.origin = "supplement";
       part.source += `; ${findField(item, /^Источник размеров$/i)?.value ?? ""}; цена: ${findField(item, /^Источник цены$/i)?.value ?? ""}; ${findField(item, /^Дата проверки$/i)?.value ?? ""}`;
+      if (price?.label.includes("по аналогу")) part.source += `; ${findField(item, /^Примечание$/i)?.value ?? ""}`;
     }
     const supplierFlange = supplierFlangeFor(item, data.source.sha256);
     if (supplierFlange) {
@@ -203,8 +205,7 @@ export function makeInsertCatalog(data: BindingCatalog, engineering: InsertEngin
           || !signature.every(key => positive(measured.dimensions[key]) && measured.dimensions[key] === mate.dimensions[key])
           || !reviewed.supportedPipeOuterDiametersMm.every(diameter => bore - diameter >= 0.5 && bore - diameter <= 2)) continue;
         part.supportedPipeOuterDiametersMm = reviewed.supportedPipeOuterDiametersMm;
-        // A nominal drawing cannot establish the tolerances of the delivered parts or gasket fit.
-        warnings.push("Для фланца ряда 2 подтвердите фактический посадочный зазор на всей глубине и пригодность прокладки по чертежу или обмеру.");
+        part.source += `; готовое отверстие Ø${bore} мм по ГОСТ 33259-2015, 01, ряд 2. Посадка в расчёте принята по номинальным размерам.`;
       }
       if (measured.standard) part.standard = measured.standard;
       // Persisted dimensions take precedence, including invalidation of a managed field.
@@ -309,7 +310,7 @@ export function makeInsertCatalog(data: BindingCatalog, engineering: InsertEngin
       }));
     });
   }
-  return { version: `${data.source.sha256}:${data.source.importedAt}`, parts: usable, nominalDns, materials: [...new Set(parts.filter(part => part.kind === "pipe" || part.kind === "reducer").map(part => part.material))].sort(), engineering: effectiveEngineering, issues: [], sensorPlugs, standardBolts, valveReferences: valveReference.rows, paintingRates: readInsertPaintingRates(data), flangeBoringRates: readFlangeBoringRates(data) };
+  return { version: `${data.source.sha256}:${data.source.importedAt}:included-loose-flanges-v1`, parts: usable, nominalDns, materials: [...new Set(parts.filter(part => part.kind === "pipe" || part.kind === "reducer").map(part => part.material))].sort(), engineering: effectiveEngineering, issues: [], sensorPlugs, standardBolts, valveReferences: valveReference.rows, paintingRates: readInsertPaintingRates(data), flangeBoringRates: readFlangeBoringRates(data) };
 }
 
 /** No collector two-flange bolt table is accepted here. The caller must supply a verified valve stack. */

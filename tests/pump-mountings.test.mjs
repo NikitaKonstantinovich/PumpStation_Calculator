@@ -5,6 +5,7 @@ import {catalogMounting} from '../services/local-storage/node-mountings.mjs';
 import {loadTs} from './load-ts.mjs';
 const manifest=JSON.parse(await readFile(new URL('../data/pump-mountings-reviewed.json',import.meta.url),'utf8'));
 const fasteners=JSON.parse(await readFile(new URL('../data/pump-fasteners-reviewed.json',import.meta.url),'utf8'));
+const vertical=JSON.parse(await readFile(new URL('../data/vertical-pump-mountings-reviewed.json',import.meta.url),'utf8'));
 const tanks=JSON.parse(await readFile(new URL('../data/tank-frame-mountings.json',import.meta.url),'utf8'));
 const args=r=>({variant:{id:r.variantId,designation:r.designation,manufacturer_article:r.article},model:{id:r.modelId},motor:r.motor,manufacturer:r.manufacturer,series:r.series});
 const {tankFrameMounting}=await loadTs(new URL('../app/frame-calculation/tank-mountings.ts',import.meta.url));
@@ -85,21 +86,23 @@ test('specified stand hardware stays selected when pump fasteners are unknown; p
  assert.equal(result.frameResult.status,'incomplete');
 });
 
-test('every audited execution is unique; supplements retain source provenance and do not fill missing geometry',()=>{
+test('every audited execution is unique; supplements retain source provenance and use reviewed geometry only',()=>{
  assert.equal(manifest.rows.length,4577);assert.equal(new Set(manifest.rows.map(r=>r.variantId)).size,4577);
  assert.equal(fasteners.rows.length,4577);assert.equal(new Set(fasteners.rows.map(r=>r.variantId)).size,4577);
  const supplements=new Map(fasteners.rows.map(r=>[r.variantId,r]));
  for(const r of manifest.rows){
   const loaded=catalogMounting(args(r));assert(loaded);
   const supplement=supplements.get(r.variantId);assert(supplement);
-  if(loaded.frameV1?.cad){
+  if(vertical.rows.some(v=>v.variantId===r.variantId)){
+   assert(loaded.frameV1);assert(readMounting(loaded.frameV1));assert.equal(loaded.frameAssessment.version,vertical.version);
+  }else if(loaded.frameV1?.cad){
    assert.equal(loaded.frameAssessment.evidence.kind,'horizontal_step_mount');
    assert(readMounting(loaded.frameV1));
   }else if(r.status==='catalogue_grid'||supplement.mounting){
    assert(loaded.frameV1);assert(readMounting(loaded.frameV1));
    if(loaded.frameV1.boltDiameterMm){assert(supplement.evidence.sha256);assert(loaded.frameV1.fastenerSource);assert.equal(loaded.frameV1.boltDiameterMm,supplement.fasteners.boltDiameterMm);}
   }else assert.equal(loaded.frameV1,undefined);
-  if(supplement.status==='missing')assert.equal(loaded.fastenersV1?.boltDiameterMm??null,null);
+  if(supplement.status==='missing'&&!vertical.rows.some(v=>v.variantId===r.variantId))assert.equal(loaded.fastenersV1?.boltDiameterMm??null,null);
  }
 });
 

@@ -15,6 +15,7 @@ from urllib.request import Request, urlopen
 from http.server import ThreadingHTTPServer
 
 HERE = Path(__file__).resolve().parent
+LIBRARY_ROOT = next((p for p in HERE.parents if (p / "Equipment").is_dir() and (p / "frontend/scripts/model_assets.py").is_file()), HERE.parents[2])
 
 
 def module(name):
@@ -62,8 +63,78 @@ class FrameRegistryTests(unittest.TestCase):
 
 
 class ContractTests(unittest.TestCase):
+    def test_release_catalogue_resolves_new_four_hole_pump_flange(self):
+        with tempfile.TemporaryDirectory() as temp:
+            work=Path(temp); script=work/"release/prepare.py";script.parent.mkdir()
+            shutil.copyfile(HERE/"prepare.py",script)
+            data_dir=script.parent/"data";data_dir.mkdir()
+            catalogue=json.loads((HERE.parents[1]/"data/stamped-loose-flanges.json").read_bytes())
+            (data_dir/"stamped-loose-flanges.json").write_text(json.dumps(catalogue),encoding="utf8")
+            row=catalogue["catalog"]["фланцы-006-r0116:4-hole"];stock=catalogue["parts"][row["model"]]
+            data=payload();data["manifest"]["instances"][0].update(equipmentId="фланцы-006-r0116:4-hole",geometry=dict(kind="flange",stampedHash=stock["sourceHash"],**stock["dimensions"]))
+            job=work/"job";job.mkdir();(job/"request.json").write_text(json.dumps(data),encoding="utf8")
+            result=subprocess.run([sys.executable,"-I",str(script),"--root",str(LIBRARY_ROOT),"--job",str(job)],capture_output=True)
+            self.assertEqual(result.returncode,0,result.stderr)
+            resolved=json.loads((job/"resolved.json").read_bytes())
+            self.assertEqual(resolved["omissions"],[])
+            self.assertEqual(resolved["instances"][0]["sourceHash"],stock["sourceHash"])
+
+    def test_purchased_cad_quality_warning_is_visible_without_losing_the_instance(self):
+        class FixtureJobs(server.Jobs):
+            def command(self,cmd,folder,stage):
+                parts=server.read_json(folder/"request.json")["manifest"]["instances"]
+                if stage=="prepare":
+                    (folder/"resolved.json").write_text(json.dumps(dict(instances=parts,omissions=[])))
+                    (folder/"sources.json").write_text("{}")
+                elif stage=="solidworks":
+                    (folder/"verification.json").write_text(json.dumps(dict(instances=parts)))
+                    (folder/"import-diagnostics.json").write_text(json.dumps([dict(name="Затвор",warning="Поверхностное тело сохранено")]))
+        with tempfile.TemporaryDirectory() as temp:
+            jobs=FixtureJobs(temp,HERE,"runner","template")
+            try:
+                submitted=jobs.submit("owner",payload());jobs.executor.submit(lambda:None).result()
+                job=jobs.get(submitted["id"],"owner")
+                self.assertEqual((job["status"],job["completed"],job["omissions"]),("completed",1,[]))
+                self.assertIn("Затвор: Поверхностное тело сохранено",job["warnings"])
+                self.assertIn("замечания",job["stage"])
+                self.assertEqual(server.read_json(Path(temp)/job["id"]/"report.json")["warnings"],job["warnings"])
+            finally:jobs.close()
+
+    def test_document_identity_ignores_location_but_preserves_execution(self):
+        part=dict(path="shared.step",sourceHash="a"*64,configuration="M16x80",name="Болт M16x80 DIN933 Ц 8,8 для левой стойки")
+        key=prepare.document_key(part)
+        self.assertEqual(key,prepare.document_key({**part,"name":"Болт M16x80 DIN 933 Ц 8.8 для правой стойки"}))
+        for patch in [dict(name="Болт M16x80 DIN933 Ц 10,9"),dict(material="aisi304"),dict(configuration="M16x90"),dict(coating="black"),dict(sourceHash="b"*64),dict(name="Болт M16x80 DIN931 Ц 8.8")]:
+            self.assertNotEqual(key,prepare.document_key({**part,**patch}))
+        label=prepare.canonical_label(part,dict(kind="rod",hardware="bolt",nominalMm=16,lengthMm=80))
+        self.assertEqual(label,"Болт DIN 933 M16×80 · 8.8 · Ц")
+        rivet={**part,"name":"Гайка-заклёпка RIVKLE 34355080130 M8 для левой стойки"}
+        self.assertEqual(prepare.document_key(rivet),prepare.document_key({**rivet,"name":rivet["name"].replace("левой","правой")}))
+        self.assertNotEqual(prepare.document_key(rivet),prepare.document_key({**rivet,"name":rivet["name"].replace("34355080130","34355080131")}))
+
+    def test_subassembly_pose_is_validated_and_cannot_disagree_between_children(self):
+        data=payload();part=data["manifest"]["instances"][0]
+        part["subassembly"]=dict(id="collector",name="Коллектор",transform=list(prepare.IDENTITY))
+        server.validate(data)
+        part["subassembly"]["transform"][0]=2
+        with self.assertRaises(ValueError):server.validate(data)
+        part["subassembly"]["transform"][0]=1
+        clone=json.loads(json.dumps(part));clone["id"]="another";clone["subassembly"]["transform"][9]=1
+        data["manifest"]["instances"].append(clone)
+        with self.assertRaises(ValueError):server.validate(data)
+
+    def test_saddles_share_local_geometry_but_not_different_radius_or_thread(self):
+        main=dict(lengthMm=900,outerMm=114.3,innerMm=108.3)
+        branch=dict(id="one",name="Патрубок 1",origin=[100,0,0],axis=[0,1,0],endMm=120,outerMm=60.3,innerMm=54.3)
+        a,ta=prepare.canonical_geometry(dict(kind="collector-branch",main=main,branch=branch))
+        b,tb=prepare.canonical_geometry(dict(kind="collector-branch",main={**main,"lengthMm":1200},branch={**branch,"id":"two","name":"Патрубок 2","origin":[-100,0,0],"axis":[0,0,-1]}))
+        self.assertEqual(a,b);self.assertNotEqual(ta,tb)
+        for change in [dict(outerMm=76),dict(thread=dict(designation="G2",lengthMm=20)),dict(origin=[100,0,10])]:
+            c,_=prepare.canonical_geometry(dict(kind="collector-branch",main=main,branch={**branch,**change}))
+            self.assertNotEqual(a,c)
+
     def test_prepare_runs_from_staged_worker_using_only_configured_root(self):
-        root = HERE.parents[2]
+        root = LIBRARY_ROOT
         with tempfile.TemporaryDirectory() as temp:
             work = Path(temp)
             script = work / "release" / "service" / "prepare.py"
@@ -85,7 +156,7 @@ class ContractTests(unittest.TestCase):
             self.assertEqual(resolved["instances"][0]["sourceHash"], stock["sourceHash"])
 
     def test_stamp_requires_the_reviewed_file_and_exact_mount_never_a_generated_plate(self):
-        root = HERE.parents[2]
+        root = LIBRARY_ROOT
         index = json.loads((root/"frontend/data/stamped-loose-flanges.json").read_bytes())
         sku = "фланцы-006-r0118"
         source = index["parts"]["100"]
@@ -236,6 +307,8 @@ class ContractTests(unittest.TestCase):
                 folder = Path(temp) / "job"; folder.mkdir()
                 job = dict(id="job", status="building", stage="Подготовка", completed=0)
                 path = folder / "progress.json"
+                path.write_text(json.dumps(dict(phase="session", done=0, total=0)))
+                self.assertEqual(jobs.checked(job)["stage"], "Закрытие текущего сеанса SOLIDWORKS")
                 path.write_text(json.dumps(dict(phase="insert", done=20, total=50)))
                 current = jobs.checked(job)
                 self.assertEqual(current["stage"], "Размещение элементов: 20 из 50")
@@ -356,6 +429,69 @@ except ImportError: HAS_OCP = False
 
 @unittest.skipUnless(HAS_OCP, "OCP Python required")
 class GeometryTests(unittest.TestCase):
+    def test_channel_drilling_survives_prepare_canonicalization(self):
+        profile=dict(width=40,height=80,flange=7.4,web=4.5,rootRadius=6.5,toeRadius=3.5)
+        g=dict(kind="channel-member",profile=profile,member=dict(id="rear",axis="x",opening=1,start=0,end=600,cross=100),
+               section=[[0,0],[40,0],[40,7.4],[4.5,7.4],[4.5,72.6],[40,72.6],[40,80],[0,80]],
+               holes=[dict(id="h",memberId="rear",valid=True,x=300,y=120,diameterMm=9,face="top")])
+        normalized,_=prepare.canonical_geometry(g)
+        self.assertAlmostEqual(self.volume(prepare.generate(g)),self.volume(prepare.generate(normalized)),places=6)
+        g["holes"][0]["memberId"]="another"
+        with self.assertRaises(ValueError):prepare.canonical_geometry(g)
+
+    def test_concentric_and_eccentric_reducers_have_open_bores_and_expected_volume(self):
+        import math
+        from OCP.BRepClass3d import BRepClass3d_SolidClassifier
+        from OCP.TopAbs import TopAbs_OUT, TopAbs_SOLID
+        from OCP.TopExp import TopExp_Explorer
+        from OCP.TopoDS import TopoDS
+        from OCP.gp import gp_Pnt
+        for offset in ([0,0,0],[0,0,25.4]):
+            g=dict(kind="reducer",lengthMm=127,outerMm=139.7,innerMm=127.1,smallOuterMm=88.9,smallInnerMm=77.7,offset=offset)
+            body=prepare.generate(g)
+            expected=math.pi*127/12*(139.7**2+139.7*88.9+88.9**2-127.1**2-127.1*77.7-77.7**2)
+            self.assertAlmostEqual(self.volume(body),expected,delta=.001)
+            cast=getattr(TopoDS,"Solid_s",None) or TopoDS.Solid
+            solid=cast(TopExp_Explorer(body,TopAbs_SOLID).Current())
+            for fraction in (.01,.5,.99):
+                point=gp_Pnt(127*fraction,offset[1]*fraction,offset[2]*fraction)
+                self.assertEqual(BRepClass3d_SolidClassifier(solid,point,1e-6).State(),TopAbs_OUT)
+
+    def test_wav8_layout_preserves_browser_bounds(self):
+        from OCP.Bnd import Bnd_Box
+        from OCP.BRepBndLib import BRepBndLib
+        body=prepare.generate(dict(kind="tank-envelope",diameterMm=200,heightMm=311))
+        bounds=Bnd_Box();BRepBndLib.AddOptimal_s(body,bounds)
+        for actual,expected in zip((*bounds.CornerMin().Coord(),*bounds.CornerMax().Coord()),(-100,-100,0,100,100,311)):
+            self.assertAlmostEqual(actual,expected,places=5)
+
+    def test_channel_member_drills_only_selected_flange_and_rejects_edge_breakout(self):
+        import math
+        profile=dict(width=52,height=120,flange=7.8,web=4.8,rootRadius=7.5,toeRadius=4.5)
+        # Straight-corner control section isolates the prism and bore volume checks.
+        section=[[0,0],[52,0],[52,7.8],[4.8,7.8],[4.8,112.2],[52,112.2],[52,120],[0,120]]
+        for axis in ("x","y"):
+            for opening in (-1,1):
+                m=dict(id="rail",axis=axis,opening=opening,start=0,end=1000,cross=0)
+                offset=30 if opening==1 else 22
+                x,y=(500,offset) if axis=="x" else (offset,500)
+                base=dict(kind="channel-member",profile=profile,member=m,section=section,holes=[])
+                plain=prepare.generate(base)
+                for face in ("top","bottom"):
+                    hole=dict(memberId="rail",valid=True,x=x,y=y,diameterMm=17,face=face)
+                    drilled=prepare.generate({**base,"holes":[hole]})
+                    self.assertAlmostEqual(self.volume(plain)-self.volume(drilled),math.pi*8.5**2*7.8,places=5)
+                    with self.assertRaises(ValueError):prepare.generate({**base,"holes":[{**hole,"diameterMm":100}]})
+
+    def test_rivet_nut_is_one_solid_with_a_through_bore(self):
+        import math
+        from OCP.TopAbs import TopAbs_SOLID
+        from OCP.TopExp import TopExp_Explorer
+        shape=prepare.generate(dict(kind="rivet-nut",headLengthMm=1.5,headOuterMm=16,bodyLengthMm=16,bodyOuterMm=11,innerMm=8))
+        solids=TopExp_Explorer(shape,TopAbs_SOLID)
+        self.assertTrue(solids.More());solids.Next();self.assertFalse(solids.More())
+        self.assertAlmostEqual(self.volume(shape),math.pi*((8**2-4**2)*1.5+(5.5**2-4**2)*16),places=5)
+
     @staticmethod
     def volume(shape):
         from OCP.BRepGProp import BRepGProp

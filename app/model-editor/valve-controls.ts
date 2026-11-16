@@ -2,7 +2,7 @@ import importedMounts from "../../data/valve-control-mounts.json";
 import type { ProjectConfig, SpecEntity, SpecItem } from "../project-config";
 import type { Assembly, Bounds, Component, Vec3 } from "./model";
 
-export const VALVE_CONTROL_REVISION = importedMounts.revision;
+export const VALVE_CONTROL_REVISION = importedMounts.revision + "-shared-switch-part-v1";
 export type ValveControl = {
   version: 1; parentId: string; role: "bracket" | "switch-1" | "switch-2";
   revision: string; position: Vec3; rotation: Vec3; manual?: boolean;
@@ -83,7 +83,7 @@ export function addValveControls(assembly: Assembly, project: ProjectConfig): As
     for (const part of parts) {
       const local=composeValvePose(nativePose,{ position: part.position as Vec3, rotation: part.rotation as Vec3 }), pose=composeValvePose(parent,local), bounds=part.asset.bounds as Bounds;
       const note=`Автоматическая посадка Dendor 017W DN${mount.dn}: кронштейн по сверловке Ø${mount.boltCircle}, выключатели по пазам. Номинальное положение в регулировочных пазах; ход срабатывания настраивается при сборке.`;
-      children.push({ id: `${parent.id}-control-${part.role}`, name: `${part.asset.name}${part.role.startsWith("switch")?` · ${part.role.endsWith("1")?"1":"2"}`:""}`, kind: "equipment",
+      children.push({ id: `${parent.id}-control-${part.role}`, name: part.asset.name, kind: "equipment",
         sourceKey: `equipment:${part.row.equipmentId}`, equipmentId: part.row.equipmentId, sourceNote: note, ...pose, bounds, meshUrl: part.asset.meshUrl,
         cadSource: { path: part.asset.source, hash: part.asset.sourceHash }, ports: [], hidden: false, locked: false, opacity: 1,
         parameters: { length: bounds[3]-bounds[0], width: bounds[4]-bounds[1], height: bounds[5]-bounds[2], diameter: 1, routeOffset: 0 },

@@ -78,12 +78,12 @@ test("each flanged pump has one separate valve spacer, two spacer flanges and di
   assert.equal(rows.filter(row => /flange/.test(row.assemblyRole)).reduce((sum, row) => sum + row.quantity, 0), 6);
   assert.equal(role(rows, "primary-pump-gasket"), undefined);
   assert.equal(role(rows, "primary-check-gaskets").quantity, 6);
-  assert.equal(role(rows, "primary-valve-gaskets").quantity, 6);
+  assert.equal(role(rows, "primary-valve-gaskets"), undefined);
   assert.equal(role(rows, "primary-check-fasteners-studs").quantity, 24);
   for (const kind of ["nuts", "washers"]) assert.equal(role(rows, `primary-check-fasteners-${kind}`).quantity, 48);
   assert.match(role(rows, "primary-check-fasteners-studs").name, /Шпилька/);
   assert.ok(role(rows, "primary-check-fasteners-studs").price > 0);
-  assert.match(role(rows, "primary-valve-fasteners-bolts").name, /М16х120/);
+  assert.match(role(rows, "primary-valve-fasteners-bolts").name, /М16х115/);
   assert.match(role(rows, "primary-check-fasteners-studs").description, /фланца насоса/);
   assert.equal(role(rows, "network-gaskets").quantity, 2);
   assert.ok(rows.every(row => row.section === "discharge" && /^04\./.test(row.position)));
@@ -92,7 +92,7 @@ test("each flanged pump has one separate valve spacer, two spacer flanges and di
 test("insertion table respects DN, PN, material and never invents length or price", () => {
   for (const material of ["st20", "aisi304"]) {
     const row = role(build(fixture({ material })), "primary-between-valves-insertion");
-    assert.equal(row.price, 4140); assert.equal(row.status, "clarify");
+    assert.equal(row.price, material === "aisi304" ? null : 4140); assert.equal(row.status, "clarify");
     assert.match(row.description, /Предварительный вариант/);
     assert.equal(row.technicalStatus,"unverified");
     assert.doesNotMatch(row.details, /L\s*=|\d+ мм/);
@@ -198,12 +198,14 @@ test("second circuit has independent counts, DN, PN and connection; network part
 test("missing components keep visible unresolved rows, including washers", () => {
   const db = { items: [], collectorCatalog: { ...catalog, components: [] } };
   const rows = build(fixture(), db);
-  for (const key of ["primary-between-valves-flanges-weldFlange", "primary-check-fasteners-bolts", "primary-check-fasteners-nuts", "primary-check-fasteners-washers", "primary-valve-gaskets"]) {
+  for (const key of ["primary-between-valves-flanges-weldFlange", "primary-check-fasteners-bolts", "primary-check-fasteners-nuts", "primary-check-fasteners-washers", "primary-check-gaskets"]) {
     assert.equal(role(rows, key).status, "clarify"); assert.equal(role(rows, key).price, null);
   }
   const p = fixture({ material: "aisi304" }), stainless = build(p);
   assert.equal(role(stainless, "primary-between-valves-flanges-collar").quantity, 6);
-  assert.equal(role(stainless, "primary-between-valves-flanges-looseFlange").quantity, 6);
+  assert.equal(role(stainless, "primary-between-valves-flanges-looseFlange"), undefined);
+  assert.equal(role(stainless, "primary-between-valves-insertion").price, null);
+  assert.match(role(stainless, "primary-between-valves-insertion").technicalNotes.join(" "), /Свободные фланцы должны входить/);
   assert.ok(role(stainless, "primary-valve-fasteners-bolts").price > 0);
   const missingThickness = structuredClone(database);
   for (const item of missingThickness.items) if (item.id.startsWith("фланцы-006-")) {

@@ -3,12 +3,27 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { loadTs } from "./load-ts.mjs";
 const root = new URL("../", import.meta.url);
-const { resolvePumpSpatial } = await loadTs(new URL("app/model-editor/pump-spatial.ts", root));
+const { resolvePumpSpatial, resolveStationPumpLayout } = await loadTs(new URL("app/model-editor/pump-spatial.ts", root));
 const model = await loadTs(new URL("app/model-editor/model.ts", root));
 const { createProject } = await loadTs(new URL("app/project-config.ts", root));
 const pumps = JSON.parse(await readFile(new URL("public/pumps.json", root), "utf8"));
 const profiles = JSON.parse(await readFile(new URL("public/model-assets/manifest.json", root), "utf8"));
 const none = { version: 1, profiles: {} };
+test("CDM10-4 recovers confirmed roles from the same STEP even when sold as a model reference", async () => {
+  const data = JSON.parse(await readFile(new URL("data/prepared-pump-cad-models.json", root), "utf8"));
+  const { profile } = data.models["CNP:CDM:1100092298"];
+  const pump = { manufacturer: "CNP", series: "CDM", type: "vertical_multistage" };
+  assert.deepEqual(profile.ports.map(p => p.id), ["port-a", "port-b"]);
+  const result = resolveStationPumpLayout(pump, profile);
+  assert.equal(result.info.envelope, "cad");
+  assert.deepEqual(result.ports.map(p => [p.id, p.point, p.axis]),
+    [["inlet", [0, 0, 0], [-1, 0, 0]], ["outlet", [280, 0, 0], [1, 0, 0]]]);
+  const altered = { ...profile, ports: profile.ports.map(p => ({ ...p, point: [p.point[0], p.point[1] + 8, p.point[2]] })) };
+  const fallback = resolveStationPumpLayout(pump, altered);
+  assert.equal(fallback.info.schematic, true);
+  assert.notEqual(fallback.info.envelope, "cad");
+  assert.deepEqual(fallback.ports.map(p => p.id), ["inlet", "outlet"]);
+});
 // Explicit missing-data fixture: the live MBL catalog now has verified dimensions/ports.
 const mbl = { ...pumps.find(p => p.id === "nu-34f0554f7dc091e4"), dimensions: undefined, spatialData: undefined };
 function assembly(id, catalog = profiles, lines) {
@@ -116,9 +131,9 @@ test("refresh replaces legacy ports with labelled schematic ports while preservi
 
 test("rendered fallback has catalog dimensions; missing sizes use an explicitly different marker material", async () => {
   const replacements = {};
-  for (const name of ["geometry", "collector-renderer", "insertion-renderer", "fastener-renderer"]) {
+  for (const name of ["geometry", "collector-renderer", "insertion-renderer", "fastener-renderer", "frame-renderer", "frame-hardware-renderer", "channel-frame-renderer"]) {
     const url = new URL(`app/model-editor/${name}.ts`, root);
-    replacements[url.href] = (await readFile(url, "utf8")).replace('from "three"', `from ${JSON.stringify(new URL("node_modules/three/build/three.module.js", root).href)}`);
+    replacements[url.href] = (await readFile(url, "utf8")).replace(/from ["'](three(?:\/[^"']+)*)["']/g, (_, specifier) => `from ${JSON.stringify(import.meta.resolve(specifier))}`);
   }
   const { componentObject, disposeObject } = await loadTs(new URL("app/model-editor/geometry.ts", root), replacements);
   const a = assembly("9", none), c = a.components.find(c => c.kind === "pump");

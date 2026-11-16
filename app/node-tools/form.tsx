@@ -13,6 +13,7 @@ import { PumpDetailCard } from "./pump-detail-card";
 import { DnCalculatorView } from "./dn-view";
 import { CollectorNodeView } from "./collector-view";
 import { NodeSpecificationView } from "./specification-view";
+import { ComponentMassesView } from "./component-masses-view";
 import type { ParameterWrite } from "./schema";
 const validationKey = (b: ParameterBinding) => JSON.stringify([b.key, b.mode, b.value, b.field, b.editable, b.active]);
 function Input({
@@ -205,8 +206,8 @@ export function ToolForm({
       }
     };
     const classes = selected && (selected === v.node || selected === v.binding?.node) ? "nt-selected" : "";
-    if (["table", "select", "pump-card", "hydraulic-chart", "pump-detail", "dn-calculator", "collector-constructor", "specification", "station-geometry"].includes(v.kind)) return <div key={v.node} data-view-node={v.node} data-binding-node={v.binding?.node} className={classes} role={select ? "button" : undefined} tabIndex={select ? 0 : undefined} onKeyDown={event=>{if(select && event.target===event.currentTarget && event.key==="Enter")select(v.node);}} onClick={choose}>
-      {v.kind === "station-geometry" ? <GeometryView view={v} disabled={blocked} change={change}/> : v.kind === "dn-calculator" ? <DnCalculatorView view={v} disabled={blocked} change={change}/> : v.kind === "collector-constructor" ? <CollectorNodeView view={v} disabled={blocked} change={change} writes={writes}/> : v.kind === "specification" ? <NodeSpecificationView view={v} disabled={blocked} change={change} writes={writes}/> : v.kind === "table" ? <CandidateTable view={v} disabled={blocked} showOrigin={showOrigin} change={change}/> : v.kind === "select" ? <DynamicSelect view={v} disabled={blocked} showOrigin={showOrigin} change={change}/> : v.kind === "hydraulic-chart" ? <HydraulicChartView view={v} disabled={blocked} change={change} writes={writes}/> : v.kind === "pump-detail" ? <PumpDetailCard view={v} showOrigin={showOrigin}/> : <PumpCard view={v}/>}
+    if (["table", "select", "pump-card", "hydraulic-chart", "pump-detail", "dn-calculator", "collector-constructor", "specification", "component-masses", "station-geometry"].includes(v.kind)) return <div key={v.node} data-view-node={v.node} data-binding-node={v.binding?.node} className={classes} role={select ? "button" : undefined} tabIndex={select ? 0 : undefined} onKeyDown={event=>{if(select && event.target===event.currentTarget && event.key==="Enter")select(v.node);}} onClick={choose}>
+      {v.kind === "component-masses" ? <ComponentMassesView view={v}/> : v.kind === "station-geometry" ? <GeometryView view={v} disabled={blocked} change={change}/> : v.kind === "dn-calculator" ? <DnCalculatorView view={v} disabled={blocked} change={change}/> : v.kind === "collector-constructor" ? <CollectorNodeView view={v} disabled={blocked} change={change} writes={writes}/> : v.kind === "specification" ? <NodeSpecificationView view={v} disabled={blocked} change={change} writes={writes}/> : v.kind === "table" ? <CandidateTable view={v} disabled={blocked} showOrigin={showOrigin} change={change}/> : v.kind === "select" ? <DynamicSelect view={v} disabled={blocked} showOrigin={showOrigin} change={change}/> : v.kind === "hydraulic-chart" ? <HydraulicChartView view={v} disabled={blocked} change={change} writes={writes}/> : v.kind === "pump-detail" ? <PumpDetailCard view={v} showOrigin={showOrigin}/> : <PumpCard view={v}/>}
     </div>;
     if (v.kind === "field") {
       if (!v.binding) return <p role="alert">Подключите параметр поля</p>;

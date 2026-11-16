@@ -63,6 +63,28 @@ test("beta uses only supplied input with server-resolved versions and blocks ful
   const denied=await call(instance,"search_equipment",{catalog:"collectors",query:"",offset:0});assert.match(denied.error,/beta/);
   assert.ok((await call(tools({profile:"beta"}),"read_current_project",{})).error);
 });
+test("assistant reads the open product from node results and keeps its pinned graph and catalogue", async () => {
+  const { nodeAssistantProject } = await load("node-tools/assistant-project");
+  const data = { schema: 1, product: { version: "pinned-graph", baseVersions: settings.baseValues.versions, sourceVersions: { pump_catalog_v2: "catalog-pin" } }, tools: {} };
+  const program = { algorithmId: "pump-station", version: data.product.version, tools: [{ id: "duty", name: "Условия станции" }, { id: "settings", name: "Настройки проекта" }], plans: { duty: { steps: [{ id: "duty/request", operation: "pump.request", links: [{ from: "settings/result" }] }, { id: "duty/select", operation: "pump.select" }] } } };
+  const snapshot = nodeAssistantProject({ program, name: "Насосная установка", data, available: new Set(), pendingInput: false, isAvailable: id => id === "duty", evaluate: () => ({
+    bindings: [], issues: [{ message: "Проверьте давление", severity: "warning" }],
+    trace: { "duty/request": { inputs: { settings: { stationType: "utility", main: { reservePumpCount: 1, private: "PRIVATE-FIELD" } } }, outputs: { value: { flowRate: 27.5, head: 40, workingPumpCount: 2 }, valid: true } },
+      "duty/select": { outputs: { valid: true, value: { variantId: "pump-v2", pump: { model: "CDM 10-5", secret: "PRIVATE-PUMP" } } } } },
+    view: { kind: "specification", specification: { status: "ready", readiness: { knownTotal: 110, pricedRows: 2 }, items: [{ position: "1", name: "Фланец", quantity: 2, price: 55, status: "selected" }] } },
+  }) });
+  const instance = tools({ context: { projectId: "mine", workspace: snapshot } });
+  const current = await call(instance, "read_current_project", {});
+  assert.match(current.data.origin, /нодовый продукт/);
+  assert.deepEqual([current.data.primaryInput.flowRate, current.data.primaryInput.selectedPumpModel, current.data.primaryInput.reservePumpCount], [27.5, "CDM 10-5", 1]);
+  assert.equal(current.data.product.version, "pinned-graph");
+  assert.equal(current.data.product.sourceVersions.pump_catalog_v2, "catalog-pin");
+  assert.equal(current.data.product.tools[0].sources, "Настройки проекта");
+  assert.equal(current.data.specification.knownTotal, 110);
+  const spec = await call(instance, "read_project_specification", { query: "Фланец", offset: 0 });
+  assert.equal(spec.data.items[0].quantity, 2);
+  assert.doesNotMatch(JSON.stringify([current, spec]), /PRIVATE/);
+});
 test("equipment search reads current import and saved records using fixed projections and paging",async()=>{
   const instance=tools();const component=await call(instance,"search_equipment",{catalog:"components",query:"DN100",offset:0});assert.equal(component.data.databaseRevision,7);assert.ok(component.data.items.length>0);assert.ok(component.data.items.length<=5);
   for(const catalog of ["insertions","collectors"]){const result=await call(instance,"search_equipment",{catalog,query:"DN",offset:0});assert.equal(result.data.items.length,5);assert.equal(result.data.nextOffset,5);assert.ok(!JSON.stringify(result).includes("PRIVATE-"));const next=await call(instance,"search_equipment",{catalog,query:"DN",offset:5});assert.equal(next.data.items.length,2);assert.equal(next.data.nextOffset,null);}

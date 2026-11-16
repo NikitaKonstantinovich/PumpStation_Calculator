@@ -29,6 +29,7 @@ export type Pump = {
   article?: string; execution?: string; dataWarnings?: string[];
   ratedHead?: number | null; voltage?: string | null; frequencyHz?: number | null;
   speedRpm?: number | null; weightKg?: number | null; inletDn?: number | null; outletDn?: number | null;
+  weightSource?: string; weightEstimated?: boolean;
   description?: string | null; availability?: string | null; catalogSource?: string;
   electric?: PumpProperties; materials?: PumpProperties; dimensions?: PumpProperties;
   technicalSheet?: { key: string; label: string; group: string; unit: string | null; value: string | number; page: number }[];

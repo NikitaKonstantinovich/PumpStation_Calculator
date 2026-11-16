@@ -1,0 +1,10 @@
+{
+  "version": 1,
+  "note": "Расчётные допущения для оценки сухой массы, не технологические требования к изготовлению. Заменяются фактическими данными проекта.",
+  "weldLegMm": 3,
+  "steelDensityKgM3": 7850,
+  "coatingThicknessMm": 0.08,
+  "coatingDensityKgM3": 1500,
+  "flaxBundleAreaMm2": 10,
+  "flaxBulkDensityKgM3": 500
+}

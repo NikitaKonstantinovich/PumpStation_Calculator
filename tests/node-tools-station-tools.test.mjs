@@ -15,6 +15,7 @@ const { legacyBaseSnapshot }=await loadTs(new URL("base-values.ts",base));
 const { defaultDnOverrides }=await loadTs(new URL("node-tools/dn-runtime.ts",base));
 const { useStandardPumpSpacing }=await loadTs(new URL("node-tools/spacing-upgrade.ts",base));
 const {connectWorkspaceControls,addProductGeometry}=await loadTs(new URL("node-tools/workspace-upgrade.ts",base));
+const {addComponentMassTool}=await loadTs(new URL("node-tools/component-masses-upgrade.ts",base));
 
 function fixture(){
   const doc=addPumpProductFixture(prepareDocument(initialTools())),root=doc.diagrams.find(g=>g.id===doc.product.root);
@@ -39,6 +40,18 @@ function selectedContexts(program,role="admin"){
   return ctx;
 }
 const findView=(view,kind)=>view?.kind===kind?view:view?.children?.map(child=>findView(child,kind)).find(Boolean);
+
+test("mass tool is a visible, idempotent specification dependent; notice policy remains in graph",()=>{
+ const {spec}=chain(),before=structuredClone(spec.document),added=addComponentMassTool(spec.document,spec.id);
+ assert.deepEqual(spec.document,before);assert.deepEqual(addComponentMassTool(added.document,spec.id),added);
+ const program=compileTools(added.document,"masses-fixture-v1"),ctx=selectedContexts(program),mass=evaluateProduct(program,added.id,ctx),s=evaluateProduct(program,spec.id,ctx);
+ assert(findView(mass.view,"component-masses"));assert.equal(mass.value.rows.length,findView(s.view,"specification").specification.items.length);
+ assert.deepEqual(findView(s.view,"specification").specification.noticePolicy,{tankValveArticle:false,frameAnchorDiameters:false});
+ assert.equal(program.tools.find(t=>t.id===added.id).workspaceVisible,true);
+ assert.deepEqual(mass.issues.filter(i=>i.severity==="error"),[]);
+ const signature=rows=>rows.map(r=>[r.name,r.quantity,r.equipmentId??null]);
+ assert.deepEqual(signature(mass.value.rows),signature(findView(s.view,"specification").specification.items.map(r=>({...r,equipmentId:undefined}))));
+});
 
 test("window flags reach DN, collectors and specification; disabled geometry skips composition and re-enable uses current values",()=>{
   const {spec,dn,collectors}=chain();connectWorkspaceControls(spec.document,"settings");

@@ -7,9 +7,12 @@ import { jointFastenerLength } from "../joint-fastener-length";
 import reference from "../suction-fasteners.json";
 import shapes from "../../data/fastener-shapes.json";
 import cad from "../../data/flange-cad-mounts.json";
+import horizontalCad from "../../data/end-suction-flange-mounts.json";
 import { flangeHoleCenters } from "./flange-hole-pattern";
 import { previousStampGrip, upgradeStampedFlanges } from "./stamped-flanges";
 import { reviewedMvMounts } from "./onis-flow";
+import { alignPumpFlanges, fourOfEightPair, matchingHoles } from "./align-vibration-flanges";
+import { fourOfEightInsertionNote, fourOfEightVibrationNote } from "../pump-vibration-drilling";
 
 const add = (a: Vec3, b: Vec3): Vec3 => a.map((v,i)=>v+b[i]) as Vec3;
 const sub = (a: Vec3, b: Vec3): Vec3 => a.map((v,i)=>v-b[i]) as Vec3;
@@ -27,7 +30,7 @@ export const isHardwareRow = (c:Component) => /fasteners-(bolts|studs|nuts|washe
 export const hasLegacyDrillingBlock = (c:Component) => c.fastener?.status==="blocked" &&
   c.fastener.issues.includes("Фактическая сверловка не согласуется с принятой таблицей DN/PN и диаметром крепежа.");
 const isVibration = (c:Component) => /-vibration-compensator$/.test(c.line?.role??"");
-type Support = { node:string; owner:Component; port:Port; mount?:FlangeMount; pieceId?:string };
+export type Support = { node:string; owner:Component; port:Port; mount?:FlangeMount; pieceId?:string };
 function procedural(s: InsertionShape, source:string, equipmentId?:string): FlangeMount | undefined {
   if(s.stampedHash==="missing") return;
   const holes=flangeHoleCenters(s);
@@ -53,7 +56,8 @@ function supports(c:Component):Support[] {
   } else if (c.kind==="pump" || c.cadSource && !c.line || isVibration(c)) {
     const mesh=c.shape?.kind==="mesh"?c.shape:undefined;
     const hash=mesh?.modelHash??c.cadSource?.hash??"";
-    const mounts=(cad.models as unknown as Record<string,Record<string,FlangeMount>>)[hash] ?? reviewedMvMounts(hash);
+    const mounts=(cad.models as unknown as Record<string,Record<string,FlangeMount>>)[hash] ??
+      (horizontalCad as unknown as Record<string,Record<string,FlangeMount>>)[hash] ?? reviewedMvMounts(hash);
     for(const p of c.ports.filter(p=>p.connection==="flanged")) {
       const mount=mounts?.[p.id];
       append(p,mount&&mesh?transformed(mount,{position:mesh.modelPosition??zero,rotation:mesh.modelRotation??zero}):mount);
@@ -87,6 +91,8 @@ export function rebuildFasteners(assembly:Assembly):Assembly {
   }
   const groups=new Map<string,Support[]>();
   for(const c of parts)for(const s of supports(c)){const root=find(s.node);groups.set(root,[...(groups.get(root)??[]),s]);}
+  const aligned=alignPumpFlanges(assembly,[...groups].map(([root,ends])=>({ends,links:joints.filter(j=>find(key(j.a))===root&&find(key(j.b))===root)})));
+  if(aligned!==assembly) return rebuildFasteners(aligned);
   const generated:Component[]=[];
   for(const [root,ends] of groups){
     // A KMS has two independent steel rings. Never union its ports into a
@@ -97,6 +103,15 @@ export function rebuildFasteners(assembly:Assembly):Assembly {
     // Ignore welded backs; only mating surfaces or explicit collar seats count.
     const members=[...new Set(links.flatMap(j=>[j.a.componentId,j.b.componentId]))];
     const objects=members.map(id=>byId.get(id)!).filter(Boolean);
+    // The shank points toward the pump on either side and after arbitrary rotation.
+    // Sort the bearing ends by their position along the actual pump-facing axis.
+    const branchLine=objects.find(c=>c.line)?.line;
+    const pumpOwner=objects.find(c=>c.kind==="pump") ?? (branchLine ? byId.get(branchLine.pumpId) : undefined);
+    if (pumpOwner && ends.length===2 && ends.every(e=>e.mount)) {
+      const midpoint=mul(add(ends[0].mount!.face,ends[1].mount!.face),.5);
+      const toward=sub(pumpOwner.position,midpoint);
+      if (dot(ends[0].mount!.axis,toward)<0) ends.reverse();
+    }
     const id=`fastener-${hash(ends.map(s=>s.node).sort().join("|"))}`;
     const issues:string[]=[],warnings:string[]=[];
     const binding:FastenerBinding={version:1,members,jointIds:links.map(j=>j.id),status:"blocked",issues,sources:[],grip:0,minimumLength:0,count:0,centers:[]};
@@ -119,8 +134,12 @@ export function rebuildFasteners(assembly:Assembly):Assembly {
       const dn=a.port.dn??b.port.dn,pn=a.port.pn??b.port.pn;
       if(!dn||!pn||a.port.dn&&b.port.dn&&a.port.dn!==b.port.dn||a.port.pn&&b.port.pn&&a.port.pn!==b.port.pn)issues.push("DN/PN сопрягаемых исполнений не подтверждены или различаются.");
       const ref=reference.find(r=>r.dn===dn&&r.pn===pn);
+      const exception=fourOfEightPair(ends,objects);
+      const fourOfEight=!!exception && matchingHoles(exception.pump.mount!,exception.mate.mount!).length===4;
+      const installedHoles=fourOfEight ? matchingHoles(am,bm) : am.holes;
+      if(fourOfEight) warnings.push(exception.vibration?fourOfEightVibrationNote:fourOfEightInsertionNote);
       if(!ref)issues.push(`Нет принятого правила крепежа DN${dn??"?"} PN${pn??"?"}.`);
-      if(am.holes.length!==bm.holes.length || am.holes.some(h=>!bm.holes.some(k=>Math.hypot(...sub(sub(k,h),mul(axis,dot(sub(k,h),axis))))<.2)))issues.push("Сверловка или угловое положение отверстий не совпадают. Фланцы автоматически не поворачиваются.");
+      if(!fourOfEight && (am.holes.length!==bm.holes.length || am.holes.some(h=>!bm.holes.some(k=>Math.hypot(...sub(sub(k,h),mul(axis,dot(sub(k,h),axis))))<.2))))issues.push("Сверловка или угловое положение отверстий не совпадают. Фланцы автоматически не поворачиваются.");
       if(ref && (am.holeDiameter<=ref.boltDiameter || bm.holeDiameter<=ref.boltDiameter))issues.push("Диаметр отверстий фланцев недостаточен для выбранного крепежа.");
       const wafer=objects.find(c=>/CheckValve|SuctionValve|DischargeValve/.test(c.line?.role??""));
       const vibration=objects.find(isVibration);
@@ -140,12 +159,12 @@ export function rebuildFasteners(assembly:Assembly):Assembly {
       const rodRows=selected ? specParts.filter(c=>c.equipmentId===selected.id) : [];
       const specifiedCount=rodRows.length===1 ? rodRows[0].line?.quantity : undefined;
       const matchesCount=(count:number|undefined)=>am.holes.length===count && bm.holes.length===count;
-      if(ref && !matchesCount(ref.holes) && !matchesCount(specifiedCount))
+      if(ref && !fourOfEight && !matchesCount(ref.holes) && !matchesCount(specifiedCount))
         issues.push(`Число отверстий на опорных фланцах не согласуется с крепежом стыка: по справочнику ${ref.holes}, по спецификации ${specifiedCount ?? "—"}, на фланцах ${am.holes.length} и ${bm.holes.length}.`);
       const nut=choose("nut")??hardware.find(h=>h.kind==="nut"&&h.diameter===ref?.boltDiameter),washer=choose("washer")??hardware.find(h=>h.kind==="washer"&&h.diameter===ref?.boltDiameter);
       const shape=shapes.rows.find(s=>s.d===ref?.boltDiameter);
       binding.grip=Math.max(0,span+am.thickness+bm.thickness);
-      binding.count=am.holes.length;
+      binding.count=installedHoles.length;
       if(!nut||!washer||!shape)issues.push("Нет полных каталоговых размеров гайки/шайбы/головки для этого диаметра.");
       if(nut&&washer&&shape&&ref){
         const bearingRadius=Math.max(shape.washerOuter/2,shape.flats/Math.sqrt(3));
@@ -171,10 +190,10 @@ export function rebuildFasteners(assembly:Assembly):Assembly {
           binding.sources.push(rod.source,nut.source,washer.source);
           binding.dimensions={diameter:ref.boltDiameter,length:rod.length,flats:shape.flats,head:shape.head,nut:nut.length,washer:washer.length,washerInner:shape.washerInner,washerOuter:shape.washerOuter,ends:endsCount};
           if(!selected)warnings.push("Стандартная длина подобрана для фактического 3D-пакета; отдельный соответствующий комплект в спецификации не найден. Стоимость и состав спецификации не изменены.");
-          if(specParts.some(c=>c.line?.quantity!==am.holes.length*(["nut","washer"].includes(hardware.find(h=>h.id===c.equipmentId)?.kind??"")?endsCount:1)))warnings.push("Количество крепежа в спецификации отличается от фактической сверловки; требуется сверка.");
+          if(specParts.some(c=>c.line?.quantity!==(fourOfEight?8:am.holes.length)*(["nut","washer"].includes(hardware.find(h=>h.id===c.equipmentId)?.kind??"")?endsCount:1)))warnings.push("Количество крепежа в спецификации отличается от фактической сверловки; требуется сверка.");
           position=sub(am.face,mul(axis,am.thickness));rotation=mountingRotation([1,0,0],axis);
           const basis=([ [1,0,0],[0,1,0],[0,0,1] ] as Vec3[]).map(v=>rotate(v,rotation));
-          binding.centers=am.holes.map(h=>{const d=sub(h,am.face);return [0,dot(d,basis[1]),dot(d,basis[2])] as Vec3;});
+          binding.centers=installedHoles.map(h=>{const d=sub(h,am.face);return [0,dot(d,basis[1]),dot(d,basis[2])] as Vec3;});
         }
       }
       if(objects.some(c=>c.ports.some(p=>p.provisional)))warnings.push("В пакете есть предварительные монтажные базы; посадку необходимо подтвердить перед изготовлением.");
@@ -192,6 +211,37 @@ export function rebuildFasteners(assembly:Assembly):Assembly {
       position,rotation,hidden:prior?.hidden??false,opacity:prior?.opacity??1,locked:true,ports:[],fastener:binding,
       parameters:{length:d?.length??1,width:radius*2,height:radius*2,diameter:d?.diameter??1,routeOffset:0},
       bounds:binding.status==="ready"?[d!.ends===2?studStart:-d!.head,-radius,-radius,studStart+d!.length,radius,radius]:[-8,-8,-8,8,8,8]});
+  }
+  // All pumps on one circuit use the same bolt for each mounting interface.
+  // The common length must satisfy the largest real grip in that circuit.
+  const pumpSets=new Map<string,Component[]>();
+  for(const c of generated) {
+    const b=c.fastener!;
+    if(b.status!=="ready" || b.dimensions?.ends!==1)continue;
+    const pump=b.members.map(id=>byId.get(id)).find(p=>p?.kind==="pump");
+    if(!pump)continue;
+    const line=b.members.map(id=>byId.get(id)?.line).find(Boolean);
+    const circuit=line?.circuit ?? /^pump-(\d+)-/.exec(pump.id)?.[1];
+    if(circuit===undefined)continue;
+    const k=`${circuit}:${line?.side??"mount"}`;
+    pumpSets.set(k,[...(pumpSets.get(k)??[]),c]);
+  }
+  const series=(h:HardwareItem)=>h.name.replace(/([МM]\s*\d+)\s*[хx×]\s*\d+(?=\s|$)/i,"$1×#");
+  for(const sets of pumpSets.values()) {
+    const first=sets[0].fastener!.hardware!.rod;
+    if(sets.some(c=>series(c.fastener!.hardware!.rod)!==series(first))) {
+      for(const c of sets){c.fastener!.status="blocked";c.fastener!.issues.push("Крепёж насосов одного контура различается по диаметру, стандарту или исполнению; единый типоразмер не подтверждён.");}
+      continue;
+    }
+    const minimum=Math.max(...sets.map(c=>Math.max(c.fastener!.minimumLength,c.fastener!.hardware!.rod.length)));
+    const common=assembly.fastenerCatalog.items.filter(h=>h.kind==="bolt"&&series(h)===series(first)&&h.length+.01>=minimum).sort((a,b)=>a.length-b.length)[0];
+    if(!common)continue;
+    for(const c of sets){
+      const b=c.fastener!;
+      b.hardware={...b.hardware!,rod:common};b.dimensions={...b.dimensions!,length:common.length};
+      c.parameters={...c.parameters,length:common.length};
+      if(c.bounds)c.bounds=[...c.bounds.slice(0,3),common.length,c.bounds[4],c.bounds[5]] as Component["bounds"];
+    }
   }
   return {...assembly,components:[...parts,...generated]};
 }

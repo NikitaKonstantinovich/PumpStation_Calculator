@@ -1,4 +1,5 @@
 import type { InsertCalculation, InsertConfiguration } from "./component-insert-calculations";
+import { pumpMatingFlangeBom } from "./pump-mating-flange";
 
 /** Persisted audit snapshot; BOM is explanatory and never a second set of priced rows. */
 export type CalculatedInsertion = {
@@ -20,9 +21,14 @@ export function insertionBomIssues(c: InsertCalculation): string[] {
     c.configuration.left?.part === c.configuration.base && c.bom.some(row => row.role === "base" && row.kind === "threadEnd");
   const required = ["base", ...(baseIsLeftEnd ? [] : [`left-${c.leftConnection}`]), `right-${c.rightConnection}`, "welding",
     ...(c.material === "st20" ? ["painting"] : []), ...(c.withSensorNipple ? ["sensor-nipple"] : []),
-    ...(["left", "right"] as const).flatMap(side => c.configuration[side]?.looseFlange ? [`${side}-looseFlange`] : []),
+    ...(["left", "right"] as const).flatMap(side => c.configuration[side]?.connection === "collar" || c.configuration[side]?.looseFlange ? [`${side}-looseFlange`] : []),
     ...(c.configuration.sensor?.plug ? ["sensor-plug"] : []), ...(c.configuration.extension ? ["extension-pipe"] : [])];
   const issues = required.filter(role => !c.bom.some(row => row.role === role && finitePositive(row.quantity))).map(role => `Неполный BOM: ${role}`);
+  for (const side of ["left", "right"] as const) if (c.configuration[side]?.connection === "collar") {
+    const flange = c.bom.find(row => row.role === `${side}-looseFlange`);
+    if (!c.configuration[side].looseFlange || flange?.kind !== "looseFlange" || flange.quantity !== 1 || !flange.componentId)
+      issues.push(`Свободный фланец ${side === "left" ? "левого" : "правого"} конца должен входить в состав и стоимость вставки. Пересчитайте и выгрузите изделие.`);
+  }
   if (!c.configuration.base || !c.configuration.left?.part || !c.configuration.right?.part ||
     c.configuration.material !== c.material || c.configuration.pn !== c.pn || c.configuration.dnLarge !== c.dnLarge || c.configuration.dnSmall !== c.dnSmall ||
     c.configuration.geometry !== c.geometry || c.configuration.left.connection !== c.leftConnection || c.configuration.right.connection !== c.rightConnection ||
@@ -39,12 +45,12 @@ export function insertionPrice(snapshot: CalculatedInsertion): number | null {
   return Math.abs(c.bom.reduce((sum, row) => sum + row.cost!, 0) - c.price) <= .01 ? c.price : null;
 }
 
-export type InstalledInsertion = { snapshot: CalculatedInsertion; sensorConnection?: "fire-pressure-switch" };
+export type InstalledInsertion = { snapshot: CalculatedInsertion; sensorConnection?: "fire-pressure-switch"; reversed?: boolean; pumpFlangeExecution?: "dn65-pn16-four-hole" };
 /** Keep the purchased insertion snapshot intact. An occupied station port
  * replaces its reserve cap; the removed cap is neither bought nor drawn. */
 export function installedInsertionBom(assembly: InstalledInsertion, checkPressure = true) {
   const calculation = assembly.snapshot.calculation;
-  const parts = calculation.bom.filter(row => assembly.sensorConnection !== "fire-pressure-switch" || row.role !== "sensor-plug");
+  const parts = pumpMatingFlangeBom(assembly, calculation.bom.filter(row => assembly.sensorConnection !== "fire-pressure-switch" || row.role !== "sensor-plug"));
   const assumption = !checkPressure && calculation.assumptions?.find(item => item.code === "sensor-pn25-pressure");
   if (!assumption) return parts;
   const warning = `; ${assumption.message} ${assumption.source}`;

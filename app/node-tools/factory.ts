@@ -292,6 +292,7 @@ export function initialTools(manufacturers = ["cnp", "aquastrong", "onis", "vand
   const tank = param("membraneTank", "Мембранный бак", "boolean", "flag", "", 1850, {
     initial: false
   }, "options");
+  const cabinetSeparate = param("cabinetSeparate", "Отдельно стоящий шкаф", "boolean", "flag", "", 4700, {initial:false}, "options");
   const volume = param("membraneTankVolume", "Объём бака", "enum", "volume", "л", 2070, {
     options: ["8", "50", "80", "100"],
     initial: "8"
@@ -351,7 +352,7 @@ export function initialTools(manufacturers = ["cnp", "aquastrong", "onis", "vand
     membraneTank: "membraneTank.value",
     membraneTankVolume: "membraneTankVolume.value"
   }, 1350, 1900);
-  const fields = [station, inlet, tank, volume, vibration, plugs, usd, cny, ...discounts, F("jockeyPump", "boolean", "flag"), F("isolatingValves", "boolean", "flag"), F("combinedCircuitsSimultaneous", "boolean", "flag"), object("main"), object("secondary")];
+  const fields = [station, inlet, tank, volume, cabinetSeparate, vibration, plugs, usd, cny, ...discounts, F("jockeyPump", "boolean", "flag"), F("isolatingValves", "boolean", "flag"), F("combinedCircuitsSimultaneous", "boolean", "flag"), object("main"), object("secondary")];
   const values = Object.fromEntries(fields.map(f => [f.key, f.key + ".value"]));
   Object.assign(values, {
     membraneTankVolume: "tankVolume.value",
@@ -383,7 +384,7 @@ export function initialTools(manufacturers = ["cnp", "aquastrong", "onis", "vand
   };
   const execution = section("execution", "Исполнение установки", ["field_stationType.value", conditional("jockeyVisible", "field_jockeyPump.value", "rules.fire", 250)], 200);
   const conditions = section("conditions", "Условия на входе", ["field_inletHead.value"], 1550);
-  const equipment = section("equipment", "Комплектация", ["field_membraneTank.value", conditional("volumeVisible", "field_membraneTankVolume.value", "membraneTank.value", 2100), "field_vibrationCompensators.value", "field_collectorPlugs.value", conditional("valvesVisible", "field_isolatingValves.value", "rules.valves", 2750), conditional("modeVisible", "field_combinedCircuitsSimultaneous.value", "rules.combined", 3000)], 2400);
+  const equipment = section("equipment", "Комплектация", ["field_membraneTank.value", conditional("volumeVisible", "field_membraneTankVolume.value", "membraneTank.value", 2100), "field_cabinetSeparate.value", "field_vibrationCompensators.value", "field_collectorPlugs.value", conditional("valvesVisible", "field_isolatingValves.value", "rules.valves", 2750), conditional("modeVisible", "field_combinedCircuitsSimultaneous.value", "rules.combined", 3000)], 2400);
   const finance = section("finance", "Финансовые параметры", ["field_usdRate.value", "field_cnyRate.value", ...discounts.map(f => "field_" + f.key + ".value")], 3400, true);
   s.add("save", "command.save", 1500, 4400, {}, "ui");
   s.add("form", "ui.form", 1850, 1800, {

@@ -198,15 +198,15 @@
       "outerDiameter": 60,
       "wallThickness": 3.5,
       "lengthMm": 47,
-      "price": null,
+      "price": 70,
       "article": "D270-18288",
       "manufacturer": "Китай / ДН.ру",
       "dimensionsSource": "https://dn.ru/fiting/rezby/stalnye/kitai/gost3262-75/dn50",
-      "priceSource": "https://dn.ru/fiting/rezby/stalnye/kitai/gost3262-75/dn50",
-      "warnings": [
-        "Цена СТ20 DN50 D270-18288 предоставляется по запросу; отображаемые 79,30 ₽ не приняты как подтверждённая цена."
-      ],
-      "note": "Наружный диаметр и стенка из блока параметров, длина из названия артикула. Без покрытия, готовая наружная резьба / сварка, PN16. Цена требует проверки при заказе."
+      "priceSource": "https://khoper.ru/produkciya/detali-truboprovoda/fitingi-stalnye/nippeli-privarnye-rezby/rezba-50-2-l47-n-iz-truby-gost-3262/",
+      "warnings": [],
+      "note": "Наружный диаметр и стенка из блока параметров, длина из названия артикула. Без покрытия, готовая наружная резьба / сварка, PN16. Цена D270-18288 по запросу; расчётная цена взята по стальной приварной резьбе DN50 2″ L=47 по ГОСТ 3262 у «Хопёр Сталь».",
+      "priceStatus": "analogue",
+      "checkedAt": "2026-11-16"
     },
     {
       "id": "thread-end:dnru-d270-17412",
@@ -224,6 +224,44 @@
       "priceSource": "https://dn.ru/fiting/nipples/stalnye/dn-ru/h-304-w-nr-ru20/50",
       "warnings": [],
       "note": "Паспорт стр. 3–4: PN20; DN50, наружная BSPT R2, D=60.3, T=3, L=50, L1=22 мм. Цена карточки 915 ₽ проверена 31.10.2026. Альтернатива NK-NE50/4 с OD60 для совместимого стыка с воротником OD60.3; PN25 не разрешён."
+    },
+    {
+      "id": "thread-end:dnru-d270-17410",
+      "material": "aisi304",
+      "dn": 32,
+      "pn": 20,
+      "thread": "1 1/4\"",
+      "outerDiameter": 42.4,
+      "wallThickness": 3,
+      "lengthMm": 50,
+      "weightKg": 0.13,
+      "price": 567.3,
+      "article": "D270-17410 Н-304-W-НР",
+      "manufacturer": "DN.ru",
+      "dimensionsSource": "https://dn.ru/storage/certificates/dn/fiting/nippel-privarnoj-dn-ru-n-304-nr-w-du8-100-ru20-nerzhaveyushhaya-stal-pod-privarku-naruzhnaya-rezba.pdf",
+      "priceSource": "https://dn.ru/fiting/nipples/stalnye/dn-ru/h-304-w-nr-ru20/32",
+      "checkedAt": "2026-11-16",
+      "warnings": [],
+      "note": "Паспорт, стр. 3–4: наружная BSPT R1¼, D=42,4 мм, T=3 мм, L=50 мм, L1=18 мм. Цена из карточки артикула."
+    },
+    {
+      "id": "thread-end:dnru-d270-17411",
+      "material": "aisi304",
+      "dn": 40,
+      "pn": 20,
+      "thread": "1 1/2\"",
+      "outerDiameter": 48.3,
+      "wallThickness": 3,
+      "lengthMm": 50,
+      "weightKg": 0.14,
+      "price": 677.1,
+      "article": "D270-17411 Н-304-W-НР",
+      "manufacturer": "DN.ru",
+      "dimensionsSource": "https://dn.ru/storage/certificates/dn/fiting/nippel-privarnoj-dn-ru-n-304-nr-w-du8-100-ru20-nerzhaveyushhaya-stal-pod-privarku-naruzhnaya-rezba.pdf",
+      "priceSource": "https://dn.ru/fiting/nipples/stalnye/dn-ru/h-304-w-nr-ru20/40",
+      "checkedAt": "2026-11-16",
+      "warnings": [],
+      "note": "Паспорт, стр. 3–4: наружная BSPT R1½, D=48,3 мм, T=3 мм, L=50 мм, L1=22 мм. Цена из карточки артикула."
     }
   ]
 }

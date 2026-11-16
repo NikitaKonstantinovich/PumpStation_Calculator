@@ -31,7 +31,9 @@ export function mergeSupplierFlanges(input, reference) {
   data.items = [...data.items.filter(item => item.tableId !== reference.id), ...items];
   catalog.tables = [...catalog.tables.filter(table => table.id !== reference.id), {
     id: reference.id, title: reference.family,
-    sourceRange: `${reference.rows.every(row => row.priceStatus === "on-request") ? "Проверка позиций, цена по запросу" : "Проверенный прайс"} ${reference.checkedAt}`,
+    sourceRange: reference.rows.some(row => row.priceStatus === "analogue")
+      ? `Расчётные цены по аналогам; размеры проверены ${reference.checkedAt}`
+      : `${reference.rows.every(row => row.priceStatus === "on-request") ? "Проверка позиций, цена по запросу" : "Проверенный прайс"} ${reference.checkedAt}`,
     sourceUrls: [...new Set(reference.rows.map(row => row.url))], headerRows: [],
     columns: items[0].fields.map(({ column, headerPath }) => ({ column, headerPath })), recordIds: items.map(item => item.id),
   }];

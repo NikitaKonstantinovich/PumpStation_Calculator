@@ -3,6 +3,7 @@ import { baseConfigurationIdentity, collectorNippleCounts } from "./base-values"
 import type { CollectorMaterial, StationType, ValveConnection } from "./project-config";
 import { checkInletPressure, dnVelocityLimit, type InletPressureCheck } from "./dn-defaults";
 import type { PipePaintingRate } from "./component-painting";
+import type { ChannelPaintingRate } from "./channel-painting";
 import type { BaseVersions, VelocityRule } from "./base-values";
 import { collectorInstrumentPortErrors, collectorInstrumentPortIdentity, type CollectorInstrumentPort } from "./hydraulic-port-ledger";
 import { collectorSpacingConfirmed, collectorSpacingIsManual } from "./collector-spacing";
@@ -15,7 +16,7 @@ export type CollectorComponent = { id: string; kind: ComponentKind; name: string
 export type CollectorValveBolt = { dn: number; pn: number; material: CollectorMaterial; model: "017W"; length: number | null; minimumLengthMm: number | null; componentId: string | null; diameter: number; source: string; warnings: string[] };
 export const COLLECTOR_BRANCH_LENGTH_RULE = "017W-standard-bolt-v1";
 export const currentCollectorLengthRule = (calculation?: CollectorCalculation | null) => calculation?.branchLengthRule === COLLECTOR_BRANCH_LENGTH_RULE;
-export type CollectorCatalog = { valveBolts?: CollectorValveBolt[]; version: string; components: CollectorComponent[]; bolts: Array<{ dn: number; pn: number; length: number; source: string }>; paintingRates?: PipePaintingRate[]; weldRates?: {aisi304:number;st20:number} };
+export type CollectorCatalog = { valveBolts?: CollectorValveBolt[]; version: string; components: CollectorComponent[]; bolts: Array<{ dn: number; pn: number; length: number; source: string }>; paintingRates?: PipePaintingRate[];channelPaintingRates?:ChannelPaintingRate[]; weldRates?: {aisi304:number;st20:number} };
 export type CollectorBomItem = { role: string; componentId: string | null; kind: ComponentKind | "welding" | "painting"; name: string; quantity: number | null; unit: "м" | "шт."; unitPrice: number | null; cost: number | null; source: string | null };
 export type WeldOperation = { role: string; name: string; count: number; lengthMm: number; cost: number };
 export type CollectorCalculation = { branchLengthRule?: string; branchBoltReferences?: Array<CollectorValveBolt | null>; fingerprint: string; catalogVersion: string; code: string | null; complete: boolean; warnings: string[]; flow: number | null; mode: string; lengthMm: number; branchLengthsMm: Array<number | null>; velocities: { collector: number | null; primary: number | null; secondary: number | null }; bom: CollectorBomItem[]; welds: WeldOperation[]; weldLengthMm: number; weldCost: number; subtotal: number; price: number | null };

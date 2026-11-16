@@ -126,5 +126,10 @@ test('hollow pump feet use full clamp height and installed rivet projection; par
  const partial=pumpFasteners({...m,clampHeightMm:null,footThicknessMm:null},4,8,'mv',imported);
  assert(partial.issue);assert.match(partial.parts[0].name,/М12/);assert.match(partial.parts[0].name,/длина не определена/);
  assert.equal(bindFramePart(partial.parts[0],[imported.find(i=>i.id==='frame-hardware-bolt-m12-65')]).componentId,undefined);
- assert(pumpFasteners(m,8,8,'mv',imported).issue);
+ assert.equal(pumpFasteners(m,8,8,'mv',imported).parts[1].componentId,'frame-hardware-rivkle-23301120100');
+ assert(pumpFasteners(m,11,8,'mv',imported).issue);
+});
+
+test('separate cabinet omits stand holes on bent frame without changing pump spacing or requiring a cabinet width',()=>{
+ const l=layoutFrame([pump],null,null,r,true);assert.deepEqual(l.issues,[]);assert(l.lengthMm);assert.deepEqual(l.stands,[]);assert.equal(l.profiles,false);assert.equal(l.standDistanceMm,null);assert(l.holes.every(h=>h.owner.startsWith('pump-')));assert.equal(l.pumps[1].x-l.pumps[0].x,300);assert.equal(l.stationAlignment,'centered');
 });

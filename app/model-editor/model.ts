@@ -1,4 +1,7 @@
 import { engineeringOperation, registerOperation } from "../engineering/runtime";
+import { applyChannelFrame, parseChannelGeometry, addChannelCabinet } from "./channel-frame";
+import type { ChannelGeometry } from "../frame-calculation/channel-types";
+import { parseChannelFrameAssembly,type ChannelFrameAssembly } from "./channel-frame-assembly";
 import { MAX_TOTAL_PUMPS } from "../pump-counts";
 import { FIRE_INSERTION_INSTRUMENTS_REVISION } from "../fire-insertion-instruments";
 import { TANK_LAYOUT_REVISION } from "../tank-connection";
@@ -15,7 +18,7 @@ import { defaultSnaps, normalizeSnaps, type SnapSettings } from "./snap-settings
 import { specificationModels } from "./specification-models";
 import { parseInsertionTemplate, parseConnectionPoint, type InsertionTemplate, type InsertionShape, type ConnectionPoint } from "./insertion-types";
 import { addLineAssemblies, mountingRotation } from "./line-assembly";
-import { parseLineBinding, parseLineJoints, parseLineShape, pipeThreadDesignation, type LineBinding, type LineCatalog, type LineJoint } from "./line-types";
+import { parseLineBinding, parseLineJoints, parseLineShape, pipeThreadConflict, type LineBinding, type LineCatalog, type LineJoint } from "./line-types";
 import { COLLECTOR_INSTRUMENT_RULES_REVISION, parseCollectorBinding, type CollectorBinding } from "./collector-types";
 import { applyCollectorTemplate, buildCollectorTemplate, collectorTankX, finishCollectorTemplate } from "./collector-template";
 import { resolvedCollectorMetal } from "./collector-mesh";
@@ -26,7 +29,8 @@ import { addValveControls, composeValvePose, followValveControls, parseValveCont
 import { hasLegacyDrillingBlock, isHardwareRow, rebuildFasteners } from "./flange-fasteners";
 import { upgradeStampedFlanges } from "./stamped-flanges";
 import { FASTENER_REVISION, parseFastenerBinding, parseFastenerCatalog, type FastenerBinding, type FastenerCatalog } from "./fastener-types";
-import { resolvePumpLayout, parsePumpGeometry, type PumpGeometryInfo } from "./pump-spatial";
+import { resolvePumpLayout, resolveStationPumpLayout, parsePumpGeometry, type PumpGeometryInfo } from "./pump-spatial";
+import { END_SUCTION_PORTS_REVISION } from "./end-suction-ports";
 import { horizontalPumpDrawing } from "./horizontal-pump-drawings";
 import { onisMvCadProfile, onisMvCadSource } from "./onis-mv-cad";
 import { cdm15_6CadProfile, CDM15_6_ARTICLE_ID } from "./cdm15-6-cad";
@@ -63,6 +67,8 @@ export type Component = {
   frameDrilling?: FrameDrilling;
   frameHardware?: FrameHardware;
   frameProfile?: FrameProfile;
+  channelFrame?: ChannelGeometry;
+  channelFrameAssembly?: ChannelFrameAssembly;
   fastener?: FastenerBinding;
   autoPose?: { position: Vec3; rotation: Vec3; parametersKey?: string };
   routing?: { from: PortRef; to: PortRef; automatic: boolean; points: Vec3[] };
@@ -164,6 +170,8 @@ export function normalizeEditor(raw: unknown, rebuildGeometry = true): EditorSta
     if (frameDrilling && component.kind === "frame") component.frameDrilling = frameDrilling;
     component.frameHardware = parseFrameHardware(c.frameHardware);
     component.frameProfile = parseFrameProfile(c.frameProfile);
+    if(component.kind==="frame")component.channelFrame=parseChannelGeometry(c.channelFrame);
+    component.channelFrameAssembly=parseChannelFrameAssembly(c.channelFrameAssembly,component.channelFrame);
     const tankMount = parseTankMount(c.tankMount);
     if (tankMount && tankMount.parentId !== component.id) component.tankMount = tankMount;
     const fastener = parseFastenerBinding(c.fastener);
@@ -345,7 +353,7 @@ export function connectionIssues(assembly: Assembly): Array<{ id: string; messag
       const down = rotate([0,0,-1],c.rotation);
       const group = assembly.components.find(p=>p.id===`frame-hardware-${owner}`)?.frameHardware;
       const lift = group?.supportLift??group?.head??0;
-      const holes = feet.map((_,i)=>frame.ports.find(p=>p.id===`${owner}/hole-${i}`));
+      const holes = feet.map((_,i)=>frame.ports.find(p=>p.id===`${owner}/hole-${i}`||frame.channelFrame&&p.id===`${owner}-hole-${i}`));
       const gap = Math.max(...holes.map((hole,i)=>hole
         ? distance(worldPoint(c,feet[i].point),add(worldPoint(frame,hole.point),normal.map(n=>n*lift) as Vec3)) : 0));
       if (holes.some(hole=>!hole) || gap > .1 || distance(normal,down.map(n=>-n) as Vec3) > .002) {
@@ -383,13 +391,25 @@ export function connectionIssues(assembly: Assembly): Array<{ id: string; messag
       if (j.provisional) issues.push({ id: j.a.componentId, message: `${owner?.name ?? j.id}: монтажные данные стыка предварительные.` });
       const pa = owner?.ports.find(p => p.id === j.a.portId), pb = assembly.components.find(c => c.id === j.b.componentId)?.ports.find(p => p.id === j.b.portId);
       if (pa?.dn && pb?.dn && pa.dn !== pb.dn) issues.push({ id: j.a.componentId, message: `${owner?.name ?? j.id}: несовместимые DN стыка ${pa.dn}/${pb.dn}.` });
-      if (pa?.connection && pb?.connection && pa.connection !== pb.connection && ![pa.connection, pb.connection].every(v => v === "weld" || v === "collar")) issues.push({ id: j.a.componentId, message: `${owner?.name ?? j.id}: типы соединения стыка не совпадают (${pa.connection}/${pb.connection}).` });
-      if (pa?.connection === "threaded" && pb?.connection === "threaded" && (pa.gender && pb.gender && pa.gender === pb.gender || pa.thread && pb.thread && (pipeThreadDesignation(pa.thread) ?? pa.thread) !== (pipeThreadDesignation(pb.thread) ?? pb.thread))) issues.push({ id: j.a.componentId, message: `${owner?.name ?? j.id}: резьбы стыка несовместимы.` });
+      // A collar's sealing face mates with a flange/gasket; its weld end
+      // remains a different connection and must not be treated as a flange.
+      const ca = pa?.connection === "collar" && pa.plane === "mating-face" ? "flanged" : pa?.connection;
+      const cb = pb?.connection === "collar" && pb.plane === "mating-face" ? "flanged" : pb?.connection;
+      if (ca && cb && ca !== cb && ![ca, cb].every(v => v === "weld" || v === "collar")) issues.push({ id: j.a.componentId, message: `${owner?.name ?? j.id}: типы соединения стыка не совпадают (${pa!.connection}/${pb!.connection}).` });
+      if (pa?.connection === "threaded" && pb?.connection === "threaded" && (pa.gender && pb.gender && pa.gender === pb.gender || pa.thread && pb.thread && pipeThreadConflict(pa.thread, pb.thread))) issues.push({ id: j.a.componentId, message: `${owner?.name ?? j.id}: резьбы стыка несовместимы.` });
     }
   }
   return issues;
 }
 
+function automaticParametersMatch(component:Component):boolean {
+  try {
+    const baseline=JSON.parse(component.autoPose?.parametersKey??"null") as Record<string,unknown>|null;
+    const parameters=component.parameters;
+    return !!baseline&&typeof baseline==="object"&&!Array.isArray(baseline)&&Object.keys(baseline).length===Object.keys(parameters).length
+      &&Object.entries(parameters).every(([key,value])=>baseline[key]===value);
+  }catch{return false;}
+}
 function base(id: string, name: string, kind: Component["kind"]): Component {
   return { id, name, kind, position: [0, 0, 0], rotation: [0, 0, 0], hidden: false, opacity: 1, locked: false, ports: [], sourceNote: "Параметрическая компоновочная геометрия; монтажные размеры требуют проверки", parameters: { length: 500, width: 300, height: 80, diameter: 60.3, routeOffset: 0 } };
 }
@@ -404,7 +424,7 @@ export function sourceFingerprint(project: ProjectConfig): string {
     const drawing = horizontalPumpDrawing(id ?? undefined);
     return [revision, drawing].filter(value => value !== undefined);
   });
-  return JSON.stringify([(entities["station-spec"] as SpecEntity)?.frameCalculation, FRAME_STAND_REVISION, TANK_LAYOUT_REVISION, FIRE_INSERTION_INSTRUMENTS_REVISION, FASTENER_REVISION, INSTRUMENT_MOUNT_REVISION, "collector-assembly-v13-tank-midpoint-flange-seating-5mm-insert-sgon60-v4", "pump-spatial-onis-v3-mbl2026-workbook", VALVE_CONTROL_REVISION, COLLECTOR_INSTRUMENT_RULES_REVISION, "check-valve-flow-v1", "discharge-butterfly-roll90-v1", PUMP_LINE_RULES_REVISION, VIBRATION_DIMENSIONS_REVISION, FRAME_RULE_REVISION, project.station, entities["system-input"], entities["system-input-2"], entities["station-dn"], entities["station-settings"], ...["suction", "discharge"].map(side => { const c = (entities["station-collectors"] as CollectorsEntity)?.[side as "suction" | "discharge"]; return [c?.configuration, c?.calculation && [c.calculation.fingerprint, c.calculation.lengthMm, c.calculation.branchLengthsMm, c.calculation.bom.map(r => [r.role, r.componentId, r.quantity])], c?.status]; }), (entities["station-spec"] as SpecEntity)?.items.map(i => [i.equipmentId, i.option, i.quantity, i.name, i.position, i.assemblyRole, i.details, i.description, i.status, i.hydraulicAssembly?.parts.map(p => [p.assemblyRole, p.equipmentId, p.quantity])]), ...(selected.some(id => onisMvCadSource(id ?? undefined)) ? ["onis-mv-exact-cad-v1"] : []), ...(selected.includes(CDM15_6_ARTICLE_ID) ? ["cdm15-6-reviewed-mounting-v1"] : []), ...prepared]);
+  return JSON.stringify([(entities["station-spec"] as SpecEntity)?.frameCalculation, FRAME_STAND_REVISION, TANK_LAYOUT_REVISION, FIRE_INSERTION_INSTRUMENTS_REVISION, FASTENER_REVISION, INSTRUMENT_MOUNT_REVISION, "collector-assembly-v13-tank-midpoint-flange-seating-5mm-insert-sgon60-v4", "pump-spatial-onis-v3-mbl2026-workbook", END_SUCTION_PORTS_REVISION, VALVE_CONTROL_REVISION, COLLECTOR_INSTRUMENT_RULES_REVISION, "check-valve-flow-v1", "discharge-butterfly-roll90-v1", PUMP_LINE_RULES_REVISION, VIBRATION_DIMENSIONS_REVISION, FRAME_RULE_REVISION, project.station, entities["system-input"], entities["system-input-2"], entities["station-dn"], entities["station-settings"], ...["suction", "discharge"].map(side => { const c = (entities["station-collectors"] as CollectorsEntity)?.[side as "suction" | "discharge"]; return [c?.configuration, c?.calculation && [c.calculation.fingerprint, c.calculation.lengthMm, c.calculation.branchLengthsMm, c.calculation.bom.map(r => [r.role, r.componentId, r.quantity])], c?.status]; }), (entities["station-spec"] as SpecEntity)?.items.map(i => [i.equipmentId, i.option, i.quantity, i.name, i.position, i.assemblyRole, i.details, i.description, i.status, i.hydraulicAssembly?.parts.map(p => [p.assemblyRole, p.equipmentId, p.quantity])]), ...(selected.some(id => onisMvCadSource(id ?? undefined)) ? ["onis-mv-exact-cad-v1"] : []), ...(selected.includes(CDM15_6_ARTICLE_ID) ? ["cdm15-6-reviewed-mounting-v1"] : []), ...prepared]);
 }
 export function coreBuildAssembly(project: ProjectConfig, pumps: Pump[], profiles: ProfileCatalog, lines?: LineCatalog): Assembly {
   return assembleWithInputs(project,pumps,profiles,lines,projectFrameSelection(project,pumps));
@@ -429,7 +449,7 @@ export function corePlaceStationPumps(project:ProjectConfig,pumps:Pump[],profile
   // Unknown mass retains only the explicitly labelled legacy layout placeholder.
   const savedFrameCalculation = (project.entities["station-spec"] as SpecEntity)?.frameCalculation;
   const frameCalculation = savedFrameCalculation?.issues.some(i=>i.code==="manual-frame") ? undefined : savedFrameCalculation;
-  const frameHeight = frameCalculation?.variant ? 50 : frameSelection.construction?.heightMm ?? 80;
+  const frameHeight = frameCalculation?.channel?.geometry?.heightMm ?? (frameCalculation?.variant ? 50 : frameSelection.construction?.heightMm ?? 80);
   let y = 0;
   for (const circuit of [1, 2]) {
     if (circuit === 2 && !(settings.stationType === "combined" || settings.stationType === "fire" && settings.jockeyPump)) continue;
@@ -441,20 +461,24 @@ export function corePlaceStationPumps(project:ProjectConfig,pumps:Pump[],profile
     const placements = frameCalculation?.layout?.pumps ?? [];
     const firstPlacement = placements.find(p=>p.id===`pump-${circuit}-0`&&p.equipmentId===pump.id);
     const { profile, scope } = pumpCadProfile(pump, profiles.profiles[pump.id], readPumpMountingCad(firstPlacement?.cad)?.sourceHash);
-    const spatial = resolvePumpLayout(pump, profile, !scope), bounds = spatial.bounds, p = pump.dimensions;
+    const spatial = lines ? resolveStationPumpLayout(pump, profile) : resolvePumpLayout(pump, profile, !scope);
+    const bounds = spatial.bounds, p = pump.dimensions;
     const pitch = lines ? positive(collectors.suction.configuration?.[circuit === 1 ? "primary" : "secondary"]?.spacing, 500) : Math.max(positive(collectors.suction.configuration?.[circuit === 1 ? "primary" : "secondary"]?.spacing, 500), bounds[4] - bounds[1] + 150);
     for (let index = 0; index < count; index++) {
       const c = base(`pump-${circuit}-${pump.id}-${index}`, `${pump.manufacturer} ${pump.model} · ${circuit}.${index + 1}`, "pump");
       c.equipmentId = pump.id; c.sourceKey = pump.id; c.bounds = bounds; c.meshUrl = spatial.info.envelope === "cad" ? profile?.meshUrl : undefined;
       if (profile && spatial.info.envelope === "cad") c.cadSource = { path: profile.source, hash: profile.sourceHash };
       const mounting = placements.find(p=>p.id===`pump-${circuit}-${index}`);
-      const fastening=frameCalculation?.parts.find(p=>p.id===`frame/pump-${circuit}-bolts`)?.fastening;
+      const fastening=frameCalculation?.channel?.hardwareGroups?.find(g=>g.owner===`pump-${circuit}-${index}`)?.hardware??frameCalculation?.parts.find(p=>p.id===`frame/pump-${circuit}-bolts`)?.fastening;
       const supportLift=fastening?.supportLift??fastening?.head??0;
       const cadMount = mounting?.equipmentId === pump.id ? readPumpMountingCad(mounting.cad) : undefined;
       const mountMatches = cadMount && c.cadSource?.hash === cadMount.sourceHash;
+      // Face midpoint is geometric; PORT_A/B need no guessed flow direction.
+      const inlet=spatial.ports.find(p=>p.id==="inlet"||p.id==="port-a"),outlet=spatial.ports.find(p=>p.id==="outlet"||p.id==="port-b");
+      const flowDatum=inlet&&outlet?(inlet.point[0]+outlet.point[0])/2:(bounds[0]+bounds[3])/2;
       c.position = mounting && mountMatches
         ? [mounting.y - cadMount.anchorMm[0], mounting.x - cadMount.anchorMm[1], frameHeight + supportLift - cadMount.anchorMm[2]]
-        : mounting && !mounting.cad ? [-(bounds[0]+bounds[3])/2, mounting.x, frameHeight + supportLift - bounds[2]]
+        : mounting && !mounting.cad ? [frameCalculation?.channel?.geometry?.arrangement==="vertical" ? mounting.y-flowDatum : frameCalculation?.channel ? mounting.y : -(bounds[0]+bounds[3])/2, mounting.x, frameHeight + supportLift - bounds[2]]
         : [0, y, frameHeight - bounds[2]];
       c.autoPose = { position: [...c.position], rotation: [...c.rotation] };
       c.parameters = { ...c.parameters, length: bounds[3] - bounds[0], width: bounds[4] - bounds[1], height: bounds[5] - bounds[2] };
@@ -509,7 +533,10 @@ export function coreBuildStationLayout(batch:ReturnType<typeof corePlaceStationP
     : `${frameSelection.reasons.join(" ")} Условная высота 80 мм сохранена только для компоновки; конструкция рамы не выбрана.`;
   const calculatedFrame = (project.entities["station-spec"] as SpecEntity)?.frameCalculation;
   const variant = calculatedFrame?.variant;
-  if(variant?.cad && variant.hash && variant.stl && variant.boundsMm?.length === 6 && calculatedFrame?.layout?.lengthMm && !calculatedFrame.issues.some(i=>i.code==="manual-frame")){
+  if(calculatedFrame?.channel?.geometry&&!calculatedFrame.issues.some(i=>i.code==="manual-frame")){
+    const color=(project.entities["station-settings"] as SettingsEntity).stationType==="utility"?"blue":"red";
+    applyChannelFrame(frame,calculatedFrame.channel.geometry,color,calculatedFrame.issues.map(i=>i.message).join("; "));
+  } else if(variant?.cad && variant.hash && variant.stl && variant.boundsMm?.length === 6 && calculatedFrame?.layout?.lengthMm && !calculatedFrame.issues.some(i=>i.code==="manual-frame")){
     frame.name = `Рама гнутая 410×${variant.lengthMm}×${variant.thicknessMm}`;
     frame.equipmentId = variant.id; frame.sourceKey = variant.id;
     frame.cadSource = {path:variant.cad,hash:variant.hash}; frame.meshUrl = variant.stl;
@@ -564,7 +591,7 @@ export function coreBuildStationLayout(batch:ReturnType<typeof corePlaceStationP
   for (const c of components) if (c.routing) c.routing.points = pipePoints(assembly, c);
   const complete = withSpecificationModels(assembly, project, pumps, profiles, lines);
   const withLines = lines ? addLineAssemblies(complete, project, profiles, lines, new Set(pumps.filter(p => p.type === "vertical_multistage").map(p => p.id))) : complete;
-  return rebuildFasteners(addFrameStands({ ...addTankConnections(addInstrumentAssemblies(addValveControls(withLines, project), project), project), fastenerCatalog: lines?.fasteners },project));
+  return rebuildFasteners(addChannelCabinet(addFrameStands({ ...addTankConnections(addInstrumentAssemblies(addValveControls(withLines, project), project), project), fastenerCatalog: lines?.fasteners },project),project));
 }
 
 /** Additional purchased equipment waits beside the installation for manual placement.
@@ -628,14 +655,14 @@ export function combineProfiles(current: ProfileCatalog, next: ProfileCatalog): 
 export function refreshModelAssets(current: Assembly, project: ProjectConfig, pumps: Pump[], prepared: ProfileCatalog, lines?: LineCatalog): Assembly {
   const generated = buildAssembly(project, pumps, prepared, lines);
   const controlled = new Set(generated.components.flatMap(c => c.valveControl ? [c.valveControl.parentId] : []));
-  const supported = generated.components.filter(c => c.frameMount || c.frameDrilling || c.ports.some(p=>p.id.startsWith("frame-foot-")) ||
+  const supported = generated.components.filter(c => c.channelFrame || c.frameMount || c.frameDrilling || c.ports.some(p=>p.id.startsWith("frame-foot-")) ||
     (c.meshUrl || c.shape?.kind === "mesh" || c.tankMount) && (c.tankMount || c.instrumentMount || c.valveControl || controlled.has(c.id) || (c.kind === "pump" ? prepared.profiles[c.equipmentId ?? ""] : prepared.equipment?.[c.sourceKey ?? ""])));
   const next = current.components.map(c => {
     const fresh = supported.find(candidate => candidate.id === c.id);
     if (!fresh || c.line?.manualGeometry) return c;
-    if(fresh.frameDrilling){
-      const automatic=c.autoPose&&!c.locked&&JSON.stringify([c.position,c.rotation])===JSON.stringify([c.autoPose.position,c.autoPose.rotation])&&c.autoPose.parametersKey===JSON.stringify(c.parameters);
-      return automatic?{...fresh,hidden:c.hidden,locked:c.locked,opacity:c.opacity}:c;
+    if(fresh.frameDrilling||fresh.channelFrame){
+      const automatic=c.autoPose&&!c.locked&&JSON.stringify([c.position,c.rotation])===JSON.stringify([c.autoPose.position,c.autoPose.rotation])&&automaticParametersMatch(c);
+      return automatic?{...fresh,hidden:c.hidden,locked:c.locked,opacity:c.opacity,channelFrameAssembly:parseChannelFrameAssembly(c.channelFrameAssembly,fresh.channelFrame)}:c;
     }
     if(c.kind==="pump"&&fresh.ports.some(port=>port.id.startsWith("frame-foot-"))){
       const automatic=c.autoPose&&!c.locked&&distance(c.position,c.autoPose.position)<1e-6&&distance(c.rotation,c.autoPose.rotation)<1e-6;
@@ -799,6 +826,26 @@ export function recoverThreadedLineGeometry(saved: Assembly, generated: Assembly
   return recovered ? mergeAssembly(saved, generated) : saved;
 }
 
+export function pumpConnectionsRecovered(saved: Component, fresh: Component): boolean {
+  const connected = (pump: Component, role: string) => pump.ports.some(port => port.id === role && port.axis);
+  return saved.kind === "pump" && fresh.kind === "pump" && saved.id === fresh.id &&
+    saved.equipmentId === fresh.equipmentId && ["inlet", "outlet"].some(role => !connected(saved, role)) &&
+    ["inlet", "outlet"].every(role => connected(fresh, role));
+}
+
+/** Only reattach branches automatically when their pump uses the same STEP. */
+export function recoverPumpConnections(saved: Assembly, generated: Assembly): Assembly {
+  if (saved.sourceFingerprint !== generated.sourceFingerprint || !generated.lineJoints?.length) return saved;
+  const oldPumps = saved.components.filter(c => c.kind === "pump" && !c.orphaned);
+  const freshPumps = generated.components.filter(c => c.kind === "pump");
+  if (oldPumps.length !== freshPumps.length) return saved;
+  const pairs = oldPumps.map(old => ({ old, fresh: freshPumps.find(c => c.id === old.id) }));
+  if (pairs.some(({old, fresh}) => !fresh || old.cadSource?.hash !== fresh.cadSource?.hash)) return saved;
+  const repaired = pairs.some(({old, fresh}) => old.cadSource && fresh && pumpConnectionsRecovered(old, fresh) &&
+    generated.lineJoints?.some(joint => [joint.a, joint.b].some(port => port.componentId === old.id)));
+  return repaired ? mergeAssembly(saved, generated) : saved;
+}
+
 export function mergeAssembly(current: Assembly, generated: Assembly): Assembly {
   const ids = new Set(generated.components.map(c => c.id));
   const currentPumps = new Map(current.components.filter(c => c.kind === "pump").map(c => [c.id, c]));
@@ -806,7 +853,7 @@ export function mergeAssembly(current: Assembly, generated: Assembly): Assembly 
   // Obsolete generated pump connection parts must disappear even if they were
   // moved or locked in a saved scene. Unrelated manual equipment stays intact.
   const supersededPumpPart = (c: Component) => c.line && generated.components.some(p => p.id === c.line!.pumpId) &&
-    /^(primary|secondary)-(insertion|pump-insertion|pump-flange|valve-flange|check-flange|pump-gasket|pump-fasteners|reducer|after-vibration-insertion|insertion-reducer|vibration)(-|$)/.test(c.line.role);
+    /^(primary|secondary)-(insertion|pump-insertion|pump-flange|valve-flange|valve-gaskets|check-flange|pump-gasket|pump-fasteners|reducer|after-vibration-insertion|insertion-reducer|vibration)(-|$)/.test(c.line.role);
   const merged = followValveControls({ ...generated, components: [...generated.components.map(c => {
     const previous = current.components.find(old => old.id === c.id);
     if (!previous) {
@@ -835,8 +882,8 @@ export function mergeAssembly(current: Assembly, generated: Assembly): Assembly 
     if (c.kind === "frame" || c.kind === "pump") {
       const automatic = previous.autoPose && !previous.locked &&
         JSON.stringify([previous.position, previous.rotation]) === JSON.stringify([previous.autoPose.position, previous.autoPose.rotation]) &&
-        (c.kind !== "frame" || previous.autoPose.parametersKey === JSON.stringify(previous.parameters));
-      if (automatic) return { ...c, hidden: previous.hidden, locked: previous.locked, opacity: previous.opacity };
+        (c.kind !== "frame" || automaticParametersMatch(previous));
+      if (automatic) return { ...c, hidden: previous.hidden, locked: previous.locked, opacity: previous.opacity,channelFrameAssembly:parseChannelFrameAssembly(previous.channelFrameAssembly,c.channelFrame) };
       if (c.kind === "frame") return { ...previous, orphaned: false,
         sourceNote: `Сохранена ручная или прежняя геометрия рамы; проверьте соответствие текущему выбору. ${c.sourceNote}` };
     }
@@ -876,7 +923,7 @@ export function mergeAssembly(current: Assembly, generated: Assembly): Assembly 
       return { ...c, ...(!unchanged ? { position: previous.position, rotation: previous.rotation } : {}), hidden: previous.hidden, locked: previous.locked, opacity: previous.opacity,
         ...(c.insertion ? { insertion: { ...c.insertion, hiddenPieceIds: previous.insertion?.hiddenPieceIds.filter(id => c.insertion!.template.geometry.pieces.some(p => p.id === id)) ?? [] } } : {}) };
     }
-    if (c.kind === "collector" && previous.autoPose?.parametersKey === JSON.stringify(previous.parameters) && !previous.locked && JSON.stringify([previous.position, previous.rotation]) === JSON.stringify([previous.autoPose.position, previous.autoPose.rotation])) {
+    if (c.kind === "collector" && previous.autoPose && automaticParametersMatch(previous) && !previous.locked && JSON.stringify([previous.position, previous.rotation]) === JSON.stringify([previous.autoPose.position, previous.autoPose.rotation])) {
       return { ...c, hidden: previous.hidden, locked: previous.locked, opacity: previous.opacity };
     }
     const addedPorts = c.kind === "collector" ? c.ports.filter(port => !previous.ports.some(old => old.id === port.id)).map(port => ({ ...port, point: [port.point[0], Math.sign(port.point[1]) * previous.parameters.diameter / 2, port.point[2]] as Vec3 })) : [];

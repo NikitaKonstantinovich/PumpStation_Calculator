@@ -8,6 +8,8 @@ import physicalSupplement from "./pump-card-supplement.json";
 import { pumpSketchFor } from "./pump-sketches";
 import { suctionCatalogItems } from "./suction-catalog";
 import { withEquipmentCadSources } from "./equipment-cad-sources";
+import { withComponentMasses } from "./component-mass-catalog";
+import type { ComponentItem } from "./component-database-types";
 
 type RecordData = Record<string, unknown>;
 type BindingData = {items: RecordData[]; catalogs?: Array<{id:string;name:string}>};
@@ -84,7 +86,7 @@ async function readCatalog(): Promise<EquipmentCatalog> {
     return row;
   });
   const componentRows=new Map([...suctionCatalogItems,...binding.items].map(item=>[item.id,item]));
-  rows.push(...[...componentRows.values()].map(item=>genericEquipment("equipment",`binding:${item.catalogId}`,categoryNames.get(String(item.catalogId)) ?? String(item.catalogId),item)));
+  rows.push(...withComponentMasses([...componentRows.values()] as ComponentItem[]).map(item=>genericEquipment("equipment",`binding:${item.catalogId}`,categoryNames.get(String(item.catalogId)) ?? String(item.catalogId),item)));
   rows.push(...standardCabinets.map(item=>genericEquipment("cabinet","cabinets","Шкафы управления",item)));
   rows.push(...(cabinets.length ? cabinets.map(row=>({...decode(row),items:cabinetItems.filter(item=>item.cabinet_id===row.id).map(decode)})) : electrical.cabinets).map(row=>genericEquipment("control-cabinet","cabinets","Шкафы управления",row)));
   rows.push(...(controlParts.length ? controlParts.map(decode) : electrical.components).map(row=>genericEquipment("control-part",`electrical:${row.category}`,`Электрика · ${row.category}`,row)));

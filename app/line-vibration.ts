@@ -9,8 +9,11 @@ import { vibrationBoltSeat } from "./vibration-fasteners";
 import { jointFlangeThickness } from "./joint-flange-dimensions";
 import { selectLineInsertion, selectLineReducer } from "./line-insertion";
 import { vibrationExecution } from "./vibration-dimensions";
+import { adoptPumpMatingFlange, installedPumpFlange } from "./pump-mating-flange";
+import { fourOfEightInsertionNote, fourOfEightVibrationNote, pumpVibrationDrilling, sameDrillingCircle, vibrationDrilling, type Drilling } from "./pump-vibration-drilling";
+import { insertionPumpDrilling } from "./insertion-pump-drilling";
 
-export function selectVibrationCompensator(items: AssemblyComponent[], dn: number, pn: number, connection: ValveConnection) {
+export function selectVibrationCompensator(items: AssemblyComponent[], dn: number, pn: number, connection: ValveConnection, pumpDrilling?: Drilling) {
   return items.filter(item => item.catalogId === "компенсаторы" && itemDn(item) === dn &&
     (connection === "flanged" ? /фланцев/i : /резьб|муфтов/i).test(item.family))
     .flatMap(item => {
@@ -21,7 +24,14 @@ export function selectVibrationCompensator(items: AssemblyComponent[], dn: numbe
       const rating = componentPressureLimit(item)?.bar;
       if (selectedPrice == null || !Number.isFinite(selectedPrice) || selectedPrice <= 0 || (!pnPrices.length && (!rating || rating < pn))) return [];
       return [{ item, price: selectedPrice, pn: pnPrices.length ? pn : rating! }];
-    }).sort((a, b) => a.pn - b.pn || a.price - b.price || a.item.id.localeCompare(b.item.id))[0];
+    }).sort((a, b) => {
+      const rank = (candidate: typeof a) => {
+        if (!pumpDrilling) return 0;
+        const d = vibrationDrilling(candidate.item,candidate.pn);
+        return d && sameDrillingCircle(pumpDrilling,d) && d.holes === pumpDrilling.holes ? 0 : 1;
+      };
+      return rank(a)-rank(b) || a.pn-b.pn || a.price-b.price || a.item.id.localeCompare(b.item.id);
+    })[0];
 }
 
 export function selectStraightThreadedNipple(items: AssemblyComponent[], dn: number, pn: number) {
@@ -41,17 +51,55 @@ type Assembly = {
   count: number;
   prefix: string;
   title: string;
+  pumpId?: string;
+  pumpSide?: "inlet" | "outlet";
 };
 
+/** RF products are straight and equal-DN. Change DN on the flanged side
+ * with a separate calculated reducer, joined by one gasket/bolt set. */
+function mixedDiameterAssembly(args: Assembly, purpose: "pump-transition" | "after-vibration") {
+  const { parts, port: p, valveDn: v, connection, pn, count, prefix, title } = args;
+  const threadedPump = p.connection === "threaded", jointDn = threadedPump ? p.dn : v;
+  const ends = threadedPump
+    ? [{ fromDn: p.dn, toDn: p.dn, fromConnection: p.connection, toConnection: "flanged" as const },
+      { fromDn: p.dn, toDn: v, fromConnection: "flanged" as const, toConnection: connection }]
+    : [{ fromDn: p.dn, toDn: v, fromConnection: p.connection, toConnection: "flanged" as const },
+      { fromDn: v, toDn: v, fromConnection: "flanged" as const, toConnection: connection }];
+  const insertions = ends.map((need, index) => {
+    const role = `${prefix}-mixed-${index === 0 ? "first" : "second"}-insertion`;
+    const row = parts.insertion(role, need.fromDn === need.toDn ? `Вставка РФ DN${jointDn}` : `Переходная вставка DN${need.fromDn}–${need.toDn}`,
+      count, `${title} · переход DN и смена типа соединения отдельными изделиями · PN${pn}`, { ...need, pn, purpose });
+    if (need.fromConnection === "flanged") parts.flanges(`${role}-from-flange`, need.fromDn, pn, count, row, "from");
+    if (need.toConnection === "flanged") parts.flanges(`${role}-to-flange`, need.toDn, pn, count, row, "to");
+    return row;
+  });
+  parts.gasket(`${prefix}-mixed-joint-gasket`, jointDn, pn, count);
+  parts.fasteners(`${prefix}-mixed-joint-fasteners`, jointDn, pn, count, {
+    gaskets: 1, thickness: 0,
+    flangeThickness: flangeStack(parts.insertionEndThickness(insertions[0], "to"), parts.insertionEndThickness(insertions[1], "from")),
+    source: "Стык переходной и прямой РФ вставок; толщины концов из выбранных расчётных изделий",
+  });
+  return insertions[0];
+}
+
 /** Connections are described outward from the pump on either side, not by flow direction. */
-export function addPumpVibrationAssembly({ parts, database, catalog, collector, port: p, valveDn: v, connection, pn, count, prefix, title }: Assembly): number {
+export function addPumpVibrationAssembly(args: Assembly): number {
+  const { parts, database, catalog, collector, port: p, valveDn: v, connection, pn, count, prefix, title } = args;
   const { add, gasket, flanges, fasteners } = parts;
-  const selected = selectVibrationCompensator(database.items, p.dn, pn, p.connection);
+  const pumpDrilling = args.pumpSide && p.connection === "flanged" ? pumpVibrationDrilling(args.pumpId,args.pumpSide) : undefined;
+  const selected = selectVibrationCompensator(database.items, p.dn, pn, p.connection,pumpDrilling);
+  const drilling = selected && vibrationDrilling(selected.item,selected.pn);
+  const fourOfEight = pumpDrilling?.holes === 4 && drilling?.holes === 8 && sameDrillingCircle(pumpDrilling,drilling);
   const detail = `${title} · DN${p.dn} · PN${pn} · непосредственно на патрубке насоса · от насоса: насос → виброкомпенсатор → ${p.dn === v ? "прямая" : "переходная"} вставка → арматура`;
   const row = add(`${prefix}-vibration-compensator`, selected?.item.family ?? `Виброкомпенсатор ${p.connection === "flanged" ? "фланцевый" : "резьбовой"} DN${p.dn}`, count,
     detail, selected?.item, "шт.", selected?.price, selected ? `База комплектующих: ${selected.item.id}; выбрано исполнение PN${selected.pn}.` : `Нет подходящего виброкомпенсатора DN${p.dn} PN${pn} с ${p.connection === "flanged" ? "фланцевым" : "резьбовым"} присоединением к насосу. Исполнение и цену уточнить.`);
   row.option = "vibrationCompensators";
   row.selectedPn = selected?.pn;
+  if (fourOfEight) {
+    row.details += ` · ${fourOfEightVibrationNote}`;
+    row.description += ` ${fourOfEightVibrationNote}`;
+    row.technicalNotes = [...(row.technicalNotes ?? []),fourOfEightVibrationNote];
+  }
   const mounting = selected && vibrationExecution(selected.item, selected.pn);
   if (mounting) {
     row.details += mounting.status === "confirmed" ? ` · монтажная длина ${mounting.lengthMm} мм` : " · монтажная длина требует уточнения";
@@ -74,8 +122,9 @@ export function addPumpVibrationAssembly({ parts, database, catalog, collector, 
       if (!stock.warnings.length && stock.thicknessMm !== null) end = stock.thicknessMm / 2;
     }
     fasteners(`${prefix}-vibration-pump-fasteners`, p.dn, pn, count,
-      { gaskets: gasketCount, thickness: 0, flangeThickness: flangeStack(pump.thickness, pumpSide.grip), allowance: pumpSide.allowance,
-        source: `Стык насос — виброкомпенсатор. ${pump.source} ${pumpSide.source}` });
+      { gaskets: gasketCount, thickness: 0, flangeThickness: flangeStack(pump.thickness, pumpSide.grip), holes: drilling?.holes,
+        allowance: [pumpSide.allowance,fourOfEight ? fourOfEightVibrationNote : undefined].filter(Boolean).join(" · "),
+        source: `Стык насос — виброкомпенсатор. ${pump.source} ${pumpSide.source} ${fourOfEight ? fourOfEightVibrationNote : ""}` });
     fasteners(`${prefix}-vibration-insertion-fasteners`, p.dn, pn, count,
       { gaskets: gasketCount, thickness: 0, flangeThickness: flangeStack(insertionSide.grip, end), allowance: insertionSide.allowance,
         source: `Стык виброкомпенсатор — вставка. ${insertionSide.source} ${end === null ? "Размер конца вставки не подтверждён." : `Со стороны вставки принято ${end} мм до опоры крепежа.`}` });
@@ -83,6 +132,10 @@ export function addPumpVibrationAssembly({ parts, database, catalog, collector, 
   const need={fromDn:p.dn,toDn:v,fromConnection:p.connection,toConnection:connection,pn,purpose:"after-vibration" as const};
 
   if (p.connection !== connection) {
+    if (p.dn !== v) {
+      mountingJoints(mixedDiameterAssembly(args, "after-vibration"));
+      return 2;
+    }
     // A rigid RF insertion bridges unlike connections after the compensator.
     const flangeDn = p.connection === "flanged" ? p.dn : v, threadDn = p.connection === "threaded" ? p.dn : v;
     const match = matingParts.find(item => item.dn === flangeDn && item.threadDn === threadDn);
@@ -123,20 +176,38 @@ export function addPumpVibrationAssembly({ parts, database, catalog, collector, 
   return 0;
 }
 
+/** Account for the selected rigid insertion after any preferred flange adoption. */
+export function addPumpInsertionJoint(args: Assembly, insertion: SpecItem) {
+  const { parts, database, port: p, pn, count, prefix } = args;
+  const execution = insertion.insertionAssembly && installedPumpFlange(insertion.insertionAssembly);
+  const drilling = insertionPumpDrilling(insertion, database);
+  const pumpDrilling = args.pumpSide ? pumpVibrationDrilling(args.pumpId, args.pumpSide) : undefined;
+  const fourOfEight = pumpDrilling?.holes === 4 && drilling?.holes === 8 && sameDrillingCircle(pumpDrilling, drilling);
+  if (fourOfEight) {
+    insertion.details += ` · ${fourOfEightInsertionNote}`;
+    insertion.description += ` ${fourOfEightInsertionNote}`;
+    insertion.technicalNotes = [...(insertion.technicalNotes ?? []), fourOfEightInsertionNote];
+  }
+  const pump = parts.pumpFlangeReference(p.dn, pn, insertion);
+  parts.gasket(`${prefix}-pump-gasket`, p.dn, pn, count);
+  parts.fasteners(`${prefix}-pump-fasteners`, p.dn, pn, count, {
+    gaskets: 1, thickness: 0, flangeThickness: flangeStack(pump.thickness, insertion.equipmentId ? pump.thickness : null),
+    holes: drilling?.holes ?? execution?.holes,
+    allowance: fourOfEight ? fourOfEightInsertionNote : undefined,
+    source: `Стык насос — вставка. ${pump.source} ${drilling?.source ?? execution?.source ?? ""} ${fourOfEight ? fourOfEightInsertionNote : ""}`,
+  });
+}
+
 /** Pump-to-first-valve composition is shared by suction and discharge specifications.
  * Their rows are also the sole input to the 3D mounting chain. */
-export function addPumpConnectionAssembly(args: Assembly & { vibration: boolean; terminal: "valve" | "check" }): number {
+export function addPumpConnectionAssembly(args: Assembly & { vibration: boolean; terminal: "valve" | "check"; pumpId?: string }): number {
   if (args.vibration) return addPumpVibrationAssembly(args);
   const { parts, database, catalog, collector, port: p, valveDn: v, connection, pn, count, prefix, title, terminal } = args;
-  const { add, gasket, flanges, fasteners } = parts;
+  const { add, flanges } = parts;
   const need={fromDn:p.dn,toDn:v,fromConnection:p.connection,toConnection:connection,pn,purpose:"pump-transition" as const};
   const pumpInsertionJoint = (insertion: SpecItem) => {
-    const pump = parts.pumpFlangeReference(p.dn, pn, insertion);
-    gasket(`${prefix}-pump-gasket`, p.dn, pn, count);
-    fasteners(`${prefix}-pump-fasteners`, p.dn, pn, count, {
-      gaskets: 1, thickness: 0, flangeThickness: flangeStack(pump.thickness, insertion.equipmentId ? pump.thickness : null),
-      source: `Стык насос — вставка. ${pump.source}`,
-    });
+    adoptPumpMatingFlange(insertion, args.pumpId);
+    addPumpInsertionJoint(args, insertion);
   };
   if (p.connection === "threaded" && connection === "threaded") {
     const part = suctionCatalogItems.find(item => item.id === `suction-table:union-valtec-${v}` && (componentPressureLimit(item)?.bar ?? 0) >= pn);
@@ -148,6 +219,11 @@ export function addPumpConnectionAssembly(args: Assembly & { vibration: boolean;
     return 4;
   }
   if (p.connection !== connection) {
+    if (p.dn !== v) {
+      const first = mixedDiameterAssembly(args, "pump-transition");
+      if (p.connection === "flanged") pumpInsertionJoint(first);
+      return p.connection === "flanged" ? 2 : 1;
+    }
     const flangeDn = p.connection === "flanged" ? p.dn : v, threadDn = p.connection === "threaded" ? p.dn : v;
     const matching = matingParts.find(item => item.dn === flangeDn && item.threadDn === threadDn);
     const part = pn <= 16 && matching ? suctionCatalogItems.find(item => item.id === `suction-table:rf-${flangeDn}`) : undefined;

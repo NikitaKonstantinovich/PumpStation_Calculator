@@ -5,6 +5,7 @@ import { evaluateProduct } from "./runtime";
 import type { Evaluation, ProductControls, ToolContext, ToolProgram, Values, WorkspaceData } from "./schema";
 import type { UserRole } from "../user-types";
 import type { CatalogSource } from "./workspace-sources";
+import { migrateCabinetProjectSetting } from "./cabinet-setting-upgrade";
 export const usesCatalog = (program: ToolProgram) => Object.values(program.plans).some(plan => plan.steps.some(step => step.operation === "pump.catalog"));
 export const ownBindings = (result: Evaluation, id: string) => result.bindings.filter(b => !b.toolId || b.toolId === id);
 export function productContexts(program: ToolProgram, data: WorkspaceData | undefined, defaults: Values, role: UserRole, resources?: ToolContext["resources"]): Record<string, ToolContext> {
@@ -24,6 +25,7 @@ export function migrateProduct(program: ToolProgram, previous: WorkspaceData | u
       ...previous?.tools
     },
     contexts = productContexts(program, previous, defaults, role, resources);
+  migrateCabinetProjectSetting(program,contexts);
   // Only an explicit version application imports legacy project flags. A value
   // already stored by the node instrument, including false, always wins.
   for (const [kind, ref] of Object.entries(program.product?.controls ?? {})) {

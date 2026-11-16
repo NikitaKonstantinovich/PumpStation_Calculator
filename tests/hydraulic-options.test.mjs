@@ -132,7 +132,7 @@ test("separators add N-1 valves per collector and exactly two welded ends per ga
       assert.equal(row.quantity, pumps - 1);
       assert.equal(calculated.bom.find(row => row.role === "section-break-weldFlange").quantity, 2 * (pumps - 1));
       assert.equal(calculated.welds.find(row => row.role === "section-break").count, 2 * (pumps - 1));
-      assert.equal(part(row, "separator-gaskets").quantity, 2);
+      assert.equal(part(row, "separator-gaskets"), undefined);
       assert.equal(part(row, "collector-interface"), undefined,"collector-owned flanges and welding must not become duplicate purchase rows");
       assert.equal(part(row, "separator-limit-switches-bracket").quantity, 1);
       assert.equal(part(row, "separator-limit-switches-bracket").equipmentId, "кронштейны-001-r0006");

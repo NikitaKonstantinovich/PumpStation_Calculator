@@ -1,7 +1,8 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { readFile } from "node:fs/promises";
-import ts from "typescript";
+import { build } from "esbuild";
+import { fileURLToPath } from "node:url";
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { loadTs } from "./load-ts.mjs";
@@ -135,26 +136,14 @@ test("collector pressure warning preserves a database price and is removed after
 });
 
 test("actual specification render keeps technical descriptions and warnings behind the button", async () => {
-  const pageUrl = new URL("../app/full-workspace.tsx", import.meta.url);
-  const page = await readFile(pageUrl, "utf8");
-  const insertionSource=(await readFile(new URL("../app/specification-insertions.tsx",import.meta.url),"utf8")).replace('import "./specification-insertions.css";',"");
-  const hydraulicSource=(await readFile(new URL("../app/specification-hydraulic-options.tsx",import.meta.url),"utf8")).replace('import "./specification-insertions.css";',"");
-  const source = [
-    `import { useEffect, useRef, useState } from ${JSON.stringify(import.meta.resolve("react"))};`,
-    'import { specificationItemPresentation, specificationIssueId, specificationSection, visibleSpecificationItems } from "./specification-presentation";',
-    'import { assessSpecification, specificationHasPrice, specificationLineTotal } from "./specification-readiness";',
-    'const IssueNavigationMessage=()=>null; const IssueMessages=()=>null;',
-    'const loadedComponentsDatabase=undefined;', insertionSource, hydraulicSource,
-    'const normalizeSpecificationItems=items=>items; const isSecondaryEnabled=()=>false; const pumpPriceRub=()=>0;',
-    page.slice(page.indexOf("const SPEC_GROUPS:"), page.indexOf("\n];", page.indexOf("const SPEC_GROUPS:")) + 3),
-    page.slice(page.indexOf("function Specification("), page.indexOf("\ntype DnField=")),
-    'export {Specification};',
-  ].join("\n");
-  const compiled = ts.transpileModule(source, { compilerOptions: { module: ts.ModuleKind.ESNext, jsx: ts.JsxEmit.ReactJSX, target: ts.ScriptTarget.ES2022 } }).outputText.replaceAll('"react/jsx-runtime"', JSON.stringify(import.meta.resolve("react/jsx-runtime")));
-  const { Specification } = await loadTs(pageUrl, { [pageUrl.href]: compiled });
+  const { outputFiles } = await build({ entryPoints: [fileURLToPath(new URL("../app/node-tools/specification-view.tsx", import.meta.url))], bundle: true, write: false, format: "esm", platform: "node", loader: { ".css": "empty" }, plugins: [{ name: "runtime-libraries", setup(builder) { builder.onResolve({ filter: /^(react(?:\/.*)?|exceljs)$/ }, args => ({ path: import.meta.resolve(args.path), external: true })); } }] });
+  const { NodeSpecificationView } = await import("data:text/javascript;base64," + Buffer.from(outputFiles[0].text).toString("base64"));
+  const render = (project,items) => renderToStaticMarkup(createElement(NodeSpecificationView, {
+    view: {kind:"specification",node:"spec/table",specification:{status:"ready",project,items,manualRows:[],readiness:{ready:true,compositionComplete:true,technicalReady:true,costComplete:true,knownTotal:items.reduce((total,item)=>total+(item.price??0)*item.quantity,0),findings:[]}}},change(){}
+  }));
   const item = withInletPressureChecks(row("Фланец", { details: "DN100 · PN16 · Ст20", description: "Предупреждение: проверить размеры" }), [checkInletPressure(200, "Фланец", 16, "PN16")]);
   const current = project(); current.entities["station-spec"].items = [item];
-  const html = renderToStaticMarkup(createElement(Specification, { project: current, issues: [], entity: current.entities["station-spec"], settings: current.entities["station-settings"] }));
+  const html = render(current,current.entities["station-spec"].items);
   assert.match(html, /spec-table__row--warning/);
   assert.match(html, /<summary[^>]*>Выгрузить/);
   assert.match(html, /<button[^>]*>CSV<\/button>/);
@@ -168,7 +157,7 @@ test("actual specification render keeps technical descriptions and warnings behi
   const {fixture,sync,rows}=await import("./fixtures/station-specification.mjs");
   const flatProject=fixture();flatProject.entities["station-settings"].stationType="fire";
   const selected=sync(flatProject),parts=rows(selected).filter(r=>r.assemblyRole==="discharge:transducer"||r.hydraulicPart?.location==="discharge:transducer");
-  const flatHtml=renderToStaticMarkup(createElement(Specification,{project:selected,issues:[],entity:{...selected.entities["station-spec"],items:parts},settings:selected.entities["station-settings"]}));
+  const flatHtml=render(selected,parts);
   assert.equal((flatHtml.match(/spec-table__row--item/g)??[]).length,4);
   assert.equal((flatHtml.match(/spec-table__cell--quantity">2<\/span>/g)??[]).length,3);
   assert.match(flatHtml,/spec-table__cell--quantity">0\.6<\/span>/);

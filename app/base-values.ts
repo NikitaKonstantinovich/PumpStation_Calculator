@@ -5,6 +5,7 @@ import { validateCollectorNippleRules, type CollectorNippleConfiguration } from 
 export { DEFAULT_COLLECTOR_NIPPLES, collectorNippleRules, collectorNippleCounts } from "./collector-nipple-rules";
 export type { CollectorNippleRules, CollectorNippleConfiguration } from "./collector-nipple-rules";
 import type { PipePaintingRate } from "./component-painting";
+import { CHANNEL_PAINTING_PROFILES, isChannelPaintingRate, type ChannelPaintingRate } from "./channel-painting";
 import { validateThreadCuttingRates, type ThreadCuttingRate } from "./thread-cutting";
 
 export const BASE_SECTIONS = ["financial", "spacing", "welding", "velocity", "painting", "preferences"] as const;
@@ -18,14 +19,15 @@ export type BaseValues = {
   spacing: { legacy: boolean; minimum: number; increment: number; gap: number; rules: SpacingRule[] };
   welding: { aisi304: number; st20: number; date: string; note: string; threadCutting?: ThreadCuttingRate[] };
   velocity: VelocityRule[];
-  painting: Array<PipePaintingRate & { date: string; note: string }>;
+  painting: Array<(PipePaintingRate & { date: string; note: string })|ChannelPaintingRate>;
   preferences: { hoseLengthMm: 600 | 800 | 1000 | null; rules: PreferenceRule[]; collectorNipples?: CollectorNippleConfiguration };
 };
 export type BaseVersions = Record<BaseSection, string>;
+export const isPipeBasePaintingRate=(row:BaseValues["painting"][number]):row is PipePaintingRate & {date:string;note:string}=>!isChannelPaintingRate(row);
 export type AppliedBaseValues = { versions: BaseVersions; values: BaseValues };
 export type BasePublication = { id: string; values: BaseValues; createdAt: string; author: string };
 export const initialBaseValues = (): BaseValues => structuredClone(seed) as BaseValues;
-export const legacyBaseValues = (): BaseValues => { const values = initialBaseValues(); values.financial.discounts=Object.fromEntries(Object.entries(values.financial.discounts).filter(([key])=>["cnp","aquastrong","onis","vandjord","wellmix"].includes(key)));values.spacing = { ...values.spacing, legacy: true, rules: [] }; return values; };
+export const legacyBaseValues = (): BaseValues => { const values = initialBaseValues(); values.financial.discounts=Object.fromEntries(Object.entries(values.financial.discounts).filter(([key])=>["cnp","aquastrong","onis","vandjord","wellmix"].includes(key)));values.painting=values.painting.filter(isPipeBasePaintingRate);values.spacing = { ...values.spacing, legacy: true, rules: [] }; return values; };
 export const baseSnapshot = (id: string, values: BaseValues): AppliedBaseValues => ({ versions: Object.fromEntries(BASE_SECTIONS.map(k => [k, id])) as BaseVersions, values: structuredClone(values) });
 export const legacyBaseSnapshot = () => baseSnapshot("legacy-v1", legacyBaseValues());
 export const stableBaseJson = (value: unknown): string => JSON.stringify(value, (_k, v) => v && typeof v === "object" && !Array.isArray(v) ? Object.fromEntries(Object.entries(v).sort(([a],[b]) => a.localeCompare(b))) : v);
@@ -86,8 +88,15 @@ export function validateBaseValues(raw: unknown): string[] {
     next = r.toDn === null ? Infinity : r.toDn+1;
   }
   if (next !== Infinity) errors.push("Последний диапазон DN должен быть без верхней границы.");
-  const paint = new Set<number>();
-  for (const r of v.painting) { if (!Number.isInteger(r.dn) || r.dn <= 0 || paint.has(r.dn) || r.material !== "st20" || typeof r.id!=="string" || !r.id || (r.pricePerMeter !== null && !validBaseNumber(r.pricePerMeter)) || typeof r.source!=="string" || !r.source.trim()) errors.push(`Некорректный тариф окраски DN${r.dn}.`); paint.add(r.dn); }
+  const paint = new Set<number>(),channelPaint=new Set<string>();
+  for (const r of v.painting) {
+    if(isChannelPaintingRate(r)){
+      if(!(CHANNEL_PAINTING_PROFILES as readonly string[]).includes(r.profile)||channelPaint.has(r.profile)||r.id!==`channel-painting-${r.profile}`||(r.pricePerMeter!==null&&!validBaseNumber(r.pricePerMeter))||typeof r.source!=="string"||!r.source.trim()||typeof r.note!=="string")errors.push(`Некорректный тариф окраски швеллера ${r.profile}.`);
+      channelPaint.add(r.profile);continue;
+    }
+    if (!Number.isInteger(r.dn) || r.dn <= 0 || paint.has(r.dn) || r.material !== "st20" || typeof r.id!=="string" || !r.id || (r.pricePerMeter !== null && !validBaseNumber(r.pricePerMeter)) || typeof r.source!=="string" || !r.source.trim()) errors.push(`Некорректный тариф окраски DN${r.dn}.`); paint.add(r.dn);
+  }
+  if(channelPaint.size&&channelPaint.size!==CHANNEL_PAINTING_PROFILES.length)errors.push("Задайте строки окраски всех типоразмеров швеллера.");
   if (v.preferences.hoseLengthMm !== null && ![600,800,1000].includes(v.preferences.hoseLengthMm)) errors.push("Длина подводки: 600, 800 или 1000 мм.");
   errors.push(...validateCollectorNippleRules(v.preferences.collectorNipples));
   const pref = new Set<string>();
@@ -108,8 +117,8 @@ export function paintingItemForBase<T extends {id:string;prices:Array<{label:str
   if(!tariff)return item;
   return {...item,prices:tariff.pricePerMeter===null?[]:[{label:"Тариф окраски по версии проекта, ₽/м",amount:tariff.pricePerMeter,currency:"RUB"}]};
 }
-export function applyBaseTariffs<T extends {version:string; paintingRates?: PipePaintingRate[]}>(catalog:T, applied?:AppliedBaseValues):T & {weldRates?: {aisi304:number; st20:number}} {
+export function applyBaseTariffs<T extends {version:string; paintingRates?: PipePaintingRate[]}>(catalog:T, applied?:AppliedBaseValues):T & {weldRates?: {aisi304:number; st20:number};channelPaintingRates?:ChannelPaintingRate[]} {
   if (!applied) return catalog;
   const legacy=applied.versions.welding==="legacy-v1"&&applied.versions.painting==="legacy-v1";
-  return { ...catalog, version: legacy?catalog.version:`${catalog.version}:base:${applied.versions.welding}:${applied.versions.painting}`, weldRates: { aisi304: applied.values.welding.aisi304, st20: applied.values.welding.st20 }, paintingRates: applied.values.painting.map(r => ({...r, warnings: r.pricePerMeter === null ? [`Нет тарифа окраски DN${r.dn}`] : []})) };
+  return { ...catalog, version: legacy?catalog.version:`${catalog.version}:base:${applied.versions.welding}:${applied.versions.painting}`, weldRates: { aisi304: applied.values.welding.aisi304, st20: applied.values.welding.st20 }, paintingRates: applied.values.painting.filter(isPipeBasePaintingRate).map(r => ({...r, warnings: r.pricePerMeter === null ? [`Нет тарифа окраски DN${r.dn}`] : []})),channelPaintingRates:applied.values.painting.filter(isChannelPaintingRate).map(r=>({...r})) };
 }

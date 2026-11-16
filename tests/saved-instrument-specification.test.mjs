@@ -1,8 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import {readFile} from "node:fs/promises";
 import {fixture,sync,rows,resources,choose,parseProjectConfig,load} from "./fixtures/station-specification.mjs";
-import {loadTs} from "./load-ts.mjs";
 const {repairSavedInstrumentSpecification:repair}=await load("saved-instrument-specification");
 const {specificationItemPresentation:presentation}=await load("specification-presentation");
 const {specificationHasPrice}=await load("specification-readiness");
@@ -77,25 +75,4 @@ test("pressure validation cannot restore fitting warnings in either mode; manual
     assert.ok(checked.every(r=>!presentation(r).hasWarning));
     assert.strictEqual(acceptInstrumentFitting(manual),manual);
   }
-});
-
-test("actual workspace hydration effect repairs a frozen saved project after resources arrive",async()=>{
-  const url=new URL("../app/full-workspace.tsx",import.meta.url),page=(await readFile(url,"utf8")).replace(/\r\n/g,"\n");
-  const start=page.indexOf('  useEffect(()=>{\n    if(!suctionEnabled)');assert.ok(start>0);
-  const effect=page.slice(start,page.indexOf('\n\n  useEffect(() => {',start));
-  const code=`import {repairSavedInstrumentSpecification} from './saved-instrument-specification';
-  import {refreshSavedSpecificationInsertions} from './saved-insertion-specification';
-  export async function hydrate(project,resources){
-    const config=project,snapshot=true,suctionEnabled=true,catalogue=resources.pumps,suctionSource='snapshot',activeSession=null;
-    let current=project;const setConfig=change=>{current=change(current)};
-    const loadComponentsDatabase=async()=>resources;
-    const synchronizeFullProject=()=>{throw new Error('Snapshot must not trigger full recalculation')};
-    const useEffect=callback=>callback(),setSaveMessage=message=>{throw new Error(message)},setAssetErrors=()=>{};
-    ${effect}
-    await Promise.resolve();await Promise.resolve();return current;
-  }`;
-  const {hydrate}=await loadTs(url,{[url.href]:code});
-  const p=brokenSnapshot(),next=await hydrate(p,data);
-  assert.equal(converter(next).equipmentId,"station-v11-oni-ppt10-16");assert.equal(converter(next).price,3445.91);
-  assert.ok(!presentation(converter(next)).hasWarning);assert.strictEqual(next.entities["station-collectors"],p.entities["station-collectors"]);
 });

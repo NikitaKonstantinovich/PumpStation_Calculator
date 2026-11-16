@@ -23,9 +23,9 @@
   "statistics": {
     "catalogs": 25,
     "tables": 87,
-    "componentRows": 2038,
-    "pricedComponentRows": 1999,
-    "priceEntries": 4460,
+    "componentRows": 2040,
+    "pricedComponentRows": 2011,
+    "priceEntries": 4472,
     "formulaRules": 4785,
     "formulaErrorsInSavedValues": 0,
     "dataValidations": 23,
@@ -1423,7 +1423,8 @@
             "https://dn.ru/fiting/rezby/stalnye/kitai/gost3262-75/dn25",
             "https://dn.ru/fiting/rezby/stalnye/kitai/gost3262-75/dn32",
             "https://dn.ru/fiting/rezby/stalnye/kitai/gost3262-75/dn40",
-            "https://dn.ru/fiting/rezby/stalnye/kitai/gost3262-75/dn50"
+            "https://dn.ru/fiting/rezby/stalnye/kitai/gost3262-75/dn50",
+            "https://khoper.ru/produkciya/detali-truboprovoda/fitingi-stalnye/nippeli-privarnye-rezby/rezba-50-2-l47-n-iz-truby-gost-3262/"
           ],
           "headerRows": [],
           "columns": [
@@ -1552,7 +1553,9 @@
             "https://www.newkey.ru/product/klapan-obratnyi-muftovyi-priamoi-112-dn40-aisi304-cf8-pn40-nk-cs404/",
             "https://www.newkey.ru/product/kran-sharovyi-privarnoi-2-dn50-aisi304-cf8-pn40-nk-be504/",
             "https://dn.ru/storage/certificates/dn/fiting/nippel-privarnoj-dn-ru-n-304-nr-w-du8-100-ru20-nerzhaveyushhaya-stal-pod-privarku-naruzhnaya-rezba.pdf",
-            "https://dn.ru/fiting/nipples/stalnye/dn-ru/h-304-w-nr-ru20/50"
+            "https://dn.ru/fiting/nipples/stalnye/dn-ru/h-304-w-nr-ru20/50",
+            "https://dn.ru/fiting/nipples/stalnye/dn-ru/h-304-w-nr-ru20/32",
+            "https://dn.ru/fiting/nipples/stalnye/dn-ru/h-304-w-nr-ru20/40"
           ],
           "headerRows": [],
           "columns": [
@@ -1666,7 +1669,9 @@
             "thread-end:newkey-nk-ne32-4",
             "thread-end:newkey-nk-ne40-4",
             "thread-end:newkey-nk-ne50-4",
-            "thread-end:dnru-d270-17412"
+            "thread-end:dnru-d270-17412",
+            "thread-end:dnru-d270-17410",
+            "thread-end:dnru-d270-17411"
           ]
         }
       ]
@@ -3264,7 +3269,7 @@
         {
           "id": "st20-ready-bore-flanges",
           "title": "Фланцы плоские Сталь 20 — ГОСТ 33259-2015, ряд 2",
-          "sourceRange": "Проверка позиций, цена по запросу 2026-11-12",
+          "sourceRange": "Расчётные цены по аналогам; размеры проверены 2026-11-12",
           "sourceUrls": [
             "https://detalllidersnab.ru/page145856686.html",
             "https://signal-teplo.ru/upload/iblock/203/vq3htl65l1axjlrwvdsrcwpcfenf7afx.pdf"
@@ -3314,9 +3319,9 @@
               ]
             },
             {
-              "column": "checkedAt",
+              "column": "priceDate",
               "headerPath": [
-                "Дата проверки позиции"
+                "Дата цены"
               ]
             },
             {
@@ -221659,20 +221664,6 @@
           "value": "https://dn.ru/fiting/rezby/stalnye/kitai/gost3262-75/dn50"
         },
         {
-          "column": "PRICE_SOURCE",
-          "headerPath": [
-            "Источник цены"
-          ],
-          "value": "https://dn.ru/fiting/rezby/stalnye/kitai/gost3262-75/dn50"
-        },
-        {
-          "column": "CHECKED",
-          "headerPath": [
-            "Дата проверки"
-          ],
-          "value": "2026-10-30"
-        },
-        {
           "column": "ARTICLE",
           "headerPath": [
             "Артикул"
@@ -221687,23 +221678,45 @@
           "value": "Китай / ДН.ру"
         },
         {
+          "column": "PRICE_SOURCE",
+          "headerPath": [
+            "Источник цены"
+          ],
+          "value": "https://khoper.ru/produkciya/detali-truboprovoda/fitingi-stalnye/nippeli-privarnye-rezby/rezba-50-2-l47-n-iz-truby-gost-3262/"
+        },
+        {
+          "column": "CHECKED",
+          "headerPath": [
+            "Дата проверки"
+          ],
+          "value": "2026-11-16"
+        },
+        {
           "column": "NOTE",
           "headerPath": [
             "Примечание"
           ],
-          "value": "Наружный диаметр и стенка из блока параметров, длина из названия артикула. Без покрытия, готовая наружная резьба / сварка, PN16. Цена требует проверки при заказе."
+          "value": "Наружный диаметр и стенка из блока параметров, длина из названия артикула. Без покрытия, готовая наружная резьба / сварка, PN16. Цена D270-18288 по запросу; расчётная цена взята по стальной приварной резьбе DN50 2″ L=47 по ГОСТ 3262 у «Хопёр Сталь»."
         },
         {
           "column": "ISSUES",
           "headerPath": [
             "Неподтверждённые данные"
           ],
-          "value": "Цена СТ20 DN50 D270-18288 предоставляется по запросу; отображаемые 79,30 ₽ не приняты как подтверждённая цена."
+          "value": ""
         }
       ],
-      "prices": [],
+      "prices": [
+        {
+          "label": "Цена, ₽/шт. (по аналогу)",
+          "amount": 70,
+          "currency": "RUB",
+          "sourceColumn": "PRICE"
+        }
+      ],
       "sourceUrls": [
-        "https://dn.ru/fiting/rezby/stalnye/kitai/gost3262-75/dn50"
+        "https://dn.ru/fiting/rezby/stalnye/kitai/gost3262-75/dn50",
+        "https://khoper.ru/produkciya/detali-truboprovoda/fitingi-stalnye/nippeli-privarnye-rezby/rezba-50-2-l47-n-iz-truby-gost-3262/"
       ]
     },
     {
@@ -222691,6 +222704,302 @@
       "sourceUrls": [
         "https://dn.ru/storage/certificates/dn/fiting/nippel-privarnoj-dn-ru-n-304-nr-w-du8-100-ru20-nerzhaveyushhaya-stal-pod-privarku-naruzhnaya-rezba.pdf",
         "https://dn.ru/fiting/nipples/stalnye/dn-ru/h-304-w-nr-ru20/50"
+      ]
+    },
+    {
+      "id": "thread-end:dnru-d270-17410",
+      "catalogId": "сгоны-резьба",
+      "tableId": "ready-thread-ends-aisi304-20261030",
+      "family": "Готовые приварные резьбовые концы AISI304",
+      "sourceSheet": "Подтверждённые резьбовые концы 30.10.2026",
+      "sourceRow": 8,
+      "fields": [
+        {
+          "column": "NAME",
+          "headerPath": [
+            "Наименование"
+          ],
+          "value": "Резьбовой патрубок DN32 1 1/4\" AISI304 PN20 L=50 D270-17410 Н-304-W-НР"
+        },
+        {
+          "column": "PURPOSE",
+          "headerPath": [
+            "Назначение"
+          ],
+          "value": "Резьбовой конец вставки"
+        },
+        {
+          "column": "DN",
+          "headerPath": [
+            "DN"
+          ],
+          "value": 32
+        },
+        {
+          "column": "PN",
+          "headerPath": [
+            "PN"
+          ],
+          "value": 20
+        },
+        {
+          "column": "THREAD",
+          "headerPath": [
+            "Резьба, дюйм"
+          ],
+          "value": "1 1/4\""
+        },
+        {
+          "column": "GENDER",
+          "headerPath": [
+            "Исполнение резьбы"
+          ],
+          "value": "НР"
+        },
+        {
+          "column": "OD",
+          "headerPath": [
+            "Диаметр, мм"
+          ],
+          "value": 42.4
+        },
+        {
+          "column": "WALL",
+          "headerPath": [
+            "Толщина, мм"
+          ],
+          "value": 3
+        },
+        {
+          "column": "L",
+          "headerPath": [
+            "Длина, мм"
+          ],
+          "value": 50
+        },
+        {
+          "column": "DIM_SOURCE",
+          "headerPath": [
+            "Источник размеров"
+          ],
+          "value": "https://dn.ru/storage/certificates/dn/fiting/nippel-privarnoj-dn-ru-n-304-nr-w-du8-100-ru20-nerzhaveyushhaya-stal-pod-privarku-naruzhnaya-rezba.pdf"
+        },
+        {
+          "column": "L_SOURCE",
+          "headerPath": [
+            "Источник длины"
+          ],
+          "value": "https://dn.ru/storage/certificates/dn/fiting/nippel-privarnoj-dn-ru-n-304-nr-w-du8-100-ru20-nerzhaveyushhaya-stal-pod-privarku-naruzhnaya-rezba.pdf"
+        },
+        {
+          "column": "PRICE_SOURCE",
+          "headerPath": [
+            "Источник цены"
+          ],
+          "value": "https://dn.ru/fiting/nipples/stalnye/dn-ru/h-304-w-nr-ru20/32"
+        },
+        {
+          "column": "CHECKED",
+          "headerPath": [
+            "Дата проверки"
+          ],
+          "value": "2026-11-16"
+        },
+        {
+          "column": "ARTICLE",
+          "headerPath": [
+            "Артикул"
+          ],
+          "value": "D270-17410 Н-304-W-НР"
+        },
+        {
+          "column": "MAKER",
+          "headerPath": [
+            "Производитель"
+          ],
+          "value": "DN.ru"
+        },
+        {
+          "column": "NOTE",
+          "headerPath": [
+            "Примечание"
+          ],
+          "value": "Паспорт, стр. 3–4: наружная BSPT R1¼, D=42,4 мм, T=3 мм, L=50 мм, L1=18 мм. Цена из карточки артикула."
+        },
+        {
+          "column": "ISSUES",
+          "headerPath": [
+            "Неподтверждённые данные"
+          ],
+          "value": ""
+        },
+        {
+          "column": "WEIGHT",
+          "headerPath": [
+            "Масса, кг"
+          ],
+          "value": 0.13
+        }
+      ],
+      "prices": [
+        {
+          "label": "Цена, ₽/шт.",
+          "amount": 567.3,
+          "currency": "RUB",
+          "sourceColumn": "PRICE"
+        }
+      ],
+      "sourceUrls": [
+        "https://dn.ru/storage/certificates/dn/fiting/nippel-privarnoj-dn-ru-n-304-nr-w-du8-100-ru20-nerzhaveyushhaya-stal-pod-privarku-naruzhnaya-rezba.pdf",
+        "https://dn.ru/fiting/nipples/stalnye/dn-ru/h-304-w-nr-ru20/32"
+      ]
+    },
+    {
+      "id": "thread-end:dnru-d270-17411",
+      "catalogId": "сгоны-резьба",
+      "tableId": "ready-thread-ends-aisi304-20261030",
+      "family": "Готовые приварные резьбовые концы AISI304",
+      "sourceSheet": "Подтверждённые резьбовые концы 30.10.2026",
+      "sourceRow": 9,
+      "fields": [
+        {
+          "column": "NAME",
+          "headerPath": [
+            "Наименование"
+          ],
+          "value": "Резьбовой патрубок DN40 1 1/2\" AISI304 PN20 L=50 D270-17411 Н-304-W-НР"
+        },
+        {
+          "column": "PURPOSE",
+          "headerPath": [
+            "Назначение"
+          ],
+          "value": "Резьбовой конец вставки"
+        },
+        {
+          "column": "DN",
+          "headerPath": [
+            "DN"
+          ],
+          "value": 40
+        },
+        {
+          "column": "PN",
+          "headerPath": [
+            "PN"
+          ],
+          "value": 20
+        },
+        {
+          "column": "THREAD",
+          "headerPath": [
+            "Резьба, дюйм"
+          ],
+          "value": "1 1/2\""
+        },
+        {
+          "column": "GENDER",
+          "headerPath": [
+            "Исполнение резьбы"
+          ],
+          "value": "НР"
+        },
+        {
+          "column": "OD",
+          "headerPath": [
+            "Диаметр, мм"
+          ],
+          "value": 48.3
+        },
+        {
+          "column": "WALL",
+          "headerPath": [
+            "Толщина, мм"
+          ],
+          "value": 3
+        },
+        {
+          "column": "L",
+          "headerPath": [
+            "Длина, мм"
+          ],
+          "value": 50
+        },
+        {
+          "column": "DIM_SOURCE",
+          "headerPath": [
+            "Источник размеров"
+          ],
+          "value": "https://dn.ru/storage/certificates/dn/fiting/nippel-privarnoj-dn-ru-n-304-nr-w-du8-100-ru20-nerzhaveyushhaya-stal-pod-privarku-naruzhnaya-rezba.pdf"
+        },
+        {
+          "column": "L_SOURCE",
+          "headerPath": [
+            "Источник длины"
+          ],
+          "value": "https://dn.ru/storage/certificates/dn/fiting/nippel-privarnoj-dn-ru-n-304-nr-w-du8-100-ru20-nerzhaveyushhaya-stal-pod-privarku-naruzhnaya-rezba.pdf"
+        },
+        {
+          "column": "PRICE_SOURCE",
+          "headerPath": [
+            "Источник цены"
+          ],
+          "value": "https://dn.ru/fiting/nipples/stalnye/dn-ru/h-304-w-nr-ru20/40"
+        },
+        {
+          "column": "CHECKED",
+          "headerPath": [
+            "Дата проверки"
+          ],
+          "value": "2026-11-16"
+        },
+        {
+          "column": "ARTICLE",
+          "headerPath": [
+            "Артикул"
+          ],
+          "value": "D270-17411 Н-304-W-НР"
+        },
+        {
+          "column": "MAKER",
+          "headerPath": [
+            "Производитель"
+          ],
+          "value": "DN.ru"
+        },
+        {
+          "column": "NOTE",
+          "headerPath": [
+            "Примечание"
+          ],
+          "value": "Паспорт, стр. 3–4: наружная BSPT R1½, D=48,3 мм, T=3 мм, L=50 мм, L1=22 мм. Цена из карточки артикула."
+        },
+        {
+          "column": "ISSUES",
+          "headerPath": [
+            "Неподтверждённые данные"
+          ],
+          "value": ""
+        },
+        {
+          "column": "WEIGHT",
+          "headerPath": [
+            "Масса, кг"
+          ],
+          "value": 0.14
+        }
+      ],
+      "prices": [
+        {
+          "label": "Цена, ₽/шт.",
+          "amount": 677.1,
+          "currency": "RUB",
+          "sourceColumn": "PRICE"
+        }
+      ],
+      "sourceUrls": [
+        "https://dn.ru/storage/certificates/dn/fiting/nippel-privarnoj-dn-ru-n-304-nr-w-du8-100-ru20-nerzhaveyushhaya-stal-pod-privarku-naruzhnaya-rezba.pdf",
+        "https://dn.ru/fiting/nipples/stalnye/dn-ru/h-304-w-nr-ru20/40"
       ]
     },
     {
@@ -253602,18 +253911,18 @@
           "value": "10"
         },
         {
-          "column": "checkedAt",
+          "column": "priceDate",
           "headerPath": [
-            "Дата проверки позиции"
+            "Дата цены"
           ],
-          "value": "2026-11-12"
+          "value": "2026-11-16"
         },
         {
           "column": "vat",
           "headerPath": [
             "Условия цены"
           ],
-          "value": "Цена и НДС по запросу"
+          "value": "Цена второго ряда по запросу. Расчётная цена по фланцу ряда 1 из базы: фланцы-001-r0007, тот же DN, PN, тип 01, исполнение B и Ст20."
         },
         {
           "column": "sourceUrl",
@@ -253721,7 +254030,14 @@
           "value": "Подтверждены номинальные размеры. Сверловка и уплотнительный выступ совпадают с фланцы-001-r0007. Цена по запросу. Требуется проверка проходного отверстия на всей глубине посадки и совместимости прокладки."
         }
       ],
-      "prices": [],
+      "prices": [
+        {
+          "amount": 337,
+          "currency": "RUB",
+          "sourceColumn": "price",
+          "label": "Цена, ₽/шт. (по аналогу)"
+        }
+      ],
       "sourceUrls": [
         "https://detalllidersnab.ru/page145856686.html"
       ]
@@ -253784,18 +254100,18 @@
           "value": "16"
         },
         {
-          "column": "checkedAt",
+          "column": "priceDate",
           "headerPath": [
-            "Дата проверки позиции"
+            "Дата цены"
           ],
-          "value": "2026-11-12"
+          "value": "2026-11-16"
         },
         {
           "column": "vat",
           "headerPath": [
             "Условия цены"
           ],
-          "value": "Цена и НДС по запросу"
+          "value": "Цена второго ряда по запросу. Расчётная цена по фланцу ряда 1 из базы: фланцы-002-r0030, тот же DN, PN, тип 01, исполнение B и Ст20."
         },
         {
           "column": "sourceUrl",
@@ -253903,7 +254219,14 @@
           "value": "Подтверждены номинальные размеры. Сверловка и уплотнительный выступ совпадают с фланцы-002-r0030. Цена по запросу. Требуется проверка проходного отверстия на всей глубине посадки и совместимости прокладки."
         }
       ],
-      "prices": [],
+      "prices": [
+        {
+          "amount": 349,
+          "currency": "RUB",
+          "sourceColumn": "price",
+          "label": "Цена, ₽/шт. (по аналогу)"
+        }
+      ],
       "sourceUrls": [
         "https://detalllidersnab.ru/page145856686.html"
       ]
@@ -253966,18 +254289,18 @@
           "value": "25"
         },
         {
-          "column": "checkedAt",
+          "column": "priceDate",
           "headerPath": [
-            "Дата проверки позиции"
+            "Дата цены"
           ],
-          "value": "2026-11-12"
+          "value": "2026-11-16"
         },
         {
           "column": "vat",
           "headerPath": [
             "Условия цены"
           ],
-          "value": "Цена и НДС по запросу"
+          "value": "Цена второго ряда по запросу. Расчётная цена по фланцу ряда 1 из базы: фланцы-003-r0053, тот же DN, PN, тип 01, исполнение B и Ст20."
         },
         {
           "column": "sourceUrl",
@@ -254085,7 +254408,14 @@
           "value": "Подтверждены номинальные размеры. Сверловка и уплотнительный выступ совпадают с фланцы-003-r0053. Цена по запросу. Требуется проверка проходного отверстия на всей глубине посадки и совместимости прокладки."
         }
       ],
-      "prices": [],
+      "prices": [
+        {
+          "amount": 443,
+          "currency": "RUB",
+          "sourceColumn": "price",
+          "label": "Цена, ₽/шт. (по аналогу)"
+        }
+      ],
       "sourceUrls": [
         "https://detalllidersnab.ru/page145856686.html"
       ]
@@ -254148,18 +254478,18 @@
           "value": "10"
         },
         {
-          "column": "checkedAt",
+          "column": "priceDate",
           "headerPath": [
-            "Дата проверки позиции"
+            "Дата цены"
           ],
-          "value": "2026-11-12"
+          "value": "2026-11-16"
         },
         {
           "column": "vat",
           "headerPath": [
             "Условия цены"
           ],
-          "value": "Цена и НДС по запросу"
+          "value": "Цена второго ряда по запросу. Расчётная цена по фланцу ряда 1 из базы: фланцы-001-r0008, тот же DN, PN, тип 01, исполнение B и Ст20."
         },
         {
           "column": "sourceUrl",
@@ -254267,7 +254597,14 @@
           "value": "Подтверждены номинальные размеры. Сверловка и уплотнительный выступ совпадают с фланцы-001-r0008. Цена по запросу. Требуется проверка проходного отверстия на всей глубине посадки и совместимости прокладки."
         }
       ],
-      "prices": [],
+      "prices": [
+        {
+          "amount": 346,
+          "currency": "RUB",
+          "sourceColumn": "price",
+          "label": "Цена, ₽/шт. (по аналогу)"
+        }
+      ],
       "sourceUrls": [
         "https://detalllidersnab.ru/page145856686.html"
       ]
@@ -254330,18 +254667,18 @@
           "value": "16"
         },
         {
-          "column": "checkedAt",
+          "column": "priceDate",
           "headerPath": [
-            "Дата проверки позиции"
+            "Дата цены"
           ],
-          "value": "2026-11-12"
+          "value": "2026-11-16"
         },
         {
           "column": "vat",
           "headerPath": [
             "Условия цены"
           ],
-          "value": "Цена и НДС по запросу"
+          "value": "Цена второго ряда по запросу. Расчётная цена по фланцу ряда 1 из базы: фланцы-002-r0031, тот же DN, PN, тип 01, исполнение B и Ст20."
         },
         {
           "column": "sourceUrl",
@@ -254449,7 +254786,14 @@
           "value": "Подтверждены номинальные размеры. Сверловка и уплотнительный выступ совпадают с фланцы-002-r0031. Цена по запросу. Требуется проверка проходного отверстия на всей глубине посадки и совместимости прокладки."
         }
       ],
-      "prices": [],
+      "prices": [
+        {
+          "amount": 384,
+          "currency": "RUB",
+          "sourceColumn": "price",
+          "label": "Цена, ₽/шт. (по аналогу)"
+        }
+      ],
       "sourceUrls": [
         "https://detalllidersnab.ru/page145856686.html"
       ]
@@ -254512,18 +254856,18 @@
           "value": "25"
         },
         {
-          "column": "checkedAt",
+          "column": "priceDate",
           "headerPath": [
-            "Дата проверки позиции"
+            "Дата цены"
           ],
-          "value": "2026-11-12"
+          "value": "2026-11-16"
         },
         {
           "column": "vat",
           "headerPath": [
             "Условия цены"
           ],
-          "value": "Цена и НДС по запросу"
+          "value": "Цена второго ряда по запросу. Расчётная цена по фланцу ряда 1 из базы: фланцы-003-r0054, тот же DN, PN, тип 01, исполнение B и Ст20."
         },
         {
           "column": "sourceUrl",
@@ -254631,7 +254975,14 @@
           "value": "Подтверждены номинальные размеры. Сверловка и уплотнительный выступ совпадают с фланцы-003-r0054. Цена по запросу. Требуется проверка проходного отверстия на всей глубине посадки и совместимости прокладки."
         }
       ],
-      "prices": [],
+      "prices": [
+        {
+          "amount": 551,
+          "currency": "RUB",
+          "sourceColumn": "price",
+          "label": "Цена, ₽/шт. (по аналогу)"
+        }
+      ],
       "sourceUrls": [
         "https://detalllidersnab.ru/page145856686.html"
       ]
@@ -254694,18 +255045,18 @@
           "value": "10"
         },
         {
-          "column": "checkedAt",
+          "column": "priceDate",
           "headerPath": [
-            "Дата проверки позиции"
+            "Дата цены"
           ],
-          "value": "2026-11-12"
+          "value": "2026-11-16"
         },
         {
           "column": "vat",
           "headerPath": [
             "Условия цены"
           ],
-          "value": "Цена и НДС по запросу"
+          "value": "Цена второго ряда по запросу. Расчётная цена по фланцу ряда 1 из базы: фланцы-001-r0009, тот же DN, PN, тип 01, исполнение B и Ст20."
         },
         {
           "column": "sourceUrl",
@@ -254813,7 +255164,14 @@
           "value": "Подтверждены номинальные размеры. Сверловка и уплотнительный выступ совпадают с фланцы-001-r0009. Цена по запросу. Требуется проверка проходного отверстия на всей глубине посадки и совместимости прокладки."
         }
       ],
-      "prices": [],
+      "prices": [
+        {
+          "amount": 450,
+          "currency": "RUB",
+          "sourceColumn": "price",
+          "label": "Цена, ₽/шт. (по аналогу)"
+        }
+      ],
       "sourceUrls": [
         "https://signal-teplo.ru/upload/iblock/203/vq3htl65l1axjlrwvdsrcwpcfenf7afx.pdf"
       ]
@@ -254876,18 +255234,18 @@
           "value": "16"
         },
         {
-          "column": "checkedAt",
+          "column": "priceDate",
           "headerPath": [
-            "Дата проверки позиции"
+            "Дата цены"
           ],
-          "value": "2026-11-12"
+          "value": "2026-11-16"
         },
         {
           "column": "vat",
           "headerPath": [
             "Условия цены"
           ],
-          "value": "Цена и НДС по запросу"
+          "value": "Цена второго ряда по запросу. Расчётная цена по фланцу ряда 1 из базы: фланцы-002-r0032, тот же DN, PN, тип 01, исполнение B и Ст20."
         },
         {
           "column": "sourceUrl",
@@ -254995,7 +255353,14 @@
           "value": "Подтверждены номинальные размеры. Сверловка и уплотнительный выступ совпадают с фланцы-002-r0032. Цена по запросу. Требуется проверка проходного отверстия на всей глубине посадки и совместимости прокладки."
         }
       ],
-      "prices": [],
+      "prices": [
+        {
+          "amount": 560,
+          "currency": "RUB",
+          "sourceColumn": "price",
+          "label": "Цена, ₽/шт. (по аналогу)"
+        }
+      ],
       "sourceUrls": [
         "https://detalllidersnab.ru/page145856686.html"
       ]
@@ -255058,18 +255423,18 @@
           "value": "25"
         },
         {
-          "column": "checkedAt",
+          "column": "priceDate",
           "headerPath": [
-            "Дата проверки позиции"
+            "Дата цены"
           ],
-          "value": "2026-11-12"
+          "value": "2026-11-16"
         },
         {
           "column": "vat",
           "headerPath": [
             "Условия цены"
           ],
-          "value": "Цена и НДС по запросу"
+          "value": "Цена второго ряда по запросу. Расчётная цена по фланцу ряда 1 из базы: фланцы-003-r0055, тот же DN, PN, тип 01, исполнение B и Ст20."
         },
         {
           "column": "sourceUrl",
@@ -255177,7 +255542,14 @@
           "value": "Подтверждены номинальные размеры. Сверловка и уплотнительный выступ совпадают с фланцы-003-r0055. Цена по запросу. Требуется проверка проходного отверстия на всей глубине посадки и совместимости прокладки."
         }
       ],
-      "prices": [],
+      "prices": [
+        {
+          "amount": 540,
+          "currency": "RUB",
+          "sourceColumn": "price",
+          "label": "Цена, ₽/шт. (по аналогу)"
+        }
+      ],
       "sourceUrls": [
         "https://detalllidersnab.ru/page145856686.html"
       ]
@@ -391724,7 +392096,7 @@
       "шаровые-краны": 11,
       "резьбовые-фитинги": 16,
       "пожарная-арматура": 6,
-      "сгоны-резьба": 29,
+      "сгоны-резьба": 31,
       "трубы": 120,
       "металл": 29,
       "фланцы": 167,

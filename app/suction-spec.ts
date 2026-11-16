@@ -14,6 +14,8 @@ import { PUMP_LINE_RULES_REVISION } from "./line-insertion";
 import { pressureChecksEnabled, withoutPressureChecks } from "./pressure-check-policy";
 import { flangeStack, equipmentFlangeThickness } from "./line-joint-stack";
 import { jointFlangeThickness } from "./joint-flange-dimensions";
+import { waferFastenerLength, valveFlangeGrip } from "./wafer-fastener-length";
+import flangeHardware from "../data/flange-hardware-supplement.json";
 import fastenerReference from "./suction-fasteners.json";
 import { INSTRUMENT_CONNECTION_REVISION, addInstrumentSideConnection, isAcceptedInstrumentFitting, acceptInstrumentFitting } from "./instrument-connection";
 import { addValveLimitSwitches, VALVE_LIMIT_SWITCHES_REVISION } from "./valve-limit-switches";
@@ -26,6 +28,7 @@ export function suctionFingerprint(project:ProjectConfig) {
 }
 
 export function coreBuildSuctionSpec(project:ProjectConfig, database:{items:AssemblyComponent[]}, catalog:CollectorCatalog, valves:SpecItem[]=(project.entities["station-spec"] as {items:SpecItem[]}).items, pumps?:readonly Pump[]|null, automaticInsertions=false):SpecItem[] {
+  database={...database,items:[...database.items,...flangeHardware.filter(item=>!database.items.some(existing=>existing.id===item.id))]};
   const e=project.entities, settings=e["station-settings"] as SettingsEntity, dn=e["station-dn"] as DnEntity;
   const collector=baseConfigurationIdentity((e["station-collectors"] as CollectorsEntity).suction.configuration!);
   if (!collector || !(e["system-input"] as InputEntity).calculated) return [];
@@ -41,21 +44,22 @@ export function coreBuildSuctionSpec(project:ProjectConfig, database:{items:Asse
     if(branch && (branch.dn!==h.dn || branch.connection!==h.connection || branch.pn!==h.pn)) errors.push("Параметры отвода коллектора не совпадают с арматурой. Исправьте переопределения в конструкторе коллекторов.");
     if(errors.length || !h.port) {add(`${prefix}-error`,`${title}: ошибка комплектации всасывающей линии`,1,errors.join(" "),undefined,"компл.");continue;}
     const p=h.port, v=h.dn, pn=h.pn;
-    const threads = addPumpConnectionAssembly({ parts, database, catalog, collector, port: p, valveDn: v, connection: h.connection, pn, count, prefix, title, vibration: Boolean(settings.vibrationCompensators), terminal: "valve" });
+    const threads = addPumpConnectionAssembly({ parts, database, catalog, collector, port: p, pumpId: input.selectedPumpId, pumpSide: "inlet", valveDn: v, connection: h.connection, pn, count, prefix, title, vibration: Boolean(settings.vibrationCompensators), terminal: "valve" });
     if(h.connection==="flanged") {
-      gasket(`${prefix}-valve-gaskets`,v,pn,2*count);
+      if(h.valveType!=="butterfly") gasket(`${prefix}-valve-gaskets`,v,pn,2*count);
       const outward=rows.find(row=>row.insertionRequirement&&row.assemblyRole?.startsWith(`${prefix}-`));
-      const generic=jointFlangeThickness(database,collector.material,v,pn).thicknessMm;
+      const generic=valveFlangeGrip(jointFlangeThickness(database,collector.material,v,pn).thicknessMm,jointFlangeThickness(database,collector.material,v,pn,undefined,undefined,undefined,true).thicknessMm);
       const pump = !settings.vibrationCompensators && p.connection === "flanged" && p.dn === v
         ? parts.pumpFlangeReference(v, pn) : undefined;
-      const before=pump ? pump.thickness : outward?.insertionAssembly?parts.insertionEndThickness(outward,"to"):outward&&generic!==null?generic/2:null;
+      const before=pump ? pump.thickness : outward?.insertionAssembly?valveFlangeGrip(parts.insertionEndThickness(outward,"to"),parts.insertionEndThickness(outward,"to",true)):outward&&generic!==null?generic/2:null;
       const after=generic===null?null:generic/2;
       const valve=database.items.find(item=>item.id===valves.find(row=>row.option===`${prefix}SuctionValve`)?.equipmentId);
       const source="Стык всасывающей арматуры. Учитываются корпус выбранной арматуры и толщины обоих соседних фланцев.";
       if(h.valveType==="butterfly"){
         const reference=fastenerReference.find(row=>row.dn===v&&row.pn===pn);
         const thickness=valve?number(field(valve,/^(?:Строительная длина|Толщина межфланцевого элемента|L), мм$/i))??(/\b017W\b/i.test(valve.family)?reference?.wafer017WLength??null:null):null;
-        fasteners(`${prefix}-valve-fasteners`,v,pn,count,{gaskets:2,thickness,flangeThickness:flangeStack(before,after),source:[source,pump?.source,reference?.source].filter(Boolean).join(" ")});
+        const actual=waferFastenerLength(valve,v,pn,thickness);
+        fasteners(`${prefix}-valve-fasteners`,v,pn,count,{gaskets:0,thickness:actual.thickness,flangeThickness:flangeStack(before,after),source:[source,pump?.source,reference?.source,actual.source].filter(Boolean).join(" ")});
       }else{
         const integral=equipmentFlangeThickness(valve);
         fasteners(`${prefix}-valve-inlet-fasteners`,v,pn,count,{gaskets:1,thickness:0,flangeThickness:flangeStack(before,integral),source:[source,pump?.source].filter(Boolean).join(" ")});

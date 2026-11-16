@@ -1,6 +1,8 @@
 import { spacingEvidenceReader } from "./node-spacing.mjs";
 import { catalogDrawings, readDrawingFile } from "./node-drawings.mjs";
 import { catalogMounting } from "./node-mountings.mjs";
+import { catalogInstallation, installationMounting } from "./node-installation.mjs";
+import { catalogMass } from "./node-masses.mjs";
 import { DatabaseSync } from "node:sqlite";
 import { createHash } from "node:crypto";
 import { resolve } from "node:path";
@@ -195,9 +197,12 @@ export function readCatalogSnapshot(path) {
       if (!modelActive || model.selection_enabled !== 1) issues.push("Модель не разрешена для подбора в источнике");
       const modelReviews = [...(reviewsByModel.get(model.id) ?? []).filter(row => !row.variant_id), ...(reviewsByVariant.get(variant.id) ?? [])];
       for (const row of modelReviews) issues.push(String(row.category ?? "Данные") + " · " + String(row.message ?? "Требуется уточнение"));
-      const connections = ports.get(variant.id) ?? [], inlet = connections.find(port => port.side === "inlet"), outlet = connections.find(port => port.side === "outlet");
+      const installation=catalogInstallation({variant,model,motor,manufacturer:manufacturer.name,series:familySeries.code});
+      const connections = ports.get(variant.id) ?? [];
+      const inlet = {...connections.find(port => port.side === "inlet"),...installation?.ports.inlet};
+      const outlet = {...connections.find(port => port.side === "outlet"),...installation?.ports.outlet};
       if (number(inlet?.dn) == null || number(outlet?.dn) == null) issues.push("Точный DN патрубков не подтверждён");
-      if (number(inlet?.pn_nominal_bar) == null || number(outlet?.pn_nominal_bar) == null) issues.push("Точный PN патрубков не подтверждён");
+      if ([inlet,outlet].some(p=>number(p.pn_nominal_bar)==null&&p.pn_status!=="not_applicable")) issues.push("Точный PN патрубков не подтверждён");
       if (!(cad.get(model.id) ?? []).some(binding => binding.assembly_approved === 1)) issues.push("CAD-компоновка исполнения не подтверждена");
       const priceRows = (links.get(variant.id) ?? []).map(link => ({ ...prices.get(link.price_id), applicability:link.applicability })).filter(row => row.id);
       const net = priceRows.filter(row => decimal(row.net_amount_decimal) != null);
@@ -209,6 +214,7 @@ export function readCatalogSnapshot(path) {
       // A scalar rating exists only when the source supplies one unambiguous mode.
       const rating = electricalRatings.length === 1 ? electricalRatings[0] : null;
       const dimension = dimensionsFor(variant, model, issues);
+      if(installation)dimension.dimensions={...dimension.dimensions,...installation.dimensions};
       const passport = onisPassports.get(variant.id) ?? [];
       const poleCount = number(passport.find(row => row.parameter_id === "poleCount")?.numeric_value);
       const technicalSheet = passport.filter(row => !["speedRpm","poleCount","liquidTemperatureRangeC"].includes(row.parameter_id)).map(row => ({
@@ -216,6 +222,7 @@ export function readCatalogSnapshot(path) {
         page:row.parameter_id.startsWith("dimension.") || row.parameter_id.startsWith("flange.") ?
           row.source_id.endsWith(":110176") ? 41 : 2 : 1,
       }));
+      const mass=catalogMass({variant,model,motor,manufacturer:manufacturer.name,series:familySeries.code});
       const pump = {
         spacingEvidence:spacingFor(variant, model, motor, electricalRatings, {manufacturer:String(manufacturer.name),series:String(familySeries.code),dimensions:dimension.dimensions,evidence:dimension.evidence}),
         id:String(variant.id), manufacturer:String(manufacturer.name), series:String(familySeries.code), group:String(familySeries.code), model:String(model.designation),
@@ -228,14 +235,14 @@ export function readCatalogSnapshot(path) {
         curve:qh, ...(characteristics.efficiency ? {efficiencyCurve:characteristics.efficiency} : {}), ...(characteristics.power ? {powerCurve:characteristics.power} : {}), ...(characteristics.npshr ? {npshCurve:characteristics.npshr} : {}),
         ...(knownMedium ? {medium:model.medium} : {}), active:modelActive, selectable:modelActive && model.selection_enabled === 1 && knownMedium && !!set && qh.length >= 2,
         ...(variant.manufacturer_article != null ? {article:String(variant.manufacturer_article)} : {}), execution:String(variant.designation), dataWarnings:[...new Set(issues)], ratedHead:number(model.nominal_head_m), voltage:rating?.voltageV != null ? String(rating.voltageV) : null,
-        frequencyHz, speedRpm:number(motor?.speed_rpm), weightKg:number(variant.mass_kg), inletDn:number(inlet?.dn), outletDn:number(outlet?.dn),
+        frequencyHz, speedRpm:number(motor?.speed_rpm), weightKg:mass?.kg??null, ...(mass?.source?{weightSource:mass.source,weightEstimated:mass.estimated}:{}), inletDn:number(inlet?.dn), outletDn:number(outlet?.dn),
         description:material?.description ?? null, availability:availability.get(model.id)?.confirmed_availability ?? null, catalogSource:SOURCE,
         ...(dimension.dimensions ? {dimensions:dimension.dimensions} : {}),
         electric:{powerKw:number(motor?.power_kw),voltageV:rating?.voltageV ?? null,currentA:rating?.currentA ?? null,phaseCount:number(motor?.phase_count),frequencyHz,speedRpm:number(motor?.speed_rpm),...(poleCount != null ? {poleCount} : {}),protectionClass:motor?.protection_class ?? null,insulationClass:motor?.insulation_class ?? null,efficiencyClass:motor?.efficiency_class ?? null,ratings:electricalRatings},
         ...(technicalSheet.length ? {technicalSheet} : {}),
         materials:material ? {profileId:material.id,scope:material.scope,description:material.description,sealDescription:material.default_seal_description ?? null,sealCode:variant.seal_code ?? null,components:(materialComponents.get(material.id) ?? []).map(row=>({component:row.component,material:row.material,state:row.state}))} : {},
         inlet:inlet ? {...inlet} : {}, outlet:outlet ? {...outlet} : {},
-        mounting:{...(dimension.frameV1?{frameV1:dimension.frameV1}:{}),...catalogMounting({variant,model,motor,manufacturer:manufacturer.name,series:familySeries.code}),hasSensors:variant.has_sensors===1 ? true : variant.has_sensors===0 ? false : null,sensorStatus:variant.sensor_status ?? "unknown"},
+        mounting:{...installationMounting({...(dimension.frameV1?{frameV1:dimension.frameV1}:{}),...catalogMounting({variant,model,motor,manufacturer:manufacturer.name,series:familySeries.code})},installation),hasSensors:variant.has_sensors===1 ? true : variant.has_sensors===0 ? false : null,sensorStatus:variant.sensor_status ?? "unknown"},
         fluid:{medium:model.medium ?? null,operatingLimits:operatingLimits.get(variant.id) ?? null,seriesEnvelope:seriesEnvelopes.get(model.series_id) ?? null,nominalNpshrM:number(model.nominal_npshr_m),maxWorkingPressureBar:variantPressure.get(variant.id)?.max_working_pressure_bar ?? null,pressureTemperatureCondition:variantPressure.get(variant.id)?.temperature_condition ?? null,pressureRatings:(pressureRatings.get(variant.id) ?? []).map(row=>({temperatureC:number(row.temperature_c),maxWorkingPressureBar:number(row.max_working_pressure_bar)}))},
       };
       const sourceIds = [...new Set([model.source_id,variant.source_id,motor?.source_id,set?.source_id,curveSelection?.source_id,inlet?.source_id,outlet?.source_id,best?.source_id,...dimension.sourceIds,...passport.map(row=>row.source_id)].filter(Boolean))];
@@ -246,6 +253,8 @@ export function readCatalogSnapshot(path) {
         curveRecords:set ? (curves.get(set.id) ?? []).map(row=>({id:row.id,kind:row.kind,xUnit:row.x_unit,yUnit:row.y_unit})) : [],
         sources:sourceIds.map(id=>sourceRecords.get(id)).filter(Boolean).map(row=>({id:row.id,archivePath:row.archive_path,jsonPointer:row.json_pointer,sha256:row.record_sha256})),pumpType:types.get(model.pump_type_id) ?? null,
         ...(dimension.evidence ? {dimensions:dimension.evidence} : {}),
+        ...(mass?.provenance ? {mass:mass.provenance} : {}),
+        ...(installation ? {installation:{version:installation.version,evidence:installation.evidence,policy:"Execution-bound catalogue/STEP facts; working pressure is separate from flange PN"}} : {}),
       }};
     });
     const issues = [];

@@ -1,4 +1,12 @@
 .floating-panel--assistant:not(.floating-panel--docked){min-height:360px}
+.app-header__actions .assistant-menu-button{display:inline-flex;align-items:center;gap:8px;min-height:36px;width:auto;padding:0 10px;font-size:12px;font-weight:650;white-space:nowrap;color:var(--blue-dark)}
+.assistant-menu-button__icon{width:15px;height:13px;flex:none;border-block:1.5px solid currentColor;display:grid;align-items:center}
+.assistant-menu-button__icon::after{content:"";height:1.5px;background:currentColor}
+.assistant-drawer{position:fixed;inset:0 0 0 auto;width:min(100%,460px);height:100dvh;max-width:none;max-height:none;margin:0;padding:0;border:0;border-inline-start:1px solid var(--line);background:var(--paper);color:var(--ink);box-shadow:-16px 0 48px #07192a33}
+.assistant-drawer::backdrop{background:#07192a59}
+.assistant-drawer__content{height:100%;min-height:0;padding-bottom:env(safe-area-inset-bottom);box-sizing:border-box}
+.assistant-chat .assistant-chat__close{font-size:22px;flex:0 0 32px;width:32px;height:32px;line-height:1}
+@media(max-width:460px){.assistant-drawer{border-inline-start:0}}
 .assistant-chat{display:flex;flex-direction:column;height:100%;min-height:0;overflow:hidden;background:var(--paper);color:var(--ink);font-size:12px;line-height:1.6;container-type:inline-size}
 .assistant-chat :is(button,textarea,a):focus-visible{outline:2px solid var(--blue);outline-offset:3px}
 .assistant-chat button{font:inherit;cursor:pointer}.assistant-chat button:disabled{cursor:default;opacity:.5}

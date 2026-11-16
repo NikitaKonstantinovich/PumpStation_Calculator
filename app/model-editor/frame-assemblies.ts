@@ -6,7 +6,7 @@ import type { Assembly, Bounds, Component, Vec3 } from "./model";
 import { frameBoltSeat, type FrameHardware } from "./frame-hardware";
 import { composeValvePose, relativePose } from "./valve-controls";
 
-export const FRAME_STAND_REVISION=models.revision+"-complete-v1";
+export const FRAME_STAND_REVISION=models.revision+"-shared-hardware-v2";
 const roles=["stand-left","stand-right","cabinet","profile-upper","profile-lower","hardware"] as const;
 export type FrameMount={version:1;parentId:string;role:typeof roles[number];revision:string;position:Vec3;rotation:Vec3;manual?:boolean};
 const vec=(v:unknown):v is Vec3=>Array.isArray(v)&&v.length===3&&v.every(n=>typeof n==="number"&&Number.isFinite(n)&&Math.abs(n)<1e7);
@@ -57,7 +57,11 @@ export function addFrameStands(assembly:Assembly,project:ProjectConfig):Assembly
   const seat=frameBoltSeat(data),max=seat+10,min=Math.min(-data.sheet-data.tail,seat-data.length),r=data.headDiameter/2;
   const bounds:Bounds=[min,Math.min(...centers.map(p=>p[1]))-r,Math.min(...centers.map(p=>p[2]))-r,max,Math.max(...centers.map(p=>p[1]))+r,Math.max(...centers.map(p=>p[2]))+r];
   const c=component(id,name,"hardware",parent,position,rotation,bounds);
-  c.frameHardware={version:1,...data,centers};c.sourceNote="Болт, шайба (если предусмотрена) и гайка-заклёпка по выбранной комплектации. Резьба показана номинальным цилиндром; деформация заклёпки условная.";
+  const circuit=parent.kind==="pump"?/^pump-(\d+)-/.exec(parent.id)?.[1]:undefined;
+  const ref=(key:string)=>{const p=calculation!.parts.find(p=>p.id===`frame/${key}`);return p?{id:p.componentId,name:p.name}:undefined;};
+  const parts=Object.fromEntries(Object.entries({bolt:ref(circuit?`pump-${circuit}-bolts`:`bolt-m${data.diameter}-${data.length}`),
+   washer:data.washer?ref(`washer-m${data.diameter}`):undefined,rivet:ref(circuit?`pump-${circuit}-rivets`:`rivet-m${data.diameter}`)}).filter((entry):entry is [string,{id:string|undefined;name:string}]=>!!entry[1]));
+  c.frameHardware={version:1,...data,centers,parts};c.sourceNote="Болт, шайба (если предусмотрена) и гайка-заклёпка по выбранной комплектации. Резьба показана номинальным цилиндром; деформация заклёпки условная.";
   return c;
  }
  const standard={diameter:8,length:25,clamp:3,sheet,washer:2,hole:11,head:1.5,headDiameter:16,tail:11};

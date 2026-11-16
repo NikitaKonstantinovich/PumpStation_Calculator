@@ -10,6 +10,8 @@ import { normalizeSpecificationItems } from "../specification-items";
 import type { Pump } from "../pump-catalog";
 import type { Diagnostic, ToolContext, Values } from "./schema";
 import type { SpecificationData, SpecificationManualRow, SpecificationResult } from "./specification-nodes";
+import { applySpecificationNotices } from "./specification-notices";
+import { componentMassData } from "./component-masses";
 
 const primitiveProgram = { version: "node-specification-primitives", plans: {}, args: {} };
 const pure = <T,>(run: () => T): T => withEvaluationProgram(primitiveProgram, run);
@@ -103,7 +105,13 @@ export function executeSpecificationOperation(step: Step, values: Values, _conte
         // let an unfinished station survive saving and reopening, as in Workspace 1.
         return { data: specification, issues: (specification.readiness?.findings ?? []).map(finding => ({ node: step.id, key: finding.id, severity: "warning", message: finding.message })) };
       }
-      case "ui.specification": return { value: { kind: "specification", node: step.id, label: "Спецификация", specification: values.data ?? { status: "empty", message: "Подключите проверку состава и стоимости.", items: [], manualRows: [] }, specificationBindings: { ...(values.manualBinding ? { manual: values.manualBinding } : {}), ...(values.hydraulicBinding ? { hydraulic: values.hydraulicBinding } : {}), ...(values.dnBinding ? { dn: values.dnBinding } : {}) } } };
+      case "spec.notices": {
+        const specification=applySpecificationNotices(data(values.result),{tankValveArticle:values.tankValveArticle!==false,frameAnchorDiameters:values.frameAnchorDiameters!==false});
+        return {data:specification,issues:(specification.readiness?.findings??[]).map(f=>({node:step.id,key:f.id,severity:"warning",message:f.message}))};
+      }
+      case "spec.masses": return {data:componentMassData(values.result as SpecificationResult|null)};
+      case "ui.componentMasses": return {value:{kind:"component-masses",node:step.id,label:"Массы комплектующих",componentMasses:values.data??componentMassData(null)}};
+      case "ui.specification": return { value: { kind: "specification", node: step.id, label: "Спецификация", specification: values.data ?? { status: "empty", message: "Подключите проверку состава и стоимости.", items: [], manualRows: [] }, specificationBindings: { ...(values.manualBinding ? { manual: values.manualBinding } : {}), ...(values.hydraulicBinding ? { hydraulic: values.hydraulicBinding } : {}), ...(values.dnBinding ? { dn: values.dnBinding } : {}),...(values.frameBinding ? { frame: values.frameBinding } : {}) } } };
       default: return undefined;
     }
   });

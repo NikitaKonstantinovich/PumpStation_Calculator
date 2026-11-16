@@ -1,5 +1,6 @@
 import { installedInsertionPrice } from "./calculated-insertion";
-import type { DnEntity, ProjectConfig, SpecEntity, SpecItem } from "./project-config";
+import type { DnEntity, ProjectConfig, SpecEntity, SpecItem, InputEntity } from "./project-config";
+import { adoptPumpMatingFlange } from "./pump-mating-flange";
 import { selectStationInsertion } from "./station-insertion-selection";
 import type { AssemblyComponent } from "./suction-catalog";
 
@@ -26,6 +27,7 @@ export function refreshSavedSpecificationInsertions(project: ProjectConfig, cata
     const updated: SpecItem = { ...row, name: item.family, equipmentId: item.id, description: selected.explanation,
       insertionAssembly: updatedAssembly, price, technicalStatus: selected.technicalStatus,
       technicalNotes: selected.findings.map(finding => finding.message), status: row.status === "confirmation" ? "confirmation" : status };
+    adoptPumpMatingFlange(updated, (project.entities[row.assemblyRole?.startsWith("secondary-") ? "system-input-2" : "system-input"] as InputEntity)?.selectedPumpId);
     if (row.inletPressureCheck) updated.inletPressureCheck = { ...row.inletPressureCheck, baseStatus: status };
     if (row.dischargePressureCheck) updated.dischargePressureCheck = { ...row.dischargePressureCheck, baseStatus: status };
     if (JSON.stringify(updated) === JSON.stringify(row)) return row;

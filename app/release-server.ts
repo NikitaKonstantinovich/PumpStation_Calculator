@@ -12,11 +12,15 @@ export async function guardDisabledBetaFeature(request: Request): Promise<Respon
 }
 
 export async function guardReleaseRequest(request: Request): Promise<Response | null> {
-  const path = new URL(request.url).pathname.replace(/\/$/, "") || "/";
-  if(path==="/"&&new URL(request.url).searchParams.get("view")==="geometry-nodes"||path==="/"&&new URL(request.url).searchParams.get("view")==="node-editor"){
+  const url = new URL(request.url), path = url.pathname.replace(/\/$/, "") || "/", view = url.searchParams.get("view");
+  if(path==="/"&&(view==="geometry-nodes"||view==="node-editor")){
     const user=await currentUser(request);
     if(!user)return json({error:"Требуется вход."},401,{"Cache-Control":"no-store"});
     if(user.role!=="admin"||IS_BETA)return json({error:"Редактор доступен администратору в полной версии."},403,{"Cache-Control":"no-store"});
+    if(view==="geometry-nodes"){
+      url.searchParams.set("view","algorithm-library");
+      return new Response(null,{status:307,headers:{Location:url.href,"Cache-Control":"no-store"}});
+    }
   }
   if(path==="/"&&new URL(request.url).searchParams.get("view")==="workspace2"){const user=await currentUser(request);if(!user)return json({error:"Требуется вход"},401);if(IS_BETA)return disabledInBeta();}
   if (path === "/" || publicShellAsset(path)) return null;

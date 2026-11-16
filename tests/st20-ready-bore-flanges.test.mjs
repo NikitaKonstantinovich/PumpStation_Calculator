@@ -32,7 +32,7 @@ const insertionCatalog = makeInsertCatalog(enriched);
 const request = { dnFrom: 32, dnTo: 65, materials: ["st20"], includeEccentric: true, withSensorNipple: false };
 const uses = (row, id) => row.bom.some(item => item.componentId === id);
 
-test("steel row 2 inserts have sourced nominal dimensions, the original drilling and no supplier prices", () => {
+test("steel row 2 inserts have sourced nominal dimensions, original drilling, and prices from workbook analogues", () => {
   assert.equal(readyFlanges.rows.length, 9);
   for (const entry of expected) {
     for (const [index, pn] of pressures.entries()) {
@@ -42,13 +42,15 @@ test("steel row 2 inserts have sourced nominal dimensions, the original drilling
       assert.equal(offer.baselineId, entry.baselines[index]);
       assert.deepEqual(offer.supportedPipeOuterDiametersMm, entry.pipeOds);
       assert.deepEqual(offer.compatiblePns, [pn]);
-      assert.equal(offer.price, null);
+      assert.equal(offer.priceStatus, "analogue");
 
       const item = itemById.get(id);
       assert.ok(item, id);
-      assert.deepEqual(item.prices, []);
+      assert.equal(item.prices.length, 1);
+      assert.match(item.prices[0].label, /по аналогу/);
       assert.equal(item.fields.find(field => field.headerPath.at(-1) === "Назначение")?.value, "Фланец вставки");
       const baseline = itemById.get(offer.baselineId);
+      assert.equal(item.prices[0].amount, baseline.prices[0].amount);
       const original = readFlangeDimensions(baseline, itemPressures.get(baseline.id), flangeDimensions, enriched.source.sha256);
       const actual = readFlangeDimensions(item, pn, flangeDimensions, enriched.source.sha256);
       assert.deepEqual(actual.warnings, [], id);
@@ -70,7 +72,8 @@ test("steel row 2 inserts have sourced nominal dimensions, the original drilling
       }
       const part = insertionCatalog.parts.find(part => part.id === id);
       assert.ok(part, id);
-      assert.equal(part.price, null);
+      assert.equal(part.price, item.prices[0].amount);
+      assert.ok(part.source.includes(offer.baselineId));
       assert.deepEqual(part.supportedPipeOuterDiametersMm, entry.pipeOds);
     }
   }
@@ -98,7 +101,7 @@ test("insert-only steel flanges preserve collector choices and default joint thi
   }
 });
 
-test("sourced DN65 to DN50 eccentric reducer still requires a confirmed and priced flange", () => {
+test("sourced DN65 to DN50 eccentric reducer uses a priced DN50 row 2 flange", () => {
   const reducerId = "переходы-001-r0049";
   const originalFlange = "фланцы-003-r0055";
   const alternate = "st20-ready-bore:50-25";
@@ -113,39 +116,42 @@ test("sourced DN65 to DN50 eccentric reducer still requires a confirmed and pric
   assert.equal(original.price, null);
   assert.equal(original.machining?.find(operation => operation.side === "right")?.originalBoreMm, 59);
   assert.ok(preview);
-  assert.equal(preview.complete, false);
-  assert.equal(preview.price, null);
+  assert.equal(preview.complete, true);
+  assert.ok(preview.price > 0);
   assert.equal(preview.machining, undefined);
   assert.equal(preview.assemblyDecisions?.find(decision => decision.side === "right")?.depthMm, 15);
 
   const selected = generateInsertCalculations(request, insertionCatalog);
-  assert.ok(selected.some(row => row.geometry === "eccentric" && row.dnLarge === 65 && row.dnSmall === 50 && row.pn === 25));
-  assert.ok(selected.every(row => !row.complete || row.bom.every(item => !item.componentId?.startsWith("st20-ready-bore:"))));
-  const completeRows = rows => rows.filter(row => row.complete).map(row => [row.identityKey, row.bom, row.price]);
-  const baseline = generateInsertCalculations(request, makeInsertCatalog(baseSource));
-  assert.deepEqual(completeRows(selected), completeRows(baseline));
+  assert.ok(selected.some(row => row.geometry === "eccentric" && row.dnLarge === 65 && row.dnSmall === 50
+    && row.pn === 25 && row.complete && uses(row, alternate)));
 });
 
-test("a price does not establish actual steel row 2 fit, and unrelated ends stay excluded", () => {
-  const alternate = "st20-ready-bore:50-25";
-  const changed = structuredClone(enriched);
-  const offer = changed.items.find(item => item.id === alternate);
-  offer.prices.push({ amount: 1000, currency: "RUB", sourceColumn: "price", label: "Цена, ₽/шт." });
-  const catalog = makeInsertCatalog(changed);
-  assert.equal(catalog.parts.find(part => part.id === alternate).price, 1000);
-
-  const candidates = generateInsertCandidates(request, catalog);
-  const reducer = candidates.find(row => uses(row, "переходы-001-r0049") && uses(row, alternate));
-  assert.ok(reducer);
-  assert.equal(reducer.bom.find(item => item.componentId === alternate).unitPrice, 1000);
-  assert.equal(reducer.complete, false);
-  assert.equal(reducer.price, null);
-  assert.ok(reducer.warnings.some(warning => /фактический посадочный зазор.*пригодность прокладки/.test(warning)));
-
-  const dn50Pipes = new Set(catalog.parts.filter(part => part.kind === "pipe" && part.dn === 50 && part.material === "st20" && part.outerDiameter === 57).map(part => part.id));
+test("row 2 prices do not permit an unsupported pipe diameter", () => {
+  const candidates = generateInsertCandidates(request, insertionCatalog);
+  const dn50Pipes = new Set(insertionCatalog.parts.filter(part => part.kind === "pipe" && part.dn === 50 && part.material === "st20" && part.outerDiameter === 57).map(part => part.id));
   const unsupported = candidates.filter(row => row.geometry === "straight" && row.bom.some(item => item.role === "base" && dn50Pipes.has(item.componentId)));
   assert.ok(unsupported.length);
   assert.ok(unsupported.every(row => row.bom.every(item => !item.componentId?.startsWith("st20-ready-bore:50-"))));
+});
+
+test("all compact steel thread-to-flange inserts select row 2 without boring, with and without a sensor", () => {
+  for (const withSensorNipple of [false, true]) {
+    const rows = generateInsertCalculations({ ...request, withSensorNipple }, insertionCatalog)
+      .filter(row => row.configuration.construction === "compact-threaded" && row.rightConnection === "flanged");
+    assert.equal(rows.length, 6);
+    for (const row of rows) {
+      assert.deepEqual(row.warnings, []);
+      assert.equal(row.complete, true);
+      assert.ok(row.price > 0);
+      assert.equal(row.machining, undefined);
+      assert.ok(uses(row, `st20-ready-bore:${row.dnLarge}-${row.pn}`));
+      if (row.dnLarge === 50) {
+        const stub = row.bom.find(item => item.role === "base");
+        assert.equal(stub.unitPrice, 70);
+        assert.match(stub.source, /Хопёр Сталь/);
+      }
+    }
+  }
 });
 
 test("a changed mating face or drilling invalidates only the associated steel row 2 offer", () => {

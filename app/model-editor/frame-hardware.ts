@@ -1,7 +1,8 @@
 import type { Vec3 } from "./model";
 
 /** Joint coordinates: X points out of the receiving sheet; X=0 is its front. */
-export type FrameHardware={version:1;diameter:number;length:number;clamp:number;sheet:number;washer:number;hole:number;head:number;headDiameter:number;tail:number;supportLift?:number;centers:Vec3[]};
+export type FrameHardwarePart={id?:string;name:string};
+export type FrameHardware={version:1;joint?:"through";nut?:number;diameter:number;length:number;clamp:number;sheet:number;washer:number;hole:number;head:number;headDiameter:number;tail:number;supportLift?:number;centers:Vec3[];parts?:Partial<Record<"bolt"|"washer"|"rivet"|"nut",FrameHardwarePart>>};
 export type FrameProfile={version:1;length:number;holes:number[]};
 export const FRAME_PROFILE_SLOT_RADIUS_MM = 5.5;
 
@@ -33,8 +34,11 @@ export function frameBoltSeat(hardware: Pick<FrameHardware,"supportLift"|"head"|
 export function parseFrameHardware(value:unknown):FrameHardware|undefined {
  if(!value||typeof value!=="object")return;
  const v=value as FrameHardware;
- if(v.version!==1||![6,8,10,12,14,16,20,24].includes(v.diameter)||![v.length,v.clamp,v.sheet,v.hole,v.head,v.headDiameter,v.tail].every(n=>Number.isFinite(n)&&n>0&&n<500)||!Number.isFinite(v.washer)||v.washer<0||v.washer>10||!Array.isArray(v.centers)||v.centers.length>100||v.centers.some(p=>!Array.isArray(p)||p.length!==3||p.some(n=>!Number.isFinite(n)||Math.abs(n)>1e6)))return;
+ if(v.version!==1||![6,8,10,12,14,16,20,24].includes(v.diameter)||![v.length,v.clamp,v.sheet,v.hole,v.headDiameter,v.tail].every(n=>Number.isFinite(n)&&n>0&&n<500)||(!Number.isFinite(v.head)||v.head>=500)||(v.joint==="through"?v.head!==0:v.head<=0)||!Number.isFinite(v.washer)||v.washer<0||v.washer>10||!Array.isArray(v.centers)||v.centers.length>100||v.centers.some(p=>!Array.isArray(p)||p.length!==3||p.some(n=>!Number.isFinite(n)||Math.abs(n)>1e6)))return;
+ if(v.joint!==undefined&&v.joint!=="through")return;
+ if(v.joint==="through"&&(!v.nut||!Number.isFinite(v.nut)||v.nut<=0||v.nut>100||v.washer<=0||v.length<v.clamp+v.sheet+2*v.washer+v.nut+5-.001))return;
  if(v.supportLift!==undefined&&(!Number.isFinite(v.supportLift)||v.supportLift<0||v.supportLift>v.head))return;
+ if(v.parts&&(typeof v.parts!=="object"||Array.isArray(v.parts)||Object.entries(v.parts).some(([k,p])=>!["bolt","washer","rivet","nut"].includes(k)||!p||typeof p.name!=="string"||p.name.length>1000||p.id!==undefined&&(typeof p.id!=="string"||p.id.length>240))))return;
  return structuredClone(v);
 }
 export function parseFrameProfile(value:unknown):FrameProfile|undefined {

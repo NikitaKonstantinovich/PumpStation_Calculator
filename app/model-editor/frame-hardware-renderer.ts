@@ -16,6 +16,14 @@ export function frameHardwareObject(c:Component):THREE.Group {
  add(new THREE.CylinderGeometry(b.diameter/2,b.diameter/2,b.length,16).rotateZ(-Math.PI/2),seat-b.length/2);
  add(new THREE.CylinderGeometry(d.flats/Math.sqrt(3),d.flats/Math.sqrt(3),d.head,6).rotateZ(-Math.PI/2),seat+d.head/2);
  if(b.washer)add(ringGeometry({kind:"tube",lengthMm:b.washer,outerMm:d.washerOuter,innerMm:d.washerInner}),seat-b.washer);
+ if(b.joint==="through"){
+  add(ringGeometry({kind:"tube",lengthMm:b.washer,outerMm:d.washerOuter,innerMm:d.washerInner}),-b.sheet-b.washer);
+  const shape=new THREE.Shape(),r=d.flats/Math.sqrt(3);
+  for(let i=0;i<6;i++){const a=i*Math.PI/3;if(i)shape.lineTo(r*Math.cos(a),r*Math.sin(a));else shape.moveTo(r,0);}shape.closePath();
+  const hole=new THREE.Path();hole.absarc(0,0,b.diameter/2,0,Math.PI*2,true);shape.holes.push(hole);
+  add(new THREE.ExtrudeGeometry(shape,{depth:b.nut!,bevelEnabled:false,curveSegments:16}).rotateY(Math.PI/2),-b.sheet-b.washer-b.nut!);
+  return group;
+ }
  add(ringGeometry({kind:"tube",lengthMm:b.head,outerMm:b.headDiameter,innerMm:b.diameter}),0);
  // Nominal installed envelope, without a fictitious helical thread or bulge.
  add(ringGeometry({kind:"tube",lengthMm:b.sheet+b.tail,outerMm:b.hole,innerMm:b.diameter}),-b.sheet-b.tail);

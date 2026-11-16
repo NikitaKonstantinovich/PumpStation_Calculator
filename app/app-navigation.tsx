@@ -6,13 +6,12 @@ import Link from "next/link";
 import type { AccountUser } from "./user-types";
 import "./app-navigation.css";
 
-export type AppView = "workspace" | "algorithm-library" | "projects" | "workspace2" | "node-editor" | "geometry-nodes" | "equipment-admin" | "component-calculator" | "item-entry" | "base-values" | "users" | "help";
-const destinations: { view: AppView; icon: string; label: string; admin?: boolean; full?: boolean }[] = [
-  { view: "workspace", icon: "▦", label: "Рабочее пространство" },
+export type AppView = "workspace" | "algorithm-library" | "projects" | "workspace2" | "node-editor" | "equipment-admin" | "component-calculator" | "item-entry" | "base-values" | "users" | "help";
+const destinations: { view: AppView; icon: string; label: string; admin?: boolean; full?: boolean; beta?: boolean }[] = [
+  { view: "workspace", icon: "▦", label: "Рабочее пространство", beta: true },
   { view: "projects", icon: "▤", label: "Мои проекты", full: true },
   { view: "algorithm-library", icon: "▤", label: "Библиотека алгоритмов", admin: true, full: true },
   { view: "node-editor", icon: "⌘", label: "Нодовый редактор", admin: true, full: true },
-  { view: "geometry-nodes", icon: "⌘", label: "Алгоритм станции", admin: true, full: true },
   { view: "equipment-admin", icon: "⌁", label: "База комплектующих", admin: true },
   { view: "component-calculator", icon: "⌗", label: "Расчёт комплектующих", admin: true, full: true },
   { view: "item-entry", icon: "＋", label: "Заведение позиций", admin: true },
@@ -102,7 +101,7 @@ export function AppNavigation({ account, view, open, setOpen, buttonRef, header,
         <div className="sidebar__top"><div className="brand"><span className="brand__mark">PS</span><span><b>Pump Station</b><small>Calculator</small></span></div></div>
         <div className="user-card"><span className="avatar avatar--large">{initials}</span><div><div className="user-card__name"><b>{account.name}</b><span className="user-role">{account.role}</span></div><small>{account.email}</small></div></div>
         <nav className="sidebar__nav" aria-label="Разделы приложения">
-          {destinations.filter(item => !item.admin || account.role === "admin").map(item => <button key={item.view} type="button" className={`sidebar__link${view === item.view ? " sidebar__link--active" : ""}`} aria-current={view === item.view ? "page" : undefined} disabled={beta && item.full} title={beta && item.full ? "Доступно в полной версии" : undefined} onClick={() => request(() => navigate(item.view), view !== item.view)}>
+          {destinations.filter(item => (!item.beta || beta) && (!item.admin || account.role === "admin")).map(item => <button key={item.view} type="button" className={`sidebar__link${view === item.view ? " sidebar__link--active" : ""}`} aria-current={view === item.view ? "page" : undefined} disabled={beta && item.full} title={beta && item.full ? "Доступно в полной версии" : undefined} onClick={() => request(() => navigate(item.view), view !== item.view)}>
             <span aria-hidden="true">{item.icon}</span><span>{item.label}</span>{item.view === "projects" && projectCount != null && <em>{projectCount}</em>}
           </button>)}
           {!beta && products.map(product=><button key={product.id} type="button" className={`sidebar__link${view==="workspace2"&&activeAlgorithm===product.id?" sidebar__link--active":""}`} aria-current={view==="workspace2"&&activeAlgorithm===product.id?"page":undefined} onClick={()=>request(()=>navigateAlgorithm?.(product.id,product.name),view!=="workspace2"||activeAlgorithm!==product.id)}><span aria-hidden="true">▦</span><span>{product.name}</span></button>)}

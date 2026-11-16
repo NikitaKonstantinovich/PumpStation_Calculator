@@ -97,16 +97,17 @@ export function corePrepareInsertionTemplate(row: InsertCalculation, context: In
     end.ports = [point("face", [0, 0, 0], [-1, 0, 0], e.dn, e.c.connection, end.source), point("base-joint", [e.axial, 0, 0], [1, 0, 0], e.dn, "weld", end.source, "weld")];
     joints.push({ a: { piece: "base", port: `${e.side}-weld` }, b: { piece: e.side, port: "base-joint" }, kind: e.c.connection === "collar" || compact && e.c.connection === "threaded" ? "butt" : "seat", confirmed: !!p && fidelity !== "missing" });
     if (e.c.connection === "collar") {
-      const loose = context.catalog.parts.find(p => insertPartIdentity(p) === e.c.looseFlange) ?? context.catalog.parts.filter(p => p.kind === "looseFlange" && p.dn === e.dn && p.material === row.material && (p.pn === pn || p.compatiblePns?.includes(pn))).sort((a, b) => Number(b.pn === pn) - Number(a.pn === pn) || a.id.localeCompare(b.id))[0], dims = loose ? context.flanges[loose.id] : undefined;
+      const loose = e.c.looseFlange ? lookup(`${e.side}-looseFlange`, e.c.looseFlange) : context.catalog.parts.filter(p => p.kind === "looseFlange" && p.dn === e.dn && p.material === row.material && (p.pn === pn || p.compatiblePns?.includes(pn))).sort((a, b) => Number(b.pn === pn) - Number(a.pn === pn) || a.id.localeCompare(b.id))[0], dims = loose ? context.flanges[loose.id] : undefined;
       if (loose && p && positive(p.thicknessMm) && positive(dims?.thicknessMm) && positive(dims.outerDiameterMm) && positive(dims.boreDiameterMm)) {
         const stock=stampedShape(loose.id,{kind:"flange",lengthMm:dims.thicknessMm,outerMm:dims.outerDiameterMm,innerMm:dims.boreDiameterMm,boltCircleMm:dims.boltCircleMm,boltHoleMm:dims.boltHoleDiameterMm,boltHoles:dims.holes},true);
-        const fits = stock.innerMm! >= e.od && positive(p.lipOuterDiameterMm) && stock.innerMm! < p.lipOuterDiameterMm;
+        const fits = positive(p.outerDiameter) && stock.innerMm! >= p.outerDiameter &&
+          positive(p.lipOuterDiameterMm) && stock.innerMm! < p.lipOuterDiameterMm;
         if(!fits) stock.stampedHash="missing";
         if(stock.stampedHash==="missing") issues.push(`${loose.id}: ${stampMissing}`);
         if (!fits) issues.push(`${loose.id}: свободный фланец не согласован с шейкой и бортом воротника.`);
         warnings.push(`${loose.id}: положение свободного фланца принято за бортом воротника; контакт со скруглением и необходимость фаски требуют проверки перед изготовлением.`);
         const sign = e.side === "left" ? 1 : -1;
-        const ring=add(`${e.side}-loose`, loose, [e.origin[0] + sign * p.thicknessMm, e.origin[1], e.origin[2]], e.rotation, stock, "parametric", true);
+        const ring=add(`${e.side}-loose`, loose, [e.origin[0] + sign * p.thicknessMm, e.origin[1], e.origin[2]], e.rotation, stock, "parametric", !e.c.looseFlange);
         if(stock.stampedHash===projectFittings.flange.sourceHash) {
           ring.source=projectFittings.flange.basis;
           warnings.push(ring.source);

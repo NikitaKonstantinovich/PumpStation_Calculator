@@ -1,4 +1,5 @@
 import * as THREE from "three";
+import { channelFrameObject } from "./channel-frame-renderer";
 import { pipePoints, type Assembly, type Component, type Vec3 } from "./model";
 import { frameBoxes } from "./snap-geometry";
 import { pieceObject, ringGeometry, type InsertionRenderCache } from "./insertion-renderer";
@@ -55,7 +56,7 @@ function sameRenderData(a: unknown, b: unknown): boolean {
 function geometryInputs(c: Component): unknown[] {
   // Include the inputs to the procedural builders and STL materials. Omit
   // editor state and calculation diagnostics, which can change independently.
-  const inputs = [c.kind, c.meshUrl, c.frameColor, c.frameDrilling, c.frameHardware, c.frameProfile, c.tankMount?.role, c.instrumentMount?.role];
+  const inputs = [c.kind, c.meshUrl, c.frameColor, c.frameDrilling, c.frameHardware, c.frameProfile, c.channelFrame, c.tankMount?.role, c.instrumentMount?.role];
   const b = c.fastener;
   if (b) return [...inputs, "fastener", b.status, b.dimensions, b.grip, b.centers];
   if (c.collector) return [...inputs, "collector", c.collector.template, c.collector.selectedPieceId];
@@ -88,15 +89,15 @@ export function setMaterialOpacity(mat: THREE.Material, factor: number) {
 
 export function updateComponentAppearance(group: THREE.Group, c: Component, previous?: Component) {
   group.visible = !c.hidden;
-  const hidden = (c.collector ?? c.insertion)?.hiddenPieceIds;
-  const pieceOpacities = c.collector?.pieceOpacities;
+  const hidden = (c.collector ?? c.insertion ?? c.channelFrameAssembly)?.hiddenPieceIds;
+  const pieceOpacities = (c.collector ?? c.channelFrameAssembly)?.pieceOpacities;
   if (previous?.opacity === c.opacity &&
-      sameRenderData(hidden, (previous.collector ?? previous.insertion)?.hiddenPieceIds) &&
-      sameRenderData(pieceOpacities, previous.collector?.pieceOpacities)) return;
+      sameRenderData(hidden, (previous.collector ?? previous.insertion ?? previous.channelFrameAssembly)?.hiddenPieceIds) &&
+      sameRenderData(pieceOpacities, (previous.collector ?? previous.channelFrameAssembly)?.pieceOpacities)) return;
   const update = (object: THREE.Object3D, opacity: number) => {
     const pieceId = object.userData.pieceId as string | undefined;
     if (pieceId) {
-      if (hidden) object.visible = !hidden.includes(pieceId);
+      if (hidden || c.channelFrame) object.visible = !hidden?.includes(pieceId);
       opacity *= pieceOpacities?.[pieceId] ?? 1;
     }
     if (object.userData.fixedOpacity) return;
@@ -114,7 +115,8 @@ export function componentObject(assembly: Assembly, c: Component, insertionCache
   const opaque = { ...c, opacity: 1 };
   const group = new THREE.Group(), mat = material(opaque), p = c.parameters;
   group.userData.componentId = c.id;
-  if (c.frameHardware) { mat.dispose(); group.add(frameHardwareObject(opaque)); }
+  if (c.channelFrame) { group.add(channelFrameObject(opaque,mat)); mat.dispose(); }
+  else if (c.frameHardware) { mat.dispose(); group.add(frameHardwareObject(opaque)); }
   else if (c.frameProfile) { mat.dispose(); group.add(frameProfileObject(opaque)); }
   else if (c.fastener) { mat.dispose(); group.add(fastenerObject(opaque)); }
   else if (c.collector) {

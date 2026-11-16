@@ -259,7 +259,7 @@ export function evaluatePlan(plan: ToolProgram["plans"][string], context: ToolCo
   }
   let count = 0;
   function validateView(v: View | undefined, depth = 0) {
-    if (!v || depth > 20 || ++count > 2000 || !["form", "section", "grid", "field", "condition", "message", "table", "select", "pump-card", "hydraulic-chart", "pump-detail", "dn-calculator", "collector-constructor", "specification", "station-geometry"].includes(v.kind) || typeof v.node !== "string") throw Error("Некорректная структура интерфейса");
+    if (!v || depth > 20 || ++count > 2000 || !["form", "section", "grid", "field", "condition", "message", "table", "select", "pump-card", "hydraulic-chart", "pump-detail", "dn-calculator", "collector-constructor", "specification", "component-masses", "station-geometry"].includes(v.kind) || typeof v.node !== "string") throw Error("Некорректная структура интерфейса");
     if (v.kind === "field" || v.kind === "select" || ["table", "dn-calculator", "station-geometry"].includes(v.kind) && v.binding) {
       const b = bindings.find(b => b.key === v.binding?.key && b.node === v.binding?.node);
       if (!b || JSON.stringify(b) !== JSON.stringify(v.binding)) throw Error(v.node + " · подключите действительную привязку параметра");
@@ -286,8 +286,8 @@ export function evaluatePlan(plan: ToolProgram["plans"][string], context: ToolCo
     if (v.specificationBindings) {
       if (v.kind !== "specification") throw Error(v.node + " · привязки спецификации доступны только её таблице");
       for (const [key, binding] of Object.entries(v.specificationBindings)) if (binding) {
-        const contract = { manual: ["specManualRows", "array"], hydraulic: ["hydraulicOptions", "object"], dn: ["dnOverrides", "object"] }[key as "manual" | "hydraulic" | "dn"];
-        if (!contract || !ownBinding(binding, contract[0], contract[1], key === "dn" || key === "hydraulic")) throw Error(v.node + " · подключите действительный параметр спецификации");
+        const contract = { manual: ["specManualRows", "array"], hydraulic: ["hydraulicOptions", "object"], dn: ["dnOverrides", "object"],frame:["channelFrameInputs","object"] }[key as "manual" | "hydraulic" | "dn"|"frame"];
+        if (!contract || !ownBinding(binding, contract[0], contract[1], key === "dn" || key === "hydraulic"||key==="frame")) throw Error(v.node + " · подключите действительный параметр спецификации");
       }
     }
     if (v.chartBindings != null) {

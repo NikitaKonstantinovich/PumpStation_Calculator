@@ -9,10 +9,50 @@ const source = await json("../public/binding-components.json");
 const standards = await json("../data/component-insert-standards.json");
 const policy = await json("../data/flange-boring-policy.json");
 const { makeInsertCatalog } = await loadTs(new URL("../app/component-insert-catalog.ts", import.meta.url));
-const { generateInsertCalculations } = await loadTs(new URL("../app/component-insert-calculations.ts", import.meta.url));
+const { generateInsertCalculations, generateInsertCandidates } = await loadTs(new URL("../app/component-insert-calculations.ts", import.meta.url));
 const { planFlangeBoring } = await loadTs(new URL("../app/component-flange-boring.ts", import.meta.url));
 const catalog = makeInsertCatalog(source);
 const rows = generateInsertCalculations({ dnFrom:50, dnTo:400, materials:["aisi304"], withSensorNipple:true, includeEccentric:true }, catalog);
+
+test("DN32 and DN40 select matching weld diameters in compact thread/collar inserts", () => {
+  const calculated = generateInsertCalculations({
+    dnFrom:32, dnTo:40, materials:["aisi304"], withSensorNipple:false, includeEccentric:false,
+  }, catalog);
+  for (const [dn, diameter, article, length] of [[32,42.4,17410,65], [40,48.3,17411,67]]) {
+    for (const pn of [10,16]) {
+      const row = calculated.find(r => r.dnLarge === dn && r.dnSmall === dn && r.pn === pn &&
+        r.leftConnection === "threaded" && r.rightConnection === "collar");
+      assert.ok(row?.complete, JSON.stringify(row?.warnings));
+      const base = catalog.parts.find(p => p.id === row.bom.find(b => b.role === "base").componentId);
+      const collar = catalog.parts.find(p => p.id === row.bom.find(b => b.role === "right-collar").componentId);
+      assert.equal(base.id, `thread-end:dnru-d270-${article}`);
+      assert.equal(base.outerDiameter, diameter);
+      assert.equal(collar.outerDiameter, diameter);
+      assert.ok(row.bom.some(b => b.role === "right-looseFlange"));
+      assert.equal(row.totalLengthMm, length);
+      assert.equal(row.weldLengthMm, 2 * Math.PI * diameter);
+      assert.ok(row.price > 0);
+    }
+    assert.ok(!calculated.some(r => r.dnLarge === dn && r.pn === 25 && r.leftConnection === "threaded"));
+  }
+});
+
+test("weld diameter tolerance applies below 4 mm and preserves the source diameters", () => {
+  const input = { dnFrom:40, dnTo:40, materials:["aisi304"], withSensorNipple:false, includeEccentric:false };
+  const id = "thread-end:newkey-nk-ne40-4";
+  for (const [outerDiameter,difference,complete] of [[48,0.3,true], [44.301,3.999,true], [44.3,4,false], [44.2,4.1,false]]) {
+    const parts = catalog.parts.map(part => part.id === id ? {...part,outerDiameter} : part);
+    const result = generateInsertCandidates(input,{...catalog,parts}).find(row => row.pn===16 &&
+      row.leftConnection==="threaded" && row.rightConnection==="collar" &&
+      row.bom.some(part=>part.role==="base" && part.componentId===id));
+    assert.ok(result);
+    assert.equal(result.complete,complete,result.warnings.join(" "));
+    assert.equal(JSON.parse(result.configuration.base)[6],outerDiameter);
+    assert.equal(JSON.parse(result.configuration.right.part)[6],48.3);
+    if (complete) assert.equal(result.welds[0].acceptedDiameterDifferenceMm,difference);
+    else assert.ok(result.warnings.some(w=>w.includes("должна быть меньше 4 мм")));
+  }
+});
 
 test("DN50 thread/collar uses a real OD60.3 ready end, retains price and excludes PN25", () => {
   for (const pn of [10,16]) {

@@ -155,6 +155,14 @@ try {
   const workspaceReady = () => until(() => evaluate("!globalThis.fixtureBeforeReload && Boolean(" + newButton + ")"), "The node workspace did not open.");
   const start = new URL("/?" + new URLSearchParams({ view: "workspace2", algorithm: "pump-station", project: original.project.id }), origin);
   assert.equal((await send("Network.setCookie", { name: "ps_session", value: token, url: origin, httpOnly: true })).success, true);
+  await send("Page.navigate", { url: new URL('/?project=' + original.project.id, origin).href });
+  await workspaceReady();
+  assert.equal(await pageProject(), original.project.id);
+  assert.equal(await evaluate("new URL(location.href).searchParams.get('view')"), 'workspace2');
+  assert.equal(await evaluate("document.body.innerText.includes('Первое рабочее пространство')"), false);
+  await send("Page.navigate", { url: new URL('/?view=geometry-nodes&project=' + original.project.id, origin).href });
+  await until(() => evaluate("document.querySelector('.al-library h1')?.textContent === 'Библиотека алгоритмов'"), 'The retired editor did not open the algorithm library.');
+  assert.equal(await evaluate("new URL(location.href).searchParams.get('view')"), 'algorithm-library');
   await send("Page.navigate", { url: start.href });
   await workspaceReady();
 
@@ -207,7 +215,17 @@ try {
   const invalid = await request("/api/projects", { config: partial, baseRevision: 2, operation: randomUUID() }, "PUT");
   assert.equal(invalid.status, 400, await invalid.text());
   assert.equal((await json("/api/projects?id=" + encodeURIComponent(draft.id))).revision, 2);
-  console.log("PASS · node project creation waits for save, reloads immediately, retries after a rejected write and validates partial drafts");
+  const legacy = createProject('Сохранённый проект прежнего интерфейса');
+  legacy.project.graphVersion = engineeringVersion;
+  legacy.entities['system-input'].flowRate = 27;
+  rows.set(legacy.project.id, {config: legacy, revision: 1});
+  await send('Page.navigate', {url: new URL('/?view=workspace&project=' + legacy.project.id, origin).href});
+  await until(() => evaluate("document.querySelector('.projects-main h1')?.textContent === 'Мои проекты' && document.body.innerText.includes('Открыть в продукте')"), 'The legacy project did not open in the project list.');
+  assert.equal(await evaluate("new URL(location.href).searchParams.get('view')"), 'projects');
+  assert.equal(rows.get(legacy.project.id).config.entities['system-input'].flowRate, 27);
+  assert.equal(rows.get(legacy.project.id).revision, 1);
+  assert.equal(rows.get(legacy.project.id).config.workspace2, undefined);
+  console.log("PASS · current project routing, retired editor redirect, legacy project preservation, new project save/reload/retry and partial draft validation");
 } finally {
   gate?.resolve();
   socket?.close();

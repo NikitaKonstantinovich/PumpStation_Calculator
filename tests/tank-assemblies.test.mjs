@@ -93,7 +93,7 @@ test("8 L tank sits on the actual DN20 valve with both threaded connections and 
   assert.ok(valve.meshUrl&&valve.cadSource.hash);assert.equal(active(a).length,2);assert.equal(tank.tankMount.mode,"port");assert.equal(tank.tankMount.parentId,valve.id);assert.equal(valve.tankMount.parentId,"collector-discharge");assert.equal(tank.tankMount.volume,8);
   assert.deepEqual(tank.bounds,[-100,-100,0,100,100,311]);assert.match(tank.sourceNote,/Габаритная|Габарит|габарит|профиль|Профиль/);
   assert.equal(row.hydraulicAssembly.parts.find(p=>p.assemblyRole==="tank-valve").equipmentId,"tank-ld-pride-dn20-drain");
-  assert.equal(row.hydraulicAssembly.parts.find(p=>p.assemblyRole==="tank-valve").price,null,"unknown LD20 price must not be borrowed");
+  assert.equal(row.hydraulicAssembly.parts.find(p=>p.assemblyRole==="tank-valve").price,1220,"approved estimate by DN20 drain/vent analogue preserves the native valve geometry");
   assert.ok(!row.hydraulicAssembly.parts.some(p=>p.assemblyRole==="tank-hose"));assert.ok(!a.components.some(c=>c.id.startsWith(`spec-${row.position}-equipment:${row.equipmentId}-`)));
   assert.deepEqual(tankJoints(a),[]);assert.deepEqual(a.lineJoints.filter(j=>j.id.startsWith("tank-joint-")).map(j=>[j.a.componentId,j.b.componentId,j.overlap]),[["collector-discharge",valve.id,10],[valve.id,tank.id,12]]);
   const collector=a.components.find(c=>c.id==="collector-discharge");close(tank.position[2]-model.portPoint(a,{componentId:collector.id,portId:"instrument-tank-0"})[2],33.5);

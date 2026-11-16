@@ -18,6 +18,8 @@ import { addPumpConnectionAssembly, selectStraightThreadedNipple } from "./line-
 import { PUMP_LINE_RULES_REVISION, selectLineInsertion as selectDischargeInsertion } from "./line-insertion";
 import { flangeStack, equipmentFlangeThickness } from "./line-joint-stack";
 import { jointFlangeThickness } from "./joint-flange-dimensions";
+import { waferFastenerLength, valveFlangeGrip } from "./wafer-fastener-length";
+import flangeHardware from "../data/flange-hardware-supplement.json";
 import type { Pump } from "./pump-catalog";
 import { DISCHARGE_INSTRUMENT_PRESSURE_REVISION, dischargeInstrumentPressure } from "./instrument-pressure";
 import { addValveLimitSwitches, VALVE_LIMIT_SWITCHES_REVISION } from "./valve-limit-switches";
@@ -43,6 +45,7 @@ export function commonDischargeHead(project: ProjectConfig): number | null {
 }
 
 export function coreBuildDischargeSpec(project: ProjectConfig, database: { items: AssemblyComponent[] }, catalog: CollectorCatalog, valves: SpecItem[] = (project.entities["station-spec"] as { items: SpecItem[] }).items, pumps?:readonly Pump[]|null, automaticInsertions=false): SpecItem[] {
+  database={...database,items:[...database.items,...flangeHardware.filter(item=>!database.items.some(existing=>existing.id===item.id))]};
   const e = project.entities, settings = e["station-settings"] as SettingsEntity, dn = e["station-dn"] as DnEntity;
   const collector = baseConfigurationIdentity((e["station-collectors"] as CollectorsEntity).discharge.configuration!);
   if (!collector || !(e["system-input"] as InputEntity).calculated) return [];
@@ -62,10 +65,10 @@ export function coreBuildDischargeSpec(project: ProjectConfig, database: { items
   };
   // Each wafer gets its OWN bolt stack. Integral flanges require two independent
   // joints and their actual flange thickness, not the wafer's face-to-face size.
-  const valveJoints = (role: string, size: number, pn: number, count: number, item: AssemblyComponent | undefined, before: number | null, after: number | null, pumpSource?: string) => {
+  const valveJoints = (role: string, size: number, pn: number, count: number, item: AssemblyComponent | undefined, before: number | null, after: number | null, pumpSource?: string, butterfly = false) => {
     const wafer = Boolean(item && /межфланц|\b017W\b/i.test(item.family));
     const flanged = Boolean(item && !wafer && /фланц/i.test(item.family));
-    gasket(`${role}-gaskets`, size, pn, 2 * count);
+    if (!butterfly) gasket(`${role}-gaskets`, size, pn, 2 * count);
     if (!wafer && !flanged) {
       for (const [key, name] of [["bolts", "Болты"], ["nuts", "Гайки"], ["washers", "Шайбы"]]) {
         add(`${role}-fasteners-${key}`, `${name} для арматуры DN${size}`, count, `PN${pn} · исполнение арматуры не подтверждено; число стыков и длину крепежа уточнить`, undefined, "компл.");
@@ -79,7 +82,10 @@ export function coreBuildDischargeSpec(project: ProjectConfig, database: { items
     const integral = equipmentFlangeThickness(item) ?? (/\b012F\b/i.test(item!.family) ? reference?.flange012FThickness ?? null : null);
     const source=`${reference?.checkValveSource??reference?.source??"Источник межфланцевого корпуса не подтверждён"}; учитываются фланцы с обеих сторон стыка.`;
     const inletSource = [source, pumpSource].filter(Boolean).join(" ");
-    if(wafer) fasteners(`${role}-fasteners`,size,pn,count,{gaskets:2,thickness,flangeThickness:flangeStack(before,after),fastener:check010?"stud":"bolt",source:inletSource});
+    if(wafer) {
+      const actual=waferFastenerLength(item,size,pn,thickness);
+      fasteners(`${role}-fasteners`,size,pn,count,{gaskets:butterfly?0:2,thickness:actual.thickness,flangeThickness:flangeStack(before,after),fastener:check010?"stud":"bolt",source:[inletSource,actual.source].filter(Boolean).join(" ")});
+    }
     else {
       fasteners(`${role}-pump-fasteners`,size,pn,count,{gaskets:1,thickness:0,flangeThickness:flangeStack(before,integral),source:inletSource});
       fasteners(`${role}-fasteners`,size,pn,count,{gaskets:1,thickness:0,flangeThickness:flangeStack(after,integral),source});
@@ -97,18 +103,18 @@ export function coreBuildDischargeSpec(project: ProjectConfig, database: { items
       continue;
     }
     const p = h.port, v = h.dn, pn = h.pn;
-    let threads = addPumpConnectionAssembly({ parts, database, catalog, collector, port: p, valveDn: v, connection: h.connection, pn, count, prefix, title, vibration: Boolean(settings.vibrationCompensators), terminal: "check" });
+    let threads = addPumpConnectionAssembly({ parts, database, catalog, collector, port: p, pumpId: input.selectedPumpId, pumpSide: "outlet", valveDn: v, connection: h.connection, pn, count, prefix, title, vibration: Boolean(settings.vibrationCompensators), terminal: "check" });
     if (h.connection === "flanged") {
       const between=insert(`${prefix}-between-valves-insertion`, v, pn, count, `${title} · обратный клапан → вставка → затвор`);
       flanges(`${prefix}-between-valves-flanges`, v, pn, 2 * count, between);
       const selected = (option: string) => database.items.find(item => item.id === valves.find(row => row.option === option)?.equipmentId);
-      const generic=jointFlangeThickness(database,collector.material,v,pn).thicknessMm;
+      const generic=valveFlangeGrip(jointFlangeThickness(database,collector.material,v,pn).thicknessMm,jointFlangeThickness(database,collector.material,v,pn,undefined,undefined,undefined,true).thicknessMm);
       const outward=rows.find(row=>row.insertionRequirement&&row.assemblyRole?.startsWith(`${prefix}-`)&&row!==between);
-      const end=(row:SpecItem|undefined,side:"from"|"to")=>row?.insertionAssembly?parts.insertionEndThickness(row,side):row&&generic!==null?generic/2:null;
+      const end=(row:SpecItem|undefined,side:"from"|"to")=>row?.insertionAssembly?valveFlangeGrip(parts.insertionEndThickness(row,side),parts.insertionEndThickness(row,side,true)):row&&generic!==null?generic/2:null;
       const pump = !settings.vibrationCompensators && p.connection === "flanged" && p.dn === v
         ? parts.pumpFlangeReference(v, pn) : undefined;
       valveJoints(`${prefix}-check`, v, pn, count, selected(`${prefix}CheckValve`),pump ? pump.thickness : end(outward,"to"),end(between,"from"),pump?.source);
-      valveJoints(`${prefix}-valve`, v, pn, count, selected(`${prefix}DischargeValve`),end(between,"to"),generic===null?null:generic/2);
+      valveJoints(`${prefix}-valve`, v, pn, count, selected(`${prefix}DischargeValve`),end(between,"to"),generic===null?null:generic/2,undefined,h.valveType==="butterfly");
       if (!secondary && (settings.stationType === "fire" || settings.stationType === "combined") && h.valveType === "butterfly") addValveLimitSwitches(parts, database.items, prefix, count, v, selected(`${prefix}DischargeValve`));
     } else {
       const nipple = selectStraightThreadedNipple(database.items, v, pn);

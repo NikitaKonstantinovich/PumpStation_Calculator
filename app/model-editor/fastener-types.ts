@@ -1,6 +1,6 @@
 import type { Vec3 } from "./model";
 
-export const FASTENER_REVISION = "flange-fasteners-v2-kms";
+export const FASTENER_REVISION = "flange-fasteners-v6-insertion-four-of-eight";
 export type HardwareItem = { id: string; name: string; kind: "bolt" | "stud" | "nut" | "washer"; diameter: number; length: number; source: string };
 export type FastenerCatalog = { version: 1; items: HardwareItem[] };
 /** CAD mounting metadata is keyed by source hash. Points are in native model mm. */

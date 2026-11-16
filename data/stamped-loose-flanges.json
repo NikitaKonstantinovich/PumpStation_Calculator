@@ -4,10 +4,10 @@
    "source": "Equipment/Piping/3D/Элементы трубопроводов/Фланцы/Штампованные/Фланец_1_040х16_AISI_штампованный.SLDPRT",
    "sourceHash": "3767d9ce17cdc9e98279c7206fed4b57c371634a6dc56a5cc98f5f80e330aafb",
    "dimensions": {
-    "lengthMm": 15.0,
-    "outerMm": 150.0,
-    "innerMm": 51.0,
-    "boltCircleMm": 110.0,
+    "lengthMm": 15,
+    "outerMm": 150,
+    "innerMm": 51,
+    "boltCircleMm": 110,
     "boltHoles": 4,
     "boltHoleMm": 17.5
    },
@@ -31,14 +31,76 @@
    ],
    "name": "Фланец свободный штампованный DN40 AISI (библиотека)"
   },
+  "50": {
+   "source": "Equipment/Piping/3D/HECO/Pressed/heco_LF-060-GPR-1.step",
+   "sourceHash": "90452ede2043bd795a18de6fa80fd59f7151b912ccf364ccb8e72b6b9d6e6067",
+   "dimensions": {
+    "lengthMm": 19.5,
+    "outerMm": 165,
+    "innerMm": 65,
+    "boltCircleMm": 125,
+    "boltHoles": 4,
+    "boltHoleMm": 17.5
+   },
+   "placement": [
+    1,
+    0,
+    0,
+    0,
+    1,
+    0,
+    0,
+    0,
+    1,
+    0,
+    0,
+    0,
+    1,
+    0,
+    0,
+    0
+   ],
+   "name": "Фланец свободный штампованный DN50 HECO LF-060-GPR-1"
+  },
+  "65": {
+   "source": "Equipment/Piping/3D/HECO/Pressed/heco_LF-076-GPR-1.step",
+   "sourceHash": "d6a22eea5f299ee52420d1b663d39376fe88551428fa2257ae029dcfdd4cc90c",
+   "dimensions": {
+    "lengthMm": 21,
+    "outerMm": 185,
+    "innerMm": 81,
+    "boltCircleMm": 145,
+    "boltHoles": 4,
+    "boltHoleMm": 17.5
+   },
+   "placement": [
+    1,
+    0,
+    0,
+    0,
+    1,
+    0,
+    0,
+    0,
+    1,
+    0,
+    0,
+    0,
+    1,
+    0,
+    0,
+    0
+   ],
+   "name": "Фланец свободный штампованный DN65 HECO LF-076-GPR-1"
+  },
   "80": {
    "source": "Equipment/Piping/3D/Элементы трубопроводов/Фланцы/Штампованные/Фланец_1_080х16_AISI_штампованный.SLDPRT",
    "sourceHash": "3c950ca44528e0b9d03473ff477c833fc25266e78c9c54fc8976e74171c2fcd4",
    "dimensions": {
-    "lengthMm": 16.0,
-    "outerMm": 200.0,
-    "innerMm": 94.0,
-    "boltCircleMm": 160.0,
+    "lengthMm": 16,
+    "outerMm": 200,
+    "innerMm": 94,
+    "boltCircleMm": 160,
     "boltHoles": 8,
     "boltHoleMm": 17.5
    },
@@ -62,76 +124,14 @@
    ],
    "name": "Фланец свободный штампованный DN80 AISI (библиотека)"
   },
-  "50": {
-   "source": "Equipment/Piping/3D/HECO/Pressed/heco_LF-060-GPR-1.step",
-   "sourceHash": "90452ede2043bd795a18de6fa80fd59f7151b912ccf364ccb8e72b6b9d6e6067",
-   "dimensions": {
-    "lengthMm": 19.5,
-    "outerMm": 165.0,
-    "innerMm": 65.0,
-    "boltCircleMm": 125.0,
-    "boltHoles": 4,
-    "boltHoleMm": 17.5
-   },
-   "placement": [
-    1,
-    0,
-    0,
-    0,
-    1.0,
-    0.0,
-    0,
-    -0.0,
-    1.0,
-    0,
-    0,
-    0,
-    1,
-    0,
-    0,
-    0
-   ],
-   "name": "Фланец свободный штампованный DN50 HECO LF-060-GPR-1"
-  },
-  "65": {
-   "source": "Equipment/Piping/3D/HECO/Pressed/heco_LF-076-GPR-1.step",
-   "sourceHash": "d6a22eea5f299ee52420d1b663d39376fe88551428fa2257ae029dcfdd4cc90c",
-   "dimensions": {
-    "lengthMm": 21.0,
-    "outerMm": 185.0,
-    "innerMm": 81.0,
-    "boltCircleMm": 145.0,
-    "boltHoles": 4,
-    "boltHoleMm": 17.5
-   },
-   "placement": [
-    1,
-    0,
-    0,
-    0,
-    1.0,
-    0.0,
-    0,
-    -0.0,
-    1.0,
-    0,
-    0,
-    0,
-    1,
-    0,
-    0,
-    0
-   ],
-   "name": "Фланец свободный штампованный DN65 HECO LF-076-GPR-1"
-  },
   "100": {
    "source": "Equipment/Piping/3D/HECO/Pressed/heco_LF-114-GPR-1.step",
    "sourceHash": "ede619288cf4544a029daf1b92618274aca79901808aa27ee1f95ae93123ee22",
    "dimensions": {
-    "lengthMm": 23.0,
-    "outerMm": 220.0,
-    "innerMm": 119.0,
-    "boltCircleMm": 180.0,
+    "lengthMm": 23,
+    "outerMm": 220,
+    "innerMm": 119,
+    "boltCircleMm": 180,
     "boltHoles": 8,
     "boltHoleMm": 17.5
    },
@@ -141,9 +141,9 @@
     0,
     0,
     0.9999999999999635,
-    -2.70393491597073e-07,
+    -2.70393491597073e-7,
     0,
-    2.70393491597073e-07,
+    2.70393491597073e-7,
     0.9999999999999635,
     0,
     0,
@@ -159,10 +159,10 @@
    "source": "Equipment/Piping/3D/HECO/Pressed/heco_LF-139-GPR-1.step",
    "sourceHash": "cccaf350e46259d2c2227e7ad7e29442ea632425067dd0f012ab0c728ec7ca7a",
    "dimensions": {
-    "lengthMm": 25.0,
-    "outerMm": 250.0,
-    "innerMm": 145.0,
-    "boltCircleMm": 210.0,
+    "lengthMm": 25,
+    "outerMm": 250,
+    "innerMm": 145,
+    "boltCircleMm": 210,
     "boltHoles": 8,
     "boltHoleMm": 17.5
    },
@@ -172,9 +172,9 @@
     0,
     0,
     0.9999999999999857,
-    1.6954893844456283e-07,
+    1.6954893844456283e-7,
     0,
-    -1.6954893844456283e-07,
+    -1.6954893844456283e-7,
     0.9999999999999857,
     0,
     0,
@@ -191,9 +191,9 @@
    "sourceHash": "ebb55515c06c7d1247245950f88db965302e2c65dd5ba9be3eb755808d87452f",
    "dimensions": {
     "lengthMm": 27.5,
-    "outerMm": 285.0,
-    "innerMm": 173.0,
-    "boltCircleMm": 240.0,
+    "outerMm": 285,
+    "innerMm": 173,
+    "boltCircleMm": 240,
     "boltHoles": 8,
     "boltHoleMm": 21.5
    },
@@ -222,9 +222,9 @@
    "sourceHash": "f0b770cf1cba6710e8368c458cac09cdb389314a09fdcdb7f46064b3ac281d26",
    "dimensions": {
     "lengthMm": 31.5,
-    "outerMm": 340.0,
-    "innerMm": 225.0,
-    "boltCircleMm": 295.0,
+    "outerMm": 340,
+    "innerMm": 225,
+    "boltCircleMm": 295,
     "boltHoles": 12,
     "boltHoleMm": 21.5
    },
@@ -664,6 +664,17 @@
   "фланцы-006-r0129": {
    "previous": {},
    "model": null
+  },
+  "фланцы-006-r0116:4-hole": {
+   "previous": {
+    "lengthMm": 21,
+    "outerMm": 185,
+    "innerMm": 81,
+    "boltCircleMm": 145,
+    "boltHoles": 4,
+    "boltHoleMm": 17.5
+   },
+   "model": "65"
   }
  }
 }

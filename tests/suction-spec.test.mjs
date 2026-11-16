@@ -13,12 +13,12 @@ const { normalizeSpecificationItems }=await loadTs(new URL("../app/specification
 const binding=JSON.parse(await readFile(new URL("../public/binding-components.json",import.meta.url),"utf8"));
 const catalog=makeCollectorCatalog(binding);
 const instrumentValveData=JSON.parse(await readFile(new URL("../data/instrument-valve.json",import.meta.url),"utf8"));
-function fixture({pumpDn=40,pumpConnection="threaded",valveDn=40,valveConnection="threaded",type="utility",pn=16,count=3,material="st20",network="flanged"}={}){
+function fixture({pumpDn=40,pumpConnection="threaded",valveDn=40,valveConnection="threaded",type="utility",pn=16,count=3,material="st20",network="flanged",networkDn}={}){
   const p=createProject();
   Object.assign(p.entities["system-input"],{selectedPumpId:"manual-test",flowRate:6,head:30,staticHead:0,workingPumpCount:count-1,reservePumpCount:1,calculated:true});
   Object.assign(p.entities["station-settings"],{stationType:type});
   Object.assign(p.entities["station-dn"],{collectorMaterial:material,suctionValveDn:valveDn,dischargeValveDn:valveDn,connectionType:valveConnection,suctionValveType:valveConnection==="threaded"?"ball":"butterfly",pn,pumpSuctionPort:{pumpId:"manual-test",dn:pumpDn,connection:pumpConnection,source:"test"}});
-  p.entities["station-collectors"].suction.overrides={connection:network,dn:network==="flanged"?100:50};
+  p.entities["station-collectors"].suction.overrides={connection:network,dn:networkDn??(network==="flanged"?100:50)};
   return synchronizeCollectors(p);
 }
 const build=p=>buildSuctionSpec(p,binding,catalog);
@@ -63,11 +63,11 @@ test("flanged pump and ball valve use RF plus one gasket and two threaded joints
   assert.equal(byRole(rows,"primary-pump-fasteners-bolts").quantity,12);
   assert.equal(byRole(rows,"primary-pump-fasteners-nuts").quantity,12);
 });
-test("threaded pump and fire butterfly reverse RF and include valve gaskets, bracket and two switches",()=>{
+test("threaded pump and fire butterfly reverse RF without valve gaskets, with bracket and two switches",()=>{
   const rows=build(fixture({valveConnection:"flanged",type:"fire"}));
   assert.match(byRole(rows,"primary-adapter").details,/развёрнута/);
   assert.equal(byRole(rows,"primary-flax").quantity,.3);
-  assert.equal(byRole(rows,"primary-valve-gaskets").quantity,6);
+  assert.equal(byRole(rows,"primary-valve-gaskets"),undefined);
   assert.equal(byRole(rows,"primary-valve-fasteners-bolts").quantity,12);
   assert.equal(byRole(rows,"primary-limit-switches-bracket").quantity,3);
   assert.equal(byRole(rows,"primary-limit-switches-bracket").price,null,"DN40 has no confirmed bracket price");
@@ -76,10 +76,10 @@ test("threaded pump and fire butterfly reverse RF and include valve gaskets, bra
   assert.equal(byRole(rows,"primary-limit-switches"),undefined);
   assert.equal(byRole(rows,"gauge").quantity,2);assert.equal(byRole(rows,"pressure-switch").quantity,2);assert.equal(byRole(rows,"instrument-valve").quantity,2);
 });
-test("equal flanged diameters join the pump directly with one wafer gasket pair and no extra flanges",()=>{
+test("equal flanged diameters join the butterfly directly without gaskets or extra flanges",()=>{
   const rows=build(fixture({pumpDn:80,valveDn:80,pumpConnection:"flanged",valveConnection:"flanged"}));
   for (const role of ["primary-insertion","primary-pump-flange-weldFlange","primary-valve-flange-weldFlange","primary-pump-gasket"]) assert.equal(byRole(rows,role),undefined);
-  assert.equal(byRole(rows,"primary-valve-gaskets").quantity,6);
+  assert.equal(byRole(rows,"primary-valve-gaskets"),undefined);
   assert.equal(byRole(rows,"primary-valve-fasteners-bolts").quantity,24);
   assert.equal(byRole(rows,"primary-valve-fasteners-bolts").price,null,"no valve model selected");
   assert.match(byRole(rows,"primary-valve-fasteners-bolts").description,/фланца насоса принята равной/);
@@ -145,16 +145,7 @@ test("secondary branches scale independently while common instruments do not dou
   assert.ok(!byRole(rows,"secondary-limit-switches"));
 });
 
-const pageUrl=new URL("../app/full-workspace.tsx",import.meta.url),page=await readFile(pageUrl,"utf8");
-const actualSelection=[
-  'import {refreshSuctionSpecification} from "./station-hydraulic-calculation"; export {refreshSuctionSpecification};',
-  'import {synchronizeCollectors} from "./collector-project";',
-  'import { canEditSetting } from "./project-access";',
-  'export function changeCollectorMode(project, simultaneous, database) { const role="pro"; let updated=project;  const updateEngineering=change=>{updated=refreshSuctionSpecification(synchronizeCollectors(change(updated)),database);};',
-  page.slice(page.indexOf("  const updateSettings ="),page.indexOf("  const addSelectedPumpToSpec =")),
-  'updateSettings({combinedCircuitsSimultaneous:simultaneous}); return updated; }',
-].join("\n");
-const {refreshSuctionSpecification:refresh,changeCollectorMode}=await loadTs(pageUrl,{[pageUrl.href]:actualSelection});
+const {refreshSuctionSpecification:refresh}=await loadTs(new URL("../app/station-hydraulic-calculation.ts",import.meta.url));
 test("inlet pressure refreshes collector and each selected part through head/PN changes and save/load",()=>{
   const db={items:binding.items,collectorCatalog:catalog};
   let p=fixture({pumpDn:65,valveDn:80,pumpConnection:"flanged",valveConnection:"flanged"});
@@ -186,7 +177,7 @@ test("inlet pressure refreshes collector and each selected part through head/PN 
 });
 
 test("fallback gasket warning and price survive pressure warning removal; changed catalogue rating is rechecked",()=>{
-  let p=fixture({pumpDn:150,valveDn:150,pumpConnection:"flanged",valveConnection:"flanged",pn:25});
+  let p=fixture({networkDn:150,pumpDn:150,valveDn:150,pumpConnection:"flanged",valveConnection:"flanged",pn:25});
   const items=structuredClone(binding.items);
   // Only a lower PN16 gasket remains for this DN; selection still uses the existing fallback rule.
   const candidates=items.filter(i=>i.catalogId==="прокладки"&&i.fields.some(f=>f.headerPath.at(-1)==="DN"&&Number(f.value)===150));
@@ -198,20 +189,20 @@ test("fallback gasket warning and price survive pressure warning removal; change
   const db={items,collectorCatalog:catalog};
   p.entities["station-settings"].inletHead=200;
   p=refresh(synchronizeCollectors(p),db,true);
-  const high=byRole(p.entities["station-spec"].items,"primary-valve-gaskets");
+  const high=byRole(p.entities["station-spec"].items,"network-gaskets");
   assert.equal(high.inletPressureCheck.checks[0].status,"exceeded");
   assert.match(high.description,/PN прокладки ниже требуемого/);
   assert.ok(high.price>0);
   p.entities["station-settings"].inletHead=30;
   p=refresh(p,db);
-  const low=byRole(p.entities["station-spec"].items,"primary-valve-gaskets");
+  const low=byRole(p.entities["station-spec"].items,"network-gaskets");
   assert.equal(low.inletPressureCheck.checks[0].status,"within-limit");
   assert.equal(low.description,high.description);
   assert.equal(low.status,"confirmation");assert.equal(low.price,high.price);
   const item=items.find(i=>i.id===low.equipmentId);
   item.fields.find(f=>f.headerPath.at(-1)==="PN").value=1;
   p=refresh(p,db);
-  assert.equal(byRole(p.entities["station-spec"].items,"primary-valve-gaskets").inletPressureCheck.checks[0].status,"exceeded");
+  assert.equal(byRole(p.entities["station-spec"].items,"network-gaskets").inletPressureCheck.checks[0].status,"exceeded");
 });
 
 test("PN25 common collector retains a warning on actual PN16 equipment in its first circuit",()=>{
@@ -251,7 +242,8 @@ test("common suction mode refreshes network parts and survives project reload wi
   p.entities["station-spec"].items.push(custom,customCabinet);
   p=refresh(synchronizeCollectors(p),db,true);
   for(const simultaneous of [false,true,false,true]) {
-    p=changeCollectorMode(p,simultaneous,db);
+    p.entities["station-settings"].combinedCircuitsSimultaneous=simultaneous;
+    p=refresh(synchronizeCollectors(p),db);
     const expected=simultaneous?150:100;
     for(let reload=0;reload<2;reload++) {
       const rows=p.entities["station-spec"].items;
@@ -268,7 +260,7 @@ test("common suction mode refreshes network parts and survives project reload wi
     assert.deepEqual(refresh(p,db),p);
   }
 });
-test("actual page fill uses corrected DN, auto-refreshes changed counts and is idempotent",()=>{
+test("station refresh uses corrected DN, auto-refreshes changed counts and is idempotent",()=>{
   const db={items:binding.items,collectorCatalog:catalog};
   const once=refresh(fixture({pumpDn:25,valveDn:50}),db,true);
   const rows=once.entities["station-spec"].items;
@@ -353,21 +345,20 @@ test("old and invalid saved inlet heads remain unspecified; negative heads survi
   assert.equal(parseProjectConfig(p).entities["station-settings"].inletHead,-3);
 });
 
-test("gaskets fill every existing flange role with compatible execution, quantities and max prices",()=>{
-  const rows=build(fixture({pumpDn:80,valveDn:80,pumpConnection:"flanged",valveConnection:"flanged"}));
-  for(const role of ["primary-valve-gaskets"]) {
+test("network flange gaskets retain compatible execution, quantities and max prices",()=>{
+  const rows=build(fixture({networkDn:80,pumpDn:80,valveDn:80,pumpConnection:"flanged",valveConnection:"flanged"}));
+  for(const role of ["network-gaskets"]) {
     assert.equal(byRole(rows,role).price,32.94);assert.equal(byRole(rows,role).status,"selected");
     assert.match(byRole(rows,role).details,/PN прокладки 10\/16\/25\/40/);
   }
-  assert.equal(byRole(rows,"primary-valve-gaskets").quantity,6);
   assert.equal(byRole(rows,"network-gaskets").quantity,2);
-  assert.equal(byRole(rows,"network-gaskets").price,47.58);
-  const pn25=build(fixture({pumpDn:100,valveDn:100,pumpConnection:"flanged",valveConnection:"flanged",pn:25}));
-  assert.equal(byRole(pn25,"primary-valve-gaskets").price,100);
-  const missing=build(fixture({pumpDn:200,valveDn:200,pumpConnection:"flanged",valveConnection:"flanged",pn:25}));
-  assert.equal(byRole(missing,"primary-valve-gaskets").price,800);
-  assert.equal(byRole(missing,"primary-valve-gaskets").status,"confirmation");
-  assert.match(byRole(missing,"primary-valve-gaskets").details,/⚠ Предупреждение:.*требуется PN25.*PN40/);
+  assert.equal(byRole(rows,"network-gaskets").quantity,2);
+  const pn25=build(fixture({networkDn:100,pumpDn:100,valveDn:100,pumpConnection:"flanged",valveConnection:"flanged",pn:25}));
+  assert.equal(byRole(pn25,"network-gaskets").price,100);
+  const missing=build(fixture({networkDn:200,pumpDn:200,valveDn:200,pumpConnection:"flanged",valveConnection:"flanged",pn:25}));
+  assert.equal(byRole(missing,"network-gaskets").price,800);
+  assert.equal(byRole(missing,"network-gaskets").status,"confirmation");
+  assert.match(byRole(missing,"network-gaskets").details,/⚠ Предупреждение:.*требуется PN25.*PN40/);
 });
 
 test("flax is priced in metres for pump branches and common threaded network connections",()=>{
@@ -391,14 +382,14 @@ test("flax is priced in metres for pump branches and common threaded network con
 });
 
 test("nearest lower PN gasket remains priced with a persisted warning; exact matches stay green",()=>{
-  const p=fixture({pumpDn:300,valveDn:300,pumpConnection:"flanged",valveConnection:"flanged",pn:16});
-  const rows=build(p),gasket=byRole(rows,"primary-valve-gaskets");
+  const p=fixture({networkDn:300,pumpDn:300,valveDn:300,pumpConnection:"flanged",valveConnection:"flanged",pn:16});
+  const rows=build(p),gasket=byRole(rows,"network-gaskets");
   assert.equal(gasket.price,350);assert.equal(gasket.status,"confirmation");
   assert.match(gasket.description,/PN прокладки ниже требуемого/);
   p.entities["station-spec"].items=replaceSuctionSpec(p.entities["station-spec"].items,rows);
   const loaded=parseProjectConfig(JSON.parse(JSON.stringify(p))).entities["station-spec"].items;
-  assert.equal(byRole(loaded,"primary-valve-gaskets").status,"confirmation");
-  const exact=byRole(build(fixture({pumpDn:80,valveDn:80,pumpConnection:"flanged",valveConnection:"flanged"})),"primary-valve-gaskets");
+  assert.equal(byRole(loaded,"network-gaskets").status,"confirmation");
+  const exact=byRole(build(fixture({networkDn:80,pumpDn:80,valveDn:80,pumpConnection:"flanged",valveConnection:"flanged"})),"network-gaskets");
   assert.equal(exact.status,"selected");assert.ok(!exact.description.includes("Предупреждение:"));
 });
 

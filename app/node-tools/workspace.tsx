@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useRef, useState, useMemo } from "react";
+import { useEffect, useRef, useState, useMemo, type RefObject } from "react";
 import { DEFAULT_ALGORITHM } from "./algorithm-schema";
 import { useAppNavigationGuard } from "../app-navigation";
 import { sameJson } from "../project-merge";
@@ -20,6 +20,10 @@ import { CalculationToggle } from "../pressure-check-toggle";
 import { controlInfo, productEvaluator, toolAvailable, workspaceControls, writeControl } from "./workspace-controls";
 import { toolSourceDependencies } from "./workspace-sources";
 import { useWorkspaceCatalogs, WorkspaceCatalogGate } from "./workspace-catalogs";
+import { nodeAssistantProject, type NodeAssistantReader } from "./assistant-project";
+import { loadCatalog } from "./catalog-client";
+import { loadStationCatalog } from "./station-catalog";
+import type { CatalogSource } from "./workspace-sources";
 import type { Evaluation, View } from "./schema";
 import "./tools.css";
 import "./product-workspace.css";
@@ -261,6 +265,7 @@ function NodeWorkspaceContent({
   projectError,
   detach,
   initialRuntime,
+  assistantContextRef,
   pendingSave = false
 }: {
   project: ProjectConfig;
@@ -276,6 +281,7 @@ function NodeWorkspaceContent({
   projectError?: string;
   detach: (panelId:string)=>void;
   initialRuntime?: Loaded;
+  assistantContextRef?: RefObject<NodeAssistantReader | null>;
 }) {
   const [working, setWorking] = useState<WorkspaceData>(() => project.workspace2 ?? {
       schema: 1,
@@ -369,7 +375,34 @@ function NodeWorkspaceContent({
     void check();const timer=window.setInterval(()=>void check(),10000);window.addEventListener("algorithms-changed",check);window.addEventListener("focus",check);
     return()=>{live=false;window.clearInterval(timer);window.removeEventListener("algorithms-changed",check);window.removeEventListener("focus",check);};
   },[algorithmId]);
-  if(disabled)return <main className="nt-workspace"><h1>{loaded?.algorithm.name ?? name}</h1><p>Продукт отключён администратором. Введённые данные остаются в этой вкладке.</p><button onClick={()=>update(working)}>Сохранить введённые данные</button><button onClick={()=>{const blob=new Blob([JSON.stringify({...project,workspace2:working},null,2)],{type:"application/json"});const url=URL.createObjectURL(blob);const link=document.createElement("a");link.href=url;link.download="project.json";link.click();URL.revokeObjectURL(url);}}>Скачать проект</button><button onClick={back}>В рабочее пространство</button><p>{status}</p></main>;
+  useEffect(() => {
+    if (!assistantContextRef || !remote || !working.product || disabled) return;
+    const read: NodeAssistantReader = async signal => {
+      const available = new Set<CatalogSource>(catalogs.available);
+      const resources = { ...catalogs.resources };
+      const required = new Set(remote.program.tools.filter(t => t.enabled !== false && t.workspaceVisible !== false)
+        .flatMap(t => toolSourceDependencies(remote.program, t.id)));
+      const pump = working.product?.sourceVersions?.pump_catalog_v2, station = working.product?.sourceVersions?.station_catalog;
+      await Promise.allSettled([
+        required.has("pump_catalog_v2") && !available.has("pump_catalog_v2") && pump && loadCatalog(pump, signal).then(snapshot => {
+          resources.pump_catalog_v2 = snapshot;
+          available.add("pump_catalog_v2");
+        }),
+        required.has("station_catalog") && !available.has("station_catalog") && station && loadStationCatalog(station, remote.baseVersions, signal).then(snapshot => {
+          resources.station_catalog = snapshot;
+          available.add("station_catalog");
+        }),
+      ]);
+      signal.throwIfAborted();
+      const activeContexts = available.size === catalogs.available.size ? contexts : productContexts(remote.program, working, remote.defaults, remote.role, resources);
+      return nodeAssistantProject({ program: remote.program, name: remote.algorithm.name, data: working, available, pendingInput,
+        evaluate: activeContexts === contexts ? evaluate : productEvaluator(remote.program, activeContexts),
+        isAvailable: id => toolAvailable(remote.program, id, activeContexts, available) });
+    };
+    assistantContextRef.current = read;
+    return () => { if (assistantContextRef.current === read) assistantContextRef.current = null; };
+  }, [assistantContextRef, remote, working, disabled, catalogs.available, catalogs.resources, contexts, evaluate, pendingInput]);
+  if(disabled)return <main className="nt-workspace"><h1>{loaded?.algorithm.name ?? name}</h1><p>Продукт отключён администратором. Введённые данные остаются в этой вкладке.</p><button onClick={()=>update(working)}>Сохранить введённые данные</button><button onClick={()=>{const blob=new Blob([JSON.stringify({...project,workspace2:working},null,2)],{type:"application/json"});const url=URL.createObjectURL(blob);const link=document.createElement("a");link.href=url;link.download="project.json";link.click();URL.revokeObjectURL(url);}}>Скачать проект</button><button onClick={back}>Мои проекты</button><p>{status}</p></main>;
   const archived = Object.keys(working.tools).filter(id => !tools.some(t => t.id === id));
   const ribbon=(windows?:WindowRibbonActions)=><ProductRibbon storageKey={"product-ribbon/1/"+[userId,algorithmId].map(encodeURIComponent).join("/")} name={loaded?.algorithm.name??name} windows={windows}
     project={<>
@@ -384,7 +417,7 @@ function NodeWorkspaceContent({
     <details className="nt-workspace-menu"><summary>Действия продукта</summary><div><button onClick={async () => {
         try { apply(await loadTools(undefined,base ? JSON.parse(base) : undefined,sources ? JSON.parse(sources) : undefined,algorithmId)); }
         catch (e) { setError((e as Error).message); }
-      }} disabled={updatingCatalog}>Применить актуальную версию продукта</button>{remote?.sourceVersions.pump_catalog_v2 && <button disabled={updatingCatalog} onClick={()=>setCatalogUpdatePrompt("pumps")}>Обновить каталог насосов</button>}{remote?.sourceVersions.station_catalog && <button disabled={updatingCatalog} onClick={()=>setCatalogUpdatePrompt("station")}>Обновить справочники комплектации</button>}{working.product && <small>Закреплена версия · {working.product.version}</small>}<button onClick={()=>{if(pendingInput){setError("Завершите ввод в поле перед выходом из продукта.");return;}back();}}>Первое рабочее пространство</button>
+      }} disabled={updatingCatalog}>Применить актуальную версию продукта</button>{remote?.sourceVersions.pump_catalog_v2 && <button disabled={updatingCatalog} onClick={()=>setCatalogUpdatePrompt("pumps")}>Обновить каталог насосов</button>}{remote?.sourceVersions.station_catalog && <button disabled={updatingCatalog} onClick={()=>setCatalogUpdatePrompt("station")}>Обновить справочники комплектации</button>}{working.product && <small>Закреплена версия · {working.product.version}</small>}<button onClick={()=>{if(pendingInput){setError("Завершите ввод в поле перед выходом из продукта.");return;}back();}}>Мои проекты</button>
       {!!archived.length && <details><summary>Архив инструментов · {archived.length}</summary>{archived.map(id=><p key={id}>{id} · данные сохранены</p>)}</details>}
     </div></details>
     {controls.items.filter(c=>c.binding.value!==true).map(c=><small role="status" key={c.kind}>{c.kind==="geometry"?"Расчёт геометрии отключён":"Проверки давления отключены"}</small>)}

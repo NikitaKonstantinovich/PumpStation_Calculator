@@ -40,8 +40,22 @@ def inspect(task):
         return pump_id, None, 'STEP read failed'
     reader.SetSystemLengthUnit(1.0)
     reader.TransferRoots()
+    shape = reader.OneShape()
+    # Inspect another principal axis in an orthonormal temporary frame; output
+    # remains in the original CAD coordinates. No STEP or mesh is rewritten.
+    order = profile.get('inspectionCoordinateOrder', [0, 1, 2])
+    if order not in ([0, 1, 2], [1, 2, 0], [2, 0, 1]):
+        raise ValueError('Expected a right-handed cyclic coordinate permutation')
+    if order != [0, 1, 2]:
+        from OCP.gp import gp_Trsf
+        from OCP.BRepBuilderAPI import BRepBuilderAPI_Transform
+        transform = gp_Trsf()
+        transform.SetValues(*[v for axis in order for v in [*[int(i == axis) for i in range(3)], 0]])
+        shape = BRepBuilderAPI_Transform(shape, transform, True).Shape()
+    ports = [{**p, 'point': [p['point'][i] for i in order], 'axis': [p['axis'][i] for i in order]}
+             for p in profile['ports'] if p.get('axis')]
     solids=[]
-    for raw in unique_shapes(reader.OneShape(),TopAbs_SOLID):
+    for raw in unique_shapes(shape,TopAbs_SOLID):
         s=TopoDS.Solid(raw);box=Bnd_Box();BRepBndLib.Add_s(s,box,False)
         lo,hi=box.CornerMin(),box.CornerMax()
         solids.append(([lo.X(),lo.Y(),lo.Z(),hi.X(),hi.Y(),hi.Z()],s,None))
@@ -53,7 +67,7 @@ def inspect(task):
             if classifier.State() in (TopAbs_IN,TopAbs_ON): return False
         return True
     cylinders = []; planes = {}
-    for raw in unique_shapes(reader.OneShape(), TopAbs_FACE):
+    for raw in unique_shapes(shape, TopAbs_FACE):
         face = TopoDS.Face(raw)
         surface = BRepAdaptor_Surface(face)
         if surface.GetType() == GeomAbs_Plane and abs(surface.Plane().Axis().Direction().X()) > .999999:
@@ -107,7 +121,7 @@ def inspect(task):
             if found:return x
         return None
     mounts = {}
-    for port in profile['ports']:
+    for port in ports:
         if port['id'] not in ('inlet', 'outlet', 'left', 'right') or abs(port.get('axis',[0])[0]) < .9999:
             continue
         x,y,z=port['point']; sign=port['axis'][0]
@@ -137,6 +151,11 @@ def inspect(task):
         if back is None:continue
         mounts[port['id']]={'source':f"STEP {profile['source']}; SHA256 {digest}; cylindrical through walls and planar back bearing lands around every hole", 'face':[outer,y,z], 'axis':port['axis'],
                             'holes':[[outer,c['y'],c['z']] for c in candidates], 'holeDiameter':first['diameter'], 'thickness':abs(back-outer), 'holeKind':'through'}
+    for mount in mounts.values():
+        native = lambda p: [p[order.index(i)] for i in range(3)]
+        mount['face'] = native(mount['face'])
+        mount['axis'] = native(mount['axis'])
+        mount['holes'] = [native(p) for p in mount['holes']]
     return pump_id, {'hash':digest,'ports':mounts}, None
 
 def main():

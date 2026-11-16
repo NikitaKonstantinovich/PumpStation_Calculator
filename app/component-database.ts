@@ -3,6 +3,7 @@ import { suctionCatalogItems } from "./suction-catalog";
 import { pressureTransducerCatalog } from "./pressure-transducers";
 import { LEGACY_NOMENCLATURE_CATALOG_ID, LEGACY_NOMENCLATURE_LABEL, routeNomenclature } from "./component-nomenclature";
 import type { ComponentCatalog, ComponentGroupId, ComponentItem, ComponentsDatabase } from "./component-database-types";
+import { withComponentMasses } from "./component-mass-catalog";
 export type RawBindingDatabase = BindingCatalog & {
   catalogs: Array<{
     id: string;
@@ -67,7 +68,7 @@ export function assembleComponentDatabase(binding: RawBindingDatabase, control: 
       currency: item.currency
     }] : []
   }));
-  const items = pressureTransducerCatalog([...binding.items, ...suctionCatalogItems, ...savedInsertions, ...controlItems]).map(routeNomenclature);
+  const items = withComponentMasses(pressureTransducerCatalog([...binding.items, ...suctionCatalogItems, ...savedInsertions, ...controlItems]).map(routeNomenclature));
   return {
     collectorCatalog: makeCollectorCatalog(binding),
     catalogs: [...binding.catalogs.map(catalog => ({

@@ -42,6 +42,15 @@ export function pipeThreadDesignation(thread?: string): string | undefined {
   return designation && /^G(?:[1-9]\d*(?: [1-9]\d*\/[1-9]\d*)?|[1-9]\d*\/[1-9]\d*)$/.test(designation) ? designation : undefined;
 }
 
+/** Compare nominal inch sizes without inventing a thread standard for a
+ * size-only catalogue label. Axial fitting still requires the strict G parser. */
+export function pipeThreadConflict(a: string, b: string): boolean {
+  const key = (value: string) => pipeThreadDesignation(value)
+    ?? (/["″”]\s*$/.test(value) ? pipeThreadDesignation(`G${value}`) : undefined)
+    ?? value;
+  return key(a) !== key(b);
+}
+
 const obj = (v: unknown): Record<string, unknown> => v && typeof v === "object" && !Array.isArray(v) ? v as Record<string, unknown> : {};
 const text = (v: unknown, n = 1000): v is string => typeof v === "string" && v.length <= n;
 const finite = (v: unknown): v is number => typeof v === "number" && Number.isFinite(v) && Math.abs(v) < 1e7;

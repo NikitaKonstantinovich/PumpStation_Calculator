@@ -18,7 +18,7 @@ import { instrumentCount, normalizeHydraulicOptions, separationEnabled } from ".
 import fastenerReference from "./suction-fasteners.json";
 import { INSTRUMENT_CONNECTION_REVISION, addInstrumentSideConnection } from "./instrument-connection";
 import { addValveLimitSwitches } from "./valve-limit-switches";
-import { tankConnectionDn, tankValve20, TANK_VALVE_20_ID, TANK_ADAPTER_20_25_ID, TANK_LAYOUT_REVISION } from "./tank-connection";
+import { tankConnectionDn, tankValve20, TANK_VALVE_20_ID, TANK_ADAPTER_20_25_ID, TANK_LAYOUT_REVISION, TANK_PRICE_REVISION } from "./tank-connection";
 import type { Pump } from "./pump-catalog";
 import { DISCHARGE_INSTRUMENT_PRESSURE_REVISION, transducerSelectionPressure } from "./instrument-pressure";
 import { automaticTransducerId, automaticTransducerSummary, selectAutomaticTransducer, pressureTransducerCatalog, TRANSDUCER_SELECTION_REVISION } from "./pressure-transducers";
@@ -80,7 +80,7 @@ export function coreBuildHydraulicOptions(project: ProjectConfig, resources: { i
   const collectors = project.entities["station-collectors"] as CollectorsEntity;
   const rows: SpecItem[] = [];
   const instrumentPressure = transducerSelectionPressure(project,resources.pumps);
-  const fingerprint = JSON.stringify(["hydraulic-flat-lines-v1",TRANSDUCER_SELECTION_REVISION,DISCHARGE_INSTRUMENT_PRESSURE_REVISION,instrumentPressure,TANK_LAYOUT_REVISION,INSTRUMENT_CONNECTION_REVISION,"hydraulic-options-v1", baseSettingsIdentity(settings), collectors.suction.configuration&&baseConfigurationIdentity(collectors.suction.configuration), collectors.discharge.configuration&&baseConfigurationIdentity(collectors.discharge.configuration)], (_key, value) => value && typeof value === "object" && !Array.isArray(value) ? Object.fromEntries(Object.entries(value).sort(([a], [b]) => a.localeCompare(b))) : value);
+  const fingerprint = JSON.stringify(["hydraulic-flat-lines-v1",TRANSDUCER_SELECTION_REVISION,DISCHARGE_INSTRUMENT_PRESSURE_REVISION,instrumentPressure,TANK_LAYOUT_REVISION,TANK_PRICE_REVISION,INSTRUMENT_CONNECTION_REVISION,"hydraulic-options-v1", baseSettingsIdentity(settings), collectors.suction.configuration&&baseConfigurationIdentity(collectors.suction.configuration), collectors.discharge.configuration&&baseConfigurationIdentity(collectors.discharge.configuration)], (_key, value) => value && typeof value === "object" && !Array.isArray(value) ? Object.fromEntries(Object.entries(value).sort(([a], [b]) => a.localeCompare(b))) : value);
   for (const side of ["suction", "discharge"] as const) {
     const collector = collectors[side].configuration;
     if (!collector) continue;
@@ -135,10 +135,9 @@ export function coreBuildHydraulicOptions(project: ProjectConfig, resources: { i
     });
     if (separationEnabled(settings) && (collector.sectionBreaks ?? 0) > 0) build("separator", "isolatingValves", "Затвор разделительный с рукояткой", collector.sectionBreaks!, { kind: "isolating-valve", pressureBar, dn: collector.dn, pn: collector.pn, color: "red", actuator: "handle" }, Array.from({ length: collector.sectionBreaks! }, (_, i) => `${side}:between-${i + 1}-${i + 2}`), (parts, product, findings) => {
       if (!collector.dn) { parts.add("connection", "Комплект подключения затвора", 1, "DN коллектора не определён"); return; }
-      parts.gasket("separator-gaskets", collector.dn, collector.pn, 2);
       const reference = fastenerReference.find(row => row.dn === collector.dn && row.pn === collector.pn);
       const thickness = product ? number(field(product, /^(?:Строительная длина|Толщина межфланцевого элемента|L), мм$/i)) ?? (/\b017W\b/.test(product.family) ? reference?.wafer017WLength ?? null : null) : null;
-      parts.fasteners("separator-fasteners", collector.dn, collector.pn, 1, { gaskets: 2, thickness, source: reference?.source });
+      parts.fasteners("separator-fasteners", collector.dn, collector.pn, 1, { gaskets: 0, thickness, source: reference?.source });
       if (thickness === null) findings.push("Строительная длина выбранного затвора неизвестна; длину крепежа нельзя подтвердить.");
       addValveLimitSwitches(parts, database.items, "separator", 1, collector.dn, product);
       // The two welded mating ends belong to the collector BOM, not this purchased valve.
@@ -162,7 +161,14 @@ export function coreBuildHydraulicOptions(project: ProjectConfig, resources: { i
       }
       const valve = database.items.find(item => item.id === (size === 20 ? TANK_VALVE_20_ID : "шаровые-краны-001-r0195"));
       const row = parts.add("tank-valve", `Отсечной шаровой кран DN${size} ВР/ВР`, 1, `Коллектор → кран → ${volume === 8 ? "бак" : "шланг → бак"}`, valve);
-      if(size===20){row.name="Кран LD Pride DN20 PN40 с дренажем и воздухоотводчиком";row.technicalStatus="unverified";row.description="Модель подключения по изображениям пользователя; точный артикул и цена крана DN20 требуют подтверждения. Цена другого крана не подставляется.";}
+      if(size===20){
+        row.name=valve?.family??"Кран DN20 PN40 с дренажем и воздухоотводчиком";
+        row.description=String(valve&&field(valve,/^Источник цены$/i)||row.description);
+        if(valve&&field(valve,/^Подтверждение артикула$/i)==="не подтвержден"){
+          row.technicalStatus="unverified";
+          row.technicalNotes=["Точный артикул LD Pride DN20 требует подтверждения; стоимость принята ориентировочно по аналогу."];
+        }
+      }
       if (!componentPressureLimit(valve)) { row.technicalStatus = "unverified"; row.description = `Исходная книга: кран бака. Не подтверждены ${checkPressure ? "PN, " : ""}стандарт резьбы и точный артикул.`; }
       parts.flax("tank-thread-seals", volume===8?.2:.3, volume===8?"Сгон → кран → бак: два резьбовых стыка × 0,1 м.":"Сгон → переход DN20/DN25 → кран → шланг: три резьбовых стыка × 0,1 м; накидная гайка у бака уплотняется прокладкой.");
       if (volume !== 8) {

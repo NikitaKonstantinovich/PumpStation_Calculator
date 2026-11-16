@@ -60,6 +60,7 @@ export type InsertEngineering = {
   boltReferences: InsertBoltReference[];
   collarSelections?: InsertCollarSelection[];
   collarAssembly?: InsertCollarAssembly;
+  weldOuterDiameterTolerance?: { exclusiveLimitMm: number; source: string };
   flangeAssembly?: { faceOffsetMm: number; clearanceFactor: number; fastenerModels: string[]; source: string };
   /** Legacy input retained for compatibility; pump reducers never use this rule. */
   reducerExtension?: { side: "left"; weldFactor: number; weldGapMm: number; source: string; wallMismatchAllowance?: InsertWallMismatchAllowance };
@@ -74,7 +75,7 @@ export type InsertStandardBolt = { id: string; diameterMm: number; lengthMm: num
 export type InsertCatalog = { weldRates?: {aisi304:number;st20:number}; version: string; parts: InsertPart[]; nominalDns: number[]; materials: InsertMaterial[]; engineering: InsertEngineering; issues: string[]; sensorPlugs?: InsertSensorPlug[]; standardBolts?: InsertStandardBolt[]; valveReferences?: InsertValveReference[]; paintingRates?: InsertPaintingRate[]; flangeBoringRates?: FlangeBoringRate[] };
 export type InsertBomItem = { role: string; componentId: string | null; kind: InsertPartKind | "plug" | "welding" | "painting" | "machining"; name: string; quantity: number | null; unit: "м" | "шт."; unitPrice: number | null; cost: number | null; source: string | null };
 export type InsertDimension = { name: string; value: number | null; unit: "мм" | "бар" | "°C"; source: string | null };
-export type InsertWeld = { role: string; name: string; count: number; factor: number | null; diameterMm: number | null; lengthMm: number | null; cost: number | null; source: string };
+export type InsertWeld = { role: string; name: string; count: number; factor: number | null; diameterMm: number | null; lengthMm: number | null; cost: number | null; source: string; acceptedDiameterDifferenceMm?: number };
 export type InsertConfiguration = {
   version: 1; dnLarge: number; dnSmall: number | null; pn: number | null; material: InsertMaterial; geometry: InsertGeometry;
   base: string; left: { connection: InsertConnection; part: string | null; looseFlange: string | null };
@@ -266,11 +267,12 @@ function calculateVariant(base: InsertPart, left: End, right: End, input: Insert
   };
   const rate = (catalog.weldRates ?? WELD_RATES)[material];
   if (!positive(rate)) warnings.push(`Нет тарифа сварки для ${insertMaterialLabel(material)}`);
-  const weld = (role: string, name: string, factor: number | null, diameterMm: number | null, source: string) => {
+  const weld = (role: string, name: string, factor: number | null, diameterMm: number | null, source: string, acceptedDiameterDifferenceMm?: number) => {
     if (!positive(diameterMm)) warnings.push(`Нет наружного диаметра для сварки: ${name}`);
     if (!positive(factor)) warnings.push(`Не подтверждена схема сварки: ${name}`);
     const lengthMm = positive(diameterMm) && positive(factor) ? factor * Math.PI * diameterMm : null;
-    welds.push({ role, name, count: 1, factor, diameterMm, lengthMm, cost: lengthMm !== null && positive(rate) ? lengthMm / 1000 * rate : null, source });
+    welds.push({ role, name, count: 1, factor, diameterMm, lengthMm, cost: lengthMm !== null && positive(rate) ? lengthMm / 1000 * rate : null, source,
+      ...(acceptedDiameterDifferenceMm === undefined ? {} : { acceptedDiameterDifferenceMm }) });
   };
   const pair = engineering.connectionPairs?.find(pair => pair.left === left.connection && pair.right === right.connection && hasSource(pair.source));
   if (!pair) warnings.push(`Не подтверждено сочетание соединений: ${left.connection} / ${right.connection}`);
@@ -447,13 +449,31 @@ function calculateVariant(base: InsertPart, left: End, right: End, input: Insert
       // Free flanges never contribute to axial length or a second collar weld.
       if (engineering.looseFlangeInBom?.include !== false) addPart(`${role}-looseFlange`, end.looseFlange, 1);
     }
-    if (end.connection === "collar" && positive(end.part?.outerDiameter) && positive(diameter) && Math.abs(end.part.outerDiameter - diameter) > 0.01) warnings.push(`Наружный диаметр воротника ${role} не совпадает с основной деталью`);
-    if (compact && end.connection === "threaded" && (!positive(end.part?.outerDiameter) || !positive(diameter) || Math.abs(end.part.outerDiameter - diameter) > 0.01)) warnings.push(`Не согласованы наружные диаметры стыка готовых резьбовых патрубков DN${dn}`);
+    const weldedButt = end.connection === "collar" || compact && end.connection === "threaded";
+    const tolerance = engineering.weldOuterDiameterTolerance;
+    const hasTolerance = positive(tolerance?.exclusiveLimitMm) && hasSource(tolerance.source);
+    let acceptedDiameterDifferenceMm: number | undefined;
+    if (weldedButt && end.part) {
+      if (!positive(end.part.outerDiameter) || !positive(diameter)) {
+        warnings.push(`Для сварного стыка ${endLabel} конца не подтверждены оба наружных диаметра.`);
+      } else {
+        const difference = Number(Math.abs(end.part.outerDiameter - diameter).toFixed(9));
+        if (hasTolerance && difference > 0 && difference < tolerance.exclusiveLimitMm) {
+          acceptedDiameterDifferenceMm = difference;
+          addDimension(`Разница наружных диаметров сварного стыка ${endLabel} конца`, difference,
+            `${tolerance.source} Ø основы ${diameter} мм, Ø концевой детали ${end.part.outerDiameter} мм.`);
+        } else if (hasTolerance ? difference >= tolerance.exclusiveLimitMm : difference > 0.01) {
+          const endName = end.connection === "collar" ? "воротника" : "резьбового патрубка";
+          warnings.push(`Сварной стык ${endLabel} конца. Наружный диаметр основы ${diameter} мм, наружный диаметр ${endName} ${end.part.outerDiameter} мм. Разница ${difference} мм${hasTolerance ? ` должна быть меньше ${tolerance.exclusiveLimitMm} мм` : " требует согласования"}.`);
+        }
+      }
+    }
     if (compact && end.connection === "threaded" && (!positive(end.part?.wallThickness) || !hasSource(end.part?.dimensionSources.wallThickness) || end.part.wallThickness !== thickness)) warnings.push(`Не согласованы стенки стыка готовых резьбовых патрубков DN${dn}`);
     if (compact && end.connection === "flanged" && positive(baseLengthMm) && axialSize !== null && addition !== null && axialSize - addition >= baseLengthMm) warnings.push(`Фланец перекрывает всю длину резьбового патрубка DN${dn}; компактная сборка невозможна`);
     const factor = end.connection === "threaded" ? rule?.weldFactor ?? null : end.connection === "collar" && collarAssembly ? collarAssembly.weldFactor : 2;
     const weldSource = end.connection === "threaded" ? rule?.source ?? "Нет подтверждённой схемы" : end.connection === "collar" && collarAssembly ? collarAssembly.weldSource : "collector-calculations.ts: 2πD на приварной фланец/воротник";
-    weld(`${role}-weld`, `Приварка ${role === "left" ? "левого" : "правого"} конца`, factor, diameter, weldSource);
+    weld(`${role}-weld`, `Приварка ${role === "left" ? "левого" : "правого"} конца`, factor, diameter,
+      acceptedDiameterDifferenceMm === undefined ? weldSource : `${weldSource}. ${tolerance!.source} Длина шва рассчитана по Ø основы.`, acceptedDiameterDifferenceMm);
     return addition;
   };
   const axialLeftMm = endAddition(left, dnLarge, "left", base.outerDiameter);

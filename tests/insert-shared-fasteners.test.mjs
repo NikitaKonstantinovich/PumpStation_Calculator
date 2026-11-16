@@ -33,7 +33,7 @@ test("insert and line hardware select the same valve bolt and check-valve stud f
 
 test("DN100 flange clearance uses full selected check-valve studs, 1.1 and actual pipe overlaps", () => {
   const rows = calculate().filter(row => row.geometry === "straight");
-  for (const [pn, bolt, stud, gap, pipe, total] of [[10, 125, 155, 170.5, 204.5, 214.5], [16, 130, 165, 181.5, 223.5, 233.5], [25, 140, 175, 192.5, 238.5, 248.5]]) {
+  for (const [pn, bolt, stud, gap, pipe, total] of [[10, 120, 155, 170.5, 204.5, 214.5], [16, 125, 165, 181.5, 223.5, 233.5], [25, 135, 175, 192.5, 238.5, 248.5]]) {
     const row = rows.find(row => row.pn === pn);
     assert.equal(row.complete, true, row.warnings.join("; "));
     assert.equal(row.baseLengthMm, pipe);
@@ -55,12 +55,12 @@ test("large nuts and washers are not zeroed and an absent standard bolt stays in
   assert.equal(selected.diameter, 33);
   assert.equal(selected.nutWidth, 26);
   assert.equal(selected.washerWidth, 5);
-  assert.equal(selected.length, 271);
+  assert.equal(selected.length, 267);
   assert.equal(selected.standardLength, null);
   const row = calculate(source, { dnFrom: 500, dnTo: 500 }).find(row => row.geometry === "straight" && row.pn === 25);
   assert.equal(row.baseLengthMm, null);
   assert.equal(row.price, null);
-  assert.ok(row.warnings.some(reason => /М33.*271/.test(reason)));
+  assert.ok(row.warnings.some(reason => /М33.*267/.test(reason)));
 });
 
 test("a missing nut or unsupported material stack cannot acquire a steel bolt length", () => {

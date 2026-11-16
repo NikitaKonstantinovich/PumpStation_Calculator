@@ -49,6 +49,7 @@ export type SettingsEntity = {
   stationType: StationType;
   combinedCircuitsSimultaneous: boolean;
   membraneTank: boolean;
+  cabinetSeparate?: boolean;
   membraneTankVolume: 8 | 50 | 80 | 100;
   vibrationCompensators: boolean;
   collectorPlugs: boolean;
@@ -63,6 +64,7 @@ export type SpecSection = "pump" | "control" | "suction" | "discharge" | "frame"
 export type SpecOption = "primaryPump" | "controlCabinet" | "frame" | "cabinetStand" | "mountingKit" | "vibrationMounts" | "pressureTransducer" | "externalElectrical" | "suctionCollector" | "dischargeCollector" | "secondaryPump" | "membraneTank" | "vibrationCompensators" | "collectorPlugs" | "isolatingValves" | "primarySuctionValve" | "primaryDischargeValve" | "primaryCheckValve" | "secondarySuctionValve" | "secondaryDischargeValve" | "secondaryCheckValve";
 export type SpecTechnicalStatus = "ready" | "incomplete" | "unverified" | "stale" | "error";
 export type SpecItem = {
+  frameAssembly?: {version:1;parts:Array<{name:string;quantity:number;unit:string;lengthMm?:number;unitPriceRub:number|null;source:string}>};
   selectedPn?: number;
   inletPressureCheck?: { checks: import("./dn-defaults").InletPressureCheck[]; baseStatus: "selected" | "clarify" | "confirmation" };
   dischargePressureCheck?: SpecItem["inletPressureCheck"];
@@ -72,7 +74,7 @@ export type SpecItem = {
   technicalStatus?: SpecTechnicalStatus;
   technicalNotes?: string[];
   insertionRequirement?: import("./station-insertion-selection").InsertionRequirement;
-  insertionAssembly?: { snapshot: import("./calculated-insertion").CalculatedInsertion; reversed: boolean; accounting: "assembly"; externalFlanges?: { from?: string; to?: string }; sensorConnection?: "fire-pressure-switch" };
+  insertionAssembly?: { snapshot: import("./calculated-insertion").CalculatedInsertion; reversed: boolean; accounting: "assembly"; externalFlanges?: { from?: string; to?: string }; sensorConnection?: "fire-pressure-switch"; pumpFlangeExecution?: "dn65-pn16-four-hole" };
   assemblyRole?: string;
   sourceFingerprint?: string;
   position: string;
@@ -231,7 +233,7 @@ export function parseProjectConfig(raw: unknown, preserveCalculation = false): P
   if (input2?.kind === "input") entities["system-input-2"] = { ...input2, staticHead: input2.staticHead ?? 0, workingPumpCount: input2.workingPumpCount == null ? null : Math.max(1, finite(input2.workingPumpCount, 1)), reservePumpCount: input2.reservePumpCount == null ? null : Math.max(0, finite(input2.reservePumpCount, 0)), calculated: input2.calculated ?? false };
   const rawSettings = entities["station-settings"] as Partial<SettingsEntity>;
   const stationType = rawSettings.stationType ?? "utility";
-  entities["station-settings"] = { kind: "settings", pressureChecksEnabled: rawSettings.pressureChecksEnabled !== false, inletHead: typeof rawSettings.inletHead === "number" && Number.isFinite(rawSettings.inletHead) ? rawSettings.inletHead : null, stationType, combinedCircuitsSimultaneous: stationType === "combined" && rawSettings.combinedCircuitsSimultaneous === true, membraneTank: rawSettings.membraneTank ?? false, membraneTankVolume: [8, 50, 80, 100].includes(rawSettings.membraneTankVolume ?? 0) ? rawSettings.membraneTankVolume! : 8, vibrationCompensators: rawSettings.vibrationCompensators ?? false, collectorPlugs: rawSettings.collectorPlugs ?? false, isolatingValves: rawSettings.isolatingValves ?? false, jockeyPump: rawSettings.jockeyPump ?? false, ...(rawSettings.hydraulicOptions ? { hydraulicOptions: normalizeHydraulicOptions(rawSettings.hydraulicOptions) } : {}), usdRate: finite(rawSettings.usdRate, 85), cnyRate: finite(rawSettings.cnyRate, 13), manufacturerDiscounts: { cnp: finite(rawSettings.manufacturerDiscounts?.cnp, 45), aquastrong: finite(rawSettings.manufacturerDiscounts?.aquastrong, 55), onis: finite(rawSettings.manufacturerDiscounts?.onis, 0), vandjord: finite(rawSettings.manufacturerDiscounts?.vandjord, 25), wellmix: finite(rawSettings.manufacturerDiscounts?.wellmix, 35) } };
+  entities["station-settings"] = { kind: "settings", pressureChecksEnabled: rawSettings.pressureChecksEnabled !== false, inletHead: typeof rawSettings.inletHead === "number" && Number.isFinite(rawSettings.inletHead) ? rawSettings.inletHead : null, stationType, combinedCircuitsSimultaneous: stationType === "combined" && rawSettings.combinedCircuitsSimultaneous === true, membraneTank: rawSettings.membraneTank ?? false, ...(typeof rawSettings.cabinetSeparate === "boolean" ? {cabinetSeparate:rawSettings.cabinetSeparate} : {}), membraneTankVolume: [8, 50, 80, 100].includes(rawSettings.membraneTankVolume ?? 0) ? rawSettings.membraneTankVolume! : 8, vibrationCompensators: rawSettings.vibrationCompensators ?? false, collectorPlugs: rawSettings.collectorPlugs ?? false, isolatingValves: rawSettings.isolatingValves ?? false, jockeyPump: rawSettings.jockeyPump ?? false, ...(rawSettings.hydraulicOptions ? { hydraulicOptions: normalizeHydraulicOptions(rawSettings.hydraulicOptions) } : {}), usdRate: finite(rawSettings.usdRate, 85), cnyRate: finite(rawSettings.cnyRate, 13), manufacturerDiscounts: { cnp: finite(rawSettings.manufacturerDiscounts?.cnp, 45), aquastrong: finite(rawSettings.manufacturerDiscounts?.aquastrong, 55), onis: finite(rawSettings.manufacturerDiscounts?.onis, 0), vandjord: finite(rawSettings.manufacturerDiscounts?.vandjord, 25), wellmix: finite(rawSettings.manufacturerDiscounts?.wellmix, 35) } };
   const rawDn = entities["station-dn"] as Partial<DnEntity>;
   const savedDn = (value:unknown) => typeof value === "number" && Number.isFinite(value) && value > 0 ? value : null;
   const connection = (value:unknown):ValveConnection|null => value==="threaded"||value==="flanged"?value:null;

@@ -1,5 +1,6 @@
 import { BASE_SECTIONS, baseEqual, collectorNippleRules, legacyBaseSnapshot, spacingForPump, type AppliedBaseValues, type BaseSection } from "./base-values";
 import { collectorRuleSet, describeNippleRules } from "./collector-nipple-rules";
+import { isChannelPaintingRate } from "./channel-painting";
 import type { ProjectConfig, SettingsEntity, SpecEntity } from "./project-config";
 import type { CollectorsEntity } from "./collector-project";
 
@@ -23,7 +24,7 @@ export function projectBaseChanges(project:ProjectConfig, latest:AppliedBaseValu
   const oldThreads=old.values.welding.threadCutting??[],newThreads=latest.values.welding.threadCutting??[];
   for(const id of new Set([...oldThreads,...newThreads].map(row=>row.id))){const before=oldThreads.find(r=>r.id===id),after=newThreads.find(r=>r.id===id),row=after??before!;add("welding",`Нарезка резьбы ${row.material==="aisi304"?"AISI304":"Ст20"} DN${row.dn} ${row.thread}`,before?.pricePerEnd,after?.pricePerEnd,"₽/конец","Стоимость нарезки; готовая резьбовая деталь не тарифицируется повторно");add("welding",`Условия нарезки DN${row.dn} ${row.material}`,before&&{priceKind:before.priceKind,source:before.source,note:before.note,date:before.date},after&&{priceKind:after.priceKind,source:after.source,note:after.note,date:after.date},"","Применимость и достоверность тарифа");}
   if(!baseEqual(old.values.velocity,latest.values.velocity))add("velocity","Диапазоны DN и пределы скорости",old.values.velocity,latest.values.velocity,"м/с","Автоподбор DN и проверка скорости");
-  for(const row of latest.values.painting){const prior=old.values.painting.find(p=>p.id===row.id);add("painting",`Окраска Ст20 DN${row.dn}`,prior?.pricePerMeter,row.pricePerMeter,"₽/м","Стоимость окраски коллекторов");}
+  for(const row of latest.values.painting){const prior=old.values.painting.find(p=>p.id===row.id),channel=isChannelPaintingRate(row);add("painting",channel?`Окраска швеллера ${row.profile}`:`Окраска Ст20 DN${row.dn}`,prior?.pricePerMeter,row.pricePerMeter,"₽/м",channel?"Стоимость окраски швеллерной рамы":"Стоимость окраски коллекторов");}
   const oldProducts={hoseLengthMm:old.values.preferences.hoseLengthMm,rules:old.values.preferences.rules},newProducts={hoseLengthMm:latest.values.preferences.hoseLengthMm,rules:latest.values.preferences.rules};
   if(!baseEqual(oldProducts,newProducts))add("preferences","Предпочтительные изделия и подводка",oldProducts,newProducts,"","Подбор совместимых комплектующих",Boolean(Object.keys(settings.hydraulicOptions?.products??{}).length||settings.hydraulicOptions?.hoseLengthMm));
   const beforeNipples=collectorNippleRules(old.values),afterNipples=collectorNippleRules(latest.values);

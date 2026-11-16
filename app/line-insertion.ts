@@ -4,7 +4,7 @@ import { componentPressureLimit } from "./suction-pressure";
 import { field, itemDn, number } from "./line-spec-parts";
 import type { CollectorCatalog, CollectorConfiguration } from "./collector-calculations";
 
-export const PUMP_LINE_RULES_REVISION = "pump-connections-v7-threaded-fittings";
+export const PUMP_LINE_RULES_REVISION = "pump-connections-v14-insertion-four-of-eight";
 
 /** The same exact reducer selection serves both sides and both vibration modes. */
 export function coreSelectLineReducer(items: AssemblyComponent[], catalog: CollectorCatalog, material: CollectorConfiguration["material"], pumpDn: number, valveDn: number, pn: number, geometry: "concentric" | "eccentric" = "eccentric") {

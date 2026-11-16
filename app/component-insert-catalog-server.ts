@@ -62,7 +62,7 @@ export async function currentInsertSourceCatalog(source?: InsertSource) {
   const current = source ?? await currentInsertSource();
   const catalog = makeInsertCatalog(current);
   // Include all reference/engineering data and tariff values in the revision.
-  catalog.version = await sha256(JSON.stringify({ algorithmVersion: 31, weldRates: WELD_RATES, databaseRevision: current.databaseRevision, catalog }));
+  catalog.version = await sha256(JSON.stringify({ algorithmVersion: 33, weldRates: WELD_RATES, databaseRevision: current.databaseRevision, catalog }));
   return catalog;
 }
 export async function currentInsertCatalog(source?: InsertSource, applied?:AppliedBaseValues) {
