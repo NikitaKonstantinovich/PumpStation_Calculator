@@ -48,10 +48,11 @@ export default function Home({account, onAccountChange}: {account: AccountUser; 
   const assistantContextRef = useRef<NodeAssistantReader | null>(null);
   const closeSettings = () => { setSettingsOpen(false); requestAnimationFrame(() => menuButton.current?.focus()); };
   const [config, setConfig] = useState<ProjectConfig>(() => createProject("Насосная станция № 24", { id:"PS-NEW", timestamp:"2000-01-01T00:00:00.000Z" }));
-  const [saveMessage, setSaveMessage] = useState("Все изменения сохранены");
+  const [saveMessage, setSaveMessage] = useState("");
   const bootstrapAccount = useRef(account);
   const role = account.role;
   const [bootError,setBootError]=useState("");
+  const [projectLoadError,setProjectLoadError]=useState("");
   const accessError = account ? projectAccessError(config, role) : null;
   const [accessNotice,setAccessNotice]=useState("");
   const [accountLoading,setAccountLoading]=useState(true);
@@ -83,6 +84,7 @@ export default function Home({account, onAccountChange}: {account: AccountUser; 
         });
       },next=>parseAccessibleProject(next,user.role));
     session.current=active;setActiveSession(active);setConflicted(false);setProjectDirty(active.dirty); setConfig(project);
+    hydrated.current=true;setProjectLoadError("");setAccessNotice("");
     setSaveMessage(revision?"Сохранено на сервере":"Есть изменения");
     return active;
   },[]);
@@ -106,39 +108,54 @@ export default function Home({account, onAccountChange}: {account: AccountUser; 
     let active=true;
     void (async()=>{
       const user=bootstrapAccount.current;
-      const [page, requestedFile]=await Promise.all([
+      // A stale project link must not discard the project list or block other tools.
+      const [pageResult, fileResult]=await Promise.allSettled([
         projectApi<{projects:StoredProject[];next:number|null;modelLibraryVersion?:string}>(),
         requestedProject ? projectApi<ProjectFile>("?id="+encodeURIComponent(requestedProject)) : undefined
       ]);
       if(!active)return;
-      const recentProject=requestedProject===null?page.projects[0]?.id:undefined;
-      let file=requestedFile ?? (recentProject ? await projectApi<ProjectFile>("?id="+encodeURIComponent(recentProject)) : undefined);
-      let loaded:ProjectConfig;
+      for(const result of [pageResult,fileResult]){
+        if(result.status==="rejected" && result.reason instanceof ProjectRequestError && result.reason.status===401)throw result.reason;
+      }
+      const page=pageResult.status==="fulfilled"?pageResult.value:undefined;
+      if(page){
+        setProjects(page.projects);setNextPage(page.next);libraryVersion.current=page.modelLibraryVersion;
+      }else if(pageResult.status==="rejected"){
+        setBootError(pageResult.reason instanceof Error?pageResult.reason.message:"Не удалось загрузить список проектов");
+      }
+      const requested=params.get("view");
+      const projectView=!requested || requested==="workspace" || requested==="workspace2" || requested==="projects";
       try {
-        loaded=file?parseAccessibleProject(file.config,user.role):createProject("Новая насосная станция",{baseValues:await fetchPublishedBaseValues()});
+        if(fileResult.status==="rejected")throw fileResult.reason;
+        const recentProject=!requestedProject && projectView?page?.projects[0]?.id:undefined;
+        const file=fileResult.value ?? (recentProject ? await projectApi<ProjectFile>("?id="+encodeURIComponent(recentProject)) : undefined);
+        if(!active)return;
+        const loaded=file?parseAccessibleProject(file.config,user.role):undefined;
+        const program=await loadProgram(loaded?(loaded.project.graphVersion??INITIAL_VERSION):undefined);
+        if(!active)return;
+        setBrowserPublication(program);
+        if(loaded && file){
+          loaded.project.graphVersion=program.version;
+          activate(user,loaded,file.revision,true);
+          if(!requested || requested==="workspace"){
+            params.set("project",loaded.project.id);
+            if(loaded.workspace2){
+              const id=algorithmForProject(loaded.workspace2);
+              setAlgorithmId(id);setView("workspace2");params.set("view","workspace2");params.set("algorithm",id);
+            }else {setView("projects");params.set("view","projects");}
+            params.delete("panel");
+            window.history.replaceState({},"","/?"+params.toString());
+          }
+        }
       } catch(error) {
         if(!active)return;
-        setAccessNotice("Сохранённый проект оставлен в базе. "+(error instanceof Error?error.message:"Не удалось открыть проект."));
-        loaded=createProject("Новая насосная станция",{baseValues:await fetchPublishedBaseValues()});
-        file=undefined;
-      }
-      if(!active)return;
-      setProjects(page.projects);setNextPage(page.next);
-      libraryVersion.current=page.modelLibraryVersion;
-      const program=await loadProgram(file?(loaded.project.graphVersion??INITIAL_VERSION):undefined);
-      if(!active)return;
-      setBrowserPublication(program);loaded.project.graphVersion=program.version;
-      if (file) activate(user,loaded,file.revision,true);
-      else setConfig(loaded);
-      const requested = params.get("view");
-      if ((!requested || requested === "workspace") && file) {
-        params.set("project",loaded.project.id);
-        if (loaded.workspace2) {
-          const id=algorithmForProject(loaded.workspace2);
-          setAlgorithmId(id);setView("workspace2");params.set("view","workspace2");params.set("algorithm",id);
-        } else {setView("projects");params.set("view","projects");}
-        params.delete("panel");
-        window.history.replaceState({},"","/?"+params.toString());
+        if(error instanceof ProjectRequestError && error.status===401)throw error;
+        setProjectLoadError(error instanceof Error?error.message:"Не удалось открыть проект.");
+        if(error instanceof ProjectRequestError && error.status===404){
+          params.delete("project");params.delete("nodePanel");params.delete("panel");
+          if(projectView){setView("projects");params.set("view","projects");params.delete("algorithm");}
+          window.history.replaceState({},"","/?"+params.toString());
+        }
       }
       hydrated.current=true;
     })().catch(error=>{
@@ -219,18 +236,18 @@ export default function Home({account, onAccountChange}: {account: AccountUser; 
     if(project.workspace2){const id=algorithmForProject(project.workspace2);setAlgorithmId(id);params.set("algorithm",id);}
     setView(next);params.set("view",next);window.history.replaceState({},"","/?"+params.toString());
   };
-  if(accountLoading)return <main className="auth-page"><section className="auth-intro"><Link className="brand auth-brand" href="/"><span className="brand__mark">PS</span><span><b>Pump Station</b><small>Calculator</small></span></Link></section><section className="auth-panel"><div className="auth-card"><span className="auth-icon">PS</span><h2>Загрузка</h2><p>Подготавливаем рабочее пространство…</p></div></section></main>;
+  if(accountLoading)return <main className="auth-page"><section className="auth-intro"><Link prefetch={false} className="brand auth-brand" href="/"><span className="brand__mark">PS</span><span><b>Pump Station</b><small>Calculator</small></span></Link></section><section className="auth-panel"><div className="auth-card"><span className="auth-icon">PS</span><h2>Загрузка</h2><p>Подготавливаем рабочее пространство…</p></div></section></main>;
   const header = <>
-      <Link className="brand" href="/"><span className="brand__mark">PS</span><span><b>Pump Station</b><small>Calculator</small></span></Link>
+      <Link prefetch={false} className="brand" href="/"><span className="brand__mark">PS</span><span><b>Pump Station</b><small>Calculator</small></span></Link>
       {activeSession && <div className="app-header__project"><small>ТЕКУЩИЙ ПРОЕКТ</small><button onClick={rename}>{config.project.name} <span>✎</span></button></div>}
       <div className="app-header__actions"><span className="save-state" role="status"><i style={{background:saveMessage==="Сохранено на сервере"?"#48a96a":conflicted?"#d75a57":"#d29b44"}}/>{saveMessage}</span><button className="avatar" onClick={()=>{setSidebar(true)}} title={account.name}>{initials(account.name)}</button><AssistantMenu userId={account.id} context={activeSession && config.workspace2 ? {projectId:config.project.id} : undefined} getWorkspace={view === "workspace2" ? async signal => assistantContextRef.current?.(signal) : undefined}/></div>
   </>;
-  const openAlgorithmEditor=(id:string)=>{setAlgorithmId(id);setView("node-editor");window.history.pushState({},"","/?"+new URLSearchParams({view:"node-editor",algorithm:id,project:config.project.id}));};
+  const openAlgorithmEditor=(id:string)=>{setAlgorithmId(id);setView("node-editor");const params=new URLSearchParams({view:"node-editor",algorithm:id});if(session.current)params.set("project",session.current.latest.project.id);window.history.pushState({},"","/?"+params);};
   const openAlgorithmProduct=async(id:string,name:string)=>{
     try {
       if(session.current && !await session.current.flush())throw Error("Сначала сохраните текущий проект или разрешите конфликт сохранения.");
       let target:ProjectConfig|undefined,revision=0,persisted=false;
-      if(algorithmForProject(config.workspace2)===id){target=config;revision=session.current?.revision??0;persisted=revision>0;}
+      if(session.current && algorithmForProject(config.workspace2)===id){target=config;revision=session.current.revision;persisted=revision>0;}
       else {
         let remembered=rememberedProducts.current.get(id);
         try{remembered??=localStorage.getItem("product.last."+account.id+"."+id)??undefined;}catch{/* Optional shortcut to a server project. */}
@@ -310,14 +327,15 @@ export default function Home({account, onAccountChange}: {account: AccountUser; 
   };
   const navigateView = (next: AppView) => {
     setView(requestedView(next)); setSidebar(false);
-    const params = new URLSearchParams({ project: config.project.id });
+    const params = new URLSearchParams();
+    if(session.current)params.set("project",session.current.latest.project.id);
     params.set("view", requestedView(next));
     if(next==="node-editor"||next==="workspace2")params.set("algorithm",algorithmId);
     window.history.pushState({}, "", "/?" + params.toString());
   };
   const backToProjects=()=>navigateView("projects");
   const renderPage = () => {
-    if(bootError)return <main className="base-page"><h1>Не удалось загрузить проект</h1><p role="alert">{bootError}</p><button className="button" onClick={()=>window.location.reload()}>Повторить загрузку</button></main>;
+    if(view==="workspace2" && projectLoadError && !activeSession)return <main className="base-page"><h1>Не удалось загрузить проект</h1><p role="alert">{projectLoadError}</p><button className="button" onClick={()=>window.location.reload()}>Повторить загрузку</button><button className="button" onClick={backToProjects}>Мои проекты</button></main>;
     if(view==="help")return <HelpCenter onBack={backToProjects}/>;
     if(view==="algorithm-library")return account.role==="admin"?<AlgorithmLibrary openEditor={openAlgorithmEditor}/>:<main><h1>Доступ только для администратора</h1></main>;
     if(view==="node-editor")return account.role==="admin"?<ToolEditor key={algorithmId} algorithmId={algorithmId} selectAlgorithm={openAlgorithmEditor} project={algorithmForProject(config.workspace2)===algorithmId?config:{...config,workspace2:undefined}} back={async()=>{if(session.current && !await session.current.flush())return;backToProjects();}}/>:<main><h1>Доступ только для администратора</h1></main>;
@@ -332,13 +350,14 @@ export default function Home({account, onAccountChange}: {account: AccountUser; 
       {accessError && <p role="alert">{accessError}</p>}
       {activeSession && !config.workspace2 && <section className="base-page"><h2>{config.project.name}</h2><p>Проект создан в прежнем рабочем пространстве. Откройте его в продукте для продолжения расчёта и подтвердите выбор насоса.</p><button className="button" onClick={()=>void openAlgorithmProduct(DEFAULT_ALGORITHM,"Насосная установка")}>Открыть в продукте</button><button className="button" onClick={download}>Экспорт JSON</button><button className="button" onClick={()=>setHistoryVisible(true)}>История версий</button></section>}
       <div className="projects-header__actions"><button className="button" onClick={()=>{importMode.current="new";fileInput.current?.click();}}>Открыть JSON</button></div>
-      <ProjectsPage user={account} projects={projects} onBack={()=>setSidebar(true)} onOpen={openStoredProject} onCreate={()=>void newAlgorithmProject()} onDelete={deleteProject} onLogout={logout}/>
+      {bootError?<main className="base-page"><h1>Не удалось загрузить список проектов</h1><p role="alert">{bootError}</p><button className="button" onClick={()=>window.location.reload()}>Повторить загрузку</button></main>:<ProjectsPage user={account} projects={projects} onBack={()=>setSidebar(true)} onOpen={openStoredProject} onCreate={()=>void newAlgorithmProject()} onDelete={deleteProject} onLogout={logout}/>}
       {projectCreationError && <p role="alert">{projectCreationError}</p>}
       {nextPage!==null&&<button onClick={()=>void projectApi<{projects:StoredProject[];next:number|null}>("?offset="+nextPage).then(page=>{setProjects(old=>[...old,...page.projects.filter(p=>!old.some(item=>item.id===p.id))]);setNextPage(page.next);}).catch(e=>window.alert(e.message))}>Загрузить ещё</button>}
     </>;
   };
   return <AppNavigation account={account} view={view} open={sidebar} setOpen={setSidebar} buttonRef={menuButton} header={header} navigate={navigateView} navigateAlgorithm={(id,name)=>void openAlgorithmProduct(id,name)} activeAlgorithm={algorithmId} projectCount={projects.length} settings={()=>setSettingsOpen(true)} logout={logout}>
     {accessNotice && <p className="access-note" role="status">{accessNotice}</p>}
+    {projectLoadError && view!=="workspace2" && <p className="access-note" role="status">Не удалось открыть проект по ссылке: {projectLoadError}. Выберите сохранённый проект или создайте новый.</p>}
     <input ref={fileInput} className="visually-hidden" type="file" accept="application/json,.json" onChange={openFile}/>
     {historyVisible&&activeSession&&<ProjectHistory session={activeSession} onClose={()=>setHistoryVisible(false)} onOpen={openById}/>}
     <Suspense fallback={<main className="beta-loading" role="status">Загружаем инструменты…</main>}>{renderPage()}</Suspense>
