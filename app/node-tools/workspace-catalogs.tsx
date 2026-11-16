@@ -5,6 +5,7 @@ import { loadCatalog } from "./catalog-client";
 import { loadStationCatalog } from "./station-catalog";
 import type { ToolContext } from "./schema";
 import type { CatalogSource } from "./workspace-sources";
+import { WorkspaceLoading } from "../workspace-loading";
 
 type Resources = NonNullable<ToolContext["resources"]>;
 type CatalogRuntime = {
@@ -82,6 +83,6 @@ export function WorkspaceCatalogGate({catalogs, sources, versions, children}: {
     const error = errors?.[source];
     return error
       ? <p key={source} role="alert">{labels[source]} · {error} <button type="button" onClick={() => request(source, true)}>Повторить загрузку</button></p>
-      : <p key={source} role="status">{labels[source]} · загрузка…</p>;
+      : <WorkspaceLoading key={source} compact title={labels[source]} steps={["Получаем данные для инструментов"]}/>;
   })}</>;
 }

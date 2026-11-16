@@ -51,12 +51,16 @@ async function workspace(search, options, check) {
   };
   const projectApi = async (params = "", body) => {
     calls.push({ params, body });
-    if (body) return { revision: 1 };
+    if (body) {
+      if(options.saveGate)await options.saveGate;
+      if(options.rejectSave)throw new ProjectRequestError("Временно не удалось сохранить проект",503);
+      return { revision: 1 };
+    }
     if (!params) {
       if (options.listError) throw new ProjectRequestError("Список недоступен", options.listError);
       return { projects: cards, next: null };
     }
-    if (params === "?id=saved-project") return file;
+    if (params === "?id=saved-project") { if(options.projectGate)await options.projectGate; return file; }
     throw new ProjectRequestError("Проект или версия не найдены", options.projectError ?? 404);
   };
   class ProjectSession {
@@ -76,7 +80,16 @@ async function workspace(search, options, check) {
     loadProgram: async () => { if (options.programError) throw Error("Версия расчёта недоступна"); return program; },
     setBrowserPublication: () => {}, currentPublication: () => program,
     fetchPublishedBaseValues: async () => undefined,
-    loadTools: async () => ({ algorithm: { name: "Насосная установка" }, program: {}, defaults: {}, baseVersions: {}, sourceVersions: {} }),
+    loadTools: async () => {
+      options.runtimeCalls=(options.runtimeCalls??0)+1;
+      if(options.runtimeGate)await options.runtimeGate;
+      if(options.rejectRuntime)throw Error("Каталог временно недоступен");
+      return { algorithm: { name: "Насосная установка" }, program: {}, defaults: {}, baseVersions: {}, sourceVersions: {} };
+    },
+    paintLoadingStep: async () => {},
+    PRODUCT_OPEN_STEPS: ["save", "project", "catalogs", "prepare"],
+    PROJECT_OPEN_STEPS: ["save", "project", "rules", "open"],
+    PROJECT_CREATE_STEPS: ["save", "settings", "prepare", "persist"],
     useTheme: () => ["dark", () => {}, {}, () => {}],
     resetComponentsDatabase: () => {}, withUpdatedTimestamp: value => value,
   };
@@ -227,5 +240,66 @@ test("a saved project's runtime failure still leaves independent tools usable", 
     ui.find("AppNavigation").props.navigate("equipment-admin"); await ui.settle();
     assert.ok(ui.find("EquipmentAdminPanel"));
     assert.equal(ui.sessions.length, 0);
+  });
+});
+
+test("product opening shows progress immediately and ignores duplicate clicks", async () => {
+  const gate=Promise.withResolvers(), options={empty:true,runtimeGate:gate.promise};
+  await workspace("?view=projects", options, async ui => {
+    const menu=ui.find("AppNavigation");
+    menu.props.navigateAlgorithm("pump-station","Насосная установка");
+    menu.props.navigateAlgorithm("pump-station","Насосная установка");
+    await ui.settle();
+    const progress=ui.find("WorkspaceLoading");
+    assert.equal(progress.props.modal,true);
+    assert.equal(progress.props.title,"Насосная установка");
+    assert.equal(progress.props.step,1);
+    assert.equal(options.runtimeCalls,1,"Do not launch duplicate workspace loads");
+    assert.equal(ui.sessions.length,0);
+    gate.resolve();await ui.settle();
+    assert.ok(ui.find("NodeWorkspace"));
+    assert.equal(ui.find("WorkspaceLoading"),undefined);
+  });
+});
+
+test("opening failure stays visible and Retry recovers without reloading the page", async () => {
+  const options={empty:true,rejectRuntime:true};
+  await workspace("?view=projects",options,async ui=>{
+    ui.find("AppNavigation").props.navigateAlgorithm("pump-station","Насосная установка");await ui.settle();
+    assert.equal(ui.find("WorkspaceLoading").props.error,"Каталог временно недоступен");
+    assert.equal(ui.sessions.length,0);
+    options.rejectRuntime=false;
+    ui.find("WorkspaceLoading").props.retry();await ui.settle();
+    assert.ok(ui.find("NodeWorkspace"));
+    assert.equal(ui.find("WorkspaceLoading"),undefined);
+  });
+});
+
+test("saved project opening reports the project request and releases its progress window", async () => {
+  const gate=Promise.withResolvers(),options={};
+  await workspace("?view=projects",options,async ui=>{
+    options.projectGate=gate.promise;
+    ui.button("Открыть проект").props.onClick();await ui.settle();
+    assert.equal(ui.find("WorkspaceLoading").props.step,1);
+    assert.equal(ui.find("WorkspaceLoading").props.modal,true);
+    gate.resolve();await ui.settle();
+    assert.ok(ui.find("NodeWorkspace"));
+    assert.equal(ui.find("WorkspaceLoading"),undefined);
+  });
+});
+
+test("new project progress waits for persistence and retry keeps the same operation", async () => {
+  const gate=Promise.withResolvers(),options={empty:true,saveGate:gate.promise,rejectSave:true};
+  await workspace("?view=projects",options,async ui=>{
+    ui.button("＋ Новый проект").props.onClick();await ui.settle();
+    assert.equal(ui.find("WorkspaceLoading").props.step,3);
+    assert.equal(ui.sessions.length,0,"The project must not open before persistence");
+    const first=ui.calls.find(call=>call.body).body;
+    gate.resolve();await ui.settle();
+    assert.match(ui.find("WorkspaceLoading").props.error,/не удалось сохранить/);
+    options.rejectSave=false;
+    ui.find("WorkspaceLoading").props.retry();await ui.settle();
+    assert.deepEqual(ui.calls.filter(call=>call.body).at(-1).body,first);
+    assert.ok(ui.find("NodeWorkspace"));
   });
 });

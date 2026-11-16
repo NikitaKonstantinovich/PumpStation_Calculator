@@ -21,6 +21,7 @@ import { controlInfo, productEvaluator, toolAvailable, workspaceControls, writeC
 import { toolSourceDependencies } from "./workspace-sources";
 import { useWorkspaceCatalogs, WorkspaceCatalogGate } from "./workspace-catalogs";
 import { nodeAssistantProject, type NodeAssistantReader } from "./assistant-project";
+import { WorkspaceLoading } from "../workspace-loading";
 import { loadCatalog } from "./catalog-client";
 import { loadStationCatalog } from "./station-catalog";
 import type { CatalogSource } from "./workspace-sources";
@@ -61,14 +62,21 @@ export function loadTools(version?: string, base?: Record<string, string>, sourc
   return pending;
 }
 async function fetchRuntime(url: string): Promise<Loaded> {
+  const signal = AbortSignal.timeout(90_000);
+  try {
   const response = await fetch(url, {
     cache: "no-store",
+    signal,
     headers: { [NODE_RUNTIME_HEADER]: OPERATIONS.join(",") }
   });
   const body = await response.json();
   if (!response.ok) throw Error(body.error ?? "Не удалось загрузить инструменты");
   if (missingRuntimeOperations(body.program, OPERATIONS).length) throw Error(NODE_RUNTIME_UPDATE_MESSAGE);
   return body;
+  } catch(error) {
+    if(signal.aborted)throw Error("Сервер не завершил загрузку инструментов за 90 секунд. Повторите загрузку.");
+    throw error;
+  }
 }
 function RuntimeTool({
   toolId,
@@ -433,7 +441,7 @@ function NodeWorkspaceContent({
       setCatalogUpdatePrompt(null);
     } catch(e){setError((e as Error).message);} finally{setUpdatingCatalog(false);}
   }}>{updatingCatalog ? "Загрузка…" : catalogUpdatePrompt === "station" ? "Обновить справочники" : "Обновить каталог"}</button><button disabled={updatingCatalog} onClick={()=>setCatalogUpdatePrompt(null)}>Отмена</button></footer>{error && <p role="alert">{error}</p>}</section></div>}
-  {error && <p role="alert">{error}{error===NODE_RUNTIME_UPDATE_MESSAGE && <button onClick={()=>window.location.reload()}>Обновить страницу</button>}</p>}{remote?.sourceErrors && <p role="alert">Ошибка источника: {Object.values(remote.sourceErrors).join("; ")}. Зависимые инструменты недоступны до восстановления источника; закреплённый снимок не заменяется.</p>}{message && <p role="status">{message}</p>}{!remote && !error && <p>Загружаем инструменты…</p>}
+  {error && remote && <p role="alert">{error}{error===NODE_RUNTIME_UPDATE_MESSAGE && <button onClick={()=>window.location.reload()}>Обновить страницу</button>}</p>}{remote?.sourceErrors && <p role="alert">Ошибка источника: {Object.values(remote.sourceErrors).join("; ")}. Зависимые инструменты недоступны до восстановления источника; закреплённый снимок не заменяется.</p>}{message && <p role="status">{message}</p>}{!remote && <WorkspaceLoading title={name} steps={["Загружаем инструменты и параметры проекта"]} error={error || undefined} retry={()=>window.location.reload()}/>}
   {remote && !tools.length && <p className="al-empty">В этом продукте пока нет инструментов. Администратор может добавить их в нодовом редакторе.</p>}
   </>;
   function renderTool(toolId: string) {

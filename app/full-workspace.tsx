@@ -27,6 +27,7 @@ import { UsersPanel } from "./users-panel";
 import { ComponentCalculator } from "./component-calculator";
 import type { AccountUser } from "./user-types";
 import { parseAccessibleProject, projectAccessError } from "./project-access";
+import { WorkspaceLoading, paintLoadingStep, PRODUCT_OPEN_STEPS, PROJECT_OPEN_STEPS, PROJECT_CREATE_STEPS } from "./workspace-loading";
 
 const AlgorithmLibrary = lazy(() => import("./node-tools/algorithm-library").then(module => ({default: module.AlgorithmLibrary})));
 const ToolEditor = lazy(() => import("./node-tools/editor").then(module => ({default: module.ToolEditor})));
@@ -56,6 +57,18 @@ export default function Home({account, onAccountChange}: {account: AccountUser; 
   const accessError = account ? projectAccessError(config, role) : null;
   const [accessNotice,setAccessNotice]=useState("");
   const [accountLoading,setAccountLoading]=useState(true);
+  const [bootstrapStep,setBootstrapStep]=useState(0);
+  const openingBusy=useRef(false), openingAttempt=useRef(0);
+  const [opening,setOpening]=useState<{title:string;steps:readonly string[];step:number;attempt:number;retry:()=>void;error?:string}|null>(null);
+  const beginOpening=(title:string,steps:readonly string[],retry:()=>void)=>{
+    if(openingBusy.current)return false;
+    openingBusy.current=true;setSidebar(false);
+    setOpening({title,steps,step:0,attempt:++openingAttempt.current,retry});
+    return true;
+  };
+  const openingStep=(step:number)=>setOpening(current=>current?{...current,step}:null);
+  const openingFailed=(error:unknown)=>setOpening(current=>current?{...current,error:error instanceof Error?error.message:"Не удалось открыть рабочее пространство."}:null);
+  const finishOpening=()=>{openingBusy.current=false;setOpening(current=>current?.error?current:null);};
   const [projects,setProjects]=useState<StoredProject[]>([]);
   const [nextPage,setNextPage]=useState<number|null>(null);
   const [historyVisible,setHistoryVisible]=useState(false);
@@ -114,6 +127,7 @@ export default function Home({account, onAccountChange}: {account: AccountUser; 
         requestedProject ? projectApi<ProjectFile>("?id="+encodeURIComponent(requestedProject)) : undefined
       ]);
       if(!active)return;
+      setBootstrapStep(1);
       for(const result of [pageResult,fileResult]){
         if(result.status==="rejected" && result.reason instanceof ProjectRequestError && result.reason.status===401)throw result.reason;
       }
@@ -131,6 +145,7 @@ export default function Home({account, onAccountChange}: {account: AccountUser; 
         const file=fileResult.value ?? (recentProject ? await projectApi<ProjectFile>("?id="+encodeURIComponent(recentProject)) : undefined);
         if(!active)return;
         const loaded=file?parseAccessibleProject(file.config,user.role):undefined;
+        setBootstrapStep(2);
         const program=await loadProgram(loaded?(loaded.project.graphVersion??INITIAL_VERSION):undefined);
         if(!active)return;
         setBrowserPublication(program);
@@ -203,18 +218,23 @@ export default function Home({account, onAccountChange}: {account: AccountUser; 
     } catch(error){window.alert(error instanceof Error?error.message:"Не удалось открыть проект");}
   };
   const rename = () => { const name=window.prompt("Название проекта",config.project.name)?.trim();if(name)updateConfig(current=>({...current,project:{...current.project,name}})); };
-  const openById=async(id:string)=>{
-    if(!account)return;
+  const openById=async(id:string):Promise<void>=>{
+    if(!account || !beginOpening("Открываем сохранённый проект",PROJECT_OPEN_STEPS,()=>void openById(id)))return;
+    try{
     if(session.current?.latest.project.id!==id && session.current && !await session.current.flush())throw new Error("Сначала сохраните текущий проект или сохраните конфликт как копию.");
+    openingStep(1);
     const file=await projectApi<ProjectFile>("?id="+encodeURIComponent(id));
     const loaded=parseAccessibleProject(file.config,role);
+    openingStep(2);
     const program=await loadProgram(loaded.project.graphVersion??INITIAL_VERSION);
+    openingStep(3);await paintLoadingStep();
     setBrowserPublication(program);loaded.project.graphVersion=program.version;
     activate(account,loaded,file.revision,true);
     const params=new URLSearchParams({project:id});
     setAccessNotice("");
     if(loaded.workspace2){const id=algorithmForProject(loaded.workspace2);setAlgorithmId(id);setView("workspace2");params.set("view","workspace2");params.set("algorithm",id);}else {setView("projects");params.set("view","projects");}
     window.history.replaceState({},"","/?"+params.toString());
+    }catch(error){openingFailed(error);}finally{finishOpening();}
   };
   const openStoredProject=(card:StoredProject)=>{void openById(card.id).catch(error=>window.alert(error.message));};
   const reloadFromDatabase=()=>{void openById(config.project.id).catch(error=>setAccessNotice(error.message));};
@@ -236,16 +256,18 @@ export default function Home({account, onAccountChange}: {account: AccountUser; 
     if(project.workspace2){const id=algorithmForProject(project.workspace2);setAlgorithmId(id);params.set("algorithm",id);}
     setView(next);params.set("view",next);window.history.replaceState({},"","/?"+params.toString());
   };
-  if(accountLoading)return <main className="auth-page"><section className="auth-intro"><Link prefetch={false} className="brand auth-brand" href="/"><span className="brand__mark">PS</span><span><b>Pump Station</b><small>Calculator</small></span></Link></section><section className="auth-panel"><div className="auth-card"><span className="auth-icon">PS</span><h2>Загрузка</h2><p>Подготавливаем рабочее пространство…</p></div></section></main>;
+  if(accountLoading)return <main className="beta-loading"><WorkspaceLoading title="Подготавливаем рабочее пространство" steps={["Загружаем список проектов", "Загружаем выбранный проект", "Проверяем правила расчёта"]} step={bootstrapStep}/></main>;
   const header = <>
       <Link prefetch={false} className="brand" href="/"><span className="brand__mark">PS</span><span><b>Pump Station</b><small>Calculator</small></span></Link>
       {activeSession && <div className="app-header__project"><small>ТЕКУЩИЙ ПРОЕКТ</small><button onClick={rename}>{config.project.name} <span>✎</span></button></div>}
       <div className="app-header__actions"><span className="save-state" role="status"><i style={{background:saveMessage==="Сохранено на сервере"?"#48a96a":conflicted?"#d75a57":"#d29b44"}}/>{saveMessage}</span><button className="avatar" onClick={()=>{setSidebar(true)}} title={account.name}>{initials(account.name)}</button><AssistantMenu userId={account.id} context={activeSession && config.workspace2 ? {projectId:config.project.id} : undefined} getWorkspace={view === "workspace2" ? async signal => assistantContextRef.current?.(signal) : undefined}/></div>
   </>;
   const openAlgorithmEditor=(id:string)=>{setAlgorithmId(id);setView("node-editor");const params=new URLSearchParams({view:"node-editor",algorithm:id});if(session.current)params.set("project",session.current.latest.project.id);window.history.pushState({},"","/?"+params);};
-  const openAlgorithmProduct=async(id:string,name:string)=>{
+  const openAlgorithmProduct=async(id:string,name:string):Promise<void>=>{
+    if(!beginOpening(name,PRODUCT_OPEN_STEPS,()=>void openAlgorithmProduct(id,name)))return;
     try {
       if(session.current && !await session.current.flush())throw Error("Сначала сохраните текущий проект или разрешите конфликт сохранения.");
+      openingStep(1);
       let target:ProjectConfig|undefined,revision=0,persisted=false;
       if(session.current && algorithmForProject(config.workspace2)===id){target=config;revision=session.current.revision;persisted=revision>0;}
       else {
@@ -259,8 +281,10 @@ export default function Home({account, onAccountChange}: {account: AccountUser; 
         const settings=target.entities["station-settings"] as SettingsEntity;
         const projectControls={geometry:settings.geometryEnabled,pressure:settings.pressureChecksEnabled};
         const needsCatalogs=Object.values(initial.program.product?.controls ?? {}).some(ref=>toolSourceDependencies(initial.program,ref.toolId).length);
+        openingStep(2);
         const remote=needsCatalogs ? await loadTools(initial.program.version,initial.baseVersions,initial.sourceVersions,id) : initial;
         if(remote.sourceErrors && Object.keys(remote.sourceErrors).length)throw Error(Object.values(remote.sourceErrors).join(" · "));
+        openingStep(3);await paintLoadingStep();
         const workspace2=remote.program.product
           ? migrateProduct(remote.program,undefined,remote.defaults,remote.baseVersions,remote.role,remote.resources,remote.sourceVersions,projectControls).data
           : {schema:1 as const,algorithmId:id,tools:{}};
@@ -271,7 +295,7 @@ export default function Home({account, onAccountChange}: {account: AccountUser; 
       rememberedProducts.current.set(id,target.project.id);try{localStorage.setItem("product.last."+account.id+"."+id,target.project.id);}catch{/* The project itself is stored on the server. */}
       setAlgorithmId(id);setAlgorithmName(name);setView("workspace2");setSidebar(false);
       window.history.pushState({},"","/?"+new URLSearchParams({view:"workspace2",algorithm:id,project:target.project.id}));
-    }catch(e){window.alert((e as Error).message);}
+    }catch(e){openingFailed(e);}finally{finishOpening();}
   };
   const openProductWindow=(panelId:string)=>{
     const current=session.current;if(!current)return;
@@ -283,19 +307,21 @@ export default function Home({account, onAccountChange}: {account: AccountUser; 
       child.location.replace("/?"+new URLSearchParams({view:"workspace2",algorithm:algorithmId,project:config.project.id,nodePanel:panelId}));
     }).catch(()=>{child.close();setSaveMessage("Не удалось сохранить проект перед открытием отдельного окна.");});
   };
-  const newAlgorithmProject=async()=>{
+  const newAlgorithmProject=async():Promise<void>=>{
     const creation=projectCreation.current, previous=session.current;
-    if(creation.running)return;
+    if(creation.running || !beginOpening("Создаём проект",PROJECT_CREATE_STEPS,()=>void newAlgorithmProject()))return;
     creation.running=true;
     setCreatingProject(true);
     setProjectCreationError("");
     try {
       if(previous && !await previous.flush())throw Error("Сначала сохраните текущий проект или разрешите конфликт.");
+      openingStep(1);
       let runtime: Awaited<ReturnType<typeof loadTools>> | undefined;
       if(creation.request?.owner!==account.id || creation.request.algorithm!==algorithmId){
         const [remote,baseValues]=await Promise.all([loadTools(undefined,undefined,undefined,algorithmId,"initialize"),fetchPublishedBaseValues()]);
         runtime=remote;
         if(remote.sourceErrors && Object.keys(remote.sourceErrors).length)throw Error(Object.values(remote.sourceErrors).join(" · "));
+        openingStep(2);await paintLoadingStep();
         const next=createProject(remote.algorithm.name,{baseValues});
         next.project.graphVersion=currentPublication().version;
         next.project.modelLibraryVersion=libraryVersion.current;
@@ -306,6 +332,7 @@ export default function Home({account, onAccountChange}: {account: AccountUser; 
       }
       if(session.current!==previous)return;
       const {config:next,operation}=creation.request;
+      openingStep(3);
       let revision:number;
       try {
         ({revision}=await projectApi<{revision:number}>("",{config:next,operation,baseRevision:0}));
@@ -322,8 +349,8 @@ export default function Home({account, onAccountChange}: {account: AccountUser; 
       activate(account,next,revision,true);setView("workspace2");
       rememberedProducts.current.set(algorithmId,next.project.id);try{localStorage.setItem("product.last."+account.id+"."+algorithmId,next.project.id);}catch{/* Optional navigation shortcut. */}
       window.history.replaceState({},"","/?"+new URLSearchParams({view:"workspace2",algorithm:algorithmId,project:next.project.id}));
-    } catch(error){setProjectCreationError(error instanceof Error?error.message:"Не удалось создать проект.");}
-    finally{creation.running=false;setCreatingProject(false);}
+    } catch(error){setProjectCreationError(error instanceof Error?error.message:"Не удалось создать проект.");openingFailed(error);}
+    finally{creation.running=false;setCreatingProject(false);finishOpening();}
   };
   const navigateView = (next: AppView) => {
     setView(requestedView(next)); setSidebar(false);
@@ -362,5 +389,6 @@ export default function Home({account, onAccountChange}: {account: AccountUser; 
     {historyVisible&&activeSession&&<ProjectHistory session={activeSession} onClose={()=>setHistoryVisible(false)} onOpen={openById}/>}
     <Suspense fallback={<main className="beta-loading" role="status">Загружаем инструменты…</main>}>{renderPage()}</Suspense>
     {settingsOpen && <AppSettings theme={theme} onThemeChange={setTheme} profile={colorProfile} onProfileChange={setColorProfile} onClose={closeSettings}/>}
+    {opening && <WorkspaceLoading key={opening.attempt} modal title={opening.title} steps={opening.steps} step={opening.step} error={opening.error} retry={opening.retry} close={()=>setOpening(null)}/>}
   </AppNavigation>;
 }

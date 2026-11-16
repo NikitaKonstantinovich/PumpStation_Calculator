@@ -174,8 +174,12 @@ export async function toolResources(program: ToolProgram, versions?: Record<stri
   sourceVersions: Record<string, string>;
 }> {
   const resources: NonNullable<ToolContext["resources"]> = {}, sourceVersions = {...versions};
-  if (usesCatalog(program)) { const snapshot = await catalogSnapshot(versions?.pump_catalog_v2); resources.pump_catalog_v2 = snapshot; sourceVersions.pump_catalog_v2 = snapshot.id; }
-  if (usesStationCatalog(program)) { const snapshot = await stationCatalogSnapshot(versions?.station_catalog, baseVersions); resources.station_catalog = snapshot; sourceVersions.station_catalog = snapshot.id; }
+  const [pump, station] = await Promise.all([
+    usesCatalog(program) ? catalogSnapshot(versions?.pump_catalog_v2) : undefined,
+    usesStationCatalog(program) ? stationCatalogSnapshot(versions?.station_catalog, baseVersions) : undefined
+  ]);
+  if(pump){resources.pump_catalog_v2=pump;sourceVersions.pump_catalog_v2=pump.id;}
+  if(station){resources.station_catalog=station;sourceVersions.station_catalog=station.id;}
   return { resources, sourceVersions };
 }
 
